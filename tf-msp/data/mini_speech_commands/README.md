@@ -1,0 +1,3 @@
+# Speech Commands dataset excerpt
+
+This is a small excerpt of the [Speech Commands Dataset](https://ai.googleblog.com/2017/08/launching-speech-commands-dataset.html) for use in a tutorial on tensorflow.org. Please refer to the original [dataset](http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz](http://download.tensorflow.org/data/speech_commands_v0.01.tar.gz) for documentation and license information."""
