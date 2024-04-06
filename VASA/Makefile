@@ -28,7 +28,7 @@ CFLAGS_BASE = -v28 \
 			--tmu_support=tmu0 \
 			--vcu_support=vcu2 \
 			--include_path="$(F28379D_HEADERS)device_support/f2837xd/common/include" \
-            --include_path="$(F28379D_HEADERS)driverlib/f2837xd/driverlib" \
+			--include_path="$(F28379D_HEADERS)driverlib/f2837xd/driverlib" \
 			--include_path="/opt/ccstudio/ccs/tools/compiler/ti-cgt-c2000_22.6.1.LTS/include" \
 			-g \
 			--diag_warning=225 \
@@ -85,7 +85,7 @@ LFLAGS = -v28 \
 		-i"$(F28379D_HEADERS)driverlib/f2837xd/driverlib" \
 		-i"/opt/ccstudio/ccs/tools/compiler/ti-cgt-c2000_22.6.1.LTS/include" \
 		-i"/opt/ccstudio/ccs/tools/compiler/ti-cgt-c2000_22.6.1.LTS/lib" \
-		-l"$(F28379D_HEADERS)driverlib/f2837xd/driverlib/ccs/Release/driverlib_coff.lib" \
+		-l"$(F28379D_HEADERS)driverlib/f2837xd/driverlib/ccs/Release/driverlib_coff.lib"
 
 TARGET = VASA.out
 SOURCES = ./main.c
