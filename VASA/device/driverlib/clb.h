@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   clb.h
+//  FILE:   clb.h
 //
-// TITLE:  C28x CLB driver.
+//  TITLE:  C28x CLB driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef CLB_H
 #define CLB_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -59,69 +58,69 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "cpu.h"
+#include "debug.h"
 #include "inc/hw_clb.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
-#include "cpu.h"
-#include "debug.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 //*****************************************************************************
 //
 // Address offsets from LOGICCFG to LOGICCTL and DATAEXCH register memory maps
 //
 //*****************************************************************************
-#define CLB_LOGICCTL                0x0100U
-#define CLB_DATAEXCH                0x0200U
+#define CLB_LOGICCTL 0x0100U
+#define CLB_DATAEXCH 0x0200U
 
 //*****************************************************************************
 //
 // Address offsets for CLB-internal memory space
 //
 //*****************************************************************************
-#define CLB_ADDR_COUNTER_0_LOAD     0x0U
-#define CLB_ADDR_COUNTER_1_LOAD     0x1U
-#define CLB_ADDR_COUNTER_2_LOAD     0x2U
+#define CLB_ADDR_COUNTER_0_LOAD 0x0U
+#define CLB_ADDR_COUNTER_1_LOAD 0x1U
+#define CLB_ADDR_COUNTER_2_LOAD 0x2U
 
-#define CLB_ADDR_COUNTER_0_MATCH1   0x4U
-#define CLB_ADDR_COUNTER_1_MATCH1   0x5U
-#define CLB_ADDR_COUNTER_2_MATCH1   0x6U
+#define CLB_ADDR_COUNTER_0_MATCH1 0x4U
+#define CLB_ADDR_COUNTER_1_MATCH1 0x5U
+#define CLB_ADDR_COUNTER_2_MATCH1 0x6U
 
-#define CLB_ADDR_COUNTER_0_MATCH2   0x8U
-#define CLB_ADDR_COUNTER_1_MATCH2   0x9U
-#define CLB_ADDR_COUNTER_2_MATCH2   0xAU
+#define CLB_ADDR_COUNTER_0_MATCH2 0x8U
+#define CLB_ADDR_COUNTER_1_MATCH2 0x9U
+#define CLB_ADDR_COUNTER_2_MATCH2 0xAU
 
-#define CLB_ADDR_HLC_R0             0xCU
-#define CLB_ADDR_HLC_R1             0xDU
-#define CLB_ADDR_HLC_R2             0xEU
-#define CLB_ADDR_HLC_R3             0xFU
+#define CLB_ADDR_HLC_R0 0xCU
+#define CLB_ADDR_HLC_R1 0xDU
+#define CLB_ADDR_HLC_R2 0xEU
+#define CLB_ADDR_HLC_R3 0xFU
 
-#define CLB_ADDR_HLC_BASE           0x20U
-#define CLB_NUM_HLC_INSTR           31U
+#define CLB_ADDR_HLC_BASE 0x20U
+#define CLB_NUM_HLC_INSTR 31U
 
 //*****************************************************************************
 //
 // PUSH/PULL FIFO size (32-bit registers)
 //
 //*****************************************************************************
-#define CLB_FIFO_SIZE               4U
+#define CLB_FIFO_SIZE 4U
 
 //*****************************************************************************
 //
 // Key to enable writes to the CLB registers
 //
 //*****************************************************************************
-#define CLB_LOCK_KEY                0x5A5AU
+#define CLB_LOCK_KEY 0x5A5AU
 
 //*****************************************************************************
 //
 // Shift and masks needed by the API for Input selection
 //
 //*****************************************************************************
-#define CLB_LCL_MUX_SEL_MISC_INPUT_SEL_M          0x20U
-#define CLB_LCL_MUX_SEL_MISC_INPUT_SEL_S          28U
-#define CLB_LCL_MUX_SEL_MISC_INPUT_SEL_BITM       (uint32_t)1U
+#define CLB_LCL_MUX_SEL_MISC_INPUT_SEL_M    0x20U
+#define CLB_LCL_MUX_SEL_MISC_INPUT_SEL_S    28U
+#define CLB_LCL_MUX_SEL_MISC_INPUT_SEL_BITM (uint32_t)1U
 
 //*****************************************************************************
 //
@@ -167,16 +166,15 @@ extern "C"
 //! Values that can be passed to select CLB input signal
 //
 //*****************************************************************************
-typedef enum
-{
-    CLB_IN0 = 0,                    //!< Input 0
-    CLB_IN1 = 1,                    //!< Input 1
-    CLB_IN2 = 2,                    //!< Input 2
-    CLB_IN3 = 3,                    //!< Input 3
-    CLB_IN4 = 4,                    //!< Input 4
-    CLB_IN5 = 5,                    //!< Input 5
-    CLB_IN6 = 6,                    //!< Input 6
-    CLB_IN7 = 7                     //!< Input 7
+typedef enum {
+  CLB_IN0 = 0, //!< Input 0
+  CLB_IN1 = 1, //!< Input 1
+  CLB_IN2 = 2, //!< Input 2
+  CLB_IN3 = 3, //!< Input 3
+  CLB_IN4 = 4, //!< Input 4
+  CLB_IN5 = 5, //!< Input 5
+  CLB_IN6 = 6, //!< Input 6
+  CLB_IN7 = 7  //!< Input 7
 } CLB_Inputs;
 
 //*****************************************************************************
@@ -185,16 +183,15 @@ typedef enum
 //! CLB_configOutputLUT() as the \e outID parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    CLB_OUT0 = 0,                   //!< Output 0
-    CLB_OUT1 = 1,                   //!< Output 1
-    CLB_OUT2 = 2,                   //!< Output 2
-    CLB_OUT3 = 3,                   //!< Output 3
-    CLB_OUT4 = 4,                   //!< Output 4
-    CLB_OUT5 = 5,                   //!< Output 5
-    CLB_OUT6 = 6,                   //!< Output 6
-    CLB_OUT7 = 7                    //!< Output 7
+typedef enum {
+  CLB_OUT0 = 0, //!< Output 0
+  CLB_OUT1 = 1, //!< Output 1
+  CLB_OUT2 = 2, //!< Output 2
+  CLB_OUT3 = 3, //!< Output 3
+  CLB_OUT4 = 4, //!< Output 4
+  CLB_OUT5 = 5, //!< Output 5
+  CLB_OUT6 = 6, //!< Output 6
+  CLB_OUT7 = 7  //!< Output 7
 } CLB_Outputs;
 
 //*****************************************************************************
@@ -203,11 +200,10 @@ typedef enum
 //! CLB_configCounterLoadMatch() as the \e counterID parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    CLB_CTR0 = 0,                   //!< Counter 0
-    CLB_CTR1 = 1,                   //!< Counter 1
-    CLB_CTR2 = 2                    //!< Counter 2
+typedef enum {
+  CLB_CTR0 = 0, //!< Counter 0
+  CLB_CTR1 = 1, //!< Counter 1
+  CLB_CTR2 = 2  //!< Counter 2
 } CLB_Counters;
 
 //*****************************************************************************
@@ -216,15 +212,14 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    CLB_REG_HLC_R0 = CLB_O_DBG_R0,  //!< HLC R0 register
-    CLB_REG_HLC_R1 = CLB_O_DBG_R1,  //!< HLC R1 register
-    CLB_REG_HLC_R2 = CLB_O_DBG_R2,  //!< HLC R2 register
-    CLB_REG_HLC_R3 = CLB_O_DBG_R3,  //!< HLC R3 register
-    CLB_REG_CTR_C0 = CLB_O_DBG_C0,  //!< Counter 0 register
-    CLB_REG_CTR_C1 = CLB_O_DBG_C1,  //!< Counter 1 register
-    CLB_REG_CTR_C2 = CLB_O_DBG_C2   //!< Counter 2 register
+typedef enum {
+  CLB_REG_HLC_R0 = CLB_O_DBG_R0, //!< HLC R0 register
+  CLB_REG_HLC_R1 = CLB_O_DBG_R1, //!< HLC R1 register
+  CLB_REG_HLC_R2 = CLB_O_DBG_R2, //!< HLC R2 register
+  CLB_REG_HLC_R3 = CLB_O_DBG_R3, //!< HLC R3 register
+  CLB_REG_CTR_C0 = CLB_O_DBG_C0, //!< Counter 0 register
+  CLB_REG_CTR_C1 = CLB_O_DBG_C1, //!< Counter 1 register
+  CLB_REG_CTR_C2 = CLB_O_DBG_C2  //!< Counter 2 register
 } CLB_Register;
 
 //*****************************************************************************
@@ -233,12 +228,11 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    CLB_FILTER_NONE         = 0,    //!< No filtering
-    CLB_FILTER_RISING_EDGE  = 1,    //!< Rising edge detect
-    CLB_FILTER_FALLING_EDGE = 2,    //!< Falling edge detect
-    CLB_FILTER_ANY_EDGE     = 3     //!< Any edge detect
+typedef enum {
+  CLB_FILTER_NONE         = 0, //!< No filtering
+  CLB_FILTER_RISING_EDGE  = 1, //!< Rising edge detect
+  CLB_FILTER_FALLING_EDGE = 2, //!< Falling edge detect
+  CLB_FILTER_ANY_EDGE     = 3  //!< Any edge detect
 } CLB_FilterType;
 
 //*****************************************************************************
@@ -247,10 +241,9 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    CLB_GP_IN_MUX_EXTERNAL  = 0,    //!< Use external input path
-    CLB_GP_IN_MUX_GP_REG    = 1     //!< Use CLB_GP_REG bit value as input
+typedef enum {
+  CLB_GP_IN_MUX_EXTERNAL = 0, //!< Use external input path
+  CLB_GP_IN_MUX_GP_REG   = 1  //!< Use CLB_GP_REG bit value as input
 } CLB_GPInputMux;
 
 //*****************************************************************************
@@ -259,34 +252,33 @@ typedef enum
 //! \e localMuxCfg parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    CLB_LOCAL_IN_MUX_GLOBAL_IN          = 0,   //!< Global input mux selection
-    CLB_LOCAL_IN_MUX_EPWM_DCAEVT1       = 1,   //!< EPWMx DCAEVT1
-    CLB_LOCAL_IN_MUX_EPWM_DCAEVT2       = 2,   //!< EPWMx DCAEVT2
-    CLB_LOCAL_IN_MUX_EPWM_DCBEVT1       = 3,   //!< EPWMx DCBEVT1
-    CLB_LOCAL_IN_MUX_EPWM_DCBEVT2       = 4,   //!< EPWMx DCBEVT2
-    CLB_LOCAL_IN_MUX_EPWM_DCAH          = 5,   //!< EPWMx DCAH
-    CLB_LOCAL_IN_MUX_EPWM_DCAL          = 6,   //!< EPWMx DCAL
-    CLB_LOCAL_IN_MUX_EPWM_DCBH          = 7,   //!< EPWMx DCBH
-    CLB_LOCAL_IN_MUX_EPWM_DCBL          = 8,   //!< EPWMx DCBL
-    CLB_LOCAL_IN_MUX_EPWM_OST           = 9,   //!< EPWMx OST
-    CLB_LOCAL_IN_MUX_EPWM_CBC           = 10,  //!< EPWMx CBC
-    CLB_LOCAL_IN_MUX_ECAP_ECAPIN        = 11,  //!< ECAPx ECAPIN
-    CLB_LOCAL_IN_MUX_ECAP_ECAP_OUT      = 12,  //!< ECAPx ECAP_OUT
-    CLB_LOCAL_IN_MUX_ECAP_ECAP_OUT_EN   = 13,  //!< ECAPx ECAP_OUT_EN
-    CLB_LOCAL_IN_MUX_ECAP_CEVT1         = 14,  //!< ECAPx CEVT1
-    CLB_LOCAL_IN_MUX_ECAP_CEVT2         = 15,  //!< ECAPx CEVT2
-    CLB_LOCAL_IN_MUX_ECAP_CEVT3         = 16,  //!< ECAPx CEVT3
-    CLB_LOCAL_IN_MUX_ECAP_CEVT4         = 17,  //!< ECAPx CEVT4
-    CLB_LOCAL_IN_MUX_EQEP_EQEPA         = 18,  //!< EQEPx EQEPA
-    CLB_LOCAL_IN_MUX_EQEP_EQEPB         = 19,  //!< EQEPx EQEPB
-    CLB_LOCAL_IN_MUX_EQEP_EQEPI         = 20,  //!< EQEPx EQEPI
-    CLB_LOCAL_IN_MUX_EQEP_EQEPS         = 21,  //!< EQEPx EQEPS
-    CLB_LOCAL_IN_MUX_CPU1_TBCLKSYNC     = 22,  //!< CPU1.TBCLKSYNC
-    CLB_LOCAL_IN_MUX_CPU2_TBCLKSYNC     = 23,  //!< CPU2.TBCLKSYNC
-    CLB_LOCAL_IN_MUX_CPU1_HALT          = 24,  //!< CPU1.HALT
-    CLB_LOCAL_IN_MUX_CPU2_HALT          = 25,  //!< CPU2.HALT
+typedef enum {
+  CLB_LOCAL_IN_MUX_GLOBAL_IN        = 0,  //!< Global input mux selection
+  CLB_LOCAL_IN_MUX_EPWM_DCAEVT1     = 1,  //!< EPWMx DCAEVT1
+  CLB_LOCAL_IN_MUX_EPWM_DCAEVT2     = 2,  //!< EPWMx DCAEVT2
+  CLB_LOCAL_IN_MUX_EPWM_DCBEVT1     = 3,  //!< EPWMx DCBEVT1
+  CLB_LOCAL_IN_MUX_EPWM_DCBEVT2     = 4,  //!< EPWMx DCBEVT2
+  CLB_LOCAL_IN_MUX_EPWM_DCAH        = 5,  //!< EPWMx DCAH
+  CLB_LOCAL_IN_MUX_EPWM_DCAL        = 6,  //!< EPWMx DCAL
+  CLB_LOCAL_IN_MUX_EPWM_DCBH        = 7,  //!< EPWMx DCBH
+  CLB_LOCAL_IN_MUX_EPWM_DCBL        = 8,  //!< EPWMx DCBL
+  CLB_LOCAL_IN_MUX_EPWM_OST         = 9,  //!< EPWMx OST
+  CLB_LOCAL_IN_MUX_EPWM_CBC         = 10, //!< EPWMx CBC
+  CLB_LOCAL_IN_MUX_ECAP_ECAPIN      = 11, //!< ECAPx ECAPIN
+  CLB_LOCAL_IN_MUX_ECAP_ECAP_OUT    = 12, //!< ECAPx ECAP_OUT
+  CLB_LOCAL_IN_MUX_ECAP_ECAP_OUT_EN = 13, //!< ECAPx ECAP_OUT_EN
+  CLB_LOCAL_IN_MUX_ECAP_CEVT1       = 14, //!< ECAPx CEVT1
+  CLB_LOCAL_IN_MUX_ECAP_CEVT2       = 15, //!< ECAPx CEVT2
+  CLB_LOCAL_IN_MUX_ECAP_CEVT3       = 16, //!< ECAPx CEVT3
+  CLB_LOCAL_IN_MUX_ECAP_CEVT4       = 17, //!< ECAPx CEVT4
+  CLB_LOCAL_IN_MUX_EQEP_EQEPA       = 18, //!< EQEPx EQEPA
+  CLB_LOCAL_IN_MUX_EQEP_EQEPB       = 19, //!< EQEPx EQEPB
+  CLB_LOCAL_IN_MUX_EQEP_EQEPI       = 20, //!< EQEPx EQEPI
+  CLB_LOCAL_IN_MUX_EQEP_EQEPS       = 21, //!< EQEPx EQEPS
+  CLB_LOCAL_IN_MUX_CPU1_TBCLKSYNC   = 22, //!< CPU1.TBCLKSYNC
+  CLB_LOCAL_IN_MUX_CPU2_TBCLKSYNC   = 23, //!< CPU2.TBCLKSYNC
+  CLB_LOCAL_IN_MUX_CPU1_HALT        = 24, //!< CPU1.HALT
+  CLB_LOCAL_IN_MUX_CPU2_HALT        = 25, //!< CPU2.HALT
 } CLB_LocalInputMux;
 
 //*****************************************************************************
@@ -295,84 +287,83 @@ typedef enum
 //! \e globalMuxCfg parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    CLB_GLOBAL_IN_MUX_EPWM1A            = 0,   //!< EPWM1A
-    CLB_GLOBAL_IN_MUX_EPWM1A_OE         = 1,   //!< EPWM1A trip output
-    CLB_GLOBAL_IN_MUX_EPWM1B            = 2,   //!< EPWM1B
-    CLB_GLOBAL_IN_MUX_EPWM1B_OE         = 3,   //!< EPWM1B trip output
-    CLB_GLOBAL_IN_MUX_EPWM1_CTR_ZERO    = 4,   //!< EPWM1 TBCTR = Zero
-    CLB_GLOBAL_IN_MUX_EPWM1_CTR_PRD     = 5,   //!< EPWM1 TBCTR = TBPRD
-    CLB_GLOBAL_IN_MUX_EPWM1_CTRDIR      = 6,   //!< EPWM1 CTRDIR
-    CLB_GLOBAL_IN_MUX_EPWM1_TBCLK       = 7,   //!< EPWM1 TBCLK
-    CLB_GLOBAL_IN_MUX_EPWM1_CTR_CMPA    = 8,   //!< EPWM1 TBCTR = CMPA
-    CLB_GLOBAL_IN_MUX_EPWM1_CTR_CMPB    = 9,   //!< EPWM1 TBCTR = CMPB
-    CLB_GLOBAL_IN_MUX_EPWM1_CTR_CMPC    = 10,  //!< EPWM1 TBCTR = CMPC
-    CLB_GLOBAL_IN_MUX_EPWM1_CTR_CMPD    = 11,  //!< EPWM1 TBCTR = CMPD
-    CLB_GLOBAL_IN_MUX_EPWM1A_AQ         = 12,  //!< EPWM1A AQ submodule output
-    CLB_GLOBAL_IN_MUX_EPWM1B_AQ         = 13,  //!< EPWM1B AQ submodule output
-    CLB_GLOBAL_IN_MUX_EPWM1A_DB         = 14,  //!< EPWM1A DB submodule output
-    CLB_GLOBAL_IN_MUX_EPWM1B_DB         = 15,  //!< EPWM1B DB submodule output
+typedef enum {
+  CLB_GLOBAL_IN_MUX_EPWM1A         = 0,  //!< EPWM1A
+  CLB_GLOBAL_IN_MUX_EPWM1A_OE      = 1,  //!< EPWM1A trip output
+  CLB_GLOBAL_IN_MUX_EPWM1B         = 2,  //!< EPWM1B
+  CLB_GLOBAL_IN_MUX_EPWM1B_OE      = 3,  //!< EPWM1B trip output
+  CLB_GLOBAL_IN_MUX_EPWM1_CTR_ZERO = 4,  //!< EPWM1 TBCTR = Zero
+  CLB_GLOBAL_IN_MUX_EPWM1_CTR_PRD  = 5,  //!< EPWM1 TBCTR = TBPRD
+  CLB_GLOBAL_IN_MUX_EPWM1_CTRDIR   = 6,  //!< EPWM1 CTRDIR
+  CLB_GLOBAL_IN_MUX_EPWM1_TBCLK    = 7,  //!< EPWM1 TBCLK
+  CLB_GLOBAL_IN_MUX_EPWM1_CTR_CMPA = 8,  //!< EPWM1 TBCTR = CMPA
+  CLB_GLOBAL_IN_MUX_EPWM1_CTR_CMPB = 9,  //!< EPWM1 TBCTR = CMPB
+  CLB_GLOBAL_IN_MUX_EPWM1_CTR_CMPC = 10, //!< EPWM1 TBCTR = CMPC
+  CLB_GLOBAL_IN_MUX_EPWM1_CTR_CMPD = 11, //!< EPWM1 TBCTR = CMPD
+  CLB_GLOBAL_IN_MUX_EPWM1A_AQ      = 12, //!< EPWM1A AQ submodule output
+  CLB_GLOBAL_IN_MUX_EPWM1B_AQ      = 13, //!< EPWM1B AQ submodule output
+  CLB_GLOBAL_IN_MUX_EPWM1A_DB      = 14, //!< EPWM1A DB submodule output
+  CLB_GLOBAL_IN_MUX_EPWM1B_DB      = 15, //!< EPWM1B DB submodule output
 
-    CLB_GLOBAL_IN_MUX_EPWM2A            = 16,  //!< EPWM2A
-    CLB_GLOBAL_IN_MUX_EPWM2A_OE         = 17,  //!< EPWM2A trip output
-    CLB_GLOBAL_IN_MUX_EPWM2B            = 18,  //!< EPWM2B
-    CLB_GLOBAL_IN_MUX_EPWM2B_OE         = 19,  //!< EPWM2B trip output
-    CLB_GLOBAL_IN_MUX_EPWM2_CTR_ZERO    = 20,  //!< EPWM2 TBCTR = Zero
-    CLB_GLOBAL_IN_MUX_EPWM2_CTR_PRD     = 21,  //!< EPWM2 TBCTR = TBPRD
-    CLB_GLOBAL_IN_MUX_EPWM2_CTRDIR      = 22,  //!< EPWM2 CTRDIR
-    CLB_GLOBAL_IN_MUX_EPWM2_TBCLK       = 23,  //!< EPWM2 TBCLK
-    CLB_GLOBAL_IN_MUX_EPWM2_CTR_CMPA    = 24,  //!< EPWM2 TBCTR = CMPA
-    CLB_GLOBAL_IN_MUX_EPWM2_CTR_CMPB    = 25,  //!< EPWM2 TBCTR = CMPB
-    CLB_GLOBAL_IN_MUX_EPWM2_CTR_CMPC    = 26,  //!< EPWM2 TBCTR = CMPC
-    CLB_GLOBAL_IN_MUX_EPWM2_CTR_CMPD    = 27,  //!< EPWM2 TBCTR = CMPD
-    CLB_GLOBAL_IN_MUX_EPWM2A_AQ         = 28,  //!< EPWM2A AQ submodule output
-    CLB_GLOBAL_IN_MUX_EPWM2B_AQ         = 29,  //!< EPWM2B AQ submodule output
-    CLB_GLOBAL_IN_MUX_EPWM2A_DB         = 30,  //!< EPWM2A DB submodule output
-    CLB_GLOBAL_IN_MUX_EPWM2B_DB         = 31,  //!< EPWM2B DB submodule output
+  CLB_GLOBAL_IN_MUX_EPWM2A         = 16, //!< EPWM2A
+  CLB_GLOBAL_IN_MUX_EPWM2A_OE      = 17, //!< EPWM2A trip output
+  CLB_GLOBAL_IN_MUX_EPWM2B         = 18, //!< EPWM2B
+  CLB_GLOBAL_IN_MUX_EPWM2B_OE      = 19, //!< EPWM2B trip output
+  CLB_GLOBAL_IN_MUX_EPWM2_CTR_ZERO = 20, //!< EPWM2 TBCTR = Zero
+  CLB_GLOBAL_IN_MUX_EPWM2_CTR_PRD  = 21, //!< EPWM2 TBCTR = TBPRD
+  CLB_GLOBAL_IN_MUX_EPWM2_CTRDIR   = 22, //!< EPWM2 CTRDIR
+  CLB_GLOBAL_IN_MUX_EPWM2_TBCLK    = 23, //!< EPWM2 TBCLK
+  CLB_GLOBAL_IN_MUX_EPWM2_CTR_CMPA = 24, //!< EPWM2 TBCTR = CMPA
+  CLB_GLOBAL_IN_MUX_EPWM2_CTR_CMPB = 25, //!< EPWM2 TBCTR = CMPB
+  CLB_GLOBAL_IN_MUX_EPWM2_CTR_CMPC = 26, //!< EPWM2 TBCTR = CMPC
+  CLB_GLOBAL_IN_MUX_EPWM2_CTR_CMPD = 27, //!< EPWM2 TBCTR = CMPD
+  CLB_GLOBAL_IN_MUX_EPWM2A_AQ      = 28, //!< EPWM2A AQ submodule output
+  CLB_GLOBAL_IN_MUX_EPWM2B_AQ      = 29, //!< EPWM2B AQ submodule output
+  CLB_GLOBAL_IN_MUX_EPWM2A_DB      = 30, //!< EPWM2A DB submodule output
+  CLB_GLOBAL_IN_MUX_EPWM2B_DB      = 31, //!< EPWM2B DB submodule output
 
-    CLB_GLOBAL_IN_MUX_EPWM3A            = 32,  //!< EPWM3A
-    CLB_GLOBAL_IN_MUX_EPWM3A_OE         = 33,  //!< EPWM3A trip output
-    CLB_GLOBAL_IN_MUX_EPWM3B            = 34,  //!< EPWM3B
-    CLB_GLOBAL_IN_MUX_EPWM3B_OE         = 35,  //!< EPWM3B trip output
-    CLB_GLOBAL_IN_MUX_EPWM3_CTR_ZERO    = 36,  //!< EPWM3 TBCTR = Zero
-    CLB_GLOBAL_IN_MUX_EPWM3_CTR_PRD     = 37,  //!< EPWM3 TBCTR = TBPRD
-    CLB_GLOBAL_IN_MUX_EPWM3_CTRDIR      = 38,  //!< EPWM3 CTRDIR
-    CLB_GLOBAL_IN_MUX_EPWM3_TBCLK       = 39,  //!< EPWM3 TBCLK
-    CLB_GLOBAL_IN_MUX_EPWM3_CTR_CMPA    = 40,  //!< EPWM3 TBCTR = CMPA
-    CLB_GLOBAL_IN_MUX_EPWM3_CTR_CMPB    = 41,  //!< EPWM3 TBCTR = CMPB
-    CLB_GLOBAL_IN_MUX_EPWM3_CTR_CMPC    = 42,  //!< EPWM3 TBCTR = CMPC
-    CLB_GLOBAL_IN_MUX_EPWM3_CTR_CMPD    = 43,  //!< EPWM3 TBCTR = CMPD
-    CLB_GLOBAL_IN_MUX_EPWM3A_AQ         = 44,  //!< EPWM3A AQ submodule output
-    CLB_GLOBAL_IN_MUX_EPWM3B_AQ         = 45,  //!< EPWM3B AQ submodule output
-    CLB_GLOBAL_IN_MUX_EPWM3A_DB         = 46,  //!< EPWM3A DB submodule output
-    CLB_GLOBAL_IN_MUX_EPWM3B_DB         = 47,  //!< EPWM3B DB submodule output
+  CLB_GLOBAL_IN_MUX_EPWM3A         = 32, //!< EPWM3A
+  CLB_GLOBAL_IN_MUX_EPWM3A_OE      = 33, //!< EPWM3A trip output
+  CLB_GLOBAL_IN_MUX_EPWM3B         = 34, //!< EPWM3B
+  CLB_GLOBAL_IN_MUX_EPWM3B_OE      = 35, //!< EPWM3B trip output
+  CLB_GLOBAL_IN_MUX_EPWM3_CTR_ZERO = 36, //!< EPWM3 TBCTR = Zero
+  CLB_GLOBAL_IN_MUX_EPWM3_CTR_PRD  = 37, //!< EPWM3 TBCTR = TBPRD
+  CLB_GLOBAL_IN_MUX_EPWM3_CTRDIR   = 38, //!< EPWM3 CTRDIR
+  CLB_GLOBAL_IN_MUX_EPWM3_TBCLK    = 39, //!< EPWM3 TBCLK
+  CLB_GLOBAL_IN_MUX_EPWM3_CTR_CMPA = 40, //!< EPWM3 TBCTR = CMPA
+  CLB_GLOBAL_IN_MUX_EPWM3_CTR_CMPB = 41, //!< EPWM3 TBCTR = CMPB
+  CLB_GLOBAL_IN_MUX_EPWM3_CTR_CMPC = 42, //!< EPWM3 TBCTR = CMPC
+  CLB_GLOBAL_IN_MUX_EPWM3_CTR_CMPD = 43, //!< EPWM3 TBCTR = CMPD
+  CLB_GLOBAL_IN_MUX_EPWM3A_AQ      = 44, //!< EPWM3A AQ submodule output
+  CLB_GLOBAL_IN_MUX_EPWM3B_AQ      = 45, //!< EPWM3B AQ submodule output
+  CLB_GLOBAL_IN_MUX_EPWM3A_DB      = 46, //!< EPWM3A DB submodule output
+  CLB_GLOBAL_IN_MUX_EPWM3B_DB      = 47, //!< EPWM3B DB submodule output
 
-    CLB_GLOBAL_IN_MUX_EPWM4A            = 48,  //!< EPWM4A
-    CLB_GLOBAL_IN_MUX_EPWM4A_OE         = 49,  //!< EPWM4A trip output
-    CLB_GLOBAL_IN_MUX_EPWM4B            = 50,  //!< EPWM4B
-    CLB_GLOBAL_IN_MUX_EPWM4B_OE         = 51,  //!< EPWM4B trip output
-    CLB_GLOBAL_IN_MUX_EPWM4_CTR_ZERO    = 52,  //!< EPWM4 TBCTR = Zero
-    CLB_GLOBAL_IN_MUX_EPWM4_CTR_PRD     = 53,  //!< EPWM4 TBCTR = TBPRD
-    CLB_GLOBAL_IN_MUX_EPWM4_CTRDIR      = 54,  //!< EPWM4 CTRDIR
-    CLB_GLOBAL_IN_MUX_EPWM4_TBCLK       = 55,  //!< EPWM4 TBCLK
-    CLB_GLOBAL_IN_MUX_EPWM4_CTR_CMPA    = 56,  //!< EPWM4 TBCTR = CMPA
-    CLB_GLOBAL_IN_MUX_EPWM4_CTR_CMPB    = 57,  //!< EPWM4 TBCTR = CMPB
-    CLB_GLOBAL_IN_MUX_EPWM4_CTR_CMPC    = 58,  //!< EPWM4 TBCTR = CMPC
-    CLB_GLOBAL_IN_MUX_EPWM4_CTR_CMPD    = 59,  //!< EPWM4 TBCTR = CMPD
-    CLB_GLOBAL_IN_MUX_EPWM4A_AQ         = 60,  //!< EPWM4A AQ submodule output
-    CLB_GLOBAL_IN_MUX_EPWM4B_AQ         = 61,  //!< EPWM4B AQ submodule output
-    CLB_GLOBAL_IN_MUX_EPWM4A_DB         = 62,  //!< EPWM4A DB submodule output
-    CLB_GLOBAL_IN_MUX_EPWM4B_DB         = 63,  //!< EPWM4B DB submodule output
+  CLB_GLOBAL_IN_MUX_EPWM4A         = 48, //!< EPWM4A
+  CLB_GLOBAL_IN_MUX_EPWM4A_OE      = 49, //!< EPWM4A trip output
+  CLB_GLOBAL_IN_MUX_EPWM4B         = 50, //!< EPWM4B
+  CLB_GLOBAL_IN_MUX_EPWM4B_OE      = 51, //!< EPWM4B trip output
+  CLB_GLOBAL_IN_MUX_EPWM4_CTR_ZERO = 52, //!< EPWM4 TBCTR = Zero
+  CLB_GLOBAL_IN_MUX_EPWM4_CTR_PRD  = 53, //!< EPWM4 TBCTR = TBPRD
+  CLB_GLOBAL_IN_MUX_EPWM4_CTRDIR   = 54, //!< EPWM4 CTRDIR
+  CLB_GLOBAL_IN_MUX_EPWM4_TBCLK    = 55, //!< EPWM4 TBCLK
+  CLB_GLOBAL_IN_MUX_EPWM4_CTR_CMPA = 56, //!< EPWM4 TBCTR = CMPA
+  CLB_GLOBAL_IN_MUX_EPWM4_CTR_CMPB = 57, //!< EPWM4 TBCTR = CMPB
+  CLB_GLOBAL_IN_MUX_EPWM4_CTR_CMPC = 58, //!< EPWM4 TBCTR = CMPC
+  CLB_GLOBAL_IN_MUX_EPWM4_CTR_CMPD = 59, //!< EPWM4 TBCTR = CMPD
+  CLB_GLOBAL_IN_MUX_EPWM4A_AQ      = 60, //!< EPWM4A AQ submodule output
+  CLB_GLOBAL_IN_MUX_EPWM4B_AQ      = 61, //!< EPWM4B AQ submodule output
+  CLB_GLOBAL_IN_MUX_EPWM4A_DB      = 62, //!< EPWM4A DB submodule output
+  CLB_GLOBAL_IN_MUX_EPWM4B_DB      = 63, //!< EPWM4B DB submodule output
 
-    CLB_GLOBAL_IN_MUX_CLB_AUXSIG0       = 64,  //!< CLB X-BAR AUXSIG0
-    CLB_GLOBAL_IN_MUX_CLB_AUXSIG1       = 65,  //!< CLB X-BAR AUXSIG1
-    CLB_GLOBAL_IN_MUX_CLB_AUXSIG2       = 66,  //!< CLB X-BAR AUXSIG2
-    CLB_GLOBAL_IN_MUX_CLB_AUXSIG3       = 67,  //!< CLB X-BAR AUXSIG3
-    CLB_GLOBAL_IN_MUX_CLB_AUXSIG4       = 68,  //!< CLB X-BAR AUXSIG4
-    CLB_GLOBAL_IN_MUX_CLB_AUXSIG5       = 69,  //!< CLB X-BAR AUXSIG5
-    CLB_GLOBAL_IN_MUX_CLB_AUXSIG6       = 70,  //!< CLB X-BAR AUXSIG6
-    CLB_GLOBAL_IN_MUX_CLB_AUXSIG7       = 71,  //!< CLB X-BAR AUXSIG7
+  CLB_GLOBAL_IN_MUX_CLB_AUXSIG0 = 64, //!< CLB X-BAR AUXSIG0
+  CLB_GLOBAL_IN_MUX_CLB_AUXSIG1 = 65, //!< CLB X-BAR AUXSIG1
+  CLB_GLOBAL_IN_MUX_CLB_AUXSIG2 = 66, //!< CLB X-BAR AUXSIG2
+  CLB_GLOBAL_IN_MUX_CLB_AUXSIG3 = 67, //!< CLB X-BAR AUXSIG3
+  CLB_GLOBAL_IN_MUX_CLB_AUXSIG4 = 68, //!< CLB X-BAR AUXSIG4
+  CLB_GLOBAL_IN_MUX_CLB_AUXSIG5 = 69, //!< CLB X-BAR AUXSIG5
+  CLB_GLOBAL_IN_MUX_CLB_AUXSIG6 = 70, //!< CLB X-BAR AUXSIG6
+  CLB_GLOBAL_IN_MUX_CLB_AUXSIG7 = 71, //!< CLB X-BAR AUXSIG7
 
 } CLB_GlobalInputMux;
 
@@ -394,14 +385,9 @@ typedef enum
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool CLB_isBaseValid(uint32_t base)
-{
-    return(
-           (base == CLB1_BASE) ||
-           (base == CLB2_BASE) ||
-           (base == CLB3_BASE) ||
-           (base == CLB4_BASE)
-          );
+static inline bool CLB_isBaseValid(uint32_t base) {
+  return ((base == CLB1_BASE) || (base == CLB2_BASE) || (base == CLB3_BASE) ||
+          (base == CLB4_BASE));
 }
 
 //*****************************************************************************
@@ -416,9 +402,8 @@ static inline bool CLB_isBaseValid(uint32_t base)
 //! \return Returns \b true if the address is valid and \b false otherwise.
 //
 //*****************************************************************************
-static inline bool CLB_isAddressValid(uint32_t address)
-{
-    return(address <= (CLB_ADDR_HLC_BASE + CLB_NUM_HLC_INSTR));
+static inline bool CLB_isAddressValid(uint32_t address) {
+  return (address <= (CLB_ADDR_HLC_BASE + CLB_NUM_HLC_INSTR));
 }
 #endif
 
@@ -433,13 +418,12 @@ static inline bool CLB_isAddressValid(uint32_t address)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CLB_enableCLB(uint32_t base)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline void CLB_enableCLB(uint32_t base) {
+  ASSERT(CLB_isBaseValid(base));
 
-    EALLOW;
-    HWREGH(base + CLB_LOGICCTL + CLB_O_LOAD_EN) |= CLB_LOAD_EN_GLOBAL_EN;
-    EDIS;
+  EALLOW;
+  HWREGH(base + CLB_LOGICCTL + CLB_O_LOAD_EN) |= CLB_LOAD_EN_GLOBAL_EN;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -453,13 +437,12 @@ static inline void CLB_enableCLB(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CLB_disableCLB(uint32_t base)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline void CLB_disableCLB(uint32_t base) {
+  ASSERT(CLB_isBaseValid(base));
 
-    EALLOW;
-    HWREGH(base + CLB_LOGICCTL + CLB_O_LOAD_EN) &= ~CLB_LOAD_EN_GLOBAL_EN;
-    EDIS;
+  EALLOW;
+  HWREGH(base + CLB_LOGICCTL + CLB_O_LOAD_EN) &= ~CLB_LOAD_EN_GLOBAL_EN;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -474,17 +457,16 @@ static inline void CLB_disableCLB(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CLB_enableLock(uint32_t base)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline void CLB_enableLock(uint32_t base) {
+  ASSERT(CLB_isBaseValid(base));
 
-    //
-    // Setting the lock bit requires key 0x5A5A to be written at the same time
-    //
-    EALLOW;
-    HWREG(base + CLB_LOGICCTL + CLB_O_LOCK) =
-        (uint32_t)CLB_LOCK_LOCK | ((uint32_t)CLB_LOCK_KEY << CLB_LOCK_KEY_S);
-    EDIS;
+  //
+  // Setting the lock bit requires key 0x5A5A to be written at the same time
+  //
+  EALLOW;
+  HWREG(base + CLB_LOGICCTL + CLB_O_LOCK) =
+      (uint32_t)CLB_LOCK_LOCK | ((uint32_t)CLB_LOCK_KEY << CLB_LOCK_KEY_S);
+  EDIS;
 }
 
 //*****************************************************************************
@@ -501,16 +483,15 @@ static inline void CLB_enableLock(uint32_t base)
 //
 //*****************************************************************************
 static inline void CLB_writeInterface(uint32_t base, uint32_t address,
-                                      uint32_t value)
-{
-    ASSERT(CLB_isBaseValid(base));
-    ASSERT(CLB_isAddressValid(address));
+                                      uint32_t value) {
+  ASSERT(CLB_isBaseValid(base));
+  ASSERT(CLB_isAddressValid(address));
 
-    EALLOW;
-    HWREG(base + CLB_LOGICCTL + CLB_O_LOAD_ADDR) = address;
-    HWREG(base + CLB_LOGICCTL + CLB_O_LOAD_DATA) =  value;
-    HWREG(base + CLB_LOGICCTL + CLB_O_LOAD_EN) |= CLB_LOAD_EN_LOAD_EN;
-    EDIS;
+  EALLOW;
+  HWREG(base + CLB_LOGICCTL + CLB_O_LOAD_ADDR)  = address;
+  HWREG(base + CLB_LOGICCTL + CLB_O_LOAD_DATA)  = value;
+  HWREG(base + CLB_LOGICCTL + CLB_O_LOAD_EN)   |= CLB_LOAD_EN_LOAD_EN;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -530,22 +511,21 @@ static inline void CLB_writeInterface(uint32_t base, uint32_t address,
 //
 //*****************************************************************************
 static inline void CLB_selectInputFilter(uint32_t base, CLB_Inputs inID,
-                                         CLB_FilterType filterType)
-{
-    uint16_t shiftVal;
+                                         CLB_FilterType filterType) {
+  uint16_t shiftVal;
 
-    ASSERT(CLB_isBaseValid(base));
+  ASSERT(CLB_isBaseValid(base));
 
-    //
-    // Each input has a 2-bit field in this register so need to calculate
-    // shift amount accordingly.
-    //
-    shiftVal = (uint16_t)inID << 1;
+  //
+  // Each input has a 2-bit field in this register so need to calculate
+  // shift amount accordingly.
+  //
+  shiftVal = (uint16_t)inID << 1;
 
-    HWREGH(base + CLB_LOGICCTL + CLB_O_INPUT_FILTER) =
-        (HWREGH(base + CLB_LOGICCTL + CLB_O_INPUT_FILTER) &
-         ~(CLB_INPUT_FILTER_FIN0_M << shiftVal)) |
-        ((uint16_t)filterType << shiftVal);
+  HWREGH(base + CLB_LOGICCTL + CLB_O_INPUT_FILTER) =
+      (HWREGH(base + CLB_LOGICCTL + CLB_O_INPUT_FILTER) &
+       ~(CLB_INPUT_FILTER_FIN0_M << shiftVal)) |
+      ((uint16_t)filterType << shiftVal);
 }
 
 //*****************************************************************************
@@ -561,12 +541,11 @@ static inline void CLB_selectInputFilter(uint32_t base, CLB_Inputs inID,
 //! \return None.
 //
 //*****************************************************************************
-static inline void CLB_enableSynchronization(uint32_t base, CLB_Inputs inID)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline void CLB_enableSynchronization(uint32_t base, CLB_Inputs inID) {
+  ASSERT(CLB_isBaseValid(base));
 
-    HWREGH(base + CLB_LOGICCTL + CLB_O_INPUT_FILTER + 1U) |=
-                                                    (1U << (uint16_t)inID);
+  HWREGH(base + CLB_LOGICCTL + CLB_O_INPUT_FILTER + 1U) |=
+      (1U << (uint16_t)inID);
 }
 
 //*****************************************************************************
@@ -582,12 +561,11 @@ static inline void CLB_enableSynchronization(uint32_t base, CLB_Inputs inID)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CLB_disableSynchronization(uint32_t base, CLB_Inputs inID)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline void CLB_disableSynchronization(uint32_t base, CLB_Inputs inID) {
+  ASSERT(CLB_isBaseValid(base));
 
-    HWREGH(base + CLB_LOGICCTL + CLB_O_INPUT_FILTER + 1U) &=
-                                                    ~(1U << (uint16_t)inID);
+  HWREGH(base + CLB_LOGICCTL + CLB_O_INPUT_FILTER + 1U) &=
+      ~(1U << (uint16_t)inID);
 }
 
 //*****************************************************************************
@@ -610,14 +588,13 @@ static inline void CLB_disableSynchronization(uint32_t base, CLB_Inputs inID)
 //
 //*****************************************************************************
 static inline void CLB_configGPInputMux(uint32_t base, CLB_Inputs inID,
-                                        CLB_GPInputMux gpMuxCfg)
-{
-    ASSERT(CLB_isBaseValid(base));
+                                        CLB_GPInputMux gpMuxCfg) {
+  ASSERT(CLB_isBaseValid(base));
 
-    HWREGH(base + CLB_LOGICCTL + CLB_O_IN_MUX_SEL_0) =
-        (HWREGH(base + CLB_LOGICCTL + CLB_O_IN_MUX_SEL_0) &
-         ~(CLB_IN_MUX_SEL_0_SEL_GP_IN_0 << (uint16_t)inID)) |
-        ((uint16_t)gpMuxCfg << (uint16_t)inID);
+  HWREGH(base + CLB_LOGICCTL + CLB_O_IN_MUX_SEL_0) =
+      (HWREGH(base + CLB_LOGICCTL + CLB_O_IN_MUX_SEL_0) &
+       ~(CLB_IN_MUX_SEL_0_SEL_GP_IN_0 << (uint16_t)inID)) |
+      ((uint16_t)gpMuxCfg << (uint16_t)inID);
 }
 
 //*****************************************************************************
@@ -638,11 +615,10 @@ static inline void CLB_configGPInputMux(uint32_t base, CLB_Inputs inID,
 //! \return None.
 //
 //*****************************************************************************
-static inline void CLB_setGPREG(uint32_t base, uint32_t gpRegVal)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline void CLB_setGPREG(uint32_t base, uint32_t gpRegVal) {
+  ASSERT(CLB_isBaseValid(base));
 
-    HWREG(base + CLB_LOGICCTL + CLB_O_GP_REG) = gpRegVal;
+  HWREG(base + CLB_LOGICCTL + CLB_O_GP_REG) = gpRegVal;
 }
 
 //*****************************************************************************
@@ -662,11 +638,10 @@ static inline void CLB_setGPREG(uint32_t base, uint32_t gpRegVal)
 //! \return CLB_GP_REG value.
 //
 //*****************************************************************************
-static inline uint32_t CLB_getGPREG(uint32_t base)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline uint32_t CLB_getGPREG(uint32_t base) {
+  ASSERT(CLB_isBaseValid(base));
 
-    return(HWREG(base + CLB_LOGICCTL + CLB_O_GP_REG));
+  return (HWREG(base + CLB_LOGICCTL + CLB_O_GP_REG));
 }
 
 //*****************************************************************************
@@ -693,36 +668,32 @@ static inline uint32_t CLB_getGPREG(uint32_t base)
 //
 //*****************************************************************************
 static inline void CLB_configLocalInputMux(uint32_t base, CLB_Inputs inID,
-                                            CLB_LocalInputMux localMuxCfg)
-{
-    uint16_t shiftVal;
+                                           CLB_LocalInputMux localMuxCfg) {
+  uint16_t shiftVal;
 
-    ASSERT(CLB_isBaseValid(base));
+  ASSERT(CLB_isBaseValid(base));
 
+  //
+  // Each local input has a 5-bit field in this register so need to calculate
+  // shift amount accordingly.
+  //
+  shiftVal = (uint16_t)inID * CLB_LCL_MUX_SEL_1_LCL_MUX_SEL_IN_1_S;
+
+  if (inID < CLB_IN4) {
+    HWREG(base + CLB_LOGICCTL + CLB_O_LCL_MUX_SEL_1) =
+        (HWREG(base + CLB_LOGICCTL + CLB_O_LCL_MUX_SEL_1) &
+         ~((uint32_t)CLB_LCL_MUX_SEL_1_LCL_MUX_SEL_IN_0_M << shiftVal)) |
+        ((uint32_t)localMuxCfg << shiftVal);
+  } else {
     //
-    // Each local input has a 5-bit field in this register so need to calculate
-    // shift amount accordingly.
+    // Calculating shift amount for inputs > input3
     //
-    shiftVal = (uint16_t)inID * CLB_LCL_MUX_SEL_1_LCL_MUX_SEL_IN_1_S;
-
-    if(inID < CLB_IN4)
-    {
-        HWREG(base + CLB_LOGICCTL + CLB_O_LCL_MUX_SEL_1) =
-            (HWREG(base + CLB_LOGICCTL + CLB_O_LCL_MUX_SEL_1) &
-             ~((uint32_t)CLB_LCL_MUX_SEL_1_LCL_MUX_SEL_IN_0_M << shiftVal)) |
-            ((uint32_t)localMuxCfg << shiftVal);
-    }
-    else
-    {
-        //
-        // Calculating shift amount for inputs > input3
-        //
-        shiftVal -= 4U * CLB_LCL_MUX_SEL_1_LCL_MUX_SEL_IN_1_S;
-        HWREG(base + CLB_LOGICCTL + CLB_O_LCL_MUX_SEL_2) =
-            (HWREG(base + CLB_LOGICCTL + CLB_O_LCL_MUX_SEL_2) &
-             ~((uint32_t)CLB_LCL_MUX_SEL_1_LCL_MUX_SEL_IN_0_M << shiftVal)) |
-            ((uint32_t)localMuxCfg << shiftVal);
-    }
+    shiftVal -= 4U * CLB_LCL_MUX_SEL_1_LCL_MUX_SEL_IN_1_S;
+    HWREG(base + CLB_LOGICCTL + CLB_O_LCL_MUX_SEL_2) =
+        (HWREG(base + CLB_LOGICCTL + CLB_O_LCL_MUX_SEL_2) &
+         ~((uint32_t)CLB_LCL_MUX_SEL_1_LCL_MUX_SEL_IN_0_M << shiftVal)) |
+        ((uint32_t)localMuxCfg << shiftVal);
+  }
 }
 
 //*****************************************************************************
@@ -748,33 +719,29 @@ static inline void CLB_configLocalInputMux(uint32_t base, CLB_Inputs inID,
 //
 //*****************************************************************************
 static inline void CLB_configGlobalInputMux(uint32_t base, CLB_Inputs inID,
-                                            CLB_GlobalInputMux globalMuxCfg)
-{
-    uint16_t shiftVal;
+                                            CLB_GlobalInputMux globalMuxCfg) {
+  uint16_t shiftVal;
 
-    ASSERT(CLB_isBaseValid(base));
+  ASSERT(CLB_isBaseValid(base));
 
-    //
-    // Each input has a 5-bit field in this register so need to calculate
-    // shift amount accordingly.
-    //
-    shiftVal = (uint16_t)inID * CLB_GLBL_MUX_SEL_1_GLBL_MUX_SEL_IN_1_S;
+  //
+  // Each input has a 5-bit field in this register so need to calculate
+  // shift amount accordingly.
+  //
+  shiftVal = (uint16_t)inID * CLB_GLBL_MUX_SEL_1_GLBL_MUX_SEL_IN_1_S;
 
-    if(inID < CLB_IN4)
-    {
-        HWREG(base + CLB_LOGICCTL + CLB_O_GLBL_MUX_SEL_1) =
-            (HWREG(base + CLB_LOGICCTL + CLB_O_GLBL_MUX_SEL_1) &
-             ~((uint32_t)CLB_GLBL_MUX_SEL_1_GLBL_MUX_SEL_IN_0_M << shiftVal)) |
-            ((uint32_t)globalMuxCfg << shiftVal);
-    }
-    else
-    {
-        shiftVal -= 4U * CLB_GLBL_MUX_SEL_1_GLBL_MUX_SEL_IN_1_S;
-        HWREG(base + CLB_LOGICCTL + CLB_O_GLBL_MUX_SEL_2) =
-            (HWREG(base + CLB_LOGICCTL + CLB_O_GLBL_MUX_SEL_2) &
-             ~((uint32_t)CLB_GLBL_MUX_SEL_1_GLBL_MUX_SEL_IN_0_M << shiftVal)) |
-            ((uint32_t)globalMuxCfg << shiftVal);
-    }
+  if (inID < CLB_IN4) {
+    HWREG(base + CLB_LOGICCTL + CLB_O_GLBL_MUX_SEL_1) =
+        (HWREG(base + CLB_LOGICCTL + CLB_O_GLBL_MUX_SEL_1) &
+         ~((uint32_t)CLB_GLBL_MUX_SEL_1_GLBL_MUX_SEL_IN_0_M << shiftVal)) |
+        ((uint32_t)globalMuxCfg << shiftVal);
+  } else {
+    shiftVal -= 4U * CLB_GLBL_MUX_SEL_1_GLBL_MUX_SEL_IN_1_S;
+    HWREG(base + CLB_LOGICCTL + CLB_O_GLBL_MUX_SEL_2) =
+        (HWREG(base + CLB_LOGICCTL + CLB_O_GLBL_MUX_SEL_2) &
+         ~((uint32_t)CLB_GLBL_MUX_SEL_1_GLBL_MUX_SEL_IN_0_M << shiftVal)) |
+        ((uint32_t)globalMuxCfg << shiftVal);
+  }
 }
 
 //*****************************************************************************
@@ -805,19 +772,15 @@ static inline void CLB_configGlobalInputMux(uint32_t base, CLB_Inputs inID,
 //! \return None.
 //
 //*****************************************************************************
-static inline void CLB_setOutputMask(uint32_t base, uint32_t outputMask ,
-                                             bool enable)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline void CLB_setOutputMask(uint32_t base, uint32_t outputMask,
+                                     bool enable) {
+  ASSERT(CLB_isBaseValid(base));
 
-    if(enable == true)
-     {
-        HWREG(base + CLB_LOGICCTL + CLB_O_OUT_EN) |= outputMask;
-     }
-    else
-     {
-        HWREG(base + CLB_LOGICCTL + CLB_O_OUT_EN) &= ~outputMask;
-     }
+  if (enable == true) {
+    HWREG(base + CLB_LOGICCTL + CLB_O_OUT_EN) |= outputMask;
+  } else {
+    HWREG(base + CLB_LOGICCTL + CLB_O_OUT_EN) &= ~outputMask;
+  }
 }
 
 //*****************************************************************************
@@ -830,11 +793,10 @@ static inline void CLB_setOutputMask(uint32_t base, uint32_t outputMask ,
 //!         constant set by the HLC.
 //
 //*****************************************************************************
-static inline uint16_t CLB_getInterruptTag(uint32_t base)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline uint16_t CLB_getInterruptTag(uint32_t base) {
+  ASSERT(CLB_isBaseValid(base));
 
-    return(HWREGH(base + CLB_LOGICCTL + CLB_O_INTR_TAG_REG));
+  return (HWREGH(base + CLB_LOGICCTL + CLB_O_INTR_TAG_REG));
 }
 
 //*****************************************************************************
@@ -848,11 +810,10 @@ static inline uint16_t CLB_getInterruptTag(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CLB_clearInterruptTag(uint32_t base)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline void CLB_clearInterruptTag(uint32_t base) {
+  ASSERT(CLB_isBaseValid(base));
 
-    HWREGH(base + CLB_LOGICCTL + CLB_O_INTR_TAG_REG) = 0U;
+  HWREGH(base + CLB_LOGICCTL + CLB_O_INTR_TAG_REG) = 0U;
 }
 
 //*****************************************************************************
@@ -876,16 +837,15 @@ static inline void CLB_clearInterruptTag(uint32_t base)
 //*****************************************************************************
 static inline void CLB_selectLUT4Inputs(uint32_t base, uint32_t lut4In0,
                                         uint32_t lut4In1, uint32_t lut4In2,
-                                        uint32_t lut4In3)
-{
-    ASSERT(CLB_isBaseValid(base));
+                                        uint32_t lut4In3) {
+  ASSERT(CLB_isBaseValid(base));
 
-    EALLOW;
-    HWREG(base + CLB_O_LUT4_IN0) = lut4In0;
-    HWREG(base + CLB_O_LUT4_IN1) = lut4In1;
-    HWREG(base + CLB_O_LUT4_IN2) = lut4In2;
-    HWREG(base + CLB_O_LUT4_IN3) = lut4In3;
-    EDIS;
+  EALLOW;
+  HWREG(base + CLB_O_LUT4_IN0) = lut4In0;
+  HWREG(base + CLB_O_LUT4_IN1) = lut4In1;
+  HWREG(base + CLB_O_LUT4_IN2) = lut4In2;
+  HWREG(base + CLB_O_LUT4_IN3) = lut4In3;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -904,14 +864,13 @@ static inline void CLB_selectLUT4Inputs(uint32_t base, uint32_t lut4In0,
 //
 //*****************************************************************************
 static inline void CLB_configLUT4Function(uint32_t base, uint32_t lut4Fn10,
-                                          uint32_t lut4Fn2)
-{
-    ASSERT(CLB_isBaseValid(base));
+                                          uint32_t lut4Fn2) {
+  ASSERT(CLB_isBaseValid(base));
 
-    EALLOW;
-    HWREG(base + CLB_O_LUT4_FN1_0) = lut4Fn10;
-    HWREG(base + CLB_O_LUT4_FN2) = lut4Fn2;
-    EDIS;
+  EALLOW;
+  HWREG(base + CLB_O_LUT4_FN1_0) = lut4Fn10;
+  HWREG(base + CLB_O_LUT4_FN2)   = lut4Fn2;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -936,16 +895,15 @@ static inline void CLB_configLUT4Function(uint32_t base, uint32_t lut4Fn10,
 //*****************************************************************************
 static inline void CLB_selectFSMInputs(uint32_t base, uint32_t external0,
                                        uint32_t external1, uint32_t extra0,
-                                       uint32_t extra1)
-{
-    ASSERT(CLB_isBaseValid(base));
+                                       uint32_t extra1) {
+  ASSERT(CLB_isBaseValid(base));
 
-    EALLOW;
-    HWREG(base + CLB_O_FSM_EXTERNAL_IN0) = external0;
-    HWREG(base + CLB_O_FSM_EXTERNAL_IN1) = external1;
-    HWREG(base + CLB_O_FSM_EXTRA_IN0) = extra0;
-    HWREG(base + CLB_O_FSM_EXTRA_IN1) = extra1;
-    EDIS;
+  EALLOW;
+  HWREG(base + CLB_O_FSM_EXTERNAL_IN0) = external0;
+  HWREG(base + CLB_O_FSM_EXTERNAL_IN1) = external1;
+  HWREG(base + CLB_O_FSM_EXTRA_IN0)    = extra0;
+  HWREG(base + CLB_O_FSM_EXTRA_IN1)    = extra1;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -964,14 +922,13 @@ static inline void CLB_selectFSMInputs(uint32_t base, uint32_t external0,
 //
 //*****************************************************************************
 static inline void CLB_configFSMLUTFunction(uint32_t base, uint32_t fsmLutFn10,
-                                            uint32_t fsmLutFn2)
-{
-    ASSERT(CLB_isBaseValid(base));
+                                            uint32_t fsmLutFn2) {
+  ASSERT(CLB_isBaseValid(base));
 
-    EALLOW;
-    HWREG(base + CLB_O_FSM_LUT_FN1_0) = fsmLutFn10;
-    HWREG(base + CLB_O_FSM_LUT_FN2) = fsmLutFn2;
-    EDIS;
+  EALLOW;
+  HWREG(base + CLB_O_FSM_LUT_FN1_0) = fsmLutFn10;
+  HWREG(base + CLB_O_FSM_LUT_FN2)   = fsmLutFn2;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -993,15 +950,14 @@ static inline void CLB_configFSMLUTFunction(uint32_t base, uint32_t fsmLutFn10,
 //*****************************************************************************
 static inline void CLB_configFSMNextState(uint32_t base, uint32_t nextState0,
                                           uint32_t nextState1,
-                                          uint32_t nextState2)
-{
-    ASSERT(CLB_isBaseValid(base));
+                                          uint32_t nextState2) {
+  ASSERT(CLB_isBaseValid(base));
 
-    EALLOW;
-    HWREG(base + CLB_O_FSM_NEXT_STATE_0) = nextState0;
-    HWREG(base + CLB_O_FSM_NEXT_STATE_1) = nextState1;
-    HWREG(base + CLB_O_FSM_NEXT_STATE_2) = nextState2;
-    EDIS;
+  EALLOW;
+  HWREG(base + CLB_O_FSM_NEXT_STATE_0) = nextState0;
+  HWREG(base + CLB_O_FSM_NEXT_STATE_1) = nextState1;
+  HWREG(base + CLB_O_FSM_NEXT_STATE_2) = nextState2;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1025,16 +981,15 @@ static inline void CLB_configFSMNextState(uint32_t base, uint32_t nextState0,
 //*****************************************************************************
 static inline void CLB_selectCounterInputs(uint32_t base, uint32_t reset,
                                            uint32_t event, uint32_t mode0,
-                                           uint32_t mode1)
-{
-    ASSERT(CLB_isBaseValid(base));
+                                           uint32_t mode1) {
+  ASSERT(CLB_isBaseValid(base));
 
-    EALLOW;
-    HWREG(base + CLB_O_COUNT_RESET) = reset;
-    HWREG(base + CLB_O_COUNT_EVENT) = event;
-    HWREG(base + CLB_O_COUNT_MODE_0) = mode0;
-    HWREG(base + CLB_O_COUNT_MODE_1) = mode1;
-    EDIS;
+  EALLOW;
+  HWREG(base + CLB_O_COUNT_RESET)  = reset;
+  HWREG(base + CLB_O_COUNT_EVENT)  = event;
+  HWREG(base + CLB_O_COUNT_MODE_0) = mode0;
+  HWREG(base + CLB_O_COUNT_MODE_1) = mode1;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1052,13 +1007,12 @@ static inline void CLB_selectCounterInputs(uint32_t base, uint32_t reset,
 //! \return None.
 //
 //*****************************************************************************
-static inline void CLB_configMiscCtrlModes(uint32_t base, uint32_t miscCtrl)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline void CLB_configMiscCtrlModes(uint32_t base, uint32_t miscCtrl) {
+  ASSERT(CLB_isBaseValid(base));
 
-    EALLOW;
-    HWREG(base + CLB_O_MISC_CONTROL) = miscCtrl;
-    EDIS;
+  EALLOW;
+  HWREG(base + CLB_O_MISC_CONTROL) = miscCtrl;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1078,13 +1032,12 @@ static inline void CLB_configMiscCtrlModes(uint32_t base, uint32_t miscCtrl)
 //
 //*****************************************************************************
 static inline void CLB_configOutputLUT(uint32_t base, CLB_Outputs outID,
-                                       uint32_t outputCfg)
-{
-    ASSERT(CLB_isBaseValid(base));
+                                       uint32_t outputCfg) {
+  ASSERT(CLB_isBaseValid(base));
 
-    EALLOW;
-    HWREG(base + CLB_O_OUTPUT_LUT_0 + (sizeof(uint32_t) * outID)) = outputCfg;
-    EDIS;
+  EALLOW;
+  HWREG(base + CLB_O_OUTPUT_LUT_0 + (sizeof(uint32_t) * outID)) = outputCfg;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1100,13 +1053,12 @@ static inline void CLB_configOutputLUT(uint32_t base, CLB_Outputs outID,
 //! \return None.
 //
 //*****************************************************************************
-static inline void CLB_configHLCEventSelect(uint32_t base, uint32_t eventSel)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline void CLB_configHLCEventSelect(uint32_t base, uint32_t eventSel) {
+  ASSERT(CLB_isBaseValid(base));
 
-    EALLOW;
-    HWREG(base + CLB_O_HLC_EVENT_SEL) = eventSel;
-    EDIS;
+  EALLOW;
+  HWREG(base + CLB_O_HLC_EVENT_SEL) = eventSel;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1129,12 +1081,11 @@ static inline void CLB_configHLCEventSelect(uint32_t base, uint32_t eventSel)
 //*****************************************************************************
 static inline void CLB_programHLCInstruction(uint32_t base,
                                              uint32_t instructionNum,
-                                             uint32_t instruction)
-{
-    ASSERT(CLB_isBaseValid(base));
-    ASSERT(instructionNum < 32U);
+                                             uint32_t instruction) {
+  ASSERT(CLB_isBaseValid(base));
+  ASSERT(instructionNum < 32U);
 
-    CLB_writeInterface(base, CLB_ADDR_HLC_BASE + instructionNum, instruction);
+  CLB_writeInterface(base, CLB_ADDR_HLC_BASE + instructionNum, instruction);
 }
 
 //*****************************************************************************
@@ -1159,14 +1110,13 @@ static inline void CLB_programHLCInstruction(uint32_t base,
 //*****************************************************************************
 static inline void CLB_setHLCRegisters(uint32_t base, uint32_t r0Init,
                                        uint32_t r1Init, uint32_t r2Init,
-                                       uint32_t r3Init)
-{
-    ASSERT(CLB_isBaseValid(base));
+                                       uint32_t r3Init) {
+  ASSERT(CLB_isBaseValid(base));
 
-    CLB_writeInterface(base, CLB_ADDR_HLC_R0, r0Init);
-    CLB_writeInterface(base, CLB_ADDR_HLC_R1, r1Init);
-    CLB_writeInterface(base, CLB_ADDR_HLC_R2, r2Init);
-    CLB_writeInterface(base, CLB_ADDR_HLC_R3, r3Init);
+  CLB_writeInterface(base, CLB_ADDR_HLC_R0, r0Init);
+  CLB_writeInterface(base, CLB_ADDR_HLC_R1, r1Init);
+  CLB_writeInterface(base, CLB_ADDR_HLC_R2, r2Init);
+  CLB_writeInterface(base, CLB_ADDR_HLC_R3, r3Init);
 }
 
 //*****************************************************************************
@@ -1181,11 +1131,10 @@ static inline void CLB_setHLCRegisters(uint32_t base, uint32_t r0Init,
 //! \return Returns the value in the specified HLC register or counter.
 //
 //*****************************************************************************
-static inline uint32_t CLB_getRegister(uint32_t base, CLB_Register registerID)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline uint32_t CLB_getRegister(uint32_t base, CLB_Register registerID) {
+  ASSERT(CLB_isBaseValid(base));
 
-    return(HWREG(base + CLB_LOGICCTL + (uint32_t)registerID));
+  return (HWREG(base + CLB_LOGICCTL + (uint32_t)registerID));
 }
 
 //*****************************************************************************
@@ -1199,11 +1148,10 @@ static inline uint32_t CLB_getRegister(uint32_t base, CLB_Register registerID)
 //!         masks from <tt>hw_clb.h</tt> to decode the bits.
 //
 //*****************************************************************************
-static inline uint32_t CLB_getOutputStatus(uint32_t base)
-{
-    ASSERT(CLB_isBaseValid(base));
+static inline uint32_t CLB_getOutputStatus(uint32_t base) {
+  ASSERT(CLB_isBaseValid(base));
 
-    return(HWREG(base + CLB_LOGICCTL + CLB_O_DBG_OUT));
+  return (HWREG(base + CLB_LOGICCTL + CLB_O_DBG_OUT));
 }
 
 //*****************************************************************************
@@ -1273,7 +1221,7 @@ extern void CLB_writeFIFOs(uint32_t base, const uint32_t pullData[]);
 //! \return None.
 //
 //*****************************************************************************
-extern void CLB_readFIFOs(uint32_t base , uint32_t pushData[]);
+extern void CLB_readFIFOs(uint32_t base, uint32_t pushData[]);
 
 //*****************************************************************************
 //

@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   dac.h
+//  FILE:   dac.h
 //
-// TITLE:  C28x DAC driver.
+//  TITLE:  C28x DAC driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef DAC_H
 #define DAC_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -59,23 +58,23 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "cpu.h"
+#include "debug.h"
 #include "inc/hw_dac.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
-#include "cpu.h"
-#include "debug.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 //
 // A 8-bit register mask
 //
-#define DAC_REG_BYTE_MASK       (0xFFU)   //!< Register Byte Mask
+#define DAC_REG_BYTE_MASK (0xFFU) //!< Register Byte Mask
 
 //
 // Lock Key
 //
-#define DAC_LOCK_KEY            (0xA000U) //!< DAC Lock Key
+#define DAC_LOCK_KEY (0xA000U) //!< DAC Lock Key
 
 #ifndef DOXYGEN_PDF_IGNORE
 //*****************************************************************************
@@ -84,9 +83,9 @@ extern "C"
 // DAC_lockRegister() and DAC_isRegisterLocked() functions.
 //
 //*****************************************************************************
-#define DAC_LOCK_CONTROL        (0x1U)    //!< Lock the control register
-#define DAC_LOCK_SHADOW         (0x2U)    //!< Lock the shadow value register
-#define DAC_LOCK_OUTPUT         (0x4U)    //!< Lock the output enable register
+#define DAC_LOCK_CONTROL (0x1U) //!< Lock the control register
+#define DAC_LOCK_SHADOW  (0x2U) //!< Lock the shadow value register
+#define DAC_LOCK_OUTPUT  (0x4U) //!< Lock the output enable register
 
 #endif // DOXYGEN_PDF_IGNORE
 
@@ -96,22 +95,20 @@ extern "C"
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    DAC_REF_VDAC        = 0,  //!< VDAC reference voltage
-    DAC_REF_ADC_VREFHI  = 1   //!< ADC VREFHI reference voltage
-}DAC_ReferenceVoltage;
+typedef enum {
+  DAC_REF_VDAC       = 0, //!< VDAC reference voltage
+  DAC_REF_ADC_VREFHI = 1  //!< ADC VREFHI reference voltage
+} DAC_ReferenceVoltage;
 
 //*****************************************************************************
 //
 //! Values that can be passed to DAC_setLoadMode() as the \e mode parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    DAC_LOAD_SYSCLK  = 0,     //!< Load on next SYSCLK
-    DAC_LOAD_PWMSYNC = 4      //!< Load on next PWMSYNC specified by SYNCSEL
-}DAC_LoadMode;
+typedef enum {
+  DAC_LOAD_SYSCLK  = 0, //!< Load on next SYSCLK
+  DAC_LOAD_PWMSYNC = 4  //!< Load on next PWMSYNC specified by SYNCSEL
+} DAC_LoadMode;
 
 //*****************************************************************************
 //
@@ -132,14 +129,8 @@ typedef enum
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-DAC_isBaseValid(uint32_t base)
-{
-    return(
-           (base == DACA_BASE) ||
-           (base == DACB_BASE) ||
-           (base == DACC_BASE)
-          );
+static inline bool DAC_isBaseValid(uint32_t base) {
+  return ((base == DACA_BASE) || (base == DACB_BASE) || (base == DACC_BASE));
 }
 #endif
 
@@ -154,18 +145,16 @@ DAC_isBaseValid(uint32_t base)
 //! \return Returns the DAC revision value.
 //
 //*****************************************************************************
-static inline uint16_t
-DAC_getRevision(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
+static inline uint16_t DAC_getRevision(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
 
-    //
-    // Get the revision value.
-    //
-    return(HWREGH(base + DAC_O_REV) & DAC_REV_REV_M);
+  //
+  // Get the revision value.
+  //
+  return (HWREGH(base + DAC_O_REV) & DAC_REV_REV_M);
 }
 
 //*****************************************************************************
@@ -184,23 +173,22 @@ DAC_getRevision(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DAC_setReferenceVoltage(uint32_t base, DAC_ReferenceVoltage source)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
+static inline void DAC_setReferenceVoltage(uint32_t             base,
+                                           DAC_ReferenceVoltage source) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
 
-    //
-    // Set the reference voltage
-    //
-    EALLOW;
+  //
+  // Set the reference voltage
+  //
+  EALLOW;
 
-    HWREGH(base + DAC_O_CTL) = (HWREGH(base + DAC_O_CTL) &
-                                ~DAC_CTL_DACREFSEL) | (uint16_t)source;
+  HWREGH(base + DAC_O_CTL) =
+      (HWREGH(base + DAC_O_CTL) & ~DAC_CTL_DACREFSEL) | (uint16_t)source;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -219,23 +207,21 @@ DAC_setReferenceVoltage(uint32_t base, DAC_ReferenceVoltage source)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DAC_setLoadMode(uint32_t base, DAC_LoadMode mode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
+static inline void DAC_setLoadMode(uint32_t base, DAC_LoadMode mode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
 
-    //
-    // Set the load mode
-    //
-    EALLOW;
+  //
+  // Set the load mode
+  //
+  EALLOW;
 
-    HWREGH(base + DAC_O_CTL) = (HWREGH(base + DAC_O_CTL) &
-                                ~DAC_CTL_LOADMODE) | (uint16_t)mode;
+  HWREGH(base + DAC_O_CTL) =
+      (HWREGH(base + DAC_O_CTL) & ~DAC_CTL_LOADMODE) | (uint16_t)mode;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -254,26 +240,22 @@ DAC_setLoadMode(uint32_t base, DAC_LoadMode mode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DAC_setPWMSyncSignal(uint32_t base, uint16_t pwmSignal)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
-    ASSERT((pwmSignal > 0U) && (pwmSignal < 17U));
+static inline void DAC_setPWMSyncSignal(uint32_t base, uint16_t pwmSignal) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
+  ASSERT((pwmSignal > 0U) && (pwmSignal < 17U));
 
-    //
-    // Set the PWM sync signal
-    //
-    EALLOW;
+  //
+  // Set the PWM sync signal
+  //
+  EALLOW;
 
-    HWREGH(base + DAC_O_CTL) = (HWREGH(base + DAC_O_CTL) &
-                                ~DAC_CTL_SYNCSEL_M) |
-                               ((uint16_t)(pwmSignal - 1U) <<
-                                DAC_CTL_SYNCSEL_S);
+  HWREGH(base + DAC_O_CTL) = (HWREGH(base + DAC_O_CTL) & ~DAC_CTL_SYNCSEL_M) |
+                             ((uint16_t)(pwmSignal - 1U) << DAC_CTL_SYNCSEL_S);
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -287,18 +269,16 @@ DAC_setPWMSyncSignal(uint32_t base, uint16_t pwmSignal)
 //! \return Returns the DAC active output value.
 //
 //*****************************************************************************
-static inline uint16_t
-DAC_getActiveValue(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
+static inline uint16_t DAC_getActiveValue(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
 
-    //
-    // Get the active value
-    //
-    return(HWREGH(base + DAC_O_VALA) & DAC_VALA_DACVALA_M);
+  //
+  // Get the active value
+  //
+  return (HWREGH(base + DAC_O_VALA) & DAC_VALA_DACVALA_M);
 }
 
 //*****************************************************************************
@@ -313,21 +293,19 @@ DAC_getActiveValue(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DAC_setShadowValue(uint32_t base, uint16_t value)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
-    ASSERT(value <= DAC_VALS_DACVALS_M);
+static inline void DAC_setShadowValue(uint32_t base, uint16_t value) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
+  ASSERT(value <= DAC_VALS_DACVALS_M);
 
-    //
-    // Set the shadow value
-    //
-    HWREGH(base + DAC_O_VALS) = (HWREGH(base + DAC_O_VALS) &
-                                 ~DAC_VALS_DACVALS_M) |
-                                (uint16_t)(value & DAC_VALS_DACVALS_M);
+  //
+  // Set the shadow value
+  //
+  HWREGH(base + DAC_O_VALS) =
+      (HWREGH(base + DAC_O_VALS) & ~DAC_VALS_DACVALS_M) |
+      (uint16_t)(value & DAC_VALS_DACVALS_M);
 }
 
 //*****************************************************************************
@@ -341,18 +319,16 @@ DAC_setShadowValue(uint32_t base, uint16_t value)
 //! \return Returns the DAC shadow output value.
 //
 //*****************************************************************************
-static inline uint16_t
-DAC_getShadowValue(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
+static inline uint16_t DAC_getShadowValue(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
 
-    //
-    // Get the shadow value
-    //
-    return(HWREGH(base + DAC_O_VALS) & DAC_VALS_DACVALS_M);
+  //
+  // Get the shadow value
+  //
+  return (HWREGH(base + DAC_O_VALS) & DAC_VALS_DACVALS_M);
 }
 
 //*****************************************************************************
@@ -369,22 +345,20 @@ DAC_getShadowValue(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DAC_enableOutput(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
+static inline void DAC_enableOutput(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
 
-    //
-    // Enable the output
-    //
-    EALLOW;
+  //
+  // Enable the output
+  //
+  EALLOW;
 
-    HWREGH(base + DAC_O_OUTEN) |= DAC_OUTEN_DACOUTEN;
+  HWREGH(base + DAC_O_OUTEN) |= DAC_OUTEN_DACOUTEN;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -398,22 +372,20 @@ DAC_enableOutput(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DAC_disableOutput(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
+static inline void DAC_disableOutput(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
 
-    //
-    // Disable the output
-    //
-    EALLOW;
+  //
+  // Disable the output
+  //
+  EALLOW;
 
-    HWREGH(base + DAC_O_OUTEN) &= ~DAC_OUTEN_DACOUTEN;
+  HWREGH(base + DAC_O_OUTEN) &= ~DAC_OUTEN_DACOUTEN;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -433,24 +405,22 @@ DAC_disableOutput(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DAC_setOffsetTrim(uint32_t base, int16_t offset)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
-    ASSERT((offset > -129) && (offset < 128));
+static inline void DAC_setOffsetTrim(uint32_t base, int16_t offset) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
+  ASSERT((offset > -129) && (offset < 128));
 
-    //
-    // Set the offset trim value
-    //
-    EALLOW;
+  //
+  // Set the offset trim value
+  //
+  EALLOW;
 
-    HWREGH(base + DAC_O_TRIM) = (HWREGH(base + DAC_O_TRIM) &
-                                 ~DAC_TRIM_OFFSET_TRIM_M) | (int16_t)offset;
+  HWREGH(base + DAC_O_TRIM) =
+      (HWREGH(base + DAC_O_TRIM) & ~DAC_TRIM_OFFSET_TRIM_M) | (int16_t)offset;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -464,24 +434,22 @@ DAC_setOffsetTrim(uint32_t base, int16_t offset)
 //! \return None.
 //
 //*****************************************************************************
-static inline int16_t
-DAC_getOffsetTrim(uint32_t base)
-{
-    uint16_t value;
+static inline int16_t DAC_getOffsetTrim(uint32_t base) {
+  uint16_t value;
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
 
-    //
-    // Get the sign-extended offset trim value
-    //
-    value = (HWREGH(base + DAC_O_TRIM) & DAC_TRIM_OFFSET_TRIM_M);
-    value = ((value & (uint16_t)DAC_REG_BYTE_MASK) ^ (uint16_t)0x80) -
-            (uint16_t)0x80;
+  //
+  // Get the sign-extended offset trim value
+  //
+  value = (HWREGH(base + DAC_O_TRIM) & DAC_TRIM_OFFSET_TRIM_M);
+  value =
+      ((value & (uint16_t)DAC_REG_BYTE_MASK) ^ (uint16_t)0x80) - (uint16_t)0x80;
 
-    return((int16_t)value);
+  return ((int16_t)value);
 }
 
 //*****************************************************************************
@@ -503,24 +471,21 @@ DAC_getOffsetTrim(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DAC_lockRegister(uint32_t base, uint16_t reg)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
-    ASSERT((reg & ~(DAC_LOCK_CONTROL | DAC_LOCK_SHADOW |
-                    DAC_LOCK_OUTPUT)) == 0U);
+static inline void DAC_lockRegister(uint32_t base, uint16_t reg) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
+  ASSERT((reg & ~(DAC_LOCK_CONTROL | DAC_LOCK_SHADOW | DAC_LOCK_OUTPUT)) == 0U);
 
-    //
-    // Lock the specified registers
-    //
-    EALLOW;
+  //
+  // Lock the specified registers
+  //
+  EALLOW;
 
-    HWREGH(base + DAC_O_LOCK) |= reg;
+  HWREGH(base + DAC_O_LOCK) |= reg;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -543,20 +508,17 @@ DAC_lockRegister(uint32_t base, uint16_t reg)
 //! \b false if all specified registers aren't locked.
 //
 //*****************************************************************************
-static inline bool
-DAC_isRegisterLocked(uint32_t base, uint16_t reg)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DAC_isBaseValid(base));
-    ASSERT((reg & ~(DAC_LOCK_CONTROL | DAC_LOCK_SHADOW |
-                    DAC_LOCK_OUTPUT)) == 0U);
+static inline bool DAC_isRegisterLocked(uint32_t base, uint16_t reg) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DAC_isBaseValid(base));
+  ASSERT((reg & ~(DAC_LOCK_CONTROL | DAC_LOCK_SHADOW | DAC_LOCK_OUTPUT)) == 0U);
 
-    //
-    // Return the lock status on the specified registers
-    //
-    return((bool)((HWREGH(base + DAC_O_LOCK) & reg) != 0U));
+  //
+  // Return the lock status on the specified registers
+  //
+  return ((bool)((HWREGH(base + DAC_O_LOCK) & reg) != 0U));
 }
 
 //*****************************************************************************
@@ -580,8 +542,7 @@ DAC_isRegisterLocked(uint32_t base, uint16_t reg)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-DAC_tuneOffsetTrim(uint32_t base, float32_t referenceVoltage);
+extern void DAC_tuneOffsetTrim(uint32_t base, float32_t referenceVoltage);
 
 //*****************************************************************************
 //

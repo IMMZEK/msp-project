@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   sci.h
+//  FILE:   sci.h
 //
-// TITLE:  C28x SCI driver.
+//  TITLE:  C28x SCI driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef SCI_H
 #define SCI_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -59,12 +58,12 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "debug.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_sci.h"
 #include "inc/hw_types.h"
-#include "debug.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 //*****************************************************************************
 //
@@ -73,14 +72,14 @@ extern "C"
 // SCI_getInterruptStatus.
 //
 //*****************************************************************************
-#define SCI_INT_RXERR          0x01U  //!< RXERR interrupt
-#define SCI_INT_RXRDY_BRKDT    0x02U  //!< RXRDY interrupt
-#define SCI_INT_TXRDY          0x04U  //!< TXRDY interrupt
-#define SCI_INT_TXFF           0x08U  //!< TX FIFO level interrupt
-#define SCI_INT_RXFF           0x10U  //!< RX FIFO level interrupt
-#define SCI_INT_FE             0x20U  //!< Frame Error
-#define SCI_INT_OE             0x40U  //!< Overrun Error
-#define SCI_INT_PE             0x80U  //!< Parity Error
+#define SCI_INT_RXERR       0x01U //!< RXERR interrupt
+#define SCI_INT_RXRDY_BRKDT 0x02U //!< RXRDY interrupt
+#define SCI_INT_TXRDY       0x04U //!< TXRDY interrupt
+#define SCI_INT_TXFF        0x08U //!< TX FIFO level interrupt
+#define SCI_INT_RXFF        0x10U //!< RX FIFO level interrupt
+#define SCI_INT_FE          0x20U //!< Frame Error
+#define SCI_INT_OE          0x40U //!< Overrun Error
+#define SCI_INT_PE          0x80U //!< Parity Error
 
 //*****************************************************************************
 //
@@ -91,19 +90,19 @@ extern "C"
 // SCI_getParityMode.
 //
 //*****************************************************************************
-#define SCI_CONFIG_WLEN_MASK   0x0007U  //!< Mask for extracting word length
-#define SCI_CONFIG_WLEN_8      0x0007U  //!< 8 bit data
-#define SCI_CONFIG_WLEN_7      0x0006U  //!< 7 bit data
-#define SCI_CONFIG_WLEN_6      0x0005U  //!< 6 bit data
-#define SCI_CONFIG_WLEN_5      0x0004U  //!< 5 bit data
-#define SCI_CONFIG_WLEN_4      0x0003U  //!< 4 bit data
-#define SCI_CONFIG_WLEN_3      0x0002U  //!< 3 bit data
-#define SCI_CONFIG_WLEN_2      0x0001U  //!< 2 bit data
-#define SCI_CONFIG_WLEN_1      0x0000U  //!< 1 bit data
-#define SCI_CONFIG_STOP_MASK   0x0080U  //!< Mask for extracting stop bits
-#define SCI_CONFIG_STOP_ONE    0x0000U  //!< One stop bit
-#define SCI_CONFIG_STOP_TWO    0x0080U  //!< Two stop bits
-#define SCI_CONFIG_PAR_MASK    0x0060U  //!< Parity Mask
+#define SCI_CONFIG_WLEN_MASK 0x0007U //!< Mask for extracting word length
+#define SCI_CONFIG_WLEN_8    0x0007U //!< 8 bit data
+#define SCI_CONFIG_WLEN_7    0x0006U //!< 7 bit data
+#define SCI_CONFIG_WLEN_6    0x0005U //!< 6 bit data
+#define SCI_CONFIG_WLEN_5    0x0004U //!< 5 bit data
+#define SCI_CONFIG_WLEN_4    0x0003U //!< 4 bit data
+#define SCI_CONFIG_WLEN_3    0x0002U //!< 3 bit data
+#define SCI_CONFIG_WLEN_2    0x0001U //!< 2 bit data
+#define SCI_CONFIG_WLEN_1    0x0000U //!< 1 bit data
+#define SCI_CONFIG_STOP_MASK 0x0080U //!< Mask for extracting stop bits
+#define SCI_CONFIG_STOP_ONE  0x0000U //!< One stop bit
+#define SCI_CONFIG_STOP_TWO  0x0080U //!< Two stop bits
+#define SCI_CONFIG_PAR_MASK  0x0060U //!< Parity Mask
 
 //*****************************************************************************
 //
@@ -111,11 +110,10 @@ extern "C"
 //! describe the parity of the SCI communication.
 //
 //*****************************************************************************
-typedef enum
-{
-    SCI_CONFIG_PAR_NONE = 0x0000U,  //!< No parity
-    SCI_CONFIG_PAR_EVEN = 0x0060U,  //!< Even parity
-    SCI_CONFIG_PAR_ODD  = 0x0020U   //!< Odd parity
+typedef enum {
+  SCI_CONFIG_PAR_NONE = 0x0000U, //!< No parity
+  SCI_CONFIG_PAR_EVEN = 0x0060U, //!< Even parity
+  SCI_CONFIG_PAR_ODD  = 0x0020U  //!< Odd parity
 } SCI_ParityType;
 
 //*****************************************************************************
@@ -125,25 +123,24 @@ typedef enum
 //! SCI_getTxFIFOStatus().
 //
 //*****************************************************************************
-typedef enum
-{
-    SCI_FIFO_TX0  = 0x0000U, //!< Transmit interrupt empty
-    SCI_FIFO_TX1  = 0x0001U, //!< Transmit interrupt 1/16 full
-    SCI_FIFO_TX2  = 0x0002U, //!< Transmit interrupt 2/16 full
-    SCI_FIFO_TX3  = 0x0003U, //!< Transmit interrupt 3/16 full
-    SCI_FIFO_TX4  = 0x0004U, //!< Transmit interrupt 4/16 full
-    SCI_FIFO_TX5  = 0x0005U, //!< Transmit interrupt 5/16 full
-    SCI_FIFO_TX6  = 0x0006U, //!< Transmit interrupt 6/16 full
-    SCI_FIFO_TX7  = 0x0007U, //!< Transmit interrupt 7/16 full
-    SCI_FIFO_TX8  = 0x0008U, //!< Transmit interrupt 8/16 full
-    SCI_FIFO_TX9  = 0x0009U, //!< Transmit interrupt 9/16 full
-    SCI_FIFO_TX10 = 0x000AU, //!< Transmit interrupt 10/16 full
-    SCI_FIFO_TX11 = 0x000BU, //!< Transmit interrupt 11/16 full
-    SCI_FIFO_TX12 = 0x000CU, //!< Transmit interrupt 12/16 full
-    SCI_FIFO_TX13 = 0x000DU, //!< Transmit interrupt 13/16 full
-    SCI_FIFO_TX14 = 0x000EU, //!< Transmit interrupt 14/16 full
-    SCI_FIFO_TX15 = 0x000FU, //!< Transmit interrupt 15/16 full
-    SCI_FIFO_TX16 = 0x0010U  //!< Transmit interrupt full
+typedef enum {
+  SCI_FIFO_TX0  = 0x0000U, //!< Transmit interrupt empty
+  SCI_FIFO_TX1  = 0x0001U, //!< Transmit interrupt 1/16 full
+  SCI_FIFO_TX2  = 0x0002U, //!< Transmit interrupt 2/16 full
+  SCI_FIFO_TX3  = 0x0003U, //!< Transmit interrupt 3/16 full
+  SCI_FIFO_TX4  = 0x0004U, //!< Transmit interrupt 4/16 full
+  SCI_FIFO_TX5  = 0x0005U, //!< Transmit interrupt 5/16 full
+  SCI_FIFO_TX6  = 0x0006U, //!< Transmit interrupt 6/16 full
+  SCI_FIFO_TX7  = 0x0007U, //!< Transmit interrupt 7/16 full
+  SCI_FIFO_TX8  = 0x0008U, //!< Transmit interrupt 8/16 full
+  SCI_FIFO_TX9  = 0x0009U, //!< Transmit interrupt 9/16 full
+  SCI_FIFO_TX10 = 0x000AU, //!< Transmit interrupt 10/16 full
+  SCI_FIFO_TX11 = 0x000BU, //!< Transmit interrupt 11/16 full
+  SCI_FIFO_TX12 = 0x000CU, //!< Transmit interrupt 12/16 full
+  SCI_FIFO_TX13 = 0x000DU, //!< Transmit interrupt 13/16 full
+  SCI_FIFO_TX14 = 0x000EU, //!< Transmit interrupt 14/16 full
+  SCI_FIFO_TX15 = 0x000FU, //!< Transmit interrupt 15/16 full
+  SCI_FIFO_TX16 = 0x0010U  //!< Transmit interrupt full
 } SCI_TxFIFOLevel;
 
 //*****************************************************************************
@@ -153,25 +150,24 @@ typedef enum
 //! SCI_getRxFIFOStatus().
 //
 //*****************************************************************************
-typedef enum
-{
-    SCI_FIFO_RX0  = 0x0000U, //!< Receive interrupt empty
-    SCI_FIFO_RX1  = 0x0001U, //!< Receive interrupt 1/16 full
-    SCI_FIFO_RX2  = 0x0002U, //!< Receive interrupt 2/16 full
-    SCI_FIFO_RX3  = 0x0003U, //!< Receive interrupt 3/16 full
-    SCI_FIFO_RX4  = 0x0004U, //!< Receive interrupt 4/16 full
-    SCI_FIFO_RX5  = 0x0005U, //!< Receive interrupt 5/16 full
-    SCI_FIFO_RX6  = 0x0006U, //!< Receive interrupt 6/16 full
-    SCI_FIFO_RX7  = 0x0007U, //!< Receive interrupt 7/16 full
-    SCI_FIFO_RX8  = 0x0008U, //!< Receive interrupt 8/16 full
-    SCI_FIFO_RX9  = 0x0009U, //!< Receive interrupt 9/16 full
-    SCI_FIFO_RX10 = 0x000AU, //!< Receive interrupt 10/16 full
-    SCI_FIFO_RX11 = 0x000BU, //!< Receive interrupt 11/16 full
-    SCI_FIFO_RX12 = 0x000CU, //!< Receive interrupt 12/16 full
-    SCI_FIFO_RX13 = 0x000DU, //!< Receive interrupt 13/16 full
-    SCI_FIFO_RX14 = 0x000EU, //!< Receive interrupt 14/16 full
-    SCI_FIFO_RX15 = 0x000FU, //!< Receive interrupt 15/16 full
-    SCI_FIFO_RX16 = 0x0010U  //!< Receive interrupt full
+typedef enum {
+  SCI_FIFO_RX0  = 0x0000U, //!< Receive interrupt empty
+  SCI_FIFO_RX1  = 0x0001U, //!< Receive interrupt 1/16 full
+  SCI_FIFO_RX2  = 0x0002U, //!< Receive interrupt 2/16 full
+  SCI_FIFO_RX3  = 0x0003U, //!< Receive interrupt 3/16 full
+  SCI_FIFO_RX4  = 0x0004U, //!< Receive interrupt 4/16 full
+  SCI_FIFO_RX5  = 0x0005U, //!< Receive interrupt 5/16 full
+  SCI_FIFO_RX6  = 0x0006U, //!< Receive interrupt 6/16 full
+  SCI_FIFO_RX7  = 0x0007U, //!< Receive interrupt 7/16 full
+  SCI_FIFO_RX8  = 0x0008U, //!< Receive interrupt 8/16 full
+  SCI_FIFO_RX9  = 0x0009U, //!< Receive interrupt 9/16 full
+  SCI_FIFO_RX10 = 0x000AU, //!< Receive interrupt 10/16 full
+  SCI_FIFO_RX11 = 0x000BU, //!< Receive interrupt 11/16 full
+  SCI_FIFO_RX12 = 0x000CU, //!< Receive interrupt 12/16 full
+  SCI_FIFO_RX13 = 0x000DU, //!< Receive interrupt 13/16 full
+  SCI_FIFO_RX14 = 0x000EU, //!< Receive interrupt 14/16 full
+  SCI_FIFO_RX15 = 0x000FU, //!< Receive interrupt 15/16 full
+  SCI_FIFO_RX16 = 0x0010U  //!< Receive interrupt full
 } SCI_RxFIFOLevel;
 
 //*****************************************************************************
@@ -180,13 +176,13 @@ typedef enum
 // bits and flags of the SCIRXST register.
 //
 //*****************************************************************************
-#define SCI_RXSTATUS_WAKE       0x0002U  //!< Receiver wake up detect
-#define SCI_RXSTATUS_PARITY     0x0004U  //!< Parity error
-#define SCI_RXSTATUS_OVERRUN    0x0008U  //!< Overrun error
-#define SCI_RXSTATUS_FRAMING    0x0010U  //!< Framing error
-#define SCI_RXSTATUS_BREAK      0x0020U  //!< Break detect
-#define SCI_RXSTATUS_READY      0x0040U  //!< Receiver ready
-#define SCI_RXSTATUS_ERROR      0x0080U  //!< Receiver error
+#define SCI_RXSTATUS_WAKE    0x0002U //!< Receiver wake up detect
+#define SCI_RXSTATUS_PARITY  0x0004U //!< Parity error
+#define SCI_RXSTATUS_OVERRUN 0x0008U //!< Overrun error
+#define SCI_RXSTATUS_FRAMING 0x0010U //!< Framing error
+#define SCI_RXSTATUS_BREAK   0x0020U //!< Break detect
+#define SCI_RXSTATUS_READY   0x0040U //!< Receiver ready
+#define SCI_RXSTATUS_ERROR   0x0080U //!< Receiver error
 
 //*****************************************************************************
 //
@@ -207,15 +203,9 @@ typedef enum
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-SCI_isBaseValid(uint32_t base)
-{
-    return(
-           (base == SCIA_BASE) ||
-           (base == SCIB_BASE) ||
-           (base == SCIC_BASE) ||
-           (base == SCID_BASE)
-          );
+static inline bool SCI_isBaseValid(uint32_t base) {
+  return ((base == SCIA_BASE) || (base == SCIB_BASE) || (base == SCIC_BASE) ||
+          (base == SCID_BASE));
 }
 #endif
 
@@ -233,19 +223,17 @@ SCI_isBaseValid(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_setParityMode(uint32_t base, SCI_ParityType parity)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_setParityMode(uint32_t base, SCI_ParityType parity) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Set the parity mode.
-    //
-    HWREGH(base + SCI_O_CCR) = ((HWREGH(base + SCI_O_CCR) &
-                                 ~(SCI_CONFIG_PAR_MASK)) | (uint16_t)parity);
+  //
+  // Set the parity mode.
+  //
+  HWREGH(base + SCI_O_CCR) =
+      ((HWREGH(base + SCI_O_CCR) & ~(SCI_CONFIG_PAR_MASK)) | (uint16_t)parity);
 }
 
 //*****************************************************************************
@@ -262,22 +250,20 @@ SCI_setParityMode(uint32_t base, SCI_ParityType parity)
 //! \b SCI_CONFIG_PAR_NONE, \b SCI_CONFIG_PAR_EVEN, \b SCI_CONFIG_PAR_ODD.
 //
 //*****************************************************************************
-static inline SCI_ParityType
-SCI_getParityMode(uint32_t base)
-{
-    uint16_t parity;
+static inline SCI_ParityType SCI_getParityMode(uint32_t base) {
+  uint16_t parity;
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Return the current parity setting.
-    //
-    parity = (HWREGH(base + SCI_O_CCR) & (SCI_CONFIG_PAR_MASK));
+  //
+  // Return the current parity setting.
+  //
+  parity = (HWREGH(base + SCI_O_CCR) & (SCI_CONFIG_PAR_MASK));
 
-    return((SCI_ParityType)parity);
+  return ((SCI_ParityType)parity);
 }
 
 //*****************************************************************************
@@ -291,18 +277,16 @@ SCI_getParityMode(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_setAddrMultiProcessorMode(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_setAddrMultiProcessorMode(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Enable the address-bit mode protocol
-    //
-    HWREGH(base + SCI_O_CCR) |= SCI_CCR_ADDRIDLE_MODE;
+  //
+  // Enable the address-bit mode protocol
+  //
+  HWREGH(base + SCI_O_CCR) |= SCI_CCR_ADDRIDLE_MODE;
 }
 
 //*****************************************************************************
@@ -316,18 +300,16 @@ SCI_setAddrMultiProcessorMode(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_setIdleMultiProcessorMode(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_setIdleMultiProcessorMode(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Disable the address-bit mode protocol
-    //
-    HWREGH(base + SCI_O_CCR) &= ~SCI_CCR_ADDRIDLE_MODE;
+  //
+  // Disable the address-bit mode protocol
+  //
+  HWREGH(base + SCI_O_CCR) &= ~SCI_CCR_ADDRIDLE_MODE;
 }
 
 //*****************************************************************************
@@ -341,39 +323,35 @@ SCI_setIdleMultiProcessorMode(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_lockAutobaud(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_lockAutobaud(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Prime the baud register
-    //
-    HWREGH(base + SCI_O_HBAUD) = 0x0U;
-    HWREGH(base + SCI_O_LBAUD) = 0x1U;
+  //
+  // Prime the baud register
+  //
+  HWREGH(base + SCI_O_HBAUD) = 0x0U;
+  HWREGH(base + SCI_O_LBAUD) = 0x1U;
 
-    //
-    // Prepare for autobaud detection.
-    // Set the CDC bit to enable autobaud detection and clear the ABD bit.
-    //
-    HWREGH(base + SCI_O_FFCT) |= SCI_FFCT_CDC;
-    HWREGH(base + SCI_O_FFCT) |= SCI_FFCT_ABDCLR;
+  //
+  // Prepare for autobaud detection.
+  // Set the CDC bit to enable autobaud detection and clear the ABD bit.
+  //
+  HWREGH(base + SCI_O_FFCT) |= SCI_FFCT_CDC;
+  HWREGH(base + SCI_O_FFCT) |= SCI_FFCT_ABDCLR;
 
-    //
-    // Wait until we correctly read an 'A' or 'a' and lock
-    //
-    while((HWREGH(base + SCI_O_FFCT) & SCI_FFCT_ABD) != SCI_FFCT_ABD)
-    {
-    }
+  //
+  // Wait until we correctly read an 'A' or 'a' and lock
+  //
+  while ((HWREGH(base + SCI_O_FFCT) & SCI_FFCT_ABD) != SCI_FFCT_ABD) {}
 
-    //
-    // After autobaud lock, clear the ABD and CDC bits
-    //
-    HWREGH(base + SCI_O_FFCT) |= SCI_FFCT_ABDCLR;
-    HWREGH(base + SCI_O_FFCT) &= ~SCI_FFCT_CDC;
+  //
+  // After autobaud lock, clear the ABD and CDC bits
+  //
+  HWREGH(base + SCI_O_FFCT) |= SCI_FFCT_ABDCLR;
+  HWREGH(base + SCI_O_FFCT) &= ~SCI_FFCT_CDC;
 }
 
 //*****************************************************************************
@@ -395,22 +373,21 @@ SCI_lockAutobaud(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_setFIFOInterruptLevel(uint32_t base, SCI_TxFIFOLevel txLevel,
-                          SCI_RxFIFOLevel rxLevel)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_setFIFOInterruptLevel(uint32_t        base,
+                                             SCI_TxFIFOLevel txLevel,
+                                             SCI_RxFIFOLevel rxLevel) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Set the FIFO interrupt levels.
-    //
-    HWREGH(base + SCI_O_FFTX) = (HWREGH(base + SCI_O_FFTX) &
-                                 (~SCI_FFTX_TXFFIL_M)) | (uint16_t)txLevel;
-    HWREGH(base + SCI_O_FFRX) = (HWREGH(base + SCI_O_FFRX) &
-                                 (~SCI_FFRX_RXFFIL_M)) | (uint16_t)rxLevel;
+  //
+  // Set the FIFO interrupt levels.
+  //
+  HWREGH(base + SCI_O_FFTX) =
+      (HWREGH(base + SCI_O_FFTX) & (~SCI_FFTX_TXFFIL_M)) | (uint16_t)txLevel;
+  HWREGH(base + SCI_O_FFRX) =
+      (HWREGH(base + SCI_O_FFRX) & (~SCI_FFRX_RXFFIL_M)) | (uint16_t)rxLevel;
 }
 
 //*****************************************************************************
@@ -431,23 +408,20 @@ SCI_setFIFOInterruptLevel(uint32_t base, SCI_TxFIFOLevel txLevel,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_getFIFOInterruptLevel(uint32_t base, SCI_TxFIFOLevel *txLevel,
-                          SCI_RxFIFOLevel *rxLevel)
-{
+static inline void SCI_getFIFOInterruptLevel(uint32_t         base,
+                                             SCI_TxFIFOLevel *txLevel,
+                                             SCI_RxFIFOLevel *rxLevel) {
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Extract the transmit and receive FIFO levels.
-    //
-    *txLevel = (SCI_TxFIFOLevel)(HWREGH(base + SCI_O_FFTX) &
-                                 SCI_FFTX_TXFFIL_M);
-    *rxLevel = (SCI_RxFIFOLevel)(HWREGH(base + SCI_O_FFRX) &
-                                 SCI_FFRX_RXFFIL_M);
+  //
+  // Extract the transmit and receive FIFO levels.
+  //
+  *txLevel = (SCI_TxFIFOLevel)(HWREGH(base + SCI_O_FFTX) & SCI_FFTX_TXFFIL_M);
+  *rxLevel = (SCI_RxFIFOLevel)(HWREGH(base + SCI_O_FFRX) & SCI_FFRX_RXFFIL_M);
 }
 
 //*****************************************************************************
@@ -475,28 +449,25 @@ SCI_getFIFOInterruptLevel(uint32_t base, SCI_TxFIFOLevel *txLevel,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_getConfig(uint32_t base, uint32_t lspclkHz, uint32_t *baud,
-              uint32_t *config)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_getConfig(uint32_t base, uint32_t lspclkHz,
+                                 uint32_t *baud, uint32_t *config) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Compute the baud rate.
-    //
-    *baud = lspclkHz /
-            ((1U + (((uint32_t)HWREGH(base + SCI_O_HBAUD) << 8U) |
-               HWREGH(base + SCI_O_LBAUD))) * 8U);
+  //
+  // Compute the baud rate.
+  //
+  *baud = lspclkHz / ((1U + (((uint32_t)HWREGH(base + SCI_O_HBAUD) << 8U) |
+                             HWREGH(base + SCI_O_LBAUD))) *
+                      8U);
 
-    //
-    // Get the parity, data length, and number of stop bits.
-    //
-    *config = (uint32_t)HWREGH(base + SCI_O_CCR) & (SCI_CONFIG_PAR_MASK |
-                                                    SCI_CONFIG_STOP_MASK |
-                                                    SCI_CONFIG_WLEN_MASK);
+  //
+  // Get the parity, data length, and number of stop bits.
+  //
+  *config = (uint32_t)HWREGH(base + SCI_O_CCR) &
+            (SCI_CONFIG_PAR_MASK | SCI_CONFIG_STOP_MASK | SCI_CONFIG_WLEN_MASK);
 }
 
 //*****************************************************************************
@@ -511,19 +482,17 @@ SCI_getConfig(uint32_t base, uint32_t lspclkHz, uint32_t *baud,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_enableModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_enableModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Enable RX, TX, and the SCI.
-    //
-    HWREGH(base + SCI_O_CTL1) |= (SCI_CTL1_TXENA | SCI_CTL1_RXENA |
-                                  SCI_CTL1_SWRESET);
+  //
+  // Enable RX, TX, and the SCI.
+  //
+  HWREGH(base + SCI_O_CTL1) |=
+      (SCI_CTL1_TXENA | SCI_CTL1_RXENA | SCI_CTL1_SWRESET);
 }
 
 //*****************************************************************************
@@ -538,23 +507,21 @@ SCI_enableModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_disableModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_disableModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Disable the FIFO.
-    //
-    HWREGH(base + SCI_O_FFTX) &= ~(SCI_FFTX_SCIFFENA);
+  //
+  // Disable the FIFO.
+  //
+  HWREGH(base + SCI_O_FFTX) &= ~(SCI_FFTX_SCIFFENA);
 
-    //
-    // Disable the SCI.
-    //
-    HWREGH(base + SCI_O_CTL1) &= ~(SCI_CTL1_TXENA | SCI_CTL1_RXENA);
+  //
+  // Disable the SCI.
+  //
+  HWREGH(base + SCI_O_CTL1) &= ~(SCI_CTL1_TXENA | SCI_CTL1_RXENA);
 }
 
 //*****************************************************************************
@@ -569,18 +536,16 @@ SCI_disableModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_enableTxModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_enableTxModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Enable TX and the SCI.
-    //
-    HWREGH(base + SCI_O_CTL1) |= (SCI_CTL1_TXENA | SCI_CTL1_SWRESET);
+  //
+  // Enable TX and the SCI.
+  //
+  HWREGH(base + SCI_O_CTL1) |= (SCI_CTL1_TXENA | SCI_CTL1_SWRESET);
 }
 
 //*****************************************************************************
@@ -595,18 +560,16 @@ SCI_enableTxModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_disableTxModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_disableTxModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Disable TX.
-    //
-    HWREGH(base + SCI_O_CTL1) &= ~SCI_CTL1_TXENA;
+  //
+  // Disable TX.
+  //
+  HWREGH(base + SCI_O_CTL1) &= ~SCI_CTL1_TXENA;
 }
 
 //*****************************************************************************
@@ -621,18 +584,16 @@ SCI_disableTxModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_enableRxModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_enableRxModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Enable RX and the SCI.
-    //
-    HWREGH(base + SCI_O_CTL1) |= (SCI_CTL1_RXENA | SCI_CTL1_SWRESET);
+  //
+  // Enable RX and the SCI.
+  //
+  HWREGH(base + SCI_O_CTL1) |= (SCI_CTL1_RXENA | SCI_CTL1_SWRESET);
 }
 
 //*****************************************************************************
@@ -647,18 +608,16 @@ SCI_enableRxModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_disableRxModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_disableRxModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Disable RX.
-    //
-    HWREGH(base + SCI_O_CTL1) &= ~SCI_CTL1_RXENA;
+  //
+  // Disable RX.
+  //
+  HWREGH(base + SCI_O_CTL1) &= ~SCI_CTL1_RXENA;
 }
 
 //*****************************************************************************
@@ -672,18 +631,16 @@ SCI_disableRxModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_enableSleepMode(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_enableSleepMode(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Set sleep bit
-    //
-    HWREGH(base + SCI_O_CTL1) |= SCI_CTL1_SLEEP;
+  //
+  // Set sleep bit
+  //
+  HWREGH(base + SCI_O_CTL1) |= SCI_CTL1_SLEEP;
 }
 
 //*****************************************************************************
@@ -697,18 +654,16 @@ SCI_enableSleepMode(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_disableSleepMode(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_disableSleepMode(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Clear sleep bit
-    //
-    HWREGH(base + SCI_O_CTL1) &= ~SCI_CTL1_SLEEP;
+  //
+  // Clear sleep bit
+  //
+  HWREGH(base + SCI_O_CTL1) &= ~SCI_CTL1_SLEEP;
 }
 
 //*****************************************************************************
@@ -722,20 +677,18 @@ SCI_disableSleepMode(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_enableFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_enableFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Enable the FIFO.
-    //
-    HWREGH(base + SCI_O_FFTX) |= SCI_FFTX_SCIRST;
-    HWREGH(base + SCI_O_FFTX) |= SCI_FFTX_SCIFFENA | SCI_FFTX_TXFIFORESET;
-    HWREGH(base + SCI_O_FFRX) |= SCI_FFRX_RXFIFORESET;
+  //
+  // Enable the FIFO.
+  //
+  HWREGH(base + SCI_O_FFTX) |= SCI_FFTX_SCIRST;
+  HWREGH(base + SCI_O_FFTX) |= SCI_FFTX_SCIFFENA | SCI_FFTX_TXFIFORESET;
+  HWREGH(base + SCI_O_FFRX) |= SCI_FFRX_RXFIFORESET;
 }
 
 //*****************************************************************************
@@ -749,18 +702,16 @@ SCI_enableFIFO(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_disableFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_disableFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Disable the FIFO.
-    //
-    HWREGH(base + SCI_O_FFTX) &= ~SCI_FFTX_SCIFFENA;
+  //
+  // Disable the FIFO.
+  //
+  HWREGH(base + SCI_O_FFTX) &= ~SCI_FFTX_SCIFFENA;
 }
 
 //*****************************************************************************
@@ -776,19 +727,18 @@ SCI_disableFIFO(uint32_t base)
 //! if the FIFO enhancement is disabled.
 //
 //*****************************************************************************
-static inline bool
-SCI_isFIFOEnabled(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline bool SCI_isFIFOEnabled(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Return true if the FIFO is enabled and false if it is disabled.
-    //
-    return(((HWREGH(base + SCI_O_FFTX) & SCI_FFTX_SCIFFENA) ==
-            SCI_FFTX_SCIFFENA) ? true : false);
+  //
+  // Return true if the FIFO is enabled and false if it is disabled.
+  //
+  return (((HWREGH(base + SCI_O_FFTX) & SCI_FFTX_SCIFFENA) == SCI_FFTX_SCIFFENA)
+              ? true
+              : false);
 }
 
 //*****************************************************************************
@@ -802,19 +752,17 @@ SCI_isFIFOEnabled(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_resetRxFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_resetRxFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Reset the specified FIFO.
-    //
-    HWREGH(base + SCI_O_FFRX) &= ~SCI_FFRX_RXFIFORESET;
-    HWREGH(base + SCI_O_FFRX) |= SCI_FFRX_RXFIFORESET;
+  //
+  // Reset the specified FIFO.
+  //
+  HWREGH(base + SCI_O_FFRX) &= ~SCI_FFRX_RXFIFORESET;
+  HWREGH(base + SCI_O_FFRX) |= SCI_FFRX_RXFIFORESET;
 }
 
 //*****************************************************************************
@@ -828,19 +776,17 @@ SCI_resetRxFIFO(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_resetTxFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_resetTxFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Reset the specified FIFO.
-    //
-    HWREGH(base + SCI_O_FFTX) &= ~SCI_FFTX_TXFIFORESET;
-    HWREGH(base + SCI_O_FFTX) |= SCI_FFTX_TXFIFORESET;
+  //
+  // Reset the specified FIFO.
+  //
+  HWREGH(base + SCI_O_FFTX) &= ~SCI_FFTX_TXFIFORESET;
+  HWREGH(base + SCI_O_FFTX) |= SCI_FFTX_TXFIFORESET;
 }
 
 //*****************************************************************************
@@ -854,19 +800,17 @@ SCI_resetTxFIFO(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_resetChannels(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_resetChannels(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Reset the Tx and Rx Channels
-    //
-    HWREGH(base + SCI_O_FFTX) &= ~SCI_FFTX_SCIRST;
-    HWREGH(base + SCI_O_FFTX) |= SCI_FFTX_SCIRST;
+  //
+  // Reset the Tx and Rx Channels
+  //
+  HWREGH(base + SCI_O_FFTX) &= ~SCI_FFTX_SCIRST;
+  HWREGH(base + SCI_O_FFTX) |= SCI_FFTX_SCIRST;
 }
 
 //*****************************************************************************
@@ -883,19 +827,18 @@ SCI_resetChannels(uint32_t base)
 //! if there is no data in the receive buffer.
 //
 //*****************************************************************************
-static inline bool
-SCI_isDataAvailableNonFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline bool SCI_isDataAvailableNonFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Return the availability of characters with FIFO disabled.
-    //
-    return(((HWREGH(base + SCI_O_RXST) & SCI_RXST_RXRDY) ==
-            SCI_RXST_RXRDY) ? true : false);
+  //
+  // Return the availability of characters with FIFO disabled.
+  //
+  return (((HWREGH(base + SCI_O_RXST) & SCI_RXST_RXRDY) == SCI_RXST_RXRDY)
+              ? true
+              : false);
 }
 
 //*****************************************************************************
@@ -912,19 +855,18 @@ SCI_isDataAvailableNonFIFO(uint32_t base)
 //! or \b false if there is no space available in the transmit buffer.
 //
 //*****************************************************************************
-static inline bool
-SCI_isSpaceAvailableNonFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline bool SCI_isSpaceAvailableNonFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Return the availability of space.
-    //
-    return(((HWREGH(base + SCI_O_CTL2) & SCI_CTL2_TXRDY) ==
-            SCI_CTL2_TXRDY) ? true : false);
+  //
+  // Return the availability of space.
+  //
+  return (((HWREGH(base + SCI_O_CTL2) & SCI_CTL2_TXRDY) == SCI_CTL2_TXRDY)
+              ? true
+              : false);
 }
 
 //*****************************************************************************
@@ -941,19 +883,17 @@ SCI_isSpaceAvailableNonFIFO(uint32_t base)
 //! \b SCI_FIFO_TX4, ..., or \b SCI_FIFO_TX16
 //
 //*****************************************************************************
-static inline SCI_TxFIFOLevel
-SCI_getTxFIFOStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline SCI_TxFIFOLevel SCI_getTxFIFOStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Get the current FIFO status
-    //
-    return((SCI_TxFIFOLevel)((HWREGH(base + SCI_O_FFTX) & SCI_FFTX_TXFFST_M) >>
-                             SCI_FFTX_TXFFST_S));
+  //
+  // Get the current FIFO status
+  //
+  return ((SCI_TxFIFOLevel)((HWREGH(base + SCI_O_FFTX) & SCI_FFTX_TXFFST_M) >>
+                            SCI_FFTX_TXFFST_S));
 }
 
 //*****************************************************************************
@@ -970,19 +910,17 @@ SCI_getTxFIFOStatus(uint32_t base)
 //! \b SCI_FIFO_RX4, ..., or \b SCI_FIFO_RX16
 //
 //*****************************************************************************
-static inline SCI_RxFIFOLevel
-SCI_getRxFIFOStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline SCI_RxFIFOLevel SCI_getRxFIFOStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Get the current FIFO status
-    //
-    return((SCI_RxFIFOLevel)((HWREGH(base + SCI_O_FFRX) & SCI_FFRX_RXFFST_M) >>
-                             SCI_FFRX_RXFFST_S));
+  //
+  // Get the current FIFO status
+  //
+  return ((SCI_RxFIFOLevel)((HWREGH(base + SCI_O_FFRX) & SCI_FFRX_RXFFST_M) >>
+                            SCI_FFRX_RXFFST_S));
 }
 
 //*****************************************************************************
@@ -1007,34 +945,30 @@ SCI_getRxFIFOStatus(uint32_t base)
 //! transmissions are complete.
 //
 //*****************************************************************************
-static inline bool
-SCI_isTransmitterBusy(uint32_t base)
-{
-    //
-    // Check the argument.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline bool SCI_isTransmitterBusy(uint32_t base) {
+  //
+  // Check the argument.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
+  //
+  // Check if FIFO enhancement is enabled.
+  //
+  if (SCI_isFIFOEnabled(base)) {
     //
-    // Check if FIFO enhancement is enabled.
+    // With FIFO enhancement, determine if the SCI is busy.
     //
-    if(SCI_isFIFOEnabled(base))
-    {
-        //
-        // With FIFO enhancement, determine if the SCI is busy.
-        //
-        return(((HWREGH(base + SCI_O_FFTX) & SCI_FFTX_TXFFST_M) !=
-                 0U) ? true : false);
-    }
-    else
-    {
-        //
-        // Without FIFO enhancement, determine if the SCI is busy.
-        // Check if the transmit buffer and shift register empty.
-        //
-        return(((HWREGH(base + SCI_O_CTL2) & SCI_CTL2_TXEMPTY) ==
-                SCI_CTL2_TXEMPTY) ? false : true);
-    }
+    return (((HWREGH(base + SCI_O_FFTX) & SCI_FFTX_TXFFST_M) != 0U) ? true
+                                                                    : false);
+  } else {
+    //
+    // Without FIFO enhancement, determine if the SCI is busy.
+    // Check if the transmit buffer and shift register empty.
+    //
+    return (((HWREGH(base + SCI_O_CTL2) & SCI_CTL2_TXEMPTY) == SCI_CTL2_TXEMPTY)
+                ? false
+                : true);
+  }
 }
 
 //*****************************************************************************
@@ -1054,25 +988,21 @@ SCI_isTransmitterBusy(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_writeCharBlockingFIFO(uint32_t base, uint16_t data)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_writeCharBlockingFIFO(uint32_t base, uint16_t data) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Wait until space is available in the transmit FIFO.
-    //
-    while(SCI_getTxFIFOStatus(base) == SCI_FIFO_TX16)
-    {
-    }
+  //
+  // Wait until space is available in the transmit FIFO.
+  //
+  while (SCI_getTxFIFOStatus(base) == SCI_FIFO_TX16) {}
 
-    //
-    // Send a char.
-    //
-    HWREGH(base + SCI_O_TXBUF) = data;
+  //
+  // Send a char.
+  //
+  HWREGH(base + SCI_O_TXBUF) = data;
 }
 
 //*****************************************************************************
@@ -1091,25 +1021,21 @@ SCI_writeCharBlockingFIFO(uint32_t base, uint16_t data)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_writeCharBlockingNonFIFO(uint32_t base, uint16_t data)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_writeCharBlockingNonFIFO(uint32_t base, uint16_t data) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Wait until space is available in the transmit buffer.
-    //
-    while(!SCI_isSpaceAvailableNonFIFO(base))
-    {
-    }
+  //
+  // Wait until space is available in the transmit buffer.
+  //
+  while (!SCI_isSpaceAvailableNonFIFO(base)) {}
 
-    //
-    // Send a char.
-    //
-    HWREGH(base + SCI_O_TXBUF) = data;
+  //
+  // Send a char.
+  //
+  HWREGH(base + SCI_O_TXBUF) = data;
 }
 
 //*****************************************************************************
@@ -1133,18 +1059,16 @@ SCI_writeCharBlockingNonFIFO(uint32_t base, uint16_t data)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_writeCharNonBlocking(uint32_t base, uint16_t data)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_writeCharNonBlocking(uint32_t base, uint16_t data) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Send a char.
-    //
-    HWREGH(base + SCI_O_TXBUF) = data;
+  //
+  // Send a char.
+  //
+  HWREGH(base + SCI_O_TXBUF) = data;
 }
 
 //*****************************************************************************
@@ -1165,18 +1089,16 @@ SCI_writeCharNonBlocking(uint32_t base, uint16_t data)
 //! and \b SCI_RXSTATUS_ERROR.
 //
 //*****************************************************************************
-static inline uint16_t
-SCI_getRxStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline uint16_t SCI_getRxStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Return the current value of the receive status register.
-    //
-    return(HWREGH(base + SCI_O_RXST));
+  //
+  // Return the current value of the receive status register.
+  //
+  return (HWREGH(base + SCI_O_RXST));
 }
 
 //*****************************************************************************
@@ -1196,32 +1118,28 @@ SCI_getRxStatus(uint32_t base)
 //!         consuming the data
 //
 //*****************************************************************************
-static inline uint16_t
-SCI_readCharBlockingFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline uint16_t SCI_readCharBlockingFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
+  //
+  // Wait until a character is available in the receive FIFO.
+  //
+  while (SCI_getRxFIFOStatus(base) == SCI_FIFO_RX0) {
     //
-    // Wait until a character is available in the receive FIFO.
+    // If there is any error return
     //
-    while(SCI_getRxFIFOStatus(base) == SCI_FIFO_RX0)
-    {
-        //
-        //If there is any error return
-        //
-        if((SCI_getRxStatus(base) & SCI_RXSTATUS_ERROR) != 0U)
-        {
-            return(0U);
-        }
+    if ((SCI_getRxStatus(base) & SCI_RXSTATUS_ERROR) != 0U) {
+      return (0U);
     }
+  }
 
-    //
-    // Return the character from the receive buffer.
-    //
-    return((uint16_t)(HWREGH(base + SCI_O_RXBUF) & SCI_RXBUF_SAR_M));
+  //
+  // Return the character from the receive buffer.
+  //
+  return ((uint16_t)(HWREGH(base + SCI_O_RXBUF) & SCI_RXBUF_SAR_M));
 }
 
 //*****************************************************************************
@@ -1238,25 +1156,21 @@ SCI_readCharBlockingFIFO(uint32_t base)
 //! \return Returns the character read from the specified port as \e uint16_t.
 //
 //*****************************************************************************
-static inline uint16_t
-SCI_readCharBlockingNonFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline uint16_t SCI_readCharBlockingNonFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Wait until a character is available in the receive FIFO.
-    //
-    while(!SCI_isDataAvailableNonFIFO(base))
-    {
-    }
+  //
+  // Wait until a character is available in the receive FIFO.
+  //
+  while (!SCI_isDataAvailableNonFIFO(base)) {}
 
-    //
-    // Return the character from the receive buffer.
-    //
-    return((uint16_t)(HWREGH(base + SCI_O_RXBUF) & SCI_RXBUF_SAR_M));
+  //
+  // Return the character from the receive buffer.
+  //
+  return ((uint16_t)(HWREGH(base + SCI_O_RXBUF) & SCI_RXBUF_SAR_M));
 }
 
 //*****************************************************************************
@@ -1277,18 +1191,16 @@ SCI_readCharBlockingNonFIFO(uint32_t base)
 //! \return Returns \e uin16_t which is read from the receive buffer.
 //
 //*****************************************************************************
-static inline uint16_t
-SCI_readCharNonBlocking(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline uint16_t SCI_readCharNonBlocking(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Return the character from the receive buffer.
-    //
-    return((uint16_t)(HWREGH(base + SCI_O_RXBUF) & SCI_RXBUF_SAR_M));
+  //
+  // Return the character from the receive buffer.
+  //
+  return ((uint16_t)(HWREGH(base + SCI_O_RXBUF) & SCI_RXBUF_SAR_M));
 }
 
 //*****************************************************************************
@@ -1305,19 +1217,17 @@ SCI_readCharNonBlocking(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_performSoftwareReset(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_performSoftwareReset(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // To clear all errors a sw reset of the module is required
-    //
-    HWREGH(base + SCI_O_CTL1) &= ~SCI_CTL1_SWRESET;
-    HWREGH(base + SCI_O_CTL1) |= SCI_CTL1_SWRESET;
+  //
+  // To clear all errors a sw reset of the module is required
+  //
+  HWREGH(base + SCI_O_CTL1) &= ~SCI_CTL1_SWRESET;
+  HWREGH(base + SCI_O_CTL1) |= SCI_CTL1_SWRESET;
 }
 
 //*****************************************************************************
@@ -1332,18 +1242,16 @@ SCI_performSoftwareReset(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_enableLoopback(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_enableLoopback(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Set the loop back mode.
-    //
-    HWREGH(base + SCI_O_CCR) |= SCI_CCR_LOOPBKENA;
+  //
+  // Set the loop back mode.
+  //
+  HWREGH(base + SCI_O_CCR) |= SCI_CCR_LOOPBKENA;
 }
 
 //*****************************************************************************
@@ -1358,18 +1266,16 @@ SCI_enableLoopback(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_disableLoopback(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_disableLoopback(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Clear the loop back mode.
-    //
-    HWREGH(base + SCI_O_CCR) &= ~SCI_CCR_LOOPBKENA;
+  //
+  // Clear the loop back mode.
+  //
+  HWREGH(base + SCI_O_CCR) &= ~SCI_CCR_LOOPBKENA;
 }
 
 //*****************************************************************************
@@ -1384,18 +1290,16 @@ SCI_disableLoopback(uint32_t base)
 //! an overflow hasn't occurred.
 //
 //*****************************************************************************
-static inline bool
-SCI_getOverflowStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline bool SCI_getOverflowStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Return the current FIFO overflow status
-    //
-    return((HWREGH(base + SCI_O_FFRX) & SCI_FFRX_RXFFOVF) == SCI_FFRX_RXFFOVF);
+  //
+  // Return the current FIFO overflow status
+  //
+  return ((HWREGH(base + SCI_O_FFRX) & SCI_FFRX_RXFFOVF) == SCI_FFRX_RXFFOVF);
 }
 
 //*****************************************************************************
@@ -1409,18 +1313,16 @@ SCI_getOverflowStatus(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SCI_clearOverflowStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SCI_isBaseValid(base));
+static inline void SCI_clearOverflowStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SCI_isBaseValid(base));
 
-    //
-    // Clear the current FIFO overflow status
-    //
-    HWREGH(base + SCI_O_FFRX) |= SCI_FFRX_RXFFOVRCLR;
+  //
+  // Clear the current FIFO overflow status
+  //
+  HWREGH(base + SCI_O_FFRX) |= SCI_FFRX_RXFFOVRCLR;
 }
 
 //*****************************************************************************
@@ -1464,9 +1366,8 @@ SCI_clearOverflowStatus(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SCI_setConfig(uint32_t base, uint32_t lspclkHz, uint32_t baud,
-              uint32_t config);
+extern void SCI_setConfig(uint32_t base, uint32_t lspclkHz, uint32_t baud,
+                          uint32_t config);
 
 //*****************************************************************************
 //
@@ -1489,9 +1390,8 @@ SCI_setConfig(uint32_t base, uint32_t lspclkHz, uint32_t baud,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SCI_writeCharArray(uint32_t base, const uint16_t * const array,
-                   uint16_t length);
+extern void SCI_writeCharArray(uint32_t base, const uint16_t *const array,
+                               uint16_t length);
 
 //*****************************************************************************
 //
@@ -1511,8 +1411,8 @@ SCI_writeCharArray(uint32_t base, const uint16_t * const array,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SCI_readCharArray(uint32_t base, uint16_t * const array, uint16_t length);
+extern void SCI_readCharArray(uint32_t base, uint16_t *const array,
+                              uint16_t length);
 
 //*****************************************************************************
 //
@@ -1539,8 +1439,7 @@ SCI_readCharArray(uint32_t base, uint16_t * const array, uint16_t length);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SCI_enableInterrupt(uint32_t base, uint32_t intFlags);
+extern void SCI_enableInterrupt(uint32_t base, uint32_t intFlags);
 
 //*****************************************************************************
 //
@@ -1559,8 +1458,7 @@ SCI_enableInterrupt(uint32_t base, uint32_t intFlags);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SCI_disableInterrupt(uint32_t base, uint32_t intFlags);
+extern void SCI_disableInterrupt(uint32_t base, uint32_t intFlags);
 
 //*****************************************************************************
 //
@@ -1572,8 +1470,7 @@ SCI_disableInterrupt(uint32_t base, uint32_t intFlags);
 //! values described in SCI_enableInterrupt().
 //
 //*****************************************************************************
-extern uint32_t
-SCI_getInterruptStatus(uint32_t base);
+extern uint32_t SCI_getInterruptStatus(uint32_t base);
 
 //*****************************************************************************
 //
@@ -1592,8 +1489,7 @@ SCI_getInterruptStatus(uint32_t base);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SCI_clearInterruptStatus(uint32_t base, uint32_t intFlags);
+extern void SCI_clearInterruptStatus(uint32_t base, uint32_t intFlags);
 
 //*****************************************************************************
 //
@@ -1613,8 +1509,7 @@ SCI_clearInterruptStatus(uint32_t base, uint32_t intFlags);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SCI_setBaud(uint32_t base, uint32_t lspclkHz, uint32_t baud);
+extern void SCI_setBaud(uint32_t base, uint32_t lspclkHz, uint32_t baud);
 
 //*****************************************************************************
 //
@@ -1630,8 +1525,7 @@ SCI_setBaud(uint32_t base, uint32_t lspclkHz, uint32_t baud);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SCI_setWakeFlag(uint32_t base);
+extern void SCI_setWakeFlag(uint32_t base);
 
 //*****************************************************************************
 //

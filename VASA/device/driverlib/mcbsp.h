@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   mcbsp.h
+//  FILE:   mcbsp.h
 //
-// TITLE:  C28x McBSP driver.
+//  TITLE:  C28x McBSP driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef MCBSP_H
 #define MCBSP_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -59,11 +58,11 @@ extern "C"
 //
 //*****************************************************************************
 
+#include "debug.h"
 #include "inc/hw_ints.h"
-#include "inc/hw_types.h"
 #include "inc/hw_mcbsp.h"
 #include "inc/hw_memmap.h"
-#include "debug.h"
+#include "inc/hw_types.h"
 #include "interrupt.h"
 
 //*****************************************************************************
@@ -77,14 +76,10 @@ extern "C"
 // McBSP_setTxDataSize() anf McBSP_setRxDataSize().
 //
 //*****************************************************************************
-#define MCBSP_XCR1_M            (MCBSP_XCR1_XWDLEN1_M |                       \
-                                 MCBSP_XCR1_XFRLEN1_M)
-#define MCBSP_RCR1_M            (MCBSP_RCR1_RWDLEN1_M |                       \
-                                 MCBSP_RCR1_RFRLEN1_M)
-#define MCBSP_XCR2_M            (MCBSP_XCR2_XWDLEN2_M |                       \
-                                 MCBSP_XCR2_XFRLEN2_M)
-#define MCBSP_RCR2_M            (MCBSP_RCR2_RWDLEN2_M |                       \
-                                 MCBSP_RCR2_RFRLEN2_M)
+#define MCBSP_XCR1_M (MCBSP_XCR1_XWDLEN1_M | MCBSP_XCR1_XFRLEN1_M)
+#define MCBSP_RCR1_M (MCBSP_RCR1_RWDLEN1_M | MCBSP_RCR1_RFRLEN1_M)
+#define MCBSP_XCR2_M (MCBSP_XCR2_XWDLEN2_M | MCBSP_XCR2_XFRLEN2_M)
+#define MCBSP_RCR2_M (MCBSP_RCR2_RWDLEN2_M | MCBSP_RCR2_RFRLEN2_M)
 
 //*****************************************************************************
 //
@@ -114,10 +109,10 @@ extern "C"
 // McBSP_configureRxMultichannel().
 //
 //*****************************************************************************
-#define MCBSP_ERROR_EXCEEDED_CHANNELS  0x1U //!< Exceeded number of channels.
-#define MCBSP_ERROR_2_PARTITION_A      0x2U //!< Error in 2 partition A setup.
-#define MCBSP_ERROR_2_PARTITION_B      0x4U //!< Error in 2 partition B setup.
-#define MCBSP_ERROR_INVALID_MODE       0x8U //!< Invalid mode.
+#define MCBSP_ERROR_EXCEEDED_CHANNELS 0x1U //!< Exceeded number of channels.
+#define MCBSP_ERROR_2_PARTITION_A     0x2U //!< Error in 2 partition A setup.
+#define MCBSP_ERROR_2_PARTITION_B     0x4U //!< Error in 2 partition B setup.
+#define MCBSP_ERROR_INVALID_MODE      0x8U //!< Invalid mode.
 
 //*****************************************************************************
 //
@@ -125,15 +120,14 @@ extern "C"
 //! mode parameters.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_RIGHT_JUSTIFY_FILL_ZERO = 0x0000U, //!< Right justify and
-                                             //!< zero fill MSB.
-    MCBSP_RIGHT_JUSTIFY_FILL_SIGN = 0x2000U, //!< Right justified sign
-                                             //!< extended into MSBs.
-    MCBSP_LEFT_JUSTIFY_FILL_ZER0  = 0x4000U  //!< Left justifies LBS
-                                             //!< filled with zero.
-}McBSP_RxSignExtensionMode;
+typedef enum {
+  MCBSP_RIGHT_JUSTIFY_FILL_ZERO = 0x0000U, //!< Right justify and
+                                           //!< zero fill MSB.
+  MCBSP_RIGHT_JUSTIFY_FILL_SIGN = 0x2000U, //!< Right justified sign
+                                           //!< extended into MSBs.
+  MCBSP_LEFT_JUSTIFY_FILL_ZER0  = 0x4000U  //!< Left justifies LBS
+                                           //!< filled with zero.
+} McBSP_RxSignExtensionMode;
 
 //*****************************************************************************
 //
@@ -141,13 +135,12 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_CLOCK_MCBSP_MODE        = 0x0000U, //!< Disables clock stop mode.
-    MCBSP_CLOCK_SPI_MODE_NO_DELAY = 0x1000U, //!< Enables clock stop mode.
-    MCBSP_CLOCK_SPI_MODE_DELAY    = 0x1800U  //!< Enables clock stop mode
-                                             //!< with half cycle delay.
-}McBSP_ClockStopMode;
+typedef enum {
+  MCBSP_CLOCK_MCBSP_MODE        = 0x0000U, //!< Disables clock stop mode.
+  MCBSP_CLOCK_SPI_MODE_NO_DELAY = 0x1000U, //!< Enables clock stop mode.
+  MCBSP_CLOCK_SPI_MODE_DELAY    = 0x1800U  //!< Enables clock stop mode
+                                           //!< with half cycle delay.
+} McBSP_ClockStopMode;
 
 //*****************************************************************************
 //
@@ -155,15 +148,14 @@ typedef enum
 //! \e interruptSource parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_RX_ISR_SOURCE_SERIAL_WORD  = 0x0000U, //!<Interrupt when Rx is ready.
-    MCBSP_RX_ISR_SOURCE_END_OF_BLOCK = 0x0010U, //!<Interrupt at block end.
-    MCBSP_RX_ISR_SOURCE_FRAME_SYNC   = 0x0020U, //!<Interrupt when
-                                                //!<frame sync occurs.
-    MCBSP_RX_ISR_SOURCE_SYNC_ERROR   = 0x0030U  //!<Interrupt on
-                                                //!<frame sync error.
-}McBSP_RxInterruptSource;
+typedef enum {
+  MCBSP_RX_ISR_SOURCE_SERIAL_WORD  = 0x0000U, //!< Interrupt when Rx is ready.
+  MCBSP_RX_ISR_SOURCE_END_OF_BLOCK = 0x0010U, //!< Interrupt at block end.
+  MCBSP_RX_ISR_SOURCE_FRAME_SYNC   = 0x0020U, //!< Interrupt when
+                                              //!< frame sync occurs.
+  MCBSP_RX_ISR_SOURCE_SYNC_ERROR   = 0x0030U  //!< Interrupt on
+                                              //!< frame sync error.
+} McBSP_RxInterruptSource;
 
 //*****************************************************************************
 //
@@ -171,15 +163,14 @@ typedef enum
 //! emulationMode parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_EMULATION_IMMEDIATE_STOP = 0x0000U, //!< McBSP TX and RX stop when
-                                              //!< a breakpoint is reached.
-    MCBSP_EMULATION_SOFT_STOP      = 0x0100U, //!< McBSP TX stops after
-                                              //!<current word transmitted.
-    MCBSP_EMULATION_FREE_RUN       = 0x0200U  //!< McBSP TX and RX run
-                                              //!< ignoring the breakpoint.
-}McBSP_EmulationMode;
+typedef enum {
+  MCBSP_EMULATION_IMMEDIATE_STOP = 0x0000U, //!< McBSP TX and RX stop when
+                                            //!< a breakpoint is reached.
+  MCBSP_EMULATION_SOFT_STOP      = 0x0100U, //!< McBSP TX stops after
+                                            //!< current word transmitted.
+  MCBSP_EMULATION_FREE_RUN       = 0x0200U  //!< McBSP TX and RX run
+                                            //!< ignoring the breakpoint.
+} McBSP_EmulationMode;
 
 //*****************************************************************************
 //
@@ -187,15 +178,14 @@ typedef enum
 //! interruptSource parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_TX_ISR_SOURCE_TX_READY     = 0x0000U, //!<Interrupt when Tx Ready.
-    MCBSP_TX_ISR_SOURCE_END_OF_BLOCK = 0x0010U, //!<Interrupt at block end.
-    MCBSP_TX_ISR_SOURCE_FRAME_SYNC   = 0x0020U, //!<Interrupt when frame
-                                                //!<sync occurs.
-    MCBSP_TX_ISR_SOURCE_SYNC_ERROR   = 0x0030U  //!<Interrupt on frame sync
-                                                //!<error.
-}McBSP_TxInterruptSource;
+typedef enum {
+  MCBSP_TX_ISR_SOURCE_TX_READY     = 0x0000U, //!< Interrupt when Tx Ready.
+  MCBSP_TX_ISR_SOURCE_END_OF_BLOCK = 0x0010U, //!< Interrupt at block end.
+  MCBSP_TX_ISR_SOURCE_FRAME_SYNC   = 0x0020U, //!< Interrupt when frame
+                                              //!< sync occurs.
+  MCBSP_TX_ISR_SOURCE_SYNC_ERROR   = 0x0030U  //!< Interrupt on frame sync
+                                              //!< error.
+} McBSP_TxInterruptSource;
 
 //*****************************************************************************
 //
@@ -203,11 +193,10 @@ typedef enum
 //! McBSP_setRxDataSize() as the \e dataFrame parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_PHASE_ONE_FRAME = 0x0000U, //!< Single Phase.
-    MCBSP_PHASE_TWO_FRAME = 0x0001U  //!< Dual Phase.
-}McBSP_DataPhaseFrame;
+typedef enum {
+  MCBSP_PHASE_ONE_FRAME = 0x0000U, //!< Single Phase.
+  MCBSP_PHASE_TWO_FRAME = 0x0001U  //!< Dual Phase.
+} McBSP_DataPhaseFrame;
 
 //*****************************************************************************
 //
@@ -215,15 +204,14 @@ typedef enum
 //! and McBSP_setRxDataSize() as the \e bitsPerWord parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_BITS_PER_WORD_8  = 0x0000U,  //!< 8 bit word.
-    MCBSP_BITS_PER_WORD_12 = 0x0020U,  //!< 12 bit word.
-    MCBSP_BITS_PER_WORD_16 = 0x0040U,  //!< 16 bit word.
-    MCBSP_BITS_PER_WORD_20 = 0x0060U,  //!< 20 bit word.
-    MCBSP_BITS_PER_WORD_24 = 0x0080U,  //!< 24 bit word.
-    MCBSP_BITS_PER_WORD_32 = 0x00A0U   //!< 32 bit word.
-}McBSP_DataBitsPerWord;
+typedef enum {
+  MCBSP_BITS_PER_WORD_8  = 0x0000U, //!< 8 bit word.
+  MCBSP_BITS_PER_WORD_12 = 0x0020U, //!< 12 bit word.
+  MCBSP_BITS_PER_WORD_16 = 0x0040U, //!< 16 bit word.
+  MCBSP_BITS_PER_WORD_20 = 0x0060U, //!< 20 bit word.
+  MCBSP_BITS_PER_WORD_24 = 0x0080U, //!< 24 bit word.
+  MCBSP_BITS_PER_WORD_32 = 0x00A0U  //!< 32 bit word.
+} McBSP_DataBitsPerWord;
 
 //*****************************************************************************
 //
@@ -231,14 +219,13 @@ typedef enum
 //! McBSP_setRxCompandingMode() as the \e compandingMode parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_COMPANDING_NONE = 0x0000U,           //!< Disables companding.
-    MCBSP_COMPANDING_NONE_LSB_FIRST = 0x0008U, //!< Disables companding and
-                                               //!< Enables 8 bit LSB first
-                                               //!< data reception.
-    MCBSP_COMPANDING_U_LAW_SET = 0x0010U,      //!< U-law companding.
-    MCBSP_COMPANDING_A_LAW_SET = 0x0018U       //!< A-law companding.
+typedef enum {
+  MCBSP_COMPANDING_NONE           = 0x0000U, //!< Disables companding.
+  MCBSP_COMPANDING_NONE_LSB_FIRST = 0x0008U, //!< Disables companding and
+                                             //!< Enables 8 bit LSB first
+                                             //!< data reception.
+  MCBSP_COMPANDING_U_LAW_SET      = 0x0010U, //!< U-law companding.
+  MCBSP_COMPANDING_A_LAW_SET      = 0x0018U  //!< A-law companding.
 } McBSP_CompandingMode;
 
 //*****************************************************************************
@@ -247,12 +234,11 @@ typedef enum
 //! and McBSP_setRxDataDelayBits() as the \e delayBits parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_DATA_DELAY_BIT_0 = 0x0000U, //!< O bit delay.
-    MCBSP_DATA_DELAY_BIT_1 = 0x0001U, //!< 1 bit delay.
-    MCBSP_DATA_DELAY_BIT_2 = 0x0002U  //!< 2 bit delay.
-}McBSP_DataDelayBits;
+typedef enum {
+  MCBSP_DATA_DELAY_BIT_0 = 0x0000U, //!< O bit delay.
+  MCBSP_DATA_DELAY_BIT_1 = 0x0001U, //!< 1 bit delay.
+  MCBSP_DATA_DELAY_BIT_2 = 0x0002U  //!< 2 bit delay.
+} McBSP_DataDelayBits;
 
 //*****************************************************************************
 //
@@ -260,13 +246,12 @@ typedef enum
 //! the \e clockSource parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_SRG_RX_CLOCK_SOURCE_LSPCLK = 0x0001U, //!< LSPCLK is SRG clock
-                                                //!< source.
-    MCBSP_SRG_RX_CLOCK_SOURCE_MCLKX_PIN = 0x0003U //!< MCLKx is SRG clock
-                                                  //!< source.
-}McBSP_SRGRxClockSource;
+typedef enum {
+  MCBSP_SRG_RX_CLOCK_SOURCE_LSPCLK    = 0x0001U, //!< LSPCLK is SRG clock
+                                                 //!< source.
+  MCBSP_SRG_RX_CLOCK_SOURCE_MCLKX_PIN = 0x0003U  //!< MCLKx is SRG clock
+                                                 //!< source.
+} McBSP_SRGRxClockSource;
 
 //*****************************************************************************
 //
@@ -274,11 +259,10 @@ typedef enum
 //! as the \e clockSource parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_SRG_TX_CLOCK_SOURCE_LSPCLK = 0x0001U,//!< LSPCLK is SRG clock source.
-    MCBSP_SRG_TX_CLOCK_SOURCE_MCLKR_PIN = 0x0002U//!< MCLKris SRG clock source.
-}McBSP_SRGTxClockSource;
+typedef enum {
+  MCBSP_SRG_TX_CLOCK_SOURCE_LSPCLK = 0x0001U,   //!< LSPCLK is SRG clock source.
+  MCBSP_SRG_TX_CLOCK_SOURCE_MCLKR_PIN = 0x0002U //!< MCLKris SRG clock source.
+} McBSP_SRGTxClockSource;
 
 //*****************************************************************************
 //
@@ -286,13 +270,12 @@ typedef enum
 //! \e syncMode parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_TX_INTERNAL_FRAME_SYNC_DATA = 0x0000U, //!< Data is frame
-                                                        //!< sync source.
-    MCBSP_TX_INTERNAL_FRAME_SYNC_SRG  = 0x1000U  //!< SRG is frame
-                                                        //!< sync source.
-}McBSP_TxInternalFrameSyncSource;
+typedef enum {
+  MCBSP_TX_INTERNAL_FRAME_SYNC_DATA = 0x0000U, //!< Data is frame
+                                               //!< sync source.
+  MCBSP_TX_INTERNAL_FRAME_SYNC_SRG  = 0x1000U  //!< SRG is frame
+                                               //!< sync source.
+} McBSP_TxInternalFrameSyncSource;
 
 //*****************************************************************************
 //
@@ -301,11 +284,10 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_MULTICHANNEL_TWO_PARTITION   = 0x0000U,   //!< Two partition.
-    MCBSP_MULTICHANNEL_EIGHT_PARTITION = 0x0200U    //!< Eight partition.
-}McBSP_MultichannelPartition;
+typedef enum {
+  MCBSP_MULTICHANNEL_TWO_PARTITION   = 0x0000U, //!< Two partition.
+  MCBSP_MULTICHANNEL_EIGHT_PARTITION = 0x0200U  //!< Eight partition.
+} McBSP_MultichannelPartition;
 
 //*****************************************************************************
 //
@@ -313,17 +295,16 @@ typedef enum
 //! McBSP_setTxTwoPartitionBlock() as the \e block parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_PARTITION_BLOCK_0 = 0x0000U,   //!< Partition block 0.
-    MCBSP_PARTITION_BLOCK_1 = 0x0001U,   //!< Partition block 1.
-    MCBSP_PARTITION_BLOCK_2 = 0x0002U,   //!< Partition block 2.
-    MCBSP_PARTITION_BLOCK_3 = 0x0003U,   //!< Partition block 3.
-    MCBSP_PARTITION_BLOCK_4 = 0x0004U,   //!< Partition block 4.
-    MCBSP_PARTITION_BLOCK_5 = 0x0005U,   //!< Partition block 5.
-    MCBSP_PARTITION_BLOCK_6 = 0x0006U,   //!< Partition block 6.
-    MCBSP_PARTITION_BLOCK_7 = 0x0007U    //!< Partition block 7.
-}McBSP_PartitionBlock;
+typedef enum {
+  MCBSP_PARTITION_BLOCK_0 = 0x0000U, //!< Partition block 0.
+  MCBSP_PARTITION_BLOCK_1 = 0x0001U, //!< Partition block 1.
+  MCBSP_PARTITION_BLOCK_2 = 0x0002U, //!< Partition block 2.
+  MCBSP_PARTITION_BLOCK_3 = 0x0003U, //!< Partition block 3.
+  MCBSP_PARTITION_BLOCK_4 = 0x0004U, //!< Partition block 4.
+  MCBSP_PARTITION_BLOCK_5 = 0x0005U, //!< Partition block 5.
+  MCBSP_PARTITION_BLOCK_6 = 0x0006U, //!< Partition block 6.
+  MCBSP_PARTITION_BLOCK_7 = 0x0007U  //!< Partition block 7.
+} McBSP_PartitionBlock;
 
 //*****************************************************************************
 //
@@ -331,11 +312,10 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_ALL_RX_CHANNELS_ENABLED      = 0x0000U,//!< All Channels are enabled.
-    MCBSP_RX_CHANNEL_SELECTION_ENABLED = 0x0001U//!< Selected channels enabled.
-}McBSP_RxChannelMode;
+typedef enum {
+  MCBSP_ALL_RX_CHANNELS_ENABLED      = 0x0000U, //!< All Channels are enabled.
+  MCBSP_RX_CHANNEL_SELECTION_ENABLED = 0x0001U  //!< Selected channels enabled.
+} McBSP_RxChannelMode;
 
 //*****************************************************************************
 //
@@ -343,14 +323,13 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_ALL_TX_CHANNELS_ENABLED            = 0x0000U, //!< All Channels
-                                                        //!< Enabled.
-    MCBSP_TX_CHANNEL_SELECTION_ENABLED       = 0x0001U, //!< Selection Enabled.
-    MCBSP_ENABLE_MASKED_TX_CHANNEL_SELECTION = 0x0002U, //!< Masked Tx Channel.
-    MCBSP_SYMMERTIC_RX_TX_SELECTION         = 0x0003U //!< Symmetric Selection.
-}McBSP_TxChannelMode;
+typedef enum {
+  MCBSP_ALL_TX_CHANNELS_ENABLED            = 0x0000U, //!< All Channels
+                                                      //!< Enabled.
+  MCBSP_TX_CHANNEL_SELECTION_ENABLED       = 0x0001U, //!< Selection Enabled.
+  MCBSP_ENABLE_MASKED_TX_CHANNEL_SELECTION = 0x0002U, //!< Masked Tx Channel.
+  MCBSP_SYMMERTIC_RX_TX_SELECTION          = 0x0003U  //!< Symmetric Selection.
+} McBSP_TxChannelMode;
 
 //*****************************************************************************
 //
@@ -358,13 +337,12 @@ typedef enum
 //! syncSource parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_TX_EXTERNAL_FRAME_SYNC_SOURCE = 0x0000U, //!< FSR pin supplies
-                                                   //!< frame sync signal.
-    MCBSP_TX_INTERNAL_FRAME_SYNC_SOURCE = 0x0800U  //!< SRG supplies
-                                                   //!< frame sync signal.
-}McBSP_TxFrameSyncSource;
+typedef enum {
+  MCBSP_TX_EXTERNAL_FRAME_SYNC_SOURCE = 0x0000U, //!< FSR pin supplies
+                                                 //!< frame sync signal.
+  MCBSP_TX_INTERNAL_FRAME_SYNC_SOURCE = 0x0800U  //!< SRG supplies
+                                                 //!< frame sync signal.
+} McBSP_TxFrameSyncSource;
 
 //*****************************************************************************
 //
@@ -372,13 +350,12 @@ typedef enum
 //! syncSource parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_RX_EXTERNAL_FRAME_SYNC_SOURCE = 0x0000U, //!< FSR pin supplies
-                                                   //!< frame sync signal.
-    MCBSP_RX_INTERNAL_FRAME_SYNC_SOURCE = 0x0400U  //!< SRG supplies
-                                                   //!< frame sync signal.
-}McBSP_RxFrameSyncSource;
+typedef enum {
+  MCBSP_RX_EXTERNAL_FRAME_SYNC_SOURCE = 0x0000U, //!< FSR pin supplies
+                                                 //!< frame sync signal.
+  MCBSP_RX_INTERNAL_FRAME_SYNC_SOURCE = 0x0400U  //!< SRG supplies
+                                                 //!< frame sync signal.
+} McBSP_RxFrameSyncSource;
 
 //*****************************************************************************
 //
@@ -386,11 +363,10 @@ typedef enum
 //! clockSource parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_EXTERNAL_TX_CLOCK_SOURCE = 0x0000U, //!< Clock source is external.
-    MCBSP_INTERNAL_TX_CLOCK_SOURCE = 0x0200U  //!< Clock source is internal.
-}McBSP_TxClockSource;
+typedef enum {
+  MCBSP_EXTERNAL_TX_CLOCK_SOURCE = 0x0000U, //!< Clock source is external.
+  MCBSP_INTERNAL_TX_CLOCK_SOURCE = 0x0200U  //!< Clock source is internal.
+} McBSP_TxClockSource;
 
 //*****************************************************************************
 //
@@ -398,11 +374,10 @@ typedef enum
 //! clockSource parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_EXTERNAL_RX_CLOCK_SOURCE = 0x0000U, //!< Clock source is external.
-    MCBSP_INTERNAL_RX_CLOCK_SOURCE = 0x0100U  //!< Clock source is internal.
-}McBSP_RxClockSource;
+typedef enum {
+  MCBSP_EXTERNAL_RX_CLOCK_SOURCE = 0x0000U, //!< Clock source is external.
+  MCBSP_INTERNAL_RX_CLOCK_SOURCE = 0x0100U  //!< Clock source is internal.
+} McBSP_RxClockSource;
 
 //*****************************************************************************
 //
@@ -410,11 +385,10 @@ typedef enum
 //! Transmitter \e syncPolarity parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_TX_FRAME_SYNC_POLARITY_HIGH = 0x0000U,//!<Pulse active high.
-    MCBSP_TX_FRAME_SYNC_POLARITY_LOW = 0x0008U  //!<Pulse active low.
-}McBSP_TxFrameSyncPolarity;
+typedef enum {
+  MCBSP_TX_FRAME_SYNC_POLARITY_HIGH = 0x0000U, //!< Pulse active high.
+  MCBSP_TX_FRAME_SYNC_POLARITY_LOW  = 0x0008U  //!< Pulse active low.
+} McBSP_TxFrameSyncPolarity;
 
 //*****************************************************************************
 //
@@ -422,11 +396,10 @@ typedef enum
 //! \e syncPolarity parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_RX_FRAME_SYNC_POLARITY_HIGH = 0x0000U,//!<Pulse active high.
-    MCBSP_RX_FRAME_SYNC_POLARITY_LOW = 0x0004U  //!<Pulse active low.
-}McBSP_RxFrameSyncPolarity;
+typedef enum {
+  MCBSP_RX_FRAME_SYNC_POLARITY_HIGH = 0x0000U, //!< Pulse active high.
+  MCBSP_RX_FRAME_SYNC_POLARITY_LOW  = 0x0004U  //!< Pulse active low.
+} McBSP_RxFrameSyncPolarity;
 
 //*****************************************************************************
 //
@@ -434,11 +407,10 @@ typedef enum
 //! as the Transmiiter \e clockPolarity parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_TX_POLARITY_RISING_EDGE  = 0x0000U, //!< TX data  on rising edge.
-    MCBSP_TX_POLARITY_FALLING_EDGE = 0x0002U  //!< TX data  on falling edge.
-}McBSP_TxClockPolarity;
+typedef enum {
+  MCBSP_TX_POLARITY_RISING_EDGE  = 0x0000U, //!< TX data  on rising edge.
+  MCBSP_TX_POLARITY_FALLING_EDGE = 0x0002U  //!< TX data  on falling edge.
+} McBSP_TxClockPolarity;
 
 //*****************************************************************************
 //
@@ -446,12 +418,11 @@ typedef enum
 //! as the Receiver \e clockPolarity parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_RX_POLARITY_FALLING_EDGE  = 0x0000U, //!< RX data sampled falling
-                                               //!< edge.
-    MCBSP_RX_POLARITY_RISING_EDGE =  0x0001U  //!< RX data sampled rising edge.
-}McBSP_RxClockPolarity;
+typedef enum {
+  MCBSP_RX_POLARITY_FALLING_EDGE = 0x0000U, //!< RX data sampled falling
+                                            //!< edge.
+  MCBSP_RX_POLARITY_RISING_EDGE  = 0x0001U  //!< RX data sampled rising edge.
+} McBSP_RxClockPolarity;
 
 //*****************************************************************************
 //
@@ -459,10 +430,9 @@ typedef enum
 //! \e compandingType parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MCBSP_COMPANDING_U_LAW = 0x0002U, //!< U-law companding.
-    MCBSP_COMPANDING_A_LAW = 0x0003U  //!< A-law companding.
+typedef enum {
+  MCBSP_COMPANDING_U_LAW = 0x0002U, //!< U-law companding.
+  MCBSP_COMPANDING_A_LAW = 0x0003U  //!< A-law companding.
 } McBSP_CompandingType;
 
 //*****************************************************************************
@@ -471,19 +441,18 @@ typedef enum
 //! McBSP_configureTxClock() as the \e clock parameters.
 //
 //*****************************************************************************
-typedef struct
-{
-    bool clockSRGSyncFlag;                     //!< SRG - FSR sync flag.
-    uint16_t clockSRGDivider;                  //!< Data clock divider.
-    McBSP_TxClockSource clockSourceTx;         //!< McBSP TX clock source.
-    McBSP_RxClockSource clockSourceRx;         //!< McBSP RX clock source.
-    McBSP_SRGRxClockSource clockRxSRGSource;   //!< SRG clock source.
-    McBSP_SRGTxClockSource clockTxSRGSource;   //!< SRG clock source.
-    McBSP_TxClockPolarity clockMCLKXPolarity;  //!< Clock polarity of MCLKX
-                                               //!< pin.
-    McBSP_RxClockPolarity clockMCLKRPolarity;  //!< Clock polarity of MCLKR
-                                               //!< pin.
-}McBSP_ClockParams;
+typedef struct {
+  bool                   clockSRGSyncFlag;   //!< SRG - FSR sync flag.
+  uint16_t               clockSRGDivider;    //!< Data clock divider.
+  McBSP_TxClockSource    clockSourceTx;      //!< McBSP TX clock source.
+  McBSP_RxClockSource    clockSourceRx;      //!< McBSP RX clock source.
+  McBSP_SRGRxClockSource clockRxSRGSource;   //!< SRG clock source.
+  McBSP_SRGTxClockSource clockTxSRGSource;   //!< SRG clock source.
+  McBSP_TxClockPolarity  clockMCLKXPolarity; //!< Clock polarity of MCLKX
+                                             //!< pin.
+  McBSP_RxClockPolarity  clockMCLKRPolarity; //!< Clock polarity of MCLKR
+                                             //!< pin.
+} McBSP_ClockParams;
 
 //*****************************************************************************
 //
@@ -491,16 +460,15 @@ typedef struct
 //! Transmitter \e frameSync parameters.
 //
 //*****************************************************************************
-typedef struct
-{
-    bool syncSRGSyncFSRFlag;                      //!< Frame sync pulse.
-    bool syncErrorDetect;                         //!< Frame sync detect flag.
-    uint16_t syncClockDivider;         //!< Clock divider for sync period.
-    uint16_t syncPulseDivider;         //!< Clock divider for sync pulse width.
-    McBSP_TxFrameSyncSource syncSourceTx;           //!< Frame sync source.
-    McBSP_TxInternalFrameSyncSource syncIntSource;//!< Internal Sync source.
-    McBSP_TxFrameSyncPolarity syncFSXPolarity;    //!< Frame sync polarity.
-}McBSP_TxFsyncParams;
+typedef struct {
+  bool     syncSRGSyncFSRFlag; //!< Frame sync pulse.
+  bool     syncErrorDetect;    //!< Frame sync detect flag.
+  uint16_t syncClockDivider;   //!< Clock divider for sync period.
+  uint16_t syncPulseDivider;   //!< Clock divider for sync pulse width.
+  McBSP_TxFrameSyncSource         syncSourceTx;    //!< Frame sync source.
+  McBSP_TxInternalFrameSyncSource syncIntSource;   //!< Internal Sync source.
+  McBSP_TxFrameSyncPolarity       syncFSXPolarity; //!< Frame sync polarity.
+} McBSP_TxFsyncParams;
 
 //*****************************************************************************
 //
@@ -508,15 +476,14 @@ typedef struct
 //! Receiver \e frameSync parameters.
 //
 //*****************************************************************************
-typedef struct
-{
-    bool syncSRGSyncFSRFlag;                    //!< Frame sync pulse.
-    bool syncErrorDetect;                       //!< Frame sync error detect.
-    uint16_t syncClockDivider;                  //!< Clock divider sync period.
-    uint16_t syncPulseDivider;         //!< Clock divider for sync pulse width.
-    McBSP_RxFrameSyncSource syncSourceRx;       //!< Frame sync source.
-    McBSP_RxFrameSyncPolarity syncFSRPolarity;  //!< Frame sync polarity.
-}McBSP_RxFsyncParams;
+typedef struct {
+  bool     syncSRGSyncFSRFlag; //!< Frame sync pulse.
+  bool     syncErrorDetect;    //!< Frame sync error detect.
+  uint16_t syncClockDivider;   //!< Clock divider sync period.
+  uint16_t syncPulseDivider;   //!< Clock divider for sync pulse width.
+  McBSP_RxFrameSyncSource   syncSourceRx;    //!< Frame sync source.
+  McBSP_RxFrameSyncPolarity syncFSRPolarity; //!< Frame sync polarity.
+} McBSP_RxFsyncParams;
 
 //*****************************************************************************
 //
@@ -524,20 +491,19 @@ typedef struct
 //! Transmitter \e data parameters.
 //
 //*****************************************************************************
-typedef struct
-{
-    bool loopbackModeFlag;                   //!< Digital Loopback Mode.
-    bool twoPhaseModeFlag;                   //!< Two phase transmitter mode.
-    bool pinDelayEnableFlag;                 //!< DX Pin delay enable flag.
-    uint16_t phase1FrameLength;              //!< Phase 1 frame length.
-    uint16_t phase2FrameLength;              //!< Phase 2 frame length.
-    McBSP_ClockStopMode clockStopMode;       //!< Clock stop mode.
-    McBSP_DataBitsPerWord phase1WordLength;  //!< Phase 1 word length.
-    McBSP_DataBitsPerWord phase2WordLength;  //!< Phase 2 word length.
-    McBSP_CompandingMode compandingMode;     //!< Data companding mode.
-    McBSP_DataDelayBits dataDelayBits;       //!< Data delay in bits.
-    McBSP_TxInterruptSource interruptMode;   //!< Transmitter interrupt mode.
-}McBSP_TxDataParams;
+typedef struct {
+  bool                    loopbackModeFlag;   //!< Digital Loopback Mode.
+  bool                    twoPhaseModeFlag;   //!< Two phase transmitter mode.
+  bool                    pinDelayEnableFlag; //!< DX Pin delay enable flag.
+  uint16_t                phase1FrameLength;  //!< Phase 1 frame length.
+  uint16_t                phase2FrameLength;  //!< Phase 2 frame length.
+  McBSP_ClockStopMode     clockStopMode;      //!< Clock stop mode.
+  McBSP_DataBitsPerWord   phase1WordLength;   //!< Phase 1 word length.
+  McBSP_DataBitsPerWord   phase2WordLength;   //!< Phase 2 word length.
+  McBSP_CompandingMode    compandingMode;     //!< Data companding mode.
+  McBSP_DataDelayBits     dataDelayBits;      //!< Data delay in bits.
+  McBSP_TxInterruptSource interruptMode;      //!< Transmitter interrupt mode.
+} McBSP_TxDataParams;
 
 //*****************************************************************************
 //
@@ -545,20 +511,19 @@ typedef struct
 //! Receiver \e data parameters.
 //
 //*****************************************************************************
-typedef struct
-{
-    bool loopbackModeFlag;                   //!< Digital Loopback Mode.
-    bool twoPhaseModeFlag;                   //!< Two phase receiver mode.
-    uint16_t phase1FrameLength;              //!< Phase 1 frame length.
-    uint16_t phase2FrameLength;              //!< Phase 2 frame length.
-    McBSP_ClockStopMode clockStopMode;       //!< Clock stop mode.
-    McBSP_DataBitsPerWord phase1WordLength;  //!< Phase 1 word length.
-    McBSP_DataBitsPerWord phase2WordLength;  //!< Phase 2 word length.
-    McBSP_CompandingMode compandingMode;     //!< Data companding mode.
-    McBSP_DataDelayBits dataDelayBits;       //!< Data delay in bits.
-    McBSP_RxSignExtensionMode signExtMode;   //!< Sign extension mode.
-    McBSP_RxInterruptSource interruptMode;   //!< Transmitter interrupt mode.
-}McBSP_RxDataParams;
+typedef struct {
+  bool                      loopbackModeFlag;  //!< Digital Loopback Mode.
+  bool                      twoPhaseModeFlag;  //!< Two phase receiver mode.
+  uint16_t                  phase1FrameLength; //!< Phase 1 frame length.
+  uint16_t                  phase2FrameLength; //!< Phase 2 frame length.
+  McBSP_ClockStopMode       clockStopMode;     //!< Clock stop mode.
+  McBSP_DataBitsPerWord     phase1WordLength;  //!< Phase 1 word length.
+  McBSP_DataBitsPerWord     phase2WordLength;  //!< Phase 2 word length.
+  McBSP_CompandingMode      compandingMode;    //!< Data companding mode.
+  McBSP_DataDelayBits       dataDelayBits;     //!< Data delay in bits.
+  McBSP_RxSignExtensionMode signExtMode;       //!< Sign extension mode.
+  McBSP_RxInterruptSource   interruptMode;     //!< Transmitter interrupt mode.
+} McBSP_RxDataParams;
 
 //*****************************************************************************
 //
@@ -566,14 +531,13 @@ typedef struct
 //! Receiver \e multichannel parameters.
 //
 //*****************************************************************************
-typedef struct
-{
-    uint16_t channelCountRx;             //!< Number of channels to be enabled.
-    uint16_t *ptrChannelsListRx;         //!< Pointer to array that has list of
-                                         //!< channels.
-    McBSP_RxChannelMode multichannelModeRx;   //!< Multichannel modes.
-    McBSP_MultichannelPartition partitionRx;  //!< Multichannel partition.
-}McBSP_RxMultichannelParams;
+typedef struct {
+  uint16_t            channelCountRx;     //!< Number of channels to be enabled.
+  uint16_t           *ptrChannelsListRx;  //!< Pointer to array that has list of
+                                          //!< channels.
+  McBSP_RxChannelMode multichannelModeRx; //!< Multichannel modes.
+  McBSP_MultichannelPartition partitionRx; //!< Multichannel partition.
+} McBSP_RxMultichannelParams;
 
 //*****************************************************************************
 //
@@ -581,14 +545,13 @@ typedef struct
 //! Transmitter \e multichannel parameters.
 //
 //*****************************************************************************
-typedef struct
-{
-    uint16_t channelCountTx;     //!< Number of channels to be enabled.
-    uint16_t *ptrChannelsListTx; //!< Pointer to array that has list of
-                                 //!< channels.
-    McBSP_TxChannelMode multichannelModeTx;   //!< Multichannel modes.
-    McBSP_MultichannelPartition partitionTx;  //!< Multichannel partition.
-}McBSP_TxMultichannelParams;
+typedef struct {
+  uint16_t            channelCountTx;     //!< Number of channels to be enabled.
+  uint16_t           *ptrChannelsListTx;  //!< Pointer to array that has list of
+                                          //!< channels.
+  McBSP_TxChannelMode multichannelModeTx; //!< Multichannel modes.
+  McBSP_MultichannelPartition partitionTx; //!< Multichannel partition.
+} McBSP_TxMultichannelParams;
 
 //*****************************************************************************
 //
@@ -596,15 +559,13 @@ typedef struct
 //! SPIMasterMode parameters.
 //
 //*****************************************************************************
-typedef struct
-{
-    bool loopbackModeFlag;             //!< Digital Loopback Mode .
-    uint32_t clockSRGDivider;          //!< Clock divider.
-    McBSP_ClockStopMode clockStopMode; //!< Clock stop mode.
-    McBSP_DataBitsPerWord wordLength;  //!< Word length.
-    McBSP_TxClockPolarity spiMode;     //!< Master out clock polarity.
-}
-McBSP_SPIMasterModeParams;
+typedef struct {
+  bool                  loopbackModeFlag; //!< Digital Loopback Mode .
+  uint32_t              clockSRGDivider;  //!< Clock divider.
+  McBSP_ClockStopMode   clockStopMode;    //!< Clock stop mode.
+  McBSP_DataBitsPerWord wordLength;       //!< Word length.
+  McBSP_TxClockPolarity spiMode;          //!< Master out clock polarity.
+} McBSP_SPIMasterModeParams;
 
 //*****************************************************************************
 //
@@ -612,14 +573,12 @@ McBSP_SPIMasterModeParams;
 //! SPISlaveMode parameters.
 //
 //*****************************************************************************
-typedef struct
-{
-    bool loopbackModeFlag;             //!< Digital Loopback Mode.
-    McBSP_ClockStopMode clockStopMode; //!< Clock stop mode.
-    McBSP_DataBitsPerWord wordLength;  //!< Word length.
-    McBSP_TxClockPolarity spiMode;     //!< Clock polarity.
-}
-McBSP_SPISlaveModeParams;
+typedef struct {
+  bool                  loopbackModeFlag; //!< Digital Loopback Mode.
+  McBSP_ClockStopMode   clockStopMode;    //!< Clock stop mode.
+  McBSP_DataBitsPerWord wordLength;       //!< Word length.
+  McBSP_TxClockPolarity spiMode;          //!< Clock polarity.
+} McBSP_SPISlaveModeParams;
 
 //*****************************************************************************
 //
@@ -640,13 +599,8 @@ McBSP_SPISlaveModeParams;
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-McBSP_isBaseValid(uint32_t base)
-{
-    return(
-           (base == MCBSPA_BASE) ||
-           (base == MCBSPB_BASE)
-          );
+static inline bool McBSP_isBaseValid(uint32_t base) {
+  return ((base == MCBSPA_BASE) || (base == MCBSPB_BASE));
 }
 #endif
 
@@ -661,18 +615,16 @@ McBSP_isBaseValid(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_disableLoopback(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_disableLoopback(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear DLB bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR1) &= ~MCBSP_SPCR1_DLB;
+  //
+  // Clear DLB bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR1) &= ~MCBSP_SPCR1_DLB;
 }
 
 //*****************************************************************************
@@ -686,18 +638,16 @@ McBSP_disableLoopback(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableLoopback(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableLoopback(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set DLB bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR1) |= MCBSP_SPCR1_DLB;
+  //
+  // Set DLB bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR1) |= MCBSP_SPCR1_DLB;
 }
 
 //*****************************************************************************
@@ -717,18 +667,17 @@ McBSP_enableLoopback(uint32_t base)
 //
 //*****************************************************************************
 static inline void
-McBSP_setRxSignExtension(uint32_t base, const McBSP_RxSignExtensionMode mode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setRxSignExtension(uint32_t base, const McBSP_RxSignExtensionMode mode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Write to RJUST bits.
-    //
-    HWREGH(base + MCBSP_O_SPCR1) =
-    ((HWREGH(base + MCBSP_O_SPCR1) & ~MCBSP_SPCR1_RJUST_M ) | (uint16_t)mode);
+  //
+  // Write to RJUST bits.
+  //
+  HWREGH(base + MCBSP_O_SPCR1) =
+      ((HWREGH(base + MCBSP_O_SPCR1) & ~MCBSP_SPCR1_RJUST_M) | (uint16_t)mode);
 }
 
 //*****************************************************************************
@@ -749,19 +698,18 @@ McBSP_setRxSignExtension(uint32_t base, const McBSP_RxSignExtensionMode mode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_setClockStopMode(uint32_t base, const McBSP_ClockStopMode mode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_setClockStopMode(uint32_t                  base,
+                                          const McBSP_ClockStopMode mode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Write to CLKSTP bits.
-    //
-    HWREGH(base + MCBSP_O_SPCR1) =
-    ((HWREGH(base + MCBSP_O_SPCR1) & ~MCBSP_SPCR1_CLKSTP_M) | (uint16_t)mode);
+  //
+  // Write to CLKSTP bits.
+  //
+  HWREGH(base + MCBSP_O_SPCR1) =
+      ((HWREGH(base + MCBSP_O_SPCR1) & ~MCBSP_SPCR1_CLKSTP_M) | (uint16_t)mode);
 }
 
 //*****************************************************************************
@@ -775,18 +723,16 @@ McBSP_setClockStopMode(uint32_t base, const McBSP_ClockStopMode mode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_disableDxPinDelay(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_disableDxPinDelay(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set DXENA bit
-    //
-    HWREGH(base + MCBSP_O_SPCR1) &= ~MCBSP_SPCR1_DXENA;
+  //
+  // Set DXENA bit
+  //
+  HWREGH(base + MCBSP_O_SPCR1) &= ~MCBSP_SPCR1_DXENA;
 }
 
 //*****************************************************************************
@@ -801,18 +747,16 @@ McBSP_disableDxPinDelay(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableDxPinDelay(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableDxPinDelay(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set DXENA bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR1) |= MCBSP_SPCR1_DXENA;
+  //
+  // Set DXENA bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR1) |= MCBSP_SPCR1_DXENA;
 }
 
 //*****************************************************************************
@@ -833,20 +777,19 @@ McBSP_enableDxPinDelay(uint32_t base)
 //
 //*****************************************************************************
 static inline void
-McBSP_setRxInterruptSource(uint32_t base,
-                           const McBSP_RxInterruptSource interruptSource)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setRxInterruptSource(uint32_t                      base,
+                           const McBSP_RxInterruptSource interruptSource) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Write to RINTM bits.
-    //
-    HWREGH(base + MCBSP_O_SPCR1) =
-    ((HWREGH(base + MCBSP_O_SPCR1) & ~MCBSP_SPCR1_RINTM_M) |
-     (uint16_t)interruptSource);
+  //
+  // Write to RINTM bits.
+  //
+  HWREGH(base + MCBSP_O_SPCR1) =
+      ((HWREGH(base + MCBSP_O_SPCR1) & ~MCBSP_SPCR1_RINTM_M) |
+       (uint16_t)interruptSource);
 }
 
 //*****************************************************************************
@@ -860,18 +803,16 @@ McBSP_setRxInterruptSource(uint32_t base,
 //! \return  None.
 //
 //*****************************************************************************
-static inline void
-McBSP_clearRxFrameSyncError(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_clearRxFrameSyncError(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear RSYNCERR bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR1) &= ~MCBSP_SPCR1_RSYNCERR;
+  //
+  // Clear RSYNCERR bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR1) &= ~MCBSP_SPCR1_RSYNCERR;
 }
 
 //*****************************************************************************
@@ -890,19 +831,17 @@ McBSP_clearRxFrameSyncError(uint32_t base)
 //!       error occurs.
 //
 //*****************************************************************************
-static inline uint16_t
-McBSP_getRxErrorStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline uint16_t McBSP_getRxErrorStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Return the value of RFULL & RSYNCERR bit.
-    //
-    return(HWREGH(base + MCBSP_O_SPCR1) & (MCBSP_SPCR1_RFULL |
-                                           MCBSP_SPCR1_RSYNCERR));
+  //
+  // Return the value of RFULL & RSYNCERR bit.
+  //
+  return (HWREGH(base + MCBSP_O_SPCR1) &
+          (MCBSP_SPCR1_RFULL | MCBSP_SPCR1_RSYNCERR));
 }
 
 //*****************************************************************************
@@ -919,19 +858,17 @@ McBSP_getRxErrorStatus(uint32_t base)
 //!         \b false if there is no new data in the receive buffer.
 //
 //*****************************************************************************
-static inline bool
-McBSP_isRxReady(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline bool McBSP_isRxReady(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Check RRDY bit.
-    //
-    return((HWREGH(base + MCBSP_O_SPCR1) & MCBSP_SPCR1_RRDY)
-           == MCBSP_SPCR1_RRDY);
+  //
+  // Check RRDY bit.
+  //
+  return ((HWREGH(base + MCBSP_O_SPCR1) & MCBSP_SPCR1_RRDY) ==
+          MCBSP_SPCR1_RRDY);
 }
 
 //*****************************************************************************
@@ -945,18 +882,16 @@ McBSP_isRxReady(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_resetReceiver(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_resetReceiver(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear RRST bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR1) &= ~ MCBSP_SPCR1_RRST;
+  //
+  // Clear RRST bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR1) &= ~MCBSP_SPCR1_RRST;
 }
 
 //*****************************************************************************
@@ -970,18 +905,16 @@ McBSP_resetReceiver(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableReceiver(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableReceiver(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set RRST bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR1) |= MCBSP_SPCR1_RRST;
+  //
+  // Set RRST bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR1) |= MCBSP_SPCR1_RRST;
 }
 
 //*****************************************************************************
@@ -1004,19 +937,18 @@ McBSP_enableReceiver(uint32_t base)
 //
 //*****************************************************************************
 static inline void
-McBSP_setEmulationMode(uint32_t base, const McBSP_EmulationMode emulationMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setEmulationMode(uint32_t base, const McBSP_EmulationMode emulationMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // write to FREE and SOFT bits.
-    //
-    HWREGH(base + MCBSP_O_SPCR2) =
-    ((HWREGH(base + MCBSP_O_SPCR2) & ~(MCBSP_SPCR2_FREE | MCBSP_SPCR2_SOFT))
-     | (uint16_t)emulationMode);
+  //
+  // write to FREE and SOFT bits.
+  //
+  HWREGH(base + MCBSP_O_SPCR2) =
+      ((HWREGH(base + MCBSP_O_SPCR2) & ~(MCBSP_SPCR2_FREE | MCBSP_SPCR2_SOFT)) |
+       (uint16_t)emulationMode);
 }
 
 //*****************************************************************************
@@ -1030,18 +962,16 @@ McBSP_setEmulationMode(uint32_t base, const McBSP_EmulationMode emulationMode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_resetFrameSyncLogic(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_resetFrameSyncLogic(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear FRST bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR2) &= ~MCBSP_SPCR2_FRST;
+  //
+  // Clear FRST bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR2) &= ~MCBSP_SPCR2_FRST;
 }
 
 //*****************************************************************************
@@ -1055,18 +985,16 @@ McBSP_resetFrameSyncLogic(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableFrameSyncLogic(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableFrameSyncLogic(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set FRST bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR2) |= MCBSP_SPCR2_FRST;
+  //
+  // Set FRST bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR2) |= MCBSP_SPCR2_FRST;
 }
 
 //*****************************************************************************
@@ -1080,18 +1008,16 @@ McBSP_enableFrameSyncLogic(uint32_t base)
 //! \return
 //
 //*****************************************************************************
-static inline void
-McBSP_resetSampleRateGenerator(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_resetSampleRateGenerator(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear GRST bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR2) &= ~MCBSP_SPCR2_GRST;
+  //
+  // Clear GRST bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR2) &= ~MCBSP_SPCR2_GRST;
 }
 
 //*****************************************************************************
@@ -1105,18 +1031,16 @@ McBSP_resetSampleRateGenerator(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableSampleRateGenerator(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableSampleRateGenerator(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set GRST bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR2) |= MCBSP_SPCR2_GRST;
+  //
+  // Set GRST bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR2) |= MCBSP_SPCR2_GRST;
 }
 
 //*****************************************************************************
@@ -1138,20 +1062,19 @@ McBSP_enableSampleRateGenerator(uint32_t base)
 //
 //*****************************************************************************
 static inline void
-McBSP_setTxInterruptSource(uint32_t base,
-                           const McBSP_TxInterruptSource interruptSource)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setTxInterruptSource(uint32_t                      base,
+                           const McBSP_TxInterruptSource interruptSource) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Write to XINTM bits.
-    //
-    HWREGH(base + MCBSP_O_SPCR2) =
-    ((HWREGH(base + MCBSP_O_SPCR2) & ~MCBSP_SPCR2_XINTM_M) |
-     (uint16_t)interruptSource);
+  //
+  // Write to XINTM bits.
+  //
+  HWREGH(base + MCBSP_O_SPCR2) =
+      ((HWREGH(base + MCBSP_O_SPCR2) & ~MCBSP_SPCR2_XINTM_M) |
+       (uint16_t)interruptSource);
 }
 
 //*****************************************************************************
@@ -1170,19 +1093,17 @@ McBSP_setTxInterruptSource(uint32_t base,
 //!       error occurs.
 //
 //*****************************************************************************
-static inline uint16_t
-McBSP_getTxErrorStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline uint16_t McBSP_getTxErrorStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Return the value of XEMPTY & XSYNCERR bit.
-    //
-    return(HWREGH(base + MCBSP_O_SPCR2) & (MCBSP_SPCR2_XEMPTY |
-                                           MCBSP_SPCR2_XSYNCERR));
+  //
+  // Return the value of XEMPTY & XSYNCERR bit.
+  //
+  return (HWREGH(base + MCBSP_O_SPCR2) &
+          (MCBSP_SPCR2_XEMPTY | MCBSP_SPCR2_XSYNCERR));
 }
 
 //*****************************************************************************
@@ -1196,18 +1117,16 @@ McBSP_getTxErrorStatus(uint32_t base)
 //! \return  None.
 //
 //*****************************************************************************
-static inline void
-McBSP_clearTxFrameSyncError(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_clearTxFrameSyncError(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear XSYNCERR bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR2) &= ~MCBSP_SPCR2_XSYNCERR;
+  //
+  // Clear XSYNCERR bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR2) &= ~MCBSP_SPCR2_XSYNCERR;
 }
 
 //*****************************************************************************
@@ -1223,19 +1142,17 @@ McBSP_clearTxFrameSyncError(uint32_t base)
 //!         \b false if transmitter is not ready to accept new data.
 //
 //*****************************************************************************
-static inline bool
-McBSP_isTxReady(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline bool McBSP_isTxReady(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Check XRDY bit.
-    //
-    return((HWREGH(base + MCBSP_O_SPCR2) & MCBSP_SPCR2_XRDY)
-           == MCBSP_SPCR2_XRDY);
+  //
+  // Check XRDY bit.
+  //
+  return ((HWREGH(base + MCBSP_O_SPCR2) & MCBSP_SPCR2_XRDY) ==
+          MCBSP_SPCR2_XRDY);
 }
 
 //*****************************************************************************
@@ -1249,18 +1166,16 @@ McBSP_isTxReady(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_resetTransmitter(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_resetTransmitter(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear XRST bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR2) &= ~MCBSP_SPCR2_XRST;
+  //
+  // Clear XRST bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR2) &= ~MCBSP_SPCR2_XRST;
 }
 
 //*****************************************************************************
@@ -1274,18 +1189,16 @@ McBSP_resetTransmitter(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableTransmitter(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableTransmitter(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set XRST bit.
-    //
-    HWREGH(base + MCBSP_O_SPCR2) |= MCBSP_SPCR2_XRST;
+  //
+  // Set XRST bit.
+  //
+  HWREGH(base + MCBSP_O_SPCR2) |= MCBSP_SPCR2_XRST;
 }
 
 //*****************************************************************************
@@ -1299,18 +1212,16 @@ McBSP_enableTransmitter(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_disableTwoPhaseRx(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_disableTwoPhaseRx(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear RPHASE bit.
-    //
-    HWREGH(base + MCBSP_O_RCR2) &= ~MCBSP_RCR2_RPHASE;
+  //
+  // Clear RPHASE bit.
+  //
+  HWREGH(base + MCBSP_O_RCR2) &= ~MCBSP_RCR2_RPHASE;
 }
 
 //*****************************************************************************
@@ -1324,18 +1235,16 @@ McBSP_disableTwoPhaseRx(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableTwoPhaseRx(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableTwoPhaseRx(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set RPHASE bit.
-    //
-    HWREGH(base + MCBSP_O_RCR2) |= MCBSP_RCR2_RPHASE;
+  //
+  // Set RPHASE bit.
+  //
+  HWREGH(base + MCBSP_O_RCR2) |= MCBSP_RCR2_RPHASE;
 }
 
 //*****************************************************************************
@@ -1358,20 +1267,19 @@ McBSP_enableTwoPhaseRx(uint32_t base)
 //
 //*****************************************************************************
 static inline void
-McBSP_setRxCompandingMode(uint32_t base,
-                          const McBSP_CompandingMode compandingMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setRxCompandingMode(uint32_t                   base,
+                          const McBSP_CompandingMode compandingMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Write to RCOMPAND bits.
-    //
-    HWREGH(base + MCBSP_O_RCR2) =
-    ((HWREGH(base + MCBSP_O_RCR2) & ~MCBSP_RCR2_RCOMPAND_M) |
-     (uint16_t)compandingMode);
+  //
+  // Write to RCOMPAND bits.
+  //
+  HWREGH(base + MCBSP_O_RCR2) =
+      ((HWREGH(base + MCBSP_O_RCR2) & ~MCBSP_RCR2_RCOMPAND_M) |
+       (uint16_t)compandingMode);
 }
 
 //*****************************************************************************
@@ -1386,19 +1294,17 @@ McBSP_setRxCompandingMode(uint32_t base,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_disableRxFrameSyncErrorDetection(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
+static inline void McBSP_disableRxFrameSyncErrorDetection(uint32_t base) {
+  //
+  // Check the arguments.
+  //
 
-    ASSERT(McBSP_isBaseValid(base));
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set RFIG bit.
-    //
-    HWREGH(base + MCBSP_O_RCR2) |= MCBSP_RCR2_RFIG;
+  //
+  // Set RFIG bit.
+  //
+  HWREGH(base + MCBSP_O_RCR2) |= MCBSP_RCR2_RFIG;
 }
 
 //*****************************************************************************
@@ -1413,18 +1319,16 @@ McBSP_disableRxFrameSyncErrorDetection(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableRxFrameSyncErrorDetection(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableRxFrameSyncErrorDetection(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear RFIG bit.
-    //
-    HWREGH(base + MCBSP_O_RCR2) &= ~MCBSP_RCR2_RFIG;
+  //
+  // Clear RFIG bit.
+  //
+  HWREGH(base + MCBSP_O_RCR2) &= ~MCBSP_RCR2_RFIG;
 }
 
 //*****************************************************************************
@@ -1443,19 +1347,18 @@ McBSP_enableRxFrameSyncErrorDetection(uint32_t base)
 //
 //*****************************************************************************
 static inline void
-McBSP_setRxDataDelayBits(uint32_t base, const McBSP_DataDelayBits delayBits)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setRxDataDelayBits(uint32_t base, const McBSP_DataDelayBits delayBits) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Write to RDATDLY bits.
-    //
-    HWREGH(base + MCBSP_O_RCR2) =
-    ((HWREGH(base + MCBSP_O_RCR2) & ~MCBSP_RCR2_RDATDLY_M) |
-     (uint16_t)delayBits);
+  //
+  // Write to RDATDLY bits.
+  //
+  HWREGH(base + MCBSP_O_RCR2) =
+      ((HWREGH(base + MCBSP_O_RCR2) & ~MCBSP_RCR2_RDATDLY_M) |
+       (uint16_t)delayBits);
 }
 
 //*****************************************************************************
@@ -1469,18 +1372,16 @@ McBSP_setRxDataDelayBits(uint32_t base, const McBSP_DataDelayBits delayBits)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_disableTwoPhaseTx(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_disableTwoPhaseTx(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear XPHASE bit.
-    //
-    HWREGH(base + MCBSP_O_XCR2) &= ~MCBSP_XCR2_XPHASE;
+  //
+  // Clear XPHASE bit.
+  //
+  HWREGH(base + MCBSP_O_XCR2) &= ~MCBSP_XCR2_XPHASE;
 }
 
 //*****************************************************************************
@@ -1494,18 +1395,16 @@ McBSP_disableTwoPhaseTx(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableTwoPhaseTx(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableTwoPhaseTx(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set XPHASE bit
-    //
-    HWREGH(base + MCBSP_O_XCR2) |= MCBSP_XCR2_XPHASE;
+  //
+  // Set XPHASE bit
+  //
+  HWREGH(base + MCBSP_O_XCR2) |= MCBSP_XCR2_XPHASE;
 }
 
 //*****************************************************************************
@@ -1528,20 +1427,19 @@ McBSP_enableTwoPhaseTx(uint32_t base)
 //
 //*****************************************************************************
 static inline void
-McBSP_setTxCompandingMode(uint32_t base,
-                          const McBSP_CompandingMode compandingMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setTxCompandingMode(uint32_t                   base,
+                          const McBSP_CompandingMode compandingMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Write to XCOMPAND bits.
-    //
-    HWREGH(base + MCBSP_O_XCR2) =
-    ((HWREGH(base + MCBSP_O_XCR2) & ~MCBSP_XCR2_XCOMPAND_M) |
-     (uint16_t)compandingMode);
+  //
+  // Write to XCOMPAND bits.
+  //
+  HWREGH(base + MCBSP_O_XCR2) =
+      ((HWREGH(base + MCBSP_O_XCR2) & ~MCBSP_XCR2_XCOMPAND_M) |
+       (uint16_t)compandingMode);
 }
 
 //*****************************************************************************
@@ -1556,18 +1454,16 @@ McBSP_setTxCompandingMode(uint32_t base,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_disableTxFrameSyncErrorDetection(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_disableTxFrameSyncErrorDetection(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set XFIG bit.
-    //
-    HWREGH(base + MCBSP_O_XCR2) |= MCBSP_XCR2_XFIG;
+  //
+  // Set XFIG bit.
+  //
+  HWREGH(base + MCBSP_O_XCR2) |= MCBSP_XCR2_XFIG;
 }
 
 //*****************************************************************************
@@ -1582,18 +1478,16 @@ McBSP_disableTxFrameSyncErrorDetection(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableTxFrameSyncErrorDetection(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableTxFrameSyncErrorDetection(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear XFIG bit.
-    //
-    HWREGH(base + MCBSP_O_XCR2) &= ~MCBSP_XCR2_XFIG;
+  //
+  // Clear XFIG bit.
+  //
+  HWREGH(base + MCBSP_O_XCR2) &= ~MCBSP_XCR2_XFIG;
 }
 
 //*****************************************************************************
@@ -1612,19 +1506,18 @@ McBSP_enableTxFrameSyncErrorDetection(uint32_t base)
 //
 //*****************************************************************************
 static inline void
-McBSP_setTxDataDelayBits(uint32_t base, const McBSP_DataDelayBits delayBits)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setTxDataDelayBits(uint32_t base, const McBSP_DataDelayBits delayBits) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Write to XDATDLY bits.
-    //
-    HWREGH(base + MCBSP_O_XCR2) =
-    ((HWREGH(base + MCBSP_O_XCR2) & ~MCBSP_XCR2_XDATDLY_M) |
-     (uint16_t)delayBits);
+  //
+  // Write to XDATDLY bits.
+  //
+  HWREGH(base + MCBSP_O_XCR2) =
+      ((HWREGH(base + MCBSP_O_XCR2) & ~MCBSP_XCR2_XDATDLY_M) |
+       (uint16_t)delayBits);
 }
 
 //*****************************************************************************
@@ -1642,20 +1535,20 @@ McBSP_setTxDataDelayBits(uint32_t base, const McBSP_DataDelayBits delayBits)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_setFrameSyncPulsePeriod(uint32_t base, uint16_t frameClockDivider)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
-    ASSERT(frameClockDivider < 4096U);
+static inline void McBSP_setFrameSyncPulsePeriod(uint32_t base,
+                                                 uint16_t frameClockDivider) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
+  ASSERT(frameClockDivider < 4096U);
 
-    //
-    // Assign value to FPER to set the pulse width.
-    //
-    HWREGH(base + MCBSP_O_SRGR2) =
-    ((HWREGH(base + MCBSP_O_SRGR2) & ~MCBSP_SRGR2_FPER_M) | frameClockDivider);
+  //
+  // Assign value to FPER to set the pulse width.
+  //
+  HWREGH(base + MCBSP_O_SRGR2) =
+      ((HWREGH(base + MCBSP_O_SRGR2) & ~MCBSP_SRGR2_FPER_M) |
+       frameClockDivider);
 }
 
 //*****************************************************************************
@@ -1674,20 +1567,19 @@ McBSP_setFrameSyncPulsePeriod(uint32_t base, uint16_t frameClockDivider)
 //
 //*****************************************************************************
 static inline void
-McBSP_setFrameSyncPulseWidthDivider(uint32_t base, uint16_t pulseWidthDivider)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
-    ASSERT(pulseWidthDivider < 256U);
+McBSP_setFrameSyncPulseWidthDivider(uint32_t base, uint16_t pulseWidthDivider) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
+  ASSERT(pulseWidthDivider < 256U);
 
-    //
-    // Assign value to FWID to set sync clock rate.
-    //
-    HWREGH(base + MCBSP_O_SRGR1) =
-    ((HWREGH(base + MCBSP_O_SRGR1) & ~MCBSP_SRGR1_FWID_M) |
-     (uint16_t)(pulseWidthDivider << MCBSP_SRGR1_FWID_S));
+  //
+  // Assign value to FWID to set sync clock rate.
+  //
+  HWREGH(base + MCBSP_O_SRGR1) =
+      ((HWREGH(base + MCBSP_O_SRGR1) & ~MCBSP_SRGR1_FWID_M) |
+       (uint16_t)(pulseWidthDivider << MCBSP_SRGR1_FWID_S));
 }
 
 //*****************************************************************************
@@ -1705,21 +1597,20 @@ McBSP_setFrameSyncPulseWidthDivider(uint32_t base, uint16_t pulseWidthDivider)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_setSRGDataClockDivider(uint32_t base, uint16_t dataClockDivider)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
-    ASSERT(dataClockDivider < 256U);
+static inline void McBSP_setSRGDataClockDivider(uint32_t base,
+                                                uint16_t dataClockDivider) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
+  ASSERT(dataClockDivider < 256U);
 
-    //
-    // Assign value to CLKGDV to set data clock rate.
-    //
-    HWREGH(base + MCBSP_O_SRGR1) =
-    ((HWREGH(base + MCBSP_O_SRGR1) & ~MCBSP_SRGR1_CLKGDV_M) |
-     dataClockDivider);
+  //
+  // Assign value to CLKGDV to set data clock rate.
+  //
+  HWREGH(base + MCBSP_O_SRGR1) =
+      ((HWREGH(base + MCBSP_O_SRGR1) & ~MCBSP_SRGR1_CLKGDV_M) |
+       dataClockDivider);
 }
 
 //*****************************************************************************
@@ -1734,18 +1625,16 @@ McBSP_setSRGDataClockDivider(uint32_t base, uint16_t dataClockDivider)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_disableSRGSyncFSR(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_disableSRGSyncFSR(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear GSYNC  bit.
-    //
-    HWREGH(base + MCBSP_O_SRGR2) &= ~MCBSP_SRGR2_GSYNC;
+  //
+  // Clear GSYNC  bit.
+  //
+  HWREGH(base + MCBSP_O_SRGR2) &= ~MCBSP_SRGR2_GSYNC;
 }
 
 //*****************************************************************************
@@ -1760,18 +1649,16 @@ McBSP_disableSRGSyncFSR(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableSRGSyncFSR(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableSRGSyncFSR(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set GSYNC bit.
-    //
-    HWREGH(base + MCBSP_O_SRGR2) |= MCBSP_SRGR2_GSYNC;
+  //
+  // Set GSYNC bit.
+  //
+  HWREGH(base + MCBSP_O_SRGR2) |= MCBSP_SRGR2_GSYNC;
 }
 
 //*****************************************************************************
@@ -1791,27 +1678,26 @@ McBSP_enableSRGSyncFSR(uint32_t base)
 //
 //*****************************************************************************
 static inline void
-McBSP_setRxSRGClockSource(uint32_t base,
-                          const McBSP_SRGRxClockSource srgClockSource)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setRxSRGClockSource(uint32_t                     base,
+                          const McBSP_SRGRxClockSource srgClockSource) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set or clear CLKSM bit.
-    //
-    HWREGH(base + MCBSP_O_SRGR2) =
-    ((HWREGH(base + MCBSP_O_SRGR2) & ~MCBSP_SRGR2_CLKSM) |
-     ((uint16_t)((uint16_t)srgClockSource & 0x1U) << 13U));
+  //
+  // Set or clear CLKSM bit.
+  //
+  HWREGH(base + MCBSP_O_SRGR2) =
+      ((HWREGH(base + MCBSP_O_SRGR2) & ~MCBSP_SRGR2_CLKSM) |
+       ((uint16_t)((uint16_t)srgClockSource & 0x1U) << 13U));
 
-    //
-    // Set or clear SCLKME bit.
-    //
-    HWREGH(base + MCBSP_O_PCR) =
-    ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_SCLKME) |
-     (uint16_t)(((uint16_t)srgClockSource >> 1U) << 7U));
+  //
+  // Set or clear SCLKME bit.
+  //
+  HWREGH(base + MCBSP_O_PCR) =
+      ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_SCLKME) |
+       (uint16_t)(((uint16_t)srgClockSource >> 1U) << 7U));
 }
 
 //*****************************************************************************
@@ -1831,26 +1717,25 @@ McBSP_setRxSRGClockSource(uint32_t base,
 //
 //*****************************************************************************
 static inline void
-McBSP_setTxSRGClockSource(uint32_t base,
-                          const McBSP_SRGTxClockSource srgClockSource)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setTxSRGClockSource(uint32_t                     base,
+                          const McBSP_SRGTxClockSource srgClockSource) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set or clear CLKSM bit.
-    //
-    HWREGH(base + MCBSP_O_SRGR2) =
-    ((HWREGH(base + MCBSP_O_SRGR2) & ~MCBSP_SRGR2_CLKSM) |
-     ((uint16_t)((uint16_t)srgClockSource & 0x1U) << 13U));
-    //
-    // Set or clear SCLKME bit.
-    //
-    HWREGH(base + MCBSP_O_PCR) =
-    ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_SCLKME) |
-     (uint16_t)(((uint16_t)srgClockSource >> 1U) << 7U));
+  //
+  // Set or clear CLKSM bit.
+  //
+  HWREGH(base + MCBSP_O_SRGR2) =
+      ((HWREGH(base + MCBSP_O_SRGR2) & ~MCBSP_SRGR2_CLKSM) |
+       ((uint16_t)((uint16_t)srgClockSource & 0x1U) << 13U));
+  //
+  // Set or clear SCLKME bit.
+  //
+  HWREGH(base + MCBSP_O_PCR) =
+      ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_SCLKME) |
+       (uint16_t)(((uint16_t)srgClockSource >> 1U) << 7U));
 }
 
 //*****************************************************************************
@@ -1877,20 +1762,18 @@ McBSP_setTxSRGClockSource(uint32_t base,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_setTxInternalFrameSyncSource(uint32_t base,
-                                const McBSP_TxInternalFrameSyncSource syncMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_setTxInternalFrameSyncSource(
+    uint32_t base, const McBSP_TxInternalFrameSyncSource syncMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set or clear FSGM bit.
-    //
-    HWREGH(base + MCBSP_O_SRGR2) =
-    ((HWREGH(base + MCBSP_O_SRGR2) & ~MCBSP_SRGR2_FSGM) | (uint16_t)syncMode);
+  //
+  // Set or clear FSGM bit.
+  //
+  HWREGH(base + MCBSP_O_SRGR2) =
+      ((HWREGH(base + MCBSP_O_SRGR2) & ~MCBSP_SRGR2_FSGM) | (uint16_t)syncMode);
 }
 
 //*****************************************************************************
@@ -1908,19 +1791,18 @@ McBSP_setTxInternalFrameSyncSource(uint32_t base,
 //
 //*****************************************************************************
 static inline void
-McBSP_setRxMultichannelPartition(uint32_t base,
-                                 const McBSP_MultichannelPartition partition)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setRxMultichannelPartition(uint32_t                          base,
+                                 const McBSP_MultichannelPartition partition) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set or Clear RMCME bit.
-    //
-    HWREGH(base + MCBSP_O_MCR1) =
-    ((HWREGH(base + MCBSP_O_MCR1) & ~MCBSP_MCR1_RMCME) | (uint16_t)partition);
+  //
+  // Set or Clear RMCME bit.
+  //
+  HWREGH(base + MCBSP_O_MCR1) =
+      ((HWREGH(base + MCBSP_O_MCR1) & ~MCBSP_MCR1_RMCME) | (uint16_t)partition);
 }
 
 //*****************************************************************************
@@ -1943,37 +1825,31 @@ McBSP_setRxMultichannelPartition(uint32_t base,
 //
 //*****************************************************************************
 static inline void
-McBSP_setRxTwoPartitionBlock(uint32_t base, const McBSP_PartitionBlock block)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setRxTwoPartitionBlock(uint32_t base, const McBSP_PartitionBlock block) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
+  //
+  // Check the block value if it is 0,2,4,6 or 1,3,5,7.
+  //
+  if (((uint16_t)block == 0U) || ((uint16_t)block == 2U) ||
+      ((uint16_t)block == 4U) || ((uint16_t)block == 6U)) {
     //
-    //Check the block value if it is 0,2,4,6 or 1,3,5,7.
+    // write to RPABLK bits.
     //
-    if(((uint16_t)block ==  0U) ||
-       ((uint16_t)block ==  2U) ||
-       ((uint16_t)block ==  4U) ||
-       ((uint16_t)block ==  6U))
-    {
-        //
-        // write to RPABLK bits.
-        //
-        HWREGH(base + MCBSP_O_MCR1)  =
+    HWREGH(base + MCBSP_O_MCR1) =
         ((HWREGH(base + MCBSP_O_MCR1) & ~MCBSP_MCR1_RPABLK_M) |
-         (uint16_t)(((uint16_t)block >> 1U)<< 5U));
-    }
-    else
-    {
-        //
-        // write to RPBBLK bits.
-        //
-        HWREGH(base + MCBSP_O_MCR1)  =
+         (uint16_t)(((uint16_t)block >> 1U) << 5U));
+  } else {
+    //
+    // write to RPBBLK bits.
+    //
+    HWREGH(base + MCBSP_O_MCR1) =
         ((HWREGH(base + MCBSP_O_MCR1) & ~MCBSP_MCR1_RPBBLK_M) |
-         (uint16_t)(((uint16_t)block >> 1U)<< 7U));
-    }
+         (uint16_t)(((uint16_t)block >> 1U) << 7U));
+  }
 }
 
 //*****************************************************************************
@@ -1989,19 +1865,17 @@ McBSP_setRxTwoPartitionBlock(uint32_t base, const McBSP_PartitionBlock block)
 //!  representing the respective active block number .
 //
 //*****************************************************************************
-static inline uint16_t
-McBSP_getRxActiveBlock(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline uint16_t McBSP_getRxActiveBlock(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // return RCBLK bits.
-    //
-    return((HWREGH(base + MCBSP_O_MCR1) & MCBSP_MCR1_RCBLK_M) >>
-           MCBSP_MCR1_RCBLK_S);
+  //
+  // return RCBLK bits.
+  //
+  return ((HWREGH(base + MCBSP_O_MCR1) & MCBSP_MCR1_RCBLK_M) >>
+          MCBSP_MCR1_RCBLK_S);
 }
 
 //*****************************************************************************
@@ -2022,18 +1896,18 @@ McBSP_getRxActiveBlock(uint32_t base)
 //
 //*****************************************************************************
 static inline void
-McBSP_setRxChannelMode(uint32_t base, const McBSP_RxChannelMode channelMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setRxChannelMode(uint32_t base, const McBSP_RxChannelMode channelMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set or clear RMCM bit.
-    //
-    HWREGH(base + MCBSP_O_MCR1) =
-    ((HWREGH(base + MCBSP_O_MCR1) & ~MCBSP_MCR1_RMCM) | (uint16_t)channelMode);
+  //
+  // Set or clear RMCM bit.
+  //
+  HWREGH(base + MCBSP_O_MCR1) =
+      ((HWREGH(base + MCBSP_O_MCR1) & ~MCBSP_MCR1_RMCM) |
+       (uint16_t)channelMode);
 }
 
 //*****************************************************************************
@@ -2051,19 +1925,18 @@ McBSP_setRxChannelMode(uint32_t base, const McBSP_RxChannelMode channelMode)
 //
 //*****************************************************************************
 static inline void
-McBSP_setTxMultichannelPartition(uint32_t base,
-                                 const McBSP_MultichannelPartition partition)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setTxMultichannelPartition(uint32_t                          base,
+                                 const McBSP_MultichannelPartition partition) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set or clear XMCME bit.
-    //
-    HWREGH(base + MCBSP_O_MCR2) =
-    ((HWREGH(base + MCBSP_O_MCR2) & ~MCBSP_MCR2_XMCME) | (uint16_t)partition);
+  //
+  // Set or clear XMCME bit.
+  //
+  HWREGH(base + MCBSP_O_MCR2) =
+      ((HWREGH(base + MCBSP_O_MCR2) & ~MCBSP_MCR2_XMCME) | (uint16_t)partition);
 }
 
 //*****************************************************************************
@@ -2086,34 +1959,28 @@ McBSP_setTxMultichannelPartition(uint32_t base,
 //
 //*****************************************************************************
 static inline void
-McBSP_setTxTwoPartitionBlock(uint32_t base, const McBSP_PartitionBlock block)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setTxTwoPartitionBlock(uint32_t base, const McBSP_PartitionBlock block) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    if(((uint16_t)block ==  0U) ||
-       ((uint16_t)block ==  2U) ||
-       ((uint16_t)block ==  4U) ||
-       ((uint16_t)block ==  6U))
-    {
-        //
-        // write to XPABLK bits.
-        //
-        HWREGH(base + MCBSP_O_MCR2)  =
+  if (((uint16_t)block == 0U) || ((uint16_t)block == 2U) ||
+      ((uint16_t)block == 4U) || ((uint16_t)block == 6U)) {
+    //
+    // write to XPABLK bits.
+    //
+    HWREGH(base + MCBSP_O_MCR2) =
         ((HWREGH(base + MCBSP_O_MCR2) & ~MCBSP_MCR2_XPABLK_M) |
-         ((uint16_t)((uint16_t)block >> 1U)<< 5U));
-    }
-    else
-    {
-        //
-        // write to XPBBLK bits.
-        //
-        HWREGH(base + MCBSP_O_MCR2)  =
+         ((uint16_t)((uint16_t)block >> 1U) << 5U));
+  } else {
+    //
+    // write to XPBBLK bits.
+    //
+    HWREGH(base + MCBSP_O_MCR2) =
         ((HWREGH(base + MCBSP_O_MCR2) & ~MCBSP_MCR2_XPBBLK_M) |
-         ((uint16_t)((uint16_t)block >> 1U)<< 7U));
-    }
+         ((uint16_t)((uint16_t)block >> 1U) << 7U));
+  }
 }
 
 //*****************************************************************************
@@ -2129,20 +1996,17 @@ McBSP_setTxTwoPartitionBlock(uint32_t base, const McBSP_PartitionBlock block)
 //!  0 to 7 representing the respective active block number.
 //
 //*****************************************************************************
-static inline uint16_t
-McBSP_getTxActiveBlock(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline uint16_t McBSP_getTxActiveBlock(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // return XCBLK bits.
-    //
-    return((HWREGH(base + MCBSP_O_MCR2) & MCBSP_MCR2_XCBLK_M) >>
-           MCBSP_MCR2_XCBLK_S);
-
+  //
+  // return XCBLK bits.
+  //
+  return ((HWREGH(base + MCBSP_O_MCR2) & MCBSP_MCR2_XCBLK_M) >>
+          MCBSP_MCR2_XCBLK_S);
 }
 
 //*****************************************************************************
@@ -2167,19 +2031,18 @@ McBSP_getTxActiveBlock(uint32_t base)
 //
 //*****************************************************************************
 static inline void
-McBSP_setTxChannelMode(uint32_t base, const McBSP_TxChannelMode channelMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setTxChannelMode(uint32_t base, const McBSP_TxChannelMode channelMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set values to the XMCM bits.
-    //
-    HWREGH(base + MCBSP_O_MCR2) =
-    ((HWREGH(base + MCBSP_O_MCR2) & ~MCBSP_MCR2_XMCM_M) |
-     (uint16_t)channelMode);
+  //
+  // Set values to the XMCM bits.
+  //
+  HWREGH(base + MCBSP_O_MCR2) =
+      ((HWREGH(base + MCBSP_O_MCR2) & ~MCBSP_MCR2_XMCM_M) |
+       (uint16_t)channelMode);
 }
 
 //*****************************************************************************
@@ -2201,19 +2064,18 @@ McBSP_setTxChannelMode(uint32_t base, const McBSP_TxChannelMode channelMode)
 //
 //*****************************************************************************
 static inline void
-McBSP_setTxFrameSyncSource(uint32_t base,
-                           const McBSP_TxFrameSyncSource syncSource)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setTxFrameSyncSource(uint32_t                      base,
+                           const McBSP_TxFrameSyncSource syncSource) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    //Set or Clear the FSXM bit.
-    //
-    HWREGH(base + MCBSP_O_PCR) =
-    ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_FSXM) | (uint16_t)syncSource);
+  //
+  // Set or Clear the FSXM bit.
+  //
+  HWREGH(base + MCBSP_O_PCR) =
+      ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_FSXM) | (uint16_t)syncSource);
 }
 
 //*****************************************************************************
@@ -2235,19 +2097,18 @@ McBSP_setTxFrameSyncSource(uint32_t base,
 //
 //*****************************************************************************
 static inline void
-McBSP_setRxFrameSyncSource(uint32_t base,
-                           const McBSP_RxFrameSyncSource syncSource)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setRxFrameSyncSource(uint32_t                      base,
+                           const McBSP_RxFrameSyncSource syncSource) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set or clear FSRM bit.
-    //
-    HWREGH(base + MCBSP_O_PCR) =
-    ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_FSRM) | (uint16_t)syncSource);
+  //
+  // Set or clear FSRM bit.
+  //
+  HWREGH(base + MCBSP_O_PCR) =
+      ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_FSRM) | (uint16_t)syncSource);
 }
 
 //*****************************************************************************
@@ -2267,18 +2128,17 @@ McBSP_setRxFrameSyncSource(uint32_t base,
 //
 //*****************************************************************************
 static inline void
-McBSP_setTxClockSource(uint32_t base, const McBSP_TxClockSource clockSource)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setTxClockSource(uint32_t base, const McBSP_TxClockSource clockSource) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set or clear CLKXM bit.
-    //
-    HWREGH(base + MCBSP_O_PCR) =
-    ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_CLKXM ) | (uint16_t)clockSource);
+  //
+  // Set or clear CLKXM bit.
+  //
+  HWREGH(base + MCBSP_O_PCR) =
+      ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_CLKXM) | (uint16_t)clockSource);
 }
 
 //*****************************************************************************
@@ -2298,18 +2158,17 @@ McBSP_setTxClockSource(uint32_t base, const McBSP_TxClockSource clockSource)
 //
 //*****************************************************************************
 static inline void
-McBSP_setRxClockSource(uint32_t base, const McBSP_RxClockSource clockSource)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setRxClockSource(uint32_t base, const McBSP_RxClockSource clockSource) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set or clear CLKRM bit.
-    //
-    HWREGH(base + MCBSP_O_PCR) =
-    ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_CLKRM) | (uint16_t)clockSource);
+  //
+  // Set or clear CLKRM bit.
+  //
+  HWREGH(base + MCBSP_O_PCR) =
+      ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_CLKRM) | (uint16_t)clockSource);
 }
 
 //*****************************************************************************
@@ -2328,19 +2187,18 @@ McBSP_setRxClockSource(uint32_t base, const McBSP_RxClockSource clockSource)
 //
 //*****************************************************************************
 static inline void
-McBSP_setTxFrameSyncPolarity(uint32_t base,
-                             const McBSP_TxFrameSyncPolarity syncPolarity)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setTxFrameSyncPolarity(uint32_t                        base,
+                             const McBSP_TxFrameSyncPolarity syncPolarity) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set or clear FSXP bit.
-    //
-    HWREGH(base + MCBSP_O_PCR) =
-    ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_FSXP) | (uint16_t)syncPolarity);
+  //
+  // Set or clear FSXP bit.
+  //
+  HWREGH(base + MCBSP_O_PCR) =
+      ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_FSXP) | (uint16_t)syncPolarity);
 }
 
 //*****************************************************************************
@@ -2358,19 +2216,18 @@ McBSP_setTxFrameSyncPolarity(uint32_t base,
 //
 //*****************************************************************************
 static inline void
-McBSP_setRxFrameSyncPolarity(uint32_t base,
-                             const McBSP_RxFrameSyncPolarity syncPolarity)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setRxFrameSyncPolarity(uint32_t                        base,
+                             const McBSP_RxFrameSyncPolarity syncPolarity) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set or clear FSRP bit.
-    //
-    HWREGH(base + MCBSP_O_PCR) =
-    ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_FSRP) | (uint16_t)syncPolarity);
+  //
+  // Set or clear FSRP bit.
+  //
+  HWREGH(base + MCBSP_O_PCR) =
+      ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_FSRP) | (uint16_t)syncPolarity);
 }
 
 //*****************************************************************************
@@ -2389,20 +2246,19 @@ McBSP_setRxFrameSyncPolarity(uint32_t base,
 //
 //*****************************************************************************
 static inline void
-McBSP_setTxClockPolarity(uint32_t base,
-                         const McBSP_TxClockPolarity clockPolarity)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setTxClockPolarity(uint32_t                    base,
+                         const McBSP_TxClockPolarity clockPolarity) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear CLKXP bit first , then set or clear CLKXP bit.
-    //
-    HWREGH(base + MCBSP_O_PCR) =
-    ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_CLKXP) |
-     (uint16_t)clockPolarity);
+  //
+  // Clear CLKXP bit first , then set or clear CLKXP bit.
+  //
+  HWREGH(base + MCBSP_O_PCR) =
+      ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_CLKXP) |
+       (uint16_t)clockPolarity);
 }
 
 //*****************************************************************************
@@ -2422,20 +2278,19 @@ McBSP_setTxClockPolarity(uint32_t base,
 //
 //*****************************************************************************
 static inline void
-McBSP_setRxClockPolarity(uint32_t base,
-                         const McBSP_RxClockPolarity clockPolarity)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+McBSP_setRxClockPolarity(uint32_t                    base,
+                         const McBSP_RxClockPolarity clockPolarity) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear CLKRP bit first , then set or clear CLKRP bit.
-    //
-    HWREGH(base + MCBSP_O_PCR) =
-    ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_CLKRP) |
-     (uint16_t)clockPolarity);
+  //
+  // Clear CLKRP bit first , then set or clear CLKRP bit.
+  //
+  HWREGH(base + MCBSP_O_PCR) =
+      ((HWREGH(base + MCBSP_O_PCR) & ~MCBSP_PCR_CLKRP) |
+       (uint16_t)clockPolarity);
 }
 
 //*****************************************************************************
@@ -2449,18 +2304,16 @@ McBSP_setRxClockPolarity(uint32_t base,
 //! \return received data.
 //
 //*****************************************************************************
-static inline
-uint16_t McBSP_read16bitData(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline uint16_t McBSP_read16bitData(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Read DRR1 register.
-    //
-    return(HWREGH(base + MCBSP_O_DRR1));
+  //
+  // Read DRR1 register.
+  //
+  return (HWREGH(base + MCBSP_O_DRR1));
 }
 
 //*****************************************************************************
@@ -2474,19 +2327,17 @@ uint16_t McBSP_read16bitData(uint32_t base)
 //! \return received data.
 //
 //*****************************************************************************
-static inline uint32_t
-McBSP_read32bitData(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline uint32_t McBSP_read32bitData(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Read DDR1 register and return DDR2:DDR1.
-    //
-    return((((uint32_t)HWREGH(base + MCBSP_O_DRR2) << 16U) |
-            HWREGH(base + MCBSP_O_DRR1)));
+  //
+  // Read DDR1 register and return DDR2:DDR1.
+  //
+  return ((((uint32_t)HWREGH(base + MCBSP_O_DRR2) << 16U) |
+           HWREGH(base + MCBSP_O_DRR1)));
 }
 
 //*****************************************************************************
@@ -2501,18 +2352,16 @@ McBSP_read32bitData(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_write16bitData(uint32_t base, uint16_t data)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_write16bitData(uint32_t base, uint16_t data) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Write to DXR1 register.
-    //
-    HWREGH(base + MCBSP_O_DXR1) = data;
+  //
+  // Write to DXR1 register.
+  //
+  HWREGH(base + MCBSP_O_DXR1) = data;
 }
 
 //*****************************************************************************
@@ -2527,23 +2376,21 @@ McBSP_write16bitData(uint32_t base, uint16_t data)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_write32bitData(uint32_t base, uint32_t data)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_write32bitData(uint32_t base, uint32_t data) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Write to DXR2 register first.
-    //
-    HWREGH(base + MCBSP_O_DXR2) = data >> 16U;
+  //
+  // Write to DXR2 register first.
+  //
+  HWREGH(base + MCBSP_O_DXR2) = data >> 16U;
 
-    //
-    // Write to DXR1 register.
-    //
-    HWREGH(base + MCBSP_O_DXR1) = data & 0xFFFFU;
+  //
+  // Write to DXR1 register.
+  //
+  HWREGH(base + MCBSP_O_DXR1) = data & 0xFFFFU;
 }
 
 //*****************************************************************************
@@ -2559,12 +2406,10 @@ McBSP_write32bitData(uint32_t base, uint32_t data)
 //
 //*****************************************************************************
 static inline uint16_t
-McBSP_getLeftJustifyData(uint16_t data,
-                         const McBSP_CompandingType compandingType)
-{
-    return(data << (uint16_t)compandingType);
+McBSP_getLeftJustifyData(uint16_t                   data,
+                         const McBSP_CompandingType compandingType) {
+  return (data << (uint16_t)compandingType);
 }
-
 
 //*****************************************************************************
 //
@@ -2577,18 +2422,16 @@ McBSP_getLeftJustifyData(uint16_t data,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableRxInterrupt(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableRxInterrupt(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set RINT ENA bit.
-    //
-    HWREGH(base + MCBSP_O_MFFINT) |= MCBSP_MFFINT_RINT;
+  //
+  // Set RINT ENA bit.
+  //
+  HWREGH(base + MCBSP_O_MFFINT) |= MCBSP_MFFINT_RINT;
 }
 
 //*****************************************************************************
@@ -2602,18 +2445,16 @@ McBSP_enableRxInterrupt(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_disableRxInterrupt(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_disableRxInterrupt(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear RINT ENA bit.
-    //
-    HWREGH(base + MCBSP_O_MFFINT) |= ~(MCBSP_MFFINT_RINT);
+  //
+  // Clear RINT ENA bit.
+  //
+  HWREGH(base + MCBSP_O_MFFINT) |= ~(MCBSP_MFFINT_RINT);
 }
 
 //*****************************************************************************
@@ -2627,18 +2468,16 @@ McBSP_disableRxInterrupt(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_enableTxInterrupt(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_enableTxInterrupt(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Set XINT ENA bit.
-    //
-    HWREGH(base + MCBSP_O_MFFINT) |= MCBSP_MFFINT_XINT;
+  //
+  // Set XINT ENA bit.
+  //
+  HWREGH(base + MCBSP_O_MFFINT) |= MCBSP_MFFINT_XINT;
 }
 
 //*****************************************************************************
@@ -2652,18 +2491,16 @@ McBSP_enableTxInterrupt(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-McBSP_disableTxInterrupt(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(McBSP_isBaseValid(base));
+static inline void McBSP_disableTxInterrupt(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(McBSP_isBaseValid(base));
 
-    //
-    // Clear XINT ENA bit.
-    //
-    HWREGH(base + MCBSP_O_MFFINT) |= ~(MCBSP_MFFINT_XINT);
+  //
+  // Clear XINT ENA bit.
+  //
+  HWREGH(base + MCBSP_O_MFFINT) |= ~(MCBSP_MFFINT_XINT);
 }
 
 //*****************************************************************************
@@ -2680,8 +2517,7 @@ McBSP_disableTxInterrupt(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_transmit16BitDataNonBlocking(uint32_t base, uint16_t data);
+extern void McBSP_transmit16BitDataNonBlocking(uint32_t base, uint16_t data);
 
 //*****************************************************************************
 //
@@ -2698,8 +2534,7 @@ McBSP_transmit16BitDataNonBlocking(uint32_t base, uint16_t data);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_transmit16BitDataBlocking(uint32_t base, uint16_t data);
+extern void McBSP_transmit16BitDataBlocking(uint32_t base, uint16_t data);
 
 //*****************************************************************************
 //
@@ -2715,8 +2550,7 @@ McBSP_transmit16BitDataBlocking(uint32_t base, uint16_t data);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_transmit32BitDataNonBlocking(uint32_t base, uint32_t data);
+extern void McBSP_transmit32BitDataNonBlocking(uint32_t base, uint32_t data);
 
 //*****************************************************************************
 //
@@ -2733,8 +2567,7 @@ McBSP_transmit32BitDataNonBlocking(uint32_t base, uint32_t data);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_transmit32BitDataBlocking(uint32_t base, uint32_t data);
+extern void McBSP_transmit32BitDataBlocking(uint32_t base, uint32_t data);
 
 //*****************************************************************************
 //
@@ -2749,8 +2582,8 @@ McBSP_transmit32BitDataBlocking(uint32_t base, uint32_t data);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_receive16BitDataNonBlocking(uint32_t base, uint16_t *receiveData);
+extern void McBSP_receive16BitDataNonBlocking(uint32_t  base,
+                                              uint16_t *receiveData);
 
 //*****************************************************************************
 //
@@ -2767,8 +2600,8 @@ McBSP_receive16BitDataNonBlocking(uint32_t base, uint16_t *receiveData);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_receive16BitDataBlocking(uint32_t base, uint16_t *receiveData);
+extern void McBSP_receive16BitDataBlocking(uint32_t  base,
+                                           uint16_t *receiveData);
 
 //*****************************************************************************
 //
@@ -2783,8 +2616,8 @@ McBSP_receive16BitDataBlocking(uint32_t base, uint16_t *receiveData);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_receive32BitDataNonBlocking(uint32_t base, uint32_t *receiveData);
+extern void McBSP_receive32BitDataNonBlocking(uint32_t  base,
+                                              uint32_t *receiveData);
 
 //*****************************************************************************
 //
@@ -2801,9 +2634,8 @@ McBSP_receive32BitDataNonBlocking(uint32_t base, uint32_t *receiveData);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_receive32BitDataBlocking(uint32_t base, uint32_t *receiveData);
-
+extern void McBSP_receive32BitDataBlocking(uint32_t  base,
+                                           uint32_t *receiveData);
 
 //*****************************************************************************
 //
@@ -2830,10 +2662,10 @@ McBSP_receive32BitDataBlocking(uint32_t base, uint32_t *receiveData);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_setRxDataSize(uint32_t base, const McBSP_DataPhaseFrame dataFrame,
-                    const McBSP_DataBitsPerWord  bitsPerWord,
-                    uint16_t wordsPerFrame);
+extern void McBSP_setRxDataSize(uint32_t                    base,
+                                const McBSP_DataPhaseFrame  dataFrame,
+                                const McBSP_DataBitsPerWord bitsPerWord,
+                                uint16_t                    wordsPerFrame);
 
 //*****************************************************************************
 //
@@ -2860,11 +2692,10 @@ McBSP_setRxDataSize(uint32_t base, const McBSP_DataPhaseFrame dataFrame,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_setTxDataSize(uint32_t base,
-                    const McBSP_DataPhaseFrame dataFrame,
-                    const McBSP_DataBitsPerWord  bitsPerWord,
-                    uint16_t wordsPerFrame);
+extern void McBSP_setTxDataSize(uint32_t                    base,
+                                const McBSP_DataPhaseFrame  dataFrame,
+                                const McBSP_DataBitsPerWord bitsPerWord,
+                                uint16_t                    wordsPerFrame);
 
 //*****************************************************************************
 //
@@ -2883,10 +2714,9 @@ McBSP_setTxDataSize(uint32_t base,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_disableRxChannel(uint32_t base,
-                       const McBSP_MultichannelPartition partition,
-                       uint16_t channel);
+extern void McBSP_disableRxChannel(uint32_t                          base,
+                                   const McBSP_MultichannelPartition partition,
+                                   uint16_t                          channel);
 
 //*****************************************************************************
 //
@@ -2905,10 +2735,9 @@ McBSP_disableRxChannel(uint32_t base,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_enableRxChannel(uint32_t base,
-                      const McBSP_MultichannelPartition partition,
-                      uint16_t channel);
+extern void McBSP_enableRxChannel(uint32_t                          base,
+                                  const McBSP_MultichannelPartition partition,
+                                  uint16_t                          channel);
 
 //*****************************************************************************
 //
@@ -2927,10 +2756,9 @@ McBSP_enableRxChannel(uint32_t base,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_disableTxChannel(uint32_t base,
-                       const McBSP_MultichannelPartition partition,
-                       uint16_t channel);
+extern void McBSP_disableTxChannel(uint32_t                          base,
+                                   const McBSP_MultichannelPartition partition,
+                                   uint16_t                          channel);
 
 //*****************************************************************************
 //
@@ -2949,10 +2777,9 @@ McBSP_disableTxChannel(uint32_t base,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_enableTxChannel(uint32_t base,
-                      const McBSP_MultichannelPartition partition,
-                      uint16_t channel);
+extern void McBSP_enableTxChannel(uint32_t                          base,
+                                  const McBSP_MultichannelPartition partition,
+                                  uint16_t                          channel);
 
 //*****************************************************************************
 //
@@ -2985,9 +2812,8 @@ McBSP_enableTxChannel(uint32_t base,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_configureTxClock(uint32_t base,
-                       const McBSP_ClockParams * ptrClockParams);
+extern void McBSP_configureTxClock(uint32_t                 base,
+                                   const McBSP_ClockParams *ptrClockParams);
 
 //*****************************************************************************
 //
@@ -3019,9 +2845,8 @@ McBSP_configureTxClock(uint32_t base,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-McBSP_configureRxClock(uint32_t base,
-                       const McBSP_ClockParams * ptrClockParams);
+extern void McBSP_configureRxClock(uint32_t                 base,
+                                   const McBSP_ClockParams *ptrClockParams);
 
 //*****************************************************************************
 //
@@ -3051,8 +2876,8 @@ McBSP_configureRxClock(uint32_t base,
 //
 //*****************************************************************************
 extern void
-McBSP_configureTxFrameSync(uint32_t base,
-                           const McBSP_TxFsyncParams * ptrFsyncParams);
+McBSP_configureTxFrameSync(uint32_t                   base,
+                           const McBSP_TxFsyncParams *ptrFsyncParams);
 
 //*****************************************************************************
 //
@@ -3080,8 +2905,8 @@ McBSP_configureTxFrameSync(uint32_t base,
 //
 //*****************************************************************************
 extern void
-McBSP_configureRxFrameSync(uint32_t base,
-                           const McBSP_RxFsyncParams * ptrFsyncParams);
+McBSP_configureRxFrameSync(uint32_t                   base,
+                           const McBSP_RxFsyncParams *ptrFsyncParams);
 
 //*****************************************************************************
 //
@@ -3124,8 +2949,8 @@ McBSP_configureRxFrameSync(uint32_t base,
 //
 //*****************************************************************************
 extern void
-McBSP_configureTxDataFormat(uint32_t base,
-                            const McBSP_TxDataParams * ptrDataParams);
+McBSP_configureTxDataFormat(uint32_t                  base,
+                            const McBSP_TxDataParams *ptrDataParams);
 
 //*****************************************************************************
 //
@@ -3167,8 +2992,8 @@ McBSP_configureTxDataFormat(uint32_t base,
 //
 //*****************************************************************************
 extern void
-McBSP_configureRxDataFormat(uint32_t base,
-                            const McBSP_RxDataParams * ptrDataParams);
+McBSP_configureRxDataFormat(uint32_t                  base,
+                            const McBSP_RxDataParams *ptrDataParams);
 
 //*****************************************************************************
 //
@@ -3215,8 +3040,8 @@ McBSP_configureRxDataFormat(uint32_t base,
 //
 //*****************************************************************************
 extern uint16_t
-McBSP_configureTxMultichannel(uint32_t base,
-                             const McBSP_TxMultichannelParams * ptrMchnParams);
+McBSP_configureTxMultichannel(uint32_t                          base,
+                              const McBSP_TxMultichannelParams *ptrMchnParams);
 
 //*****************************************************************************
 //
@@ -3260,8 +3085,8 @@ McBSP_configureTxMultichannel(uint32_t base,
 //
 //*****************************************************************************
 extern uint16_t
-McBSP_configureRxMultichannel(uint32_t base,
-                             const McBSP_RxMultichannelParams * ptrMchnParams);
+McBSP_configureRxMultichannel(uint32_t                          base,
+                              const McBSP_RxMultichannelParams *ptrMchnParams);
 
 //*****************************************************************************
 //
@@ -3290,8 +3115,8 @@ McBSP_configureRxMultichannel(uint32_t base,
 //
 //*****************************************************************************
 extern void
-McBSP_configureSPIMasterMode(uint32_t base,
-                           const McBSP_SPIMasterModeParams * ptrSPIMasterMode);
+McBSP_configureSPIMasterMode(uint32_t                         base,
+                             const McBSP_SPIMasterModeParams *ptrSPIMasterMode);
 
 //*****************************************************************************
 //
@@ -3316,8 +3141,8 @@ McBSP_configureSPIMasterMode(uint32_t base,
 //
 //*****************************************************************************
 extern void
-McBSP_configureSPISlaveMode(uint32_t base,
-                            const McBSP_SPISlaveModeParams * ptrSPISlaveMode);
+McBSP_configureSPISlaveMode(uint32_t                        base,
+                            const McBSP_SPISlaveModeParams *ptrSPISlaveMode);
 
 //*****************************************************************************
 //

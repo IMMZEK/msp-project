@@ -64,9 +64,9 @@ I installed this to /home/brighton/Documents/SDK/ti/f28379d
 
 7. Link to env (in .bashrc)
 ```
-export MSP432P4111_HEADERS=/path/to/headers/
+export F28379D_HEADERS=/path/to/headers/
 # for example
-export MSP432P4111_HEADERS=/home/brighton/Documents/SDK/ti/f28379d/C2000Ware_5_01_00_00/
+export F28379D_HEADERS=/home/brighton/Documents/SDK/ti/f28379d/C2000Ware_5_01_00_00/
 ```
 
 8. Source env

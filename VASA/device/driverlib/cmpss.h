@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   cmpss.h
+//  FILE:   cmpss.h
 //
-// TITLE:  C28x CMPSS driver.
+//  TITLE:  C28x CMPSS driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef CMPSS_H
 #define CMPSS_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -59,13 +58,13 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "cpu.h"
+#include "debug.h"
 #include "inc/hw_cmpss.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
-#include "cpu.h"
-#include "debug.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 //*****************************************************************************
 //
@@ -73,16 +72,13 @@ extern "C"
 // application code.
 //
 //*****************************************************************************
-#define CMPSS_HICMP_CTL_M   (CMPSS_COMPCTL_COMPHSOURCE |                       \
-                             CMPSS_COMPCTL_COMPHINV |                          \
-                             CMPSS_COMPCTL_ASYNCHEN)
+#define CMPSS_HICMP_CTL_M                                                      \
+  (CMPSS_COMPCTL_COMPHSOURCE | CMPSS_COMPCTL_COMPHINV | CMPSS_COMPCTL_ASYNCHEN)
 
-#define CMPSS_LOCMP_CTL_M   (CMPSS_COMPCTL_COMPLSOURCE |                       \
-                             CMPSS_COMPCTL_COMPLINV |                          \
-                             CMPSS_COMPCTL_ASYNCLEN)
+#define CMPSS_LOCMP_CTL_M                                                      \
+  (CMPSS_COMPCTL_COMPLSOURCE | CMPSS_COMPCTL_COMPLINV | CMPSS_COMPCTL_ASYNCLEN)
 
 #ifndef DOXYGEN_PDF_IGNORE
-
 
 //*****************************************************************************
 //
@@ -94,17 +90,17 @@ extern "C"
 // Comparator negative input source
 //
 //! Input driven by internal DAC
-#define CMPSS_INSRC_DAC                 0x0000U
+#define CMPSS_INSRC_DAC 0x0000U
 //! Input driven by external pin
-#define CMPSS_INSRC_PIN                 0x0001U
+#define CMPSS_INSRC_PIN 0x0001U
 
 //
 // Extra options
 //
 //! Comparator output is inverted
-#define CMPSS_INV_INVERTED              0x0002U
+#define CMPSS_INV_INVERTED        0x0002U
 //! Asynch comparator output feeds into OR with latched digital filter output
-#define CMPSS_OR_ASYNC_OUT_W_FILT       0x0040U
+#define CMPSS_OR_ASYNC_OUT_W_FILT 0x0040U
 
 //*****************************************************************************
 //
@@ -116,25 +112,25 @@ extern "C"
 // Signal driving CTRIPOUT
 //
 //! Asynchronous comparator output drives CTRIPOUT
-#define CMPSS_TRIPOUT_ASYNC_COMP        0x0000U
+#define CMPSS_TRIPOUT_ASYNC_COMP 0x0000U
 //! Synchronous comparator output drives CTRIPOUT
-#define CMPSS_TRIPOUT_SYNC_COMP         0x0010U
+#define CMPSS_TRIPOUT_SYNC_COMP  0x0010U
 //! Filter output drives CTRIPOUT
-#define CMPSS_TRIPOUT_FILTER            0x0020U
+#define CMPSS_TRIPOUT_FILTER     0x0020U
 //! Latched filter output drives CTRIPOUT
-#define CMPSS_TRIPOUT_LATCH             0x0030U
+#define CMPSS_TRIPOUT_LATCH      0x0030U
 
 //
 // Signal driving CTRIP
 //
 //! Asynchronous comparator output drives CTRIP
-#define CMPSS_TRIP_ASYNC_COMP           0x0000U
+#define CMPSS_TRIP_ASYNC_COMP 0x0000U
 //! Synchronous comparator output drives CTRIP
-#define CMPSS_TRIP_SYNC_COMP            0x0004U
+#define CMPSS_TRIP_SYNC_COMP  0x0004U
 //! Filter output drives CTRIP
-#define CMPSS_TRIP_FILTER               0x0008U
+#define CMPSS_TRIP_FILTER     0x0008U
 //! Latched filter output drives CTRIP
-#define CMPSS_TRIP_LATCH                0x000CU
+#define CMPSS_TRIP_LATCH      0x000CU
 
 //*****************************************************************************
 //
@@ -142,13 +138,13 @@ extern "C"
 //
 //*****************************************************************************
 //! High digital filter output
-#define CMPSS_STS_HI_FILTOUT            0x0001U
+#define CMPSS_STS_HI_FILTOUT      0x0001U
 //! Latched value of high digital filter output
-#define CMPSS_STS_HI_LATCHFILTOUT       0x0002U
+#define CMPSS_STS_HI_LATCHFILTOUT 0x0002U
 //! Low digital filter output
-#define CMPSS_STS_LO_FILTOUT            0x0100U
+#define CMPSS_STS_LO_FILTOUT      0x0100U
 //! Latched value of low digital filter output
-#define CMPSS_STS_LO_LATCHFILTOUT       0x0200U
+#define CMPSS_STS_LO_LATCHFILTOUT 0x0200U
 
 //*****************************************************************************
 //
@@ -159,25 +155,25 @@ extern "C"
 // When is DAC value loaded from shadow register
 //
 //! DAC value updated from SYSCLK
-#define CMPSS_DACVAL_SYSCLK             0x0000U
+#define CMPSS_DACVAL_SYSCLK  0x0000U
 //! DAC value updated from PWMSYNC
-#define CMPSS_DACVAL_PWMSYNC            0x0080U
+#define CMPSS_DACVAL_PWMSYNC 0x0080U
 
 //
 // DAC reference voltage
 //
 //! VDDA is the voltage reference
-#define CMPSS_DACREF_VDDA               0x0000U
+#define CMPSS_DACREF_VDDA 0x0000U
 //! VDAC is the voltage reference
-#define CMPSS_DACREF_VDAC               0x0020U
+#define CMPSS_DACREF_VDAC 0x0020U
 
 //
 // DAC value source
 //
 //! DAC value updated from shadow register
-#define CMPSS_DACSRC_SHDW               0x0000U
+#define CMPSS_DACSRC_SHDW 0x0000U
 //! DAC value is updated from the ramp register
-#define CMPSS_DACSRC_RAMP               0x0001U
+#define CMPSS_DACSRC_RAMP 0x0001U
 #endif
 
 //*****************************************************************************
@@ -186,20 +182,18 @@ extern "C"
 // as the pwmSyncSrc parameter.
 //
 //*****************************************************************************
-#define CMPSS_PWMSYNC1  1U //!< PWMSYNC1
-#define CMPSS_PWMSYNC2  2U //!< PWMSYNC2
-#define CMPSS_PWMSYNC3  3U //!< PWMSYNC3
-#define CMPSS_PWMSYNC4  4U //!< PWMSYNC4
-#define CMPSS_PWMSYNC5  5U //!< PWMSYNC5
-#define CMPSS_PWMSYNC6  6U //!< PWMSYNC6
-#define CMPSS_PWMSYNC7  7U //!< PWMSYNC7
-#define CMPSS_PWMSYNC8  8U //!< PWMSYNC8
-#define CMPSS_PWMSYNC9  9U //!< PWMSYNC9
-#define CMPSS_PWMSYNC10  10U //!< PWMSYNC10
-#define CMPSS_PWMSYNC11  11U //!< PWMSYNC11
-#define CMPSS_PWMSYNC12  12U //!< PWMSYNC12
-
-
+#define CMPSS_PWMSYNC1  1U  //!< PWMSYNC1
+#define CMPSS_PWMSYNC2  2U  //!< PWMSYNC2
+#define CMPSS_PWMSYNC3  3U  //!< PWMSYNC3
+#define CMPSS_PWMSYNC4  4U  //!< PWMSYNC4
+#define CMPSS_PWMSYNC5  5U  //!< PWMSYNC5
+#define CMPSS_PWMSYNC6  6U  //!< PWMSYNC6
+#define CMPSS_PWMSYNC7  7U  //!< PWMSYNC7
+#define CMPSS_PWMSYNC8  8U  //!< PWMSYNC8
+#define CMPSS_PWMSYNC9  9U  //!< PWMSYNC9
+#define CMPSS_PWMSYNC10 10U //!< PWMSYNC10
+#define CMPSS_PWMSYNC11 11U //!< PWMSYNC11
+#define CMPSS_PWMSYNC12 12U //!< PWMSYNC12
 
 //*****************************************************************************
 //
@@ -220,19 +214,11 @@ extern "C"
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-CMPSS_isBaseValid(uint32_t base)
-{
-    return(
-           (base == CMPSS1_BASE) ||
-           (base == CMPSS2_BASE) ||
-           (base == CMPSS3_BASE) ||
-           (base == CMPSS4_BASE) ||
-           (base == CMPSS5_BASE) ||
-           (base == CMPSS6_BASE) ||
-           (base == CMPSS7_BASE) ||
-           (base == CMPSS8_BASE)
-          );
+static inline bool CMPSS_isBaseValid(uint32_t base) {
+  return ((base == CMPSS1_BASE) || (base == CMPSS2_BASE) ||
+          (base == CMPSS3_BASE) || (base == CMPSS4_BASE) ||
+          (base == CMPSS5_BASE) || (base == CMPSS6_BASE) ||
+          (base == CMPSS7_BASE) || (base == CMPSS8_BASE));
 }
 #endif
 
@@ -247,22 +233,20 @@ CMPSS_isBaseValid(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_enableModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_enableModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Set the bit that enables the CMPSS module.
-    //
-    EALLOW;
+  //
+  // Set the bit that enables the CMPSS module.
+  //
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPCTL) |= CMPSS_COMPCTL_COMPDACE;
+  HWREGH(base + CMPSS_O_COMPCTL) |= CMPSS_COMPCTL_COMPDACE;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -276,22 +260,20 @@ CMPSS_enableModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_disableModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_disableModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Clear the bit that enables the CMPSS module.
-    //
-    EALLOW;
+  //
+  // Clear the bit that enables the CMPSS module.
+  //
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPCTL) &= ~CMPSS_COMPCTL_COMPDACE;
+  HWREGH(base + CMPSS_O_COMPCTL) &= ~CMPSS_COMPCTL_COMPDACE;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -321,23 +303,21 @@ CMPSS_disableModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_configHighComparator(uint32_t base, uint16_t config)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_configHighComparator(uint32_t base, uint16_t config) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Write the high comparator configuration to the appropriate register.
-    //
-    EALLOW;
+  //
+  // Write the high comparator configuration to the appropriate register.
+  //
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPCTL) =
-        (HWREGH(base + CMPSS_O_COMPCTL) & ~CMPSS_HICMP_CTL_M) | config;
+  HWREGH(base + CMPSS_O_COMPCTL) =
+      (HWREGH(base + CMPSS_O_COMPCTL) & ~CMPSS_HICMP_CTL_M) | config;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -367,23 +347,21 @@ CMPSS_configHighComparator(uint32_t base, uint16_t config)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_configLowComparator(uint32_t base, uint16_t config)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_configLowComparator(uint32_t base, uint16_t config) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Write the low comparator configuration to the appropriate register.
-    //
-    EALLOW;
+  //
+  // Write the low comparator configuration to the appropriate register.
+  //
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPCTL) =
-        (HWREGH(base + CMPSS_O_COMPCTL) & ~CMPSS_LOCMP_CTL_M) | (config << 8U);
+  HWREGH(base + CMPSS_O_COMPCTL) =
+      (HWREGH(base + CMPSS_O_COMPCTL) & ~CMPSS_LOCMP_CTL_M) | (config << 8U);
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -414,25 +392,23 @@ CMPSS_configLowComparator(uint32_t base, uint16_t config)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_configOutputsHigh(uint32_t base, uint16_t config)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_configOutputsHigh(uint32_t base, uint16_t config) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Write the high comparator output settings to the appropriate register.
-    //
-    EALLOW;
+  //
+  // Write the high comparator output settings to the appropriate register.
+  //
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPCTL) = (HWREGH(base + CMPSS_O_COMPCTL) &
-                                      ~(CMPSS_COMPCTL_CTRIPOUTHSEL_M |
-                                        CMPSS_COMPCTL_CTRIPHSEL_M))  |
-                                     config;
+  HWREGH(base + CMPSS_O_COMPCTL) =
+      (HWREGH(base + CMPSS_O_COMPCTL) &
+       ~(CMPSS_COMPCTL_CTRIPOUTHSEL_M | CMPSS_COMPCTL_CTRIPHSEL_M)) |
+      config;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -463,25 +439,23 @@ CMPSS_configOutputsHigh(uint32_t base, uint16_t config)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_configOutputsLow(uint32_t base, uint16_t config)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_configOutputsLow(uint32_t base, uint16_t config) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Write the low comparator output settings to the appropriate register.
-    //
-    EALLOW;
+  //
+  // Write the low comparator output settings to the appropriate register.
+  //
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPCTL) = (HWREGH(base + CMPSS_O_COMPCTL) &
-                                      ~(CMPSS_COMPCTL_CTRIPOUTLSEL_M |
-                                        CMPSS_COMPCTL_CTRIPLSEL_M)) |
-                                     (config << 8U);
+  HWREGH(base + CMPSS_O_COMPCTL) =
+      (HWREGH(base + CMPSS_O_COMPCTL) &
+       ~(CMPSS_COMPCTL_CTRIPOUTLSEL_M | CMPSS_COMPCTL_CTRIPLSEL_M)) |
+      (config << 8U);
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -502,18 +476,16 @@ CMPSS_configOutputsLow(uint32_t base, uint16_t config)
 //! - \b CMPSS_STS_LO_LATCHFILTOUT - Latched value of low digital filter output
 //
 //*****************************************************************************
-static inline uint16_t
-CMPSS_getStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline uint16_t CMPSS_getStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Return contents of the status register.
-    //
-    return(HWREGH(base + CMPSS_O_COMPSTS));
+  //
+  // Return contents of the status register.
+  //
+  return (HWREGH(base + CMPSS_O_COMPSTS));
 }
 
 //*****************************************************************************
@@ -549,24 +521,23 @@ CMPSS_getStatus(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_configDAC(uint32_t base, uint16_t config)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_configDAC(uint32_t base, uint16_t config) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Write the DAC configuration to the appropriate register.
-    //
-    EALLOW;
+  //
+  // Write the DAC configuration to the appropriate register.
+  //
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPDACCTL) =
-                    (HWREGH(base + CMPSS_O_COMPDACCTL) &
-                     ~(CMPSS_COMPDACCTL_SWLOADSEL | CMPSS_COMPDACCTL_SELREF |
-                       CMPSS_COMPDACCTL_DACSOURCE)) | config;
-    EDIS;
+  HWREGH(base + CMPSS_O_COMPDACCTL) =
+      (HWREGH(base + CMPSS_O_COMPDACCTL) &
+       ~(CMPSS_COMPDACCTL_SWLOADSEL | CMPSS_COMPDACCTL_SELREF |
+         CMPSS_COMPDACCTL_DACSOURCE)) |
+      config;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -584,19 +555,17 @@ CMPSS_configDAC(uint32_t base, uint16_t config)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_setDACValueHigh(uint32_t base, uint16_t value)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
-    ASSERT(value < 4096U);
+static inline void CMPSS_setDACValueHigh(uint32_t base, uint16_t value) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
+  ASSERT(value < 4096U);
 
-    //
-    // Write the DAC value to the DAC value shadow register.
-    //
-    HWREGH(base + CMPSS_O_DACHVALS) = value;
+  //
+  // Write the DAC value to the DAC value shadow register.
+  //
+  HWREGH(base + CMPSS_O_DACHVALS) = value;
 }
 
 //*****************************************************************************
@@ -614,19 +583,17 @@ CMPSS_setDACValueHigh(uint32_t base, uint16_t value)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_setDACValueLow(uint32_t base, uint16_t value)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
-    ASSERT(value < 4096U);
+static inline void CMPSS_setDACValueLow(uint32_t base, uint16_t value) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
+  ASSERT(value < 4096U);
 
-    //
-    // Write the DAC value to the DAC value shadow register.
-    //
-    HWREGH(base + CMPSS_O_DACLVALS) = value;
+  //
+  // Write the DAC value to the DAC value shadow register.
+  //
+  HWREGH(base + CMPSS_O_DACLVALS) = value;
 }
 
 //*****************************************************************************
@@ -644,22 +611,20 @@ CMPSS_setDACValueLow(uint32_t base, uint16_t value)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_initFilterHigh(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_initFilterHigh(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Set the high comparator filter initialization bit.
-    //
-    EALLOW;
+  //
+  // Set the high comparator filter initialization bit.
+  //
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_CTRIPHFILCTL) |= CMPSS_CTRIPHFILCTL_FILINIT;
+  HWREGH(base + CMPSS_O_CTRIPHFILCTL) |= CMPSS_CTRIPHFILCTL_FILINIT;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -677,22 +642,20 @@ CMPSS_initFilterHigh(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_initFilterLow(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_initFilterLow(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Set the low comparator filter initialization bit.
-    //
-    EALLOW;
+  //
+  // Set the low comparator filter initialization bit.
+  //
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_CTRIPLFILCTL) |= CMPSS_CTRIPLFILCTL_FILINIT;
+  HWREGH(base + CMPSS_O_CTRIPLFILCTL) |= CMPSS_CTRIPLFILCTL_FILINIT;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -708,18 +671,16 @@ CMPSS_initFilterLow(uint32_t base)
 //! \return Returns the value driven by the internal DAC of the high comparator.
 //
 //*****************************************************************************
-static inline uint16_t
-CMPSS_getDACValueHigh(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline uint16_t CMPSS_getDACValueHigh(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Write the DAC value to the DAC value shadow register.
-    //
-    return(HWREGH(base + CMPSS_O_DACHVALA));
+  //
+  // Write the DAC value to the DAC value shadow register.
+  //
+  return (HWREGH(base + CMPSS_O_DACHVALA));
 }
 
 //*****************************************************************************
@@ -735,18 +696,16 @@ CMPSS_getDACValueHigh(uint32_t base)
 //! \return Returns the value driven by the internal DAC of the low comparator.
 //
 //*****************************************************************************
-static inline uint16_t
-CMPSS_getDACValueLow(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline uint16_t CMPSS_getDACValueLow(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Write the DAC value to the DAC value shadow register.
-    //
-    return(HWREGH(base + CMPSS_O_DACLVALA));
+  //
+  // Write the DAC value to the DAC value shadow register.
+  //
+  return (HWREGH(base + CMPSS_O_DACLVALA));
 }
 
 //*****************************************************************************
@@ -761,22 +720,20 @@ CMPSS_getDACValueLow(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_clearFilterLatchHigh(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_clearFilterLatchHigh(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Set the bit that generates a reset pulse to the digital filter latch.
-    //
-    EALLOW;
+  //
+  // Set the bit that generates a reset pulse to the digital filter latch.
+  //
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPSTSCLR) |= CMPSS_COMPSTSCLR_HLATCHCLR;
+  HWREGH(base + CMPSS_O_COMPSTSCLR) |= CMPSS_COMPSTSCLR_HLATCHCLR;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -791,22 +748,20 @@ CMPSS_clearFilterLatchHigh(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_clearFilterLatchLow(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_clearFilterLatchLow(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Set the bit that generates a reset pulse to the digital filter latch.
-    //
-    EALLOW;
+  //
+  // Set the bit that generates a reset pulse to the digital filter latch.
+  //
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPSTSCLR) |= CMPSS_COMPSTSCLR_LLATCHCLR;
+  HWREGH(base + CMPSS_O_COMPSTSCLR) |= CMPSS_COMPSTSCLR_LLATCHCLR;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -822,18 +777,16 @@ CMPSS_clearFilterLatchLow(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_setMaxRampValue(uint32_t base,  uint16_t value)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_setMaxRampValue(uint32_t base, uint16_t value) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Write the maximum ramp value to the shadow register.
-    //
-    HWREGH(base + CMPSS_O_RAMPMAXREFS) = value;
+  //
+  // Write the maximum ramp value to the shadow register.
+  //
+  HWREGH(base + CMPSS_O_RAMPMAXREFS) = value;
 }
 
 //*****************************************************************************
@@ -846,18 +799,16 @@ CMPSS_setMaxRampValue(uint32_t base,  uint16_t value)
 //! loaded into the ramp generator.
 //
 //*****************************************************************************
-static inline uint16_t
-CMPSS_getMaxRampValue(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline uint16_t CMPSS_getMaxRampValue(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Read the maximum ramp value from the register.
-    //
-    return(HWREGH(base + CMPSS_O_RAMPMAXREFA));
+  //
+  // Read the maximum ramp value from the register.
+  //
+  return (HWREGH(base + CMPSS_O_RAMPMAXREFA));
 }
 
 //*****************************************************************************
@@ -873,18 +824,16 @@ CMPSS_getMaxRampValue(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_setRampDecValue(uint32_t base, uint16_t value)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_setRampDecValue(uint32_t base, uint16_t value) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Write the ramp decrement value to the shadow register.
-    //
-    HWREGH(base + CMPSS_O_RAMPDECVALS) = value;
+  //
+  // Write the ramp decrement value to the shadow register.
+  //
+  HWREGH(base + CMPSS_O_RAMPDECVALS) = value;
 }
 
 //*****************************************************************************
@@ -897,18 +846,16 @@ CMPSS_setRampDecValue(uint32_t base, uint16_t value)
 //! the ramp value on every system clock cycle.
 //
 //*****************************************************************************
-static inline uint16_t
-CMPSS_getRampDecValue(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline uint16_t CMPSS_getRampDecValue(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Read the ramp decrement value from the register.
-    //
-    return(HWREGH(base + CMPSS_O_RAMPDECVALA));
+  //
+  // Read the ramp decrement value from the register.
+  //
+  return (HWREGH(base + CMPSS_O_RAMPDECVALA));
 }
 
 //*****************************************************************************
@@ -925,19 +872,17 @@ CMPSS_getRampDecValue(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_setRampDelayValue(uint32_t base, uint16_t value)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
-    ASSERT(value < 8192U);
+static inline void CMPSS_setRampDelayValue(uint32_t base, uint16_t value) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
+  ASSERT(value < 8192U);
 
-    //
-    // Write the ramp delay value to the shadow register.
-    //
-    HWREGH(base + CMPSS_O_RAMPDLYS) = value;
+  //
+  // Write the ramp delay value to the shadow register.
+  //
+  HWREGH(base + CMPSS_O_RAMPDLYS) = value;
 }
 
 //*****************************************************************************
@@ -950,18 +895,16 @@ CMPSS_setRampDelayValue(uint32_t base, uint16_t value)
 //! the ramp value on every system clock cycle.
 //
 //*****************************************************************************
-static inline uint16_t
-CMPSS_getRampDelayValue(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline uint16_t CMPSS_getRampDelayValue(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Read the ramp delay value from the register.
-    //
-    return(HWREGH(base + CMPSS_O_RAMPDLYA));
+  //
+  // Read the ramp delay value from the register.
+  //
+  return (HWREGH(base + CMPSS_O_RAMPDLYA));
 }
 
 //*****************************************************************************
@@ -984,23 +927,21 @@ CMPSS_getRampDelayValue(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_configureSyncSource(uint32_t base, uint16_t syncSource)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_configureSyncSource(uint32_t base,
+                                             uint16_t syncSource) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    //
-    // Write the ramp delay value to the shadow register.
-    //
-    EALLOW;
-    HWREGH(base + CMPSS_O_COMPDACCTL) = (HWREGH(base + CMPSS_O_COMPDACCTL) &
-                                          ~CMPSS_COMPDACCTL_RAMPSOURCE_M)   |
-                                         ((uint16_t)(syncSource - 1U)       <<
-                                          CMPSS_COMPDACCTL_RAMPSOURCE_S);
-    EDIS;
+  //
+  // Write the ramp delay value to the shadow register.
+  //
+  EALLOW;
+  HWREGH(base + CMPSS_O_COMPDACCTL) =
+      (HWREGH(base + CMPSS_O_COMPDACCTL) & ~CMPSS_COMPDACCTL_RAMPSOURCE_M) |
+      ((uint16_t)(syncSource - 1U) << CMPSS_COMPDACCTL_RAMPSOURCE_S);
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1019,23 +960,21 @@ CMPSS_configureSyncSource(uint32_t base, uint16_t syncSource)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_setHysteresis(uint32_t base, uint16_t value)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
-    ASSERT(value <= 4U);
+static inline void CMPSS_setHysteresis(uint32_t base, uint16_t value) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
+  ASSERT(value <= 4U);
 
-    //
-    // Read the ramp delay value from the register.
-    //
-    EALLOW;
+  //
+  // Read the ramp delay value from the register.
+  //
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPHYSCTL) = value;
+  HWREGH(base + CMPSS_O_COMPHYSCTL) = value;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1050,19 +989,17 @@ CMPSS_setHysteresis(uint32_t base, uint16_t value)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_enableLatchResetOnPWMSYNCHigh(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_enableLatchResetOnPWMSYNCHigh(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    EALLOW;
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPSTSCLR) |= CMPSS_COMPSTSCLR_HSYNCCLREN;
+  HWREGH(base + CMPSS_O_COMPSTSCLR) |= CMPSS_COMPSTSCLR_HSYNCCLREN;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1077,19 +1014,17 @@ CMPSS_enableLatchResetOnPWMSYNCHigh(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_disableLatchResetOnPWMSYNCHigh(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_disableLatchResetOnPWMSYNCHigh(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    EALLOW;
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPSTSCLR) &= ~CMPSS_COMPSTSCLR_HSYNCCLREN;
+  HWREGH(base + CMPSS_O_COMPSTSCLR) &= ~CMPSS_COMPSTSCLR_HSYNCCLREN;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1104,19 +1039,17 @@ CMPSS_disableLatchResetOnPWMSYNCHigh(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_enableLatchResetOnPWMSYNCLow(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_enableLatchResetOnPWMSYNCLow(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    EALLOW;
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPSTSCLR) |= CMPSS_COMPSTSCLR_LSYNCCLREN;
+  HWREGH(base + CMPSS_O_COMPSTSCLR) |= CMPSS_COMPSTSCLR_LSYNCCLREN;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1131,19 +1064,17 @@ CMPSS_enableLatchResetOnPWMSYNCLow(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CMPSS_disableLatchResetOnPWMSYNCLow(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CMPSS_isBaseValid(base));
+static inline void CMPSS_disableLatchResetOnPWMSYNCLow(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CMPSS_isBaseValid(base));
 
-    EALLOW;
+  EALLOW;
 
-    HWREGH(base + CMPSS_O_COMPSTSCLR) &= ~CMPSS_COMPSTSCLR_LSYNCCLREN;
+  HWREGH(base + CMPSS_O_COMPSTSCLR) &= ~CMPSS_COMPSTSCLR_LSYNCCLREN;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1189,9 +1120,8 @@ CMPSS_disableLatchResetOnPWMSYNCLow(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CMPSS_configFilterHigh(uint32_t base, uint16_t samplePrescale,
-                       uint16_t sampleWindow, uint16_t threshold);
+extern void CMPSS_configFilterHigh(uint32_t base, uint16_t samplePrescale,
+                                   uint16_t sampleWindow, uint16_t threshold);
 
 //*****************************************************************************
 //
@@ -1236,9 +1166,8 @@ CMPSS_configFilterHigh(uint32_t base, uint16_t samplePrescale,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CMPSS_configFilterLow(uint32_t base, uint16_t samplePrescale,
-                      uint16_t sampleWindow, uint16_t threshold);
+extern void CMPSS_configFilterLow(uint32_t base, uint16_t samplePrescale,
+                                  uint16_t sampleWindow, uint16_t threshold);
 
 //*****************************************************************************
 //
@@ -1258,8 +1187,8 @@ CMPSS_configFilterLow(uint32_t base, uint16_t samplePrescale,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CMPSS_configLatchOnPWMSYNC(uint32_t base, bool highEnable, bool lowEnable);
+extern void CMPSS_configLatchOnPWMSYNC(uint32_t base, bool highEnable,
+                                       bool lowEnable);
 
 //*****************************************************************************
 //
@@ -1299,10 +1228,9 @@ CMPSS_configLatchOnPWMSYNC(uint32_t base, bool highEnable, bool lowEnable);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CMPSS_configRamp(uint32_t base, uint16_t maxRampVal, uint16_t decrementVal,
-                 uint16_t delayVal, uint16_t pwmSyncSrc, bool useRampValShdw);
-
+extern void CMPSS_configRamp(uint32_t base, uint16_t maxRampVal,
+                             uint16_t decrementVal, uint16_t delayVal,
+                             uint16_t pwmSyncSrc, bool useRampValShdw);
 
 //*****************************************************************************
 //

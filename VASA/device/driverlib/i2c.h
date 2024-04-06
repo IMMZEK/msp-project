@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   i2c.h
+//  FILE:   i2c.h
 //
-// TITLE:  C28x I2C driver.
+//  TITLE:  C28x I2C driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef I2C_H
 #define I2C_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -59,12 +58,12 @@ extern "C"
 //
 //*****************************************************************************
 
-#include "inc/hw_i2c.h"
-#include "inc/hw_memmap.h"
-#include "inc/hw_types.h"
 #include "cpu.h"
 #include "debug.h"
 #include "hw_reg_inclusive_terminology.h"
+#include "inc/hw_i2c.h"
+#include "inc/hw_memmap.h"
+#include "inc/hw_types.h"
 
 //*****************************************************************************
 //
@@ -83,9 +82,9 @@ extern "C"
 #define I2C_TARGET_SEND_MODE        0x0200U //!< Target-transmitter mode
 #define I2C_TARGET_RECEIVE_MODE     0x0000U //!< Target-receiver mode
 
-#define I2C_REPEAT_MODE         0x0080U //!< Only applies to Controller mode
-#define I2C_START_BYTE_MODE     0x0010U //!< Enable start byte mode
-#define I2C_FREE_DATA_FORMAT    0x0008U //!< Enable free data (no addr) format
+#define I2C_REPEAT_MODE      0x0080U //!< Only applies to Controller mode
+#define I2C_START_BYTE_MODE  0x0010U //!< Enable start byte mode
+#define I2C_FREE_DATA_FORMAT 0x0008U //!< Enable free data (no addr) format
 
 //*****************************************************************************
 //
@@ -94,31 +93,25 @@ extern "C"
 // I2C_getInterruptStatus().
 //
 //*****************************************************************************
-#define I2C_INT_ARB_LOST        0x00001U //!< Arbitration-lost interrupt
-#define I2C_INT_NO_ACK          0x00002U //!< NACK interrupt
-#define I2C_INT_REG_ACCESS_RDY  0x00004U //!< Register-access-ready interrupt
-#define I2C_INT_RX_DATA_RDY     0x00008U //!< Receive-data-ready interrupt
-#define I2C_INT_TX_DATA_RDY     0x00010U //!< Transmit-data-ready interrupt
-#define I2C_INT_STOP_CONDITION  0x00020U //!< Stop condition detected
-#define I2C_INT_ADDR_TARGET      0x00200U //!< Addressed as target interrupt
-#define I2C_INT_RXFF            0x10000U //!< RX FIFO level interrupt
-#define I2C_INT_TXFF            0x20000U //!< TX FIFO level interrupt
-
+#define I2C_INT_ARB_LOST       0x00001U //!< Arbitration-lost interrupt
+#define I2C_INT_NO_ACK         0x00002U //!< NACK interrupt
+#define I2C_INT_REG_ACCESS_RDY 0x00004U //!< Register-access-ready interrupt
+#define I2C_INT_RX_DATA_RDY    0x00008U //!< Receive-data-ready interrupt
+#define I2C_INT_TX_DATA_RDY    0x00010U //!< Transmit-data-ready interrupt
+#define I2C_INT_STOP_CONDITION 0x00020U //!< Stop condition detected
+#define I2C_INT_ADDR_TARGET    0x00200U //!< Addressed as target interrupt
+#define I2C_INT_RXFF           0x10000U //!< RX FIFO level interrupt
+#define I2C_INT_TXFF           0x20000U //!< TX FIFO level interrupt
 
 //
 // Helpful define to mask out the bits in the I2CSTR register that aren't
 // associated with interrupts.
 //
-#define I2C_STR_INTMASK     ((uint16_t)I2C_INT_ARB_LOST |                      \
-                             (uint16_t)I2C_INT_NO_ACK |                        \
-                             (uint16_t)I2C_INT_REG_ACCESS_RDY |                \
-                             (uint16_t)I2C_INT_RX_DATA_RDY |                   \
-                             (uint16_t)I2C_INT_TX_DATA_RDY |                   \
-                             (uint16_t)I2C_INT_STOP_CONDITION |                \
-                             (uint16_t)I2C_INT_ADDR_TARGET)
-
-
-
+#define I2C_STR_INTMASK                                                        \
+  ((uint16_t)I2C_INT_ARB_LOST | (uint16_t)I2C_INT_NO_ACK |                     \
+   (uint16_t)I2C_INT_REG_ACCESS_RDY | (uint16_t)I2C_INT_RX_DATA_RDY |          \
+   (uint16_t)I2C_INT_TX_DATA_RDY | (uint16_t)I2C_INT_STOP_CONDITION |          \
+   (uint16_t)I2C_INT_ADDR_TARGET)
 
 //*****************************************************************************
 //
@@ -126,38 +119,36 @@ extern "C"
 // returned by I2C_getStatus().
 //
 //*****************************************************************************
-#define I2C_STS_ARB_LOST        0x0001U //!< Arbitration-lost
-#define I2C_STS_NO_ACK          0x0002U //!< No-acknowledgment (NACK)
-#define I2C_STS_REG_ACCESS_RDY  0x0004U //!< Register-access-ready (ARDY)
-#define I2C_STS_RX_DATA_RDY     0x0008U //!< Receive-data-ready
-#define I2C_STS_TX_DATA_RDY     0x0010U //!< Transmit-data-ready
-#define I2C_STS_STOP_CONDITION  0x0020U //!< Stop condition detected
-#define I2C_STS_ADDR_ZERO       0x0100U //!< Address of all zeros detected
-#define I2C_STS_ADDR_TARGET     0x0200U //!< Addressed as target
-#define I2C_STS_TX_EMPTY        0x0400U //!< Transmit shift register empty
-#define I2C_STS_RX_FULL         0x0800U //!< Receive shift register full
-#define I2C_STS_BUS_BUSY        0x1000U //!< Bus busy, wait for STOP or reset
-#define I2C_STS_NACK_SENT       0x2000U //!< NACK was sent
-#define I2C_STS_TARGET_DIR      0x4000U //!< Addressed as target transmitter
+#define I2C_STS_ARB_LOST       0x0001U //!< Arbitration-lost
+#define I2C_STS_NO_ACK         0x0002U //!< No-acknowledgment (NACK)
+#define I2C_STS_REG_ACCESS_RDY 0x0004U //!< Register-access-ready (ARDY)
+#define I2C_STS_RX_DATA_RDY    0x0008U //!< Receive-data-ready
+#define I2C_STS_TX_DATA_RDY    0x0010U //!< Transmit-data-ready
+#define I2C_STS_STOP_CONDITION 0x0020U //!< Stop condition detected
+#define I2C_STS_ADDR_ZERO      0x0100U //!< Address of all zeros detected
+#define I2C_STS_ADDR_TARGET    0x0200U //!< Addressed as target
+#define I2C_STS_TX_EMPTY       0x0400U //!< Transmit shift register empty
+#define I2C_STS_RX_FULL        0x0800U //!< Receive shift register full
+#define I2C_STS_BUS_BUSY       0x1000U //!< Bus busy, wait for STOP or reset
+#define I2C_STS_NACK_SENT      0x2000U //!< NACK was sent
+#define I2C_STS_TARGET_DIR     0x4000U //!< Addressed as target transmitter
 
 #endif
-
 
 //*****************************************************************************
 //
 //! I2C interrupts to be returned by I2C_getInterruptSource().
 //
 //*****************************************************************************
-typedef enum
-{
-    I2C_INTSRC_NONE,                //!< No interrupt pending
-    I2C_INTSRC_ARB_LOST,            //!< Arbitration-lost interrupt
-    I2C_INTSRC_NO_ACK,              //!< NACK interrupt
-    I2C_INTSRC_REG_ACCESS_RDY,      //!< Register-access-ready interrupt
-    I2C_INTSRC_RX_DATA_RDY,         //!< Receive-data-ready interrupt
-    I2C_INTSRC_TX_DATA_RDY,         //!< Transmit-data-ready interrupt
-    I2C_INTSRC_STOP_CONDITION,      //!< Stop condition detected
-    I2C_INTSRC_ADDR_TARGET           //!< Addressed as target interrupt
+typedef enum {
+  I2C_INTSRC_NONE,           //!< No interrupt pending
+  I2C_INTSRC_ARB_LOST,       //!< Arbitration-lost interrupt
+  I2C_INTSRC_NO_ACK,         //!< NACK interrupt
+  I2C_INTSRC_REG_ACCESS_RDY, //!< Register-access-ready interrupt
+  I2C_INTSRC_RX_DATA_RDY,    //!< Receive-data-ready interrupt
+  I2C_INTSRC_TX_DATA_RDY,    //!< Transmit-data-ready interrupt
+  I2C_INTSRC_STOP_CONDITION, //!< Stop condition detected
+  I2C_INTSRC_ADDR_TARGET     //!< Addressed as target interrupt
 } I2C_InterruptSource;
 
 //*****************************************************************************
@@ -167,27 +158,26 @@ typedef enum
 //! parameter, and returned by I2C_getTxFIFOStatus().
 //
 //*****************************************************************************
-typedef enum
-{
-    I2C_FIFO_TXEMPTY    = 0x0000U,      //!< Transmit FIFO empty
-    I2C_FIFO_TX0        = 0x0000U,      //!< Transmit FIFO empty
-    I2C_FIFO_TX1        = 0x0001U,      //!< Transmit FIFO 1/16 full
-    I2C_FIFO_TX2        = 0x0002U,      //!< Transmit FIFO 2/16 full
-    I2C_FIFO_TX3        = 0x0003U,      //!< Transmit FIFO 3/16 full
-    I2C_FIFO_TX4        = 0x0004U,      //!< Transmit FIFO 4/16 full
-    I2C_FIFO_TX5        = 0x0005U,      //!< Transmit FIFO 5/16 full
-    I2C_FIFO_TX6        = 0x0006U,      //!< Transmit FIFO 6/16 full
-    I2C_FIFO_TX7        = 0x0007U,      //!< Transmit FIFO 7/16 full
-    I2C_FIFO_TX8        = 0x0008U,      //!< Transmit FIFO 8/16 full
-    I2C_FIFO_TX9        = 0x0009U,      //!< Transmit FIFO 9/16 full
-    I2C_FIFO_TX10       = 0x000AU,      //!< Transmit FIFO 10/16 full
-    I2C_FIFO_TX11       = 0x000BU,      //!< Transmit FIFO 11/16 full
-    I2C_FIFO_TX12       = 0x000CU,      //!< Transmit FIFO 12/16 full
-    I2C_FIFO_TX13       = 0x000DU,      //!< Transmit FIFO 13/16 full
-    I2C_FIFO_TX14       = 0x000EU,      //!< Transmit FIFO 14/16 full
-    I2C_FIFO_TX15       = 0x000FU,      //!< Transmit FIFO 15/16 full
-    I2C_FIFO_TX16       = 0x0010U,      //!< Transmit FIFO full
-    I2C_FIFO_TXFULL     = 0x0010U       //!< Transmit FIFO full
+typedef enum {
+  I2C_FIFO_TXEMPTY = 0x0000U, //!< Transmit FIFO empty
+  I2C_FIFO_TX0     = 0x0000U, //!< Transmit FIFO empty
+  I2C_FIFO_TX1     = 0x0001U, //!< Transmit FIFO 1/16 full
+  I2C_FIFO_TX2     = 0x0002U, //!< Transmit FIFO 2/16 full
+  I2C_FIFO_TX3     = 0x0003U, //!< Transmit FIFO 3/16 full
+  I2C_FIFO_TX4     = 0x0004U, //!< Transmit FIFO 4/16 full
+  I2C_FIFO_TX5     = 0x0005U, //!< Transmit FIFO 5/16 full
+  I2C_FIFO_TX6     = 0x0006U, //!< Transmit FIFO 6/16 full
+  I2C_FIFO_TX7     = 0x0007U, //!< Transmit FIFO 7/16 full
+  I2C_FIFO_TX8     = 0x0008U, //!< Transmit FIFO 8/16 full
+  I2C_FIFO_TX9     = 0x0009U, //!< Transmit FIFO 9/16 full
+  I2C_FIFO_TX10    = 0x000AU, //!< Transmit FIFO 10/16 full
+  I2C_FIFO_TX11    = 0x000BU, //!< Transmit FIFO 11/16 full
+  I2C_FIFO_TX12    = 0x000CU, //!< Transmit FIFO 12/16 full
+  I2C_FIFO_TX13    = 0x000DU, //!< Transmit FIFO 13/16 full
+  I2C_FIFO_TX14    = 0x000EU, //!< Transmit FIFO 14/16 full
+  I2C_FIFO_TX15    = 0x000FU, //!< Transmit FIFO 15/16 full
+  I2C_FIFO_TX16    = 0x0010U, //!< Transmit FIFO full
+  I2C_FIFO_TXFULL  = 0x0010U  //!< Transmit FIFO full
 } I2C_TxFIFOLevel;
 
 //*****************************************************************************
@@ -197,27 +187,26 @@ typedef enum
 //! parameter, and returned by I2C_getRxFIFOStatus().
 //
 //*****************************************************************************
-typedef enum
-{
-    I2C_FIFO_RXEMPTY    = 0x0000U,      //!< Receive FIFO empty
-    I2C_FIFO_RX0        = 0x0000U,      //!< Receive FIFO empty
-    I2C_FIFO_RX1        = 0x0001U,      //!< Receive FIFO 1/16 full
-    I2C_FIFO_RX2        = 0x0002U,      //!< Receive FIFO 2/16 full
-    I2C_FIFO_RX3        = 0x0003U,      //!< Receive FIFO 3/16 full
-    I2C_FIFO_RX4        = 0x0004U,      //!< Receive FIFO 4/16 full
-    I2C_FIFO_RX5        = 0x0005U,      //!< Receive FIFO 5/16 full
-    I2C_FIFO_RX6        = 0x0006U,      //!< Receive FIFO 6/16 full
-    I2C_FIFO_RX7        = 0x0007U,      //!< Receive FIFO 7/16 full
-    I2C_FIFO_RX8        = 0x0008U,      //!< Receive FIFO 8/16 full
-    I2C_FIFO_RX9        = 0x0009U,      //!< Receive FIFO 9/16 full
-    I2C_FIFO_RX10       = 0x000AU,      //!< Receive FIFO 10/16 full
-    I2C_FIFO_RX11       = 0x000BU,      //!< Receive FIFO 11/16 full
-    I2C_FIFO_RX12       = 0x000CU,      //!< Receive FIFO 12/16 full
-    I2C_FIFO_RX13       = 0x000DU,      //!< Receive FIFO 13/16 full
-    I2C_FIFO_RX14       = 0x000EU,      //!< Receive FIFO 14/16 full
-    I2C_FIFO_RX15       = 0x000FU,      //!< Receive FIFO 15/16 full
-    I2C_FIFO_RX16       = 0x0010U,      //!< Receive FIFO full
-    I2C_FIFO_RXFULL     = 0x0010U       //!< Receive FIFO full
+typedef enum {
+  I2C_FIFO_RXEMPTY = 0x0000U, //!< Receive FIFO empty
+  I2C_FIFO_RX0     = 0x0000U, //!< Receive FIFO empty
+  I2C_FIFO_RX1     = 0x0001U, //!< Receive FIFO 1/16 full
+  I2C_FIFO_RX2     = 0x0002U, //!< Receive FIFO 2/16 full
+  I2C_FIFO_RX3     = 0x0003U, //!< Receive FIFO 3/16 full
+  I2C_FIFO_RX4     = 0x0004U, //!< Receive FIFO 4/16 full
+  I2C_FIFO_RX5     = 0x0005U, //!< Receive FIFO 5/16 full
+  I2C_FIFO_RX6     = 0x0006U, //!< Receive FIFO 6/16 full
+  I2C_FIFO_RX7     = 0x0007U, //!< Receive FIFO 7/16 full
+  I2C_FIFO_RX8     = 0x0008U, //!< Receive FIFO 8/16 full
+  I2C_FIFO_RX9     = 0x0009U, //!< Receive FIFO 9/16 full
+  I2C_FIFO_RX10    = 0x000AU, //!< Receive FIFO 10/16 full
+  I2C_FIFO_RX11    = 0x000BU, //!< Receive FIFO 11/16 full
+  I2C_FIFO_RX12    = 0x000CU, //!< Receive FIFO 12/16 full
+  I2C_FIFO_RX13    = 0x000DU, //!< Receive FIFO 13/16 full
+  I2C_FIFO_RX14    = 0x000EU, //!< Receive FIFO 14/16 full
+  I2C_FIFO_RX15    = 0x000FU, //!< Receive FIFO 15/16 full
+  I2C_FIFO_RX16    = 0x0010U, //!< Receive FIFO full
+  I2C_FIFO_RXFULL  = 0x0010U  //!< Receive FIFO full
 } I2C_RxFIFOLevel;
 
 //*****************************************************************************
@@ -225,16 +214,15 @@ typedef enum
 //! Values that can be passed to I2C_setBitCount() as the \e size parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    I2C_BITCOUNT_1  = 1U,   //!< 1 bit per data byte
-    I2C_BITCOUNT_2  = 2U,   //!< 2 bits per data byte
-    I2C_BITCOUNT_3  = 3U,   //!< 3 bits per data byte
-    I2C_BITCOUNT_4  = 4U,   //!< 4 bits per data byte
-    I2C_BITCOUNT_5  = 5U,   //!< 5 bits per data byte
-    I2C_BITCOUNT_6  = 6U,   //!< 6 bits per data byte
-    I2C_BITCOUNT_7  = 7U,   //!< 7 bits per data byte
-    I2C_BITCOUNT_8  = 0U    //!< 8 bits per data byte
+typedef enum {
+  I2C_BITCOUNT_1 = 1U, //!< 1 bit per data byte
+  I2C_BITCOUNT_2 = 2U, //!< 2 bits per data byte
+  I2C_BITCOUNT_3 = 3U, //!< 3 bits per data byte
+  I2C_BITCOUNT_4 = 4U, //!< 4 bits per data byte
+  I2C_BITCOUNT_5 = 5U, //!< 5 bits per data byte
+  I2C_BITCOUNT_6 = 6U, //!< 6 bits per data byte
+  I2C_BITCOUNT_7 = 7U, //!< 7 bits per data byte
+  I2C_BITCOUNT_8 = 0U  //!< 8 bits per data byte
 } I2C_BitCount;
 
 //*****************************************************************************
@@ -242,10 +230,9 @@ typedef enum
 //! Values that can be passed to I2C_setAddressMode() as the \e mode parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    I2C_ADDR_MODE_7BITS        = 0x0000U,   //!< 7-bit address
-    I2C_ADDR_MODE_10BITS       = 0x0100U    //!< 10-bit address
+typedef enum {
+  I2C_ADDR_MODE_7BITS  = 0x0000U, //!< 7-bit address
+  I2C_ADDR_MODE_10BITS = 0x0100U  //!< 10-bit address
 } I2C_AddressMode;
 
 //*****************************************************************************
@@ -254,12 +241,11 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    //! If SCL is low, keep it low. If high, stop when it goes low again.
-    I2C_EMULATION_STOP_SCL_LOW = 0x0000U,
-    //! Continue I2C operation regardless
-    I2C_EMULATION_FREE_RUN     = 0x4000U
+typedef enum {
+  //! If SCL is low, keep it low. If high, stop when it goes low again.
+  I2C_EMULATION_STOP_SCL_LOW = 0x0000U,
+  //! Continue I2C operation regardless
+  I2C_EMULATION_FREE_RUN     = 0x4000U
 } I2C_EmulationMode;
 
 //*****************************************************************************
@@ -268,10 +254,9 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    I2C_DUTYCYCLE_33,       //!< Clock duty cycle is 33%
-    I2C_DUTYCYCLE_50        //!< Clock duty cycle is 55%
+typedef enum {
+  I2C_DUTYCYCLE_33, //!< Clock duty cycle is 33%
+  I2C_DUTYCYCLE_50  //!< Clock duty cycle is 55%
 } I2C_DutyCycle;
 
 //*****************************************************************************
@@ -293,13 +278,8 @@ typedef enum
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-I2C_isBaseValid(uint32_t base)
-{
-    return(
-           (base == I2CA_BASE) ||
-           (base == I2CB_BASE)
-          );
+static inline bool I2C_isBaseValid(uint32_t base) {
+  return ((base == I2CA_BASE) || (base == I2CB_BASE));
 }
 #endif
 
@@ -314,15 +294,13 @@ I2C_isBaseValid(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_enableModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_enableModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    HWREGH(base + I2C_O_MDR) |= I2C_MDR_IRS;
+  HWREGH(base + I2C_O_MDR) |= I2C_MDR_IRS;
 }
 
 //*****************************************************************************
@@ -336,15 +314,13 @@ I2C_enableModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_disableModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_disableModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    HWREGH(base + I2C_O_MDR) &= ~(I2C_MDR_IRS);
+  HWREGH(base + I2C_O_MDR) &= ~(I2C_MDR_IRS);
 }
 
 //*****************************************************************************
@@ -358,19 +334,17 @@ I2C_disableModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_enableFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_enableFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Enable the FIFO.
-    //
-    HWREGH(base + I2C_O_FFTX) |= I2C_FFTX_I2CFFEN | I2C_FFTX_TXFFRST;
-    HWREGH(base + I2C_O_FFRX) |= I2C_FFRX_RXFFRST;
+  //
+  // Enable the FIFO.
+  //
+  HWREGH(base + I2C_O_FFTX) |= I2C_FFTX_I2CFFEN | I2C_FFTX_TXFFRST;
+  HWREGH(base + I2C_O_FFRX) |= I2C_FFRX_RXFFRST;
 }
 
 //*****************************************************************************
@@ -384,19 +358,17 @@ I2C_enableFIFO(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_disableFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_disableFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Disable the FIFO.
-    //
-    HWREGH(base + I2C_O_FFTX) &= ~(I2C_FFTX_I2CFFEN | I2C_FFTX_TXFFRST);
-    HWREGH(base + I2C_O_FFRX) &= ~I2C_FFRX_RXFFRST;
+  //
+  // Disable the FIFO.
+  //
+  HWREGH(base + I2C_O_FFTX) &= ~(I2C_FFTX_I2CFFEN | I2C_FFTX_TXFFRST);
+  HWREGH(base + I2C_O_FFRX) &= ~I2C_FFRX_RXFFRST;
 }
 
 //*****************************************************************************
@@ -420,22 +392,21 @@ I2C_disableFIFO(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_setFIFOInterruptLevel(uint32_t base, I2C_TxFIFOLevel txLevel,
-                          I2C_RxFIFOLevel rxLevel)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_setFIFOInterruptLevel(uint32_t        base,
+                                             I2C_TxFIFOLevel txLevel,
+                                             I2C_RxFIFOLevel rxLevel) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Set the FIFO interrupt levels.
-    //
-    HWREGH(base + I2C_O_FFTX) = (HWREGH(base + I2C_O_FFTX) &
-                                 (~I2C_FFTX_TXFFIL_M)) | (uint16_t)txLevel;
-    HWREGH(base + I2C_O_FFRX) = (HWREGH(base + I2C_O_FFRX) &
-                                 (~I2C_FFRX_RXFFIL_M)) | (uint16_t)rxLevel;
+  //
+  // Set the FIFO interrupt levels.
+  //
+  HWREGH(base + I2C_O_FFTX) =
+      (HWREGH(base + I2C_O_FFTX) & (~I2C_FFTX_TXFFIL_M)) | (uint16_t)txLevel;
+  HWREGH(base + I2C_O_FFRX) =
+      (HWREGH(base + I2C_O_FFRX) & (~I2C_FFRX_RXFFIL_M)) | (uint16_t)rxLevel;
 }
 
 //*****************************************************************************
@@ -459,22 +430,19 @@ I2C_setFIFOInterruptLevel(uint32_t base, I2C_TxFIFOLevel txLevel,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_getFIFOInterruptLevel(uint32_t base, I2C_TxFIFOLevel *txLevel,
-                          I2C_RxFIFOLevel *rxLevel)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_getFIFOInterruptLevel(uint32_t         base,
+                                             I2C_TxFIFOLevel *txLevel,
+                                             I2C_RxFIFOLevel *rxLevel) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Extract the transmit and receive FIFO levels.
-    //
-    *txLevel = (I2C_TxFIFOLevel)(HWREGH(base + I2C_O_FFTX) &
-                                 I2C_FFTX_TXFFIL_M);
-    *rxLevel = (I2C_RxFIFOLevel)(HWREGH(base + I2C_O_FFRX) &
-                                 I2C_FFRX_RXFFIL_M);
+  //
+  // Extract the transmit and receive FIFO levels.
+  //
+  *txLevel = (I2C_TxFIFOLevel)(HWREGH(base + I2C_O_FFTX) & I2C_FFTX_TXFFIL_M);
+  *rxLevel = (I2C_RxFIFOLevel)(HWREGH(base + I2C_O_FFRX) & I2C_FFRX_RXFFIL_M);
 }
 
 //*****************************************************************************
@@ -491,23 +459,21 @@ I2C_getFIFOInterruptLevel(uint32_t base, I2C_TxFIFOLevel *txLevel,
 //! ..., or \b I2C_FIFO_TX16
 //
 //*****************************************************************************
-static inline I2C_TxFIFOLevel
-I2C_getTxFIFOStatus(uint32_t base)
-{
-    uint16_t level;
+static inline I2C_TxFIFOLevel I2C_getTxFIFOStatus(uint32_t base) {
+  uint16_t level;
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Get the current FIFO status
-    //
-    level = ((HWREGH(base + I2C_O_FFTX) & I2C_FFTX_TXFFST_M) >>
-              I2C_FFTX_TXFFST_S);
+  //
+  // Get the current FIFO status
+  //
+  level =
+      ((HWREGH(base + I2C_O_FFTX) & I2C_FFTX_TXFFST_M) >> I2C_FFTX_TXFFST_S);
 
-    return((I2C_TxFIFOLevel)level);
+  return ((I2C_TxFIFOLevel)level);
 }
 
 //*****************************************************************************
@@ -524,23 +490,21 @@ I2C_getTxFIFOStatus(uint32_t base)
 //! ..., or \b I2C_FIFO_RX16
 //
 //*****************************************************************************
-static inline I2C_RxFIFOLevel
-I2C_getRxFIFOStatus(uint32_t base)
-{
-    uint16_t level;
+static inline I2C_RxFIFOLevel I2C_getRxFIFOStatus(uint32_t base) {
+  uint16_t level;
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Get the current FIFO status
-    //
-    level = ((HWREGH(base + I2C_O_FFRX) & I2C_FFRX_RXFFST_M) >>
-              I2C_FFRX_RXFFST_S);
+  //
+  // Get the current FIFO status
+  //
+  level =
+      ((HWREGH(base + I2C_O_FFRX) & I2C_FFRX_RXFFST_M) >> I2C_FFRX_RXFFST_S);
 
-    return((I2C_RxFIFOLevel)level);
+  return ((I2C_RxFIFOLevel)level);
 }
 
 //*****************************************************************************
@@ -555,18 +519,16 @@ I2C_getRxFIFOStatus(uint32_t base)
 //! \return Returns the I2C prescaler(I2CPSC) cast as an uint16_t.
 //
 //*****************************************************************************
-static inline uint16_t
-I2C_getPreScaler(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline uint16_t I2C_getPreScaler(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Return the contents of the Prescaler register.
-    //
-    return(HWREGH(base + I2C_O_PSC));
+  //
+  // Return the contents of the Prescaler register.
+  //
+  return (HWREGH(base + I2C_O_PSC));
 }
 
 //*****************************************************************************
@@ -576,22 +538,20 @@ I2C_getPreScaler(uint32_t base)
 //! \param base is the base address of the I2C instance used.
 //! \param targetAddr 7-bit or 10-bit target address
 //!
-//! This function configures the address that the I2C Controller places on the bus
-//! when initiating a transaction.
+//! This function configures the address that the I2C Controller places on the
+//! bus when initiating a transaction.
 //!
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_setTargetAddress(uint32_t base, uint16_t targetAddr)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
-    ASSERT(targetAddr <= I2C_TAR_TAR_M);
+static inline void I2C_setTargetAddress(uint32_t base, uint16_t targetAddr) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
+  ASSERT(targetAddr <= I2C_TAR_TAR_M);
 
-    HWREGH(base + I2C_O_TAR) = targetAddr;
+  HWREGH(base + I2C_O_TAR) = targetAddr;
 }
 
 //*****************************************************************************
@@ -609,16 +569,14 @@ I2C_setTargetAddress(uint32_t base, uint16_t targetAddr)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_setOwnAddress(uint32_t base, uint16_t Addr)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
-    ASSERT(Addr <= I2C_OAR_OAR_M);
+static inline void I2C_setOwnAddress(uint32_t base, uint16_t Addr) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
+  ASSERT(Addr <= I2C_OAR_OAR_M);
 
-    HWREGH(base + I2C_O_OAR) = Addr;
+  HWREGH(base + I2C_O_OAR) = Addr;
 }
 
 //*****************************************************************************
@@ -628,22 +586,20 @@ I2C_setOwnAddress(uint32_t base, uint16_t Addr)
 //! \param base is the base address of the I2C instance used.
 //!
 //! This function returns an indication of whether or not the I2C bus is busy.
-//! This function can be used in a multi-controller environment to determine if the
-//! bus is free for another data transfer.
+//! This function can be used in a multi-controller environment to determine if
+//! the bus is free for another data transfer.
 //!
 //! \return Returns \b true if the I2C bus is busy; otherwise, returns
 //! \b false.
 //
 //*****************************************************************************
-static inline bool
-I2C_isBusBusy(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline bool I2C_isBusBusy(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    return((HWREGH(base + I2C_O_STR) & I2C_STR_BB) == I2C_STR_BB);
+  return ((HWREGH(base + I2C_O_STR) & I2C_STR_BB) == I2C_STR_BB);
 }
 
 //*****************************************************************************
@@ -670,18 +626,16 @@ I2C_isBusBusy(uint32_t base)
 //! - \b I2C_STS_TARGET_DIR- Addressed as Target transmitter
 //
 //*****************************************************************************
-static inline uint16_t
-I2C_getStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline uint16_t I2C_getStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Return contents of the status register
-    //
-    return(HWREGH(base + I2C_O_STR));
+  //
+  // Return contents of the status register
+  //
+  return (HWREGH(base + I2C_O_STR));
 }
 
 //*****************************************************************************
@@ -708,18 +662,16 @@ I2C_getStatus(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_clearStatus(uint32_t base, uint16_t stsFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_clearStatus(uint32_t base, uint16_t stsFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Write to the status registers to clear them.
-    //
-    HWREGH(base + I2C_O_STR) = stsFlags;
+  //
+  // Write to the status registers to clear them.
+  //
+  HWREGH(base + I2C_O_STR) = stsFlags;
 }
 
 //*****************************************************************************
@@ -729,8 +681,9 @@ I2C_clearStatus(uint32_t base, uint16_t stsFlags)
 //! \param base is the base address of the I2C instance used.
 //! \param config is the command to be issued to the I2C  module.
 //!
-//! This function is used to control the state of the controller and target send and
-//! receive operations. The \e config is a logical OR of the following options.
+//! This function is used to control the state of the controller and target send
+//! and receive operations. The \e config is a logical OR of the following
+//! options.
 //!
 //! One of the following four options:
 //! - \b I2C_CONTROLLER_SEND_MODE - Controller-transmitter mode
@@ -746,20 +699,19 @@ I2C_clearStatus(uint32_t base, uint16_t stsFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_setConfig(uint32_t base, uint16_t config)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_setConfig(uint32_t base, uint16_t config) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Write the selected options to the mode register.
-    //
-    HWREGH(base + I2C_O_MDR) = (HWREGH(base + I2C_O_MDR) &
-                                ~(I2C_MDR_CNT | I2C_MDR_TRX | I2C_MDR_RM |
-                                  I2C_MDR_STB | I2C_MDR_FDF)) | config;
+  //
+  // Write the selected options to the mode register.
+  //
+  HWREGH(base + I2C_O_MDR) =
+      (HWREGH(base + I2C_O_MDR) &
+       ~(I2C_MDR_CNT | I2C_MDR_TRX | I2C_MDR_RM | I2C_MDR_STB | I2C_MDR_FDF)) |
+      config;
 }
 
 //*****************************************************************************
@@ -775,19 +727,17 @@ I2C_setConfig(uint32_t base, uint16_t config)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_setBitCount(uint32_t base, I2C_BitCount size)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_setBitCount(uint32_t base, I2C_BitCount size) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Write the selected options to the mode register.
-    //
-    HWREGH(base + I2C_O_MDR) = (HWREGH(base + I2C_O_MDR) & ~I2C_MDR_BC_M) |
-                               (uint16_t)size;
+  //
+  // Write the selected options to the mode register.
+  //
+  HWREGH(base + I2C_O_MDR) =
+      (HWREGH(base + I2C_O_MDR) & ~I2C_MDR_BC_M) | (uint16_t)size;
 }
 
 //*****************************************************************************
@@ -803,18 +753,16 @@ I2C_setBitCount(uint32_t base, I2C_BitCount size)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_sendStartCondition(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_sendStartCondition(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Set the START condition bit.
-    //
-    HWREGH(base + I2C_O_MDR) |= I2C_MDR_STT;
+  //
+  // Set the START condition bit.
+  //
+  HWREGH(base + I2C_O_MDR) |= I2C_MDR_STT;
 }
 
 //*****************************************************************************
@@ -833,18 +781,16 @@ I2C_sendStartCondition(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_sendStopCondition(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_sendStopCondition(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Set the STOP condition bit.
-    //
-    HWREGH(base + I2C_O_MDR) |= I2C_MDR_STP;
+  //
+  // Set the STOP condition bit.
+  //
+  HWREGH(base + I2C_O_MDR) |= I2C_MDR_STP;
 }
 
 //*****************************************************************************
@@ -859,18 +805,16 @@ I2C_sendStopCondition(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_sendNACK(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_sendNACK(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Set the NACK mode bit.
-    //
-    HWREGH(base + I2C_O_MDR) |= I2C_MDR_NACKMOD;
+  //
+  // Set the NACK mode bit.
+  //
+  HWREGH(base + I2C_O_MDR) |= I2C_MDR_NACKMOD;
 }
 
 //*****************************************************************************
@@ -884,18 +828,16 @@ I2C_sendNACK(uint32_t base)
 //! \return Returns the byte received from by the I2C cast as an uint16_t.
 //
 //*****************************************************************************
-static inline uint16_t
-I2C_getData(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline uint16_t I2C_getData(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Return the contents of the receive register.
-    //
-    return(HWREGH(base + I2C_O_DRR));
+  //
+  // Return the contents of the receive register.
+  //
+  return (HWREGH(base + I2C_O_DRR));
 }
 
 //*****************************************************************************
@@ -910,18 +852,16 @@ I2C_getData(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_putData(uint32_t base, uint16_t data)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_putData(uint32_t base, uint16_t data) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Place the data into the transmit register.
-    //
-    HWREGH(base + I2C_O_DXR) = data;
+  //
+  // Place the data into the transmit register.
+  //
+  HWREGH(base + I2C_O_DXR) = data;
 }
 
 //*****************************************************************************
@@ -938,18 +878,16 @@ I2C_putData(uint32_t base, uint16_t data)
 //! automatically cleared after the stop condition has been generated.
 //
 //*****************************************************************************
-static inline bool
-I2C_getStopConditionStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline bool I2C_getStopConditionStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Check the stop condition bit and return appropriately.
-    //
-    return((HWREGH(base + I2C_O_MDR) & I2C_MDR_STP) != 0U);
+  //
+  // Check the stop condition bit and return appropriately.
+  //
+  return ((HWREGH(base + I2C_O_MDR) & I2C_MDR_STP) != 0U);
 }
 
 //*****************************************************************************
@@ -965,18 +903,16 @@ I2C_getStopConditionStatus(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_setDataCount(uint32_t base, uint16_t count)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_setDataCount(uint32_t base, uint16_t count) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Write the count value to the appropriate register.
-    //
-    HWREGH(base + I2C_O_CNT) = count;
+  //
+  // Write the count value to the appropriate register.
+  //
+  HWREGH(base + I2C_O_CNT) = count;
 }
 
 //*****************************************************************************
@@ -994,19 +930,17 @@ I2C_setDataCount(uint32_t base, uint16_t count)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_setAddressMode(uint32_t base, I2C_AddressMode mode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_setAddressMode(uint32_t base, I2C_AddressMode mode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Write the appropriate value to the address expansion bit.
-    //
-    HWREGH(base + I2C_O_MDR) = (HWREGH(base + I2C_O_MDR) & ~I2C_MDR_XA) |
-                               (uint16_t)mode;
+  //
+  // Write the appropriate value to the address expansion bit.
+  //
+  HWREGH(base + I2C_O_MDR) =
+      (HWREGH(base + I2C_O_MDR) & ~I2C_MDR_XA) | (uint16_t)mode;
 }
 
 //*****************************************************************************
@@ -1028,19 +962,17 @@ I2C_setAddressMode(uint32_t base, I2C_AddressMode mode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_setEmulationMode(uint32_t base, I2C_EmulationMode mode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_setEmulationMode(uint32_t base, I2C_EmulationMode mode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Write the desired emulation mode to the register.
-    //
-    HWREGH(base + I2C_O_MDR) = (HWREGH(base + I2C_O_MDR) & ~I2C_MDR_FREE) |
-                               (uint16_t)mode;
+  //
+  // Write the desired emulation mode to the register.
+  //
+  HWREGH(base + I2C_O_MDR) =
+      (HWREGH(base + I2C_O_MDR) & ~I2C_MDR_FREE) | (uint16_t)mode;
 }
 
 //*****************************************************************************
@@ -1049,25 +981,24 @@ I2C_setEmulationMode(uint32_t base, I2C_EmulationMode mode)
 //!
 //! \param base is the base address of the I2C instance used.
 //!
-//! This function enables loopback mode. This mode is only valid during controller
-//! mode and is helpful during device testing as it causes data transmitted out
-//! of the data transmit register to be received in data receive register.
+//! This function enables loopback mode. This mode is only valid during
+//! controller mode and is helpful during device testing as it causes data
+//! transmitted out of the data transmit register to be received in data receive
+//! register.
 //!
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_enableLoopback(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_enableLoopback(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Set the bit that enables loopback mode.
-    //
-    HWREGH(base + I2C_O_MDR) |= I2C_MDR_DLB;
+  //
+  // Set the bit that enables loopback mode.
+  //
+  HWREGH(base + I2C_O_MDR) |= I2C_MDR_DLB;
 }
 
 //*****************************************************************************
@@ -1082,18 +1013,16 @@ I2C_enableLoopback(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-I2C_disableLoopback(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline void I2C_disableLoopback(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Clear the bit that enables loopback mode.
-    //
-    HWREGH(base + I2C_O_MDR) &= ~I2C_MDR_DLB;
+  //
+  // Clear the bit that enables loopback mode.
+  //
+  HWREGH(base + I2C_O_MDR) &= ~I2C_MDR_DLB;
 }
 
 //*****************************************************************************
@@ -1127,26 +1056,18 @@ I2C_disableLoopback(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline I2C_InterruptSource
-I2C_getInterruptSource(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(I2C_isBaseValid(base));
+static inline I2C_InterruptSource I2C_getInterruptSource(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(I2C_isBaseValid(base));
 
-    //
-    // Return the interrupt source value
-    //
-    return((I2C_InterruptSource)(HWREGH(base + I2C_O_ISRC) &
-                                 I2C_ISRC_INTCODE_M));
+  //
+  // Return the interrupt source value
+  //
+  return (
+      (I2C_InterruptSource)(HWREGH(base + I2C_O_ISRC) & I2C_ISRC_INTCODE_M));
 }
-
-
-
-
-
-
 
 //*****************************************************************************
 //
@@ -1179,9 +1100,8 @@ I2C_getInterruptSource(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-I2C_initController(uint32_t base, uint32_t sysclkHz, uint32_t bitRate,
-               I2C_DutyCycle dutyCycle);
+extern void I2C_initController(uint32_t base, uint32_t sysclkHz,
+                               uint32_t bitRate, I2C_DutyCycle dutyCycle);
 
 //*****************************************************************************
 //
@@ -1190,8 +1110,8 @@ I2C_initController(uint32_t base, uint32_t sysclkHz, uint32_t bitRate,
 //! \param base is the base address of the I2C instance used.
 //! \param intFlags is the bit mask of the interrupt sources to be enabled.
 //!
-//! This function enables the indicated I2C Controller interrupt sources.  Only the
-//! sources that are enabled can be reflected to the processor interrupt.
+//! This function enables the indicated I2C Controller interrupt sources.  Only
+//! the sources that are enabled can be reflected to the processor interrupt.
 //! Disabled sources have no effect on the processor.
 //!
 //! The \e intFlags parameter is the logical OR of any of the following:
@@ -1212,8 +1132,7 @@ I2C_initController(uint32_t base, uint32_t sysclkHz, uint32_t bitRate,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-I2C_enableInterrupt(uint32_t base, uint32_t intFlags);
+extern void I2C_enableInterrupt(uint32_t base, uint32_t intFlags);
 
 //*****************************************************************************
 //
@@ -1232,8 +1151,7 @@ I2C_enableInterrupt(uint32_t base, uint32_t intFlags);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-I2C_disableInterrupt(uint32_t base, uint32_t intFlags);
+extern void I2C_disableInterrupt(uint32_t base, uint32_t intFlags);
 
 //*****************************************************************************
 //
@@ -1259,8 +1177,7 @@ I2C_disableInterrupt(uint32_t base, uint32_t intFlags);
 //! is disabled.
 //
 //*****************************************************************************
-extern uint32_t
-I2C_getInterruptStatus(uint32_t base);
+extern uint32_t I2C_getInterruptStatus(uint32_t base);
 
 //*****************************************************************************
 //
@@ -1286,8 +1203,7 @@ I2C_getInterruptStatus(uint32_t base);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-I2C_clearInterruptStatus(uint32_t base, uint32_t intFlags);
+extern void I2C_clearInterruptStatus(uint32_t base, uint32_t intFlags);
 
 //*****************************************************************************
 //
@@ -1306,8 +1222,7 @@ I2C_clearInterruptStatus(uint32_t base, uint32_t intFlags);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-I2C_configureModuleFrequency(uint32_t base, uint32_t sysclkHz);
+extern void I2C_configureModuleFrequency(uint32_t base, uint32_t sysclkHz);
 
 //*****************************************************************************
 //

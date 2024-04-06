@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   cla.h
+//  FILE:   cla.h
 //
-// TITLE:  CLA Driver Implementation File
+//  TITLE:  CLA Driver Implementation File
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef CLA_H
 #define CLA_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -60,14 +59,14 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "cpu.h"
 #include "debug.h"
 #include "inc/hw_cla.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_sysctl.h"
 #include "inc/hw_types.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 //*****************************************************************************
 //
@@ -75,8 +74,7 @@ extern "C"
 // application code.
 //
 //*****************************************************************************
-#define CLA_NUM_EOT_INTERRUPTS          (8U)
-
+#define CLA_NUM_EOT_INTERRUPTS (8U)
 
 //*****************************************************************************
 //
@@ -85,15 +83,15 @@ extern "C"
 // as the taskFlags parameter.
 //
 //*****************************************************************************
-#define CLA_TASKFLAG_1          (0x01U)  //!< CLA Task 1 Flag
-#define CLA_TASKFLAG_2          (0x02U)  //!< CLA Task 2 Flag
-#define CLA_TASKFLAG_3          (0x04U)  //!< CLA Task 3 Flag
-#define CLA_TASKFLAG_4          (0x08U)  //!< CLA Task 4 Flag
-#define CLA_TASKFLAG_5          (0x10U)  //!< CLA Task 5 Flag
-#define CLA_TASKFLAG_6          (0x20U)  //!< CLA Task 6 Flag
-#define CLA_TASKFLAG_7          (0x40U)  //!< CLA Task 7 Flag
-#define CLA_TASKFLAG_8          (0x80U)  //!< CLA Task 8 Flag
-#define CLA_TASKFLAG_ALL        (0xFFU)  //!< CLA All Task Flag
+#define CLA_TASKFLAG_1   (0x01U) //!< CLA Task 1 Flag
+#define CLA_TASKFLAG_2   (0x02U) //!< CLA Task 2 Flag
+#define CLA_TASKFLAG_3   (0x04U) //!< CLA Task 3 Flag
+#define CLA_TASKFLAG_4   (0x08U) //!< CLA Task 4 Flag
+#define CLA_TASKFLAG_5   (0x10U) //!< CLA Task 5 Flag
+#define CLA_TASKFLAG_6   (0x20U) //!< CLA Task 6 Flag
+#define CLA_TASKFLAG_7   (0x40U) //!< CLA Task 7 Flag
+#define CLA_TASKFLAG_8   (0x80U) //!< CLA Task 8 Flag
+#define CLA_TASKFLAG_ALL (0xFFU) //!< CLA All Task Flag
 
 //*****************************************************************************
 //
@@ -103,35 +101,33 @@ extern "C"
 //! as the taskNumber parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    CLA_TASK_1,  //!< CLA Task 1
-    CLA_TASK_2,  //!< CLA Task 2
-    CLA_TASK_3,  //!< CLA Task 3
-    CLA_TASK_4,  //!< CLA Task 4
-    CLA_TASK_5,  //!< CLA Task 5
-    CLA_TASK_6,  //!< CLA Task 6
-    CLA_TASK_7,  //!< CLA Task 7
-    CLA_TASK_8   //!< CLA Task 8
+typedef enum {
+  CLA_TASK_1, //!< CLA Task 1
+  CLA_TASK_2, //!< CLA Task 2
+  CLA_TASK_3, //!< CLA Task 3
+  CLA_TASK_4, //!< CLA Task 4
+  CLA_TASK_5, //!< CLA Task 5
+  CLA_TASK_6, //!< CLA Task 6
+  CLA_TASK_7, //!< CLA Task 7
+  CLA_TASK_8  //!< CLA Task 8
 } CLA_TaskNumber;
 
-#ifdef __TMS320C28XX__  // These enums are only accessible by C28x
+#ifdef __TMS320C28XX__ // These enums are only accessible by C28x
 //*****************************************************************************
 //
 //! Values that can be passed to CLA_mapTaskVector() as the \e claIntVect
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    CLA_MVECT_1 = CLA_O_MVECT1,     //!< Task Interrupt Vector 1
-    CLA_MVECT_2 = CLA_O_MVECT2,     //!< Task Interrupt Vector 2
-    CLA_MVECT_3 = CLA_O_MVECT3,     //!< Task Interrupt Vector 3
-    CLA_MVECT_4 = CLA_O_MVECT4,     //!< Task Interrupt Vector 4
-    CLA_MVECT_5 = CLA_O_MVECT5,     //!< Task Interrupt Vector 5
-    CLA_MVECT_6 = CLA_O_MVECT6,     //!< Task Interrupt Vector 6
-    CLA_MVECT_7 = CLA_O_MVECT7,     //!< Task Interrupt Vector 7
-    CLA_MVECT_8 = CLA_O_MVECT8      //!< Task Interrupt Vector 8
+typedef enum {
+  CLA_MVECT_1 = CLA_O_MVECT1, //!< Task Interrupt Vector 1
+  CLA_MVECT_2 = CLA_O_MVECT2, //!< Task Interrupt Vector 2
+  CLA_MVECT_3 = CLA_O_MVECT3, //!< Task Interrupt Vector 3
+  CLA_MVECT_4 = CLA_O_MVECT4, //!< Task Interrupt Vector 4
+  CLA_MVECT_5 = CLA_O_MVECT5, //!< Task Interrupt Vector 5
+  CLA_MVECT_6 = CLA_O_MVECT6, //!< Task Interrupt Vector 6
+  CLA_MVECT_7 = CLA_O_MVECT7, //!< Task Interrupt Vector 7
+  CLA_MVECT_8 = CLA_O_MVECT8  //!< Task Interrupt Vector 8
 } CLA_MVECTNumber;
 
 //*****************************************************************************
@@ -140,94 +136,85 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    CLA_TRIGGER_SOFTWARE    = 0U,   //!< CLA Task Trigger Source is Software
+typedef enum {
+  CLA_TRIGGER_SOFTWARE = 0U, //!< CLA Task Trigger Source is Software
 
-    CLA_TRIGGER_ADCA1       = 1U,   //!< CLA Task Trigger Source is ADCA1
-    CLA_TRIGGER_ADCA2       = 2U,   //!< CLA Task Trigger Source is ADCA2
-    CLA_TRIGGER_ADCA3       = 3U,   //!< CLA Task Trigger Source is ADCA3
-    CLA_TRIGGER_ADCA4       = 4U,   //!< CLA Task Trigger Source is ADCA4
-    CLA_TRIGGER_ADCAEVT     = 5U,   //!< CLA Task Trigger Source is ADCAEVT
-    CLA_TRIGGER_ADCB1       = 6U,   //!< CLA Task Trigger Source is ADCB1
-    CLA_TRIGGER_ADCB2       = 7U,   //!< CLA Task Trigger Source is ADCB2
-    CLA_TRIGGER_ADCB3       = 8U,   //!< CLA Task Trigger Source is ADCB3
-    CLA_TRIGGER_ADCB4       = 9U,   //!< CLA Task Trigger Source is ADCB4
-    CLA_TRIGGER_ADCBEVT     = 10U,  //!< CLA Task Trigger Source is ADCBEVT
-    CLA_TRIGGER_ADCC1       = 11U,  //!< CLA Task Trigger Source is ADCC1
-    CLA_TRIGGER_ADCC2       = 12U,  //!< CLA Task Trigger Source is ADCC2
-    CLA_TRIGGER_ADCC3       = 13U,  //!< CLA Task Trigger Source is ADCC3
-    CLA_TRIGGER_ADCC4       = 14U,  //!< CLA Task Trigger Source is ADCC4
-    CLA_TRIGGER_ADCCEVT     = 15U,  //!< CLA Task Trigger Source is ADCCEVT
-    CLA_TRIGGER_ADCD1       = 16U,  //!< CLA Task Trigger Source is ADCD1
-    CLA_TRIGGER_ADCD2       = 17U,  //!< CLA Task Trigger Source is ADCD2
-    CLA_TRIGGER_ADCD3       = 18U,  //!< CLA Task Trigger Source is ADCD3
-    CLA_TRIGGER_ADCD4       = 19U,  //!< CLA Task Trigger Source is ADCD4
-    CLA_TRIGGER_ADCDEVT     = 20U,  //!< CLA Task Trigger Source is ADCDEVT
+  CLA_TRIGGER_ADCA1   = 1U,  //!< CLA Task Trigger Source is ADCA1
+  CLA_TRIGGER_ADCA2   = 2U,  //!< CLA Task Trigger Source is ADCA2
+  CLA_TRIGGER_ADCA3   = 3U,  //!< CLA Task Trigger Source is ADCA3
+  CLA_TRIGGER_ADCA4   = 4U,  //!< CLA Task Trigger Source is ADCA4
+  CLA_TRIGGER_ADCAEVT = 5U,  //!< CLA Task Trigger Source is ADCAEVT
+  CLA_TRIGGER_ADCB1   = 6U,  //!< CLA Task Trigger Source is ADCB1
+  CLA_TRIGGER_ADCB2   = 7U,  //!< CLA Task Trigger Source is ADCB2
+  CLA_TRIGGER_ADCB3   = 8U,  //!< CLA Task Trigger Source is ADCB3
+  CLA_TRIGGER_ADCB4   = 9U,  //!< CLA Task Trigger Source is ADCB4
+  CLA_TRIGGER_ADCBEVT = 10U, //!< CLA Task Trigger Source is ADCBEVT
+  CLA_TRIGGER_ADCC1   = 11U, //!< CLA Task Trigger Source is ADCC1
+  CLA_TRIGGER_ADCC2   = 12U, //!< CLA Task Trigger Source is ADCC2
+  CLA_TRIGGER_ADCC3   = 13U, //!< CLA Task Trigger Source is ADCC3
+  CLA_TRIGGER_ADCC4   = 14U, //!< CLA Task Trigger Source is ADCC4
+  CLA_TRIGGER_ADCCEVT = 15U, //!< CLA Task Trigger Source is ADCCEVT
+  CLA_TRIGGER_ADCD1   = 16U, //!< CLA Task Trigger Source is ADCD1
+  CLA_TRIGGER_ADCD2   = 17U, //!< CLA Task Trigger Source is ADCD2
+  CLA_TRIGGER_ADCD3   = 18U, //!< CLA Task Trigger Source is ADCD3
+  CLA_TRIGGER_ADCD4   = 19U, //!< CLA Task Trigger Source is ADCD4
+  CLA_TRIGGER_ADCDEVT = 20U, //!< CLA Task Trigger Source is ADCDEVT
 
-    CLA_TRIGGER_XINT1       = 29U,  //!< CLA Task Trigger Source is XINT1
-    CLA_TRIGGER_XINT2       = 30U,  //!< CLA Task Trigger Source is XINT2
-    CLA_TRIGGER_XINT3       = 31U,  //!< CLA Task Trigger Source is XINT3
-    CLA_TRIGGER_XINT4       = 32U,  //!< CLA Task Trigger Source is XINT4
-    CLA_TRIGGER_XINT5       = 33U,  //!< CLA Task Trigger Source is XINT5
+  CLA_TRIGGER_XINT1 = 29U, //!< CLA Task Trigger Source is XINT1
+  CLA_TRIGGER_XINT2 = 30U, //!< CLA Task Trigger Source is XINT2
+  CLA_TRIGGER_XINT3 = 31U, //!< CLA Task Trigger Source is XINT3
+  CLA_TRIGGER_XINT4 = 32U, //!< CLA Task Trigger Source is XINT4
+  CLA_TRIGGER_XINT5 = 33U, //!< CLA Task Trigger Source is XINT5
 
-    CLA_TRIGGER_EPWM1INT    = 36U,  //!< CLA Task Trigger Source is EPWM1INT
-    CLA_TRIGGER_EPWM2INT    = 37U,  //!< CLA Task Trigger Source is EPWM2INT
-    CLA_TRIGGER_EPWM3INT    = 38U,  //!< CLA Task Trigger Source is EPWM3INT
-    CLA_TRIGGER_EPWM4INT    = 39U,  //!< CLA Task Trigger Source is EPWM4INT
-    CLA_TRIGGER_EPWM5INT    = 40U,  //!< CLA Task Trigger Source is EPWM5INT
-    CLA_TRIGGER_EPWM6INT    = 41U,  //!< CLA Task Trigger Source is EPWM6INT
-    CLA_TRIGGER_EPWM7INT    = 42U,  //!< CLA Task Trigger Source is EPWM7INT
-    CLA_TRIGGER_EPWM8INT    = 43U,  //!< CLA Task Trigger Source is EPWM8INT
-    CLA_TRIGGER_EPWM9INT    = 44U,  //!< CLA Task Trigger Source is EPWM9INT
-    CLA_TRIGGER_EPWM10INT   = 45U,  //!< CLA Task Trigger Source is EPWM10INT
-    CLA_TRIGGER_EPWM11INT   = 46U,  //!< CLA Task Trigger Source is EPWM11INT
-    CLA_TRIGGER_EPWM12INT   = 47U,  //!< CLA Task Trigger Source is EPWM12INT
+  CLA_TRIGGER_EPWM1INT  = 36U, //!< CLA Task Trigger Source is EPWM1INT
+  CLA_TRIGGER_EPWM2INT  = 37U, //!< CLA Task Trigger Source is EPWM2INT
+  CLA_TRIGGER_EPWM3INT  = 38U, //!< CLA Task Trigger Source is EPWM3INT
+  CLA_TRIGGER_EPWM4INT  = 39U, //!< CLA Task Trigger Source is EPWM4INT
+  CLA_TRIGGER_EPWM5INT  = 40U, //!< CLA Task Trigger Source is EPWM5INT
+  CLA_TRIGGER_EPWM6INT  = 41U, //!< CLA Task Trigger Source is EPWM6INT
+  CLA_TRIGGER_EPWM7INT  = 42U, //!< CLA Task Trigger Source is EPWM7INT
+  CLA_TRIGGER_EPWM8INT  = 43U, //!< CLA Task Trigger Source is EPWM8INT
+  CLA_TRIGGER_EPWM9INT  = 44U, //!< CLA Task Trigger Source is EPWM9INT
+  CLA_TRIGGER_EPWM10INT = 45U, //!< CLA Task Trigger Source is EPWM10INT
+  CLA_TRIGGER_EPWM11INT = 46U, //!< CLA Task Trigger Source is EPWM11INT
+  CLA_TRIGGER_EPWM12INT = 47U, //!< CLA Task Trigger Source is EPWM12INT
 
+  CLA_TRIGGER_TINT0 = 68U, //!< CLA Task Trigger Source is TINT0
+  CLA_TRIGGER_TINT1 = 69U, //!< CLA Task Trigger Source is TINT1
+  CLA_TRIGGER_TINT2 = 70U, //!< CLA Task Trigger Source is TINT2
 
-    CLA_TRIGGER_TINT0       = 68U,  //!< CLA Task Trigger Source is TINT0
-    CLA_TRIGGER_TINT1       = 69U,  //!< CLA Task Trigger Source is TINT1
-    CLA_TRIGGER_TINT2       = 70U,  //!< CLA Task Trigger Source is TINT2
+  CLA_TRIGGER_MXINTA = 71U, //!< CLA Task Trigger Source is MXINTA
+  CLA_TRIGGER_MRINTA = 72U, //!< CLA Task Trigger Source is MRINTA
+  CLA_TRIGGER_MXINTB = 73U, //!< CLA Task Trigger Source is MXINTB
+  CLA_TRIGGER_MRINTB = 74U, //!< CLA Task Trigger Source is MRINTB
 
-    CLA_TRIGGER_MXINTA      = 71U,  //!< CLA Task Trigger Source is MXINTA
-    CLA_TRIGGER_MRINTA      = 72U,  //!< CLA Task Trigger Source is MRINTA
-    CLA_TRIGGER_MXINTB      = 73U,  //!< CLA Task Trigger Source is MXINTB
-    CLA_TRIGGER_MRINTB      = 74U,  //!< CLA Task Trigger Source is MRINTB
+  CLA_TRIGGER_ECAP1INT = 75U, //!< CLA Task Trigger Source is ECAP1INT
+  CLA_TRIGGER_ECAP2INT = 76U, //!< CLA Task Trigger Source is ECAP2INT
+  CLA_TRIGGER_ECAP3INT = 77U, //!< CLA Task Trigger Source is ECAP3INT
+  CLA_TRIGGER_ECAP4INT = 78U, //!< CLA Task Trigger Source is ECAP4INT
+  CLA_TRIGGER_ECAP5INT = 79U, //!< CLA Task Trigger Source is ECAP5INT
+  CLA_TRIGGER_ECAP6INT = 80U, //!< CLA Task Trigger Source is ECAP6INT
 
-    CLA_TRIGGER_ECAP1INT    = 75U,  //!< CLA Task Trigger Source is ECAP1INT
-    CLA_TRIGGER_ECAP2INT    = 76U,  //!< CLA Task Trigger Source is ECAP2INT
-    CLA_TRIGGER_ECAP3INT    = 77U,  //!< CLA Task Trigger Source is ECAP3INT
-    CLA_TRIGGER_ECAP4INT    = 78U,  //!< CLA Task Trigger Source is ECAP4INT
-    CLA_TRIGGER_ECAP5INT    = 79U,  //!< CLA Task Trigger Source is ECAP5INT
-    CLA_TRIGGER_ECAP6INT    = 80U,  //!< CLA Task Trigger Source is ECAP6INT
+  CLA_TRIGGER_EQEP1INT = 83U, //!< CLA Task Trigger Source is EQEP1INT
+  CLA_TRIGGER_EQEP2INT = 84U, //!< CLA Task Trigger Source is EQEP2INT
+  CLA_TRIGGER_EQEP3INT = 85U, //!< CLA Task Trigger Source is EQEP3INT
 
-    CLA_TRIGGER_EQEP1INT    = 83U,  //!< CLA Task Trigger Source is EQEP1INT
-    CLA_TRIGGER_EQEP2INT    = 84U,  //!< CLA Task Trigger Source is EQEP2INT
-    CLA_TRIGGER_EQEP3INT    = 85U,  //!< CLA Task Trigger Source is EQEP3INT
+  CLA_TRIGGER_SDFM1INT = 95U, //!< CLA Task Trigger Source is SDFM1INT
+  CLA_TRIGGER_SDFM2INT = 96U, //!< CLA Task Trigger Source is SDFM2INT
 
+  CLA_TRIGGER_UPP1INT = 107U, //!< CLA Task Trigger Source is UPP1INT
 
-    CLA_TRIGGER_SDFM1INT    = 95U,  //!< CLA Task Trigger Source is SDFM1INT
-    CLA_TRIGGER_SDFM2INT    = 96U,  //!< CLA Task Trigger Source is SDFM2INT
+  CLA_TRIGGER_SPITXAINT = 109U, //!< CLA Task Trigger Source is SPITXAINT
+  CLA_TRIGGER_SPIRXAINT = 110U, //!< CLA Task Trigger Source is SPIRXAINT
+  CLA_TRIGGER_SPITXBINT = 111U, //!< CLA Task Trigger Source is SPITXBINT
+  CLA_TRIGGER_SPIRXBINT = 112U, //!< CLA Task Trigger Source is SPIRXBINT
+  CLA_TRIGGER_SPITXCINT = 113U, //!< CLA Task Trigger Source is SPITXCINT
+  CLA_TRIGGER_SPIRXCINT = 114U, //!< CLA Task Trigger Source is SPIRXCINT
 
-
-
-    CLA_TRIGGER_UPP1INT     = 107U, //!< CLA Task Trigger Source is UPP1INT
-
-    CLA_TRIGGER_SPITXAINT   = 109U, //!< CLA Task Trigger Source is SPITXAINT
-    CLA_TRIGGER_SPIRXAINT   = 110U, //!< CLA Task Trigger Source is SPIRXAINT
-    CLA_TRIGGER_SPITXBINT   = 111U, //!< CLA Task Trigger Source is SPITXBINT
-    CLA_TRIGGER_SPIRXBINT   = 112U, //!< CLA Task Trigger Source is SPIRXBINT
-    CLA_TRIGGER_SPITXCINT   = 113U, //!< CLA Task Trigger Source is SPITXCINT
-    CLA_TRIGGER_SPIRXCINT   = 114U, //!< CLA Task Trigger Source is SPIRXCINT
-
-
-
-
-
-    CLA_TRIGGER_CLB1INT      = 127, //!< CLA Task Trigger Source is CLB1INT
-    CLA_TRIGGER_CLB2INT      = 128, //!< CLA Task Trigger Source is CLB2INT
-    CLA_TRIGGER_CLB3INT      = 129, //!< CLA Task Trigger Source is CLB3INT
-    CLA_TRIGGER_CLB4INT      = 130, //!< CLA Task Trigger Source is CLB4INT
+  CLA_TRIGGER_CLB1INT = 127, //!< CLA Task Trigger Source is CLB1INT
+  CLA_TRIGGER_CLB2INT = 128, //!< CLA Task Trigger Source is CLB2INT
+  CLA_TRIGGER_CLB3INT = 129, //!< CLA Task Trigger Source is CLB3INT
+  CLA_TRIGGER_CLB4INT = 130, //!< CLA Task Trigger Source is CLB4INT
 
 } CLA_Trigger;
 #endif // __TMS320C28XX__
@@ -251,10 +238,8 @@ typedef enum
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-CLA_isBaseValid(uint32_t base)
-{
-    return(base == CLA1_BASE);
+static inline bool CLA_isBaseValid(uint32_t base) {
+  return (base == CLA1_BASE);
 }
 #endif
 
@@ -285,23 +270,21 @@ CLA_isBaseValid(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CLA_mapTaskVector(uint32_t base, CLA_MVECTNumber claIntVect,
-                  uint16_t claTaskAddr)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline void CLA_mapTaskVector(uint32_t base, CLA_MVECTNumber claIntVect,
+                                     uint16_t claTaskAddr) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Modify protected register
-    //
-    EALLOW;
+  //
+  // Modify protected register
+  //
+  EALLOW;
 
-    HWREGH(base + (uint16_t)claIntVect) = claTaskAddr;
+  HWREGH(base + (uint16_t)claIntVect) = claTaskAddr;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -316,32 +299,30 @@ CLA_mapTaskVector(uint32_t base, CLA_MVECTNumber claIntVect,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CLA_performHardReset(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline void CLA_performHardReset(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Modify protected register
-    //
-    EALLOW;
+  //
+  // Modify protected register
+  //
+  EALLOW;
 
-    //
-    // Hard reset of the CLA
-    //
-    HWREGH(base + CLA_O_MCTL) |= CLA_MCTL_HARDRESET;
+  //
+  // Hard reset of the CLA
+  //
+  HWREGH(base + CLA_O_MCTL) |= CLA_MCTL_HARDRESET;
 
-    EDIS;
+  EDIS;
 
-    //
-    // Wait for few cycles till the reset is complete
-    //
-    NOP;
-    NOP;
-    NOP;
+  //
+  // Wait for few cycles till the reset is complete
+  //
+  NOP;
+  NOP;
+  NOP;
 }
 
 //*****************************************************************************
@@ -356,32 +337,30 @@ CLA_performHardReset(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CLA_performSoftReset(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline void CLA_performSoftReset(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Modify protected register
-    //
-    EALLOW;
+  //
+  // Modify protected register
+  //
+  EALLOW;
 
-    //
-    // Soft reset of the CLA
-    //
-    HWREGH(base + CLA_O_MCTL) |= CLA_MCTL_SOFTRESET;
+  //
+  // Soft reset of the CLA
+  //
+  HWREGH(base + CLA_O_MCTL) |= CLA_MCTL_SOFTRESET;
 
-    EDIS;
+  EDIS;
 
-    //
-    // Wait for few cycles till the reset is complete
-    //
-    NOP;
-    NOP;
-    NOP;
+  //
+  // Wait for few cycles till the reset is complete
+  //
+  NOP;
+  NOP;
+  NOP;
 }
 
 //*****************************************************************************
@@ -396,25 +375,23 @@ CLA_performSoftReset(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CLA_enableIACK(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline void CLA_enableIACK(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Modify protected register
-    //
-    EALLOW;
+  //
+  // Modify protected register
+  //
+  EALLOW;
 
-    //
-    // Enable the main CPU to use the IACK #16bit instruction
-    //
-    HWREGH(base + CLA_O_MCTL) |= CLA_MCTL_IACKE;
+  //
+  // Enable the main CPU to use the IACK #16bit instruction
+  //
+  HWREGH(base + CLA_O_MCTL) |= CLA_MCTL_IACKE;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -429,25 +406,23 @@ CLA_enableIACK(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CLA_disableIACK(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline void CLA_disableIACK(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Modify protected register
-    //
-    EALLOW;
+  //
+  // Modify protected register
+  //
+  EALLOW;
 
-    //
-    // Enable the main CPU to use the IACK #16bit instruction
-    //
-    HWREGH(base + CLA_O_MCTL) &= ~CLA_MCTL_IACKE;
+  //
+  // Enable the main CPU to use the IACK #16bit instruction
+  //
+  HWREGH(base + CLA_O_MCTL) &= ~CLA_MCTL_IACKE;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -468,18 +443,17 @@ CLA_disableIACK(uint32_t base)
 //! execution.
 //
 //*****************************************************************************
-static inline bool
-CLA_getPendingTaskFlag(uint32_t base, CLA_TaskNumber taskNumber)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline bool CLA_getPendingTaskFlag(uint32_t       base,
+                                          CLA_TaskNumber taskNumber) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Read the run status register and return the appropriate value.
-    //
-    return(((HWREGH(base + CLA_O_MIFR) >> (uint16_t)taskNumber) & 1U) != 0U);
+  //
+  // Read the run status register and return the appropriate value.
+  //
+  return (((HWREGH(base + CLA_O_MIFR) >> (uint16_t)taskNumber) & 1U) != 0U);
 }
 
 //*****************************************************************************
@@ -493,26 +467,24 @@ CLA_getPendingTaskFlag(uint32_t base, CLA_TaskNumber taskNumber)
 //! \return the value of Interrupt Flag Register (MIFR)
 //
 //*****************************************************************************
-static inline uint16_t
-CLA_getAllPendingTaskFlags(uint32_t base)
-{
-    uint16_t status;
+static inline uint16_t CLA_getAllPendingTaskFlags(uint32_t base) {
+  uint16_t status;
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Just return the Interrupt Flag Register (MIFR) since that is what was
-    // requested.
-    //
-    status = HWREGH(base + CLA_O_MIFR);
+  //
+  // Just return the Interrupt Flag Register (MIFR) since that is what was
+  // requested.
+  //
+  status = HWREGH(base + CLA_O_MIFR);
 
-    //
-    // Return the Interrupt Flag Register value
-    //
-    return(status);
+  //
+  // Return the Interrupt Flag Register value
+  //
+  return (status);
 }
 
 //*****************************************************************************
@@ -530,18 +502,17 @@ CLA_getAllPendingTaskFlags(uint32_t base)
 //! \return True if any of task interrupt overflow has occurred.
 //
 //*****************************************************************************
-static inline bool
-CLA_getTaskOverflowFlag(uint32_t base, CLA_TaskNumber taskNumber)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline bool CLA_getTaskOverflowFlag(uint32_t       base,
+                                           CLA_TaskNumber taskNumber) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Read the run status register and return the appropriate value.
-    //
-    return(((HWREGH(base + CLA_O_MIOVF) >> (uint16_t)taskNumber) & 1U) != 0U);
+  //
+  // Read the run status register and return the appropriate value.
+  //
+  return (((HWREGH(base + CLA_O_MIOVF) >> (uint16_t)taskNumber) & 1U) != 0U);
 }
 
 //*****************************************************************************
@@ -555,26 +526,24 @@ CLA_getTaskOverflowFlag(uint32_t base, CLA_TaskNumber taskNumber)
 //! \return the value of Interrupt Overflow Flag Register(MIOVF)
 //
 //*****************************************************************************
-static inline uint16_t
-CLA_getAllTaskOverflowFlags(uint32_t base)
-{
-    uint16_t status;
+static inline uint16_t CLA_getAllTaskOverflowFlags(uint32_t base) {
+  uint16_t status;
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Just return Interrupt Overflow Flag Register(MIOVF) since that is what
-    // was requested.
-    //
-    status = HWREGH(base + CLA_O_MIOVF);
+  //
+  // Just return Interrupt Overflow Flag Register(MIOVF) since that is what
+  // was requested.
+  //
+  status = HWREGH(base + CLA_O_MIOVF);
 
-    //
-    // Return the Interrupt Overflow Flag Register
-    //
-    return(status);
+  //
+  // Return the Interrupt Overflow Flag Register
+  //
+  return (status);
 }
 
 //*****************************************************************************
@@ -592,25 +561,23 @@ CLA_getAllTaskOverflowFlags(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CLA_clearTaskFlags(uint32_t base, uint16_t taskFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline void CLA_clearTaskFlags(uint32_t base, uint16_t taskFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    //Modify protected register
-    //
-    EALLOW;
+  //
+  // Modify protected register
+  //
+  EALLOW;
 
-    //
-    // Clear the task interrupt flag
-    //
-    HWREGH(base + CLA_O_MICLR) |= taskFlags;
+  //
+  // Clear the task interrupt flag
+  //
+  HWREGH(base + CLA_O_MICLR) |= taskFlags;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -627,25 +594,23 @@ CLA_clearTaskFlags(uint32_t base, uint16_t taskFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CLA_forceTasks(uint32_t base, uint16_t taskFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline void CLA_forceTasks(uint32_t base, uint16_t taskFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Modify protected register
-    //
-    EALLOW;
+  //
+  // Modify protected register
+  //
+  EALLOW;
 
-    //
-    // Force the task interrupt.
-    //
-    HWREGH(base + CLA_O_MIFRC) |= taskFlags;
+  //
+  // Force the task interrupt.
+  //
+  HWREGH(base + CLA_O_MIFRC) |= taskFlags;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -663,25 +628,23 @@ CLA_forceTasks(uint32_t base, uint16_t taskFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CLA_enableTasks(uint32_t base, uint16_t taskFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline void CLA_enableTasks(uint32_t base, uint16_t taskFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Modify protected register
-    //
-    EALLOW;
+  //
+  // Modify protected register
+  //
+  EALLOW;
 
-    //
-    // Enable CLA task
-    //
-    HWREGH(base + CLA_O_MIER) |= taskFlags;
+  //
+  // Enable CLA task
+  //
+  HWREGH(base + CLA_O_MIER) |= taskFlags;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -701,25 +664,23 @@ CLA_enableTasks(uint32_t base, uint16_t taskFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CLA_disableTasks(uint32_t base, uint16_t taskFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline void CLA_disableTasks(uint32_t base, uint16_t taskFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Modify protected register
-    //
-    EALLOW;
+  //
+  // Modify protected register
+  //
+  EALLOW;
 
-    //
-    // Disable CLA task interrupt
-    //
-    HWREGH(base + CLA_O_MIER) &= ~taskFlags;
+  //
+  // Disable CLA task interrupt
+  //
+  HWREGH(base + CLA_O_MIER) &= ~taskFlags;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -736,18 +697,17 @@ CLA_disableTasks(uint32_t base, uint16_t taskFlags)
 //! \return True if the task is executing.
 //
 //*****************************************************************************
-static inline bool
-CLA_getTaskRunStatus(uint32_t base, CLA_TaskNumber taskNumber)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline bool CLA_getTaskRunStatus(uint32_t       base,
+                                        CLA_TaskNumber taskNumber) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Read the run status register and return the appropriate value.
-    //
-    return(((HWREGH(base + CLA_O_MIRUN) >> (uint16_t)taskNumber) & 1U) != 0U);
+  //
+  // Read the run status register and return the appropriate value.
+  //
+  return (((HWREGH(base + CLA_O_MIRUN) >> (uint16_t)taskNumber) & 1U) != 0U);
 }
 
 //*****************************************************************************
@@ -761,26 +721,24 @@ CLA_getTaskRunStatus(uint32_t base, CLA_TaskNumber taskNumber)
 //! \return the value of Interrupt Run Status Register (MIRUN)
 //
 //*****************************************************************************
-static inline uint16_t
-CLA_getAllTaskRunStatus(uint32_t base)
-{
-    uint16_t status;
+static inline uint16_t CLA_getAllTaskRunStatus(uint32_t base) {
+  uint16_t status;
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Just return the Interrupt Run Status Register since that is what was
-    // requested.
-    //
-    status = HWREGH(base + CLA_O_MIRUN);
+  //
+  // Just return the Interrupt Run Status Register since that is what was
+  // requested.
+  //
+  status = HWREGH(base + CLA_O_MIRUN);
 
-    //
-    // Return the Interrupt Run Status Register (MIRUN)
-    //
-    return(status);
+  //
+  // Return the Interrupt Run Status Register (MIRUN)
+  //
+  return (status);
 }
 #endif // #ifdef __TMS320C28XX__
 
@@ -819,25 +777,24 @@ CLA_getAllTaskRunStatus(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CLA_enableSoftwareInterrupt(uint32_t base, uint16_t taskFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline void CLA_enableSoftwareInterrupt(uint32_t base,
+                                               uint16_t taskFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Modify protected register
-    //
-    __meallow();
+  //
+  // Modify protected register
+  //
+  __meallow();
 
-    //
-    // Enable Software Interrupt
-    //
-    HWREGH(base + CLA_O_SOFTINTEN) |= taskFlags;
+  //
+  // Enable Software Interrupt
+  //
+  HWREGH(base + CLA_O_SOFTINTEN) |= taskFlags;
 
-    __medis();
+  __medis();
 }
 
 //*****************************************************************************
@@ -862,25 +819,24 @@ CLA_enableSoftwareInterrupt(uint32_t base, uint16_t taskFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CLA_disableSoftwareInterrupt(uint32_t base, uint16_t taskFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline void CLA_disableSoftwareInterrupt(uint32_t base,
+                                                uint16_t taskFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Modify protected register
-    //
-    __meallow();
+  //
+  // Modify protected register
+  //
+  __meallow();
 
-    //
-    // Enable Software Interrupt
-    //
-    HWREGH(base + CLA_O_SOFTINTEN) &=  ~taskFlags;
+  //
+  // Enable Software Interrupt
+  //
+  HWREGH(base + CLA_O_SOFTINTEN) &= ~taskFlags;
 
-    __medis();
+  __medis();
 }
 //*****************************************************************************
 //
@@ -915,25 +871,24 @@ CLA_disableSoftwareInterrupt(uint32_t base, uint16_t taskFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CLA_forceSoftwareInterrupt(uint32_t base, uint16_t taskFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CLA_isBaseValid(base));
+static inline void CLA_forceSoftwareInterrupt(uint32_t base,
+                                              uint16_t taskFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CLA_isBaseValid(base));
 
-    //
-    // Modify protected register
-    //
-    __meallow();
+  //
+  // Modify protected register
+  //
+  __meallow();
 
-    //
-    // Force Software Interrupt
-    //
-    HWREGH(base + CLA_O_SOFTINTFRC) |= taskFlags;
+  //
+  // Force Software Interrupt
+  //
+  HWREGH(base + CLA_O_SOFTINTFRC) |= taskFlags;
 
-    __medis();
+  __medis();
 }
 
 #endif // #if defined(__TMS320C28XX_CLA1__) || defined(__TMS320C28XX_CLA2__)
@@ -959,10 +914,10 @@ CLA_forceSoftwareInterrupt(uint32_t base, uint16_t taskFlags)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CLA_setTriggerSource(CLA_TaskNumber taskNumber, CLA_Trigger trigger);
+extern void CLA_setTriggerSource(CLA_TaskNumber taskNumber,
+                                 CLA_Trigger    trigger);
 
-#endif //#ifdef __TMS320C28XX__
+#endif // #ifdef __TMS320C28XX__
 //*****************************************************************************
 //
 // Close the Doxygen group.

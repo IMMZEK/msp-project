@@ -1,42 +1,42 @@
-//#############################################################################
+// #############################################################################
 //
-// FILE:   cputimer.h
+//  FILE:   cputimer.h
 //
-// TITLE:   C28x CPU timer Driver
+//  TITLE:   C28x CPU timer Driver
 //
-//#############################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// #############################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//#############################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// #############################################################################
 
 #ifndef CPUTIMER_H
 #define CPUTIMER_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #ifdef __TMS320C28XX__
@@ -61,13 +60,13 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "debug.h"
+#include "inc/hw_cputimer.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
-#include "inc/hw_cputimer.h"
-#include "debug.h"
 #include "sysctl.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 //*****************************************************************************
 //
@@ -80,15 +79,14 @@ extern "C"
 //! \e mode parameter.
 //
 //****************************************************************************
-typedef enum
-{
+typedef enum {
   //! Denotes that the timer will stop after the next decrement
   CPUTIMER_EMULATIONMODE_STOPAFTERNEXTDECREMENT = 0x0000,
   //! Denotes that the timer will stop when it reaches zero
-  CPUTIMER_EMULATIONMODE_STOPATZERO = 0x0400,
+  CPUTIMER_EMULATIONMODE_STOPATZERO             = 0x0400,
   //! Denotes that the timer will run free
-  CPUTIMER_EMULATIONMODE_RUNFREE = 0x0800
-}CPUTimer_EmulationMode;
+  CPUTIMER_EMULATIONMODE_RUNFREE                = 0x0800
+} CPUTimer_EmulationMode;
 
 //*****************************************************************************
 //
@@ -96,18 +94,17 @@ typedef enum
 //! CPUTimer_selectClockSource() as the \e source parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    //! System Clock Source
-    CPUTIMER_CLOCK_SOURCE_SYS     = 0x0,
-    //! Internal Oscillator 1 Clock Source
-    CPUTIMER_CLOCK_SOURCE_INTOSC1 = 0x1,
-    //! Internal Oscillator 2 Clock Source
-    CPUTIMER_CLOCK_SOURCE_INTOSC2 = 0x2,
-    //! External Clock Source
-    CPUTIMER_CLOCK_SOURCE_XTAL    = 0x3,
-    //! Auxiliary PLL Clock Source
-    CPUTIMER_CLOCK_SOURCE_AUX     = 0x6
+typedef enum {
+  //! System Clock Source
+  CPUTIMER_CLOCK_SOURCE_SYS     = 0x0,
+  //! Internal Oscillator 1 Clock Source
+  CPUTIMER_CLOCK_SOURCE_INTOSC1 = 0x1,
+  //! Internal Oscillator 2 Clock Source
+  CPUTIMER_CLOCK_SOURCE_INTOSC2 = 0x2,
+  //! External Clock Source
+  CPUTIMER_CLOCK_SOURCE_XTAL    = 0x3,
+  //! Auxiliary PLL Clock Source
+  CPUTIMER_CLOCK_SOURCE_AUX     = 0x6
 } CPUTimer_ClockSource;
 
 //*****************************************************************************
@@ -116,13 +113,12 @@ typedef enum
 //! CPUTimer_selectClockSource() as the \e prescaler parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    CPUTIMER_CLOCK_PRESCALER_1  = 0,      //!< Prescaler value of / 1
-    CPUTIMER_CLOCK_PRESCALER_2  = 1,      //!< Prescaler value of / 2
-    CPUTIMER_CLOCK_PRESCALER_4  = 2,      //!< Prescaler value of / 4
-    CPUTIMER_CLOCK_PRESCALER_8  = 3,      //!< Prescaler value of / 8
-    CPUTIMER_CLOCK_PRESCALER_16 = 4       //!< Prescaler value of / 16
+typedef enum {
+  CPUTIMER_CLOCK_PRESCALER_1  = 0, //!< Prescaler value of / 1
+  CPUTIMER_CLOCK_PRESCALER_2  = 1, //!< Prescaler value of / 2
+  CPUTIMER_CLOCK_PRESCALER_4  = 2, //!< Prescaler value of / 4
+  CPUTIMER_CLOCK_PRESCALER_8  = 3, //!< Prescaler value of / 8
+  CPUTIMER_CLOCK_PRESCALER_16 = 4  //!< Prescaler value of / 16
 } CPUTimer_Prescaler;
 
 //*****************************************************************************
@@ -139,10 +135,9 @@ typedef enum
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool CPUTimer_isBaseValid(uint32_t base)
-{
-    return((base == CPUTIMER0_BASE) || (base == CPUTIMER1_BASE) ||
-           (base == CPUTIMER2_BASE));
+static inline bool CPUTimer_isBaseValid(uint32_t base) {
+  return ((base == CPUTIMER0_BASE) || (base == CPUTIMER1_BASE) ||
+          (base == CPUTIMER2_BASE));
 }
 #endif
 
@@ -157,14 +152,13 @@ static inline bool CPUTimer_isBaseValid(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CPUTimer_clearOverflowFlag(uint32_t base)
-{
-    ASSERT(CPUTimer_isBaseValid(base));
+static inline void CPUTimer_clearOverflowFlag(uint32_t base) {
+  ASSERT(CPUTimer_isBaseValid(base));
 
-    //
-    // Set TIF bit of TCR register
-    //
-    HWREGH(base + CPUTIMER_O_TCR) |= CPUTIMER_TCR_TIF;
+  //
+  // Set TIF bit of TCR register
+  //
+  HWREGH(base + CPUTIMER_O_TCR) |= CPUTIMER_TCR_TIF;
 }
 
 //*****************************************************************************
@@ -178,14 +172,13 @@ static inline void CPUTimer_clearOverflowFlag(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CPUTimer_disableInterrupt(uint32_t base)
-{
-    ASSERT(CPUTimer_isBaseValid(base));
+static inline void CPUTimer_disableInterrupt(uint32_t base) {
+  ASSERT(CPUTimer_isBaseValid(base));
 
-    //
-    // Clear TIE bit of TCR register
-    //
-    HWREGH(base + CPUTIMER_O_TCR) &= ~CPUTIMER_TCR_TIE;
+  //
+  // Clear TIE bit of TCR register
+  //
+  HWREGH(base + CPUTIMER_O_TCR) &= ~CPUTIMER_TCR_TIE;
 }
 
 //*****************************************************************************
@@ -199,16 +192,15 @@ static inline void CPUTimer_disableInterrupt(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CPUTimer_enableInterrupt(uint32_t base)
-{
-    uint16_t tcrValue = 0;
-    ASSERT(CPUTimer_isBaseValid(base));
+static inline void CPUTimer_enableInterrupt(uint32_t base) {
+  uint16_t tcrValue = 0;
+  ASSERT(CPUTimer_isBaseValid(base));
 
-    //
-    // Set TIE bit of TCR register
-    //
-    tcrValue = HWREGH(base + CPUTIMER_O_TCR) & (~CPUTIMER_TCR_TIF);
-    HWREGH(base + CPUTIMER_O_TCR) = tcrValue | CPUTIMER_TCR_TIE;
+  //
+  // Set TIE bit of TCR register
+  //
+  tcrValue = HWREGH(base + CPUTIMER_O_TCR) & (~CPUTIMER_TCR_TIF);
+  HWREGH(base + CPUTIMER_O_TCR) = tcrValue | CPUTIMER_TCR_TIE;
 }
 
 //*****************************************************************************
@@ -223,16 +215,15 @@ static inline void CPUTimer_enableInterrupt(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CPUTimer_reloadTimerCounter(uint32_t base)
-{
-    uint16_t tcrValue = 0;
-    ASSERT(CPUTimer_isBaseValid(base));
+static inline void CPUTimer_reloadTimerCounter(uint32_t base) {
+  uint16_t tcrValue = 0;
+  ASSERT(CPUTimer_isBaseValid(base));
 
-    //
-    // Set TRB bit of register TCR
-    //
-    tcrValue = HWREGH(base + CPUTIMER_O_TCR) & (~CPUTIMER_TCR_TIF);
-    HWREGH(base + CPUTIMER_O_TCR) = tcrValue | CPUTIMER_TCR_TRB;
+  //
+  // Set TRB bit of register TCR
+  //
+  tcrValue = HWREGH(base + CPUTIMER_O_TCR) & (~CPUTIMER_TCR_TIF);
+  HWREGH(base + CPUTIMER_O_TCR) = tcrValue | CPUTIMER_TCR_TRB;
 }
 
 //*****************************************************************************
@@ -246,16 +237,15 @@ static inline void CPUTimer_reloadTimerCounter(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CPUTimer_stopTimer(uint32_t base)
-{
-    uint16_t tcrValue = 0;
-    ASSERT(CPUTimer_isBaseValid(base));
+static inline void CPUTimer_stopTimer(uint32_t base) {
+  uint16_t tcrValue = 0;
+  ASSERT(CPUTimer_isBaseValid(base));
 
-    //
-    // Set TSS bit of register TCR
-    //
-    tcrValue = HWREGH(base + CPUTIMER_O_TCR) & (~CPUTIMER_TCR_TIF);
-    HWREGH(base + CPUTIMER_O_TCR) = tcrValue | CPUTIMER_TCR_TSS;
+  //
+  // Set TSS bit of register TCR
+  //
+  tcrValue = HWREGH(base + CPUTIMER_O_TCR) & (~CPUTIMER_TCR_TIF);
+  HWREGH(base + CPUTIMER_O_TCR) = tcrValue | CPUTIMER_TCR_TSS;
 }
 
 //*****************************************************************************
@@ -271,14 +261,13 @@ static inline void CPUTimer_stopTimer(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CPUTimer_resumeTimer(uint32_t base)
-{
-    ASSERT(CPUTimer_isBaseValid(base));
+static inline void CPUTimer_resumeTimer(uint32_t base) {
+  ASSERT(CPUTimer_isBaseValid(base));
 
-    //
-    // Clear TSS bit of register TCR
-    //
-    HWREGH(base + CPUTIMER_O_TCR) &= ~CPUTIMER_TCR_TSS;
+  //
+  // Clear TSS bit of register TCR
+  //
+  HWREGH(base + CPUTIMER_O_TCR) &= ~CPUTIMER_TCR_TSS;
 }
 
 //*****************************************************************************
@@ -294,21 +283,20 @@ static inline void CPUTimer_resumeTimer(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CPUTimer_startTimer(uint32_t base)
-{
-    uint16_t tcrValue = 0;
-    ASSERT(CPUTimer_isBaseValid(base));
+static inline void CPUTimer_startTimer(uint32_t base) {
+  uint16_t tcrValue = 0;
+  ASSERT(CPUTimer_isBaseValid(base));
 
-    //
-    // Reload the timer counter
-    //
-    tcrValue = HWREGH(base + CPUTIMER_O_TCR) & (~CPUTIMER_TCR_TIF);
-    HWREGH(base + CPUTIMER_O_TCR) = tcrValue | CPUTIMER_TCR_TRB;
+  //
+  // Reload the timer counter
+  //
+  tcrValue = HWREGH(base + CPUTIMER_O_TCR) & (~CPUTIMER_TCR_TIF);
+  HWREGH(base + CPUTIMER_O_TCR) = tcrValue | CPUTIMER_TCR_TRB;
 
-    //
-    // Clear TSS bit of register TCR
-    //
-    HWREGH(base + CPUTIMER_O_TCR) &= ~CPUTIMER_TCR_TSS;
+  //
+  // Clear TSS bit of register TCR
+  //
+  HWREGH(base + CPUTIMER_O_TCR) &= ~CPUTIMER_TCR_TSS;
 }
 
 //*****************************************************************************
@@ -323,14 +311,13 @@ static inline void CPUTimer_startTimer(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CPUTimer_setPeriod(uint32_t base, uint32_t periodCount)
-{
-    ASSERT(CPUTimer_isBaseValid(base));
+static inline void CPUTimer_setPeriod(uint32_t base, uint32_t periodCount) {
+  ASSERT(CPUTimer_isBaseValid(base));
 
-    //
-    // Load the MSB period Count
-    //
-    HWREG(base + CPUTIMER_O_PRD) = periodCount;
+  //
+  // Load the MSB period Count
+  //
+  HWREG(base + CPUTIMER_O_PRD) = periodCount;
 }
 
 //*****************************************************************************
@@ -344,14 +331,13 @@ static inline void CPUTimer_setPeriod(uint32_t base, uint32_t periodCount)
 //! \return Returns the current CPU timer count value.
 //
 //*****************************************************************************
-static inline uint32_t CPUTimer_getTimerCount(uint32_t base)
-{
-    ASSERT(CPUTimer_isBaseValid(base));
+static inline uint32_t CPUTimer_getTimerCount(uint32_t base) {
+  ASSERT(CPUTimer_isBaseValid(base));
 
-    //
-    // Get the TIMH:TIM registers value
-    //
-    return(HWREG(base + CPUTIMER_O_TIM));
+  //
+  // Get the TIMH:TIM registers value
+  //
+  return (HWREG(base + CPUTIMER_O_TIM));
 }
 
 //*****************************************************************************
@@ -367,15 +353,14 @@ static inline uint32_t CPUTimer_getTimerCount(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CPUTimer_setPreScaler(uint32_t base, uint16_t prescaler)
-{
-    ASSERT(CPUTimer_isBaseValid(base));
+static inline void CPUTimer_setPreScaler(uint32_t base, uint16_t prescaler) {
+  ASSERT(CPUTimer_isBaseValid(base));
 
-    //
-    // Writes to TPR.TDDR and TPRH.TDDRH bits
-    //
-    HWREGH(base + CPUTIMER_O_TPRH) = prescaler >> 8U;
-    HWREGH(base + CPUTIMER_O_TPR) = (prescaler & CPUTIMER_TPR_TDDR_M) ;
+  //
+  // Writes to TPR.TDDR and TPRH.TDDRH bits
+  //
+  HWREGH(base + CPUTIMER_O_TPRH) = prescaler >> 8U;
+  HWREGH(base + CPUTIMER_O_TPR)  = (prescaler & CPUTIMER_TPR_TDDR_M);
 }
 
 //*****************************************************************************
@@ -389,15 +374,16 @@ static inline void CPUTimer_setPreScaler(uint32_t base, uint16_t prescaler)
 //! \return Returns true if the CPU timer has overflowed, false if not.
 //
 //*****************************************************************************
-static inline bool CPUTimer_getTimerOverflowStatus(uint32_t base)
-{
-    ASSERT(CPUTimer_isBaseValid(base));
+static inline bool CPUTimer_getTimerOverflowStatus(uint32_t base) {
+  ASSERT(CPUTimer_isBaseValid(base));
 
-    //
-    // Check if TIF bits of register TCR are set
-    //
-    return(((HWREGH(base + CPUTIMER_O_TCR) & CPUTIMER_TCR_TIF) ==
-            CPUTIMER_TCR_TIF) ? true : false);
+  //
+  // Check if TIF bits of register TCR are set
+  //
+  return (
+      ((HWREGH(base + CPUTIMER_O_TCR) & CPUTIMER_TCR_TIF) == CPUTIMER_TCR_TIF)
+          ? true
+          : false);
 }
 
 //*****************************************************************************
@@ -429,38 +415,36 @@ static inline bool CPUTimer_getTimerOverflowStatus(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void CPUTimer_selectClockSource(uint32_t base,
+static inline void CPUTimer_selectClockSource(uint32_t             base,
                                               CPUTimer_ClockSource source,
-                                              CPUTimer_Prescaler prescaler)
-{
-    ASSERT(base == CPUTIMER2_BASE);
+                                              CPUTimer_Prescaler   prescaler) {
+  ASSERT(base == CPUTIMER2_BASE);
+
+  //
+  // Set source and prescaler for CPU Timer 2
+  //
+  if (base == CPUTIMER2_BASE) {
+    EALLOW;
 
     //
-    // Set source and prescaler for CPU Timer 2
+    // Set Clock Source
     //
-    if(base == CPUTIMER2_BASE)
-    {
-        EALLOW;
+    HWREGH(CPUSYS_BASE + SYSCTL_O_TMR2CLKCTL) &=
+        ~SYSCTL_TMR2CLKCTL_TMR2CLKSRCSEL_M;
 
-        //
-        // Set Clock Source
-        //
-        HWREGH(CPUSYS_BASE + SYSCTL_O_TMR2CLKCTL) &=
-            ~SYSCTL_TMR2CLKCTL_TMR2CLKSRCSEL_M;
+    HWREGH(CPUSYS_BASE + SYSCTL_O_TMR2CLKCTL) |= (uint16_t)source;
 
-        HWREGH(CPUSYS_BASE + SYSCTL_O_TMR2CLKCTL) |= (uint16_t)source;
+    //
+    // Set Clock Prescaler
+    //
+    HWREGH(CPUSYS_BASE + SYSCTL_O_TMR2CLKCTL) &=
+        ~SYSCTL_TMR2CLKCTL_TMR2CLKPRESCALE_M;
 
-        //
-        // Set Clock Prescaler
-        //
-        HWREGH(CPUSYS_BASE + SYSCTL_O_TMR2CLKCTL) &=
-            ~SYSCTL_TMR2CLKCTL_TMR2CLKPRESCALE_M;
+    HWREGH(CPUSYS_BASE + SYSCTL_O_TMR2CLKCTL) |=
+        ((uint16_t)prescaler << SYSCTL_TMR2CLKCTL_TMR2CLKPRESCALE_S);
 
-        HWREGH(CPUSYS_BASE + SYSCTL_O_TMR2CLKCTL) |= ((uint16_t)prescaler <<
-                SYSCTL_TMR2CLKCTL_TMR2CLKPRESCALE_S);
-
-        EDIS;
-    }
+    EDIS;
+  }
 }
 
 //*****************************************************************************
@@ -483,7 +467,7 @@ static inline void CPUTimer_selectClockSource(uint32_t base,
 //! \return None.
 //
 //*****************************************************************************
-extern void CPUTimer_setEmulationMode(uint32_t base,
+extern void CPUTimer_setEmulationMode(uint32_t               base,
                                       CPUTimer_EmulationMode mode);
 
 //*****************************************************************************

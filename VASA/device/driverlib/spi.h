@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   spi.h
+//  FILE:   spi.h
 //
-// TITLE:  C28x SPI driver.
+//  TITLE:  C28x SPI driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef SPI_H
 #define SPI_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -60,13 +59,13 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
-#include "inc/hw_memmap.h"
-#include "inc/hw_types.h"
-#include "inc/hw_spi.h"
 #include "debug.h"
 #include "hw_reg_inclusive_terminology.h"
+#include "inc/hw_memmap.h"
+#include "inc/hw_spi.h"
+#include "inc/hw_types.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 #ifndef DOXYGEN_PDF_IGNORE
 //*****************************************************************************
@@ -76,13 +75,12 @@ extern "C"
 // SPI_getInterruptStatus().
 //
 //*****************************************************************************
-#define SPI_INT_RX_OVERRUN        0x0001U //!< Receive overrun interrupt
-#define SPI_INT_RX_DATA_TX_EMPTY  0x0002U //!< Data received, transmit empty
-#define SPI_INT_RXFF              0x0004U //!< RX FIFO level interrupt
-#define SPI_INT_TXFF              0x0008U //!< TX FIFO level interrupt
-#define SPI_INT_RXFF_OVERFLOW     0x0010U //!< RX FIFO overflow
+#define SPI_INT_RX_OVERRUN       0x0001U //!< Receive overrun interrupt
+#define SPI_INT_RX_DATA_TX_EMPTY 0x0002U //!< Data received, transmit empty
+#define SPI_INT_RXFF             0x0004U //!< RX FIFO level interrupt
+#define SPI_INT_TXFF             0x0008U //!< TX FIFO level interrupt
+#define SPI_INT_RXFF_OVERFLOW    0x0010U //!< RX FIFO overflow
 #endif
-
 
 //*****************************************************************************
 //
@@ -99,7 +97,7 @@ extern "C"
 //
 //*****************************************************************************
 #define SPI_transmitByte(base, txData)                                         \
-                                SPI_pollingNonFIFOTransaction(base, 8U,  txData)
+  SPI_pollingNonFIFOTransaction(base, 8U, txData)
 
 //*****************************************************************************
 //
@@ -116,7 +114,7 @@ extern "C"
 //
 //*****************************************************************************
 #define SPI_transmit16Bits(base, txData)                                       \
-                                SPI_pollingNonFIFOTransaction(base, 16U, txData)
+  SPI_pollingNonFIFOTransaction(base, 16U, txData)
 
 //*****************************************************************************
 //
@@ -137,7 +135,7 @@ extern "C"
 //
 //*****************************************************************************
 #define SPI_transmitNBytes(base, txBuffer, numOfWords, txDelay)                \
-      SPI_pollingFIFOTransaction(base, 8U,  txBuffer, NULL, numOfWords, txDelay)
+  SPI_pollingFIFOTransaction(base, 8U, txBuffer, NULL, numOfWords, txDelay)
 
 //*****************************************************************************
 //
@@ -157,7 +155,7 @@ extern "C"
 //
 //*****************************************************************************
 #define SPI_transmitN16BitWord(base, txBuffer, numOfWords, txDelay)            \
-      SPI_pollingFIFOTransaction(base, 16U, txBuffer, NULL, numOfWords, txDelay)
+  SPI_pollingFIFOTransaction(base, 16U, txBuffer, NULL, numOfWords, txDelay)
 
 //*****************************************************************************
 //
@@ -182,8 +180,8 @@ extern "C"
 //*****************************************************************************
 #define SPI_transmitNWordsWithCharLength(base, charLength, txBuffer,           \
                                          numOfWords, txDelay)                  \
-              SPI_pollingFIFOTransaction(base, charLength, txBuffer, NULL,     \
-                                         numOfWords, txDelay)
+  SPI_pollingFIFOTransaction(base, charLength, txBuffer, NULL, numOfWords,     \
+                             txDelay)
 
 //*****************************************************************************
 //
@@ -201,7 +199,7 @@ extern "C"
 //
 //*****************************************************************************
 #define SPI_receiveByte(base, dummyData)                                       \
-                            SPI_pollingNonFIFOTransaction(base, 8U, dummyData)
+  SPI_pollingNonFIFOTransaction(base, 8U, dummyData)
 
 //*****************************************************************************
 //
@@ -221,7 +219,7 @@ extern "C"
 //
 //*****************************************************************************
 #define SPI_receiveNBytes(base, rxBuffer, numOfWords, txDelay)                 \
-      SPI_pollingFIFOTransaction(base, 8U,  NULL, rxBuffer, numOfWords, txDelay)
+  SPI_pollingFIFOTransaction(base, 8U, NULL, rxBuffer, numOfWords, txDelay)
 
 //*****************************************************************************
 //
@@ -241,7 +239,7 @@ extern "C"
 //
 //*****************************************************************************
 #define SPI_receiveN16BitWord(base, rxBuffer, numOfWords, txDelay)             \
-      SPI_pollingFIFOTransaction(base, 16U, NULL, rxBuffer, numOfWords, txDelay)
+  SPI_pollingFIFOTransaction(base, 16U, NULL, rxBuffer, numOfWords, txDelay)
 
 //*****************************************************************************
 //
@@ -264,24 +262,23 @@ extern "C"
 //*****************************************************************************
 #define SPI_receiveNWordsWithcharLength(base, charLength, rxBuffer,            \
                                         numOfWords, txDelay)                   \
-            SPI_pollingFIFOTransaction(base, charLength, NULL, rxBuffer,       \
-                                       numOfWords, txDelay)
+  SPI_pollingFIFOTransaction(base, charLength, NULL, rxBuffer, numOfWords,     \
+                             txDelay)
 
 //*****************************************************************************
 //
 //! Values that can be passed to SPI_setConfig() as the \e protocol parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    //! Mode 0. Polarity 0, phase 0. Rising edge without delay.
-    SPI_PROT_POL0PHA0   = 0x0000U,
-    //! Mode 1. Polarity 0, phase 1. Rising edge with delay.
-    SPI_PROT_POL0PHA1   = 0x0002U,
-    //! Mode 2. Polarity 1, phase 0. Falling edge without delay.
-    SPI_PROT_POL1PHA0   = 0x0001U,
-    //! Mode 3. Polarity 1, phase 1. Falling edge with delay.
-    SPI_PROT_POL1PHA1   = 0x0003U
+typedef enum {
+  //! Mode 0. Polarity 0, phase 0. Rising edge without delay.
+  SPI_PROT_POL0PHA0 = 0x0000U,
+  //! Mode 1. Polarity 0, phase 1. Rising edge with delay.
+  SPI_PROT_POL0PHA1 = 0x0002U,
+  //! Mode 2. Polarity 1, phase 0. Falling edge without delay.
+  SPI_PROT_POL1PHA0 = 0x0001U,
+  //! Mode 3. Polarity 1, phase 1. Falling edge with delay.
+  SPI_PROT_POL1PHA1 = 0x0003U
 } SPI_TransferProtocol;
 
 //*****************************************************************************
@@ -289,12 +286,11 @@ typedef enum
 //! Values that can be passed to SPI_setConfig() as the \e mode parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    SPI_MODE_PERIPHERAL     = 0x0002U,   //!< SPI peripheral
-    SPI_MODE_CONTROLLER     = 0x0006U,   //!< SPI controller
-    SPI_MODE_PERIPHERAL_OD  = 0x0000U,   //!< SPI peripheral w/ output disabled
-    SPI_MODE_CONTROLLER_OD  = 0x0004U    //!< SPI controller w/ output disabled
+typedef enum {
+  SPI_MODE_PERIPHERAL    = 0x0002U, //!< SPI peripheral
+  SPI_MODE_CONTROLLER    = 0x0006U, //!< SPI controller
+  SPI_MODE_PERIPHERAL_OD = 0x0000U, //!< SPI peripheral w/ output disabled
+  SPI_MODE_CONTROLLER_OD = 0x0004U  //!< SPI controller w/ output disabled
 } SPI_Mode;
 
 //*****************************************************************************
@@ -304,27 +300,26 @@ typedef enum
 //! parameter, and returned by SPI_getTxFIFOStatus().
 //
 //*****************************************************************************
-typedef enum
-{
-    SPI_FIFO_TXEMPTY    = 0x0000U,      //!< Transmit FIFO empty
-    SPI_FIFO_TX0        = 0x0000U,      //!< Transmit FIFO empty
-    SPI_FIFO_TX1        = 0x0001U,      //!< Transmit FIFO 1/16 full
-    SPI_FIFO_TX2        = 0x0002U,      //!< Transmit FIFO 2/16 full
-    SPI_FIFO_TX3        = 0x0003U,      //!< Transmit FIFO 3/16 full
-    SPI_FIFO_TX4        = 0x0004U,      //!< Transmit FIFO 4/16 full
-    SPI_FIFO_TX5        = 0x0005U,      //!< Transmit FIFO 5/16 full
-    SPI_FIFO_TX6        = 0x0006U,      //!< Transmit FIFO 6/16 full
-    SPI_FIFO_TX7        = 0x0007U,      //!< Transmit FIFO 7/16 full
-    SPI_FIFO_TX8        = 0x0008U,      //!< Transmit FIFO 8/16 full
-    SPI_FIFO_TX9        = 0x0009U,      //!< Transmit FIFO 9/16 full
-    SPI_FIFO_TX10       = 0x000AU,      //!< Transmit FIFO 10/16 full
-    SPI_FIFO_TX11       = 0x000BU,      //!< Transmit FIFO 11/16 full
-    SPI_FIFO_TX12       = 0x000CU,      //!< Transmit FIFO 12/16 full
-    SPI_FIFO_TX13       = 0x000DU,      //!< Transmit FIFO 13/16 full
-    SPI_FIFO_TX14       = 0x000EU,      //!< Transmit FIFO 14/16 full
-    SPI_FIFO_TX15       = 0x000FU,      //!< Transmit FIFO 15/16 full
-    SPI_FIFO_TX16       = 0x0010U,      //!< Transmit FIFO full
-    SPI_FIFO_TXFULL     = 0x0010U       //!< Transmit FIFO full
+typedef enum {
+  SPI_FIFO_TXEMPTY = 0x0000U, //!< Transmit FIFO empty
+  SPI_FIFO_TX0     = 0x0000U, //!< Transmit FIFO empty
+  SPI_FIFO_TX1     = 0x0001U, //!< Transmit FIFO 1/16 full
+  SPI_FIFO_TX2     = 0x0002U, //!< Transmit FIFO 2/16 full
+  SPI_FIFO_TX3     = 0x0003U, //!< Transmit FIFO 3/16 full
+  SPI_FIFO_TX4     = 0x0004U, //!< Transmit FIFO 4/16 full
+  SPI_FIFO_TX5     = 0x0005U, //!< Transmit FIFO 5/16 full
+  SPI_FIFO_TX6     = 0x0006U, //!< Transmit FIFO 6/16 full
+  SPI_FIFO_TX7     = 0x0007U, //!< Transmit FIFO 7/16 full
+  SPI_FIFO_TX8     = 0x0008U, //!< Transmit FIFO 8/16 full
+  SPI_FIFO_TX9     = 0x0009U, //!< Transmit FIFO 9/16 full
+  SPI_FIFO_TX10    = 0x000AU, //!< Transmit FIFO 10/16 full
+  SPI_FIFO_TX11    = 0x000BU, //!< Transmit FIFO 11/16 full
+  SPI_FIFO_TX12    = 0x000CU, //!< Transmit FIFO 12/16 full
+  SPI_FIFO_TX13    = 0x000DU, //!< Transmit FIFO 13/16 full
+  SPI_FIFO_TX14    = 0x000EU, //!< Transmit FIFO 14/16 full
+  SPI_FIFO_TX15    = 0x000FU, //!< Transmit FIFO 15/16 full
+  SPI_FIFO_TX16    = 0x0010U, //!< Transmit FIFO full
+  SPI_FIFO_TXFULL  = 0x0010U  //!< Transmit FIFO full
 } SPI_TxFIFOLevel;
 
 //*****************************************************************************
@@ -334,28 +329,27 @@ typedef enum
 //! parameter, and returned by SPI_getRxFIFOStatus().
 //
 //*****************************************************************************
-typedef enum
-{
-    SPI_FIFO_RXEMPTY    = 0x0000U,      //!< Receive FIFO empty
-    SPI_FIFO_RX0        = 0x0000U,      //!< Receive FIFO empty
-    SPI_FIFO_RX1        = 0x0001U,      //!< Receive FIFO 1/16 full
-    SPI_FIFO_RX2        = 0x0002U,      //!< Receive FIFO 2/16 full
-    SPI_FIFO_RX3        = 0x0003U,      //!< Receive FIFO 3/16 full
-    SPI_FIFO_RX4        = 0x0004U,      //!< Receive FIFO 4/16 full
-    SPI_FIFO_RX5        = 0x0005U,      //!< Receive FIFO 5/16 full
-    SPI_FIFO_RX6        = 0x0006U,      //!< Receive FIFO 6/16 full
-    SPI_FIFO_RX7        = 0x0007U,      //!< Receive FIFO 7/16 full
-    SPI_FIFO_RX8        = 0x0008U,      //!< Receive FIFO 8/16 full
-    SPI_FIFO_RX9        = 0x0009U,      //!< Receive FIFO 9/16 full
-    SPI_FIFO_RX10       = 0x000AU,      //!< Receive FIFO 10/16 full
-    SPI_FIFO_RX11       = 0x000BU,      //!< Receive FIFO 11/16 full
-    SPI_FIFO_RX12       = 0x000CU,      //!< Receive FIFO 12/16 full
-    SPI_FIFO_RX13       = 0x000DU,      //!< Receive FIFO 13/16 full
-    SPI_FIFO_RX14       = 0x000EU,      //!< Receive FIFO 14/16 full
-    SPI_FIFO_RX15       = 0x000FU,      //!< Receive FIFO 15/16 full
-    SPI_FIFO_RX16       = 0x0010U,      //!< Receive FIFO full
-    SPI_FIFO_RXFULL     = 0x0010U,      //!< Receive FIFO full
-    SPI_FIFO_RXDEFAULT  = 0x001FU       //!< To prevent interrupt at reset
+typedef enum {
+  SPI_FIFO_RXEMPTY   = 0x0000U, //!< Receive FIFO empty
+  SPI_FIFO_RX0       = 0x0000U, //!< Receive FIFO empty
+  SPI_FIFO_RX1       = 0x0001U, //!< Receive FIFO 1/16 full
+  SPI_FIFO_RX2       = 0x0002U, //!< Receive FIFO 2/16 full
+  SPI_FIFO_RX3       = 0x0003U, //!< Receive FIFO 3/16 full
+  SPI_FIFO_RX4       = 0x0004U, //!< Receive FIFO 4/16 full
+  SPI_FIFO_RX5       = 0x0005U, //!< Receive FIFO 5/16 full
+  SPI_FIFO_RX6       = 0x0006U, //!< Receive FIFO 6/16 full
+  SPI_FIFO_RX7       = 0x0007U, //!< Receive FIFO 7/16 full
+  SPI_FIFO_RX8       = 0x0008U, //!< Receive FIFO 8/16 full
+  SPI_FIFO_RX9       = 0x0009U, //!< Receive FIFO 9/16 full
+  SPI_FIFO_RX10      = 0x000AU, //!< Receive FIFO 10/16 full
+  SPI_FIFO_RX11      = 0x000BU, //!< Receive FIFO 11/16 full
+  SPI_FIFO_RX12      = 0x000CU, //!< Receive FIFO 12/16 full
+  SPI_FIFO_RX13      = 0x000DU, //!< Receive FIFO 13/16 full
+  SPI_FIFO_RX14      = 0x000EU, //!< Receive FIFO 14/16 full
+  SPI_FIFO_RX15      = 0x000FU, //!< Receive FIFO 15/16 full
+  SPI_FIFO_RX16      = 0x0010U, //!< Receive FIFO full
+  SPI_FIFO_RXFULL    = 0x0010U, //!< Receive FIFO full
+  SPI_FIFO_RXDEFAULT = 0x001FU  //!< To prevent interrupt at reset
 } SPI_RxFIFOLevel;
 
 //*****************************************************************************
@@ -364,14 +358,13 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    //! Transmission stops after midway in the bit stream
-    SPI_EMULATION_STOP_MIDWAY         = 0x0000U,
-    //! Continue SPI operation regardless
-    SPI_EMULATION_FREE_RUN            = 0x0010U,
-    //! Transmission will stop after a started transmission completes
-    SPI_EMULATION_STOP_AFTER_TRANSMIT = 0x0020U
+typedef enum {
+  //! Transmission stops after midway in the bit stream
+  SPI_EMULATION_STOP_MIDWAY         = 0x0000U,
+  //! Continue SPI operation regardless
+  SPI_EMULATION_FREE_RUN            = 0x0010U,
+  //! Transmission will stop after a started transmission completes
+  SPI_EMULATION_STOP_AFTER_TRANSMIT = 0x0020U
 } SPI_EmulationMode;
 
 //*****************************************************************************
@@ -380,10 +373,9 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    SPI_PTE_ACTIVE_LOW  = 0x0000U,        //!< SPIPTE is active low (normal)
-    SPI_PTE_ACTIVE_HIGH = SPI_PRI_PTEINV  //!< SPIPTE is active high (inverted)
+typedef enum {
+  SPI_PTE_ACTIVE_LOW  = 0x0000U,       //!< SPIPTE is active low (normal)
+  SPI_PTE_ACTIVE_HIGH = SPI_PRI_PTEINV //!< SPIPTE is active high (inverted)
 } SPI_PTEPolarity;
 
 //*****************************************************************************
@@ -392,10 +384,9 @@ typedef enum
 //! SPI_receive32Bits()
 //
 //*****************************************************************************
-typedef enum
-{
-    SPI_DATA_LITTLE_ENDIAN   = 0U, //!< LITTLE ENDIAN
-    SPI_DATA_BIG_ENDIAN   = 1U,    //!< BIG ENDIAN
+typedef enum {
+  SPI_DATA_LITTLE_ENDIAN = 0U, //!< LITTLE ENDIAN
+  SPI_DATA_BIG_ENDIAN    = 1U, //!< BIG ENDIAN
 } SPI_endianess;
 
 //*****************************************************************************
@@ -417,14 +408,8 @@ typedef enum
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-SPI_isBaseValid(uint32_t base)
-{
-    return(
-           (base == SPIA_BASE) ||
-           (base == SPIB_BASE) ||
-           (base == SPIC_BASE)
-          );
+static inline bool SPI_isBaseValid(uint32_t base) {
+  return ((base == SPIA_BASE) || (base == SPIB_BASE) || (base == SPIC_BASE));
 }
 #endif
 
@@ -440,15 +425,13 @@ SPI_isBaseValid(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_enableModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_enableModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    HWREGH(base + SPI_O_CCR) |= SPI_CCR_SPISWRESET;
+  HWREGH(base + SPI_O_CCR) |= SPI_CCR_SPISWRESET;
 }
 
 //*****************************************************************************
@@ -463,15 +446,13 @@ SPI_enableModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_disableModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_disableModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    HWREGH(base + SPI_O_CCR) &= ~(SPI_CCR_SPISWRESET);
+  HWREGH(base + SPI_O_CCR) &= ~(SPI_CCR_SPISWRESET);
 }
 
 //*****************************************************************************
@@ -488,16 +469,13 @@ SPI_disableModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_setcharLength(uint32_t base, uint16_t charLength)
-{
-    ASSERT((charLength >= 1U) && (charLength <= 16U));
-    SPI_disableModule(base);
-    HWREGH(base + SPI_O_CCR) = (HWREGH(base + SPI_O_CCR) & ~SPI_CCR_SPICHAR_M) |
-                               (charLength - 1U);
-    SPI_enableModule(base);
+static inline void SPI_setcharLength(uint32_t base, uint16_t charLength) {
+  ASSERT((charLength >= 1U) && (charLength <= 16U));
+  SPI_disableModule(base);
+  HWREGH(base + SPI_O_CCR) =
+      (HWREGH(base + SPI_O_CCR) & ~SPI_CCR_SPICHAR_M) | (charLength - 1U);
+  SPI_enableModule(base);
 }
-
 
 //*****************************************************************************
 //
@@ -510,19 +488,17 @@ SPI_setcharLength(uint32_t base, uint16_t charLength)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_enableFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_enableFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Enable the FIFO.
-    //
-    HWREGH(base + SPI_O_FFTX) |= SPI_FFTX_SPIFFENA | SPI_FFTX_TXFIFO;
-    HWREGH(base + SPI_O_FFRX) |= SPI_FFRX_RXFIFORESET;
+  //
+  // Enable the FIFO.
+  //
+  HWREGH(base + SPI_O_FFTX) |= SPI_FFTX_SPIFFENA | SPI_FFTX_TXFIFO;
+  HWREGH(base + SPI_O_FFRX) |= SPI_FFRX_RXFIFORESET;
 }
 
 //*****************************************************************************
@@ -536,19 +512,17 @@ SPI_enableFIFO(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_disableFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_disableFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Disable the FIFO.
-    //
-    HWREGH(base + SPI_O_FFTX) &= ~(SPI_FFTX_SPIFFENA | SPI_FFTX_TXFIFO);
-    HWREGH(base + SPI_O_FFRX) &= ~SPI_FFRX_RXFIFORESET;
+  //
+  // Disable the FIFO.
+  //
+  HWREGH(base + SPI_O_FFTX) &= ~(SPI_FFTX_SPIFFENA | SPI_FFTX_TXFIFO);
+  HWREGH(base + SPI_O_FFRX) &= ~SPI_FFRX_RXFIFORESET;
 }
 
 //*****************************************************************************
@@ -563,19 +537,17 @@ SPI_disableFIFO(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_resetTxFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_resetTxFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Reset the TX FIFO.
-    //
-    HWREGH(base + SPI_O_FFTX) &= ~SPI_FFTX_TXFIFO;
-    HWREGH(base + SPI_O_FFTX) |= SPI_FFTX_TXFIFO;
+  //
+  // Reset the TX FIFO.
+  //
+  HWREGH(base + SPI_O_FFTX) &= ~SPI_FFTX_TXFIFO;
+  HWREGH(base + SPI_O_FFTX) |= SPI_FFTX_TXFIFO;
 }
 
 //*****************************************************************************
@@ -590,19 +562,17 @@ SPI_resetTxFIFO(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_resetRxFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_resetRxFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Reset the RX FIFO.
-    //
-    HWREGH(base + SPI_O_FFRX) &= ~SPI_FFRX_RXFIFORESET;
-    HWREGH(base + SPI_O_FFRX) |= SPI_FFRX_RXFIFORESET;
+  //
+  // Reset the RX FIFO.
+  //
+  HWREGH(base + SPI_O_FFRX) &= ~SPI_FFRX_RXFIFORESET;
+  HWREGH(base + SPI_O_FFRX) |= SPI_FFRX_RXFIFORESET;
 }
 
 //*****************************************************************************
@@ -623,22 +593,21 @@ SPI_resetRxFIFO(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_setFIFOInterruptLevel(uint32_t base, SPI_TxFIFOLevel txLevel,
-                          SPI_RxFIFOLevel rxLevel)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_setFIFOInterruptLevel(uint32_t        base,
+                                             SPI_TxFIFOLevel txLevel,
+                                             SPI_RxFIFOLevel rxLevel) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Set the FIFO interrupt levels.
-    //
-    HWREGH(base + SPI_O_FFTX) = (HWREGH(base + SPI_O_FFTX) &
-                                 (~SPI_FFTX_TXFFIL_M)) | (uint16_t)txLevel;
-    HWREGH(base + SPI_O_FFRX) = (HWREGH(base + SPI_O_FFRX) &
-                                 (~SPI_FFRX_RXFFIL_M)) | (uint16_t)rxLevel;
+  //
+  // Set the FIFO interrupt levels.
+  //
+  HWREGH(base + SPI_O_FFTX) =
+      (HWREGH(base + SPI_O_FFTX) & (~SPI_FFTX_TXFFIL_M)) | (uint16_t)txLevel;
+  HWREGH(base + SPI_O_FFRX) =
+      (HWREGH(base + SPI_O_FFRX) & (~SPI_FFRX_RXFFIL_M)) | (uint16_t)rxLevel;
 }
 
 //*****************************************************************************
@@ -659,22 +628,21 @@ SPI_setFIFOInterruptLevel(uint32_t base, SPI_TxFIFOLevel txLevel,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_getFIFOInterruptLevel(uint32_t base, SPI_TxFIFOLevel *txLevel,
-                          SPI_RxFIFOLevel *rxLevel)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_getFIFOInterruptLevel(uint32_t         base,
+                                             SPI_TxFIFOLevel *txLevel,
+                                             SPI_RxFIFOLevel *rxLevel) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Extract the transmit and receive FIFO levels.
-    //
-    *txLevel = (SPI_TxFIFOLevel)((uint16_t)(HWREGH(base + SPI_O_FFTX) &
-                                            SPI_FFTX_TXFFIL_M));
-    *rxLevel = (SPI_RxFIFOLevel)((uint16_t)(HWREGH(base + SPI_O_FFRX) &
-                                            SPI_FFRX_RXFFIL_M));
+  //
+  // Extract the transmit and receive FIFO levels.
+  //
+  *txLevel = (SPI_TxFIFOLevel)((uint16_t)(HWREGH(base + SPI_O_FFTX) &
+                                          SPI_FFTX_TXFFIL_M));
+  *rxLevel = (SPI_RxFIFOLevel)((uint16_t)(HWREGH(base + SPI_O_FFRX) &
+                                          SPI_FFRX_RXFFIL_M));
 }
 
 //*****************************************************************************
@@ -691,19 +659,18 @@ SPI_getFIFOInterruptLevel(uint32_t base, SPI_TxFIFOLevel *txLevel,
 //! ..., or \b SPI_FIFO_TX16
 //
 //*****************************************************************************
-static inline SPI_TxFIFOLevel
-SPI_getTxFIFOStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline SPI_TxFIFOLevel SPI_getTxFIFOStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Get the current FIFO status
-    //
-    return((SPI_TxFIFOLevel)((uint16_t)((HWREGH(base + SPI_O_FFTX) & SPI_FFTX_TXFFST_M) >>
-                                        SPI_FFTX_TXFFST_S)));
+  //
+  // Get the current FIFO status
+  //
+  return ((SPI_TxFIFOLevel)((
+      uint16_t)((HWREGH(base + SPI_O_FFTX) & SPI_FFTX_TXFFST_M) >>
+                SPI_FFTX_TXFFST_S)));
 }
 
 //*****************************************************************************
@@ -720,19 +687,18 @@ SPI_getTxFIFOStatus(uint32_t base)
 //! ..., or \b SPI_FIFO_RX16
 //
 //*****************************************************************************
-static inline SPI_RxFIFOLevel
-SPI_getRxFIFOStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline SPI_RxFIFOLevel SPI_getRxFIFOStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Get the current FIFO status
-    //
-    return((SPI_RxFIFOLevel)((uint16_t)((HWREGH(base + SPI_O_FFRX) & SPI_FFRX_RXFFST_M) >>
-                                        SPI_FFRX_RXFFST_S)));
+  //
+  // Get the current FIFO status
+  //
+  return ((SPI_RxFIFOLevel)((
+      uint16_t)((HWREGH(base + SPI_O_FFRX) & SPI_FFRX_RXFFST_M) >>
+                SPI_FFRX_RXFFST_S)));
 }
 
 //*****************************************************************************
@@ -751,18 +717,16 @@ SPI_getRxFIFOStatus(uint32_t base)
 //! transmissions are complete.
 //
 //*****************************************************************************
-static inline bool
-SPI_isBusy(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline bool SPI_isBusy(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Determine if the SPI is busy.
-    //
-    return((HWREGH(base + SPI_O_FFTX) & SPI_FFTX_TXFFST_M) != 0U);
+  //
+  // Determine if the SPI is busy.
+  //
+  return ((HWREGH(base + SPI_O_FFTX) & SPI_FFTX_TXFFST_M) != 0U);
 }
 
 //*****************************************************************************
@@ -783,18 +747,16 @@ SPI_isBusy(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_writeDataNonBlocking(uint32_t base, uint16_t data)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_writeDataNonBlocking(uint32_t base, uint16_t data) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Write data to the transmit buffer.
-    //
-    HWREGH(base + SPI_O_TXBUF) = data;
+  //
+  // Write data to the transmit buffer.
+  //
+  HWREGH(base + SPI_O_TXBUF) = data;
 }
 
 //*****************************************************************************
@@ -814,18 +776,16 @@ SPI_writeDataNonBlocking(uint32_t base, uint16_t data)
 //! \return Returns the word of data read from the SPI receive buffer.
 //
 //*****************************************************************************
-static inline uint16_t
-SPI_readDataNonBlocking(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline uint16_t SPI_readDataNonBlocking(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Check for data to read.
-    //
-    return(HWREGH(base + SPI_O_RXBUF));
+  //
+  // Check for data to read.
+  //
+  return (HWREGH(base + SPI_O_RXBUF));
 }
 
 //*****************************************************************************
@@ -847,25 +807,21 @@ SPI_readDataNonBlocking(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_writeDataBlockingFIFO(uint32_t base, uint16_t data)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_writeDataBlockingFIFO(uint32_t base, uint16_t data) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Wait until space is available in the receive FIFO.
-    //
-    while(SPI_getTxFIFOStatus(base) == SPI_FIFO_TXFULL)
-    {
-    }
+  //
+  // Wait until space is available in the receive FIFO.
+  //
+  while (SPI_getTxFIFOStatus(base) == SPI_FIFO_TXFULL) {}
 
-    //
-    // Write data to the transmit buffer.
-    //
-    HWREGH(base + SPI_O_TXBUF) = data;
+  //
+  // Write data to the transmit buffer.
+  //
+  HWREGH(base + SPI_O_TXBUF) = data;
 }
 
 //*****************************************************************************
@@ -886,25 +842,21 @@ SPI_writeDataBlockingFIFO(uint32_t base, uint16_t data)
 //! \return Returns the word of data read from the SPI receive buffer.
 //
 //*****************************************************************************
-static inline uint16_t
-SPI_readDataBlockingFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline uint16_t SPI_readDataBlockingFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Wait until data is available in the receive FIFO.
-    //
-    while(SPI_getRxFIFOStatus(base) == SPI_FIFO_RXEMPTY)
-    {
-    }
+  //
+  // Wait until data is available in the receive FIFO.
+  //
+  while (SPI_getRxFIFOStatus(base) == SPI_FIFO_RXEMPTY) {}
 
-    //
-    // Check for data to read.
-    //
-    return(HWREGH(base + SPI_O_RXBUF));
+  //
+  // Check for data to read.
+  //
+  return (HWREGH(base + SPI_O_RXBUF));
 }
 
 //*****************************************************************************
@@ -926,25 +878,21 @@ SPI_readDataBlockingFIFO(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_writeDataBlockingNonFIFO(uint32_t base, uint16_t data)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_writeDataBlockingNonFIFO(uint32_t base, uint16_t data) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Wait until the transmit buffer is not full.
-    //
-    while((HWREGH(base + SPI_O_STS) & SPI_STS_BUFFULL_FLAG) != 0U)
-    {
-    }
+  //
+  // Wait until the transmit buffer is not full.
+  //
+  while ((HWREGH(base + SPI_O_STS) & SPI_STS_BUFFULL_FLAG) != 0U) {}
 
-    //
-    // Write data to the transmit buffer.
-    //
-    HWREGH(base + SPI_O_TXBUF) = data;
+  //
+  // Write data to the transmit buffer.
+  //
+  HWREGH(base + SPI_O_TXBUF) = data;
 }
 
 //*****************************************************************************
@@ -965,25 +913,21 @@ SPI_writeDataBlockingNonFIFO(uint32_t base, uint16_t data)
 //! \return Returns the word of data read from the SPI receive buffer.
 //
 //*****************************************************************************
-static inline uint16_t
-SPI_readDataBlockingNonFIFO(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline uint16_t SPI_readDataBlockingNonFIFO(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Wait until data has been received.
-    //
-    while((HWREGH(base + SPI_O_STS) & SPI_STS_INT_FLAG) == 0U)
-    {
-    }
+  //
+  // Wait until data has been received.
+  //
+  while ((HWREGH(base + SPI_O_STS) & SPI_STS_INT_FLAG) == 0U) {}
 
-    //
-    // Check for data to read.
-    //
-    return(HWREGH(base + SPI_O_RXBUF));
+  //
+  // Check for data to read.
+  //
+  return (HWREGH(base + SPI_O_RXBUF));
 }
 
 //*****************************************************************************
@@ -1000,18 +944,16 @@ SPI_readDataBlockingNonFIFO(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_enableTriWire(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_enableTriWire(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Set the tri-wire bit to enable 3-wire mode.
-    //
-    HWREGH(base + SPI_O_PRI) |= SPI_PRI_TRIWIRE;
+  //
+  // Set the tri-wire bit to enable 3-wire mode.
+  //
+  HWREGH(base + SPI_O_PRI) |= SPI_PRI_TRIWIRE;
 }
 
 //*****************************************************************************
@@ -1025,18 +967,16 @@ SPI_enableTriWire(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_disableTriWire(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_disableTriWire(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Clear the tri-wire bit to disable 3-wire mode.
-    //
-    HWREGH(base + SPI_O_PRI) &= ~SPI_PRI_TRIWIRE;
+  //
+  // Clear the tri-wire bit to disable 3-wire mode.
+  //
+  HWREGH(base + SPI_O_PRI) &= ~SPI_PRI_TRIWIRE;
 }
 
 //*****************************************************************************
@@ -1052,18 +992,16 @@ SPI_disableTriWire(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_enableLoopback(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_enableLoopback(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Set the bit that enables loopback mode.
-    //
-    HWREGH(base + SPI_O_CCR) |= SPI_CCR_SPILBK;
+  //
+  // Set the bit that enables loopback mode.
+  //
+  HWREGH(base + SPI_O_CCR) |= SPI_CCR_SPILBK;
 }
 
 //*****************************************************************************
@@ -1078,18 +1016,16 @@ SPI_enableLoopback(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_disableLoopback(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_disableLoopback(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Clear the bit that enables loopback mode.
-    //
-    HWREGH(base + SPI_O_CCR) &= ~SPI_CCR_SPILBK;
+  //
+  // Clear the bit that enables loopback mode.
+  //
+  HWREGH(base + SPI_O_CCR) &= ~SPI_CCR_SPILBK;
 }
 
 //*****************************************************************************
@@ -1110,19 +1046,18 @@ SPI_disableLoopback(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_setPTESignalPolarity(uint32_t base, SPI_PTEPolarity polarity)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_setPTESignalPolarity(uint32_t        base,
+                                            SPI_PTEPolarity polarity) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Write the polarity of the SPIPTE signal to the register.
-    //
-    HWREGH(base + SPI_O_PRI) = (HWREGH(base + SPI_O_PRI) & ~SPI_PRI_PTEINV) |
-                               (uint16_t)polarity;
+  //
+  // Write the polarity of the SPIPTE signal to the register.
+  //
+  HWREGH(base + SPI_O_PRI) =
+      (HWREGH(base + SPI_O_PRI) & ~SPI_PRI_PTEINV) | (uint16_t)polarity;
 }
 
 //*****************************************************************************
@@ -1136,18 +1071,16 @@ SPI_setPTESignalPolarity(uint32_t base, SPI_PTEPolarity polarity)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_enableHighSpeedMode(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_enableHighSpeedMode(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Set the bit that enables high speed mode.
-    //
-    HWREGH(base + SPI_O_CCR) |= SPI_CCR_HS_MODE;
+  //
+  // Set the bit that enables high speed mode.
+  //
+  HWREGH(base + SPI_O_CCR) |= SPI_CCR_HS_MODE;
 }
 
 //*****************************************************************************
@@ -1162,18 +1095,16 @@ SPI_enableHighSpeedMode(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_disableHighSpeedMode(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_disableHighSpeedMode(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Clear the bit that enables high speed mode.
-    //
-    HWREGH(base + SPI_O_CCR) &= ~SPI_CCR_HS_MODE;
+  //
+  // Clear the bit that enables high speed mode.
+  //
+  HWREGH(base + SPI_O_CCR) &= ~SPI_CCR_HS_MODE;
 }
 
 //*****************************************************************************
@@ -1198,20 +1129,18 @@ SPI_disableHighSpeedMode(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-SPI_setEmulationMode(uint32_t base, SPI_EmulationMode mode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_setEmulationMode(uint32_t base, SPI_EmulationMode mode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Write the desired emulation mode to the register.
-    //
-    HWREGH(base + SPI_O_PRI) = (HWREGH(base + SPI_O_PRI) &
-                                ~(SPI_PRI_FREE | SPI_PRI_SOFT)) |
-                               (uint16_t)mode;
+  //
+  // Write the desired emulation mode to the register.
+  //
+  HWREGH(base + SPI_O_PRI) =
+      (HWREGH(base + SPI_O_PRI) & ~(SPI_PRI_FREE | SPI_PRI_SOFT)) |
+      (uint16_t)mode;
 }
 
 //*****************************************************************************
@@ -1228,19 +1157,17 @@ SPI_setEmulationMode(uint32_t base, SPI_EmulationMode mode)
 //! \return None
 //
 //*****************************************************************************
-static inline void
-SPI_setTxFifoTransmitDelay(uint32_t base, uint16_t delay)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
-    ASSERT(delay <= 0xFFU);
+static inline void SPI_setTxFifoTransmitDelay(uint32_t base, uint16_t delay) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
+  ASSERT(delay <= 0xFFU);
 
-    //
-    // Configure the FIFO Transmit Delay Bits
-    //
-    HWREGH(base + SPI_O_FFCT) = delay;
+  //
+  // Configure the FIFO Transmit Delay Bits
+  //
+  HWREGH(base + SPI_O_FFCT) = delay;
 }
 
 //*****************************************************************************
@@ -1254,18 +1181,16 @@ SPI_setTxFifoTransmitDelay(uint32_t base, uint16_t delay)
 //! \return Rx emulation buffer data
 //
 //*****************************************************************************
-static inline uint16_t
-SPI_readRxEmulationBuffer(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline uint16_t SPI_readRxEmulationBuffer(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Return Emulation Buffer Received Data
-    //
-    return(HWREGH(base + SPI_O_RXEMU));
+  //
+  // Return Emulation Buffer Received Data
+  //
+  return (HWREGH(base + SPI_O_RXEMU));
 }
 
 //*****************************************************************************
@@ -1281,18 +1206,16 @@ SPI_readRxEmulationBuffer(uint32_t base)
 //! \return None
 //
 //*****************************************************************************
-static inline void
-SPI_enableTalk(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_enableTalk(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Set the TALK bit
-    //
-    HWREGH(base + SPI_O_CTL) |= SPI_CTL_TALK;
+  //
+  // Set the TALK bit
+  //
+  HWREGH(base + SPI_O_CTL) |= SPI_CTL_TALK;
 }
 
 //*****************************************************************************
@@ -1309,18 +1232,16 @@ SPI_enableTalk(uint32_t base)
 //! \return None
 //
 //*****************************************************************************
-static inline void
-SPI_disableTalk(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_disableTalk(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Set the TALK bit
-    //
-    HWREGH(base + SPI_O_CTL) &= ~SPI_CTL_TALK;
+  //
+  // Set the TALK bit
+  //
+  HWREGH(base + SPI_O_CTL) &= ~SPI_CTL_TALK;
 }
 
 //*****************************************************************************
@@ -1334,19 +1255,17 @@ SPI_disableTalk(uint32_t base)
 //! \return None
 //
 //*****************************************************************************
-static inline void
-SPI_reset(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(SPI_isBaseValid(base));
+static inline void SPI_reset(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(SPI_isBaseValid(base));
 
-    //
-    // Write to SPRST bit the TX FIFO.
-    //
-    HWREGH(base + SPI_O_FFTX) &= ~SPI_FFTX_SPIRST;
-    HWREGH(base + SPI_O_FFTX) |= SPI_FFTX_SPIRST;
+  //
+  // Write to SPRST bit the TX FIFO.
+  //
+  HWREGH(base + SPI_O_FFTX) &= ~SPI_FFTX_SPIRST;
+  HWREGH(base + SPI_O_FFTX) |= SPI_FFTX_SPIRST;
 }
 
 //*****************************************************************************
@@ -1405,9 +1324,9 @@ SPI_reset(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SPI_setConfig(uint32_t base, uint32_t lspclkHz, SPI_TransferProtocol protocol,
-              SPI_Mode mode, uint32_t bitRate, uint16_t dataWidth);
+extern void SPI_setConfig(uint32_t base, uint32_t lspclkHz,
+                          SPI_TransferProtocol protocol, SPI_Mode mode,
+                          uint32_t bitRate, uint16_t dataWidth);
 
 //*****************************************************************************
 //
@@ -1436,8 +1355,7 @@ SPI_setConfig(uint32_t base, uint32_t lspclkHz, SPI_TransferProtocol protocol,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SPI_setBaudRate(uint32_t base, uint32_t lspclkHz, uint32_t bitRate);
+extern void SPI_setBaudRate(uint32_t base, uint32_t lspclkHz, uint32_t bitRate);
 
 //*****************************************************************************
 //
@@ -1463,8 +1381,7 @@ SPI_setBaudRate(uint32_t base, uint32_t lspclkHz, uint32_t bitRate);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SPI_enableInterrupt(uint32_t base, uint32_t intFlags);
+extern void SPI_enableInterrupt(uint32_t base, uint32_t intFlags);
 
 //*****************************************************************************
 //
@@ -1487,8 +1404,7 @@ SPI_enableInterrupt(uint32_t base, uint32_t intFlags);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SPI_disableInterrupt(uint32_t base, uint32_t intFlags);
+extern void SPI_disableInterrupt(uint32_t base, uint32_t intFlags);
 
 //*****************************************************************************
 //
@@ -1507,8 +1423,7 @@ SPI_disableInterrupt(uint32_t base, uint32_t intFlags);
 //! - \b SPI_INT_TXFF - TX FIFO level interrupt
 //
 //*****************************************************************************
-extern uint32_t
-SPI_getInterruptStatus(uint32_t base);
+extern uint32_t SPI_getInterruptStatus(uint32_t base);
 
 //*****************************************************************************
 //
@@ -1538,9 +1453,7 @@ SPI_getInterruptStatus(uint32_t base);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SPI_clearInterruptStatus(uint32_t base, uint32_t intFlags);
-
+extern void SPI_clearInterruptStatus(uint32_t base, uint32_t intFlags);
 
 //*****************************************************************************
 //
@@ -1560,8 +1473,7 @@ SPI_clearInterruptStatus(uint32_t base, uint32_t intFlags);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SPI_transmit24Bits(uint32_t base, uint32_t data, uint16_t txDelay);
+extern void SPI_transmit24Bits(uint32_t base, uint32_t data, uint16_t txDelay);
 
 //*****************************************************************************
 //
@@ -1581,10 +1493,7 @@ SPI_transmit24Bits(uint32_t base, uint32_t data, uint16_t txDelay);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-SPI_transmit32Bits(uint32_t base, uint32_t data, uint16_t txDelay);
-
-
+extern void SPI_transmit32Bits(uint32_t base, uint32_t data, uint16_t txDelay);
 
 //*****************************************************************************
 //
@@ -1604,9 +1513,8 @@ SPI_transmit32Bits(uint32_t base, uint32_t data, uint16_t txDelay);
 //! \return the received 16-bit word.
 //
 //*****************************************************************************
-extern uint16_t
-SPI_receive16Bits(uint32_t base, SPI_endianess endianness, uint16_t dummyData,
-                  uint16_t txDelay);
+extern uint16_t SPI_receive16Bits(uint32_t base, SPI_endianess endianness,
+                                  uint16_t dummyData, uint16_t txDelay);
 
 //*****************************************************************************
 //
@@ -1626,9 +1534,8 @@ SPI_receive16Bits(uint32_t base, SPI_endianess endianness, uint16_t dummyData,
 //! \return the received 24-bit word.
 //
 //*****************************************************************************
-extern uint32_t
-SPI_receive24Bits(uint32_t base, SPI_endianess endianness, uint16_t dummyData,
-                  uint16_t txDelay);
+extern uint32_t SPI_receive24Bits(uint32_t base, SPI_endianess endianness,
+                                  uint16_t dummyData, uint16_t txDelay);
 
 //*****************************************************************************
 //
@@ -1648,11 +1555,8 @@ SPI_receive24Bits(uint32_t base, SPI_endianess endianness, uint16_t dummyData,
 //! \return the received 32-bit word.
 //
 //*****************************************************************************
-extern uint32_t
-SPI_receive32Bits(uint32_t base, SPI_endianess endianness, uint16_t dummyData,
-                  uint16_t txDelay);
-
-
+extern uint32_t SPI_receive32Bits(uint32_t base, SPI_endianess endianness,
+                                  uint16_t dummyData, uint16_t txDelay);
 
 //*****************************************************************************
 //
@@ -1669,9 +1573,9 @@ SPI_receive32Bits(uint32_t base, SPI_endianess endianness, uint16_t dummyData,
 //! \return .
 //
 //*****************************************************************************
-extern uint16_t
-SPI_pollingNonFIFOTransaction(uint32_t base, uint16_t charLength,
-                              uint16_t data);
+extern uint16_t SPI_pollingNonFIFOTransaction(uint32_t base,
+                                              uint16_t charLength,
+                                              uint16_t data);
 
 //*****************************************************************************
 //
@@ -1689,10 +1593,9 @@ SPI_pollingNonFIFOTransaction(uint32_t base, uint16_t charLength,
 //! \return none
 //
 //*****************************************************************************
-extern void
-SPI_pollingFIFOTransaction(uint32_t base, uint16_t charLength,
-                           uint16_t *pTxBuffer, uint16_t *pRxBuffer,
-                           uint16_t numOfWords, uint16_t txDelay);
+extern void SPI_pollingFIFOTransaction(uint32_t base, uint16_t charLength,
+                                       uint16_t *pTxBuffer, uint16_t *pRxBuffer,
+                                       uint16_t numOfWords, uint16_t txDelay);
 
 //*****************************************************************************
 //

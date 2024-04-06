@@ -1,45 +1,44 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   can.h
+//  FILE:   can.h
 //
-// TITLE:  C28x CAN driver.
+//  TITLE:  C28x CAN driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 #ifndef CAN_H
 #define CAN_H
-
 
 //*****************************************************************************
 //
@@ -48,8 +47,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #ifdef __TMS320C28XX__
@@ -61,28 +59,28 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "debug.h"
+#include "inc/hw_can.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
-#include "inc/hw_can.h"
-#include "debug.h"
 #include "sysctl.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 //
 // The key value for RAM initialization
 //
-#define CAN_RAM_INIT_KEY           (0xAU)
+#define CAN_RAM_INIT_KEY (0xAU)
 
 //
 // RAM Initialization Register Mask
 //
-#define CAN_RAM_INIT_MASK          (0x003FU)
+#define CAN_RAM_INIT_MASK (0x003FU)
 
 //
 // The Parity disable key value
 //
-#define CAN_INIT_PARITY_DISABLE    (0x1400U)
+#define CAN_INIT_PARITY_DISABLE (0x1400U)
 
 #ifndef DOXYGEN_PDF_IGNORE
 //*****************************************************************************
@@ -98,30 +96,30 @@ extern "C"
 //*****************************************************************************
 
 //! This indicates that transmit interrupts should be enabled, or are enabled.
-#define CAN_MSG_OBJ_TX_INT_ENABLE          CAN_IF1MCTL_TXIE
+#define CAN_MSG_OBJ_TX_INT_ENABLE CAN_IF1MCTL_TXIE
 
 //! This indicates that receive interrupts should be enabled, or are
 //! enabled.
-#define CAN_MSG_OBJ_RX_INT_ENABLE          CAN_IF1MCTL_RXIE
+#define CAN_MSG_OBJ_RX_INT_ENABLE CAN_IF1MCTL_RXIE
 
 //! This indicates that a message object will use or is using filtering
 //! based on the object's message identifier.
-#define CAN_MSG_OBJ_USE_ID_FILTER          (0x00000001U)
+#define CAN_MSG_OBJ_USE_ID_FILTER (0x00000001U)
 
 //! This indicates that a message object will use or is using filtering
 //! based on the direction of the transfer.
-#define CAN_MSG_OBJ_USE_DIR_FILTER         CAN_IF1MSK_MDIR
+#define CAN_MSG_OBJ_USE_DIR_FILTER CAN_IF1MSK_MDIR
 
 //! This indicates that a message object will use or is using message
 //! identifier filtering based on the extended identifier.
-#define CAN_MSG_OBJ_USE_EXT_FILTER         CAN_IF1MSK_MXTD
+#define CAN_MSG_OBJ_USE_EXT_FILTER CAN_IF1MSK_MXTD
 
 //! This indicates that this message object is part of a FIFO structure and
 //! not the final message object in a FIFO.
-#define CAN_MSG_OBJ_FIFO                   (0x00000002U)
+#define CAN_MSG_OBJ_FIFO (0x00000002U)
 
 //! This indicates that a message object has no flags set.
-#define CAN_MSG_OBJ_NO_FLAGS               (0x00000000U)
+#define CAN_MSG_OBJ_NO_FLAGS (0x00000000U)
 
 //*****************************************************************************
 //
@@ -131,19 +129,19 @@ extern "C"
 //*****************************************************************************
 //! This flag is used to allow a CAN controller to generate error
 //! interrupts.
-#define CAN_INT_ERROR              (0x00000008UL)
+#define CAN_INT_ERROR (0x00000008UL)
 
 //! This flag is used to allow a CAN controller to generate status
 //! interrupts.
-#define CAN_INT_STATUS             (0x00000004UL)
+#define CAN_INT_STATUS (0x00000004UL)
 
 //! This flag is used to allow a CAN controller to generate interrupts
 //! on interrupt line 0
-#define CAN_INT_IE0                (0x00000002UL)
+#define CAN_INT_IE0 (0x00000002UL)
 
 //! This flag is used to allow a CAN controller to generate interrupts
 //! on interrupt line 1
-#define CAN_INT_IE1                (0x00020000UL)
+#define CAN_INT_IE1 (0x00020000UL)
 
 //*****************************************************************************
 //
@@ -153,47 +151,47 @@ extern "C"
 //*****************************************************************************
 
 //! CAN controller has detected a parity error.
-#define CAN_STATUS_PERR                  (0x00000100U)
+#define CAN_STATUS_PERR (0x00000100U)
 
 //! CAN controller has entered a Bus Off state.
-#define CAN_STATUS_BUS_OFF               (0x00000080U)
+#define CAN_STATUS_BUS_OFF (0x00000080U)
 
 //! CAN controller error level has reached warning level.
-#define CAN_STATUS_EWARN                 (0x00000040U)
+#define CAN_STATUS_EWARN (0x00000040U)
 
 //! CAN controller error level has reached error passive level.
-#define CAN_STATUS_EPASS                 (0x00000020U)
+#define CAN_STATUS_EPASS (0x00000020U)
 
 //! A message was received successfully since the last read of this status.
-#define CAN_STATUS_RXOK                  (0x00000010U)
+#define CAN_STATUS_RXOK (0x00000010U)
 
 //! A message was transmitted successfully since the last read of this
 //! status.
-#define CAN_STATUS_TXOK                  (0x00000008U)
+#define CAN_STATUS_TXOK (0x00000008U)
 
 //! This is the mask for the last error code field.
-#define CAN_STATUS_LEC_MSK               (0x00000007U)
+#define CAN_STATUS_LEC_MSK (0x00000007U)
 
 //! There was no error.
-#define CAN_STATUS_LEC_NONE              (0x00000000U)
+#define CAN_STATUS_LEC_NONE (0x00000000U)
 
 //! A bit stuffing error has occurred.
-#define CAN_STATUS_LEC_STUFF             (0x00000001U)
+#define CAN_STATUS_LEC_STUFF (0x00000001U)
 
 //! A formatting error has occurred.
-#define CAN_STATUS_LEC_FORM              (0x00000002U)
+#define CAN_STATUS_LEC_FORM (0x00000002U)
 
 //! An acknowledge error has occurred.
-#define CAN_STATUS_LEC_ACK               (0x00000003U)
+#define CAN_STATUS_LEC_ACK (0x00000003U)
 
 //! The bus remained a bit level of 1 for longer than is allowed.
-#define CAN_STATUS_LEC_BIT1              (0x00000004U)
+#define CAN_STATUS_LEC_BIT1 (0x00000004U)
 
 //! The bus remained a bit level of 0 for longer than is allowed.
-#define CAN_STATUS_LEC_BIT0              (0x00000005U)
+#define CAN_STATUS_LEC_BIT0 (0x00000005U)
 
 //! A CRC error has occurred.
-#define CAN_STATUS_LEC_CRC               (0x00000006U)
+#define CAN_STATUS_LEC_CRC (0x00000006U)
 
 //*****************************************************************************
 //
@@ -202,10 +200,10 @@ extern "C"
 //
 //*****************************************************************************
 //! CANINT0 global interrupt bit
-#define CAN_GLOBAL_INT_CANINT0          (0x00000001U)
+#define CAN_GLOBAL_INT_CANINT0 (0x00000001U)
 
 //! CANINT1 global interrupt bit
-#define CAN_GLOBAL_INT_CANINT1          (0x00000002U)
+#define CAN_GLOBAL_INT_CANINT1 (0x00000002U)
 
 //*****************************************************************************
 //
@@ -214,19 +212,19 @@ extern "C"
 //
 //*****************************************************************************
 //! Status of INT0ID
-#define CAN_INT_INT0ID_STATUS           (0x8000U)
+#define CAN_INT_INT0ID_STATUS (0x8000U)
 
 //! IF1 Arbitration Standard ID Shift Offset
-#define CAN_IF1ARB_STD_ID_S             (18U)
+#define CAN_IF1ARB_STD_ID_S (18U)
 
 //! IF1 Arbitration Standard ID Mask
-#define CAN_IF1ARB_STD_ID_M             (0x1FFC0000U)
+#define CAN_IF1ARB_STD_ID_M (0x1FFC0000U)
 
 //! IF2 Arbitration Standard ID Shift Offset
-#define CAN_IF2ARB_STD_ID_S             (18U)
+#define CAN_IF2ARB_STD_ID_S (18U)
 
 //! IF2 Arbitration Standard ID Mask
-#define CAN_IF2ARB_STD_ID_M             (0x1FFC0000U)
+#define CAN_IF2ARB_STD_ID_M (0x1FFC0000U)
 
 #endif // DOXYGEN_PDF_IGNORE
 
@@ -236,13 +234,12 @@ extern "C"
 //! This is used when calling the CAN_setupMessageObject() function.
 //
 //*****************************************************************************
-typedef enum
-{
-    //! Set the message ID frame to standard.
-    CAN_MSG_FRAME_STD,
+typedef enum {
+  //! Set the message ID frame to standard.
+  CAN_MSG_FRAME_STD,
 
-    //! Set the message ID frame to extended.
-    CAN_MSG_FRAME_EXT
+  //! Set the message ID frame to extended.
+  CAN_MSG_FRAME_EXT
 } CAN_MsgFrameType;
 
 //*****************************************************************************
@@ -251,19 +248,18 @@ typedef enum
 //! be set up via a call to the CAN_setupMessageObject() API.
 //
 //*****************************************************************************
-typedef enum
-{
-    //! Transmit message object.
-    CAN_MSG_OBJ_TYPE_TX,
+typedef enum {
+  //! Transmit message object.
+  CAN_MSG_OBJ_TYPE_TX,
 
-    //! Transmit remote request message object
-    CAN_MSG_OBJ_TYPE_TX_REMOTE,
+  //! Transmit remote request message object
+  CAN_MSG_OBJ_TYPE_TX_REMOTE,
 
-    //! Receive message object.
-    CAN_MSG_OBJ_TYPE_RX,
+  //! Receive message object.
+  CAN_MSG_OBJ_TYPE_RX,
 
-    //! Remote frame receive remote, with auto-transmit message object.
-    CAN_MSG_OBJ_TYPE_RXTX_REMOTE
+  //! Remote frame receive remote, with auto-transmit message object.
+  CAN_MSG_OBJ_TYPE_RXTX_REMOTE
 } CAN_MsgObjType;
 
 //*****************************************************************************
@@ -272,18 +268,16 @@ typedef enum
 //! be set up via a call to the CAN_selectClockSource() API.
 //
 //*****************************************************************************
-typedef enum
-{
-    //! Peripheral System Clock Source
-    CAN_CLOCK_SOURCE_SYS    = 0x0,
+typedef enum {
+  //! Peripheral System Clock Source
+  CAN_CLOCK_SOURCE_SYS = 0x0,
 
-    //! External Oscillator Clock Source
-    CAN_CLOCK_SOURCE_XTAL   = 0x1,
+  //! External Oscillator Clock Source
+  CAN_CLOCK_SOURCE_XTAL = 0x1,
 
-    //! Auxiliary Clock Input Source
-    CAN_CLOCK_SOURCE_AUX    = 0x2
+  //! Auxiliary Clock Input Source
+  CAN_CLOCK_SOURCE_AUX = 0x2
 } CAN_ClockSource;
-
 
 //*****************************************************************************
 //
@@ -305,16 +299,10 @@ typedef enum
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-CAN_isBaseValid(uint32_t base)
-{
-    return(
-           (base == CANA_BASE) ||
-           (base == CANB_BASE)
-          );
+static inline bool CAN_isBaseValid(uint32_t base) {
+  return ((base == CANA_BASE) || (base == CANB_BASE));
 }
 #endif
-
 
 //*****************************************************************************
 //
@@ -337,30 +325,27 @@ CAN_isBaseValid(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_writeDataReg(const uint16_t *const data, uint32_t address,
-                 uint32_t size)
-{
-    uint32_t idx;
-    uint32_t dataReg = address;
+static inline void CAN_writeDataReg(const uint16_t *const data,
+                                    uint32_t address, uint32_t size) {
+  uint32_t idx;
+  uint32_t dataReg = address;
 
-    //
-    // Check the dataReg.
-    //
-    ASSERT(dataReg != 0U);
+  //
+  // Check the dataReg.
+  //
+  ASSERT(dataReg != 0U);
 
+  //
+  // Loop always copies 1 byte per iteration.
+  //
+  for (idx = 0U; idx < size; idx++) {
     //
-    // Loop always copies 1 byte per iteration.
+    // Write out the data 8 bits at a time.
     //
-    for(idx = 0U; idx < size; idx++)
-    {
-        //
-        // Write out the data 8 bits at a time.
-        //
-        HWREGB(dataReg) = data[idx];
+    HWREGB(dataReg) = data[idx];
 
-        dataReg++;
-    }
+    dataReg++;
+  }
 }
 
 //*****************************************************************************
@@ -385,32 +370,28 @@ CAN_writeDataReg(const uint16_t *const data, uint32_t address,
 //
 //*****************************************************************************
 
-static inline void
-CAN_writeDataReg_16bit(const uint16_t *const data, uint32_t address,
-                 uint32_t size)
-{
-    uint32_t idx;
-    uint32_t dataReg = address;
+static inline void CAN_writeDataReg_16bit(const uint16_t *const data,
+                                          uint32_t address, uint32_t size) {
+  uint32_t idx;
+  uint32_t dataReg = address;
 
-    //
-    // Check the dataReg.
-    //
-    ASSERT(dataReg != 0U);
+  //
+  // Check the dataReg.
+  //
+  ASSERT(dataReg != 0U);
 
+  //
+  // Loop always copies 1 byte per iteration.
+  //
+  for (idx = 0U; idx < size; idx++) {
     //
-    // Loop always copies 1 byte per iteration.
+    // Write out the data 8 bits at a time.
     //
-    for(idx = 0U; idx < size; idx++)
-    {
-        //
-        // Write out the data 8 bits at a time.
-        //
-        HWREGB(dataReg) = (uint32_t)((data[idx / 2UL]) >> ((idx % 2UL) * 8UL));
+    HWREGB(dataReg) = (uint32_t)((data[idx / 2UL]) >> ((idx % 2UL) * 8UL));
 
-        dataReg++;
-    }
+    dataReg++;
+  }
 }
-
 
 //*****************************************************************************
 //
@@ -434,30 +415,27 @@ CAN_writeDataReg_16bit(const uint16_t *const data, uint32_t address,
 //
 //*****************************************************************************
 
-static inline void
-CAN_writeDataReg_32bit(const uint32_t *const data, uint32_t address,
-                 uint32_t size)
-{
-    uint32_t idx;
-    uint32_t dataReg = address;
+static inline void CAN_writeDataReg_32bit(const uint32_t *const data,
+                                          uint32_t address, uint32_t size) {
+  uint32_t idx;
+  uint32_t dataReg = address;
 
-    //
-    // Check the dataReg.
-    //
-    ASSERT(dataReg != 0U);
+  //
+  // Check the dataReg.
+  //
+  ASSERT(dataReg != 0U);
 
+  //
+  // Loop always copies 1 byte per iteration.
+  //
+  for (idx = 0U; idx < size; idx++) {
     //
-    // Loop always copies 1 byte per iteration.
+    // Write out the data 8 bits at a time.
     //
-    for(idx = 0U; idx < size; idx++)
-    {
-        //
-        // Write out the data 8 bits at a time.
-        //
-        HWREGB(dataReg) = ((data[idx / 4UL]) >> ((idx % 4UL) * 8UL));
+    HWREGB(dataReg) = ((data[idx / 4UL]) >> ((idx % 4UL) * 8UL));
 
-        dataReg++;
-    }
+    dataReg++;
+  }
 }
 
 //*****************************************************************************
@@ -481,24 +459,22 @@ CAN_writeDataReg_32bit(const uint32_t *const data, uint32_t address,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_readDataReg(uint16_t *data, const uint32_t address, uint32_t size)
-{
-    uint32_t idx;
-    uint32_t dataReg = address;
+static inline void CAN_readDataReg(uint16_t *data, const uint32_t address,
+                                   uint32_t size) {
+  uint32_t idx;
+  uint32_t dataReg = address;
 
+  //
+  // Loop always copies 1 byte per iteration.
+  //
+  for (idx = 0U; idx < size; idx++) {
     //
-    // Loop always copies 1 byte per iteration.
+    // Read out the data
     //
-    for(idx = 0U; idx < size; idx++)
-    {
-        //
-        // Read out the data
-        //
-        data[idx] = HWREGB(dataReg);
+    data[idx] = HWREGB(dataReg);
 
-        dataReg++;
-    }
+    dataReg++;
+  }
 }
 
 //*****************************************************************************
@@ -512,25 +488,21 @@ CAN_readDataReg(uint16_t *data, const uint32_t address, uint32_t size)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_initRAM(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_initRAM(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    HWREGH(base + CAN_O_RAM_INIT) = CAN_RAM_INIT_CAN_RAM_INIT |
-                                    CAN_RAM_INIT_KEY;
+  HWREGH(base + CAN_O_RAM_INIT) = CAN_RAM_INIT_CAN_RAM_INIT | CAN_RAM_INIT_KEY;
 
-    while(!((HWREGH(base + CAN_O_RAM_INIT) & CAN_RAM_INIT_MASK) ==
-            (CAN_RAM_INIT_RAM_INIT_DONE | CAN_RAM_INIT_KEY2 |
-             CAN_RAM_INIT_KEY0)))
-    {
-        //
-        // Wait until RAM Init is complete
-        //
-    }
+  while (
+      !((HWREGH(base + CAN_O_RAM_INIT) & CAN_RAM_INIT_MASK) ==
+        (CAN_RAM_INIT_RAM_INIT_DONE | CAN_RAM_INIT_KEY2 | CAN_RAM_INIT_KEY0))) {
+    //
+    // Wait until RAM Init is complete
+    //
+  }
 }
 
 //*****************************************************************************
@@ -550,46 +522,44 @@ CAN_initRAM(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_selectClockSource(uint32_t base, CAN_ClockSource source)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_selectClockSource(uint32_t        base,
+                                         CAN_ClockSource source) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
+
+  //
+  // Determine the CAN controller and set specified clock source
+  //
+  EALLOW;
+
+  switch (base) {
+  case CANA_BASE:
+    HWREGH(CLKCFG_BASE + SYSCTL_O_CLKSRCCTL2) &=
+        ~SYSCTL_CLKSRCCTL2_CANABCLKSEL_M;
+
+    HWREGH(CLKCFG_BASE + SYSCTL_O_CLKSRCCTL2) |=
+        ((uint16_t)source << SYSCTL_CLKSRCCTL2_CANABCLKSEL_S);
+    break;
+
+  case CANB_BASE:
+    HWREGH(CLKCFG_BASE + SYSCTL_O_CLKSRCCTL2) &=
+        ~SYSCTL_CLKSRCCTL2_CANBBCLKSEL_M;
+
+    HWREGH(CLKCFG_BASE + SYSCTL_O_CLKSRCCTL2) |=
+        ((uint16_t)source << SYSCTL_CLKSRCCTL2_CANBBCLKSEL_S);
+    break;
+
+  default:
 
     //
-    // Determine the CAN controller and set specified clock source
+    // Do nothing. Not a valid mode value.
     //
-    EALLOW;
+    break;
+  }
 
-    switch(base)
-    {
-        case CANA_BASE:
-            HWREGH(CLKCFG_BASE + SYSCTL_O_CLKSRCCTL2) &=
-                ~SYSCTL_CLKSRCCTL2_CANABCLKSEL_M;
-
-            HWREGH(CLKCFG_BASE + SYSCTL_O_CLKSRCCTL2) |= ((uint16_t)source <<
-                SYSCTL_CLKSRCCTL2_CANABCLKSEL_S);
-            break;
-
-        case CANB_BASE:
-            HWREGH(CLKCFG_BASE + SYSCTL_O_CLKSRCCTL2) &=
-                ~SYSCTL_CLKSRCCTL2_CANBBCLKSEL_M;
-
-            HWREGH(CLKCFG_BASE + SYSCTL_O_CLKSRCCTL2) |= ((uint16_t)source <<
-                SYSCTL_CLKSRCCTL2_CANBBCLKSEL_S);
-            break;
-
-        default:
-
-            //
-            // Do nothing. Not a valid mode value.
-            //
-            break;
-    }
-
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -606,18 +576,16 @@ CAN_selectClockSource(uint32_t base, CAN_ClockSource source)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_startModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_startModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Clear Init and CCE bits
-    //
-    HWREGH(base + CAN_O_CTL) &= ~(CAN_CTL_INIT | CAN_CTL_CCE);
+  //
+  // Clear Init and CCE bits
+  //
+  HWREGH(base + CAN_O_CTL) &= ~(CAN_CTL_INIT | CAN_CTL_CCE);
 }
 
 //*****************************************************************************
@@ -634,18 +602,16 @@ CAN_startModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_enableController(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_enableController(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Clear the init bit in the control register.
-    //
-    HWREGH(base + CAN_O_CTL) &= ~CAN_CTL_INIT;
+  //
+  // Clear the init bit in the control register.
+  //
+  HWREGH(base + CAN_O_CTL) &= ~CAN_CTL_INIT;
 }
 
 //*****************************************************************************
@@ -663,18 +629,16 @@ CAN_enableController(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_disableController(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_disableController(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Set the init bit in the control register.
-    //
-    HWREGH(base + CAN_O_CTL) |= CAN_CTL_INIT;
+  //
+  // Set the init bit in the control register.
+  //
+  HWREGH(base + CAN_O_CTL) |= CAN_CTL_INIT;
 }
 
 //*****************************************************************************
@@ -696,28 +660,26 @@ CAN_disableController(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_enableTestMode(uint32_t base, uint16_t mode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
-    ASSERT((mode & (CAN_TEST_LBACK | CAN_TEST_EXL)) !=
-           (CAN_TEST_LBACK | CAN_TEST_EXL));
+static inline void CAN_enableTestMode(uint32_t base, uint16_t mode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
+  ASSERT((mode & (CAN_TEST_LBACK | CAN_TEST_EXL)) !=
+         (CAN_TEST_LBACK | CAN_TEST_EXL));
 
-    //
-    // Clear the bits in the test register.
-    //
-    HWREGH(base + CAN_O_TEST) &= ~((uint16_t)CAN_TEST_SILENT |
-                                   (uint16_t)CAN_TEST_LBACK |
-                                   (uint16_t)CAN_TEST_EXL);
+  //
+  // Clear the bits in the test register.
+  //
+  HWREGH(base + CAN_O_TEST) &=
+      ~((uint16_t)CAN_TEST_SILENT | (uint16_t)CAN_TEST_LBACK |
+        (uint16_t)CAN_TEST_EXL);
 
-    //
-    // Enable test mode and set the bits in the test register.
-    //
-    HWREGH(base + CAN_O_CTL) |= CAN_CTL_TEST;
-    HWREGH(base + CAN_O_TEST) |= mode;
+  //
+  // Enable test mode and set the bits in the test register.
+  //
+  HWREGH(base + CAN_O_CTL)  |= CAN_CTL_TEST;
+  HWREGH(base + CAN_O_TEST) |= mode;
 }
 
 //*****************************************************************************
@@ -731,25 +693,23 @@ CAN_enableTestMode(uint32_t base, uint16_t mode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_disableTestMode(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_disableTestMode(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Clear the bits in the test register.
-    //
-    HWREGH(base + CAN_O_TEST) &= ~((uint16_t)CAN_TEST_SILENT |
-                                   (uint16_t)CAN_TEST_LBACK |
-                                   (uint16_t)CAN_TEST_EXL);
+  //
+  // Clear the bits in the test register.
+  //
+  HWREGH(base + CAN_O_TEST) &=
+      ~((uint16_t)CAN_TEST_SILENT | (uint16_t)CAN_TEST_LBACK |
+        (uint16_t)CAN_TEST_EXL);
 
-    //
-    // Clear the test mode enable bit
-    //
-    HWREGH(base + CAN_O_CTL) &= ~CAN_CTL_TEST;
+  //
+  // Clear the test mode enable bit
+  //
+  HWREGH(base + CAN_O_CTL) &= ~CAN_CTL_TEST;
 }
 
 //*****************************************************************************
@@ -764,18 +724,16 @@ CAN_disableTestMode(uint32_t base)
 //! \return Returns the value of the bit timing register.
 //
 //*****************************************************************************
-static inline uint32_t
-CAN_getBitTiming(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline uint32_t CAN_getBitTiming(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Read and return BTR register
-    //
-    return(HWREG_BP(base + CAN_O_BTR));
+  //
+  // Read and return BTR register
+  //
+  return (HWREG_BP(base + CAN_O_BTR));
 }
 
 //*****************************************************************************
@@ -791,18 +749,16 @@ CAN_getBitTiming(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_enableMemoryAccessMode(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_enableMemoryAccessMode(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Set the RAM direct access bit
-    //
-    HWREGH(base + CAN_O_TEST) |= CAN_TEST_RDA;
+  //
+  // Set the RAM direct access bit
+  //
+  HWREGH(base + CAN_O_TEST) |= CAN_TEST_RDA;
 }
 
 //*****************************************************************************
@@ -816,18 +772,16 @@ CAN_enableMemoryAccessMode(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_disableMemoryAccessMode(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_disableMemoryAccessMode(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Clear the RAM direct access bit
-    //
-    HWREGH(base + CAN_O_TEST) &= ~CAN_TEST_RDA;
+  //
+  // Clear the RAM direct access bit
+  //
+  HWREGH(base + CAN_O_TEST) &= ~CAN_TEST_RDA;
 }
 
 //*****************************************************************************
@@ -846,30 +800,24 @@ CAN_disableMemoryAccessMode(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_setInterruptionDebugMode(uint32_t base, bool enable)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_setInterruptionDebugMode(uint32_t base, bool enable) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    if(enable)
-    {
-        //
-        // Enable interrupt debug support
-        //
-        HWREGH(base + CAN_O_CTL) |= CAN_CTL_IDS;
-    }
-    else
-    {
-        //
-        // Disable interrupt debug support
-        //
-        HWREGH(base + CAN_O_CTL) &= ~CAN_CTL_IDS;
-    }
+  if (enable) {
+    //
+    // Enable interrupt debug support
+    //
+    HWREGH(base + CAN_O_CTL) |= CAN_CTL_IDS;
+  } else {
+    //
+    // Disable interrupt debug support
+    //
+    HWREGH(base + CAN_O_CTL) &= ~CAN_CTL_IDS;
+  }
 }
-
 
 //*****************************************************************************
 //
@@ -882,18 +830,16 @@ CAN_setInterruptionDebugMode(uint32_t base, bool enable)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_disableAutoBusOn(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_disableAutoBusOn(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Clear the ABO bit in the control register.
-    //
-    HWREGH(base + CAN_O_CTL) &= ~CAN_CTL_ABO;
+  //
+  // Clear the ABO bit in the control register.
+  //
+  HWREGH(base + CAN_O_CTL) &= ~CAN_CTL_ABO;
 }
 
 //*****************************************************************************
@@ -908,18 +854,16 @@ CAN_disableAutoBusOn(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_enableAutoBusOn(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_enableAutoBusOn(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Set the ABO bit in the control register.
-    //
-    HWREGH(base + CAN_O_CTL) |= CAN_CTL_ABO;
+  //
+  // Set the ABO bit in the control register.
+  //
+  HWREGH(base + CAN_O_CTL) |= CAN_CTL_ABO;
 }
 
 //*****************************************************************************
@@ -938,18 +882,16 @@ CAN_enableAutoBusOn(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_setAutoBusOnTime(uint32_t base, uint32_t onTime)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_setAutoBusOnTime(uint32_t base, uint32_t onTime) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Set bus-off timer value
-    //
-    HWREG_BP(base + CAN_O_ABOTR) = onTime;
+  //
+  // Set bus-off timer value
+  //
+  HWREG_BP(base + CAN_O_ABOTR) = onTime;
 }
 
 //*****************************************************************************
@@ -974,20 +916,18 @@ CAN_setAutoBusOnTime(uint32_t base, uint32_t onTime)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_enableInterrupt(uint32_t base, uint32_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
-    ASSERT((intFlags & ~(CAN_INT_ERROR | CAN_INT_STATUS | CAN_INT_IE0 |
-                         CAN_INT_IE1)) == 0U);
+static inline void CAN_enableInterrupt(uint32_t base, uint32_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
+  ASSERT((intFlags &
+          ~(CAN_INT_ERROR | CAN_INT_STATUS | CAN_INT_IE0 | CAN_INT_IE1)) == 0U);
 
-    //
-    // Enable the specified interrupts.
-    //
-    HWREG_BP(base + CAN_O_CTL) |= intFlags;
+  //
+  // Enable the specified interrupts.
+  //
+  HWREG_BP(base + CAN_O_CTL) |= intFlags;
 }
 
 //*****************************************************************************
@@ -1006,20 +946,18 @@ CAN_enableInterrupt(uint32_t base, uint32_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_disableInterrupt(uint32_t base, uint32_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
-    ASSERT((intFlags & ~(CAN_INT_ERROR | CAN_INT_STATUS | CAN_INT_IE0 |
-                         CAN_INT_IE1)) == 0U);
+static inline void CAN_disableInterrupt(uint32_t base, uint32_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
+  ASSERT((intFlags &
+          ~(CAN_INT_ERROR | CAN_INT_STATUS | CAN_INT_IE0 | CAN_INT_IE1)) == 0U);
 
-    //
-    // Disable the specified interrupts.
-    //
-    HWREG_BP(base + CAN_O_CTL) &= ~(intFlags);
+  //
+  // Disable the specified interrupts.
+  //
+  HWREG_BP(base + CAN_O_CTL) &= ~(intFlags);
 }
 
 //*****************************************************************************
@@ -1038,18 +976,16 @@ CAN_disableInterrupt(uint32_t base, uint32_t intFlags)
 //! \return Returns the value of the interrupt muxing register.
 //
 //*****************************************************************************
-static inline uint32_t
-CAN_getInterruptMux(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline uint32_t CAN_getInterruptMux(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Get the interrupt muxing for the CAN peripheral
-    //
-    return(HWREG_BP(base + CAN_O_IP_MUX21));
+  //
+  // Get the interrupt muxing for the CAN peripheral
+  //
+  return (HWREG_BP(base + CAN_O_IP_MUX21));
 }
 
 //*****************************************************************************
@@ -1070,18 +1006,16 @@ CAN_getInterruptMux(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_setInterruptMux(uint32_t base, uint32_t mux)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_setInterruptMux(uint32_t base, uint32_t mux) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Set the interrupt muxing for the CAN peripheral
-    //
-    HWREG_BP(base + CAN_O_IP_MUX21) = mux;
+  //
+  // Set the interrupt muxing for the CAN peripheral
+  //
+  HWREG_BP(base + CAN_O_IP_MUX21) = mux;
 }
 
 //*****************************************************************************
@@ -1095,20 +1029,18 @@ CAN_setInterruptMux(uint32_t base, uint32_t mux)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_enableRetry(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_enableRetry(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Clearing the DAR bit tells the controller to not disable the
-    // auto-retry of messages which were not transmitted or received
-    // correctly.
-    //
-    HWREGH(base + CAN_O_CTL) &= ~CAN_CTL_DAR;
+  //
+  // Clearing the DAR bit tells the controller to not disable the
+  // auto-retry of messages which were not transmitted or received
+  // correctly.
+  //
+  HWREGH(base + CAN_O_CTL) &= ~CAN_CTL_DAR;
 }
 
 //*****************************************************************************
@@ -1122,19 +1054,17 @@ CAN_enableRetry(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_disableRetry(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline void CAN_disableRetry(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Setting the DAR bit tells the controller to disable the auto-retry
-    // of messages which were not transmitted or received correctly.
-    //
-    HWREGH(base + CAN_O_CTL) |= CAN_CTL_DAR;
+  //
+  // Setting the DAR bit tells the controller to disable the auto-retry
+  // of messages which were not transmitted or received correctly.
+  //
+  HWREGH(base + CAN_O_CTL) |= CAN_CTL_DAR;
 }
 
 //*****************************************************************************
@@ -1150,18 +1080,16 @@ CAN_disableRetry(uint32_t base)
 //! otherwise.
 //
 //*****************************************************************************
-static inline bool
-CAN_isRetryEnabled(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline bool CAN_isRetryEnabled(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Read the disable automatic retry setting from the CAN controller.
-    //
-    return((bool)((HWREGH(base + CAN_O_CTL) & CAN_CTL_DAR) != CAN_CTL_DAR));
+  //
+  // Read the disable automatic retry setting from the CAN controller.
+  //
+  return ((bool)((HWREGH(base + CAN_O_CTL) & CAN_CTL_DAR) != CAN_CTL_DAR));
 }
 
 //*****************************************************************************
@@ -1186,28 +1114,27 @@ CAN_isRetryEnabled(uint32_t base)
 //! limit.
 //
 //*****************************************************************************
-static inline bool
-CAN_getErrorCount(uint32_t base, uint32_t *rxCount, uint32_t *txCount)
-{
-    uint32_t canError = 0U;
+static inline bool CAN_getErrorCount(uint32_t base, uint32_t *rxCount,
+                                     uint32_t *txCount) {
+  uint32_t canError = 0U;
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Read the current count of transmit/receive errors.
-    //
-    canError = HWREG_BP(base + CAN_O_ERRC);
+  //
+  // Read the current count of transmit/receive errors.
+  //
+  canError = HWREG_BP(base + CAN_O_ERRC);
 
-    //
-    // Extract the error numbers from the register value.
-    //
-    *rxCount = (canError & CAN_ERRC_REC_M) >> CAN_ERRC_REC_S;
-    *txCount = (canError & CAN_ERRC_TEC_M) >> CAN_ERRC_TEC_S;
+  //
+  // Extract the error numbers from the register value.
+  //
+  *rxCount = (canError & CAN_ERRC_REC_M) >> CAN_ERRC_REC_S;
+  *txCount = (canError & CAN_ERRC_TEC_M) >> CAN_ERRC_TEC_S;
 
-    return((bool)((canError & CAN_ERRC_RP) != 0U));
+  return ((bool)((canError & CAN_ERRC_RP) != 0U));
 }
 
 //*****************************************************************************
@@ -1221,18 +1148,16 @@ CAN_getErrorCount(uint32_t base, uint32_t *rxCount, uint32_t *txCount)
 //! \return Returns the value of the register.
 //
 //*****************************************************************************
-static inline uint16_t
-CAN_getStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline uint16_t CAN_getStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Return error and status register value
-    //
-    return(HWREGH(base + CAN_O_ES));
+  //
+  // Return error and status register value
+  //
+  return (HWREGH(base + CAN_O_ES));
 }
 
 //*****************************************************************************
@@ -1246,18 +1171,16 @@ CAN_getStatus(uint32_t base)
 //! \return Returns the value of the register.
 //
 //*****************************************************************************
-static inline uint32_t
-CAN_getTxRequests(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline uint32_t CAN_getTxRequests(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Return Tx requests register value
-    //
-    return(HWREG_BP(base + CAN_O_TXRQ_21));
+  //
+  // Return Tx requests register value
+  //
+  return (HWREG_BP(base + CAN_O_TXRQ_21));
 }
 
 //*****************************************************************************
@@ -1272,18 +1195,16 @@ CAN_getTxRequests(uint32_t base)
 //! \return Returns the value of the register.
 //
 //*****************************************************************************
-static inline uint32_t
-CAN_getNewDataFlags(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline uint32_t CAN_getNewDataFlags(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Return new data register value
-    //
-    return(HWREG_BP(base + CAN_O_NDAT_21));
+  //
+  // Return new data register value
+  //
+  return (HWREG_BP(base + CAN_O_NDAT_21));
 }
 
 //*****************************************************************************
@@ -1297,18 +1218,16 @@ CAN_getNewDataFlags(uint32_t base)
 //! \return Returns the value of the register.
 //
 //*****************************************************************************
-static inline uint32_t
-CAN_getValidMessageObjects(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline uint32_t CAN_getValidMessageObjects(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Return the valid message register value
-    //
-    return(HWREG_BP(base + CAN_O_MVAL_21));
+  //
+  // Return the valid message register value
+  //
+  return (HWREG_BP(base + CAN_O_MVAL_21));
 }
 
 //*****************************************************************************
@@ -1323,18 +1242,16 @@ CAN_getValidMessageObjects(uint32_t base)
 //! \return Returns the value of the interrupt register.
 //
 //*****************************************************************************
-static inline uint32_t
-CAN_getInterruptCause(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline uint32_t CAN_getInterruptCause(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Read interrupt identifier status
-    //
-    return(HWREG_BP(base + CAN_O_INT));
+  //
+  // Read interrupt identifier status
+  //
+  return (HWREG_BP(base + CAN_O_INT));
 }
 
 //*****************************************************************************
@@ -1349,18 +1266,16 @@ CAN_getInterruptCause(uint32_t base)
 //! \return Returns the value of the pending interrupts register.
 //
 //*****************************************************************************
-static inline uint32_t
-CAN_getInterruptMessageSource(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
+static inline uint32_t CAN_getInterruptMessageSource(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
 
-    //
-    // Read message object interrupt status
-    //
-    return(HWREG_BP(base + CAN_O_IPEN_21));
+  //
+  // Read message object interrupt status
+  //
+  return (HWREG_BP(base + CAN_O_IPEN_21));
 }
 
 //*****************************************************************************
@@ -1379,20 +1294,17 @@ CAN_getInterruptMessageSource(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_enableGlobalInterrupt(uint32_t base, uint16_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
-    ASSERT((intFlags & ~(CAN_GLOBAL_INT_CANINT0 |
-                         CAN_GLOBAL_INT_CANINT1)) == 0U);
+static inline void CAN_enableGlobalInterrupt(uint32_t base, uint16_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
+  ASSERT((intFlags & ~(CAN_GLOBAL_INT_CANINT0 | CAN_GLOBAL_INT_CANINT1)) == 0U);
 
-    //
-    // Enable the requested interrupts
-    //
-    HWREGH(base + CAN_O_GLB_INT_EN) |= intFlags;
+  //
+  // Enable the requested interrupts
+  //
+  HWREGH(base + CAN_O_GLB_INT_EN) |= intFlags;
 }
 
 //*****************************************************************************
@@ -1411,20 +1323,18 @@ CAN_enableGlobalInterrupt(uint32_t base, uint16_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_disableGlobalInterrupt(uint32_t base, uint16_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
-    ASSERT((intFlags & ~(CAN_GLOBAL_INT_CANINT0 |
-                         CAN_GLOBAL_INT_CANINT1)) == 0U);
+static inline void CAN_disableGlobalInterrupt(uint32_t base,
+                                              uint16_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
+  ASSERT((intFlags & ~(CAN_GLOBAL_INT_CANINT0 | CAN_GLOBAL_INT_CANINT1)) == 0U);
 
-    //
-    // Disable the requested interrupts
-    //
-    HWREGH(base + CAN_O_GLB_INT_EN) &= ~intFlags;
+  //
+  // Disable the requested interrupts
+  //
+  HWREGH(base + CAN_O_GLB_INT_EN) &= ~intFlags;
 }
 
 //*****************************************************************************
@@ -1443,20 +1353,18 @@ CAN_disableGlobalInterrupt(uint32_t base, uint16_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-CAN_clearGlobalInterruptStatus(uint32_t base, uint16_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
-    ASSERT((intFlags & ~(CAN_GLOBAL_INT_CANINT0 |
-                         CAN_GLOBAL_INT_CANINT1)) == 0U);
+static inline void CAN_clearGlobalInterruptStatus(uint32_t base,
+                                                  uint16_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
+  ASSERT((intFlags & ~(CAN_GLOBAL_INT_CANINT0 | CAN_GLOBAL_INT_CANINT1)) == 0U);
 
-    //
-    // Clear the requested interrupts
-    //
-    HWREGH(base + CAN_O_GLB_INT_CLR) |= intFlags;
+  //
+  // Clear the requested interrupts
+  //
+  HWREGH(base + CAN_O_GLB_INT_CLR) |= intFlags;
 }
 
 //*****************************************************************************
@@ -1476,20 +1384,18 @@ CAN_clearGlobalInterruptStatus(uint32_t base, uint16_t intFlags)
 //! none of the requested bits are set.
 //
 //*****************************************************************************
-static inline bool
-CAN_getGlobalInterruptStatus(uint32_t base, uint16_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(CAN_isBaseValid(base));
-    ASSERT((intFlags & ~(CAN_GLOBAL_INT_CANINT0 |
-                         CAN_GLOBAL_INT_CANINT1)) == 0U);
+static inline bool CAN_getGlobalInterruptStatus(uint32_t base,
+                                                uint16_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(CAN_isBaseValid(base));
+  ASSERT((intFlags & ~(CAN_GLOBAL_INT_CANINT0 | CAN_GLOBAL_INT_CANINT1)) == 0U);
 
-    //
-    // Read and return the global interrupt flag register
-    //
-    return((bool)((HWREGH(base + CAN_O_GLB_INT_FLG) & intFlags) != 0U));
+  //
+  // Read and return the global interrupt flag register
+  //
+  return ((bool)((HWREGH(base + CAN_O_GLB_INT_FLG) & intFlags) != 0U));
 }
 
 //*****************************************************************************
@@ -1509,8 +1415,7 @@ CAN_getGlobalInterruptStatus(uint32_t base, uint16_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CAN_initModule(uint32_t base);
+extern void CAN_initModule(uint32_t base);
 
 //*****************************************************************************
 //
@@ -1524,9 +1429,9 @@ CAN_initModule(uint32_t base);
 //!        bit time (Tq) and must be in the range from 8 to 25
 //!
 //! This function sets the CAN bit timing values for the bit rate passed in the
-//! \e bitRate and \e bitTime parameters based on the \e clockFreq parameter.  The
-//! CAN bit clock is calculated to be an average timing value that should work
-//! for most systems.  If tighter timing requirements are needed, then the
+//! \e bitRate and \e bitTime parameters based on the \e clockFreq parameter.
+//! The CAN bit clock is calculated to be an average timing value that should
+//! work for most systems.  If tighter timing requirements are needed, then the
 //! CAN_setBitTiming() function is available for full customization of all of
 //! the CAN bit timing values.
 //!
@@ -1542,9 +1447,8 @@ CAN_initModule(uint32_t base);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CAN_setBitRate(uint32_t base, uint32_t clockFreq, uint32_t bitRate,
-               uint16_t bitTime);
+extern void CAN_setBitRate(uint32_t base, uint32_t clockFreq, uint32_t bitRate,
+                           uint16_t bitTime);
 
 //*****************************************************************************
 //
@@ -1564,11 +1468,9 @@ CAN_setBitRate(uint32_t base, uint32_t clockFreq, uint32_t bitRate,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CAN_setBitTiming(uint32_t base, uint16_t prescaler,
-                 uint16_t prescalerExtension, uint16_t tSeg1, uint16_t tSeg2,
-                 uint16_t sjw);
-
+extern void CAN_setBitTiming(uint32_t base, uint16_t prescaler,
+                             uint16_t prescalerExtension, uint16_t tSeg1,
+                             uint16_t tSeg2, uint16_t sjw);
 
 //*****************************************************************************
 //
@@ -1589,8 +1491,7 @@ CAN_setBitTiming(uint32_t base, uint16_t prescaler,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CAN_clearInterruptStatus(uint32_t base, uint32_t intClr);
+extern void CAN_clearInterruptStatus(uint32_t base, uint32_t intClr);
 
 //*****************************************************************************
 //
@@ -1628,20 +1529,22 @@ CAN_clearInterruptStatus(uint32_t base, uint32_t intClr);
 //! - \b CAN_MSG_OBJ_RX_INT_ENABLE    - Enable Receive Interrupts
 //! - \b CAN_MSG_OBJ_USE_ID_FILTER    - Use filtering based on the Message ID
 //!                                     (Standard or Extended)
-//! - \b CAN_MSG_OBJ_USE_EXT_FILTER   - Use Extended Identifier Bit for filtering
-//!                                     (Only among Extended IDs will be accepted)
+//! - \b CAN_MSG_OBJ_USE_EXT_FILTER   - Use Extended Identifier Bit for
+//! filtering
+//!                                     (Only among Extended IDs will be
+//!                                     accepted)
 //! - \b CAN_MSG_OBJ_USE_DIR_FILTER   - Use filtering based on the direction of
 //!                                     the transfer
 //! - \b CAN_MSG_OBJ_FIFO             - Message object is part of a FIFO
 //!                                     structure and isn't the final message
 //!                                     object in FIFO
 //!
-//! If filtering is based on message identifier (for Standard or Extended IDs) 
-//! specified by the \e msgIDMask parameter, the value \b CAN_MSG_OBJ_USE_ID_FILTER 
-//! has to be logically ORed with the \e flag parameter.
-//! If \b CAN_MSG_OBJ_USE_EXT_FILTER is ORed with the \e flag parameter,
-//! only extended identifier frames are accepted which can further be masked
-//! by using the flag above. 
+//! If filtering is based on message identifier (for Standard or Extended IDs)
+//! specified by the \e msgIDMask parameter, the value \b
+//! CAN_MSG_OBJ_USE_ID_FILTER has to be logically ORed with the \e flag
+//! parameter. If \b CAN_MSG_OBJ_USE_EXT_FILTER is ORed with the \e flag
+//! parameter, only extended identifier frames are accepted which can further be
+//! masked by using the flag above.
 //!
 //! \note The \b msgLen Parameter for the Receive Message Object is a "don't
 //!       care" but its value should be between 0-8 due to the assert.
@@ -1649,10 +1552,10 @@ CAN_clearInterruptStatus(uint32_t base, uint32_t intClr);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CAN_setupMessageObject(uint32_t base, uint32_t objID, uint32_t msgID,
-                       CAN_MsgFrameType frame, CAN_MsgObjType msgType,
-                       uint32_t msgIDMask, uint32_t flags, uint16_t msgLen);
+extern void CAN_setupMessageObject(uint32_t base, uint32_t objID,
+                                   uint32_t msgID, CAN_MsgFrameType frame,
+                                   CAN_MsgObjType msgType, uint32_t msgIDMask,
+                                   uint32_t flags, uint16_t msgLen);
 
 //*****************************************************************************
 //
@@ -1672,9 +1575,8 @@ CAN_setupMessageObject(uint32_t base, uint32_t objID, uint32_t msgID,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CAN_sendMessage(uint32_t base, uint32_t objID, uint16_t msgLen,
-                const uint16_t *msgData);
+extern void CAN_sendMessage(uint32_t base, uint32_t objID, uint16_t msgLen,
+                            const uint16_t *msgData);
 
 //*****************************************************************************
 //
@@ -1683,7 +1585,8 @@ CAN_sendMessage(uint32_t base, uint32_t objID, uint16_t msgLen,
 //! \param base is the base address of the CAN controller.
 //! \param objID is the object number to configure (1-32).
 //! \param msgLen is the number of bytes of data in the message object (0-8)
-//! \param msgData is a pointer to the message object's data (all 16 bits are sent)
+//! \param msgData is a pointer to the message object's data (all 16 bits are
+//! sent)
 //!
 //! This function is used to transmit a message object and the message data,
 //! if applicable.
@@ -1695,9 +1598,8 @@ CAN_sendMessage(uint32_t base, uint32_t objID, uint16_t msgLen,
 //
 //*****************************************************************************
 
-extern void
-CAN_sendMessage_16bit(uint32_t base, uint32_t objID, uint16_t msgLen,
-                const uint16_t *msgData);
+extern void CAN_sendMessage_16bit(uint32_t base, uint32_t objID,
+                                  uint16_t msgLen, const uint16_t *msgData);
 
 //*****************************************************************************
 //
@@ -1706,7 +1608,8 @@ CAN_sendMessage_16bit(uint32_t base, uint32_t objID, uint16_t msgLen,
 //! \param base is the base address of the CAN controller.
 //! \param objID is the object number to configure (1-32).
 //! \param msgLen is the number of bytes of data in the message object (0-8)
-//! \param msgData is a pointer to the message object's data (all 32 bits are sent)
+//! \param msgData is a pointer to the message object's data (all 32 bits are
+//! sent)
 //!
 //! This function is used to transmit a message object and the message data,
 //! if applicable.
@@ -1718,9 +1621,8 @@ CAN_sendMessage_16bit(uint32_t base, uint32_t objID, uint16_t msgLen,
 //
 //*****************************************************************************
 
-extern void
-CAN_sendMessage_32bit(uint32_t base, uint32_t objID, uint16_t msgLen,
-                const uint32_t *msgData);
+extern void CAN_sendMessage_32bit(uint32_t base, uint32_t objID,
+                                  uint16_t msgLen, const uint32_t *msgData);
 
 //*****************************************************************************
 //
@@ -1742,9 +1644,8 @@ CAN_sendMessage_32bit(uint32_t base, uint32_t objID, uint16_t msgLen,
 //
 //*****************************************************************************
 
-extern void
-CAN_sendMessage_updateDLC(uint32_t base, uint32_t objID, uint16_t msgLen,
-                  const uint16_t *msgData);
+extern void CAN_sendMessage_updateDLC(uint32_t base, uint32_t objID,
+                                      uint16_t msgLen, const uint16_t *msgData);
 
 //*****************************************************************************
 //
@@ -1762,8 +1663,7 @@ CAN_sendMessage_updateDLC(uint32_t base, uint32_t objID, uint16_t msgLen,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CAN_sendRemoteRequestMessage(uint32_t base, uint32_t objID);
+extern void CAN_sendRemoteRequestMessage(uint32_t base, uint32_t objID);
 
 //*****************************************************************************
 //
@@ -1787,9 +1687,7 @@ CAN_sendRemoteRequestMessage(uint32_t base, uint32_t objID);
 //! \b false to indicate no new data was retrieved.
 //
 //*****************************************************************************
-extern bool
-CAN_readMessage(uint32_t base, uint32_t objID,
-                uint16_t *msgData);
+extern bool CAN_readMessage(uint32_t base, uint32_t objID, uint16_t *msgData);
 
 //*****************************************************************************
 //
@@ -1809,9 +1707,9 @@ CAN_readMessage(uint32_t base, uint32_t objID,
 //! Filled with read Data when the return value is true for this function.
 //!
 //! This function is used to read the data contents and the Message ID
-//! of the specified message object in the CAN controller.The Message ID returned
-//! is stored in the \e msgID parameter and its type in \e frameType parameter.
-//! The data returned is stored in the \e msgData parameter.
+//! of the specified message object in the CAN controller.The Message ID
+//! returned is stored in the \e msgID parameter and its type in \e frameType
+//! parameter. The data returned is stored in the \e msgData parameter.
 //!
 //! \note
 //! -# The message object requested by the \e objID must first be setup
@@ -1821,13 +1719,9 @@ CAN_readMessage(uint32_t base, uint32_t objID,
 //! \b false to indicate no new data was retrieved.
 //
 //*****************************************************************************
-extern bool CAN_readMessageWithID(uint32_t base,
-                                  uint32_t objID,
-                                  CAN_MsgFrameType *frameType,
-                                  uint32_t *msgID,
+extern bool CAN_readMessageWithID(uint32_t base, uint32_t objID,
+                                  CAN_MsgFrameType *frameType, uint32_t *msgID,
                                   uint16_t *msgData);
-
-
 
 //*****************************************************************************
 //
@@ -1846,9 +1740,8 @@ extern bool CAN_readMessageWithID(uint32_t base,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CAN_transferMessage(uint32_t base, uint16_t interface, uint32_t objID,
-                    bool direction);
+extern void CAN_transferMessage(uint32_t base, uint16_t interface,
+                                uint32_t objID, bool direction);
 
 //*****************************************************************************
 //
@@ -1864,8 +1757,7 @@ CAN_transferMessage(uint32_t base, uint16_t interface, uint32_t objID,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CAN_clearMessage(uint32_t base, uint32_t objID);
+extern void CAN_clearMessage(uint32_t base, uint32_t objID);
 
 //*****************************************************************************
 //
@@ -1881,8 +1773,7 @@ CAN_clearMessage(uint32_t base, uint32_t objID);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CAN_disableMessageObject(uint32_t base, uint32_t objID);
+extern void CAN_disableMessageObject(uint32_t base, uint32_t objID);
 
 //*****************************************************************************
 //
@@ -1899,8 +1790,7 @@ CAN_disableMessageObject(uint32_t base, uint32_t objID);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-CAN_disableAllMessageObjects(uint32_t base);
+extern void CAN_disableAllMessageObjects(uint32_t base);
 
 //*****************************************************************************
 //

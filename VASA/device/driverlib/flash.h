@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   flash.h
+//  FILE:   flash.h
 //
-// TITLE:  C28x Flash driver.
+//  TITLE:  C28x Flash driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef FLASH_H
 #define FLASH_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 #ifndef __TMS320C28XX_CLA__
 
@@ -60,13 +59,13 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "cpu.h"
+#include "debug.h"
 #include "inc/hw_flash.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
-#include "cpu.h"
-#include "debug.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 #ifndef __cplusplus
 #pragma CODE_SECTION(Flash_setBankPowerMode, ".TI.ramfunc");
@@ -79,15 +78,13 @@ extern "C"
 #pragma CODE_SECTION(Flash_enableECC, ".TI.ramfunc");
 #endif
 
-
 //*****************************************************************************
 //
 //! Values that can be passed to Flash_setBankPowerMode() as the bank parameter
 //
 //*****************************************************************************
-typedef enum
-{
-    FLASH_BANK = 0x0   //!< Bank
+typedef enum {
+  FLASH_BANK = 0x0 //!< Bank
 } Flash_BankNumber;
 
 //*****************************************************************************
@@ -96,11 +93,10 @@ typedef enum
 //! the pump semaphore.
 //
 //*****************************************************************************
-typedef enum
-{
-    FLASH_CPU1_WRAPPER = 0x2, //!< CPU1 Wrapper
-    FLASH_CPU2_WRAPPER = 0x1  //!< CPU2 Wrapper
-}Flash_PumpOwnership;
+typedef enum {
+  FLASH_CPU1_WRAPPER = 0x2, //!< CPU1 Wrapper
+  FLASH_CPU2_WRAPPER = 0x1  //!< CPU2 Wrapper
+} Flash_PumpOwnership;
 
 //*****************************************************************************
 //
@@ -108,11 +104,10 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    FLASH_BANK_PWR_SLEEP    = 0x0, //!< Sleep fallback mode
-    FLASH_BANK_PWR_STANDBY  = 0x1, //!< Standby fallback mode
-    FLASH_BANK_PWR_ACTIVE   = 0x3  //!< Active fallback mode
+typedef enum {
+  FLASH_BANK_PWR_SLEEP   = 0x0, //!< Sleep fallback mode
+  FLASH_BANK_PWR_STANDBY = 0x1, //!< Standby fallback mode
+  FLASH_BANK_PWR_ACTIVE  = 0x3  //!< Active fallback mode
 } Flash_BankPowerMode;
 
 //*****************************************************************************
@@ -121,10 +116,9 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    FLASH_PUMP_PWR_SLEEP    = 0x0, //!< Sleep fallback mode
-    FLASH_PUMP_PWR_ACTIVE   = 0x1  //!< Active fallback mode
+typedef enum {
+  FLASH_PUMP_PWR_SLEEP  = 0x0, //!< Sleep fallback mode
+  FLASH_PUMP_PWR_ACTIVE = 0x1  //!< Active fallback mode
 } Flash_PumpPowerMode;
 
 //*****************************************************************************
@@ -133,12 +127,11 @@ typedef enum
 //! Flash_getHighErrorStatus() determining the error status code.
 //
 //*****************************************************************************
-typedef enum
-{
-    FLASH_NO_ERR       = 0x0, //!< No error
-    FLASH_FAIL_0       = 0x1, //!< Fail on 0
-    FLASH_FAIL_1       = 0x2, //!< Fail on 1
-    FLASH_UNC_ERR      = 0x4  //!< Uncorrectable error
+typedef enum {
+  FLASH_NO_ERR  = 0x0, //!< No error
+  FLASH_FAIL_0  = 0x1, //!< Fail on 0
+  FLASH_FAIL_1  = 0x2, //!< Fail on 1
+  FLASH_UNC_ERR = 0x4  //!< Uncorrectable error
 } Flash_ErrorStatus;
 
 //*****************************************************************************
@@ -147,10 +140,9 @@ typedef enum
 //! Flash_getHighErrorType() determining the error type.
 //
 //*****************************************************************************
-typedef enum
-{
-    FLASH_DATA_ERR      = 0x0, //!< Data error
-    FLASH_ECC_ERR       = 0x1  //!< ECC error
+typedef enum {
+  FLASH_DATA_ERR = 0x0, //!< Data error
+  FLASH_ECC_ERR  = 0x1  //!< ECC error
 } Flash_ErrorType;
 
 //*****************************************************************************
@@ -158,10 +150,9 @@ typedef enum
 //! Values that can be returned from Flash_getECCTestSingleBitErrorType().
 //
 //*****************************************************************************
-typedef enum
-{
-    FLASH_DATA_BITS          = 0x0, //!< Data bits
-    FLASH_CHECK_BITS         = 0x1  //!< ECC bits
+typedef enum {
+  FLASH_DATA_BITS  = 0x0, //!< Data bits
+  FLASH_CHECK_BITS = 0x1  //!< ECC bits
 } Flash_SingleBitErrorIndicator;
 
 //*****************************************************************************
@@ -170,9 +161,9 @@ typedef enum
 // Flash_clearHighErrorStatus.
 //
 //*****************************************************************************
-#define    FLASH_FAIL_0_CLR       0x1 //!< Fail-0 clear
-#define    FLASH_FAIL_1_CLR       0x2 //!< Fail-1 clear
-#define    FLASH_UNC_ERR_CLR      0x4 //!< Uncorrectable error Clear
+#define FLASH_FAIL_0_CLR  0x1 //!< Fail-0 clear
+#define FLASH_FAIL_1_CLR  0x2 //!< Fail-1 clear
+#define FLASH_UNC_ERR_CLR 0x4 //!< Uncorrectable error Clear
 
 //*****************************************************************************
 //
@@ -180,23 +171,23 @@ typedef enum
 // Flash_getECCTestStatus.
 //
 //*****************************************************************************
-#define    FLASH_NO_ERROR         0x0 //!< No error
-#define    FLASH_SINGLE_ERROR     0x1 //!< Single bit error
-#define    FLASH_UNC_ERROR        0x2 //!< Uncorrectable error
+#define FLASH_NO_ERROR     0x0 //!< No error
+#define FLASH_SINGLE_ERROR 0x1 //!< Single bit error
+#define FLASH_UNC_ERROR    0x2 //!< Uncorrectable error
 
 //*****************************************************************************
 //
 // Delay instruction that allows for register configuration to complete.
 //
 //*****************************************************************************
-#define    FLASH_DELAY_CONFIG     __asm(" RPT #7 || NOP")
+#define FLASH_DELAY_CONFIG __asm(" RPT #7 || NOP")
 
 //*****************************************************************************
 //
 // Key value for claiming the pump semaphore.
 //
 //*****************************************************************************
-#define FLASH_PUMP_KEY                  0x5A5A0000UL //!< Pump semaphore key
+#define FLASH_PUMP_KEY 0x5A5A0000UL //!< Pump semaphore key
 
 //*****************************************************************************
 //
@@ -217,10 +208,8 @@ typedef enum
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-Flash_isCtrlBaseValid(uint32_t ctrlBase)
-{
-    return((ctrlBase == FLASH0CTRL_BASE));
+static inline bool Flash_isCtrlBaseValid(uint32_t ctrlBase) {
+  return ((ctrlBase == FLASH0CTRL_BASE));
 }
 #endif
 
@@ -238,10 +227,8 @@ Flash_isCtrlBaseValid(uint32_t ctrlBase)
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-Flash_isECCBaseValid(uint32_t eccBase)
-{
-    return((eccBase == FLASH0ECC_BASE));
+static inline bool Flash_isECCBaseValid(uint32_t eccBase) {
+  return ((eccBase == FLASH0ECC_BASE));
 }
 #endif
 
@@ -259,10 +246,8 @@ Flash_isECCBaseValid(uint32_t eccBase)
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-Flash_isPumpSemBaseValid(uint32_t pumpSemBase)
-{
-    return((pumpSemBase == FLASHPUMPSEMAPHORE_BASE));
+static inline bool Flash_isPumpSemBaseValid(uint32_t pumpSemBase) {
+  return ((pumpSemBase == FLASHPUMPSEMAPHORE_BASE));
 }
 #endif
 
@@ -286,28 +271,25 @@ Flash_isPumpSemBaseValid(uint32_t pumpSemBase)
 #ifdef __cplusplus
 #pragma CODE_SECTION(".TI.ramfunc");
 #endif
-static inline void
-Flash_setWaitstates(uint32_t ctrlBase, uint16_t waitstates)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isCtrlBaseValid(ctrlBase));
+static inline void Flash_setWaitstates(uint32_t ctrlBase, uint16_t waitstates) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isCtrlBaseValid(ctrlBase));
 
-    //
-    // waitstates is 4 bits wide.
-    //
-    ASSERT(waitstates <= 0xFU);
+  //
+  // waitstates is 4 bits wide.
+  //
+  ASSERT(waitstates <= 0xFU);
 
-    EALLOW;
-    //
-    // Write flash read wait-state amount to appropriate register.
-    //
-    HWREG(ctrlBase + FLASH_O_FRDCNTL) =
-        (HWREG(ctrlBase + FLASH_O_FRDCNTL) &
-         ~(uint32_t)FLASH_FRDCNTL_RWAIT_M) |
-         ((uint32_t)waitstates << FLASH_FRDCNTL_RWAIT_S);
-    EDIS;
+  EALLOW;
+  //
+  // Write flash read wait-state amount to appropriate register.
+  //
+  HWREG(ctrlBase + FLASH_O_FRDCNTL) =
+      (HWREG(ctrlBase + FLASH_O_FRDCNTL) & ~(uint32_t)FLASH_FRDCNTL_RWAIT_M) |
+      ((uint32_t)waitstates << FLASH_FRDCNTL_RWAIT_S);
+  EDIS;
 }
 
 //*****************************************************************************
@@ -336,25 +318,24 @@ Flash_setWaitstates(uint32_t ctrlBase, uint16_t waitstates)
 #ifdef __cplusplus
 #pragma CODE_SECTION(".TI.ramfunc");
 #endif
-static inline void
-Flash_setBankPowerMode(uint32_t ctrlBase, Flash_BankNumber bank,
-                       Flash_BankPowerMode powerMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isCtrlBaseValid(ctrlBase));
+static inline void Flash_setBankPowerMode(uint32_t            ctrlBase,
+                                          Flash_BankNumber    bank,
+                                          Flash_BankPowerMode powerMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isCtrlBaseValid(ctrlBase));
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Write the power mode to the appropriate register.
-    //
-    HWREG(ctrlBase + FLASH_O_FBFALLBACK) =
-        (HWREG(ctrlBase + FLASH_O_FBFALLBACK) &
-         ~((FLASH_FBFALLBACK_BNKPWR0_M) << ((uint32_t)bank * 2U))) |
-        ((uint32_t)powerMode << ((uint32_t)bank * 2U));
-    EDIS;
+  //
+  // Write the power mode to the appropriate register.
+  //
+  HWREG(ctrlBase + FLASH_O_FBFALLBACK) =
+      (HWREG(ctrlBase + FLASH_O_FBFALLBACK) &
+       ~((FLASH_FBFALLBACK_BNKPWR0_M) << ((uint32_t)bank * 2U))) |
+      ((uint32_t)powerMode << ((uint32_t)bank * 2U));
+  EDIS;
 }
 
 //*****************************************************************************
@@ -375,23 +356,22 @@ Flash_setBankPowerMode(uint32_t ctrlBase, Flash_BankNumber bank,
 #ifdef __cplusplus
 #pragma CODE_SECTION(".TI.ramfunc");
 #endif
-static inline void
-Flash_setPumpPowerMode(uint32_t ctrlBase, Flash_PumpPowerMode powerMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isCtrlBaseValid(ctrlBase));
+static inline void Flash_setPumpPowerMode(uint32_t            ctrlBase,
+                                          Flash_PumpPowerMode powerMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isCtrlBaseValid(ctrlBase));
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Write the power mode to the appropriate register.
-    //
-    HWREG(ctrlBase + FLASH_O_FPAC1) =
-        (HWREG(ctrlBase + FLASH_O_FPAC1) &
-        ~(uint32_t)FLASH_FPAC1_PMPPWR) | (uint32_t)powerMode;
-    EDIS;
+  //
+  // Write the power mode to the appropriate register.
+  //
+  HWREG(ctrlBase + FLASH_O_FPAC1) =
+      (HWREG(ctrlBase + FLASH_O_FPAC1) & ~(uint32_t)FLASH_FPAC1_PMPPWR) |
+      (uint32_t)powerMode;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -406,22 +386,19 @@ Flash_setPumpPowerMode(uint32_t ctrlBase, Flash_PumpPowerMode powerMode)
 #ifdef __cplusplus
 #pragma CODE_SECTION(".TI.ramfunc");
 #endif
-static inline void
-Flash_enablePrefetch(uint32_t ctrlBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isCtrlBaseValid(ctrlBase));
+static inline void Flash_enablePrefetch(uint32_t ctrlBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isCtrlBaseValid(ctrlBase));
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Set the prefetch enable bit.
-    //
-    HWREG(ctrlBase + FLASH_O_FRD_INTF_CTRL) |=
-            FLASH_FRD_INTF_CTRL_PREFETCH_EN;
-    EDIS;
+  //
+  // Set the prefetch enable bit.
+  //
+  HWREG(ctrlBase + FLASH_O_FRD_INTF_CTRL) |= FLASH_FRD_INTF_CTRL_PREFETCH_EN;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -436,22 +413,20 @@ Flash_enablePrefetch(uint32_t ctrlBase)
 #ifdef __cplusplus
 #pragma CODE_SECTION(".TI.ramfunc");
 #endif
-static inline void
-Flash_disablePrefetch(uint32_t ctrlBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isCtrlBaseValid(ctrlBase));
+static inline void Flash_disablePrefetch(uint32_t ctrlBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isCtrlBaseValid(ctrlBase));
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Clear the prefetch enable bit.
-    //
-    HWREG(ctrlBase + FLASH_O_FRD_INTF_CTRL) &=
-            ~(uint32_t)FLASH_FRD_INTF_CTRL_PREFETCH_EN;
-    EDIS;
+  //
+  // Clear the prefetch enable bit.
+  //
+  HWREG(ctrlBase + FLASH_O_FRD_INTF_CTRL) &=
+      ~(uint32_t)FLASH_FRD_INTF_CTRL_PREFETCH_EN;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -466,22 +441,19 @@ Flash_disablePrefetch(uint32_t ctrlBase)
 #ifdef __cplusplus
 #pragma CODE_SECTION(".TI.ramfunc");
 #endif
-static inline void
-Flash_enableCache(uint32_t ctrlBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isCtrlBaseValid(ctrlBase));
+static inline void Flash_enableCache(uint32_t ctrlBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isCtrlBaseValid(ctrlBase));
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Set the data cache enable bit.
-    //
-    HWREG(ctrlBase + FLASH_O_FRD_INTF_CTRL) |=
-            FLASH_FRD_INTF_CTRL_DATA_CACHE_EN;
-    EDIS;
+  //
+  // Set the data cache enable bit.
+  //
+  HWREG(ctrlBase + FLASH_O_FRD_INTF_CTRL) |= FLASH_FRD_INTF_CTRL_DATA_CACHE_EN;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -496,22 +468,20 @@ Flash_enableCache(uint32_t ctrlBase)
 #ifdef __cplusplus
 #pragma CODE_SECTION(".TI.ramfunc");
 #endif
-static inline void
-Flash_disableCache(uint32_t ctrlBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isCtrlBaseValid(ctrlBase));
+static inline void Flash_disableCache(uint32_t ctrlBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isCtrlBaseValid(ctrlBase));
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Clear the data cache enable bit.
-    //
-    HWREG(ctrlBase + FLASH_O_FRD_INTF_CTRL) &=
-            ~(uint32_t)FLASH_FRD_INTF_CTRL_DATA_CACHE_EN;
-    EDIS;
+  //
+  // Clear the data cache enable bit.
+  //
+  HWREG(ctrlBase + FLASH_O_FRD_INTF_CTRL) &=
+      ~(uint32_t)FLASH_FRD_INTF_CTRL_DATA_CACHE_EN;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -526,23 +496,21 @@ Flash_disableCache(uint32_t ctrlBase)
 #ifdef __cplusplus
 #pragma CODE_SECTION(".TI.ramfunc");
 #endif
-static inline void
-Flash_enableECC(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_enableECC(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Write the key value 0xA to ECC_ENABLE register.
-    //
-    HWREG(eccBase + FLASH_O_ECC_ENABLE) =
-        (HWREG(eccBase + FLASH_O_ECC_ENABLE) &
-         ~(uint32_t)FLASH_ECC_ENABLE_ENABLE_M) | 0xAU;
-    EDIS;
+  //
+  // Write the key value 0xA to ECC_ENABLE register.
+  //
+  HWREG(eccBase + FLASH_O_ECC_ENABLE) = (HWREG(eccBase + FLASH_O_ECC_ENABLE) &
+                                         ~(uint32_t)FLASH_ECC_ENABLE_ENABLE_M) |
+                                        0xAU;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -554,25 +522,22 @@ Flash_enableECC(uint32_t eccBase)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_disableECC(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_disableECC(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Clear ECC enable field with the one's complement of the key.
-    //
-    HWREG(eccBase + FLASH_O_ECC_ENABLE) =
-        (HWREG(eccBase + FLASH_O_ECC_ENABLE) &
-         ~(uint32_t)FLASH_ECC_ENABLE_ENABLE_M) | 0x5U;
-    EDIS;
+  //
+  // Clear ECC enable field with the one's complement of the key.
+  //
+  HWREG(eccBase + FLASH_O_ECC_ENABLE) = (HWREG(eccBase + FLASH_O_ECC_ENABLE) &
+                                         ~(uint32_t)FLASH_ECC_ENABLE_ENABLE_M) |
+                                        0x5U;
+  EDIS;
 }
-
 
 //*****************************************************************************
 //
@@ -590,23 +555,23 @@ Flash_disableECC(uint32_t eccBase)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_setBankPowerUpDelay(uint32_t ctrlBase, uint16_t delay)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isCtrlBaseValid(ctrlBase));
-    ASSERT(delay <= 0xFF);
+static inline void Flash_setBankPowerUpDelay(uint32_t ctrlBase,
+                                             uint16_t delay) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isCtrlBaseValid(ctrlBase));
+  ASSERT(delay <= 0xFF);
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Write period to the BAGP of the FBAC register.
-    //
-    HWREG(ctrlBase + FLASH_O_FBAC) = (HWREG(ctrlBase + FLASH_O_FBAC) &
-                                      ~(uint32_t)FLASH_FBAC_VREADST_M) | delay;
-    EDIS;
+  //
+  // Write period to the BAGP of the FBAC register.
+  //
+  HWREG(ctrlBase + FLASH_O_FBAC) =
+      (HWREG(ctrlBase + FLASH_O_FBAC) & ~(uint32_t)FLASH_FBAC_VREADST_M) |
+      delay;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -624,30 +589,28 @@ Flash_setBankPowerUpDelay(uint32_t ctrlBase, uint16_t delay)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_setPumpWakeupTime(uint32_t ctrlBase, uint16_t sysclkCycles)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isCtrlBaseValid(ctrlBase));
+static inline void Flash_setPumpWakeupTime(uint32_t ctrlBase,
+                                           uint16_t sysclkCycles) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isCtrlBaseValid(ctrlBase));
 
-    //
-    // PSLEEP = sysclkCycles/2. PSLEEP maximum value is 4095(12 bits wide)
-    //
-    ASSERT( sysclkCycles <= 8190U );
+  //
+  // PSLEEP = sysclkCycles/2. PSLEEP maximum value is 4095(12 bits wide)
+  //
+  ASSERT(sysclkCycles <= 8190U);
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Write sysclkCycles/2 to PSLEEP of the FPAC1 register.
-    //
-    HWREG(ctrlBase + FLASH_O_FPAC1) =
-          (HWREG(ctrlBase + FLASH_O_FPAC1) &
-          ~(uint32_t)FLASH_FPAC1_PSLEEP_M) |
-          (((uint32_t)sysclkCycles / (uint32_t)2) <<
-          (uint32_t)FLASH_FPAC1_PSLEEP_S);
-    EDIS;
+  //
+  // Write sysclkCycles/2 to PSLEEP of the FPAC1 register.
+  //
+  HWREG(ctrlBase + FLASH_O_FPAC1) =
+      (HWREG(ctrlBase + FLASH_O_FPAC1) & ~(uint32_t)FLASH_FPAC1_PSLEEP_M) |
+      (((uint32_t)sysclkCycles / (uint32_t)2)
+       << (uint32_t)FLASH_FPAC1_PSLEEP_S);
+  EDIS;
 }
 
 //*****************************************************************************
@@ -661,28 +624,23 @@ Flash_setPumpWakeupTime(uint32_t ctrlBase, uint16_t sysclkCycles)
 //! otherwise.
 //
 //*****************************************************************************
-static inline bool
-Flash_isBankReady(uint32_t ctrlBase, Flash_BankNumber bank)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isCtrlBaseValid(ctrlBase));
+static inline bool Flash_isBankReady(uint32_t ctrlBase, Flash_BankNumber bank) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isCtrlBaseValid(ctrlBase));
 
-    bool ready;
-    uint32_t bitMask = (uint32_t)FLASH_FBPRDY_BANKRDY << (uint32_t)bank;
-    //
-    // Return the BANKXRDY bit in FBPRDY.
-    //
-    if((HWREG(ctrlBase + FLASH_O_FBPRDY) & bitMask) == bitMask)
-    {
-        ready = true;
-    }
-    else
-    {
-        ready = false;
-    }
-    return(ready);
+  bool     ready;
+  uint32_t bitMask = (uint32_t)FLASH_FBPRDY_BANKRDY << (uint32_t)bank;
+  //
+  // Return the BANKXRDY bit in FBPRDY.
+  //
+  if ((HWREG(ctrlBase + FLASH_O_FBPRDY) & bitMask) == bitMask) {
+    ready = true;
+  } else {
+    ready = false;
+  }
+  return (ready);
 }
 
 //*****************************************************************************
@@ -695,31 +653,25 @@ Flash_isBankReady(uint32_t ctrlBase, Flash_BankNumber bank)
 //! otherwise.
 //
 //*****************************************************************************
-static inline bool
-Flash_isPumpReady(uint32_t ctrlBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isCtrlBaseValid(ctrlBase));
+static inline bool Flash_isPumpReady(uint32_t ctrlBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isCtrlBaseValid(ctrlBase));
 
-    bool ready;
+  bool ready;
 
-    //
-    // Return the PUMPRDY bit in FBPRDY.
-    //
-    if((HWREG(ctrlBase + FLASH_O_FBPRDY) &
-        (uint32_t)FLASH_FBPRDY_PUMPRDY) == FLASH_FBPRDY_PUMPRDY)
-    {
-        ready = true;
-    }
-    else
-    {
-        ready = false;
-    }
-    return(ready);
+  //
+  // Return the PUMPRDY bit in FBPRDY.
+  //
+  if ((HWREG(ctrlBase + FLASH_O_FBPRDY) & (uint32_t)FLASH_FBPRDY_PUMPRDY) ==
+      FLASH_FBPRDY_PUMPRDY) {
+    ready = true;
+  } else {
+    ready = false;
+  }
+  return (ready);
 }
-
 
 //*****************************************************************************
 //
@@ -735,15 +687,13 @@ Flash_isPumpReady(uint32_t ctrlBase)
 //! error occurred.
 //
 //*****************************************************************************
-static inline uint32_t
-Flash_getSingleBitErrorAddressLow(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline uint32_t Flash_getSingleBitErrorAddressLow(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    return(HWREG(eccBase + FLASH_O_SINGLE_ERR_ADDR_LOW));
+  return (HWREG(eccBase + FLASH_O_SINGLE_ERR_ADDR_LOW));
 }
 
 //*****************************************************************************
@@ -760,15 +710,13 @@ Flash_getSingleBitErrorAddressLow(uint32_t eccBase)
 //! error occurred.
 //
 //*****************************************************************************
-static inline uint32_t
-Flash_getSingleBitErrorAddressHigh(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline uint32_t Flash_getSingleBitErrorAddressHigh(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    return(HWREG(eccBase + FLASH_O_SINGLE_ERR_ADDR_HIGH));
+  return (HWREG(eccBase + FLASH_O_SINGLE_ERR_ADDR_HIGH));
 }
 
 //*****************************************************************************
@@ -785,15 +733,13 @@ Flash_getSingleBitErrorAddressHigh(uint32_t eccBase)
 //! uncorrectable error occurred.
 //
 //*****************************************************************************
-static inline uint32_t
-Flash_getUncorrectableErrorAddressLow(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline uint32_t Flash_getUncorrectableErrorAddressLow(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    return(HWREG(eccBase + FLASH_O_UNC_ERR_ADDR_LOW));
+  return (HWREG(eccBase + FLASH_O_UNC_ERR_ADDR_LOW));
 }
 
 //*****************************************************************************
@@ -811,14 +757,13 @@ Flash_getUncorrectableErrorAddressLow(uint32_t eccBase)
 //
 //*****************************************************************************
 static inline uint32_t
-Flash_getUncorrectableErrorAddressHigh(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+Flash_getUncorrectableErrorAddressHigh(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    return(HWREG(eccBase + FLASH_O_UNC_ERR_ADDR_HIGH));
+  return (HWREG(eccBase + FLASH_O_UNC_ERR_ADDR_HIGH));
 }
 
 //*****************************************************************************
@@ -834,20 +779,18 @@ Flash_getUncorrectableErrorAddressHigh(uint32_t eccBase)
 //! Flash_ErrorStatus type.
 //
 //*****************************************************************************
-static inline Flash_ErrorStatus
-Flash_getLowErrorStatus(uint32_t eccBase)
-{
-    uint32_t errorStatus;
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline Flash_ErrorStatus Flash_getLowErrorStatus(uint32_t eccBase) {
+  uint32_t errorStatus;
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    //
-    // Get the Low Error Status bits
-    //
-    errorStatus = (HWREG(eccBase + FLASH_O_ERR_STATUS) & 0x7UL);
-    return((Flash_ErrorStatus)errorStatus);
+  //
+  // Get the Low Error Status bits
+  //
+  errorStatus = (HWREG(eccBase + FLASH_O_ERR_STATUS) & 0x7UL);
+  return ((Flash_ErrorStatus)errorStatus);
 }
 
 //*****************************************************************************
@@ -863,20 +806,18 @@ Flash_getLowErrorStatus(uint32_t eccBase)
 //! Flash_ErrorStatus type.
 //
 //*****************************************************************************
-static inline Flash_ErrorStatus
-Flash_getHighErrorStatus(uint32_t eccBase)
-{
-    uint32_t errorStatus;
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline Flash_ErrorStatus Flash_getHighErrorStatus(uint32_t eccBase) {
+  uint32_t errorStatus;
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    //
-    // Get the High Error Status bits
-    //
-    errorStatus = ((HWREG(eccBase + FLASH_O_ERR_STATUS) >> 16U) & 0x7UL);
-    return((Flash_ErrorStatus)errorStatus);
+  //
+  // Get the High Error Status bits
+  //
+  errorStatus = ((HWREG(eccBase + FLASH_O_ERR_STATUS) >> 16U) & 0x7UL);
+  return ((Flash_ErrorStatus)errorStatus);
 }
 
 //*****************************************************************************
@@ -892,17 +833,15 @@ Flash_getHighErrorStatus(uint32_t eccBase)
 //! \return Returns the position of the lower error bit.
 //
 //*****************************************************************************
-static inline uint32_t
-Flash_getLowErrorPosition(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline uint32_t Flash_getLowErrorPosition(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    return((HWREG(eccBase + FLASH_O_ERR_POS) &
-            (uint32_t)FLASH_ERR_POS_ERR_POS_L_M) >>
-            FLASH_ERR_POS_ERR_POS_L_S);
+  return ((HWREG(eccBase + FLASH_O_ERR_POS) &
+           (uint32_t)FLASH_ERR_POS_ERR_POS_L_M) >>
+          FLASH_ERR_POS_ERR_POS_L_S);
 }
 
 //*****************************************************************************
@@ -918,17 +857,15 @@ Flash_getLowErrorPosition(uint32_t eccBase)
 //! \return Returns the position of the upper error bit.
 //
 //*****************************************************************************
-static inline uint32_t
-Flash_getHighErrorPosition(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline uint32_t Flash_getHighErrorPosition(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    return((HWREG(eccBase + FLASH_O_ERR_POS) &
-            (uint32_t)FLASH_ERR_POS_ERR_POS_H_M) >>
-            FLASH_ERR_POS_ERR_POS_H_S);
+  return ((HWREG(eccBase + FLASH_O_ERR_POS) &
+           (uint32_t)FLASH_ERR_POS_ERR_POS_H_M) >>
+          FLASH_ERR_POS_ERR_POS_H_S);
 }
 
 //*****************************************************************************
@@ -943,30 +880,25 @@ Flash_getHighErrorPosition(uint32_t eccBase)
 //! \return Returns the type of the lower 64-bit error.
 //
 //*****************************************************************************
-static inline Flash_ErrorType
-Flash_getLowErrorType(uint32_t eccBase)
-{
-    Flash_ErrorType errorType;
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline Flash_ErrorType Flash_getLowErrorType(uint32_t eccBase) {
+  Flash_ErrorType errorType;
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    //
-    // Check which error type.
-    // If bit is 1 then ECC error, else it is a Data error.
-    //
-    if((HWREG(eccBase + FLASH_O_ERR_POS) & FLASH_ERR_POS_ERR_TYPE_L)
-                                == FLASH_ERR_POS_ERR_TYPE_L)
-    {
-        errorType =  FLASH_ECC_ERR;
-    }
-    else
-    {
-        errorType =  FLASH_DATA_ERR;
-    }
+  //
+  // Check which error type.
+  // If bit is 1 then ECC error, else it is a Data error.
+  //
+  if ((HWREG(eccBase + FLASH_O_ERR_POS) & FLASH_ERR_POS_ERR_TYPE_L) ==
+      FLASH_ERR_POS_ERR_TYPE_L) {
+    errorType = FLASH_ECC_ERR;
+  } else {
+    errorType = FLASH_DATA_ERR;
+  }
 
-    return(errorType);
+  return (errorType);
 }
 
 //*****************************************************************************
@@ -981,30 +913,25 @@ Flash_getLowErrorType(uint32_t eccBase)
 //! \return Returns the type of the upper 64-bit error.
 //
 //*****************************************************************************
-static inline Flash_ErrorType
-Flash_getHighErrorType(uint32_t eccBase)
-{
-    Flash_ErrorType errorType;
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline Flash_ErrorType Flash_getHighErrorType(uint32_t eccBase) {
+  Flash_ErrorType errorType;
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    //
-    // Check which error type.
-    // If bit is 1 then ECC error, else it is a Data error.
-    //
-    if((HWREG(eccBase + FLASH_O_ERR_POS) & FLASH_ERR_POS_ERR_TYPE_H)
-                                == FLASH_ERR_POS_ERR_TYPE_H)
-    {
-        errorType =  FLASH_ECC_ERR;
-    }
-    else
-    {
-        errorType =  FLASH_DATA_ERR;
-    }
+  //
+  // Check which error type.
+  // If bit is 1 then ECC error, else it is a Data error.
+  //
+  if ((HWREG(eccBase + FLASH_O_ERR_POS) & FLASH_ERR_POS_ERR_TYPE_H) ==
+      FLASH_ERR_POS_ERR_TYPE_H) {
+    errorType = FLASH_ECC_ERR;
+  } else {
+    errorType = FLASH_DATA_ERR;
+  }
 
-    return(errorType);
+  return (errorType);
 }
 //*****************************************************************************
 //
@@ -1021,18 +948,17 @@ Flash_getHighErrorType(uint32_t eccBase)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_clearLowErrorStatus(uint32_t eccBase, uint16_t errorStatus)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
-    ASSERT( errorStatus <= 7U );
+static inline void Flash_clearLowErrorStatus(uint32_t eccBase,
+                                             uint16_t errorStatus) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
+  ASSERT(errorStatus <= 7U);
 
-    EALLOW;
-    HWREG(eccBase + FLASH_O_ERR_STATUS_CLR) |= ((uint32_t)errorStatus);
-    EDIS;
+  EALLOW;
+  HWREG(eccBase + FLASH_O_ERR_STATUS_CLR) |= ((uint32_t)errorStatus);
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1050,18 +976,17 @@ Flash_clearLowErrorStatus(uint32_t eccBase, uint16_t errorStatus)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_clearHighErrorStatus(uint32_t eccBase, uint16_t errorStatus)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
-    ASSERT( errorStatus <= 7U );
+static inline void Flash_clearHighErrorStatus(uint32_t eccBase,
+                                              uint16_t errorStatus) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
+  ASSERT(errorStatus <= 7U);
 
-    EALLOW;
-    HWREG(eccBase + FLASH_O_ERR_STATUS_CLR) |= ((uint32_t)errorStatus << 16U);
-    EDIS;
+  EALLOW;
+  HWREG(eccBase + FLASH_O_ERR_STATUS_CLR) |= ((uint32_t)errorStatus << 16U);
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1073,16 +998,13 @@ Flash_clearHighErrorStatus(uint32_t eccBase, uint16_t errorStatus)
 //! \return Returns the single bit error count.
 //
 //*****************************************************************************
-static inline uint32_t
-Flash_getErrorCount(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline uint32_t Flash_getErrorCount(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    return(HWREG(eccBase + FLASH_O_ERR_CNT) &
-            (uint32_t)FLASH_ERR_CNT_ERR_CNT_M);
+  return (HWREG(eccBase + FLASH_O_ERR_CNT) & (uint32_t)FLASH_ERR_CNT_ERR_CNT_M);
 }
 
 //*****************************************************************************
@@ -1096,18 +1018,17 @@ Flash_getErrorCount(uint32_t eccBase)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_setErrorThreshold(uint32_t eccBase, uint16_t threshold)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_setErrorThreshold(uint32_t eccBase,
+                                           uint16_t threshold) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    EALLOW;
-    HWREG(eccBase + FLASH_O_ERR_THRESHOLD) = ((uint32_t)threshold &
-        (uint32_t)FLASH_ERR_THRESHOLD_ERR_THRESHOLD_M);
-    EDIS;
+  EALLOW;
+  HWREG(eccBase + FLASH_O_ERR_THRESHOLD) =
+      ((uint32_t)threshold & (uint32_t)FLASH_ERR_THRESHOLD_ERR_THRESHOLD_M);
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1125,18 +1046,16 @@ Flash_setErrorThreshold(uint32_t eccBase, uint16_t threshold)
 //! \return Returns the interrupt flag.
 //
 //*****************************************************************************
-static inline uint32_t
-Flash_getInterruptFlag(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline uint32_t Flash_getInterruptFlag(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    //
-    // Read which type of error occurred.
-    //
-    return((HWREG(eccBase + FLASH_O_ERR_INTFLG) & (uint32_t)0x3U));
+  //
+  // Read which type of error occurred.
+  //
+  return ((HWREG(eccBase + FLASH_O_ERR_INTFLG) & (uint32_t)0x3U));
 }
 
 //*****************************************************************************
@@ -1148,18 +1067,15 @@ Flash_getInterruptFlag(uint32_t eccBase)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_clearSingleErrorInterruptFlag(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_clearSingleErrorInterruptFlag(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    EALLOW;
-    HWREG(eccBase + FLASH_O_ERR_INTCLR) |=
-        FLASH_ERR_INTCLR_SINGLE_ERR_INTCLR;
-    EDIS;
+  EALLOW;
+  HWREG(eccBase + FLASH_O_ERR_INTCLR) |= FLASH_ERR_INTCLR_SINGLE_ERR_INTCLR;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1171,18 +1087,15 @@ Flash_clearSingleErrorInterruptFlag(uint32_t eccBase)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_clearUncorrectableInterruptFlag(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_clearUncorrectableInterruptFlag(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    EALLOW;
-    HWREG(eccBase + FLASH_O_ERR_INTCLR) |=
-        FLASH_ERR_INTCLR_UNC_ERR_INTCLR;
-    EDIS;
+  EALLOW;
+  HWREG(eccBase + FLASH_O_ERR_INTCLR) |= FLASH_ERR_INTCLR_UNC_ERR_INTCLR;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1196,17 +1109,15 @@ Flash_clearUncorrectableInterruptFlag(uint32_t eccBase)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_setDataLowECCTest(uint32_t eccBase, uint32_t data)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_setDataLowECCTest(uint32_t eccBase, uint32_t data) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    EALLOW;
-    HWREG(eccBase + FLASH_O_FDATAL_TEST) = data;
-    EDIS;
+  EALLOW;
+  HWREG(eccBase + FLASH_O_FDATAL_TEST) = data;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1220,17 +1131,15 @@ Flash_setDataLowECCTest(uint32_t eccBase, uint32_t data)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_setDataHighECCTest(uint32_t eccBase, uint32_t data)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_setDataHighECCTest(uint32_t eccBase, uint32_t data) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    EALLOW;
-    HWREG(eccBase + FLASH_O_FDATAH_TEST) = data;
-    EDIS;
+  EALLOW;
+  HWREG(eccBase + FLASH_O_FDATAH_TEST) = data;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1246,28 +1155,25 @@ Flash_setDataHighECCTest(uint32_t eccBase, uint32_t data)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_setECCTestAddress(uint32_t eccBase, uint32_t address)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_setECCTestAddress(uint32_t eccBase, uint32_t address) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    //
-    // Left shift the address 1 bit to make it byte-addressable
-    //
-    uint32_t byteAddress = address << 1;
+  //
+  // Left shift the address 1 bit to make it byte-addressable
+  //
+  uint32_t byteAddress = address << 1;
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Write bits 21-3 to the register.
-    //
-    HWREG(eccBase + FLASH_O_FADDR_TEST) = byteAddress;
+  //
+  // Write bits 21-3 to the register.
+  //
+  HWREG(eccBase + FLASH_O_FADDR_TEST) = byteAddress;
 
-    EDIS;
-
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1281,23 +1187,21 @@ Flash_setECCTestAddress(uint32_t eccBase, uint32_t address)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_setECCTestECCBits(uint32_t eccBase, uint16_t ecc)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_setECCTestECCBits(uint32_t eccBase, uint16_t ecc) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    ASSERT( ecc <= 255U );
-    EALLOW;
+  ASSERT(ecc <= 255U);
+  EALLOW;
 
-    //
-    // Write the 8 ECC Control Bits.
-    //
-    HWREG(eccBase + FLASH_O_FECC_TEST) =
-        ((uint32_t)ecc & (uint32_t)FLASH_FECC_TEST_ECC_M);
-    EDIS;
+  //
+  // Write the 8 ECC Control Bits.
+  //
+  HWREG(eccBase + FLASH_O_FECC_TEST) =
+      ((uint32_t)ecc & (uint32_t)FLASH_FECC_TEST_ECC_M);
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1309,17 +1213,15 @@ Flash_setECCTestECCBits(uint32_t eccBase, uint16_t ecc)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_enableECCTestMode(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_enableECCTestMode(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    EALLOW;
-    HWREG(eccBase + FLASH_O_FECC_CTRL) |= FLASH_FECC_CTRL_ECC_TEST_EN;
-    EDIS;
+  EALLOW;
+  HWREG(eccBase + FLASH_O_FECC_CTRL) |= FLASH_FECC_CTRL_ECC_TEST_EN;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1331,18 +1233,15 @@ Flash_enableECCTestMode(uint32_t eccBase)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_disableECCTestMode(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_disableECCTestMode(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    EALLOW;
-    HWREG(eccBase + FLASH_O_FECC_CTRL) &=
-        ~(uint32_t)FLASH_FECC_CTRL_ECC_TEST_EN;
-    EDIS;
+  EALLOW;
+  HWREG(eccBase + FLASH_O_FECC_CTRL) &= ~(uint32_t)FLASH_FECC_CTRL_ECC_TEST_EN;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1354,18 +1253,15 @@ Flash_disableECCTestMode(uint32_t eccBase)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_selectLowECCBlock(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_selectLowECCBlock(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    EALLOW;
-    HWREG(eccBase + FLASH_O_FECC_CTRL) &=
-        ~(uint32_t)FLASH_FECC_CTRL_ECC_SELECT;
-    EDIS;
+  EALLOW;
+  HWREG(eccBase + FLASH_O_FECC_CTRL) &= ~(uint32_t)FLASH_FECC_CTRL_ECC_SELECT;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1377,17 +1273,15 @@ Flash_selectLowECCBlock(uint32_t eccBase)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_selectHighECCBlock(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_selectHighECCBlock(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    EALLOW;
-    HWREG(eccBase + FLASH_O_FECC_CTRL) |= FLASH_FECC_CTRL_ECC_SELECT;
-    EDIS;
+  EALLOW;
+  HWREG(eccBase + FLASH_O_FECC_CTRL) |= FLASH_FECC_CTRL_ECC_SELECT;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1399,17 +1293,15 @@ Flash_selectHighECCBlock(uint32_t eccBase)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_performECCCalculation(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline void Flash_performECCCalculation(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    EALLOW;
-    HWREG(eccBase + FLASH_O_FECC_CTRL) |= FLASH_FECC_CTRL_DO_ECC_CALC;
-    EDIS;
+  EALLOW;
+  HWREG(eccBase + FLASH_O_FECC_CTRL) |= FLASH_FECC_CTRL_DO_ECC_CALC;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1421,15 +1313,13 @@ Flash_performECCCalculation(uint32_t eccBase)
 //! \return Returns the ECC TEst data out High.
 //
 //*****************************************************************************
-static inline uint32_t
-Flash_getTestDataOutHigh(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline uint32_t Flash_getTestDataOutHigh(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    return(HWREG(eccBase + FLASH_O_FOUTH_TEST));
+  return (HWREG(eccBase + FLASH_O_FOUTH_TEST));
 }
 
 //*****************************************************************************
@@ -1441,15 +1331,13 @@ Flash_getTestDataOutHigh(uint32_t eccBase)
 //! \return Returns the ECC Test data out Low.
 //
 //*****************************************************************************
-static inline uint32_t
-Flash_getTestDataOutLow(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline uint32_t Flash_getTestDataOutLow(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    return(HWREG(eccBase + FLASH_O_FOUTL_TEST));
+  return (HWREG(eccBase + FLASH_O_FOUTL_TEST));
 }
 
 //*****************************************************************************
@@ -1466,18 +1354,16 @@ Flash_getTestDataOutLow(uint32_t eccBase)
 //! \return Returns the ECC test status.
 //
 //*****************************************************************************
-static inline uint32_t
-Flash_getECCTestStatus(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline uint32_t Flash_getECCTestStatus(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    //
-    // Read which type of error occurred.
-    //
-    return((HWREG(eccBase + FLASH_O_FECC_STATUS)) & (uint32_t)0x3U);
+  //
+  // Read which type of error occurred.
+  //
+  return ((HWREG(eccBase + FLASH_O_FECC_STATUS)) & (uint32_t)0x3U);
 }
 
 //*****************************************************************************
@@ -1491,20 +1377,18 @@ Flash_getECCTestStatus(uint32_t eccBase)
 //! is data bits than the position can range from 0 to 63.
 //
 //*****************************************************************************
-static inline uint32_t
-Flash_getECCTestErrorPosition(uint32_t eccBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+static inline uint32_t Flash_getECCTestErrorPosition(uint32_t eccBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    //
-    // Read the position bits and shift it to the right.
-    //
-    return((HWREG(eccBase + FLASH_O_FECC_STATUS) &
-        (uint32_t)FLASH_FECC_STATUS_DATA_ERR_POS_M) >>
-        FLASH_FECC_STATUS_DATA_ERR_POS_S);
+  //
+  // Read the position bits and shift it to the right.
+  //
+  return ((HWREG(eccBase + FLASH_O_FECC_STATUS) &
+           (uint32_t)FLASH_FECC_STATUS_DATA_ERR_POS_M) >>
+          FLASH_FECC_STATUS_DATA_ERR_POS_S);
 }
 
 //*****************************************************************************
@@ -1519,20 +1403,20 @@ Flash_getECCTestErrorPosition(uint32_t eccBase)
 //
 //*****************************************************************************
 static inline Flash_SingleBitErrorIndicator
-Flash_getECCTestSingleBitErrorType(uint32_t eccBase)
-{
-    uint32_t errorType;
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isECCBaseValid(eccBase));
+Flash_getECCTestSingleBitErrorType(uint32_t eccBase) {
+  uint32_t errorType;
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isECCBaseValid(eccBase));
 
-    //
-    // Read the ERR_TYPE bit to see where the single bit error was.
-    //
-    errorType = ((HWREG(eccBase + FLASH_O_FECC_STATUS) &
-                (uint32_t)FLASH_FECC_STATUS_ERR_TYPE) >> 8U);
-    return((Flash_SingleBitErrorIndicator)errorType);
+  //
+  // Read the ERR_TYPE bit to see where the single bit error was.
+  //
+  errorType = ((HWREG(eccBase + FLASH_O_FECC_STATUS) &
+                (uint32_t)FLASH_FECC_STATUS_ERR_TYPE) >>
+               8U);
+  return ((Flash_SingleBitErrorIndicator)errorType);
 }
 
 //*****************************************************************************
@@ -1546,25 +1430,23 @@ Flash_getECCTestSingleBitErrorType(uint32_t eccBase)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_claimPumpSemaphore(uint32_t pumpSemBase, Flash_PumpOwnership wrapper)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isPumpSemBaseValid(pumpSemBase));
+static inline void Flash_claimPumpSemaphore(uint32_t            pumpSemBase,
+                                            Flash_PumpOwnership wrapper) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isPumpSemBaseValid(pumpSemBase));
 
-    //
-    // Block until the pump semaphore is claimed.
-    //
-    EALLOW;
-    while((HWREG(pumpSemBase + FLASH_O_PUMPREQUEST)
-           & FLASH_PUMPREQUEST_PUMP_OWNERSHIP_M) != wrapper)
-    {
-        HWREG(pumpSemBase + FLASH_O_PUMPREQUEST) =
-              FLASH_PUMP_KEY | (uint32_t)wrapper;
-    }
-    EDIS;
+  //
+  // Block until the pump semaphore is claimed.
+  //
+  EALLOW;
+  while ((HWREG(pumpSemBase + FLASH_O_PUMPREQUEST) &
+          FLASH_PUMPREQUEST_PUMP_OWNERSHIP_M) != wrapper) {
+    HWREG(pumpSemBase + FLASH_O_PUMPREQUEST) =
+        FLASH_PUMP_KEY | (uint32_t)wrapper;
+  }
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1576,20 +1458,18 @@ Flash_claimPumpSemaphore(uint32_t pumpSemBase, Flash_PumpOwnership wrapper)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Flash_releasePumpSemaphore(uint32_t pumpSemBase)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(Flash_isPumpSemBaseValid(pumpSemBase));
+static inline void Flash_releasePumpSemaphore(uint32_t pumpSemBase) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(Flash_isPumpSemBaseValid(pumpSemBase));
 
-    //
-    // Relinquish the pump semaphore.
-    //
-    EALLOW;
-    HWREG(pumpSemBase + FLASH_O_PUMPREQUEST) = FLASH_PUMP_KEY;
-    EDIS;
+  //
+  // Relinquish the pump semaphore.
+  //
+  EALLOW;
+  HWREG(pumpSemBase + FLASH_O_PUMPREQUEST) = FLASH_PUMP_KEY;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1612,9 +1492,8 @@ Flash_releasePumpSemaphore(uint32_t pumpSemBase)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-Flash_initModule(uint32_t ctrlBase, uint32_t eccBase, uint16_t waitstates);
-
+extern void Flash_initModule(uint32_t ctrlBase, uint32_t eccBase,
+                             uint16_t waitstates);
 
 //*****************************************************************************
 //
@@ -1631,8 +1510,7 @@ Flash_initModule(uint32_t ctrlBase, uint32_t eccBase, uint16_t waitstates);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-Flash_powerDown(uint32_t ctrlBase);
+extern void Flash_powerDown(uint32_t ctrlBase);
 
 //*****************************************************************************
 //
@@ -1646,8 +1524,7 @@ Flash_powerDown(uint32_t ctrlBase);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-Flash_wakeFromLPM(uint32_t ctrlBase);
+extern void Flash_wakeFromLPM(uint32_t ctrlBase);
 
 //*****************************************************************************
 //
@@ -1655,7 +1532,7 @@ Flash_wakeFromLPM(uint32_t ctrlBase);
 //! @}
 //
 //*****************************************************************************
-#endif  // #ifdef __TMS320C28XX_CLA__
+#endif // #ifdef __TMS320C28XX_CLA__
 
 //*****************************************************************************
 //

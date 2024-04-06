@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   eqep.h
+//  FILE:   eqep.h
 //
-// TITLE:  C28x eQEP driver.
+//  TITLE:  C28x eQEP driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef EQEP_H
 #define EQEP_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -59,12 +58,12 @@ extern "C"
 //
 //*****************************************************************************
 
+#include "debug.h"
+#include "inc/hw_eqep.h"
+#include "inc/hw_memmap.h"
+#include "inc/hw_types.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include "inc/hw_memmap.h"
-#include "inc/hw_eqep.h"
-#include "inc/hw_types.h"
-#include "debug.h"
 
 #ifndef DOXYGEN_PDF_IGNORE
 //*****************************************************************************
@@ -77,28 +76,28 @@ extern "C"
 //
 // Operation Mode
 //
-#define EQEP_CONFIG_QUADRATURE      0x0000U //!< Quadrature-clock mode
-#define EQEP_CONFIG_CLOCK_DIR       0x4000U //!< Direction-count mode
-#define EQEP_CONFIG_UP_COUNT        0x8000U //!< Up-count mode, QDIR = 1
-#define EQEP_CONFIG_DOWN_COUNT      0xC000U //!< Down-count mode, QDIR = 0
+#define EQEP_CONFIG_QUADRATURE 0x0000U //!< Quadrature-clock mode
+#define EQEP_CONFIG_CLOCK_DIR  0x4000U //!< Direction-count mode
+#define EQEP_CONFIG_UP_COUNT   0x8000U //!< Up-count mode, QDIR = 1
+#define EQEP_CONFIG_DOWN_COUNT 0xC000U //!< Down-count mode, QDIR = 0
 
 //
 // Resolution
 //
-#define EQEP_CONFIG_2X_RESOLUTION   0x0000U //!< Count rising and falling edge
-#define EQEP_CONFIG_1X_RESOLUTION   0x0800U //!< Count rising edge only
+#define EQEP_CONFIG_2X_RESOLUTION 0x0000U //!< Count rising and falling edge
+#define EQEP_CONFIG_1X_RESOLUTION 0x0800U //!< Count rising edge only
 
 //
 // Swap QEPA and QEPB
 //
-#define EQEP_CONFIG_NO_SWAP         0x0000U //!< Do not swap QEPA and QEPB
-#define EQEP_CONFIG_SWAP            0x0400U //!< Swap QEPA and QEPB
+#define EQEP_CONFIG_NO_SWAP 0x0000U //!< Do not swap QEPA and QEPB
+#define EQEP_CONFIG_SWAP    0x0400U //!< Swap QEPA and QEPB
 
 //
 // Index pulse gating option
 //
-#define EQEP_CONFIG_IGATE_DISABLE  0x0000U //!< Disable gating of Index pulse
-#define EQEP_CONFIG_IGATE_ENABLE   0x0200U //!< Gate the index pin with strobe
+#define EQEP_CONFIG_IGATE_DISABLE 0x0000U //!< Disable gating of Index pulse
+#define EQEP_CONFIG_IGATE_ENABLE  0x0200U //!< Gate the index pin with strobe
 
 //*****************************************************************************
 
@@ -111,16 +110,16 @@ extern "C"
 //
 // Sync pulse pin
 //
-#define EQEP_COMPARE_NO_SYNC_OUT      0x0000U //!< Disable sync output
-#define EQEP_COMPARE_IDX_SYNC_OUT     0x2000U //!< Sync output on index pin
-#define EQEP_COMPARE_STROBE_SYNC_OUT  0x3000U //!< Sync output on strobe pin
+#define EQEP_COMPARE_NO_SYNC_OUT     0x0000U //!< Disable sync output
+#define EQEP_COMPARE_IDX_SYNC_OUT    0x2000U //!< Sync output on index pin
+#define EQEP_COMPARE_STROBE_SYNC_OUT 0x3000U //!< Sync output on strobe pin
 
 //
 // Shadow register use
 //
-#define EQEP_COMPARE_NO_SHADOW        0x0000U //!< Disable shadow of QPOSCMP
-#define EQEP_COMPARE_LOAD_ON_ZERO     0x8000U //!< Load on QPOSCNT = 0
-#define EQEP_COMPARE_LOAD_ON_MATCH    0xC000U //!< Load on QPOSCNT = QPOSCMP
+#define EQEP_COMPARE_NO_SHADOW     0x0000U //!< Disable shadow of QPOSCMP
+#define EQEP_COMPARE_LOAD_ON_ZERO  0x8000U //!< Load on QPOSCNT = 0
+#define EQEP_COMPARE_LOAD_ON_MATCH 0xC000U //!< Load on QPOSCNT = QPOSCMP
 
 //*****************************************************************************
 //
@@ -129,18 +128,18 @@ extern "C"
 // intFlags parameter and returned by EQEP_clearInterruptStatus().
 //
 //*****************************************************************************
-#define EQEP_INT_GLOBAL               0x0001U //!< Global interrupt flag
-#define EQEP_INT_POS_CNT_ERROR        0x0002U //!< Position counter error
-#define EQEP_INT_PHASE_ERROR          0x0004U //!< Quadrature phase error
-#define EQEP_INT_DIR_CHANGE           0x0008U //!< Quadrature direction change
-#define EQEP_INT_WATCHDOG             0x0010U //!< Watchdog time-out
-#define EQEP_INT_UNDERFLOW            0x0020U //!< Position counter underflow
-#define EQEP_INT_OVERFLOW             0x0040U //!< Position counter overflow
-#define EQEP_INT_POS_COMP_READY       0x0080U //!< Position-compare ready
-#define EQEP_INT_POS_COMP_MATCH       0x0100U //!< Position-compare match
-#define EQEP_INT_STROBE_EVNT_LATCH    0x0200U //!< Strobe event latch
-#define EQEP_INT_INDEX_EVNT_LATCH     0x0400U //!< Index event latch
-#define EQEP_INT_UNIT_TIME_OUT        0x0800U //!< Unit time-out
+#define EQEP_INT_GLOBAL            0x0001U //!< Global interrupt flag
+#define EQEP_INT_POS_CNT_ERROR     0x0002U //!< Position counter error
+#define EQEP_INT_PHASE_ERROR       0x0004U //!< Quadrature phase error
+#define EQEP_INT_DIR_CHANGE        0x0008U //!< Quadrature direction change
+#define EQEP_INT_WATCHDOG          0x0010U //!< Watchdog time-out
+#define EQEP_INT_UNDERFLOW         0x0020U //!< Position counter underflow
+#define EQEP_INT_OVERFLOW          0x0040U //!< Position counter overflow
+#define EQEP_INT_POS_COMP_READY    0x0080U //!< Position-compare ready
+#define EQEP_INT_POS_COMP_MATCH    0x0100U //!< Position-compare match
+#define EQEP_INT_STROBE_EVNT_LATCH 0x0200U //!< Strobe event latch
+#define EQEP_INT_INDEX_EVNT_LATCH  0x0400U //!< Index event latch
+#define EQEP_INT_UNIT_TIME_OUT     0x0800U //!< Unit time-out
 
 //*****************************************************************************
 //
@@ -148,21 +147,21 @@ extern "C"
 //
 //*****************************************************************************
 //! Unit position event detected
-#define EQEP_STS_UNIT_POS_EVNT        0x0080U
+#define EQEP_STS_UNIT_POS_EVNT    0x0080U
 //! Direction was clockwise on first index event
-#define EQEP_STS_DIR_ON_1ST_IDX       0x0040U
+#define EQEP_STS_DIR_ON_1ST_IDX   0x0040U
 //! Direction is CW (forward)
-#define EQEP_STS_DIR_FLAG             0x0020U
+#define EQEP_STS_DIR_FLAG         0x0020U
 //! Direction was CW on index
-#define EQEP_STS_DIR_LATCH            0x0010U
+#define EQEP_STS_DIR_LATCH        0x0010U
 //! Capture timer overflow
-#define EQEP_STS_CAP_OVRFLW_ERROR     0x0008U
+#define EQEP_STS_CAP_OVRFLW_ERROR 0x0008U
 //! Direction changed between position capture events
-#define EQEP_STS_CAP_DIR_ERROR        0x0004U
+#define EQEP_STS_CAP_DIR_ERROR    0x0004U
 //! First index pulse occurred
-#define EQEP_STS_1ST_IDX_FLAG         0x0002U
+#define EQEP_STS_1ST_IDX_FLAG     0x0002U
 //! Position counter error
-#define EQEP_STS_POS_CNT_ERROR        0x0001U
+#define EQEP_STS_POS_CNT_ERROR    0x0001U
 
 //*****************************************************************************
 //
@@ -173,24 +172,24 @@ extern "C"
 //
 // Position counter latch event
 //
-#define EQEP_LATCH_CNT_READ_BY_CPU    0x0000U //!< On position counter read
-#define EQEP_LATCH_UNIT_TIME_OUT      0x0004U //!< On unit time-out event
+#define EQEP_LATCH_CNT_READ_BY_CPU 0x0000U //!< On position counter read
+#define EQEP_LATCH_UNIT_TIME_OUT   0x0004U //!< On unit time-out event
 
 //
 // Strobe position counter latch event
 //
 //! On rising edge of strobe
-#define EQEP_LATCH_RISING_STROBE      0x0000U
+#define EQEP_LATCH_RISING_STROBE   0x0000U
 //! On rising edge when clockwise, on falling when counter clockwise
-#define EQEP_LATCH_EDGE_DIR_STROBE    0x0040U
+#define EQEP_LATCH_EDGE_DIR_STROBE 0x0040U
 
 //
 // Index position counter latch event
 //
-#define EQEP_LATCH_RISING_INDEX       0x0010U //!< On rising edge of index
-#define EQEP_LATCH_FALLING_INDEX      0x0020U //!< On falling edge of index
+#define EQEP_LATCH_RISING_INDEX  0x0010U //!< On rising edge of index
+#define EQEP_LATCH_FALLING_INDEX 0x0020U //!< On falling edge of index
 
-#define EQEP_LATCH_SW_INDEX_MARKER    0x0030U //!< On software index marker
+#define EQEP_LATCH_SW_INDEX_MARKER 0x0030U //!< On software index marker
 
 //*****************************************************************************
 //
@@ -198,21 +197,21 @@ extern "C"
 // parameter.
 //
 //*****************************************************************************
-#define EQEP_INIT_DO_NOTHING          0x0000U //!< Action is disabled
+#define EQEP_INIT_DO_NOTHING 0x0000U //!< Action is disabled
 
 //
 // Strobe events
 //
 //! On rising edge of strobe
-#define EQEP_INIT_RISING_STROBE       0x0800U
+#define EQEP_INIT_RISING_STROBE   0x0800U
 //! On rising edge when clockwise, on falling when counter clockwise
-#define EQEP_INIT_EDGE_DIR_STROBE     0x0C00U
+#define EQEP_INIT_EDGE_DIR_STROBE 0x0C00U
 
 //
 // Index events
 //
-#define EQEP_INIT_RISING_INDEX        0x0200U //!< On rising edge of index
-#define EQEP_INIT_FALLING_INDEX       0x0300U //!< On falling edge of index
+#define EQEP_INIT_RISING_INDEX  0x0200U //!< On rising edge of index
+#define EQEP_INIT_FALLING_INDEX 0x0300U //!< On falling edge of index
 #endif
 
 //*****************************************************************************
@@ -221,16 +220,15 @@ extern "C"
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    //! Reset position on index pulse
-    EQEP_POSITION_RESET_IDX             = 0x0000,
-    //! Reset position on maximum position
-    EQEP_POSITION_RESET_MAX_POS         = 0x1000,
-    //! Reset position on the first index pulse
-    EQEP_POSITION_RESET_1ST_IDX         = 0x2000,
-    //! Reset position on a unit time event
-    EQEP_POSITION_RESET_UNIT_TIME_OUT   = 0x3000
+typedef enum {
+  //! Reset position on index pulse
+  EQEP_POSITION_RESET_IDX           = 0x0000,
+  //! Reset position on maximum position
+  EQEP_POSITION_RESET_MAX_POS       = 0x1000,
+  //! Reset position on the first index pulse
+  EQEP_POSITION_RESET_1ST_IDX       = 0x2000,
+  //! Reset position on a unit time event
+  EQEP_POSITION_RESET_UNIT_TIME_OUT = 0x3000
 } EQEP_PositionResetMode;
 
 //*****************************************************************************
@@ -239,16 +237,15 @@ typedef enum
 //! parameter. CAPCLK is the capture timer clock frequency.
 //
 //*****************************************************************************
-typedef enum
-{
-    EQEP_CAPTURE_CLK_DIV_1   = 0x00,    //!< CAPCLK = SYSCLKOUT/1
-    EQEP_CAPTURE_CLK_DIV_2   = 0x10,    //!< CAPCLK = SYSCLKOUT/2
-    EQEP_CAPTURE_CLK_DIV_4   = 0x20,    //!< CAPCLK = SYSCLKOUT/4
-    EQEP_CAPTURE_CLK_DIV_8   = 0x30,    //!< CAPCLK = SYSCLKOUT/8
-    EQEP_CAPTURE_CLK_DIV_16  = 0x40,    //!< CAPCLK = SYSCLKOUT/16
-    EQEP_CAPTURE_CLK_DIV_32  = 0x50,    //!< CAPCLK = SYSCLKOUT/32
-    EQEP_CAPTURE_CLK_DIV_64  = 0x60,    //!< CAPCLK = SYSCLKOUT/64
-    EQEP_CAPTURE_CLK_DIV_128 = 0x70     //!< CAPCLK = SYSCLKOUT/128
+typedef enum {
+  EQEP_CAPTURE_CLK_DIV_1   = 0x00, //!< CAPCLK = SYSCLKOUT/1
+  EQEP_CAPTURE_CLK_DIV_2   = 0x10, //!< CAPCLK = SYSCLKOUT/2
+  EQEP_CAPTURE_CLK_DIV_4   = 0x20, //!< CAPCLK = SYSCLKOUT/4
+  EQEP_CAPTURE_CLK_DIV_8   = 0x30, //!< CAPCLK = SYSCLKOUT/8
+  EQEP_CAPTURE_CLK_DIV_16  = 0x40, //!< CAPCLK = SYSCLKOUT/16
+  EQEP_CAPTURE_CLK_DIV_32  = 0x50, //!< CAPCLK = SYSCLKOUT/32
+  EQEP_CAPTURE_CLK_DIV_64  = 0x60, //!< CAPCLK = SYSCLKOUT/64
+  EQEP_CAPTURE_CLK_DIV_128 = 0x70  //!< CAPCLK = SYSCLKOUT/128
 } EQEP_CAPCLKPrescale;
 
 //*****************************************************************************
@@ -257,22 +254,20 @@ typedef enum
 //! parameter. UPEVNT is the unit position event frequency.
 //
 //*****************************************************************************
-typedef enum
-{
-    EQEP_UNIT_POS_EVNT_DIV_1,           //!< UPEVNT = QCLK/1
-    EQEP_UNIT_POS_EVNT_DIV_2,           //!< UPEVNT = QCLK/2
-    EQEP_UNIT_POS_EVNT_DIV_4,           //!< UPEVNT = QCLK/4
-    EQEP_UNIT_POS_EVNT_DIV_8,           //!< UPEVNT = QCLK/8
-    EQEP_UNIT_POS_EVNT_DIV_16,          //!< UPEVNT = QCLK/16
-    EQEP_UNIT_POS_EVNT_DIV_32,          //!< UPEVNT = QCLK/32
-    EQEP_UNIT_POS_EVNT_DIV_64,          //!< UPEVNT = QCLK/64
-    EQEP_UNIT_POS_EVNT_DIV_128,         //!< UPEVNT = QCLK/128
-    EQEP_UNIT_POS_EVNT_DIV_256,         //!< UPEVNT = QCLK/256
-    EQEP_UNIT_POS_EVNT_DIV_512,         //!< UPEVNT = QCLK/512
-    EQEP_UNIT_POS_EVNT_DIV_1024,        //!< UPEVNT = QCLK/1024
-    EQEP_UNIT_POS_EVNT_DIV_2048         //!< UPEVNT = QCLK/2048
+typedef enum {
+  EQEP_UNIT_POS_EVNT_DIV_1,    //!< UPEVNT = QCLK/1
+  EQEP_UNIT_POS_EVNT_DIV_2,    //!< UPEVNT = QCLK/2
+  EQEP_UNIT_POS_EVNT_DIV_4,    //!< UPEVNT = QCLK/4
+  EQEP_UNIT_POS_EVNT_DIV_8,    //!< UPEVNT = QCLK/8
+  EQEP_UNIT_POS_EVNT_DIV_16,   //!< UPEVNT = QCLK/16
+  EQEP_UNIT_POS_EVNT_DIV_32,   //!< UPEVNT = QCLK/32
+  EQEP_UNIT_POS_EVNT_DIV_64,   //!< UPEVNT = QCLK/64
+  EQEP_UNIT_POS_EVNT_DIV_128,  //!< UPEVNT = QCLK/128
+  EQEP_UNIT_POS_EVNT_DIV_256,  //!< UPEVNT = QCLK/256
+  EQEP_UNIT_POS_EVNT_DIV_512,  //!< UPEVNT = QCLK/512
+  EQEP_UNIT_POS_EVNT_DIV_1024, //!< UPEVNT = QCLK/1024
+  EQEP_UNIT_POS_EVNT_DIV_2048  //!< UPEVNT = QCLK/2048
 } EQEP_UPEVNTPrescale;
-
 
 //*****************************************************************************
 //
@@ -280,12 +275,11 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-  EQEP_EMULATIONMODE_STOPIMMEDIATELY,   //!< Counters stop immediately
-  EQEP_EMULATIONMODE_STOPATROLLOVER,    //!< Counters stop at period rollover
-  EQEP_EMULATIONMODE_RUNFREE            //!< Counter unaffected by suspend
-}EQEP_EmulationMode;
+typedef enum {
+  EQEP_EMULATIONMODE_STOPIMMEDIATELY, //!< Counters stop immediately
+  EQEP_EMULATIONMODE_STOPATROLLOVER,  //!< Counters stop at period rollover
+  EQEP_EMULATIONMODE_RUNFREE          //!< Counter unaffected by suspend
+} EQEP_EmulationMode;
 
 //*****************************************************************************
 //
@@ -306,14 +300,8 @@ typedef enum
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-EQEP_isBaseValid(uint32_t base)
-{
-    return(
-           (base == EQEP1_BASE) ||
-           (base == EQEP2_BASE) ||
-           (base == EQEP3_BASE)
-          );
+static inline bool EQEP_isBaseValid(uint32_t base) {
+  return ((base == EQEP1_BASE) || (base == EQEP2_BASE) || (base == EQEP3_BASE));
 }
 #endif
 
@@ -331,18 +319,16 @@ EQEP_isBaseValid(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_enableModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_enableModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Enable the eQEP module.
-    //
-    HWREGH(base + EQEP_O_QEPCTL) |= EQEP_QEPCTL_QPEN;
+  //
+  // Enable the eQEP module.
+  //
+  HWREGH(base + EQEP_O_QEPCTL) |= EQEP_QEPCTL_QPEN;
 }
 
 //*****************************************************************************
@@ -357,18 +343,16 @@ EQEP_enableModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_disableModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_disableModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Disable the eQEP module.
-    //
-    HWREGH(base + EQEP_O_QEPCTL) &= ~(EQEP_QEPCTL_QPEN);
+  //
+  // Disable the eQEP module.
+  //
+  HWREGH(base + EQEP_O_QEPCTL) &= ~(EQEP_QEPCTL_QPEN);
 }
 
 //*****************************************************************************
@@ -398,22 +382,20 @@ EQEP_disableModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_setDecoderConfig(uint32_t base, uint16_t config)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_setDecoderConfig(uint32_t base, uint16_t config) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Write the new decoder configuration to the hardware.
-    //
-    HWREGH(base + EQEP_O_QDECCTL) = (HWREGH(base + EQEP_O_QDECCTL) &
-                                     ~(EQEP_QDECCTL_SWAP |
-                                       EQEP_QDECCTL_XCR |
-                                       EQEP_QDECCTL_QSRC_M |
-                                       EQEP_QDECCTL_IGATE)) | config;
+  //
+  // Write the new decoder configuration to the hardware.
+  //
+  HWREGH(base + EQEP_O_QDECCTL) =
+      (HWREGH(base + EQEP_O_QDECCTL) &
+       ~(EQEP_QDECCTL_SWAP | EQEP_QDECCTL_XCR | EQEP_QDECCTL_QSRC_M |
+         EQEP_QDECCTL_IGATE)) |
+      config;
 }
 
 //*****************************************************************************
@@ -437,25 +419,24 @@ EQEP_setDecoderConfig(uint32_t base, uint16_t config)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_setPositionCounterConfig(uint32_t base, EQEP_PositionResetMode mode,
-                              uint32_t maxPosition)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_setPositionCounterConfig(uint32_t               base,
+                                                 EQEP_PositionResetMode mode,
+                                                 uint32_t maxPosition) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Write the position counter reset configuration to the hardware.
-    //
-    HWREGH(base + EQEP_O_QEPCTL) = (HWREGH(base + EQEP_O_QEPCTL) &
-                                    ~EQEP_QEPCTL_PCRM_M) | (uint16_t)mode;
+  //
+  // Write the position counter reset configuration to the hardware.
+  //
+  HWREGH(base + EQEP_O_QEPCTL) =
+      (HWREGH(base + EQEP_O_QEPCTL) & ~EQEP_QEPCTL_PCRM_M) | (uint16_t)mode;
 
-    //
-    // Set the maximum position.
-    //
-    HWREG(base + EQEP_O_QPOSMAX) = maxPosition;
+  //
+  // Set the maximum position.
+  //
+  HWREG(base + EQEP_O_QPOSMAX) = maxPosition;
 }
 
 //*****************************************************************************
@@ -473,18 +454,16 @@ EQEP_setPositionCounterConfig(uint32_t base, EQEP_PositionResetMode mode,
 //! \return The current position of the encoder.
 //
 //*****************************************************************************
-static inline uint32_t
-EQEP_getPosition(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline uint32_t EQEP_getPosition(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Return the current position counter.
-    //
-    return(HWREG(base + EQEP_O_QPOSCNT));
+  //
+  // Return the current position counter.
+  //
+  return (HWREG(base + EQEP_O_QPOSCNT));
 }
 
 //*****************************************************************************
@@ -500,18 +479,16 @@ EQEP_getPosition(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_setPosition(uint32_t base, uint32_t position)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_setPosition(uint32_t base, uint32_t position) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Set the position counter.
-    //
-    HWREG(base + EQEP_O_QPOSCNT) = position;
+  //
+  // Set the position counter.
+  //
+  HWREG(base + EQEP_O_QPOSCNT) = position;
 }
 
 //*****************************************************************************
@@ -529,29 +506,24 @@ EQEP_setPosition(uint32_t base, uint32_t position)
 //! reverse direction.
 //
 //*****************************************************************************
-static inline int16_t
-EQEP_getDirection(uint32_t base)
-{
-    int16_t direction;
+static inline int16_t EQEP_getDirection(uint32_t base) {
+  int16_t direction;
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Return the direction of rotation.
-    //
-    if((HWREGH(base + EQEP_O_QEPSTS) & EQEP_QEPSTS_QDF) != 0U)
-    {
-        direction = 1;
-    }
-    else
-    {
-        direction = -1;
-    }
+  //
+  // Return the direction of rotation.
+  //
+  if ((HWREGH(base + EQEP_O_QEPSTS) & EQEP_QEPSTS_QDF) != 0U) {
+    direction = 1;
+  } else {
+    direction = -1;
+  }
 
-    return(direction);
+  return (direction);
 }
 
 //*****************************************************************************
@@ -578,18 +550,16 @@ EQEP_getDirection(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_enableInterrupt(uint32_t base, uint16_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_enableInterrupt(uint32_t base, uint16_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Enable the specified interrupts.
-    //
-    HWREGH(base + EQEP_O_QEINT) |= intFlags;
+  //
+  // Enable the specified interrupts.
+  //
+  HWREGH(base + EQEP_O_QEINT) |= intFlags;
 }
 
 //*****************************************************************************
@@ -616,18 +586,16 @@ EQEP_enableInterrupt(uint32_t base, uint16_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_disableInterrupt(uint32_t base, uint16_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_disableInterrupt(uint32_t base, uint16_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Disable the specified interrupts.
-    //
-    HWREGH(base + EQEP_O_QEINT) &= ~(intFlags);
+  //
+  // Disable the specified interrupts.
+  //
+  HWREGH(base + EQEP_O_QEINT) &= ~(intFlags);
 }
 
 //*****************************************************************************
@@ -655,15 +623,13 @@ EQEP_disableInterrupt(uint32_t base, uint16_t intFlags)
 //! - \b EQEP_INT_UNIT_TIME_OUT - Unit time-out
 //
 //*****************************************************************************
-static inline uint16_t
-EQEP_getInterruptStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline uint16_t EQEP_getInterruptStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    return(HWREGH(base + EQEP_O_QFLG));
+  return (HWREGH(base + EQEP_O_QFLG));
 }
 
 //*****************************************************************************
@@ -694,18 +660,16 @@ EQEP_getInterruptStatus(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_clearInterruptStatus(uint32_t base, uint16_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_clearInterruptStatus(uint32_t base, uint16_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Clear the requested interrupt sources.
-    //
-    HWREGH(base + EQEP_O_QCLR) = intFlags;
+  //
+  // Clear the requested interrupt sources.
+  //
+  HWREGH(base + EQEP_O_QCLR) = intFlags;
 }
 
 //*****************************************************************************
@@ -732,18 +696,16 @@ EQEP_clearInterruptStatus(uint32_t base, uint16_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_forceInterrupt(uint32_t base, uint16_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_forceInterrupt(uint32_t base, uint16_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Force the specified interrupts.
-    //
-    HWREGH(base + EQEP_O_QFRC) |= intFlags;
+  //
+  // Force the specified interrupts.
+  //
+  HWREGH(base + EQEP_O_QFRC) |= intFlags;
 }
 
 //*****************************************************************************
@@ -759,18 +721,16 @@ EQEP_forceInterrupt(uint32_t base, uint16_t intFlags)
 //! \return Returns \b true if an error has occurred and \b false otherwise.
 //
 //*****************************************************************************
-static inline bool
-EQEP_getError(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline bool EQEP_getError(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Return the error indicator.
-    //
-    return((HWREGH(base + EQEP_O_QFLG) & EQEP_QFLG_PHE) != 0U);
+  //
+  // Return the error indicator.
+  //
+  return ((HWREGH(base + EQEP_O_QFLG) & EQEP_QFLG_PHE) != 0U);
 }
 
 //*****************************************************************************
@@ -798,18 +758,16 @@ EQEP_getError(uint32_t base)
 //! \return Returns the value of the QEP status register.
 //
 //*****************************************************************************
-static inline uint16_t
-EQEP_getStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline uint16_t EQEP_getStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Return the status register.
-    //
-    return(HWREGH(base + EQEP_O_QEPSTS) & 0x00FFU);
+  //
+  // Return the status register.
+  //
+  return (HWREGH(base + EQEP_O_QEPSTS) & 0x00FFU);
 }
 
 //*****************************************************************************
@@ -836,18 +794,16 @@ EQEP_getStatus(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_clearStatus(uint32_t base, uint16_t statusFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_clearStatus(uint32_t base, uint16_t statusFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Clear the requested interrupt sources.
-    //
-    HWREGH(base + EQEP_O_QEPSTS) = statusFlags;
+  //
+  // Clear the requested interrupt sources.
+  //
+  HWREGH(base + EQEP_O_QEPSTS) = statusFlags;
 }
 
 //*****************************************************************************
@@ -877,22 +833,21 @@ EQEP_clearStatus(uint32_t base, uint16_t statusFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_setCaptureConfig(uint32_t base, EQEP_CAPCLKPrescale capPrescale,
-                      EQEP_UPEVNTPrescale evntPrescale)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_setCaptureConfig(uint32_t            base,
+                                         EQEP_CAPCLKPrescale capPrescale,
+                                         EQEP_UPEVNTPrescale evntPrescale) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Write new prescaler configurations to the appropriate registers.
-    //
-    HWREGH(base + EQEP_O_QCAPCTL) =
-                            (HWREGH(base + EQEP_O_QCAPCTL) &
-                             ~(EQEP_QCAPCTL_UPPS_M | EQEP_QCAPCTL_CCPS_M)) |
-                            ((uint16_t)evntPrescale | (uint16_t)capPrescale);
+  //
+  // Write new prescaler configurations to the appropriate registers.
+  //
+  HWREGH(base + EQEP_O_QCAPCTL) =
+      (HWREGH(base + EQEP_O_QCAPCTL) &
+       ~(EQEP_QCAPCTL_UPPS_M | EQEP_QCAPCTL_CCPS_M)) |
+      ((uint16_t)evntPrescale | (uint16_t)capPrescale);
 }
 
 //*****************************************************************************
@@ -906,18 +861,16 @@ EQEP_setCaptureConfig(uint32_t base, EQEP_CAPCLKPrescale capPrescale,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_enableCapture(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_enableCapture(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Enable edge capture.
-    //
-    HWREGH(base + EQEP_O_QCAPCTL) |= EQEP_QCAPCTL_CEN;
+  //
+  // Enable edge capture.
+  //
+  HWREGH(base + EQEP_O_QCAPCTL) |= EQEP_QCAPCTL_CEN;
 }
 
 //*****************************************************************************
@@ -931,18 +884,16 @@ EQEP_enableCapture(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_disableCapture(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_disableCapture(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Disable edge capture.
-    //
-    HWREGH(base + EQEP_O_QCAPCTL) &= ~(EQEP_QCAPCTL_CEN);
+  //
+  // Disable edge capture.
+  //
+  HWREGH(base + EQEP_O_QCAPCTL) &= ~(EQEP_QCAPCTL_CEN);
 }
 
 //*****************************************************************************
@@ -957,18 +908,16 @@ EQEP_disableCapture(uint32_t base)
 //! \return The period count value between the last successive position events.
 //
 //*****************************************************************************
-static inline uint16_t
-EQEP_getCapturePeriod(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline uint16_t EQEP_getCapturePeriod(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Return the capture period.
-    //
-    return(HWREGH(base + EQEP_O_QCPRD));
+  //
+  // Return the capture period.
+  //
+  return (HWREGH(base + EQEP_O_QCPRD));
 }
 
 //*****************************************************************************
@@ -982,18 +931,16 @@ EQEP_getCapturePeriod(uint32_t base)
 //! \return The capture timer value.
 //
 //*****************************************************************************
-static inline uint16_t
-EQEP_getCaptureTimer(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline uint16_t EQEP_getCaptureTimer(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Return the capture timer value.
-    //
-    return(HWREGH(base + EQEP_O_QCTMR));
+  //
+  // Return the capture timer value.
+  //
+  return (HWREGH(base + EQEP_O_QCTMR));
 }
 
 //*****************************************************************************
@@ -1007,18 +954,16 @@ EQEP_getCaptureTimer(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_enableCompare(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_enableCompare(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Enable position compare.
-    //
-    HWREGH(base + EQEP_O_QPOSCTL) |= EQEP_QPOSCTL_PCE;
+  //
+  // Enable position compare.
+  //
+  HWREGH(base + EQEP_O_QPOSCTL) |= EQEP_QPOSCTL_PCE;
 }
 
 //*****************************************************************************
@@ -1033,18 +978,16 @@ EQEP_enableCompare(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_disableCompare(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_disableCompare(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Disable position compare.
-    //
-    HWREGH(base + EQEP_O_QPOSCTL) &= ~(EQEP_QPOSCTL_PCE);
+  //
+  // Disable position compare.
+  //
+  HWREGH(base + EQEP_O_QPOSCTL) &= ~(EQEP_QPOSCTL_PCE);
 }
 
 //*****************************************************************************
@@ -1062,21 +1005,19 @@ EQEP_disableCompare(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_setComparePulseWidth(uint32_t base, uint16_t cycles)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
-    ASSERT(cycles <= (EQEP_QPOSCTL_PCSPW_M + 1U));
+static inline void EQEP_setComparePulseWidth(uint32_t base, uint16_t cycles) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
+  ASSERT(cycles <= (EQEP_QPOSCTL_PCSPW_M + 1U));
 
-    //
-    // Set the pulse width.
-    //
-    HWREGH(base + EQEP_O_QPOSCTL) = (HWREGH(base + EQEP_O_QPOSCTL) &
-                                     ~(uint16_t)EQEP_QPOSCTL_PCSPW_M) |
-                                    (cycles - 1U);
+  //
+  // Set the pulse width.
+  //
+  HWREGH(base + EQEP_O_QPOSCTL) =
+      (HWREGH(base + EQEP_O_QPOSCTL) & ~(uint16_t)EQEP_QPOSCTL_PCSPW_M) |
+      (cycles - 1U);
 }
 
 //*****************************************************************************
@@ -1093,18 +1034,16 @@ EQEP_setComparePulseWidth(uint32_t base, uint16_t cycles)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_loadUnitTimer(uint32_t base, uint32_t period)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_loadUnitTimer(uint32_t base, uint32_t period) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Set the period of the unit timer.
-    //
-    HWREG(base + EQEP_O_QUPRD) = period;
+  //
+  // Set the period of the unit timer.
+  //
+  HWREG(base + EQEP_O_QUPRD) = period;
 }
 
 //*****************************************************************************
@@ -1121,23 +1060,21 @@ EQEP_loadUnitTimer(uint32_t base, uint32_t period)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_enableUnitTimer(uint32_t base, uint32_t period)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_enableUnitTimer(uint32_t base, uint32_t period) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Set the period of the unit timer.
-    //
-    HWREG(base + EQEP_O_QUPRD) = period;
+  //
+  // Set the period of the unit timer.
+  //
+  HWREG(base + EQEP_O_QUPRD) = period;
 
-    //
-    // Enable peripheral unit timer.
-    //
-    HWREGH(base + EQEP_O_QEPCTL) |= EQEP_QEPCTL_UTE;
+  //
+  // Enable peripheral unit timer.
+  //
+  HWREGH(base + EQEP_O_QEPCTL) |= EQEP_QEPCTL_UTE;
 }
 
 //*****************************************************************************
@@ -1152,18 +1089,16 @@ EQEP_enableUnitTimer(uint32_t base, uint32_t period)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_disableUnitTimer(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_disableUnitTimer(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Disable peripheral unit timer.
-    //
-    HWREGH(base + EQEP_O_QEPCTL) &= ~(EQEP_QEPCTL_UTE);
+  //
+  // Disable peripheral unit timer.
+  //
+  HWREGH(base + EQEP_O_QEPCTL) &= ~(EQEP_QEPCTL_UTE);
 }
 
 //*****************************************************************************
@@ -1183,23 +1118,21 @@ EQEP_disableUnitTimer(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_enableWatchdog(uint32_t base, uint16_t period)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_enableWatchdog(uint32_t base, uint16_t period) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Set the timeout count for the eQEP peripheral watchdog timer.
-    //
-    HWREGH(base + EQEP_O_QWDPRD) = period;
+  //
+  // Set the timeout count for the eQEP peripheral watchdog timer.
+  //
+  HWREGH(base + EQEP_O_QWDPRD) = period;
 
-    //
-    // Enable peripheral watchdog.
-    //
-    HWREGH(base + EQEP_O_QEPCTL) |= EQEP_QEPCTL_WDE;
+  //
+  // Enable peripheral watchdog.
+  //
+  HWREGH(base + EQEP_O_QEPCTL) |= EQEP_QEPCTL_WDE;
 }
 
 //*****************************************************************************
@@ -1214,18 +1147,16 @@ EQEP_enableWatchdog(uint32_t base, uint16_t period)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_disableWatchdog(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_disableWatchdog(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Disable peripheral watchdog.
-    //
-    HWREGH(base + EQEP_O_QEPCTL) &= ~(EQEP_QEPCTL_WDE);
+  //
+  // Disable peripheral watchdog.
+  //
+  HWREGH(base + EQEP_O_QEPCTL) &= ~(EQEP_QEPCTL_WDE);
 }
 
 //*****************************************************************************
@@ -1240,18 +1171,16 @@ EQEP_disableWatchdog(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_setWatchdogTimerValue(uint32_t base, uint16_t value)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_setWatchdogTimerValue(uint32_t base, uint16_t value) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Write the value to the watchdog timer register.
-    //
-    HWREGH(base + EQEP_O_QWDTMR) = value;
+  //
+  // Write the value to the watchdog timer register.
+  //
+  HWREGH(base + EQEP_O_QWDTMR) = value;
 }
 
 //*****************************************************************************
@@ -1263,18 +1192,16 @@ EQEP_setWatchdogTimerValue(uint32_t base, uint16_t value)
 //! \return Returns the current watchdog timer value.
 //
 //*****************************************************************************
-static inline uint16_t
-EQEP_getWatchdogTimerValue(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline uint16_t EQEP_getWatchdogTimerValue(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Read the value from the watchdog timer register.
-    //
-    return(HWREGH(base + EQEP_O_QWDTMR));
+  //
+  // Read the value from the watchdog timer register.
+  //
+  return (HWREGH(base + EQEP_O_QWDTMR));
 }
 
 //*****************************************************************************
@@ -1303,20 +1230,18 @@ EQEP_getWatchdogTimerValue(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_setPositionInitMode(uint32_t base, uint16_t initMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_setPositionInitMode(uint32_t base, uint16_t initMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Set the init mode in the QEP Control register.
-    //
-    HWREGH(base + EQEP_O_QEPCTL) = (HWREGH(base + EQEP_O_QEPCTL) &
-                                    ~(EQEP_QEPCTL_IEI_M | EQEP_QEPCTL_SEI_M)) |
-                                   initMode;
+  //
+  // Set the init mode in the QEP Control register.
+  //
+  HWREGH(base + EQEP_O_QEPCTL) = (HWREGH(base + EQEP_O_QEPCTL) &
+                                  ~(EQEP_QEPCTL_IEI_M | EQEP_QEPCTL_SEI_M)) |
+                                 initMode;
 }
 
 //*****************************************************************************
@@ -1338,25 +1263,20 @@ EQEP_setPositionInitMode(uint32_t base, uint16_t initMode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_setSWPositionInit(uint32_t base, bool initialize)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_setSWPositionInit(uint32_t base, bool initialize) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Set or clear the software initialization bit.
-    //
-    if(initialize)
-    {
-        HWREGH(base + EQEP_O_QEPCTL) |= EQEP_QEPCTL_SWI;
-    }
-    else
-    {
-        HWREGH(base + EQEP_O_QEPCTL) &= ~EQEP_QEPCTL_SWI;
-    }
+  //
+  // Set or clear the software initialization bit.
+  //
+  if (initialize) {
+    HWREGH(base + EQEP_O_QEPCTL) |= EQEP_QEPCTL_SWI;
+  } else {
+    HWREGH(base + EQEP_O_QEPCTL) &= ~EQEP_QEPCTL_SWI;
+  }
 }
 
 //*****************************************************************************
@@ -1374,18 +1294,16 @@ EQEP_setSWPositionInit(uint32_t base, bool initialize)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_setInitialPosition(uint32_t base, uint32_t position)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_setInitialPosition(uint32_t base, uint32_t position) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Write position to position counter init register
-    //
-    HWREG(base + EQEP_O_QPOSINIT) = position;
+  //
+  // Write position to position counter init register
+  //
+  HWREG(base + EQEP_O_QPOSINIT) = position;
 }
 
 //*****************************************************************************
@@ -1418,20 +1336,19 @@ EQEP_setInitialPosition(uint32_t base, uint32_t position)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_setLatchMode(uint32_t base, uint32_t latchMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_setLatchMode(uint32_t base, uint32_t latchMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Set the latch mode in the QEP Control register.
-    //
-    HWREGH(base + EQEP_O_QEPCTL) = (HWREGH(base + EQEP_O_QEPCTL) &
-                                    ~(EQEP_QEPCTL_QCLM | EQEP_QEPCTL_IEL_M |
-                                      EQEP_QEPCTL_SEL)) | latchMode;
+  //
+  // Set the latch mode in the QEP Control register.
+  //
+  HWREGH(base + EQEP_O_QEPCTL) =
+      (HWREGH(base + EQEP_O_QEPCTL) &
+       ~(EQEP_QEPCTL_QCLM | EQEP_QEPCTL_IEL_M | EQEP_QEPCTL_SEL)) |
+      latchMode;
 }
 
 //*****************************************************************************
@@ -1448,18 +1365,16 @@ EQEP_setLatchMode(uint32_t base, uint32_t latchMode)
 //! \return The position count latched on an index event.
 //
 //*****************************************************************************
-static inline uint32_t
-EQEP_getIndexPositionLatch(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline uint32_t EQEP_getIndexPositionLatch(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Return the current position counter.
-    //
-    return(HWREG(base + EQEP_O_QPOSILAT));
+  //
+  // Return the current position counter.
+  //
+  return (HWREG(base + EQEP_O_QPOSILAT));
 }
 
 //*****************************************************************************
@@ -1477,18 +1392,16 @@ EQEP_getIndexPositionLatch(uint32_t base)
 //! \return The position count latched on a strobe event.
 //
 //*****************************************************************************
-static inline uint32_t
-EQEP_getStrobePositionLatch(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline uint32_t EQEP_getStrobePositionLatch(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Return the current position counter.
-    //
-    return(HWREG(base + EQEP_O_QPOSSLAT));
+  //
+  // Return the current position counter.
+  //
+  return (HWREG(base + EQEP_O_QPOSSLAT));
 }
 
 //*****************************************************************************
@@ -1504,18 +1417,16 @@ EQEP_getStrobePositionLatch(uint32_t base)
 //! \return The position count latch register value.
 //
 //*****************************************************************************
-static inline uint32_t
-EQEP_getPositionLatch(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline uint32_t EQEP_getPositionLatch(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Return the current position counter.
-    //
-    return(HWREG(base + EQEP_O_QPOSLAT));
+  //
+  // Return the current position counter.
+  //
+  return (HWREG(base + EQEP_O_QPOSLAT));
 }
 
 //*****************************************************************************
@@ -1532,18 +1443,16 @@ EQEP_getPositionLatch(uint32_t base)
 //! \return The edge-capture timer latch value.
 //
 //*****************************************************************************
-static inline uint16_t
-EQEP_getCaptureTimerLatch(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline uint16_t EQEP_getCaptureTimerLatch(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Return the current position counter.
-    //
-    return(HWREGH(base + EQEP_O_QCTMRLAT));
+  //
+  // Return the current position counter.
+  //
+  return (HWREGH(base + EQEP_O_QCTMRLAT));
 }
 
 //*****************************************************************************
@@ -1560,18 +1469,16 @@ EQEP_getCaptureTimerLatch(uint32_t base)
 //! \return The edge-capture period latch value.
 //
 //*****************************************************************************
-static inline uint16_t
-EQEP_getCapturePeriodLatch(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline uint16_t EQEP_getCapturePeriodLatch(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Return the current position counter.
-    //
-    return(HWREGH(base + EQEP_O_QCPRDLAT));
+  //
+  // Return the current position counter.
+  //
+  return (HWREGH(base + EQEP_O_QCPRDLAT));
 }
 
 //*****************************************************************************
@@ -1596,20 +1503,19 @@ EQEP_getCapturePeriodLatch(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-EQEP_setEmulationMode(uint32_t base, EQEP_EmulationMode emuMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(EQEP_isBaseValid(base));
+static inline void EQEP_setEmulationMode(uint32_t           base,
+                                         EQEP_EmulationMode emuMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(EQEP_isBaseValid(base));
 
-    //
-    // Write the emulation mode to the FREE_SOFT bits.
-    //
-    HWREGH(base + EQEP_O_QEPCTL) =
-        (HWREGH(base + EQEP_O_QEPCTL) & ~EQEP_QEPCTL_FREE_SOFT_M) |
-        ((uint16_t)emuMode << EQEP_QEPCTL_FREE_SOFT_S);
+  //
+  // Write the emulation mode to the FREE_SOFT bits.
+  //
+  HWREGH(base + EQEP_O_QEPCTL) =
+      (HWREGH(base + EQEP_O_QEPCTL) & ~EQEP_QEPCTL_FREE_SOFT_M) |
+      ((uint16_t)emuMode << EQEP_QEPCTL_FREE_SOFT_S);
 }
 
 //*****************************************************************************
@@ -1645,9 +1551,8 @@ EQEP_setEmulationMode(uint32_t base, EQEP_EmulationMode emuMode)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-EQEP_setCompareConfig(uint32_t base, uint16_t config, uint32_t compareValue,
-                      uint16_t cycles);
+extern void EQEP_setCompareConfig(uint32_t base, uint16_t config,
+                                  uint32_t compareValue, uint16_t cycles);
 
 //*****************************************************************************
 //
@@ -1666,9 +1571,9 @@ EQEP_setCompareConfig(uint32_t base, uint16_t config, uint32_t compareValue,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-EQEP_setInputPolarity(uint32_t base, bool invertQEPA, bool invertQEPB,
-                      bool invertIndex, bool invertStrobe);
+extern void EQEP_setInputPolarity(uint32_t base, bool invertQEPA,
+                                  bool invertQEPB, bool invertIndex,
+                                  bool invertStrobe);
 
 //*****************************************************************************
 //

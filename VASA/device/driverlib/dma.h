@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   dma.h
+//  FILE:   dma.h
 //
-// TITLE:  C28x DMA driver.
+//  TITLE:  C28x DMA driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef DMA_H
 #define DMA_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -60,14 +59,14 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "cpu.h"
+#include "debug.h"
 #include "inc/hw_dma.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_sysctl.h"
 #include "inc/hw_types.h"
-#include "cpu.h"
-#include "debug.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 //*****************************************************************************
 //
@@ -75,113 +74,110 @@ extern "C"
 //
 //*****************************************************************************
 //! Only one burst transfer performed per trigger.
-#define DMA_CFG_ONESHOT_DISABLE     0U
+#define DMA_CFG_ONESHOT_DISABLE 0U
 //! Burst transfers occur without additional event triggers after the first.
-#define DMA_CFG_ONESHOT_ENABLE      DMA_MODE_ONESHOT
+#define DMA_CFG_ONESHOT_ENABLE  DMA_MODE_ONESHOT
 
 //! DMA channel will be disabled at the end of a transfer.
-#define DMA_CFG_CONTINUOUS_DISABLE  0U
+#define DMA_CFG_CONTINUOUS_DISABLE 0U
 //! DMA reinitializes when the transfer count is zero and waits for a trigger.
-#define DMA_CFG_CONTINUOUS_ENABLE   DMA_MODE_CONTINUOUS
+#define DMA_CFG_CONTINUOUS_ENABLE  DMA_MODE_CONTINUOUS
 
 //! DMA transfers 16 bits at a time.
-#define DMA_CFG_SIZE_16BIT          0U
+#define DMA_CFG_SIZE_16BIT 0U
 //! DMA transfers 32 bits at a time.
-#define DMA_CFG_SIZE_32BIT          DMA_MODE_DATASIZE
+#define DMA_CFG_SIZE_32BIT DMA_MODE_DATASIZE
 
 //*****************************************************************************
 //
 //! Values that can be passed to DMA_configMode() as the \e trigger parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    DMA_TRIGGER_SOFTWARE     = 0,
+typedef enum {
+  DMA_TRIGGER_SOFTWARE = 0,
 
-    DMA_TRIGGER_ADCA1        = 1,
-    DMA_TRIGGER_ADCA2        = 2,
-    DMA_TRIGGER_ADCA3        = 3,
-    DMA_TRIGGER_ADCA4        = 4,
-    DMA_TRIGGER_ADCAEVT      = 5,
-    DMA_TRIGGER_ADCB1        = 6,
-    DMA_TRIGGER_ADCB2        = 7,
-    DMA_TRIGGER_ADCB3        = 8,
-    DMA_TRIGGER_ADCB4        = 9,
-    DMA_TRIGGER_ADCBEVT      = 10,
-    DMA_TRIGGER_ADCC1        = 11,
-    DMA_TRIGGER_ADCC2        = 12,
-    DMA_TRIGGER_ADCC3        = 13,
-    DMA_TRIGGER_ADCC4        = 14,
-    DMA_TRIGGER_ADCCEVT      = 15,
-    DMA_TRIGGER_ADCD1        = 16,
-    DMA_TRIGGER_ADCD2        = 17,
-    DMA_TRIGGER_ADCD3        = 18,
-    DMA_TRIGGER_ADCD4        = 19,
-    DMA_TRIGGER_ADCDEVT      = 20,
+  DMA_TRIGGER_ADCA1   = 1,
+  DMA_TRIGGER_ADCA2   = 2,
+  DMA_TRIGGER_ADCA3   = 3,
+  DMA_TRIGGER_ADCA4   = 4,
+  DMA_TRIGGER_ADCAEVT = 5,
+  DMA_TRIGGER_ADCB1   = 6,
+  DMA_TRIGGER_ADCB2   = 7,
+  DMA_TRIGGER_ADCB3   = 8,
+  DMA_TRIGGER_ADCB4   = 9,
+  DMA_TRIGGER_ADCBEVT = 10,
+  DMA_TRIGGER_ADCC1   = 11,
+  DMA_TRIGGER_ADCC2   = 12,
+  DMA_TRIGGER_ADCC3   = 13,
+  DMA_TRIGGER_ADCC4   = 14,
+  DMA_TRIGGER_ADCCEVT = 15,
+  DMA_TRIGGER_ADCD1   = 16,
+  DMA_TRIGGER_ADCD2   = 17,
+  DMA_TRIGGER_ADCD3   = 18,
+  DMA_TRIGGER_ADCD4   = 19,
+  DMA_TRIGGER_ADCDEVT = 20,
 
-    DMA_TRIGGER_XINT1        = 29,
-    DMA_TRIGGER_XINT2        = 30,
-    DMA_TRIGGER_XINT3        = 31,
-    DMA_TRIGGER_XINT4        = 32,
-    DMA_TRIGGER_XINT5        = 33,
+  DMA_TRIGGER_XINT1 = 29,
+  DMA_TRIGGER_XINT2 = 30,
+  DMA_TRIGGER_XINT3 = 31,
+  DMA_TRIGGER_XINT4 = 32,
+  DMA_TRIGGER_XINT5 = 33,
 
-    DMA_TRIGGER_EPWM1SOCA    = 36,
-    DMA_TRIGGER_EPWM1SOCB    = 37,
-    DMA_TRIGGER_EPWM2SOCA    = 38,
-    DMA_TRIGGER_EPWM2SOCB    = 39,
-    DMA_TRIGGER_EPWM3SOCA    = 40,
-    DMA_TRIGGER_EPWM3SOCB    = 41,
-    DMA_TRIGGER_EPWM4SOCA    = 42,
-    DMA_TRIGGER_EPWM4SOCB    = 43,
-    DMA_TRIGGER_EPWM5SOCA    = 44,
-    DMA_TRIGGER_EPWM5SOCB    = 45,
-    DMA_TRIGGER_EPWM6SOCA    = 46,
-    DMA_TRIGGER_EPWM6SOCB    = 47,
-    DMA_TRIGGER_EPWM7SOCA    = 48,
-    DMA_TRIGGER_EPWM7SOCB    = 49,
-    DMA_TRIGGER_EPWM8SOCA    = 50,
-    DMA_TRIGGER_EPWM8SOCB    = 51,
-    DMA_TRIGGER_EPWM9SOCA    = 52,
-    DMA_TRIGGER_EPWM9SOCB    = 53,
-    DMA_TRIGGER_EPWM10SOCA   = 54,
-    DMA_TRIGGER_EPWM10SOCB   = 55,
-    DMA_TRIGGER_EPWM11SOCA   = 56,
-    DMA_TRIGGER_EPWM11SOCB   = 57,
-    DMA_TRIGGER_EPWM12SOCA   = 58,
-    DMA_TRIGGER_EPWM12SOCB   = 59,
+  DMA_TRIGGER_EPWM1SOCA  = 36,
+  DMA_TRIGGER_EPWM1SOCB  = 37,
+  DMA_TRIGGER_EPWM2SOCA  = 38,
+  DMA_TRIGGER_EPWM2SOCB  = 39,
+  DMA_TRIGGER_EPWM3SOCA  = 40,
+  DMA_TRIGGER_EPWM3SOCB  = 41,
+  DMA_TRIGGER_EPWM4SOCA  = 42,
+  DMA_TRIGGER_EPWM4SOCB  = 43,
+  DMA_TRIGGER_EPWM5SOCA  = 44,
+  DMA_TRIGGER_EPWM5SOCB  = 45,
+  DMA_TRIGGER_EPWM6SOCA  = 46,
+  DMA_TRIGGER_EPWM6SOCB  = 47,
+  DMA_TRIGGER_EPWM7SOCA  = 48,
+  DMA_TRIGGER_EPWM7SOCB  = 49,
+  DMA_TRIGGER_EPWM8SOCA  = 50,
+  DMA_TRIGGER_EPWM8SOCB  = 51,
+  DMA_TRIGGER_EPWM9SOCA  = 52,
+  DMA_TRIGGER_EPWM9SOCB  = 53,
+  DMA_TRIGGER_EPWM10SOCA = 54,
+  DMA_TRIGGER_EPWM10SOCB = 55,
+  DMA_TRIGGER_EPWM11SOCA = 56,
+  DMA_TRIGGER_EPWM11SOCB = 57,
+  DMA_TRIGGER_EPWM12SOCA = 58,
+  DMA_TRIGGER_EPWM12SOCB = 59,
 
-    DMA_TRIGGER_TINT0        = 68,
-    DMA_TRIGGER_TINT1        = 69,
-    DMA_TRIGGER_TINT2        = 70,
+  DMA_TRIGGER_TINT0 = 68,
+  DMA_TRIGGER_TINT1 = 69,
+  DMA_TRIGGER_TINT2 = 70,
 
-    DMA_TRIGGER_MCBSPAMXEVT  = 71,
-    DMA_TRIGGER_MCBSPAMREVT  = 72,
-    DMA_TRIGGER_MCBSPBMXEVT  = 73,
-    DMA_TRIGGER_MCBSPBMREVT  = 74,
+  DMA_TRIGGER_MCBSPAMXEVT = 71,
+  DMA_TRIGGER_MCBSPAMREVT = 72,
+  DMA_TRIGGER_MCBSPBMXEVT = 73,
+  DMA_TRIGGER_MCBSPBMREVT = 74,
 
+  DMA_TRIGGER_SDFM1FLT1 = 95,
+  DMA_TRIGGER_SDFM1FLT2 = 96,
+  DMA_TRIGGER_SDFM1FLT3 = 97,
+  DMA_TRIGGER_SDFM1FLT4 = 98,
 
-    DMA_TRIGGER_SDFM1FLT1    = 95,
-    DMA_TRIGGER_SDFM1FLT2    = 96,
-    DMA_TRIGGER_SDFM1FLT3    = 97,
-    DMA_TRIGGER_SDFM1FLT4    = 98,
+  DMA_TRIGGER_SDFM2FLT1 = 99,
+  DMA_TRIGGER_SDFM2FLT2 = 100,
+  DMA_TRIGGER_SDFM2FLT3 = 101,
+  DMA_TRIGGER_SDFM2FLT4 = 102,
 
-    DMA_TRIGGER_SDFM2FLT1    = 99,
-    DMA_TRIGGER_SDFM2FLT2    = 100,
-    DMA_TRIGGER_SDFM2FLT3    = 101,
-    DMA_TRIGGER_SDFM2FLT4    = 102,
+  DMA_TRIGGER_SPIATX = 109,
+  DMA_TRIGGER_SPIARX = 110,
+  DMA_TRIGGER_SPIBTX = 111,
+  DMA_TRIGGER_SPIBRX = 112,
+  DMA_TRIGGER_SPICTX = 113,
+  DMA_TRIGGER_SPICRX = 114,
 
-
-    DMA_TRIGGER_SPIATX       = 109,
-    DMA_TRIGGER_SPIARX       = 110,
-    DMA_TRIGGER_SPIBTX       = 111,
-    DMA_TRIGGER_SPIBRX       = 112,
-    DMA_TRIGGER_SPICTX       = 113,
-    DMA_TRIGGER_SPICRX       = 114,
-
-    DMA_TRIGGER_CLB1INT      = 127,
-    DMA_TRIGGER_CLB2INT      = 128,
-    DMA_TRIGGER_CLB3INT      = 129,
-    DMA_TRIGGER_CLB4INT      = 130,
+  DMA_TRIGGER_CLB1INT = 127,
+  DMA_TRIGGER_CLB2INT = 128,
+  DMA_TRIGGER_CLB3INT = 129,
+  DMA_TRIGGER_CLB4INT = 130,
 
 } DMA_Trigger;
 
@@ -191,12 +187,11 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    //! DMA interrupt is generated at the beginning of a transfer
-    DMA_INT_AT_BEGINNING,
-    //! DMA interrupt is generated at the end of a transfer
-    DMA_INT_AT_END
+typedef enum {
+  //! DMA interrupt is generated at the beginning of a transfer
+  DMA_INT_AT_BEGINNING,
+  //! DMA interrupt is generated at the end of a transfer
+  DMA_INT_AT_END
 } DMA_InterruptMode;
 
 //*****************************************************************************
@@ -205,12 +200,11 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    //! Transmission stops after current read-write access is completed
-    DMA_EMULATION_STOP,
-    //! Continue DMA operation regardless of emulation suspend
-    DMA_EMULATION_FREE_RUN
+typedef enum {
+  //! Transmission stops after current read-write access is completed
+  DMA_EMULATION_STOP,
+  //! Continue DMA operation regardless of emulation suspend
+  DMA_EMULATION_FREE_RUN
 } DMA_EmulationMode;
 
 //*****************************************************************************
@@ -219,48 +213,47 @@ typedef enum
 //! configure parameter.
 //
 //*****************************************************************************
-typedef struct
-{
-    DMA_Trigger          transferTrigger;  //DMA transfer triggers
-    DMA_InterruptMode    interruptMode;    //Channel interrupt mode
-    //! enableInterrupt can have a value 1(Enable) or 0(Disable)
-    bool                 enableInterrupt;  //Enable/Disable interrupt mode
-    //! configSize can have a value DMA_CFG_SIZE_16BIT/32BIT
-    uint32_t             configSize;    //Data bus width (16 or 32 bits)
-    //! transferMode can have a value DMA_CFG_ONESHOT_DISABLE/ENABLE
-    uint32_t             transferMode;  //Burst transfer mode
-    //! reinitMode can have a value DMA_CFG_CONTINUOUS_DISABLE/ENABLE
-    uint32_t             reinitMode;    //DMA reinitialization mode
-    //! burstSize value range from 1 word to 32 sixteen-bit words.
-    uint32_t             burstSize;     //Number of words transferred per burst
-    //! transferSize value range from 1 to 65536
-    uint32_t             transferSize;  //Number of bursts per transfer
-    //! Number of bursts to be transferred before a wrap of the source address
-    //! occurs. srcWrapSize value range from 1 to 65536
-    uint32_t             srcWrapSize;
-    //! Number of bursts to be transferred before a wrap of the destination
-    //! address occurs. destWrapSize value range from 1 to 65536
-    uint32_t             destWrapSize;
-    uint32_t             destAddr;    //destination address
-    uint32_t             srcAddr;     //source address
-    //! Amount to inc or dec the source address after each word of a burst.
-    //! srcBurstStep can have only signed values from -4096 to 4095
-    int16_t              srcBurstStep;
-    //! Amount to inc or dec the destination address after each word of a burst.
-    //! destBurstStep can have only signed values from -4096 to 4095
-    int16_t              destBurstStep;
-    //! Amount to inc or dec the source address after each burst of a transfer.
-    //! srcTransferStep can have only signed values from -4096 to 4095
-    int16_t              srcTransferStep;
-    //! Amount to inc or dec the destination address after each burst of a
-    //! transfer. destTransferStep can have only signed values from -4096 to 4095
-    int16_t              destTransferStep;
-    //! Amount to inc or dec the source address when the wrap occurs.
-    //! srcWrapStep can have only signed values from -4096 to 4095
-    int16_t              srcWrapStep;
-    //! Amount to inc or dec the destination address when the wrap occurs.
-    //! destWrapStep can have only signed values from -4096 to 4095
-    int16_t              destWrapStep;
+typedef struct {
+  DMA_Trigger       transferTrigger; // DMA transfer triggers
+  DMA_InterruptMode interruptMode;   // Channel interrupt mode
+  //! enableInterrupt can have a value 1(Enable) or 0(Disable)
+  bool              enableInterrupt; // Enable/Disable interrupt mode
+  //! configSize can have a value DMA_CFG_SIZE_16BIT/32BIT
+  uint32_t          configSize; // Data bus width (16 or 32 bits)
+  //! transferMode can have a value DMA_CFG_ONESHOT_DISABLE/ENABLE
+  uint32_t          transferMode; // Burst transfer mode
+  //! reinitMode can have a value DMA_CFG_CONTINUOUS_DISABLE/ENABLE
+  uint32_t          reinitMode; // DMA reinitialization mode
+  //! burstSize value range from 1 word to 32 sixteen-bit words.
+  uint32_t          burstSize; // Number of words transferred per burst
+  //! transferSize value range from 1 to 65536
+  uint32_t          transferSize; // Number of bursts per transfer
+  //! Number of bursts to be transferred before a wrap of the source address
+  //! occurs. srcWrapSize value range from 1 to 65536
+  uint32_t          srcWrapSize;
+  //! Number of bursts to be transferred before a wrap of the destination
+  //! address occurs. destWrapSize value range from 1 to 65536
+  uint32_t          destWrapSize;
+  uint32_t          destAddr; // destination address
+  uint32_t          srcAddr;  // source address
+  //! Amount to inc or dec the source address after each word of a burst.
+  //! srcBurstStep can have only signed values from -4096 to 4095
+  int16_t           srcBurstStep;
+  //! Amount to inc or dec the destination address after each word of a burst.
+  //! destBurstStep can have only signed values from -4096 to 4095
+  int16_t           destBurstStep;
+  //! Amount to inc or dec the source address after each burst of a transfer.
+  //! srcTransferStep can have only signed values from -4096 to 4095
+  int16_t           srcTransferStep;
+  //! Amount to inc or dec the destination address after each burst of a
+  //! transfer. destTransferStep can have only signed values from -4096 to 4095
+  int16_t           destTransferStep;
+  //! Amount to inc or dec the source address when the wrap occurs.
+  //! srcWrapStep can have only signed values from -4096 to 4095
+  int16_t           srcWrapStep;
+  //! Amount to inc or dec the destination address when the wrap occurs.
+  //! destWrapStep can have only signed values from -4096 to 4095
+  int16_t           destWrapStep;
 
 } DMA_ConfigParams;
 
@@ -283,12 +276,10 @@ typedef struct
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-DMA_isBaseValid(uint32_t base)
-{
-    return((base == DMA_CH1_BASE) || (base == DMA_CH2_BASE) ||
-           (base == DMA_CH3_BASE) || (base == DMA_CH4_BASE) ||
-           (base == DMA_CH5_BASE) || (base == DMA_CH6_BASE));
+static inline bool DMA_isBaseValid(uint32_t base) {
+  return ((base == DMA_CH1_BASE) || (base == DMA_CH2_BASE) ||
+          (base == DMA_CH3_BASE) || (base == DMA_CH4_BASE) ||
+          (base == DMA_CH5_BASE) || (base == DMA_CH6_BASE));
 }
 #endif
 
@@ -303,18 +294,16 @@ DMA_isBaseValid(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_initController(void)
-{
-    EALLOW;
+static inline void DMA_initController(void) {
+  EALLOW;
 
-    //
-    // Set the hard reset bit. One NOP is required after HARDRESET.
-    //
-    HWREGH(DMA_BASE + DMA_O_CTRL) |= DMA_CTRL_HARDRESET;
-    NOP;
+  //
+  // Set the hard reset bit. One NOP is required after HARDRESET.
+  //
+  HWREGH(DMA_BASE + DMA_O_CTRL) |= DMA_CTRL_HARDRESET;
+  NOP;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -328,18 +317,16 @@ DMA_initController(void)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_triggerSoftReset(uint32_t base)
-{
-    EALLOW;
+static inline void DMA_triggerSoftReset(uint32_t base) {
+  EALLOW;
 
-    //
-    // Set the soft reset bit. One NOP is required after SOFTRESET.
-    //
-    HWREGH(base + DMA_O_CONTROL) |= DMA_CONTROL_SOFTRESET;
-    NOP;
+  //
+  // Set the soft reset bit. One NOP is required after SOFTRESET.
+  //
+  HWREGH(base + DMA_O_CONTROL) |= DMA_CONTROL_SOFTRESET;
+  NOP;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -359,24 +346,19 @@ DMA_triggerSoftReset(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_setEmulationMode(DMA_EmulationMode mode)
-{
-    EALLOW;
+static inline void DMA_setEmulationMode(DMA_EmulationMode mode) {
+  EALLOW;
 
-    //
-    // Set emulation mode
-    //
-    if(mode == DMA_EMULATION_STOP)
-    {
-        HWREGH(DMA_BASE + DMA_O_DEBUGCTRL) &= ~DMA_DEBUGCTRL_FREE;
-    }
-    else
-    {
-        HWREGH(DMA_BASE + DMA_O_DEBUGCTRL) |= DMA_DEBUGCTRL_FREE;
-    }
+  //
+  // Set emulation mode
+  //
+  if (mode == DMA_EMULATION_STOP) {
+    HWREGH(DMA_BASE + DMA_O_DEBUGCTRL) &= ~DMA_DEBUGCTRL_FREE;
+  } else {
+    HWREGH(DMA_BASE + DMA_O_DEBUGCTRL) |= DMA_DEBUGCTRL_FREE;
+  }
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -391,20 +373,18 @@ DMA_setEmulationMode(DMA_EmulationMode mode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_enableTrigger(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_enableTrigger(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Set the peripheral interrupt trigger enable bit.
-    //
-    EALLOW;
-    HWREGH(base + DMA_O_MODE) |= DMA_MODE_PERINTE;
-    EDIS;
+  //
+  // Set the peripheral interrupt trigger enable bit.
+  //
+  EALLOW;
+  HWREGH(base + DMA_O_MODE) |= DMA_MODE_PERINTE;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -420,20 +400,18 @@ DMA_enableTrigger(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_disableTrigger(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_disableTrigger(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Clear the peripheral interrupt trigger enable bit.
-    //
-    EALLOW;
-    HWREGH(base + DMA_O_MODE) &= ~DMA_MODE_PERINTE;
-    EDIS;
+  //
+  // Clear the peripheral interrupt trigger enable bit.
+  //
+  EALLOW;
+  HWREGH(base + DMA_O_MODE) &= ~DMA_MODE_PERINTE;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -449,20 +427,18 @@ DMA_disableTrigger(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_forceTrigger(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_forceTrigger(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Set the peripheral interrupt trigger force bit.
-    //
-    EALLOW;
-    HWREGH(base + DMA_O_CONTROL) |= DMA_CONTROL_PERINTFRC;
-    EDIS;
+  //
+  // Set the peripheral interrupt trigger force bit.
+  //
+  EALLOW;
+  HWREGH(base + DMA_O_CONTROL) |= DMA_CONTROL_PERINTFRC;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -478,20 +454,18 @@ DMA_forceTrigger(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_clearTriggerFlag(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_clearTriggerFlag(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Write a one to the clear bit to clear the peripheral trigger flag.
-    //
-    EALLOW;
-    HWREGH(base + DMA_O_CONTROL) |= DMA_CONTROL_PERINTCLR;
-    EDIS;
+  //
+  // Write a one to the clear bit to clear the peripheral trigger flag.
+  //
+  EALLOW;
+  HWREGH(base + DMA_O_CONTROL) |= DMA_CONTROL_PERINTCLR;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -509,18 +483,16 @@ DMA_clearTriggerFlag(uint32_t base)
 //! otherwise.
 //
 //*****************************************************************************
-static inline bool
-DMA_getTransferStatusFlag(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline bool DMA_getTransferStatusFlag(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Read the Transfer Status Flag and return appropriately.
-    //
-    return((HWREGH(base + DMA_O_CONTROL) & DMA_CONTROL_TRANSFERSTS) != 0U);
+  //
+  // Read the Transfer Status Flag and return appropriately.
+  //
+  return ((HWREGH(base + DMA_O_CONTROL) & DMA_CONTROL_TRANSFERSTS) != 0U);
 }
 
 //*****************************************************************************
@@ -538,18 +510,16 @@ DMA_getTransferStatusFlag(uint32_t base)
 //! otherwise.
 //
 //*****************************************************************************
-static inline bool
-DMA_getBurstStatusFlag(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline bool DMA_getBurstStatusFlag(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Read the Burst Status Flag and return appropriately.
-    //
-    return((HWREGH(base + DMA_O_CONTROL) & DMA_CONTROL_BURSTSTS) != 0U);
+  //
+  // Read the Burst Status Flag and return appropriately.
+  //
+  return ((HWREGH(base + DMA_O_CONTROL) & DMA_CONTROL_BURSTSTS) != 0U);
 }
 
 //*****************************************************************************
@@ -568,18 +538,16 @@ DMA_getBurstStatusFlag(uint32_t base)
 //! otherwise.
 //
 //*****************************************************************************
-static inline bool
-DMA_getRunStatusFlag(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline bool DMA_getRunStatusFlag(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Read the Run Status Flag and return appropriately.
-    //
-    return((HWREGH(base + DMA_O_CONTROL) & DMA_CONTROL_RUNSTS) != 0U);
+  //
+  // Read the Run Status Flag and return appropriately.
+  //
+  return ((HWREGH(base + DMA_O_CONTROL) & DMA_CONTROL_RUNSTS) != 0U);
 }
 
 //*****************************************************************************
@@ -598,18 +566,16 @@ DMA_getRunStatusFlag(uint32_t base)
 //! otherwise.
 //
 //*****************************************************************************
-static inline bool
-DMA_getOverflowFlag(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline bool DMA_getOverflowFlag(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Read the Overflow Flag and return appropriately.
-    //
-    return((HWREGH(base + DMA_O_CONTROL) & DMA_CONTROL_OVRFLG) != 0U);
+  //
+  // Read the Overflow Flag and return appropriately.
+  //
+  return ((HWREGH(base + DMA_O_CONTROL) & DMA_CONTROL_OVRFLG) != 0U);
 }
 
 //*****************************************************************************
@@ -626,18 +592,16 @@ DMA_getOverflowFlag(uint32_t base)
 //! flag is set. Returns \b false otherwise.
 //
 //*****************************************************************************
-static inline bool
-DMA_getTriggerFlagStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline bool DMA_getTriggerFlagStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Read the peripheral trigger flag and return appropriately.
-    //
-    return((HWREGH(base + DMA_O_CONTROL) & DMA_CONTROL_PERINTFLG) != 0U);
+  //
+  // Read the peripheral trigger flag and return appropriately.
+  //
+  return ((HWREGH(base + DMA_O_CONTROL) & DMA_CONTROL_PERINTFLG) != 0U);
 }
 
 //*****************************************************************************
@@ -653,20 +617,18 @@ DMA_getTriggerFlagStatus(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_startChannel(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_startChannel(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Set the run bit.
-    //
-    EALLOW;
-    HWREGH(base + DMA_O_CONTROL) |= DMA_CONTROL_RUN;
-    EDIS;
+  //
+  // Set the run bit.
+  //
+  EALLOW;
+  HWREGH(base + DMA_O_CONTROL) |= DMA_CONTROL_RUN;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -681,20 +643,18 @@ DMA_startChannel(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_stopChannel(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_stopChannel(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Set the halt bit.
-    //
-    EALLOW;
-    HWREGH(base + DMA_O_CONTROL) |= DMA_CONTROL_HALT;
-    EDIS;
+  //
+  // Set the halt bit.
+  //
+  EALLOW;
+  HWREGH(base + DMA_O_CONTROL) |= DMA_CONTROL_HALT;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -708,20 +668,18 @@ DMA_stopChannel(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_enableInterrupt(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_enableInterrupt(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Enable the specified DMA channel interrupt.
-    //
-    EALLOW;
-    HWREGH(base + DMA_O_MODE) |= DMA_MODE_CHINTE;
-    EDIS;
+  //
+  // Enable the specified DMA channel interrupt.
+  //
+  EALLOW;
+  HWREGH(base + DMA_O_MODE) |= DMA_MODE_CHINTE;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -735,20 +693,18 @@ DMA_enableInterrupt(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_disableInterrupt(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_disableInterrupt(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Disable the specified DMA channel interrupt.
-    //
-    EALLOW;
-    HWREGH(base + DMA_O_MODE) &= ~DMA_MODE_CHINTE;
-    EDIS;
+  //
+  // Disable the specified DMA channel interrupt.
+  //
+  EALLOW;
+  HWREGH(base + DMA_O_MODE) &= ~DMA_MODE_CHINTE;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -770,20 +726,18 @@ DMA_disableInterrupt(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_enableOverrunInterrupt(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_enableOverrunInterrupt(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Enable the specified DMA channel interrupt.
-    //
-    EALLOW;
-    HWREGH(base + DMA_O_MODE) |= DMA_MODE_OVRINTE;
-    EDIS;
+  //
+  // Enable the specified DMA channel interrupt.
+  //
+  EALLOW;
+  HWREGH(base + DMA_O_MODE) |= DMA_MODE_OVRINTE;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -798,20 +752,18 @@ DMA_enableOverrunInterrupt(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_disableOverrunInterrupt(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_disableOverrunInterrupt(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Disable the specified DMA channel interrupt.
-    //
-    EALLOW;
-    HWREGH(base + DMA_O_MODE) &= ~DMA_MODE_OVRINTE;
-    EDIS;
+  //
+  // Disable the specified DMA channel interrupt.
+  //
+  EALLOW;
+  HWREGH(base + DMA_O_MODE) &= ~DMA_MODE_OVRINTE;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -826,20 +778,18 @@ DMA_disableOverrunInterrupt(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_clearErrorFlag(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_clearErrorFlag(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    //
-    // Write to the error clear bit.
-    //
-    EALLOW;
-    HWREGH(base + DMA_O_CONTROL) |= DMA_CONTROL_ERRCLR;
-    EDIS;
+  //
+  // Write to the error clear bit.
+  //
+  EALLOW;
+  HWREGH(base + DMA_O_CONTROL) |= DMA_CONTROL_ERRCLR;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -858,29 +808,24 @@ DMA_clearErrorFlag(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_setInterruptMode(uint32_t base, DMA_InterruptMode mode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_setInterruptMode(uint32_t base, DMA_InterruptMode mode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Write the selected interrupt generation mode to the register.
-    //
-    if(mode == DMA_INT_AT_END)
-    {
-        HWREGH(base + DMA_O_MODE) |= DMA_MODE_CHINTMODE;
-    }
-    else
-    {
-        HWREGH(base + DMA_O_MODE) &= ~DMA_MODE_CHINTMODE;
-    }
+  //
+  // Write the selected interrupt generation mode to the register.
+  //
+  if (mode == DMA_INT_AT_END) {
+    HWREGH(base + DMA_O_MODE) |= DMA_MODE_CHINTMODE;
+  } else {
+    HWREGH(base + DMA_O_MODE) &= ~DMA_MODE_CHINTMODE;
+  }
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -902,26 +847,19 @@ DMA_setInterruptMode(uint32_t base, DMA_InterruptMode mode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_setPriorityMode(bool ch1IsHighPri)
-{
-    EALLOW;
+static inline void DMA_setPriorityMode(bool ch1IsHighPri) {
+  EALLOW;
 
-    //
-    // Write the selected priority mode to the register.
-    //
-    if(ch1IsHighPri)
-    {
-        HWREGH(DMA_BASE + DMA_O_PRIORITYCTRL1) |=
-            DMA_PRIORITYCTRL1_CH1PRIORITY;
-    }
-    else
-    {
-        HWREGH(DMA_BASE + DMA_O_PRIORITYCTRL1) &=
-            ~DMA_PRIORITYCTRL1_CH1PRIORITY;
-    }
+  //
+  // Write the selected priority mode to the register.
+  //
+  if (ch1IsHighPri) {
+    HWREGH(DMA_BASE + DMA_O_PRIORITYCTRL1) |= DMA_PRIORITYCTRL1_CH1PRIORITY;
+  } else {
+    HWREGH(DMA_BASE + DMA_O_PRIORITYCTRL1) &= ~DMA_PRIORITYCTRL1_CH1PRIORITY;
+  }
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -937,23 +875,21 @@ DMA_setPriorityMode(bool ch1IsHighPri)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_configSourceAddress(uint32_t base, const void *srcAddr)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_configSourceAddress(uint32_t base, const void *srcAddr) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Set up SOURCE address.
-    //
-    HWREG(base + DMA_O_SRC_BEG_ADDR_SHADOW) = (uint32_t)srcAddr;
-    HWREG(base + DMA_O_SRC_ADDR_SHADOW)     = (uint32_t)srcAddr;
+  //
+  // Set up SOURCE address.
+  //
+  HWREG(base + DMA_O_SRC_BEG_ADDR_SHADOW) = (uint32_t)srcAddr;
+  HWREG(base + DMA_O_SRC_ADDR_SHADOW)     = (uint32_t)srcAddr;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -969,23 +905,21 @@ DMA_configSourceAddress(uint32_t base, const void *srcAddr)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-DMA_configDestAddress(uint32_t base, const void *destAddr)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(DMA_isBaseValid(base));
+static inline void DMA_configDestAddress(uint32_t base, const void *destAddr) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(DMA_isBaseValid(base));
 
-    EALLOW;
+  EALLOW;
 
-    //
-    // Set up DESTINATION address.
-    //
-    HWREG(base + DMA_O_DST_BEG_ADDR_SHADOW) = (uint32_t)destAddr;
-    HWREG(base + DMA_O_DST_ADDR_SHADOW)     = (uint32_t)destAddr;
+  //
+  // Set up DESTINATION address.
+  //
+  HWREG(base + DMA_O_DST_BEG_ADDR_SHADOW) = (uint32_t)destAddr;
+  HWREG(base + DMA_O_DST_ADDR_SHADOW)     = (uint32_t)destAddr;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -1001,8 +935,8 @@ DMA_configDestAddress(uint32_t base, const void *destAddr)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-DMA_configChannel(uint32_t base, const DMA_ConfigParams *transfParams);
+extern void DMA_configChannel(uint32_t                base,
+                              const DMA_ConfigParams *transfParams);
 
 //*****************************************************************************
 //
@@ -1018,8 +952,8 @@ DMA_configChannel(uint32_t base, const DMA_ConfigParams *transfParams);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-DMA_configAddresses(uint32_t base, const void *destAddr, const void *srcAddr);
+extern void DMA_configAddresses(uint32_t base, const void *destAddr,
+                                const void *srcAddr);
 
 //*****************************************************************************
 //
@@ -1081,9 +1015,8 @@ extern void DMA_configBurst(uint32_t base, uint16_t size, int16_t srcStep,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-DMA_configTransfer(uint32_t base, uint32_t transferSize, int16_t srcStep,
-                   int16_t destStep);
+extern void DMA_configTransfer(uint32_t base, uint32_t transferSize,
+                               int16_t srcStep, int16_t destStep);
 
 //*****************************************************************************
 //
@@ -1115,9 +1048,8 @@ DMA_configTransfer(uint32_t base, uint32_t transferSize, int16_t srcStep,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-DMA_configWrap(uint32_t base, uint32_t srcWrapSize, int16_t srcStep,
-               uint32_t destWrapSize, int16_t destStep);
+extern void DMA_configWrap(uint32_t base, uint32_t srcWrapSize, int16_t srcStep,
+                           uint32_t destWrapSize, int16_t destStep);
 
 //*****************************************************************************
 //
@@ -1147,8 +1079,7 @@ DMA_configWrap(uint32_t base, uint32_t srcWrapSize, int16_t srcStep,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-DMA_configMode(uint32_t base, DMA_Trigger trigger, uint32_t config);
+extern void DMA_configMode(uint32_t base, DMA_Trigger trigger, uint32_t config);
 
 //*****************************************************************************
 //

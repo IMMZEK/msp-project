@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   gpio.h
+//  FILE:   gpio.h
 //
-// TITLE:  C28x GPIO driver.
+//  TITLE:  C28x GPIO driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef GPIO_H
 #define GPIO_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -59,15 +58,15 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "cpu.h"
+#include "debug.h"
 #include "inc/hw_gpio.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
 #include "inc/hw_xint.h"
-#include "cpu.h"
 #include "xbar.h"
-#include "debug.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 //*****************************************************************************
 //
@@ -77,28 +76,28 @@ extern "C"
 // Divide by 2 is for C28x which has word access
 //
 //*****************************************************************************
-#define GPIO_CTRL_REGS_STEP     ((GPIO_O_GPBCTRL - GPIO_O_GPACTRL) / 2U)
-#define GPIO_DATA_REGS_STEP     ((GPIO_O_GPBDAT - GPIO_O_GPADAT) / 2U)
+#define GPIO_CTRL_REGS_STEP ((GPIO_O_GPBCTRL - GPIO_O_GPACTRL) / 2U)
+#define GPIO_DATA_REGS_STEP ((GPIO_O_GPBDAT - GPIO_O_GPADAT) / 2U)
 
-#define GPIO_GPxCTRL_INDEX      (GPIO_O_GPACTRL / 2U)
-#define GPIO_GPxQSEL_INDEX      (GPIO_O_GPAQSEL1 / 2U)
-#define GPIO_GPxMUX_INDEX       (GPIO_O_GPAMUX1 / 2U)
-#define GPIO_GPxDIR_INDEX       (GPIO_O_GPADIR / 2U)
-#define GPIO_GPxAMSEL_INDEX     (0x00000014U / 2U) // Address rsvd for GPAAMSEL
-#define GPIO_GPxPUD_INDEX       (GPIO_O_GPAPUD / 2U)
-#define GPIO_GPxINV_INDEX       (GPIO_O_GPAINV / 2U)
-#define GPIO_GPxODR_INDEX       (GPIO_O_GPAODR / 2U)
-#define GPIO_GPxGMUX_INDEX      (GPIO_O_GPAGMUX1 / 2U)
-#define GPIO_GPxCSEL_INDEX      (GPIO_O_GPACSEL1 / 2U)
-#define GPIO_GPxLOCK_INDEX      (GPIO_O_GPALOCK / 2U)
-#define GPIO_GPxCR_INDEX        (GPIO_O_GPACR / 2U)
+#define GPIO_GPxCTRL_INDEX  (GPIO_O_GPACTRL / 2U)
+#define GPIO_GPxQSEL_INDEX  (GPIO_O_GPAQSEL1 / 2U)
+#define GPIO_GPxMUX_INDEX   (GPIO_O_GPAMUX1 / 2U)
+#define GPIO_GPxDIR_INDEX   (GPIO_O_GPADIR / 2U)
+#define GPIO_GPxAMSEL_INDEX (0x00000014U / 2U) // Address rsvd for GPAAMSEL
+#define GPIO_GPxPUD_INDEX   (GPIO_O_GPAPUD / 2U)
+#define GPIO_GPxINV_INDEX   (GPIO_O_GPAINV / 2U)
+#define GPIO_GPxODR_INDEX   (GPIO_O_GPAODR / 2U)
+#define GPIO_GPxGMUX_INDEX  (GPIO_O_GPAGMUX1 / 2U)
+#define GPIO_GPxCSEL_INDEX  (GPIO_O_GPACSEL1 / 2U)
+#define GPIO_GPxLOCK_INDEX  (GPIO_O_GPALOCK / 2U)
+#define GPIO_GPxCR_INDEX    (GPIO_O_GPACR / 2U)
 
-#define GPIO_GPxDAT_INDEX       (GPIO_O_GPADAT / 2U)
-#define GPIO_GPxSET_INDEX       (GPIO_O_GPASET / 2U)
-#define GPIO_GPxCLEAR_INDEX     (GPIO_O_GPACLEAR / 2U)
-#define GPIO_GPxTOGGLE_INDEX    (GPIO_O_GPATOGGLE / 2U)
+#define GPIO_GPxDAT_INDEX    (GPIO_O_GPADAT / 2U)
+#define GPIO_GPxSET_INDEX    (GPIO_O_GPASET / 2U)
+#define GPIO_GPxCLEAR_INDEX  (GPIO_O_GPACLEAR / 2U)
+#define GPIO_GPxTOGGLE_INDEX (GPIO_O_GPATOGGLE / 2U)
 
-#define GPIO_MUX_TO_GMUX        (GPIO_O_GPAGMUX1 - GPIO_O_GPAMUX1)
+#define GPIO_MUX_TO_GMUX (GPIO_O_GPAGMUX1 - GPIO_O_GPAMUX1)
 
 #ifndef DOXYGEN_PDF_IGNORE
 //*****************************************************************************
@@ -107,10 +106,10 @@ extern "C"
 // and returned by GPIO_getPadConfig().
 //
 //*****************************************************************************
-#define GPIO_PIN_TYPE_STD       0x0000U //!< Push-pull output or floating input
-#define GPIO_PIN_TYPE_PULLUP    0x0001U //!< Pull-up enable for input
-#define GPIO_PIN_TYPE_INVERT    0x0002U //!< Invert polarity on input
-#define GPIO_PIN_TYPE_OD        0x0004U //!< Open-drain on output
+#define GPIO_PIN_TYPE_STD    0x0000U //!< Push-pull output or floating input
+#define GPIO_PIN_TYPE_PULLUP 0x0001U //!< Pull-up enable for input
+#define GPIO_PIN_TYPE_INVERT 0x0002U //!< Invert polarity on input
+#define GPIO_PIN_TYPE_OD     0x0004U //!< Open-drain on output
 #endif
 
 //*****************************************************************************
@@ -119,10 +118,9 @@ extern "C"
 //! parameter and returned from GPIO_getDirectionMode().
 //
 //*****************************************************************************
-typedef enum
-{
-    GPIO_DIR_MODE_IN,                   //!< Pin is a GPIO input
-    GPIO_DIR_MODE_OUT                   //!< Pin is a GPIO output
+typedef enum {
+  GPIO_DIR_MODE_IN, //!< Pin is a GPIO input
+  GPIO_DIR_MODE_OUT //!< Pin is a GPIO output
 } GPIO_Direction;
 
 //*****************************************************************************
@@ -131,11 +129,10 @@ typedef enum
 //! parameter and returned from GPIO_getInterruptType().
 //
 //*****************************************************************************
-typedef enum
-{
-    GPIO_INT_TYPE_FALLING_EDGE = 0x00,   //!< Interrupt on falling edge
-    GPIO_INT_TYPE_RISING_EDGE  = 0x04,   //!< Interrupt on rising edge
-    GPIO_INT_TYPE_BOTH_EDGES   = 0x0C    //!< Interrupt on both edges
+typedef enum {
+  GPIO_INT_TYPE_FALLING_EDGE = 0x00, //!< Interrupt on falling edge
+  GPIO_INT_TYPE_RISING_EDGE  = 0x04, //!< Interrupt on rising edge
+  GPIO_INT_TYPE_BOTH_EDGES   = 0x0C  //!< Interrupt on both edges
 } GPIO_IntType;
 
 //*****************************************************************************
@@ -144,12 +141,11 @@ typedef enum
 //! \e qualification parameter and returned by GPIO_getQualificationMode().
 //
 //*****************************************************************************
-typedef enum
-{
-    GPIO_QUAL_SYNC,                     //!< Synchronization to SYSCLK
-    GPIO_QUAL_3SAMPLE,                  //!< Qualified with 3 samples
-    GPIO_QUAL_6SAMPLE,                  //!< Qualified with 6 samples
-    GPIO_QUAL_ASYNC                     //!< No synchronization
+typedef enum {
+  GPIO_QUAL_SYNC,    //!< Synchronization to SYSCLK
+  GPIO_QUAL_3SAMPLE, //!< Qualified with 3 samples
+  GPIO_QUAL_6SAMPLE, //!< Qualified with 6 samples
+  GPIO_QUAL_ASYNC    //!< No synchronization
 } GPIO_QualificationMode;
 
 //*****************************************************************************
@@ -157,10 +153,9 @@ typedef enum
 //! Values that can be passed to GPIO_setAnalogMode() as the \e mode parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    GPIO_ANALOG_DISABLED,       //!< Pin is in digital mode
-    GPIO_ANALOG_ENABLED         //!< Pin is in analog mode
+typedef enum {
+  GPIO_ANALOG_DISABLED, //!< Pin is in digital mode
+  GPIO_ANALOG_ENABLED   //!< Pin is in analog mode
 } GPIO_AnalogMode;
 
 //*****************************************************************************
@@ -169,12 +164,11 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    GPIO_CORE_CPU1,             //!< CPU1 selected as controller core
-    GPIO_CORE_CPU1_CLA1,        //!< CPU1's CLA1 selected as controller core
-    GPIO_CORE_CPU2,             //!< CPU2 selected as controller core
-    GPIO_CORE_CPU2_CLA1         //!< CPU2's CLA1 selected as controller core
+typedef enum {
+  GPIO_CORE_CPU1,      //!< CPU1 selected as controller core
+  GPIO_CORE_CPU1_CLA1, //!< CPU1's CLA1 selected as controller core
+  GPIO_CORE_CPU2,      //!< CPU2 selected as controller core
+  GPIO_CORE_CPU2_CLA1  //!< CPU2's CLA1 selected as controller core
 } GPIO_CoreSelect;
 
 //*****************************************************************************
@@ -183,14 +177,13 @@ typedef enum
 //! GPIO_clearPortPins(), and GPIO_togglePortPins() as the \e port parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    GPIO_PORT_A = 0,                    //!< GPIO port A
-    GPIO_PORT_B = 1,                    //!< GPIO port B
-    GPIO_PORT_C = 2,                    //!< GPIO port C
-    GPIO_PORT_D = 3,                    //!< GPIO port D
-    GPIO_PORT_E = 4,                    //!< GPIO port E
-    GPIO_PORT_F = 5                     //!< GPIO port F
+typedef enum {
+  GPIO_PORT_A = 0, //!< GPIO port A
+  GPIO_PORT_B = 1, //!< GPIO port B
+  GPIO_PORT_C = 2, //!< GPIO port C
+  GPIO_PORT_D = 3, //!< GPIO port D
+  GPIO_PORT_E = 4, //!< GPIO port E
+  GPIO_PORT_F = 5  //!< GPIO port F
 } GPIO_Port;
 
 //*****************************************************************************
@@ -200,13 +193,12 @@ typedef enum
 //! GPIO_disableInterrupt(), as the \e extIntNum parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    GPIO_INT_XINT1,                     //!< External Interrupt 1
-    GPIO_INT_XINT2,                     //!< External Interrupt 2
-    GPIO_INT_XINT3,                     //!< External Interrupt 3
-    GPIO_INT_XINT4,                     //!< External Interrupt 4
-    GPIO_INT_XINT5                      //!< External Interrupt 5
+typedef enum {
+  GPIO_INT_XINT1, //!< External Interrupt 1
+  GPIO_INT_XINT2, //!< External Interrupt 2
+  GPIO_INT_XINT3, //!< External Interrupt 3
+  GPIO_INT_XINT4, //!< External Interrupt 4
+  GPIO_INT_XINT5  //!< External Interrupt 5
 } GPIO_ExternalIntNum;
 
 //*****************************************************************************
@@ -227,11 +219,7 @@ typedef enum
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-GPIO_isPinValid(uint32_t pin)
-{
-    return(pin <= 168U);
-}
+static inline bool GPIO_isPinValid(uint32_t pin) { return (pin <= 168U); }
 #endif
 
 //*****************************************************************************
@@ -264,15 +252,14 @@ GPIO_isPinValid(uint32_t pin)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-GPIO_setInterruptType(GPIO_ExternalIntNum extIntNum, GPIO_IntType intType)
-{
-    //
-    // Write the selected polarity to the appropriate register.
-    //
-    HWREGH(XINT_BASE + (uint16_t)extIntNum) =
-        (HWREGH(XINT_BASE + (uint16_t)extIntNum) & ~XINT_1CR_POLARITY_M) |
-        (uint16_t)intType;
+static inline void GPIO_setInterruptType(GPIO_ExternalIntNum extIntNum,
+                                         GPIO_IntType        intType) {
+  //
+  // Write the selected polarity to the appropriate register.
+  //
+  HWREGH(XINT_BASE + (uint16_t)extIntNum) =
+      (HWREGH(XINT_BASE + (uint16_t)extIntNum) & ~XINT_1CR_POLARITY_M) |
+      (uint16_t)intType;
 }
 
 //*****************************************************************************
@@ -298,13 +285,12 @@ GPIO_setInterruptType(GPIO_ExternalIntNum extIntNum, GPIO_IntType intType)
 //
 //*****************************************************************************
 static inline GPIO_IntType
-GPIO_getInterruptType(GPIO_ExternalIntNum extIntNum)
-{
-    //
-    // Read the selected polarity from the appropriate register.
-    //
-    return((GPIO_IntType)((uint16_t)(HWREGH(XINT_BASE + (uint16_t)extIntNum) &
-                                     XINT_1CR_POLARITY_M)));
+GPIO_getInterruptType(GPIO_ExternalIntNum extIntNum) {
+  //
+  // Read the selected polarity from the appropriate register.
+  //
+  return ((GPIO_IntType)((uint16_t)(HWREGH(XINT_BASE + (uint16_t)extIntNum) &
+                                    XINT_1CR_POLARITY_M)));
 }
 
 //*****************************************************************************
@@ -329,13 +315,11 @@ GPIO_getInterruptType(GPIO_ExternalIntNum extIntNum)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-GPIO_enableInterrupt(GPIO_ExternalIntNum extIntNum)
-{
-    //
-    // Set the enable bit for the specified interrupt.
-    //
-    HWREGH(XINT_BASE + (uint16_t)extIntNum) |= XINT_1CR_ENABLE;
+static inline void GPIO_enableInterrupt(GPIO_ExternalIntNum extIntNum) {
+  //
+  // Set the enable bit for the specified interrupt.
+  //
+  HWREGH(XINT_BASE + (uint16_t)extIntNum) |= XINT_1CR_ENABLE;
 }
 
 //*****************************************************************************
@@ -360,13 +344,11 @@ GPIO_enableInterrupt(GPIO_ExternalIntNum extIntNum)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-GPIO_disableInterrupt(GPIO_ExternalIntNum extIntNum)
-{
-    //
-    // Clear the enable bit for the specified interrupt
-    //
-    HWREGH(XINT_BASE + (uint16_t)extIntNum) &= ~XINT_1CR_ENABLE;
+static inline void GPIO_disableInterrupt(GPIO_ExternalIntNum extIntNum) {
+  //
+  // Clear the enable bit for the specified interrupt
+  //
+  HWREGH(XINT_BASE + (uint16_t)extIntNum) &= ~XINT_1CR_ENABLE;
 }
 
 //*****************************************************************************
@@ -387,15 +369,13 @@ GPIO_disableInterrupt(GPIO_ExternalIntNum extIntNum)
 //! \return Returns external interrupt counter value.
 //
 //*****************************************************************************
-static inline uint16_t
-GPIO_getInterruptCounter(GPIO_ExternalIntNum extIntNum)
-{
-    ASSERT(extIntNum <= GPIO_INT_XINT3);
+static inline uint16_t GPIO_getInterruptCounter(GPIO_ExternalIntNum extIntNum) {
+  ASSERT(extIntNum <= GPIO_INT_XINT3);
 
-    //
-    // Read the counter value from the appropriate register.
-    //
-    return((HWREGH(XINT_BASE + XINT_O_1CTR + (uint16_t)extIntNum)));
+  //
+  // Read the counter value from the appropriate register.
+  //
+  return ((HWREGH(XINT_BASE + XINT_O_1CTR + (uint16_t)extIntNum)));
 }
 
 //*****************************************************************************
@@ -413,22 +393,19 @@ GPIO_getInterruptCounter(GPIO_ExternalIntNum extIntNum)
 //! \return Returns the value in the data register for the specified pin.
 //
 //*****************************************************************************
-static inline uint32_t
-GPIO_readPin(uint32_t pin)
-{
-    volatile uint32_t *gpioDataReg;
+static inline uint32_t GPIO_readPin(uint32_t pin) {
+  volatile uint32_t *gpioDataReg;
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(GPIO_isPinValid(pin));
+  //
+  // Check the arguments.
+  //
+  ASSERT(GPIO_isPinValid(pin));
 
-    gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
-                  ((pin / 32U) * GPIO_DATA_REGS_STEP);
+  gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
+                ((pin / 32U) * GPIO_DATA_REGS_STEP);
 
-    return((gpioDataReg[GPIO_GPxDAT_INDEX] >> (pin % 32U)) & (uint32_t)0x1U);
+  return ((gpioDataReg[GPIO_GPxDAT_INDEX] >> (pin % 32U)) & (uint32_t)0x1U);
 }
-
 
 //*****************************************************************************
 //
@@ -446,30 +423,25 @@ GPIO_readPin(uint32_t pin)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-GPIO_writePin(uint32_t pin, uint32_t outVal)
-{
-    volatile uint32_t *gpioDataReg;
-    uint32_t pinMask;
+static inline void GPIO_writePin(uint32_t pin, uint32_t outVal) {
+  volatile uint32_t *gpioDataReg;
+  uint32_t           pinMask;
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(GPIO_isPinValid(pin));
+  //
+  // Check the arguments.
+  //
+  ASSERT(GPIO_isPinValid(pin));
 
-    gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
-                  ((pin / 32U) * GPIO_DATA_REGS_STEP);
+  gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
+                ((pin / 32U) * GPIO_DATA_REGS_STEP);
 
-    pinMask = (uint32_t)1U << (pin % 32U);
+  pinMask = (uint32_t)1U << (pin % 32U);
 
-    if(outVal == 0U)
-    {
-        gpioDataReg[GPIO_GPxCLEAR_INDEX] = pinMask;
-    }
-    else
-    {
-        gpioDataReg[GPIO_GPxSET_INDEX] = pinMask;
-    }
+  if (outVal == 0U) {
+    gpioDataReg[GPIO_GPxCLEAR_INDEX] = pinMask;
+  } else {
+    gpioDataReg[GPIO_GPxSET_INDEX] = pinMask;
+  }
 }
 
 //*****************************************************************************
@@ -487,20 +459,18 @@ GPIO_writePin(uint32_t pin, uint32_t outVal)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-GPIO_togglePin(uint32_t pin)
-{
-    volatile uint32_t *gpioDataReg;
+static inline void GPIO_togglePin(uint32_t pin) {
+  volatile uint32_t *gpioDataReg;
 
-    //
-    // Check the arguments.
-    //
-    ASSERT(GPIO_isPinValid(pin));
+  //
+  // Check the arguments.
+  //
+  ASSERT(GPIO_isPinValid(pin));
 
-    gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
-                  ((pin / 32U) * GPIO_DATA_REGS_STEP);
+  gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
+                ((pin / 32U) * GPIO_DATA_REGS_STEP);
 
-    gpioDataReg[GPIO_GPxTOGGLE_INDEX] = (uint32_t)1U << (pin % 32U);
+  gpioDataReg[GPIO_GPxTOGGLE_INDEX] = (uint32_t)1U << (pin % 32U);
 }
 
 //*****************************************************************************
@@ -515,20 +485,17 @@ GPIO_togglePin(uint32_t pin)
 //! represents GPIO port pin 0, bit 1 represents GPIO port pin 1, and so on.
 //
 //*****************************************************************************
-static inline uint32_t
-GPIO_readPortData(GPIO_Port port)
-{
-    volatile uint32_t *gpioDataReg;
+static inline uint32_t GPIO_readPortData(GPIO_Port port) {
+  volatile uint32_t *gpioDataReg;
 
-    //
-    // Get the starting address of the port's registers and return DATA.
-    //
-    gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
-                  ((uint32_t)port * GPIO_DATA_REGS_STEP);
+  //
+  // Get the starting address of the port's registers and return DATA.
+  //
+  gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
+                ((uint32_t)port * GPIO_DATA_REGS_STEP);
 
-    return(gpioDataReg[GPIO_GPxDAT_INDEX]);
+  return (gpioDataReg[GPIO_GPxDAT_INDEX]);
 }
-
 
 //*****************************************************************************
 //
@@ -549,18 +516,16 @@ GPIO_readPortData(GPIO_Port port)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-GPIO_writePortData(GPIO_Port port, uint32_t outVal)
-{
-    volatile uint32_t *gpioDataReg;
+static inline void GPIO_writePortData(GPIO_Port port, uint32_t outVal) {
+  volatile uint32_t *gpioDataReg;
 
-    //
-    // Get the starting address of the port's registers and write to DATA.
-    //
-    gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
-                  ((uint32_t)port * GPIO_DATA_REGS_STEP);
+  //
+  // Get the starting address of the port's registers and write to DATA.
+  //
+  gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
+                ((uint32_t)port * GPIO_DATA_REGS_STEP);
 
-    gpioDataReg[GPIO_GPxDAT_INDEX] = outVal;
+  gpioDataReg[GPIO_GPxDAT_INDEX] = outVal;
 }
 
 //*****************************************************************************
@@ -582,18 +547,16 @@ GPIO_writePortData(GPIO_Port port, uint32_t outVal)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-GPIO_setPortPins(GPIO_Port port, uint32_t pinMask)
-{
-    volatile uint32_t *gpioDataReg;
+static inline void GPIO_setPortPins(GPIO_Port port, uint32_t pinMask) {
+  volatile uint32_t *gpioDataReg;
 
-    //
-    // Get the starting address of the port's registers and write to SET.
-    //
-    gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
-                  ((uint32_t)port * GPIO_DATA_REGS_STEP);
+  //
+  // Get the starting address of the port's registers and write to SET.
+  //
+  gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
+                ((uint32_t)port * GPIO_DATA_REGS_STEP);
 
-    gpioDataReg[GPIO_GPxSET_INDEX] = pinMask;
+  gpioDataReg[GPIO_GPxSET_INDEX] = pinMask;
 }
 
 //*****************************************************************************
@@ -615,18 +578,16 @@ GPIO_setPortPins(GPIO_Port port, uint32_t pinMask)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-GPIO_clearPortPins(GPIO_Port port, uint32_t pinMask)
-{
-    volatile uint32_t *gpioDataReg;
+static inline void GPIO_clearPortPins(GPIO_Port port, uint32_t pinMask) {
+  volatile uint32_t *gpioDataReg;
 
-    //
-    // Get the starting address of the port's registers and write to CLEAR.
-    //
-    gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
-                  ((uint32_t)port * GPIO_DATA_REGS_STEP);
+  //
+  // Get the starting address of the port's registers and write to CLEAR.
+  //
+  gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
+                ((uint32_t)port * GPIO_DATA_REGS_STEP);
 
-    gpioDataReg[GPIO_GPxCLEAR_INDEX] = pinMask;
+  gpioDataReg[GPIO_GPxCLEAR_INDEX] = pinMask;
 }
 
 //*****************************************************************************
@@ -648,18 +609,16 @@ GPIO_clearPortPins(GPIO_Port port, uint32_t pinMask)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-GPIO_togglePortPins(GPIO_Port port, uint32_t pinMask)
-{
-    volatile uint32_t *gpioDataReg;
+static inline void GPIO_togglePortPins(GPIO_Port port, uint32_t pinMask) {
+  volatile uint32_t *gpioDataReg;
 
-    //
-    // Get the starting address of the port's registers and write to TOGGLE.
-    //
-    gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
-                  ((uint32_t)port * GPIO_DATA_REGS_STEP);
+  //
+  // Get the starting address of the port's registers and write to TOGGLE.
+  //
+  gpioDataReg = (uint32_t *)((uintptr_t)GPIODATA_BASE) +
+                ((uint32_t)port * GPIO_DATA_REGS_STEP);
 
-    gpioDataReg[GPIO_GPxTOGGLE_INDEX] = pinMask;
+  gpioDataReg[GPIO_GPxTOGGLE_INDEX] = pinMask;
 }
 
 //*****************************************************************************
@@ -685,20 +644,18 @@ GPIO_togglePortPins(GPIO_Port port, uint32_t pinMask)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-GPIO_lockPortConfig(GPIO_Port port, uint32_t pinMask)
-{
-    volatile uint32_t *gpioDataReg;
+static inline void GPIO_lockPortConfig(GPIO_Port port, uint32_t pinMask) {
+  volatile uint32_t *gpioDataReg;
 
-    //
-    // Get the starting address of the port's registers and write to the lock.
-    //
-    gpioDataReg = (uint32_t *)((uintptr_t)GPIOCTRL_BASE) +
-                  ((uint32_t)port * GPIO_CTRL_REGS_STEP);
+  //
+  // Get the starting address of the port's registers and write to the lock.
+  //
+  gpioDataReg = (uint32_t *)((uintptr_t)GPIOCTRL_BASE) +
+                ((uint32_t)port * GPIO_CTRL_REGS_STEP);
 
-    EALLOW;
-    gpioDataReg[GPIO_GPxLOCK_INDEX] |= pinMask;
-    EDIS;
+  EALLOW;
+  gpioDataReg[GPIO_GPxLOCK_INDEX] |= pinMask;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -720,20 +677,18 @@ GPIO_lockPortConfig(GPIO_Port port, uint32_t pinMask)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-GPIO_unlockPortConfig(GPIO_Port port, uint32_t pinMask)
-{
-    volatile uint32_t *gpioDataReg;
+static inline void GPIO_unlockPortConfig(GPIO_Port port, uint32_t pinMask) {
+  volatile uint32_t *gpioDataReg;
 
-    //
-    // Get the starting address of the port's registers and write to the lock.
-    //
-    gpioDataReg = (uint32_t *)((uintptr_t)GPIOCTRL_BASE) +
-                  ((uint32_t)port * GPIO_CTRL_REGS_STEP);
+  //
+  // Get the starting address of the port's registers and write to the lock.
+  //
+  gpioDataReg = (uint32_t *)((uintptr_t)GPIOCTRL_BASE) +
+                ((uint32_t)port * GPIO_CTRL_REGS_STEP);
 
-    EALLOW;
-    gpioDataReg[GPIO_GPxLOCK_INDEX] &= ~pinMask;
-    EDIS;
+  EALLOW;
+  gpioDataReg[GPIO_GPxLOCK_INDEX] &= ~pinMask;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -759,20 +714,18 @@ GPIO_unlockPortConfig(GPIO_Port port, uint32_t pinMask)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-GPIO_commitPortConfig(GPIO_Port port, uint32_t pinMask)
-{
-    volatile uint32_t *gpioDataReg;
+static inline void GPIO_commitPortConfig(GPIO_Port port, uint32_t pinMask) {
+  volatile uint32_t *gpioDataReg;
 
-    //
-    // Get the starting address of the port's registers and write to the lock.
-    //
-    gpioDataReg = (uint32_t *)((uintptr_t)GPIOCTRL_BASE) +
-                  ((uint32_t)port * GPIO_CTRL_REGS_STEP);
+  //
+  // Get the starting address of the port's registers and write to the lock.
+  //
+  gpioDataReg = (uint32_t *)((uintptr_t)GPIOCTRL_BASE) +
+                ((uint32_t)port * GPIO_CTRL_REGS_STEP);
 
-    EALLOW;
-    gpioDataReg[GPIO_GPxCR_INDEX] |= pinMask;
-    EDIS;
+  EALLOW;
+  gpioDataReg[GPIO_GPxCR_INDEX] |= pinMask;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -800,8 +753,7 @@ GPIO_commitPortConfig(GPIO_Port port, uint32_t pinMask)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-GPIO_setDirectionMode(uint32_t pin, GPIO_Direction pinIO);
+extern void GPIO_setDirectionMode(uint32_t pin, GPIO_Direction pinIO);
 
 //*****************************************************************************
 //
@@ -817,8 +769,7 @@ GPIO_setDirectionMode(uint32_t pin, GPIO_Direction pinIO);
 //! GPIO_setDirectionMode().
 //
 //*****************************************************************************
-extern GPIO_Direction
-GPIO_getDirectionMode(uint32_t pin);
+extern GPIO_Direction GPIO_getDirectionMode(uint32_t pin);
 
 //*****************************************************************************
 //
@@ -846,8 +797,7 @@ GPIO_getDirectionMode(uint32_t pin);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-GPIO_setInterruptPin(uint32_t pin, GPIO_ExternalIntNum extIntNum);
+extern void GPIO_setInterruptPin(uint32_t pin, GPIO_ExternalIntNum extIntNum);
 
 //*****************************************************************************
 //
@@ -873,8 +823,7 @@ GPIO_setInterruptPin(uint32_t pin, GPIO_ExternalIntNum extIntNum);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-GPIO_setPadConfig(uint32_t pin, uint32_t pinType);
+extern void GPIO_setPadConfig(uint32_t pin, uint32_t pinType);
 
 //*****************************************************************************
 //
@@ -889,8 +838,7 @@ GPIO_setPadConfig(uint32_t pin, uint32_t pinType);
 //! \b GPIO_PIN_TYPE_PULLUP, \b GPIO_PIN_TYPE_OD, and \b GPIO_PIN_TYPE_INVERT.
 //
 //*****************************************************************************
-extern uint32_t
-GPIO_getPadConfig(uint32_t pin);
+extern uint32_t GPIO_getPadConfig(uint32_t pin);
 
 //*****************************************************************************
 //
@@ -912,8 +860,8 @@ GPIO_getPadConfig(uint32_t pin);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-GPIO_setQualificationMode(uint32_t pin, GPIO_QualificationMode qualification);
+extern void GPIO_setQualificationMode(uint32_t               pin,
+                                      GPIO_QualificationMode qualification);
 
 //*****************************************************************************
 //
@@ -926,8 +874,7 @@ GPIO_setQualificationMode(uint32_t pin, GPIO_QualificationMode qualification);
 //! \b GPIO_QUAL_ASYNC.
 //
 //*****************************************************************************
-extern GPIO_QualificationMode
-GPIO_getQualificationMode(uint32_t pin);
+extern GPIO_QualificationMode GPIO_getQualificationMode(uint32_t pin);
 
 //*****************************************************************************
 //
@@ -951,8 +898,7 @@ GPIO_getQualificationMode(uint32_t pin);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-GPIO_setQualificationPeriod(uint32_t pin, uint32_t divider);
+extern void GPIO_setQualificationPeriod(uint32_t pin, uint32_t divider);
 
 //*****************************************************************************
 //
@@ -972,8 +918,7 @@ GPIO_setQualificationPeriod(uint32_t pin, uint32_t divider);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-GPIO_setControllerCore(uint32_t pin, GPIO_CoreSelect core);
+extern void GPIO_setControllerCore(uint32_t pin, GPIO_CoreSelect core);
 
 //*****************************************************************************
 //
@@ -1002,8 +947,7 @@ GPIO_setControllerCore(uint32_t pin, GPIO_CoreSelect core);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-GPIO_setAnalogMode(uint32_t pin, GPIO_AnalogMode mode);
+extern void GPIO_setAnalogMode(uint32_t pin, GPIO_AnalogMode mode);
 
 //*****************************************************************************
 //
@@ -1023,8 +967,7 @@ GPIO_setAnalogMode(uint32_t pin, GPIO_AnalogMode mode);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-GPIO_setPinConfig(uint32_t pinConfig);
+extern void GPIO_setPinConfig(uint32_t pinConfig);
 
 //*****************************************************************************
 //

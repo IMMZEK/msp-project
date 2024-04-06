@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   interrupt.h
+//  FILE:   interrupt.h
 //
-// TITLE:  C28x Interrupt (PIE) driver.
+//  TITLE:  C28x Interrupt (PIE) driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef INTERRUPT_H
 #define INTERRUPT_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #ifdef __TMS320C28XX__
@@ -61,15 +60,14 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "cpu.h"
+#include "debug.h"
 #include "inc/hw_ints.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_pie.h"
 #include "inc/hw_types.h"
-#include "cpu.h"
-#include "debug.h"
-
+#include <stdbool.h>
+#include <stdint.h>
 
 #ifndef DOXYGEN_PDF_IGNORE
 //*****************************************************************************
@@ -78,22 +76,22 @@ extern "C"
 // and Interrupt_disableInCPU() functions as the cpuInterrupt parameter.
 //
 //*****************************************************************************
-#define INTERRUPT_CPU_INT1    0x1U      //!< CPU Interrupt Number 1
-#define INTERRUPT_CPU_INT2    0x2U      //!< CPU Interrupt Number 2
-#define INTERRUPT_CPU_INT3    0x4U      //!< CPU Interrupt Number 3
-#define INTERRUPT_CPU_INT4    0x8U      //!< CPU Interrupt Number 4
-#define INTERRUPT_CPU_INT5    0x10U     //!< CPU Interrupt Number 5
-#define INTERRUPT_CPU_INT6    0x20U     //!< CPU Interrupt Number 6
-#define INTERRUPT_CPU_INT7    0x40U     //!< CPU Interrupt Number 7
-#define INTERRUPT_CPU_INT8    0x80U     //!< CPU Interrupt Number 8
-#define INTERRUPT_CPU_INT9    0x100U    //!< CPU Interrupt Number 9
-#define INTERRUPT_CPU_INT10   0x200U    //!< CPU Interrupt Number 10
-#define INTERRUPT_CPU_INT11   0x400U    //!< CPU Interrupt Number 11
-#define INTERRUPT_CPU_INT12   0x800U    //!< CPU Interrupt Number 12
-#define INTERRUPT_CPU_INT13   0x1000U   //!< CPU Interrupt Number 13
-#define INTERRUPT_CPU_INT14   0x2000U   //!< CPU Interrupt Number 14
-#define INTERRUPT_CPU_DLOGINT 0x4000U   //!< CPU Data Log Interrupt
-#define INTERRUPT_CPU_RTOSINT 0x8000U   //!< CPU RTOS Interrupt
+#define INTERRUPT_CPU_INT1    0x1U    //!< CPU Interrupt Number 1
+#define INTERRUPT_CPU_INT2    0x2U    //!< CPU Interrupt Number 2
+#define INTERRUPT_CPU_INT3    0x4U    //!< CPU Interrupt Number 3
+#define INTERRUPT_CPU_INT4    0x8U    //!< CPU Interrupt Number 4
+#define INTERRUPT_CPU_INT5    0x10U   //!< CPU Interrupt Number 5
+#define INTERRUPT_CPU_INT6    0x20U   //!< CPU Interrupt Number 6
+#define INTERRUPT_CPU_INT7    0x40U   //!< CPU Interrupt Number 7
+#define INTERRUPT_CPU_INT8    0x80U   //!< CPU Interrupt Number 8
+#define INTERRUPT_CPU_INT9    0x100U  //!< CPU Interrupt Number 9
+#define INTERRUPT_CPU_INT10   0x200U  //!< CPU Interrupt Number 10
+#define INTERRUPT_CPU_INT11   0x400U  //!< CPU Interrupt Number 11
+#define INTERRUPT_CPU_INT12   0x800U  //!< CPU Interrupt Number 12
+#define INTERRUPT_CPU_INT13   0x1000U //!< CPU Interrupt Number 13
+#define INTERRUPT_CPU_INT14   0x2000U //!< CPU Interrupt Number 14
+#define INTERRUPT_CPU_DLOGINT 0x4000U //!< CPU Data Log Interrupt
+#define INTERRUPT_CPU_RTOSINT 0x8000U //!< CPU RTOS Interrupt
 
 //*****************************************************************************
 //
@@ -101,18 +99,18 @@ extern "C"
 // function as the group parameter.
 //
 //*****************************************************************************
-#define INTERRUPT_ACK_GROUP1    0x1U    //!< Acknowledge PIE Interrupt Group 1
-#define INTERRUPT_ACK_GROUP2    0x2U    //!< Acknowledge PIE Interrupt Group 2
-#define INTERRUPT_ACK_GROUP3    0x4U    //!< Acknowledge PIE Interrupt Group 3
-#define INTERRUPT_ACK_GROUP4    0x8U    //!< Acknowledge PIE Interrupt Group 4
-#define INTERRUPT_ACK_GROUP5    0x10U   //!< Acknowledge PIE Interrupt Group 5
-#define INTERRUPT_ACK_GROUP6    0x20U   //!< Acknowledge PIE Interrupt Group 6
-#define INTERRUPT_ACK_GROUP7    0x40U   //!< Acknowledge PIE Interrupt Group 7
-#define INTERRUPT_ACK_GROUP8    0x80U   //!< Acknowledge PIE Interrupt Group 8
-#define INTERRUPT_ACK_GROUP9    0x100U  //!< Acknowledge PIE Interrupt Group 9
-#define INTERRUPT_ACK_GROUP10   0x200U  //!< Acknowledge PIE Interrupt Group 10
-#define INTERRUPT_ACK_GROUP11   0x400U  //!< Acknowledge PIE Interrupt Group 11
-#define INTERRUPT_ACK_GROUP12   0x800U  //!< Acknowledge PIE Interrupt Group 12
+#define INTERRUPT_ACK_GROUP1  0x1U   //!< Acknowledge PIE Interrupt Group 1
+#define INTERRUPT_ACK_GROUP2  0x2U   //!< Acknowledge PIE Interrupt Group 2
+#define INTERRUPT_ACK_GROUP3  0x4U   //!< Acknowledge PIE Interrupt Group 3
+#define INTERRUPT_ACK_GROUP4  0x8U   //!< Acknowledge PIE Interrupt Group 4
+#define INTERRUPT_ACK_GROUP5  0x10U  //!< Acknowledge PIE Interrupt Group 5
+#define INTERRUPT_ACK_GROUP6  0x20U  //!< Acknowledge PIE Interrupt Group 6
+#define INTERRUPT_ACK_GROUP7  0x40U  //!< Acknowledge PIE Interrupt Group 7
+#define INTERRUPT_ACK_GROUP8  0x80U  //!< Acknowledge PIE Interrupt Group 8
+#define INTERRUPT_ACK_GROUP9  0x100U //!< Acknowledge PIE Interrupt Group 9
+#define INTERRUPT_ACK_GROUP10 0x200U //!< Acknowledge PIE Interrupt Group 10
+#define INTERRUPT_ACK_GROUP11 0x400U //!< Acknowledge PIE Interrupt Group 11
+#define INTERRUPT_ACK_GROUP12 0x800U //!< Acknowledge PIE Interrupt Group 12
 #endif
 
 //*****************************************************************************
@@ -136,8 +134,7 @@ extern "C"
 //! \return None.
 //
 //*****************************************************************************
-extern void 
-Interrupt_defaultHandler(void);
+extern void Interrupt_defaultHandler(void);
 
 //*****************************************************************************
 //
@@ -155,8 +152,7 @@ Interrupt_defaultHandler(void);
 //! \return None.
 //
 //*****************************************************************************
-extern void 
-Interrupt_illegalOperationHandler(void);
+extern void Interrupt_illegalOperationHandler(void);
 
 //*****************************************************************************
 //
@@ -173,8 +169,7 @@ Interrupt_illegalOperationHandler(void);
 //! \return None.
 //
 //*****************************************************************************
-extern void 
-Interrupt_nmiHandler(void);
+extern void Interrupt_nmiHandler(void);
 
 //*****************************************************************************
 //
@@ -187,13 +182,11 @@ Interrupt_nmiHandler(void);
 //! called or \b false if they were initially enabled.
 //
 //*****************************************************************************
-static inline bool
-Interrupt_enableGlobal(void)
-{
-    //
-    // Enable processor interrupts.
-    //
-    return(((__enable_interrupts() & 0x1U) != 0U) ? true : false);
+static inline bool Interrupt_enableGlobal(void) {
+  //
+  // Enable processor interrupts.
+  //
+  return (((__enable_interrupts() & 0x1U) != 0U) ? true : false);
 }
 
 //*****************************************************************************
@@ -207,13 +200,11 @@ Interrupt_enableGlobal(void)
 //! function was called or \b false if they were initially enabled.
 //
 //*****************************************************************************
-static inline bool
-Interrupt_disableGlobal(void)
-{
-    //
-    // Disable processor interrupts.
-    //
-    return(((__disable_interrupts() & 0x1U) != 0U) ? true : false);
+static inline bool Interrupt_disableGlobal(void) {
+  //
+  // Disable processor interrupts.
+  //
+  return (((__disable_interrupts() & 0x1U) != 0U) ? true : false);
 }
 
 //*****************************************************************************
@@ -239,23 +230,22 @@ Interrupt_disableGlobal(void)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Interrupt_register(uint32_t interruptNumber, void (*handler)(void))
-{
-    uint32_t address;
+static inline void Interrupt_register(uint32_t interruptNumber,
+                                      void (*handler)(void)) {
+  uint32_t address;
 
-    //
-    // Calculate appropriate address for the interrupt number
-    //
-    address = (uint32_t)PIEVECTTABLE_BASE +
-              (((interruptNumber & 0xFFFF0000U) >> 16U) * 2U);
+  //
+  // Calculate appropriate address for the interrupt number
+  //
+  address = (uint32_t)PIEVECTTABLE_BASE +
+            (((interruptNumber & 0xFFFF0000U) >> 16U) * 2U);
 
-    //
-    // Copy ISR address into PIE table
-    //
-    EALLOW;
-    HWREG(address) = (uint32_t)handler;
-    EDIS;
+  //
+  // Copy ISR address into PIE table
+  //
+  EALLOW;
+  HWREG(address) = (uint32_t)handler;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -278,23 +268,21 @@ Interrupt_register(uint32_t interruptNumber, void (*handler)(void))
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Interrupt_unregister(uint32_t interruptNumber)
-{
-    uint32_t address;
+static inline void Interrupt_unregister(uint32_t interruptNumber) {
+  uint32_t address;
 
-    //
-    // Calculate appropriate address for the interrupt number
-    //
-    address = (uint32_t)PIEVECTTABLE_BASE +
-              (((interruptNumber & 0xFFFF0000U) >> 16U) * 2U);
+  //
+  // Calculate appropriate address for the interrupt number
+  //
+  address = (uint32_t)PIEVECTTABLE_BASE +
+            (((interruptNumber & 0xFFFF0000U) >> 16U) * 2U);
 
-    //
-    // Copy default ISR address into PIE table
-    //
-    EALLOW;
-    HWREG(address) = (uint32_t)Interrupt_defaultHandler;
-    EDIS;
+  //
+  // Copy default ISR address into PIE table
+  //
+  EALLOW;
+  HWREG(address) = (uint32_t)Interrupt_defaultHandler;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -314,13 +302,11 @@ Interrupt_unregister(uint32_t interruptNumber)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Interrupt_enableInCPU(uint16_t cpuInterrupt)
-{
-    //
-    // Set the interrupt bits in the CPU.
-    //
-    IER |= cpuInterrupt;
+static inline void Interrupt_enableInCPU(uint16_t cpuInterrupt) {
+  //
+  // Set the interrupt bits in the CPU.
+  //
+  IER |= cpuInterrupt;
 }
 
 //*****************************************************************************
@@ -340,13 +326,11 @@ Interrupt_enableInCPU(uint16_t cpuInterrupt)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Interrupt_disableInCPU(uint16_t cpuInterrupt)
-{
-    //
-    // Clear the interrupt bits in the CPU.
-    //
-    IER &= ~cpuInterrupt;
+static inline void Interrupt_disableInCPU(uint16_t cpuInterrupt) {
+  //
+  // Clear the interrupt bits in the CPU.
+  //
+  IER &= ~cpuInterrupt;
 }
 
 //*****************************************************************************
@@ -368,13 +352,11 @@ Interrupt_disableInCPU(uint16_t cpuInterrupt)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Interrupt_clearACKGroup(uint16_t group)
-{
-    //
-    // Set interrupt group acknowledge bits
-    //
-    HWREGH(PIECTRL_BASE + PIE_O_ACK) = group;
+static inline void Interrupt_clearACKGroup(uint16_t group) {
+  //
+  // Set interrupt group acknowledge bits
+  //
+  HWREGH(PIECTRL_BASE + PIE_O_ACK) = group;
 }
 
 //*****************************************************************************
@@ -387,10 +369,8 @@ Interrupt_clearACKGroup(uint16_t group)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Interrupt_enablePIE(void)
-{
-    HWREGH(PIECTRL_BASE + PIE_O_CTRL) |= PIE_CTRL_ENPIE;
+static inline void Interrupt_enablePIE(void) {
+  HWREGH(PIECTRL_BASE + PIE_O_CTRL) |= PIE_CTRL_ENPIE;
 }
 
 //*****************************************************************************
@@ -404,10 +384,8 @@ Interrupt_enablePIE(void)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-Interrupt_disablePIE(void)
-{
-    HWREGH(PIECTRL_BASE + PIE_O_CTRL) &= ~PIE_CTRL_ENPIE;
+static inline void Interrupt_disablePIE(void) {
+  HWREGH(PIECTRL_BASE + PIE_O_CTRL) &= ~PIE_CTRL_ENPIE;
 }
 
 //*****************************************************************************
@@ -421,8 +399,7 @@ Interrupt_disablePIE(void)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-Interrupt_initModule(void);
+extern void Interrupt_initModule(void);
 
 //*****************************************************************************
 //
@@ -432,8 +409,7 @@ Interrupt_initModule(void);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-Interrupt_initVectorTable(void);
+extern void Interrupt_initVectorTable(void);
 
 //*****************************************************************************
 //
@@ -451,8 +427,7 @@ Interrupt_initVectorTable(void);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-Interrupt_enable(uint32_t interruptNumber);
+extern void Interrupt_enable(uint32_t interruptNumber);
 
 //*****************************************************************************
 //
@@ -470,8 +445,7 @@ Interrupt_enable(uint32_t interruptNumber);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-Interrupt_disable(uint32_t interruptNumber);
+extern void Interrupt_disable(uint32_t interruptNumber);
 
 //*****************************************************************************
 //

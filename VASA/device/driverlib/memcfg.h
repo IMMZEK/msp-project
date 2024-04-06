@@ -1,42 +1,42 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   memcfg.h
+//  FILE:   memcfg.h
 //
-// TITLE:  C28x RAM config driver.
+//  TITLE:  C28x RAM config driver.
 //
-//###########################################################################
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+// ###########################################################################
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef MEMCFG_H
 #define MEMCFG_H
@@ -48,8 +48,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -59,13 +58,13 @@ extern "C"
 //
 //*****************************************************************************
 
-#include <stdbool.h>
-#include <stdint.h>
+#include "cpu.h"
+#include "debug.h"
 #include "inc/hw_memcfg.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
-#include "cpu.h"
-#include "debug.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 //*****************************************************************************
 //
@@ -76,23 +75,24 @@ extern "C"
 //
 // Masks to decode memory section defines.
 //
-#define MEMCFG_SECT_TYPE_MASK   0xFF000000U
-#define MEMCFG_SECT_TYPE_D      0x00000000U
-#define MEMCFG_SECT_TYPE_LS     0x01000000U
-#define MEMCFG_SECT_TYPE_GS     0x02000000U
-#define MEMCFG_SECT_TYPE_MSG    0x03000000U
-#define MEMCFG_SECT_NUM_MASK    0x00FFFFFFU
-#define MEMCFG_XACCPROTX_M      ((uint32_t)MEMCFG_GSXACCPROT0_FETCHPROT_GS0 | \
-                                 (uint32_t)MEMCFG_GSXACCPROT0_CPUWRPROT_GS0 | \
-                                 (uint32_t)MEMCFG_GSXACCPROT0_DMAWRPROT_GS0)
-#define MEMCFG_XTEST_M          MEMCFG_DXTEST_TEST_M0_M
+#define MEMCFG_SECT_TYPE_MASK 0xFF000000U
+#define MEMCFG_SECT_TYPE_D    0x00000000U
+#define MEMCFG_SECT_TYPE_LS   0x01000000U
+#define MEMCFG_SECT_TYPE_GS   0x02000000U
+#define MEMCFG_SECT_TYPE_MSG  0x03000000U
+#define MEMCFG_SECT_NUM_MASK  0x00FFFFFFU
+#define MEMCFG_XACCPROTX_M                                                     \
+  ((uint32_t)MEMCFG_GSXACCPROT0_FETCHPROT_GS0 |                                \
+   (uint32_t)MEMCFG_GSXACCPROT0_CPUWRPROT_GS0 |                                \
+   (uint32_t)MEMCFG_GSXACCPROT0_DMAWRPROT_GS0)
+#define MEMCFG_XTEST_M MEMCFG_DXTEST_TEST_M0_M
 
 //
 // Used for access violation functions.
 //
-#define MEMCFG_NMVIOL_MASK      0x0000FFFFU
-#define MEMCFG_MVIOL_MASK       0x000F0000U
-#define MEMCFG_MVIOL_SHIFT      16U
+#define MEMCFG_NMVIOL_MASK 0x0000FFFFU
+#define MEMCFG_MVIOL_MASK  0x000F0000U
+#define MEMCFG_MVIOL_SHIFT 16U
 
 #ifndef DOXYGEN_PDF_IGNORE
 //*****************************************************************************
@@ -106,57 +106,56 @@ extern "C"
 //
 // DxRAM - Dedicated RAM config
 //
-#define MEMCFG_SECT_M0              0x00000001U //!< M0 RAM
-#define MEMCFG_SECT_M1              0x00000002U //!< M1 RAM
-#define MEMCFG_SECT_D0              0x00000004U //!< D0 RAM
-#define MEMCFG_SECT_D1              0x00000008U //!< D1 RAM
-#define MEMCFG_SECT_DX_ALL          0x0000000FU //!< All M and D RAM
+#define MEMCFG_SECT_M0     0x00000001U //!< M0 RAM
+#define MEMCFG_SECT_M1     0x00000002U //!< M1 RAM
+#define MEMCFG_SECT_D0     0x00000004U //!< D0 RAM
+#define MEMCFG_SECT_D1     0x00000008U //!< D1 RAM
+#define MEMCFG_SECT_DX_ALL 0x0000000FU //!< All M and D RAM
 
 //
 // LSxRAM - Local shared RAM config
 //
-#define MEMCFG_SECT_LS0             0x01000001U //!< LS0 RAM
-#define MEMCFG_SECT_LS1             0x01000002U //!< LS1 RAM
-#define MEMCFG_SECT_LS2             0x01000004U //!< LS2 RAM
-#define MEMCFG_SECT_LS3             0x01000008U //!< LS3 RAM
-#define MEMCFG_SECT_LS4             0x01000010U //!< LS4 RAM
-#define MEMCFG_SECT_LS5             0x01000020U //!< LS5 RAM
-#define MEMCFG_SECT_LSX_ALL         0x0100003FU //!< All LS RAM
+#define MEMCFG_SECT_LS0     0x01000001U //!< LS0 RAM
+#define MEMCFG_SECT_LS1     0x01000002U //!< LS1 RAM
+#define MEMCFG_SECT_LS2     0x01000004U //!< LS2 RAM
+#define MEMCFG_SECT_LS3     0x01000008U //!< LS3 RAM
+#define MEMCFG_SECT_LS4     0x01000010U //!< LS4 RAM
+#define MEMCFG_SECT_LS5     0x01000020U //!< LS5 RAM
+#define MEMCFG_SECT_LSX_ALL 0x0100003FU //!< All LS RAM
 
 //
 // GSxRAM - Global shared RAM config
 //
-#define MEMCFG_SECT_GS0             0x02000001U //!< GS0 RAM
-#define MEMCFG_SECT_GS1             0x02000002U //!< GS1 RAM
-#define MEMCFG_SECT_GS2             0x02000004U //!< GS2 RAM
-#define MEMCFG_SECT_GS3             0x02000008U //!< GS3 RAM
-#define MEMCFG_SECT_GS4             0x02000010U //!< GS4 RAM
-#define MEMCFG_SECT_GS5             0x02000020U //!< GS5 RAM
-#define MEMCFG_SECT_GS6             0x02000040U //!< GS6 RAM
-#define MEMCFG_SECT_GS7             0x02000080U //!< GS7 RAM
-#define MEMCFG_SECT_GS8             0x02000100U //!< GS8 RAM
-#define MEMCFG_SECT_GS9             0x02000200U //!< GS9 RAM
-#define MEMCFG_SECT_GS10            0x02000400U //!< GS10 RAM
-#define MEMCFG_SECT_GS11            0x02000800U //!< GS11 RAM
-#define MEMCFG_SECT_GS12            0x02001000U //!< GS12 RAM
-#define MEMCFG_SECT_GS13            0x02002000U //!< GS13 RAM
-#define MEMCFG_SECT_GS14            0x02004000U //!< GS14 RAM
-#define MEMCFG_SECT_GS15            0x02008000U //!< GS15 RAM
-#define MEMCFG_SECT_GSX_ALL         0x0200FFFFU //!< All GS RAM
+#define MEMCFG_SECT_GS0     0x02000001U //!< GS0 RAM
+#define MEMCFG_SECT_GS1     0x02000002U //!< GS1 RAM
+#define MEMCFG_SECT_GS2     0x02000004U //!< GS2 RAM
+#define MEMCFG_SECT_GS3     0x02000008U //!< GS3 RAM
+#define MEMCFG_SECT_GS4     0x02000010U //!< GS4 RAM
+#define MEMCFG_SECT_GS5     0x02000020U //!< GS5 RAM
+#define MEMCFG_SECT_GS6     0x02000040U //!< GS6 RAM
+#define MEMCFG_SECT_GS7     0x02000080U //!< GS7 RAM
+#define MEMCFG_SECT_GS8     0x02000100U //!< GS8 RAM
+#define MEMCFG_SECT_GS9     0x02000200U //!< GS9 RAM
+#define MEMCFG_SECT_GS10    0x02000400U //!< GS10 RAM
+#define MEMCFG_SECT_GS11    0x02000800U //!< GS11 RAM
+#define MEMCFG_SECT_GS12    0x02001000U //!< GS12 RAM
+#define MEMCFG_SECT_GS13    0x02002000U //!< GS13 RAM
+#define MEMCFG_SECT_GS14    0x02004000U //!< GS14 RAM
+#define MEMCFG_SECT_GS15    0x02008000U //!< GS15 RAM
+#define MEMCFG_SECT_GSX_ALL 0x0200FFFFU //!< All GS RAM
 
 //
 // MSGxRAM - Message RAM config
 //
-#define MEMCFG_SECT_MSGCPUTOCPU     0x03000001U //!< CPU-to-CPU message RAM
-#define MEMCFG_SECT_MSGCPUTOCLA1    0x03000002U //!< CPU-to-CLA1 message RAM
-#define MEMCFG_SECT_MSGCLA1TOCPU    0x03000004U //!< CLA1-to-CPU message RAM
-#define MEMCFG_SECT_MSGX_ALL        0x03000007U //!< All message RAM
-
+#define MEMCFG_SECT_MSGCPUTOCPU  0x03000001U //!< CPU-to-CPU message RAM
+#define MEMCFG_SECT_MSGCPUTOCLA1 0x03000002U //!< CPU-to-CLA1 message RAM
+#define MEMCFG_SECT_MSGCLA1TOCPU 0x03000004U //!< CLA1-to-CPU message RAM
+#define MEMCFG_SECT_MSGX_ALL     0x03000007U //!< All message RAM
 
 //
 // All sections
 //
-#define MEMCFG_SECT_ALL             0xFFFFFFFFU //!< All configurable RAM
+#define MEMCFG_SECT_ALL 0xFFFFFFFFU //!< All configurable RAM
 
 //*****************************************************************************
 //
@@ -164,31 +163,14 @@ extern "C"
 // parameter.
 //
 //*****************************************************************************
-#define MEMCFG_PROT_ALLOWCPUFETCH   0x00000000U //!< CPU fetch allowed
-#define MEMCFG_PROT_BLOCKCPUFETCH   0x00000001U //!< CPU fetch blocked
+#define MEMCFG_PROT_ALLOWCPUFETCH 0x00000000U //!< CPU fetch allowed
+#define MEMCFG_PROT_BLOCKCPUFETCH 0x00000001U //!< CPU fetch blocked
 
-#define MEMCFG_PROT_ALLOWCPUWRITE   0x00000000U //!< CPU write allowed
-#define MEMCFG_PROT_BLOCKCPUWRITE   0x00000002U //!< CPU write blocked
+#define MEMCFG_PROT_ALLOWCPUWRITE 0x00000000U //!< CPU write allowed
+#define MEMCFG_PROT_BLOCKCPUWRITE 0x00000002U //!< CPU write blocked
 
-#define MEMCFG_PROT_ALLOWDMAWRITE   0x00000000U //!< DMA write allowed (GSxRAM)
-#define MEMCFG_PROT_BLOCKDMAWRITE   0x00000004U //!< DMA write blocked (GSxRAM)
-
-//*****************************************************************************
-//
-// Values that can be passed to MemCfg_enableViolationInterrupt()
-// MemCfg_disableViolationInterrupt(), MemCfg_forceViolationInterrupt(),
-// MemCfg_clearViolationInterruptStatus(), and MemCfg_getViolationAddress() as
-// the intFlags parameter. They also make up the return value of
-// MemCfg_getViolationInterruptStatus().
-//
-//*****************************************************************************
-#define MEMCFG_NMVIOL_CPUREAD    0x00000001U //!< Non-controller CPU read access
-#define MEMCFG_NMVIOL_CPUWRITE   0x00000002U //!< Non-controller CPU write access
-#define MEMCFG_NMVIOL_CPUFETCH   0x00000004U //!< Non-controller CPU fetch access
-#define MEMCFG_NMVIOL_DMAWRITE   0x00000008U //!< Non-controller DMA write access
-#define MEMCFG_NMVIOL_CLA1READ   0x00000010U //!< Non-controller CLA1 read access
-#define MEMCFG_NMVIOL_CLA1WRITE  0x00000020U //!< Non-controller CLA1 write access
-#define MEMCFG_NMVIOL_CLA1FETCH  0x00000040U //!< Non-controller CLA1 fetch access
+#define MEMCFG_PROT_ALLOWDMAWRITE 0x00000000U //!< DMA write allowed (GSxRAM)
+#define MEMCFG_PROT_BLOCKDMAWRITE 0x00000004U //!< DMA write blocked (GSxRAM)
 
 //*****************************************************************************
 //
@@ -199,9 +181,28 @@ extern "C"
 // MemCfg_getViolationInterruptStatus().
 //
 //*****************************************************************************
-#define MEMCFG_MVIOL_CPUFETCH    0x00010000U //!< Controller CPU fetch access
-#define MEMCFG_MVIOL_CPUWRITE    0x00020000U //!< Controller CPU write access
-#define MEMCFG_MVIOL_DMAWRITE    0x00040000U //!< Controller DMA write access
+#define MEMCFG_NMVIOL_CPUREAD  0x00000001U //!< Non-controller CPU read access
+#define MEMCFG_NMVIOL_CPUWRITE 0x00000002U //!< Non-controller CPU write access
+#define MEMCFG_NMVIOL_CPUFETCH 0x00000004U //!< Non-controller CPU fetch access
+#define MEMCFG_NMVIOL_DMAWRITE 0x00000008U //!< Non-controller DMA write access
+#define MEMCFG_NMVIOL_CLA1READ 0x00000010U //!< Non-controller CLA1 read access
+#define MEMCFG_NMVIOL_CLA1WRITE                                                \
+  0x00000020U //!< Non-controller CLA1 write access
+#define MEMCFG_NMVIOL_CLA1FETCH                                                \
+  0x00000040U //!< Non-controller CLA1 fetch access
+
+//*****************************************************************************
+//
+// Values that can be passed to MemCfg_enableViolationInterrupt()
+// MemCfg_disableViolationInterrupt(), MemCfg_forceViolationInterrupt(),
+// MemCfg_clearViolationInterruptStatus(), and MemCfg_getViolationAddress() as
+// the intFlags parameter. They also make up the return value of
+// MemCfg_getViolationInterruptStatus().
+//
+//*****************************************************************************
+#define MEMCFG_MVIOL_CPUFETCH 0x00010000U //!< Controller CPU fetch access
+#define MEMCFG_MVIOL_CPUWRITE 0x00020000U //!< Controller CPU write access
+#define MEMCFG_MVIOL_DMAWRITE 0x00040000U //!< Controller DMA write access
 
 //*****************************************************************************
 //
@@ -214,9 +215,9 @@ extern "C"
 // an intFlag(s) parameter.
 //
 //*****************************************************************************
-#define MEMCFG_CERR_CPUREAD      0x0001U //!< Correctable CPU read error
-#define MEMCFG_CERR_DMAREAD      0x0002U //!< Correctable DMA read error
-#define MEMCFG_CERR_CLA1READ     0x0004U //!< Correctable CLA1 read error
+#define MEMCFG_CERR_CPUREAD   0x0001U //!< Correctable CPU read error
+#define MEMCFG_CERR_DMAREAD   0x0002U //!< Correctable DMA read error
+#define MEMCFG_CERR_CLA1READ  0x0004U //!< Correctable CLA1 read error
 //*****************************************************************************
 //
 // Values that can be passed to MemCfg_forceUncorrErrorStatus(),
@@ -224,9 +225,9 @@ extern "C"
 // stsFlag(s) parameter and returned by MemCfg_getUncorrErrorStatus().
 //
 //*****************************************************************************
-#define MEMCFG_UCERR_CPUREAD     0x0001U //!< Uncorrectable CPU read error
-#define MEMCFG_UCERR_DMAREAD     0x0002U //!< Uncorrectable DMA read error
-#define MEMCFG_UCERR_CLA1READ    0x0004U //!< Uncorrectable CLA1 read error
+#define MEMCFG_UCERR_CPUREAD  0x0001U //!< Uncorrectable CPU read error
+#define MEMCFG_UCERR_DMAREAD  0x0002U //!< Uncorrectable DMA read error
+#define MEMCFG_UCERR_CLA1READ 0x0004U //!< Uncorrectable CLA1 read error
 
 #endif
 
@@ -236,10 +237,9 @@ extern "C"
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MEMCFG_CLA_MEM_DATA,                //!< Section is CLA data memory
-    MEMCFG_CLA_MEM_PROGRAM              //!< Section is CLA program memory
+typedef enum {
+  MEMCFG_CLA_MEM_DATA,   //!< Section is CLA data memory
+  MEMCFG_CLA_MEM_PROGRAM //!< Section is CLA program memory
 } MemCfg_CLAMemoryType;
 
 //*****************************************************************************
@@ -248,10 +248,9 @@ typedef enum
 //! \e controllerSel parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MEMCFG_LSRAMCONTROLLER_CPU_ONLY,   //!< CPU is the owner of the section
-    MEMCFG_LSRAMCONTROLLER_CPU_CLA1    //!< CPU and CLA1 share this section
+typedef enum {
+  MEMCFG_LSRAMCONTROLLER_CPU_ONLY, //!< CPU is the owner of the section
+  MEMCFG_LSRAMCONTROLLER_CPU_CLA1  //!< CPU and CLA1 share this section
 } MemCfg_LSRAMControllerSel;
 
 //*****************************************************************************
@@ -260,10 +259,9 @@ typedef enum
 //! \e controllerSel parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    MEMCFG_GSRAMCONTROLLER_CPU1,         //!< CPU1 is controller of the section
-    MEMCFG_GSRAMCONTROLLER_CPU2          //!< CPU2 is controller of the section
+typedef enum {
+  MEMCFG_GSRAMCONTROLLER_CPU1, //!< CPU1 is controller of the section
+  MEMCFG_GSRAMCONTROLLER_CPU2  //!< CPU2 is controller of the section
 } MemCfg_GSRAMControllerSel;
 
 //*****************************************************************************
@@ -272,16 +270,15 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    //! Functional mode. Test mode is disabled.
-    MEMCFG_TEST_FUNCTIONAL   = 0,
-    //! Writes allowed to data only
-    MEMCFG_TEST_WRITE_DATA   = 1,
-    //! Writes allowed to ECC only (for DxRAM/MxRAM)
-    MEMCFG_TEST_WRITE_ECC    = 2,
-    //! Writes allowed to parity only (for LSxRAM, GSxRAM, and MSGxRAM)
-    MEMCFG_TEST_WRITE_PARITY = 2
+typedef enum {
+  //! Functional mode. Test mode is disabled.
+  MEMCFG_TEST_FUNCTIONAL   = 0,
+  //! Writes allowed to data only
+  MEMCFG_TEST_WRITE_DATA   = 1,
+  //! Writes allowed to ECC only (for DxRAM/MxRAM)
+  MEMCFG_TEST_WRITE_ECC    = 2,
+  //! Writes allowed to parity only (for LSxRAM, GSxRAM, and MSGxRAM)
+  MEMCFG_TEST_WRITE_PARITY = 2
 } MemCfg_TestMode;
 
 //*****************************************************************************
@@ -313,37 +310,33 @@ typedef enum
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_setCLAMemType(uint32_t ramSections, MemCfg_CLAMemoryType claMemType)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT((ramSections & MEMCFG_SECT_TYPE_MASK) == MEMCFG_SECT_TYPE_LS);
+static inline void MemCfg_setCLAMemType(uint32_t             ramSections,
+                                        MemCfg_CLAMemoryType claMemType) {
+  //
+  // Check the arguments.
+  //
+  ASSERT((ramSections & MEMCFG_SECT_TYPE_MASK) == MEMCFG_SECT_TYPE_LS);
 
-    //
-    // Write the CLA memory configuration to the appropriate register. Either
-    // set or clear the bit that determines the function of the RAM section as
-    // it relates to the CLA.
-    //
-    EALLOW;
+  //
+  // Write the CLA memory configuration to the appropriate register. Either
+  // set or clear the bit that determines the function of the RAM section as
+  // it relates to the CLA.
+  //
+  EALLOW;
 
-    if(claMemType == MEMCFG_CLA_MEM_PROGRAM)
-    {
-        //
-        // Program memory
-        //
-        HWREG(MEMCFG_BASE + MEMCFG_O_LSXCLAPGM) |= ramSections;
-    }
-    else
-    {
-        //
-        // Data memory
-        //
-        HWREG(MEMCFG_BASE + MEMCFG_O_LSXCLAPGM) &= ~ramSections;
-    }
+  if (claMemType == MEMCFG_CLA_MEM_PROGRAM) {
+    //
+    // Program memory
+    //
+    HWREG(MEMCFG_BASE + MEMCFG_O_LSXCLAPGM) |= ramSections;
+  } else {
+    //
+    // Data memory
+    //
+    HWREG(MEMCFG_BASE + MEMCFG_O_LSXCLAPGM) &= ~ramSections;
+  }
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -369,21 +362,19 @@ MemCfg_setCLAMemType(uint32_t ramSections, MemCfg_CLAMemoryType claMemType)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_enableViolationInterrupt(uint32_t intFlags)
-{
-    //
-    // Enable the specified interrupts.
-    //
-    EALLOW;
+static inline void MemCfg_enableViolationInterrupt(uint32_t intFlags) {
+  //
+  // Enable the specified interrupts.
+  //
+  EALLOW;
 
-    HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_NMAVINTEN) |=
-        intFlags & MEMCFG_NMVIOL_MASK;
+  HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_NMAVINTEN) |=
+      intFlags & MEMCFG_NMVIOL_MASK;
 
-    HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_MAVINTEN) |=
-        (intFlags & MEMCFG_MVIOL_MASK) >> MEMCFG_MVIOL_SHIFT;
+  HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_MAVINTEN) |=
+      (intFlags & MEMCFG_MVIOL_MASK) >> MEMCFG_MVIOL_SHIFT;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -412,21 +403,19 @@ MemCfg_enableViolationInterrupt(uint32_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_disableViolationInterrupt(uint32_t intFlags)
-{
-    //
-    // Disable the specified interrupts.
-    //
-    EALLOW;
+static inline void MemCfg_disableViolationInterrupt(uint32_t intFlags) {
+  //
+  // Disable the specified interrupts.
+  //
+  EALLOW;
 
-    HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_NMAVINTEN) &=
-        ~(intFlags & MEMCFG_NMVIOL_MASK);
+  HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_NMAVINTEN) &=
+      ~(intFlags & MEMCFG_NMVIOL_MASK);
 
-    HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_MAVINTEN) &=
-        ~((intFlags & MEMCFG_MVIOL_MASK) >> MEMCFG_MVIOL_SHIFT);
+  HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_MAVINTEN) &=
+      ~((intFlags & MEMCFG_MVIOL_MASK) >> MEMCFG_MVIOL_SHIFT);
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -451,19 +440,17 @@ MemCfg_disableViolationInterrupt(uint32_t intFlags)
 //!  - \b MEMCFG_MVIOL_CPUWRITE   - Controller CPU write access
 //!  - \b MEMCFG_MVIOL_DMAWRITE   - Controller DMA write access
 //*****************************************************************************
-static inline uint32_t
-MemCfg_getViolationInterruptStatus(void)
-{
-    uint32_t status;
+static inline uint32_t MemCfg_getViolationInterruptStatus(void) {
+  uint32_t status;
 
-    //
-    // Read and return RAM access status flags.
-    //
-    status = (HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_NMAVFLG)) |
-             (HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_MAVFLG) <<
-              MEMCFG_MVIOL_SHIFT);
+  //
+  // Read and return RAM access status flags.
+  //
+  status =
+      (HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_NMAVFLG)) |
+      (HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_MAVFLG) << MEMCFG_MVIOL_SHIFT);
 
-    return(status);
+  return (status);
 }
 
 //*****************************************************************************
@@ -490,22 +477,20 @@ MemCfg_getViolationInterruptStatus(void)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_forceViolationInterrupt(uint32_t intFlags)
-{
-    //
-    // Shift and mask the flags appropriately and write them to the
-    // corresponding SET register.
-    //
-    EALLOW;
+static inline void MemCfg_forceViolationInterrupt(uint32_t intFlags) {
+  //
+  // Shift and mask the flags appropriately and write them to the
+  // corresponding SET register.
+  //
+  EALLOW;
 
-    HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_NMAVSET) =
-        intFlags & MEMCFG_NMVIOL_MASK;
+  HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_NMAVSET) =
+      intFlags & MEMCFG_NMVIOL_MASK;
 
-    HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_MAVSET) =
-        (intFlags & MEMCFG_MVIOL_MASK) >> MEMCFG_MVIOL_SHIFT;
+  HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_MAVSET) =
+      (intFlags & MEMCFG_MVIOL_MASK) >> MEMCFG_MVIOL_SHIFT;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -528,21 +513,19 @@ MemCfg_forceViolationInterrupt(uint32_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_clearViolationInterruptStatus(uint32_t intFlags)
-{
-    //
-    // Clear the requested access violation flags.
-    //
-    EALLOW;
+static inline void MemCfg_clearViolationInterruptStatus(uint32_t intFlags) {
+  //
+  // Clear the requested access violation flags.
+  //
+  EALLOW;
 
-    HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_NMAVCLR) |=
-        intFlags & MEMCFG_NMVIOL_MASK;
+  HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_NMAVCLR) |=
+      intFlags & MEMCFG_NMVIOL_MASK;
 
-    HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_MAVCLR) |=
-        (intFlags & MEMCFG_MVIOL_MASK) >> MEMCFG_MVIOL_SHIFT;
+  HWREG(ACCESSPROTECTION_BASE + MEMCFG_O_MAVCLR) |=
+      (intFlags & MEMCFG_MVIOL_MASK) >> MEMCFG_MVIOL_SHIFT;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -559,17 +542,15 @@ MemCfg_clearViolationInterruptStatus(uint32_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_setCorrErrorThreshold(uint32_t threshold)
-{
-    //
-    // Write the threshold value to the appropriate register.
-    //
-    EALLOW;
+static inline void MemCfg_setCorrErrorThreshold(uint32_t threshold) {
+  //
+  // Write the threshold value to the appropriate register.
+  //
+  EALLOW;
 
-    HWREG(MEMORYERROR_BASE + MEMCFG_O_CERRTHRES) = threshold;
+  HWREG(MEMORYERROR_BASE + MEMCFG_O_CERRTHRES) = threshold;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -579,13 +560,11 @@ MemCfg_setCorrErrorThreshold(uint32_t threshold)
 //! \return Returns the number of correctable error have occurred.
 //
 //*****************************************************************************
-static inline uint32_t
-MemCfg_getCorrErrorCount(void)
-{
-    //
-    // Read and return the number of errors that have occurred.
-    //
-    return(HWREG(MEMORYERROR_BASE + MEMCFG_O_CERRCNT));
+static inline uint32_t MemCfg_getCorrErrorCount(void) {
+  //
+  // Read and return the number of errors that have occurred.
+  //
+  return (HWREG(MEMORYERROR_BASE + MEMCFG_O_CERRCNT));
 }
 
 //*****************************************************************************
@@ -604,17 +583,15 @@ MemCfg_getCorrErrorCount(void)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_enableCorrErrorInterrupt(uint32_t intFlags)
-{
-    //
-    // Enable the specified interrupts.
-    //
-    EALLOW;
+static inline void MemCfg_enableCorrErrorInterrupt(uint32_t intFlags) {
+  //
+  // Enable the specified interrupts.
+  //
+  EALLOW;
 
-    HWREG(MEMORYERROR_BASE + MEMCFG_O_CEINTEN) |= intFlags;
+  HWREG(MEMORYERROR_BASE + MEMCFG_O_CEINTEN) |= intFlags;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -633,17 +610,15 @@ MemCfg_enableCorrErrorInterrupt(uint32_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_disableCorrErrorInterrupt(uint32_t intFlags)
-{
-    //
-    // Disable the specified interrupts.
-    //
-    EALLOW;
+static inline void MemCfg_disableCorrErrorInterrupt(uint32_t intFlags) {
+  //
+  // Disable the specified interrupts.
+  //
+  EALLOW;
 
-    HWREG(MEMORYERROR_BASE + MEMCFG_O_CEINTEN) &= ~(intFlags);
+  HWREG(MEMORYERROR_BASE + MEMCFG_O_CEINTEN) &= ~(intFlags);
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -655,13 +630,11 @@ MemCfg_disableCorrErrorInterrupt(uint32_t intFlags)
 //! function will return 0.
 //
 //*****************************************************************************
-static inline uint32_t
-MemCfg_getCorrErrorInterruptStatus(void)
-{
-    //
-    // Read and return correctable error interrupt flags.
-    //
-    return(HWREG(MEMORYERROR_BASE + MEMCFG_O_CEINTFLG));
+static inline uint32_t MemCfg_getCorrErrorInterruptStatus(void) {
+  //
+  // Read and return correctable error interrupt flags.
+  //
+  return (HWREG(MEMORYERROR_BASE + MEMCFG_O_CEINTFLG));
 }
 
 //*****************************************************************************
@@ -678,17 +651,15 @@ MemCfg_getCorrErrorInterruptStatus(void)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_forceCorrErrorInterrupt(uint32_t intFlags)
-{
-    //
-    // Write the flags to the appropriate SET register.
-    //
-    EALLOW;
+static inline void MemCfg_forceCorrErrorInterrupt(uint32_t intFlags) {
+  //
+  // Write the flags to the appropriate SET register.
+  //
+  EALLOW;
 
-    HWREG(MEMORYERROR_BASE + MEMCFG_O_CEINTSET) = intFlags;
+  HWREG(MEMORYERROR_BASE + MEMCFG_O_CEINTSET) = intFlags;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -705,17 +676,15 @@ MemCfg_forceCorrErrorInterrupt(uint32_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_clearCorrErrorInterruptStatus(uint32_t intFlags)
-{
-    //
-    // Clear the requested flags.
-    //
-    EALLOW;
+static inline void MemCfg_clearCorrErrorInterruptStatus(uint32_t intFlags) {
+  //
+  // Clear the requested flags.
+  //
+  EALLOW;
 
-    HWREG(MEMORYERROR_BASE + MEMCFG_O_CEINTCLR) |= intFlags;
+  HWREG(MEMORYERROR_BASE + MEMCFG_O_CEINTCLR) |= intFlags;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -726,13 +695,11 @@ MemCfg_clearCorrErrorInterruptStatus(uint32_t intFlags)
 //! \b MEMCFG_CERR_CPUREAD, \b MEMCFG_CERR_DMAREAD, or \b MEMCFG_CERR_CLA1READ
 //
 //*****************************************************************************
-static inline uint32_t
-MemCfg_getCorrErrorStatus(void)
-{
-    //
-    // Read and return RAM error status flags.
-    //
-    return(HWREG(MEMORYERROR_BASE + MEMCFG_O_CERRFLG));
+static inline uint32_t MemCfg_getCorrErrorStatus(void) {
+  //
+  // Read and return RAM error status flags.
+  //
+  return (HWREG(MEMORYERROR_BASE + MEMCFG_O_CERRFLG));
 }
 
 //*****************************************************************************
@@ -744,13 +711,11 @@ MemCfg_getCorrErrorStatus(void)
 //! or \b MEMCFG_UCERR_ECATMEMREAD.
 //
 //*****************************************************************************
-static inline uint32_t
-MemCfg_getUncorrErrorStatus(void)
-{
-    //
-    // Read and return RAM error status flags.
-    //
-    return(HWREG(MEMORYERROR_BASE + MEMCFG_O_UCERRFLG));
+static inline uint32_t MemCfg_getUncorrErrorStatus(void) {
+  //
+  // Read and return RAM error status flags.
+  //
+  return (HWREG(MEMORYERROR_BASE + MEMCFG_O_UCERRFLG));
 }
 
 //*****************************************************************************
@@ -766,17 +731,15 @@ MemCfg_getUncorrErrorStatus(void)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_forceCorrErrorStatus(uint32_t stsFlags)
-{
-    //
-    // Write the flags to the appropriate SET register.
-    //
-    EALLOW;
+static inline void MemCfg_forceCorrErrorStatus(uint32_t stsFlags) {
+  //
+  // Write the flags to the appropriate SET register.
+  //
+  EALLOW;
 
-    HWREG(MEMORYERROR_BASE + MEMCFG_O_CERRSET) = stsFlags;
+  HWREG(MEMORYERROR_BASE + MEMCFG_O_CERRSET) = stsFlags;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -793,17 +756,15 @@ MemCfg_forceCorrErrorStatus(uint32_t stsFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_forceUncorrErrorStatus(uint32_t stsFlags)
-{
-    //
-    // Write the flags to the appropriate SET register.
-    //
-    EALLOW;
+static inline void MemCfg_forceUncorrErrorStatus(uint32_t stsFlags) {
+  //
+  // Write the flags to the appropriate SET register.
+  //
+  EALLOW;
 
-    HWREG(MEMORYERROR_BASE + MEMCFG_O_UCERRSET) = stsFlags;
+  HWREG(MEMORYERROR_BASE + MEMCFG_O_UCERRSET) = stsFlags;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -819,17 +780,15 @@ MemCfg_forceUncorrErrorStatus(uint32_t stsFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_clearCorrErrorStatus(uint32_t stsFlags)
-{
-    //
-    // Clear the requested flags.
-    //
-    EALLOW;
+static inline void MemCfg_clearCorrErrorStatus(uint32_t stsFlags) {
+  //
+  // Clear the requested flags.
+  //
+  EALLOW;
 
-    HWREG(MEMORYERROR_BASE + MEMCFG_O_CERRCLR) |= stsFlags;
+  HWREG(MEMORYERROR_BASE + MEMCFG_O_CERRCLR) |= stsFlags;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -846,17 +805,15 @@ MemCfg_clearCorrErrorStatus(uint32_t stsFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_clearUncorrErrorStatus(uint32_t stsFlags)
-{
-    //
-    // Clear the requested flags.
-    //
-    EALLOW;
+static inline void MemCfg_clearUncorrErrorStatus(uint32_t stsFlags) {
+  //
+  // Clear the requested flags.
+  //
+  EALLOW;
 
-    HWREG(MEMORYERROR_BASE + MEMCFG_O_UCERRCLR) |= stsFlags;
+  HWREG(MEMORYERROR_BASE + MEMCFG_O_UCERRCLR) |= stsFlags;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -869,18 +826,16 @@ MemCfg_clearUncorrErrorStatus(uint32_t stsFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_enableROMWaitState(void)
-{
-    //
-    // Clear the disable bit.
-    //
-    EALLOW;
+static inline void MemCfg_enableROMWaitState(void) {
+  //
+  // Clear the disable bit.
+  //
+  EALLOW;
 
-    HWREG(ROMWAITSTATE_BASE + MEMCFG_O_ROMWAITSTATE) &=
-        ~((uint32_t)MEMCFG_ROMWAITSTATE_WSDISABLE);
+  HWREG(ROMWAITSTATE_BASE + MEMCFG_O_ROMWAITSTATE) &=
+      ~((uint32_t)MEMCFG_ROMWAITSTATE_WSDISABLE);
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -893,18 +848,16 @@ MemCfg_enableROMWaitState(void)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_disableROMWaitState(void)
-{
-    //
-    // Set the disable bit.
-    //
-    EALLOW;
+static inline void MemCfg_disableROMWaitState(void) {
+  //
+  // Set the disable bit.
+  //
+  EALLOW;
 
-    HWREG(ROMWAITSTATE_BASE + MEMCFG_O_ROMWAITSTATE) |=
-        MEMCFG_ROMWAITSTATE_WSDISABLE;
+  HWREG(ROMWAITSTATE_BASE + MEMCFG_O_ROMWAITSTATE) |=
+      MEMCFG_ROMWAITSTATE_WSDISABLE;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -916,18 +869,15 @@ MemCfg_disableROMWaitState(void)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_enableROMPrefetch(void)
-{
-    //
-    // Set the enable bit.
-    //
-    EALLOW;
+static inline void MemCfg_enableROMPrefetch(void) {
+  //
+  // Set the enable bit.
+  //
+  EALLOW;
 
-    HWREG(ROMPREFETCH_BASE + MEMCFG_O_ROMPREFETCH) |=
-        MEMCFG_ROMPREFETCH_PFENABLE;
+  HWREG(ROMPREFETCH_BASE + MEMCFG_O_ROMPREFETCH) |= MEMCFG_ROMPREFETCH_PFENABLE;
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -939,18 +889,16 @@ MemCfg_enableROMPrefetch(void)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-MemCfg_disableROMPrefetch(void)
-{
-    //
-    // Clear the enable bit.
-    //
-    EALLOW;
+static inline void MemCfg_disableROMPrefetch(void) {
+  //
+  // Clear the enable bit.
+  //
+  EALLOW;
 
-    HWREG(ROMPREFETCH_BASE + MEMCFG_O_ROMPREFETCH) &=
-        ~((uint32_t)MEMCFG_ROMPREFETCH_PFENABLE);
+  HWREG(ROMPREFETCH_BASE + MEMCFG_O_ROMPREFETCH) &=
+      ~((uint32_t)MEMCFG_ROMPREFETCH_PFENABLE);
 
-    EDIS;
+  EDIS;
 }
 
 //*****************************************************************************
@@ -974,8 +922,7 @@ MemCfg_disableROMPrefetch(void)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-MemCfg_lockConfig(uint32_t memSections);
+extern void MemCfg_lockConfig(uint32_t memSections);
 
 //*****************************************************************************
 //
@@ -997,8 +944,7 @@ MemCfg_lockConfig(uint32_t memSections);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-MemCfg_unlockConfig(uint32_t memSections);
+extern void MemCfg_unlockConfig(uint32_t memSections);
 
 //*****************************************************************************
 //
@@ -1022,8 +968,7 @@ MemCfg_unlockConfig(uint32_t memSections);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-MemCfg_commitConfig(uint32_t memSections);
+extern void MemCfg_commitConfig(uint32_t memSections);
 
 //*****************************************************************************
 //
@@ -1051,8 +996,7 @@ MemCfg_commitConfig(uint32_t memSections);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-MemCfg_setProtection(uint32_t memSection, uint32_t protectMode);
+extern void MemCfg_setProtection(uint32_t memSection, uint32_t protectMode);
 
 //*****************************************************************************
 //
@@ -1080,7 +1024,7 @@ MemCfg_setProtection(uint32_t memSection, uint32_t protectMode);
 //
 //*****************************************************************************
 extern void
-MemCfg_setLSRAMControllerSel(uint32_t ramSection,
+MemCfg_setLSRAMControllerSel(uint32_t                  ramSection,
                              MemCfg_LSRAMControllerSel controllerSel);
 
 //*****************************************************************************
@@ -1108,7 +1052,7 @@ MemCfg_setLSRAMControllerSel(uint32_t ramSection,
 //
 //*****************************************************************************
 extern void
-MemCfg_setGSRAMControllerSel(uint32_t ramSections,
+MemCfg_setGSRAMControllerSel(uint32_t                  ramSections,
                              MemCfg_GSRAMControllerSel controllerSel);
 
 //*****************************************************************************
@@ -1136,8 +1080,7 @@ MemCfg_setGSRAMControllerSel(uint32_t ramSections,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-MemCfg_setTestMode(uint32_t memSection, MemCfg_TestMode testMode);
+extern void MemCfg_setTestMode(uint32_t memSection, MemCfg_TestMode testMode);
 
 //*****************************************************************************
 //
@@ -1161,8 +1104,7 @@ MemCfg_setTestMode(uint32_t memSection, MemCfg_TestMode testMode);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-MemCfg_initSections(uint32_t ramSections);
+extern void MemCfg_initSections(uint32_t ramSections);
 
 //*****************************************************************************
 //
@@ -1189,8 +1131,7 @@ MemCfg_initSections(uint32_t ramSections);
 //! have been initialized and \b false if not.
 //
 //*****************************************************************************
-extern bool
-MemCfg_getInitStatus(uint32_t ramSections);
+extern bool MemCfg_getInitStatus(uint32_t ramSections);
 
 //*****************************************************************************
 //
@@ -1212,8 +1153,7 @@ MemCfg_getInitStatus(uint32_t ramSections);
 //! \return Returns the violation address associated with the \e intFlag.
 //
 //*****************************************************************************
-extern uint32_t
-MemCfg_getViolationAddress(uint32_t intFlag);
+extern uint32_t MemCfg_getViolationAddress(uint32_t intFlag);
 
 //*****************************************************************************
 //
@@ -1226,8 +1166,7 @@ MemCfg_getViolationAddress(uint32_t intFlag);
 //! \return Returns the error address associated with the stsFlag.
 //
 //*****************************************************************************
-extern uint32_t
-MemCfg_getCorrErrorAddress(uint32_t stsFlag);
+extern uint32_t MemCfg_getCorrErrorAddress(uint32_t stsFlag);
 
 //*****************************************************************************
 //
@@ -1241,9 +1180,7 @@ MemCfg_getCorrErrorAddress(uint32_t stsFlag);
 //! \return Returns the error address associated with the stsFlag.
 //
 //*****************************************************************************
-extern uint32_t
-MemCfg_getUncorrErrorAddress(uint32_t stsFlag);
-
+extern uint32_t MemCfg_getUncorrErrorAddress(uint32_t stsFlag);
 
 //*****************************************************************************
 //

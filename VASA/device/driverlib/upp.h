@@ -1,44 +1,44 @@
-//###########################################################################
+// ###########################################################################
 //
-// FILE:   upp.h
+//  FILE:   upp.h
 //
-// TITLE:  C28x uPP driver.
+//  TITLE:  C28x uPP driver.
 //
-//###########################################################################
+// ###########################################################################
 //
 //
-// $Copyright:
-// Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
+//  $Copyright:
+//  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com
 //
-// Redistribution and use in source and binary forms, with or without 
-// modification, are permitted provided that the following conditions 
-// are met:
-// 
-//   Redistributions of source code must retain the above copyright 
-//   notice, this list of conditions and the following disclaimer.
-// 
-//   Redistributions in binary form must reproduce the above copyright
-//   notice, this list of conditions and the following disclaimer in the 
-//   documentation and/or other materials provided with the   
-//   distribution.
-// 
-//   Neither the name of Texas Instruments Incorporated nor the names of
-//   its contributors may be used to endorse or promote products derived
-//   from this software without specific prior written permission.
-// 
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
-// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
-// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
-// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// $
-//###########################################################################
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions
+//  are met:
+//
+//    Redistributions of source code must retain the above copyright
+//    notice, this list of conditions and the following disclaimer.
+//
+//    Redistributions in binary form must reproduce the above copyright
+//    notice, this list of conditions and the following disclaimer in the
+//    documentation and/or other materials provided with the
+//    distribution.
+//
+//    Neither the name of Texas Instruments Incorporated nor the names of
+//    its contributors may be used to endorse or promote products derived
+//    from this software without specific prior written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+//  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+//  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+//  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+//  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+//  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+//  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+//  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+//  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+//  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+//  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//  $
+// ###########################################################################
 
 #ifndef UPP_H
 #define UPP_H
@@ -50,8 +50,7 @@
 //
 //*****************************************************************************
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 //*****************************************************************************
@@ -61,11 +60,11 @@ extern "C"
 //
 //*****************************************************************************
 
+#include "cpu.h"
+#include "debug.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_types.h"
 #include "inc/hw_upp.h"
-#include "cpu.h"
-#include "debug.h"
 
 //*****************************************************************************
 //
@@ -80,8 +79,8 @@ extern "C"
 // addresses.
 //
 //*****************************************************************************
-#define UPP_DMA_TX_MSGRAM_STARTADDR     UPP_TX_MSG_RAM_BASE
-#define UPP_DMA_RX_MSGRAM_STARTADDR     0x00007000U
+#define UPP_DMA_TX_MSGRAM_STARTADDR UPP_TX_MSG_RAM_BASE
+#define UPP_DMA_RX_MSGRAM_STARTADDR 0x00007000U
 
 //*****************************************************************************
 //
@@ -91,16 +90,16 @@ extern "C"
 // CPU & DMA views, these defines can be used for CPU read/writes.
 //
 //*****************************************************************************
-#define UPP_CPU_TX_MSGRAM_STARTADDR     UPP_TX_MSG_RAM_BASE
-#define UPP_CPU_RX_MSGRAM_STARTADDR     UPP_RX_MSG_RAM_BASE
+#define UPP_CPU_TX_MSGRAM_STARTADDR UPP_TX_MSG_RAM_BASE
+#define UPP_CPU_RX_MSGRAM_STARTADDR UPP_RX_MSG_RAM_BASE
 
 //*****************************************************************************
 //
 // Defines to specify the size of the uPP Tx and Rx MSG RAMs.
 //
 //*****************************************************************************
-#define UPP_TX_MSGRAM_MAX_SIZE   0x200U
-#define UPP_RX_MSGRAM_MAX_SIZE   0x200U
+#define UPP_TX_MSGRAM_MAX_SIZE 0x200U
+#define UPP_RX_MSGRAM_MAX_SIZE 0x200U
 
 //*****************************************************************************
 //
@@ -109,7 +108,7 @@ extern "C"
 //
 //*****************************************************************************
 #ifndef UPP_32_CYCLE_NOP
-#define UPP_32_CYCLE_NOP  __asm(" RPT #31 || NOP")
+#define UPP_32_CYCLE_NOP __asm(" RPT #31 || NOP")
 #endif
 
 //*****************************************************************************
@@ -117,8 +116,7 @@ extern "C"
 // Define to specify mask for setting emulation mode in UPP_setEmulationMode().
 //
 //*****************************************************************************
-#define UPP_SOFT_FREE_M        ((uint16_t)UPP_PERCTL_SOFT |                   \
-                                (uint16_t)UPP_PERCTL_FREE)
+#define UPP_SOFT_FREE_M ((uint16_t)UPP_PERCTL_SOFT | (uint16_t)UPP_PERCTL_FREE)
 
 //*****************************************************************************
 //
@@ -126,9 +124,9 @@ extern "C"
 // UPP_setTxControlSignalMode() & UPP_setRxControlSignalMode() respectively.
 //
 //*****************************************************************************
-#define UPP_TX_SIGNAL_MODE_M    UPP_IFCFG_WAITA
-#define UPP_RX_SIGNAL_MODE_M   ((uint16_t)UPP_IFCFG_STARTA |                   \
-                                (uint16_t)UPP_IFCFG_ENAA)
+#define UPP_TX_SIGNAL_MODE_M UPP_IFCFG_WAITA
+#define UPP_RX_SIGNAL_MODE_M                                                   \
+  ((uint16_t)UPP_IFCFG_STARTA | (uint16_t)UPP_IFCFG_ENAA)
 
 //*****************************************************************************
 //
@@ -136,9 +134,9 @@ extern "C"
 // in UPP_setControlSignalPolarity().
 //
 //*****************************************************************************
-#define UPP_SIGNAL_POLARITY_M  ((uint16_t)UPP_IFCFG_WAITPOLA |                 \
-                                (uint16_t)UPP_IFCFG_ENAPOLA  |                 \
-                                (uint16_t)UPP_IFCFG_STARTPOLA)
+#define UPP_SIGNAL_POLARITY_M                                                  \
+  ((uint16_t)UPP_IFCFG_WAITPOLA | (uint16_t)UPP_IFCFG_ENAPOLA |                \
+   (uint16_t)UPP_IFCFG_STARTPOLA)
 
 //*****************************************************************************
 //
@@ -146,10 +144,11 @@ extern "C"
 // UPP_getInterruptStatus() & UPP_getRawInterruptStatus().
 //
 //*****************************************************************************
-#define UPP_INT_M  ((uint16_t)UPP_ENINTST_DPEI | (uint16_t)UPP_ENINTST_UOEI | \
-                    (uint16_t)UPP_ENINTST_EOWI | (uint16_t)UPP_ENINTST_EOLI | \
-                    (uint16_t)UPP_ENINTST_DPEQ | (uint16_t)UPP_ENINTST_UOEQ | \
-                    (uint16_t)UPP_ENINTST_EOWQ | (uint16_t)UPP_ENINTST_EOLQ)
+#define UPP_INT_M                                                              \
+  ((uint16_t)UPP_ENINTST_DPEI | (uint16_t)UPP_ENINTST_UOEI |                   \
+   (uint16_t)UPP_ENINTST_EOWI | (uint16_t)UPP_ENINTST_EOLI |                   \
+   (uint16_t)UPP_ENINTST_DPEQ | (uint16_t)UPP_ENINTST_UOEQ |                   \
+   (uint16_t)UPP_ENINTST_EOWQ | (uint16_t)UPP_ENINTST_EOLQ)
 
 //*****************************************************************************
 //
@@ -159,14 +158,14 @@ extern "C"
 // UPP_getRawInterruptStatus().
 //
 //*****************************************************************************
-#define UPP_INT_CHI_DMA_PROG_ERR   0x0001U //!<DMA Channel I Programming Error
-#define UPP_INT_CHI_UNDER_OVER_RUN 0x0002U //!<DMA Channel I Underrun/Overrun
-#define UPP_INT_CHI_END_OF_WINDOW  0x0008U //!<DMA Channel I EndOfWindow Event
-#define UPP_INT_CHI_END_OF_LINE    0x0010U //!<DMA Channel I EndOfLine Event
-#define UPP_INT_CHQ_DMA_PROG_ERR   0x0100U //!<DMA Channel Q Programming Error
-#define UPP_INT_CHQ_UNDER_OVER_RUN 0x0200U //!<DMA Channel Q Underrun/Overrun
-#define UPP_INT_CHQ_END_OF_WINDOW  0x0800U //!<DMA Channel Q EndOfWindow Event
-#define UPP_INT_CHQ_END_OF_LINE    0x1000U //!<DMA Channel Q EndOfLine Event
+#define UPP_INT_CHI_DMA_PROG_ERR   0x0001U //!< DMA Channel I Programming Error
+#define UPP_INT_CHI_UNDER_OVER_RUN 0x0002U //!< DMA Channel I Underrun/Overrun
+#define UPP_INT_CHI_END_OF_WINDOW  0x0008U //!< DMA Channel I EndOfWindow Event
+#define UPP_INT_CHI_END_OF_LINE    0x0010U //!< DMA Channel I EndOfLine Event
+#define UPP_INT_CHQ_DMA_PROG_ERR   0x0100U //!< DMA Channel Q Programming Error
+#define UPP_INT_CHQ_UNDER_OVER_RUN 0x0200U //!< DMA Channel Q Underrun/Overrun
+#define UPP_INT_CHQ_END_OF_WINDOW  0x0800U //!< DMA Channel Q EndOfWindow Event
+#define UPP_INT_CHQ_END_OF_LINE    0x1000U //!< DMA Channel Q EndOfLine Event
 
 //*****************************************************************************
 //
@@ -174,11 +173,10 @@ extern "C"
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    UPP_EMULATIONMODE_HARDSTOP = 0x0U, //!< uPP stops immediately
-    UPP_EMULATIONMODE_RUNFREE  = 0x1U, //!< uPP unaffected by suspend
-    UPP_EMULATIONMODE_SOFTSTOP = 0x2U  //!< uPP stops at DMA transaction finish
+typedef enum {
+  UPP_EMULATIONMODE_HARDSTOP = 0x0U, //!< uPP stops immediately
+  UPP_EMULATIONMODE_RUNFREE  = 0x1U, //!< uPP unaffected by suspend
+  UPP_EMULATIONMODE_SOFTSTOP = 0x2U  //!< uPP stops at DMA transaction finish
 } UPP_EmulationMode;
 
 //*****************************************************************************
@@ -186,10 +184,9 @@ typedef enum
 //! Values that can be passed to UPP_setOperationMode() as \e opMode parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    UPP_RECEIVE_MODE  = 0x0U,  //!< uPP to be configured as Receiver
-    UPP_TRANSMIT_MODE = 0x1U   //!< uPP to be configured as Transmitter
+typedef enum {
+  UPP_RECEIVE_MODE  = 0x0U, //!< uPP to be configured as Receiver
+  UPP_TRANSMIT_MODE = 0x1U  //!< uPP to be configured as Transmitter
 } UPP_OperationMode;
 
 //*****************************************************************************
@@ -198,10 +195,9 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    UPP_DATA_RATE_SDR = 0x00000U, //!< uPP to operate in Single Data Rate Mode
-    UPP_DATA_RATE_DDR = 0x10000U  //!< uPP to operate in Double Data Rate Mode
+typedef enum {
+  UPP_DATA_RATE_SDR = 0x00000U, //!< uPP to operate in Single Data Rate Mode
+  UPP_DATA_RATE_DDR = 0x10000U  //!< uPP to operate in Double Data Rate Mode
 } UPP_DataRate;
 
 //*****************************************************************************
@@ -210,10 +206,9 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    UPP_TX_SDR_INTERLEAVE_DISABLE = 0x0U, //!<Interleaving disabled in Tx SDR
-    UPP_TX_SDR_INTERLEAVE_ENABLE  = 0x8U  //!<Interleaving enabled in Tx SDR
+typedef enum {
+  UPP_TX_SDR_INTERLEAVE_DISABLE = 0x0U, //!< Interleaving disabled in Tx SDR
+  UPP_TX_SDR_INTERLEAVE_ENABLE  = 0x8U  //!< Interleaving enabled in Tx SDR
 } UPP_TxSDRInterleaveMode;
 
 //*****************************************************************************
@@ -222,10 +217,9 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    UPP_DDR_DEMUX_DISABLE = 0x00U, //!< Demultiplexing disabled in DDR mode
-    UPP_DDR_DEMUX_ENABLE  = 0x10U  //!< Demultiplexing enabled in DDR mode
+typedef enum {
+  UPP_DDR_DEMUX_DISABLE = 0x00U, //!< Demultiplexing disabled in DDR mode
+  UPP_DDR_DEMUX_ENABLE  = 0x10U  //!< Demultiplexing enabled in DDR mode
 } UPP_DDRDemuxMode;
 
 //*****************************************************************************
@@ -234,10 +228,9 @@ typedef enum
 //! \e enablePola & \e startPola parameters.
 //
 //*****************************************************************************
-typedef enum
-{
-    UPP_SIGNAL_POLARITY_HIGH  = 0x0U, //!< Signal polarity is active high
-    UPP_SIGNAL_POLARITY_LOW   = 0x1U  //!< Signal polarity is active low
+typedef enum {
+  UPP_SIGNAL_POLARITY_HIGH = 0x0U, //!< Signal polarity is active high
+  UPP_SIGNAL_POLARITY_LOW  = 0x1U  //!< Signal polarity is active low
 } UPP_SignalPolarity;
 
 //*****************************************************************************
@@ -247,10 +240,9 @@ typedef enum
 //! parameters respectively.
 //
 //*****************************************************************************
-typedef enum
-{
-    UPP_SIGNAL_DISABLE = 0x0U,  //!< Control Signal is disabled for uPP
-    UPP_SIGNAL_ENABLE  = 0x1U   //!< Control Signal is enabled for uPP
+typedef enum {
+  UPP_SIGNAL_DISABLE = 0x0U, //!< Control Signal is disabled for uPP
+  UPP_SIGNAL_ENABLE  = 0x1U  //!< Control Signal is enabled for uPP
 } UPP_SignalMode;
 
 //*****************************************************************************
@@ -259,10 +251,9 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    UPP_CLK_NOT_INVERTED = 0x0000U, //!< uPP Clock is not inverted
-    UPP_CLK_INVERTED     = 0x1000U  //!< uPP clock is inverted
+typedef enum {
+  UPP_CLK_NOT_INVERTED = 0x0000U, //!< uPP Clock is not inverted
+  UPP_CLK_INVERTED     = 0x1000U  //!< uPP clock is inverted
 } UPP_ClockPolarity;
 
 //*****************************************************************************
@@ -272,24 +263,22 @@ typedef enum
 //! get tri-stated when uPP goes to idle state.
 //
 //*****************************************************************************
-typedef enum
-{
-    UPP_TX_IDLE_DATA_IDLE      = 0x0000U, //!<Data lines will drive idle val
-    UPP_TX_IDLE_DATA_TRISTATED = 0x2000U  //!<Data lines will be tristated
+typedef enum {
+  UPP_TX_IDLE_DATA_IDLE      = 0x0000U, //!< Data lines will drive idle val
+  UPP_TX_IDLE_DATA_TRISTATED = 0x2000U  //!< Data lines will be tristated
 } UPP_TxIdleDataMode;
 
 //*****************************************************************************
 //
 //! Values that can be passed to UPP_setDMAReadThreshold(),
-//! UPP_getDMAChannelStatus(), UPP_setDMADescriptor(), UPP_isDescriptorPending(),
-//! UPP_isDescriptorActive() & UPP_getDMAFIFOWatermark() as \e channel
-//! parameter.
+//! UPP_getDMAChannelStatus(), UPP_setDMADescriptor(),
+//! UPP_isDescriptorPending(), UPP_isDescriptorActive() &
+//! UPP_getDMAFIFOWatermark() as \e channel parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    UPP_DMA_CHANNEL_I = 0U,  //!< uPP internal DMA channel I
-    UPP_DMA_CHANNEL_Q = 1U   //!< uPP internal DMA channel Q
+typedef enum {
+  UPP_DMA_CHANNEL_I = 0U, //!< uPP internal DMA channel I
+  UPP_DMA_CHANNEL_Q = 1U  //!< uPP internal DMA channel Q
 } UPP_DMAChannel;
 
 //*****************************************************************************
@@ -298,11 +287,10 @@ typedef enum
 //! UPP_setDMAReadThreshold() as \e size parameter.
 //
 //*****************************************************************************
-typedef enum
-{
-    UPP_THR_SIZE_64BYTE  = 0x0U,  //!< Tx threshold size is 64 bytes
-    UPP_THR_SIZE_128BYTE = 0x1U,  //!< Tx threshold size is 128 bytes
-    UPP_THR_SIZE_256BYTE = 0x3U   //!< Tx threshold size is 256 bytes
+typedef enum {
+  UPP_THR_SIZE_64BYTE  = 0x0U, //!< Tx threshold size is 64 bytes
+  UPP_THR_SIZE_128BYTE = 0x1U, //!< Tx threshold size is 128 bytes
+  UPP_THR_SIZE_256BYTE = 0x3U  //!< Tx threshold size is 256 bytes
 } UPP_ThresholdSize;
 
 //*****************************************************************************
@@ -311,12 +299,11 @@ typedef enum
 //! the following values lead to 2 cycle delay on clock pin.
 //
 //*****************************************************************************
-typedef enum
-{
-    UPP_INPUT_DLY_4  = 0x0U, //!< 4 cycle delay for data & control pins
-    UPP_INPUT_DLY_6  = 0x2U, //!< 6 cycle delay for data & control pins
-    UPP_INPUT_DLY_9  = 0x4U, //!< 9 cycle delay for data & control pins
-    UPP_INPUT_DLY_14 = 0x6U  //!< 14 cycle delay for data & control pins
+typedef enum {
+  UPP_INPUT_DLY_4  = 0x0U, //!< 4 cycle delay for data & control pins
+  UPP_INPUT_DLY_6  = 0x2U, //!< 6 cycle delay for data & control pins
+  UPP_INPUT_DLY_9  = 0x4U, //!< 9 cycle delay for data & control pins
+  UPP_INPUT_DLY_14 = 0x6U  //!< 14 cycle delay for data & control pins
 } UPP_InputDelay;
 
 //*****************************************************************************
@@ -325,12 +312,11 @@ typedef enum
 //! parameter.
 //
 //*****************************************************************************
-typedef struct
-{
-    uint32_t addr;        //!< Starting address of DMA channel transfer
-    uint16_t lineCount;   //!< No. of lines in a window for a DMA channel
-    uint16_t byteCount;   //!< No. of bytes in a line for a DMA channel
-    uint16_t lineOffset;  //!< Offset between start address of two lines
+typedef struct {
+  uint32_t addr;       //!< Starting address of DMA channel transfer
+  uint16_t lineCount;  //!< No. of lines in a window for a DMA channel
+  uint16_t byteCount;  //!< No. of bytes in a line for a DMA channel
+  uint16_t lineOffset; //!< Offset between start address of two lines
 } UPP_DMADescriptor;
 
 //*****************************************************************************
@@ -339,11 +325,10 @@ typedef struct
 //! DMA channel current status.
 //
 //*****************************************************************************
-typedef struct
-{
-    uint32_t curAddr;      //!< Current address of transfer for a DMA channel
-    uint16_t curByteCount; //!< Current line no. of transfer for a DMA channel
-    uint16_t curLineCount; //!< Current byte no of transfer for a DMA channel
+typedef struct {
+  uint32_t curAddr;      //!< Current address of transfer for a DMA channel
+  uint16_t curByteCount; //!< Current line no. of transfer for a DMA channel
+  uint16_t curLineCount; //!< Current byte no of transfer for a DMA channel
 } UPP_DMAChannelStatus;
 
 //*****************************************************************************
@@ -365,10 +350,8 @@ typedef struct
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-UPP_isBaseValid(uint32_t base)
-{
-    return((base == UPP_BASE));
+static inline bool UPP_isBaseValid(uint32_t base) {
+  return ((base == UPP_BASE));
 }
 #endif
 
@@ -386,10 +369,8 @@ UPP_isBaseValid(uint32_t base)
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-UPP_isRxBaseValid(uint32_t rxBase)
-{
-    return((rxBase == UPP_RX_MSG_RAM_BASE));
+static inline bool UPP_isRxBaseValid(uint32_t rxBase) {
+  return ((rxBase == UPP_RX_MSG_RAM_BASE));
 }
 #endif
 
@@ -407,10 +388,8 @@ UPP_isRxBaseValid(uint32_t rxBase)
 //
 //*****************************************************************************
 #ifdef DEBUG
-static inline bool
-UPP_isTxBaseValid(uint32_t txBase)
-{
-    return((txBase == UPP_TX_MSG_RAM_BASE));
+static inline bool UPP_isTxBaseValid(uint32_t txBase) {
+  return ((txBase == UPP_TX_MSG_RAM_BASE));
 }
 #endif
 
@@ -428,18 +407,16 @@ UPP_isTxBaseValid(uint32_t txBase)
 //! - \b false - DMA is idle
 //
 //*****************************************************************************
-static inline bool
-UPP_isDMAActive(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline bool UPP_isDMAActive(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Return the uPP internal DMA status.
-    //
-    return((HWREGH(base + UPP_O_PERCTL) & UPP_PERCTL_DMAST) != 0U);
+  //
+  // Return the uPP internal DMA status.
+  //
+  return ((HWREGH(base + UPP_O_PERCTL) & UPP_PERCTL_DMAST) != 0U);
 }
 
 //*****************************************************************************
@@ -453,28 +430,26 @@ UPP_isDMAActive(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_performSoftReset(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_performSoftReset(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Issue uPP software reset.
-    //
-    HWREGH(base + UPP_O_PERCTL) |= UPP_PERCTL_SOFTRST;
+  //
+  // Issue uPP software reset.
+  //
+  HWREGH(base + UPP_O_PERCTL) |= UPP_PERCTL_SOFTRST;
 
-    //
-    // Wait for few device clock cycles(~32).
-    //
-    UPP_32_CYCLE_NOP;
+  //
+  // Wait for few device clock cycles(~32).
+  //
+  UPP_32_CYCLE_NOP;
 
-    //
-    // Release uPP software reset.
-    //
-    HWREGH(base + UPP_O_PERCTL) &= ~(uint16_t)UPP_PERCTL_SOFTRST;
+  //
+  // Release uPP software reset.
+  //
+  HWREGH(base + UPP_O_PERCTL) &= ~(uint16_t)UPP_PERCTL_SOFTRST;
 }
 
 //*****************************************************************************
@@ -488,18 +463,16 @@ UPP_performSoftReset(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_enableModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_enableModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Enable the uPP module.
-    //
-    HWREGH(base + UPP_O_PERCTL) |= UPP_PERCTL_PEREN;
+  //
+  // Enable the uPP module.
+  //
+  HWREGH(base + UPP_O_PERCTL) |= UPP_PERCTL_PEREN;
 }
 
 //*****************************************************************************
@@ -513,18 +486,16 @@ UPP_enableModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_disableModule(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_disableModule(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Disable the uPP module.
-    //
-    HWREGH(base + UPP_O_PERCTL) &= ~(uint16_t)UPP_PERCTL_PEREN;
+  //
+  // Disable the uPP module.
+  //
+  HWREGH(base + UPP_O_PERCTL) &= ~(uint16_t)UPP_PERCTL_PEREN;
 }
 
 //*****************************************************************************
@@ -538,18 +509,16 @@ UPP_disableModule(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_enableEmulationMode(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_enableEmulationMode(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Enable uPP real time emulation.
-    //
-    HWREGH(base + UPP_O_PERCTL) |= UPP_PERCTL_RTEMU;
+  //
+  // Enable uPP real time emulation.
+  //
+  HWREGH(base + UPP_O_PERCTL) |= UPP_PERCTL_RTEMU;
 }
 
 //*****************************************************************************
@@ -563,18 +532,16 @@ UPP_enableEmulationMode(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_disableEmulationMode(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_disableEmulationMode(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Disable uPP real time emulation.
-    //
-    HWREGH(base + UPP_O_PERCTL) &= ~(uint16_t)UPP_PERCTL_RTEMU;
+  //
+  // Disable uPP real time emulation.
+  //
+  HWREGH(base + UPP_O_PERCTL) &= ~(uint16_t)UPP_PERCTL_RTEMU;
 }
 
 //*****************************************************************************
@@ -599,20 +566,18 @@ UPP_disableEmulationMode(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setEmulationMode(uint32_t base, UPP_EmulationMode emuMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_setEmulationMode(uint32_t          base,
+                                        UPP_EmulationMode emuMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Set the uPP emulation mode.
-    //
-    HWREGH(base + UPP_O_PERCTL) = (HWREGH(base + UPP_O_PERCTL) &
-                                   ~UPP_SOFT_FREE_M) | (uint16_t)emuMode;
-
+  //
+  // Set the uPP emulation mode.
+  //
+  HWREGH(base + UPP_O_PERCTL) =
+      (HWREGH(base + UPP_O_PERCTL) & ~UPP_SOFT_FREE_M) | (uint16_t)emuMode;
 }
 
 //*****************************************************************************
@@ -631,20 +596,19 @@ UPP_setEmulationMode(uint32_t base, UPP_EmulationMode emuMode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setOperationMode(uint32_t base, UPP_OperationMode opMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_setOperationMode(uint32_t          base,
+                                        UPP_OperationMode opMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Set the operation mode for uPP.
-    //
-    HWREGH(base + UPP_O_CHCTL) = (HWREGH(base + UPP_O_CHCTL)   &
-                                  ~(uint16_t)UPP_CHCTL_MODE_M) |
-                                 (uint16_t)opMode;
+  //
+  // Set the operation mode for uPP.
+  //
+  HWREGH(base + UPP_O_CHCTL) =
+      (HWREGH(base + UPP_O_CHCTL) & ~(uint16_t)UPP_CHCTL_MODE_M) |
+      (uint16_t)opMode;
 }
 
 //*****************************************************************************
@@ -662,20 +626,18 @@ UPP_setOperationMode(uint32_t base, UPP_OperationMode opMode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setDataRate(uint32_t base, UPP_DataRate dataRate)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_setDataRate(uint32_t base, UPP_DataRate dataRate) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Set the uPP data rate.
-    //
-    HWREG(base + UPP_O_CHCTL) = (HWREG(base + UPP_O_CHCTL) &
-                                 ~(uint32_t)UPP_CHCTL_DRA) |
-                                (uint32_t)dataRate;
+  //
+  // Set the uPP data rate.
+  //
+  HWREG(base + UPP_O_CHCTL) =
+      (HWREG(base + UPP_O_CHCTL) & ~(uint32_t)UPP_CHCTL_DRA) |
+      (uint32_t)dataRate;
 }
 
 //*****************************************************************************
@@ -695,20 +657,19 @@ UPP_setDataRate(uint32_t base, UPP_DataRate dataRate)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setTxSDRInterleaveMode(uint32_t base, UPP_TxSDRInterleaveMode mode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_setTxSDRInterleaveMode(uint32_t                base,
+                                              UPP_TxSDRInterleaveMode mode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Set SDR interleave mode for uPP operating in Tx mode.
-    //
-    HWREGH(base + UPP_O_CHCTL) = (HWREGH(base + UPP_O_CHCTL)     &
-                                  ~(uint16_t)UPP_CHCTL_SDRTXILA) |
-                                 (uint16_t)mode;
+  //
+  // Set SDR interleave mode for uPP operating in Tx mode.
+  //
+  HWREGH(base + UPP_O_CHCTL) =
+      (HWREGH(base + UPP_O_CHCTL) & ~(uint16_t)UPP_CHCTL_SDRTXILA) |
+      (uint16_t)mode;
 }
 
 //*****************************************************************************
@@ -727,20 +688,18 @@ UPP_setTxSDRInterleaveMode(uint32_t base, UPP_TxSDRInterleaveMode mode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setDDRDemuxMode(uint32_t base, UPP_DDRDemuxMode mode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_setDDRDemuxMode(uint32_t base, UPP_DDRDemuxMode mode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Set DDR demultiplexing mode for uPP module.
-    //
-    HWREGH(base + UPP_O_CHCTL) = (HWREGH(base + UPP_O_CHCTL)   &
-                                  ~(uint16_t)UPP_CHCTL_DEMUXA) |
-                                 (uint16_t)mode;
+  //
+  // Set DDR demultiplexing mode for uPP module.
+  //
+  HWREGH(base + UPP_O_CHCTL) =
+      (HWREGH(base + UPP_O_CHCTL) & ~(uint16_t)UPP_CHCTL_DEMUXA) |
+      (uint16_t)mode;
 }
 
 //*****************************************************************************
@@ -762,24 +721,22 @@ UPP_setDDRDemuxMode(uint32_t base, UPP_DDRDemuxMode mode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setControlSignalPolarity(uint32_t base, UPP_SignalPolarity waitPola,
-                             UPP_SignalPolarity enablePola,
-                             UPP_SignalPolarity startPola)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_setControlSignalPolarity(uint32_t           base,
+                                                UPP_SignalPolarity waitPola,
+                                                UPP_SignalPolarity enablePola,
+                                                UPP_SignalPolarity startPola) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Set uPP control signal polarity.
-    //
-    HWREGH(base + UPP_O_IFCFG) = (HWREGH(base + UPP_O_IFCFG)     &
-                                  ~UPP_SIGNAL_POLARITY_M)        |
-                                 (((uint16_t)waitPola   << 0x2U) |
-                                  ((uint16_t)enablePola << 0x1U) |
-                                  (uint16_t)startPola);
+  //
+  // Set uPP control signal polarity.
+  //
+  HWREGH(base + UPP_O_IFCFG) =
+      (HWREGH(base + UPP_O_IFCFG) & ~UPP_SIGNAL_POLARITY_M) |
+      (((uint16_t)waitPola << 0x2U) | ((uint16_t)enablePola << 0x1U) |
+       (uint16_t)startPola);
 }
 
 //*****************************************************************************
@@ -799,20 +756,19 @@ UPP_setControlSignalPolarity(uint32_t base, UPP_SignalPolarity waitPola,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setTxControlSignalMode(uint32_t base, UPP_SignalMode waitMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_setTxControlSignalMode(uint32_t       base,
+                                              UPP_SignalMode waitMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Enable/Disable Tx uPP optional control signals.
-    //
-    HWREGH(base + UPP_O_IFCFG) = (HWREGH(base + UPP_O_IFCFG)         &
-                                  ~(uint16_t)UPP_TX_SIGNAL_MODE_M)   |
-                                 ((uint16_t)waitMode << 0x5U);
+  //
+  // Enable/Disable Tx uPP optional control signals.
+  //
+  HWREGH(base + UPP_O_IFCFG) =
+      (HWREGH(base + UPP_O_IFCFG) & ~(uint16_t)UPP_TX_SIGNAL_MODE_M) |
+      ((uint16_t)waitMode << 0x5U);
 }
 
 //*****************************************************************************
@@ -833,22 +789,20 @@ UPP_setTxControlSignalMode(uint32_t base, UPP_SignalMode waitMode)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setRxControlSignalMode(uint32_t base, UPP_SignalMode enableMode,
-                           UPP_SignalMode startMode)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_setRxControlSignalMode(uint32_t       base,
+                                              UPP_SignalMode enableMode,
+                                              UPP_SignalMode startMode) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Enable/Disable Rx uPP optional control signals.
-    //
-    HWREGH(base + UPP_O_IFCFG) = (HWREGH(base + UPP_O_IFCFG)      &
-                                  ~UPP_RX_SIGNAL_MODE_M)          |
-                                 (((uint16_t)enableMode << 0x4U)  |
-                                  ((uint16_t)startMode  << 0x3U));
+  //
+  // Enable/Disable Rx uPP optional control signals.
+  //
+  HWREGH(base + UPP_O_IFCFG) =
+      (HWREGH(base + UPP_O_IFCFG) & ~UPP_RX_SIGNAL_MODE_M) |
+      (((uint16_t)enableMode << 0x4U) | ((uint16_t)startMode << 0x3U));
 }
 
 //*****************************************************************************
@@ -866,21 +820,19 @@ UPP_setRxControlSignalMode(uint32_t base, UPP_SignalMode enableMode,
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setTxClockDivider(uint32_t base, uint16_t divider)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
-    ASSERT(divider <= 0xFU);
+static inline void UPP_setTxClockDivider(uint32_t base, uint16_t divider) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
+  ASSERT(divider <= 0xFU);
 
-    //
-    // Set the clock divider for uPP Tx mode.
-    //
-    HWREGH(base + UPP_O_IFCFG) = (HWREGH(base + UPP_O_IFCFG)      &
-                                  ~(uint16_t)UPP_IFCFG_CLKDIVA_M) |
-                                 (divider << UPP_IFCFG_CLKDIVA_S);
+  //
+  // Set the clock divider for uPP Tx mode.
+  //
+  HWREGH(base + UPP_O_IFCFG) =
+      (HWREGH(base + UPP_O_IFCFG) & ~(uint16_t)UPP_IFCFG_CLKDIVA_M) |
+      (divider << UPP_IFCFG_CLKDIVA_S);
 }
 
 //*****************************************************************************
@@ -898,20 +850,19 @@ UPP_setTxClockDivider(uint32_t base, uint16_t divider)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setClockPolarity(uint32_t base, UPP_ClockPolarity clkPolarity)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_setClockPolarity(uint32_t          base,
+                                        UPP_ClockPolarity clkPolarity) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Set uPP clock polarity.
-    //
-    HWREGH(base + UPP_O_IFCFG) = (HWREGH(base + UPP_O_IFCFG)    &
-                                  ~(uint16_t)UPP_IFCFG_CLKINVA) |
-                                 (uint16_t)clkPolarity;
+  //
+  // Set uPP clock polarity.
+  //
+  HWREGH(base + UPP_O_IFCFG) =
+      (HWREGH(base + UPP_O_IFCFG) & ~(uint16_t)UPP_IFCFG_CLKINVA) |
+      (uint16_t)clkPolarity;
 }
 
 //*****************************************************************************
@@ -932,20 +883,19 @@ UPP_setClockPolarity(uint32_t base, UPP_ClockPolarity clkPolarity)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_configTxIdleDataMode(uint32_t base, UPP_TxIdleDataMode config)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_configTxIdleDataMode(uint32_t           base,
+                                            UPP_TxIdleDataMode config) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Configure Tx uPP idle data mode.
-    //
-    HWREGH(base + UPP_O_IFCFG) = (HWREGH(base + UPP_O_IFCFG)    &
-                                  ~(uint16_t)UPP_IFCFG_TRISENA) |
-                                 (uint16_t)config;
+  //
+  // Configure Tx uPP idle data mode.
+  //
+  HWREGH(base + UPP_O_IFCFG) =
+      (HWREGH(base + UPP_O_IFCFG) & ~(uint16_t)UPP_IFCFG_TRISENA) |
+      (uint16_t)config;
 }
 
 //*****************************************************************************
@@ -963,20 +913,18 @@ UPP_configTxIdleDataMode(uint32_t base, UPP_TxIdleDataMode config)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setTxIdleValue(uint32_t base, uint16_t idleVal)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
-    ASSERT(idleVal <= UPP_IFIVAL_VALA_M);
+static inline void UPP_setTxIdleValue(uint32_t base, uint16_t idleVal) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
+  ASSERT(idleVal <= UPP_IFIVAL_VALA_M);
 
-    //
-    // Set Tx uPP idle data line value.
-    //
-    HWREGH(base + UPP_O_IFIVAL) = (HWREGH(base + UPP_O_IFIVAL)   &
-                                   ~(uint16_t)UPP_IFIVAL_VALA_M) | idleVal;
+  //
+  // Set Tx uPP idle data line value.
+  //
+  HWREGH(base + UPP_O_IFIVAL) =
+      (HWREGH(base + UPP_O_IFIVAL) & ~(uint16_t)UPP_IFIVAL_VALA_M) | idleVal;
 }
 
 //*****************************************************************************
@@ -996,20 +944,18 @@ UPP_setTxIdleValue(uint32_t base, uint16_t idleVal)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setTxThreshold(uint32_t base, UPP_ThresholdSize size)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_setTxThreshold(uint32_t base, UPP_ThresholdSize size) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Set uPP I/O transmit threshold.
-    //
-    HWREG(base + UPP_O_THCFG) = (HWREG(base + UPP_O_THCFG)       &
-                                 ~(uint32_t)UPP_THCFG_TXSIZEA_M) |
-                                ((uint32_t)size << UPP_THCFG_TXSIZEA_S);
+  //
+  // Set uPP I/O transmit threshold.
+  //
+  HWREG(base + UPP_O_THCFG) =
+      (HWREG(base + UPP_O_THCFG) & ~(uint32_t)UPP_THCFG_TXSIZEA_M) |
+      ((uint32_t)size << UPP_THCFG_TXSIZEA_S);
 }
 
 //*****************************************************************************
@@ -1033,18 +979,16 @@ UPP_setTxThreshold(uint32_t base, UPP_ThresholdSize size)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_enableInterrupt(uint32_t base, uint16_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_enableInterrupt(uint32_t base, uint16_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Enable uPP interrupts.
-    //
-    HWREGH(base + UPP_O_INTENSET) = intFlags;
+  //
+  // Enable uPP interrupts.
+  //
+  HWREGH(base + UPP_O_INTENSET) = intFlags;
 }
 
 //*****************************************************************************
@@ -1068,18 +1012,16 @@ UPP_enableInterrupt(uint32_t base, uint16_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_disableInterrupt(uint32_t base, uint16_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_disableInterrupt(uint32_t base, uint16_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Disable uPP Interrupts.
-    //
-    HWREGH(base + UPP_O_INTENCLR) = intFlags;
+  //
+  // Disable uPP Interrupts.
+  //
+  HWREGH(base + UPP_O_INTENCLR) = intFlags;
 }
 
 //*****************************************************************************
@@ -1103,18 +1045,16 @@ UPP_disableInterrupt(uint32_t base, uint16_t intFlags)
 //! - \b UPP_INT_CHQ_END_OF_LINE    - DMA Channel Q End of Line Event
 //
 //*****************************************************************************
-static inline uint16_t
-UPP_getInterruptStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline uint16_t UPP_getInterruptStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Return uPP interrupt status.
-    //
-    return(HWREGH(base + UPP_O_ENINTST) & UPP_INT_M);
+  //
+  // Return uPP interrupt status.
+  //
+  return (HWREGH(base + UPP_O_ENINTST) & UPP_INT_M);
 }
 
 //*****************************************************************************
@@ -1138,18 +1078,16 @@ UPP_getInterruptStatus(uint32_t base)
 //! - \b UPP_INT_CHQ_END_OF_LINE    - DMA Channel Q End of Line Event
 //
 //*****************************************************************************
-static inline uint16_t
-UPP_getRawInterruptStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline uint16_t UPP_getRawInterruptStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Return uPP raw interrupt status.
-    //
-    return(HWREGH(base + UPP_O_RAWINTST) & UPP_INT_M);
+  //
+  // Return uPP raw interrupt status.
+  //
+  return (HWREGH(base + UPP_O_RAWINTST) & UPP_INT_M);
 }
 
 //*****************************************************************************
@@ -1173,18 +1111,16 @@ UPP_getRawInterruptStatus(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_clearInterruptStatus(uint32_t base, uint16_t intFlags)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_clearInterruptStatus(uint32_t base, uint16_t intFlags) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Clear uPP interrupt status.
-    //
-    HWREGH(base + UPP_O_ENINTST) = intFlags;
+  //
+  // Clear uPP interrupt status.
+  //
+  HWREGH(base + UPP_O_ENINTST) = intFlags;
 }
 
 //*****************************************************************************
@@ -1199,18 +1135,16 @@ UPP_clearInterruptStatus(uint32_t base, uint16_t intFlags)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_enableGlobalInterrupt(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_enableGlobalInterrupt(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Enable uPP global interrupt.
-    //
-    HWREGH(base + UPP_O_GINTEN) |= UPP_GINTEN_GINTEN;
+  //
+  // Enable uPP global interrupt.
+  //
+  HWREGH(base + UPP_O_GINTEN) |= UPP_GINTEN_GINTEN;
 }
 
 //*****************************************************************************
@@ -1225,18 +1159,16 @@ UPP_enableGlobalInterrupt(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_disableGlobalInterrupt(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_disableGlobalInterrupt(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Disable uPP global interrupt.
-    //
-    HWREGH(base + UPP_O_GINTEN) &= ~(uint16_t)UPP_GINTEN_GINTEN;
+  //
+  // Disable uPP global interrupt.
+  //
+  HWREGH(base + UPP_O_GINTEN) &= ~(uint16_t)UPP_GINTEN_GINTEN;
 }
 
 //*****************************************************************************
@@ -1252,19 +1184,16 @@ UPP_disableGlobalInterrupt(uint32_t base)
 //! - \b false - No interrupt has been generated.
 //
 //*****************************************************************************
-static inline bool
-UPP_isInterruptGenerated(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline bool UPP_isInterruptGenerated(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Returns uPP global interrupt status.
-    //
-    return((HWREGH(base + UPP_O_GINTFLG)   &
-            (uint16_t)UPP_GINTFLG_GINTFLG) != 0U);
+  //
+  // Returns uPP global interrupt status.
+  //
+  return ((HWREGH(base + UPP_O_GINTFLG) & (uint16_t)UPP_GINTFLG_GINTFLG) != 0U);
 }
 
 //*****************************************************************************
@@ -1278,18 +1207,16 @@ UPP_isInterruptGenerated(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_clearGlobalInterruptStatus(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_clearGlobalInterruptStatus(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Clear uPP global interrupt status.
-    //
-    HWREGH(base + UPP_O_GINTCLR) = UPP_GINTCLR_GINTCLR;
+  //
+  // Clear uPP global interrupt status.
+  //
+  HWREGH(base + UPP_O_GINTCLR) = UPP_GINTCLR_GINTCLR;
 }
 
 //*****************************************************************************
@@ -1303,18 +1230,16 @@ UPP_clearGlobalInterruptStatus(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_enableInputDelay(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_enableInputDelay(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Enable uPP input delay.
-    //
-    HWREGH(base + UPP_O_DLYCTL) &= ~(uint16_t)UPP_DLYCTL_DLYDIS;
+  //
+  // Enable uPP input delay.
+  //
+  HWREGH(base + UPP_O_DLYCTL) &= ~(uint16_t)UPP_DLYCTL_DLYDIS;
 }
 
 //*****************************************************************************
@@ -1328,18 +1253,16 @@ UPP_enableInputDelay(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_disableInputDelay(uint32_t base)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_disableInputDelay(uint32_t base) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Disable uPP input delay.
-    //
-    HWREGH(base + UPP_O_DLYCTL) |= UPP_DLYCTL_DLYDIS;
+  //
+  // Disable uPP input delay.
+  //
+  HWREGH(base + UPP_O_DLYCTL) |= UPP_DLYCTL_DLYDIS;
 }
 
 //*****************************************************************************
@@ -1361,20 +1284,18 @@ UPP_disableInputDelay(uint32_t base)
 //! \return None.
 //
 //*****************************************************************************
-static inline void
-UPP_setInputDelay(uint32_t base, UPP_InputDelay delay)
-{
-    //
-    // Check the arguments.
-    //
-    ASSERT(UPP_isBaseValid(base));
+static inline void UPP_setInputDelay(uint32_t base, UPP_InputDelay delay) {
+  //
+  // Check the arguments.
+  //
+  ASSERT(UPP_isBaseValid(base));
 
-    //
-    // Set uPP input delay.
-    //
-    HWREGH(base + UPP_O_DLYCTL) = (HWREGH(base + UPP_O_DLYCTL)     &
-                                   ~(uint16_t)UPP_DLYCTL_DLYCTL_M) |
-                                  (uint16_t)delay;
+  //
+  // Set uPP input delay.
+  //
+  HWREGH(base + UPP_O_DLYCTL) =
+      (HWREGH(base + UPP_O_DLYCTL) & ~(uint16_t)UPP_DLYCTL_DLYCTL_M) |
+      (uint16_t)delay;
 }
 
 //*****************************************************************************
@@ -1394,9 +1315,8 @@ UPP_setInputDelay(uint32_t base, UPP_InputDelay delay)
 //! \return None.
 //
 //*****************************************************************************
-extern void
-UPP_setDMAReadThreshold(uint32_t base, UPP_DMAChannel channel,
-                        UPP_ThresholdSize size);
+extern void UPP_setDMAReadThreshold(uint32_t base, UPP_DMAChannel channel,
+                                    UPP_ThresholdSize size);
 
 //*****************************************************************************
 //
@@ -1418,9 +1338,8 @@ UPP_setDMAReadThreshold(uint32_t base, UPP_DMAChannel channel,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-UPP_setDMADescriptor(uint32_t base, UPP_DMAChannel channel,
-                     const UPP_DMADescriptor * const desc);
+extern void UPP_setDMADescriptor(uint32_t base, UPP_DMAChannel channel,
+                                 const UPP_DMADescriptor *const desc);
 
 //*****************************************************************************
 //
@@ -1440,9 +1359,8 @@ UPP_setDMADescriptor(uint32_t base, UPP_DMAChannel channel,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-UPP_getDMAChannelStatus(uint32_t base, UPP_DMAChannel channel,
-                        UPP_DMAChannelStatus * const status);
+extern void UPP_getDMAChannelStatus(uint32_t base, UPP_DMAChannel channel,
+                                    UPP_DMAChannelStatus *const status);
 
 //*****************************************************************************
 //
@@ -1465,8 +1383,7 @@ UPP_getDMAChannelStatus(uint32_t base, UPP_DMAChannel channel,
 //! - \b false - specifies that writing of new DMA descriptor is allowed.
 //
 //*****************************************************************************
-extern bool
-UPP_isDescriptorPending(uint32_t base, UPP_DMAChannel channel);
+extern bool UPP_isDescriptorPending(uint32_t base, UPP_DMAChannel channel);
 
 //*****************************************************************************
 //
@@ -1488,8 +1405,7 @@ UPP_isDescriptorPending(uint32_t base, UPP_DMAChannel channel);
 //! - \b false - specifies that desciptor is currently idle.
 //
 //*****************************************************************************
-extern bool
-UPP_isDescriptorActive(uint32_t base, UPP_DMAChannel channel);
+extern bool UPP_isDescriptorActive(uint32_t base, UPP_DMAChannel channel);
 
 //*****************************************************************************
 //
@@ -1510,8 +1426,7 @@ UPP_isDescriptorActive(uint32_t base, UPP_DMAChannel channel);
 //! - \b false - specifies that desciptor is currently idle.
 //
 //*****************************************************************************
-extern uint16_t
-UPP_getDMAFIFOWatermark(uint32_t base, UPP_DMAChannel channel);
+extern uint16_t UPP_getDMAFIFOWatermark(uint32_t base, UPP_DMAChannel channel);
 
 //*****************************************************************************
 //
@@ -1529,9 +1444,8 @@ UPP_getDMAFIFOWatermark(uint32_t base, UPP_DMAChannel channel);
 //! \return None.
 //
 //*****************************************************************************
-extern void
-UPP_readRxMsgRAM(uint32_t rxBase, uint16_t array[], uint16_t length,
-                 uint16_t offset);
+extern void UPP_readRxMsgRAM(uint32_t rxBase, uint16_t array[], uint16_t length,
+                             uint16_t offset);
 
 //*****************************************************************************
 //
@@ -1549,9 +1463,8 @@ UPP_readRxMsgRAM(uint32_t rxBase, uint16_t array[], uint16_t length,
 //! \return None.
 //
 //*****************************************************************************
-extern void
-UPP_writeTxMsgRAM(uint32_t txBase, const uint16_t array[], uint16_t length,
-                  uint16_t offset);
+extern void UPP_writeTxMsgRAM(uint32_t txBase, const uint16_t array[],
+                              uint16_t length, uint16_t offset);
 
 //*****************************************************************************
 //
