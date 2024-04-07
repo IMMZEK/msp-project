@@ -1,0 +1,108 @@
+<div style="position:absolute;left:50%;top:50%;z-index:10;transform:translate(-50%, -50%);text-align:center" ng-show="vm.isRunningCloud&&vm.os==='osx'">
+    Note: Standalone Command Line Package generation is not available on MacOS (cloud version) at this time.
+</div>
+<div style="margin:8px 10px 8px 0;font-size:14px;" ng-show="!vm.isRunningCloud||vm.os!=='osx'">
+    <div>
+        <div style="padding:4px 6px 0 6px;">
+            <div style="font-weight:600;text-decoration:underline;">Customize Your Package</div>
+            Configure and review the package you want to create. Hover over each option to get more information.
+            <table style="margin:5px 10px 5px 5px;font-size:13px;">
+                <tr style="border-top:1px solid #eee;border-bottom:1px solid #eee;">
+                    <td style="padding:4px 10px;">Device:</td>
+                    <td style="padding:4px 10px 4px 0;">
+                        <span uib-tooltip="Package will include config/driver files for '{{vm.deviceName}}'." tooltip-placement="right" tooltip-trigger="mouseenter"
+                            tooltip-popup-delay="300" style="color:#6a6a6a;text-transform:uppercase;font-weight:500;">{{vm.deviceName}}</span>
+                    </td>
+                </tr>
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:4px 10px;">Connection:</td>
+                    <td style="padding:4px 10px 4px 0;">
+                        <span uib-tooltip="Package will include config/driver files for '{{vm.connectionName}}'." tooltip-placement="right" tooltip-trigger="mouseenter"
+                            tooltip-popup-delay="300" style="color:#6a6a6a;font-weight:500;">{{vm.connectionName}}</span>
+                    </td>
+                </tr>
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:4px 10px;vertical-align:top;">Images ({{vm.selectedPrograms}}):</td>
+                    <td style="padding:4px 10px 4px 0;">
+                        <span ng-class="{'disabled':vm.selectedPrograms===0}" uib-tooltip="Determines if selected images (in the Program view) will be included in the package."
+                            tooltip-placement="right" tooltip-trigger="mouseenter" tooltip-popup-delay="300">
+                            <tic-checkbox type="checkbox" ng-model="vm.includeImages"></tic-checkbox>
+                        </span>
+                        <span class="separator">|</span> <a uib-tooltip="View and update the list of selected images." tooltip-placement="right"
+                            tooltip-trigger="mouseenter" tooltip-popup-delay="300" href="" ng-click="vm.goToPrograms()">Edit</a>
+                        <div ng-show="vm.includeImages" style="border-top:1px solid #eee;margin-top:5px;padding-top:3px;padding-left:3px;">
+                            <div ng-repeat="image in vm.ufProgramList | filter: { isSelected: true }">{{$index+1}}. {{image.file.name}}</div>
+                        </div>
+                    </td>
+                </tr>
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:4px 10px;">Settings:</td>
+                    <td style="padding:4px 10px 4px 0;">
+                        <span uib-tooltip="Determines if configued settings (in the Settings and Utilities view) should be included in the package."
+                            tooltip-placement="right" tooltip-trigger="mouseenter" tooltip-popup-delay="300"><tic-checkbox type="checkbox" ng-model="vm.includeSettings"></tic-checkbox></span>
+                        <span>| <a href="" ng-click="vm.goToUtilitiesAndSettings()" uib-tooltip="View and update setting values." tooltip-placement="right" tooltip-trigger="mouseenter" tooltip-popup-delay="300">Edit</a> | <a href="" ng-click="vm.dlCurrentSettings()" uib-tooltip="Download settings file compatible with previously generated packages. Copy file into \user_files\settings\ folder of your existing package." tooltip-placement="right" tooltip-trigger="mouseenter" tooltip-popup-delay="300">Download</a></span>
+                    </td>
+                </tr>
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:4px 20px 4px 10px;">Operating System:</td>
+                    <td>
+                        <span ng-show="!vm.isRunningCloud" style="color:#6a6a6a;font-weight:500;">{{vm.choosenOsType}}</span>
+                        <select ng-show="vm.isRunningCloud" style="outline:none;padding-right:20px;color:#115566;line-height:22px;height:22px;font-weight:500;background-color:inherit;" ng-model="vm.choosenOsType"
+                            ng-change="vm.updatePackageName();" uib-tooltip="Launch scripts and driver files will be tailored for selected OS."
+                            tooltip-placement="right" tooltip-trigger="mouseenter" tooltip-popup-delay="300">
+                            <option ng-repeat="os in vm.osTypes">{{os}}</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr style="border-bottom:1px solid #eee;">
+                    <td style="padding:4px 10px;">Package Name:</td>
+                    <td style="padding:4px 10px 4px 0;">
+                        <span style="font-weight:500;"><input id="package-name-text" type="text" ng-model="vm.packageName" style="outline:none;color:#115566;" uib-tooltip="Provide a unique name to easily identify your package." tooltip-placement="right"/>.zip</span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div style="border-bottom:1px solid #e0e0e0;margin-bottom:50px;">
+        <div style="padding:5px 20px 10px 20px;">
+            <button id="generate-package" class="btn btn-primary btn-sm" ng-click="vm.download()">Generate Package</button>
+        </div>
+    </div>
+
+    <div style="border-top:1px solid #e0e0e0;border-bottom:1px solid #e0e0e0;">
+        <div style="padding:8px 10px;">
+            <div style="font-weight:600;text-decoration:underline;">Instructions ({{vm.choosenOsType}} Package):</div>
+            <ol style="margin-bottom:0;">
+                <li>Click 'Generate Package' button to generate <span style="color:#116677;font-weight:700;">{{vm.packageName}}.zip</span></li>
+                <li>Save and Extract the package on your local machine.</li>
+                <li ng-show="vm.choosenOsType==='Windows'">Run <span style="color:#116677;font-weight:700;">one_time_setup.bat</span> to install the necessary files
+                    on your machine to use your device
+                    <a
+                        href="" ng-click="showDriverDetails=!showDriverDetails" style="font-size:13px;">[Show <span ng-show="showDriverDetails">Less</span><span ng-show="!showDriverDetails">More</span>]</a>
+                        <ul ng-show="showDriverDetails" style="border-left:3px solid #118899;padding:2px 25px;margin-left:2px;">
+                            <li>This step is optional, and is for installing necessary OS drivers, permission files, etc. for
+                                your connection/device</li>
+                            <li>Neccessary drivers/files should already be installed on your machine if you have accessed your device using the UniFlash GUI</li>
+                        </ul>
+                </li>
+                <li>Run <span style="color:#116677;font-weight:700;">{{vm.cliScriptName[vm.choosenOsType]}}</span> to configure and connect to your
+                    device. <a href="" ng-click="showInitScriptDetails=!showInitScriptDetails" style="font-size:13px;">[Show <span ng-show="showInitScriptDetails">Less</span><span ng-show="!showInitScriptDetails">More</span>]</a>
+                    <div ng-show="showInitScriptDetails" style="border:1px solid #eee;border-left:3px solid #117788;padding:5px 18px 2px 18px;margin-left:2px;">
+                        <div style="margin-bottom:10px;text-decoration:underline;font-weight:500;">Three Ways of Running the Launch Script</div>
+                        <div>1. <span class="uf-property-text-main" style="font-family: Courier New;"> > <span ng-show="vm.choosenOsType!=='Windows'">./</span>{{vm.cliScriptName[vm.choosenOsType]}}</span></div>
+                        <div style="margin:5px 0 20px 13px;"><i class="material-icons" style="font-size:14px;position:relative;top:1px;left:2px;">subdirectory_arrow_right</i>                            Run the default command. Configures the device, connects, applies settings (if selected), and
+                            flashes and verifies the image (if selected)</div>
+                        <div>2. <span class="uf-property-text-main" style="font-family: Courier New"> > <span ng-show="vm.choosenOsType!=='Windows'">./</span>{{vm.cliScriptName[vm.choosenOsType]}} --help</span></div>
+                        <div style="margin:5px 0 20px 13px;"><i class="material-icons" style="font-size:14px;position:relative;top:1px;left:2px;">subdirectory_arrow_right</i>                            Displays the arguments and parameters supported by the UniFlash Command Line Interface</div>
+                        <div>3. <span class="uf-property-text-main" style="font-family: Courier New"> > <span ng-show="vm.choosenOsType!=='Windows'">./</span>{{vm.cliScriptName[vm.choosenOsType]}} &lt;customArguments&gt;</span></div>
+                        <div style="margin:5px 0 5px 13px;"><i class="material-icons" style="font-size:14px;position:relative;top:1px;left:2px;">subdirectory_arrow_right</i>                            Provide a list of arguments and parameters supported by the UniFlash Command Line Interface.
+                            For example, you can use it to perform Flash operations, enable logging, specify core information,
+                            etc.</div>
+                    </div>
+
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>

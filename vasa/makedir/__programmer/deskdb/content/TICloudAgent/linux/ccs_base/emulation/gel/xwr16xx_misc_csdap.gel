@@ -1,0 +1,107 @@
+/*******************************************************************/
+/* AWR16xx/IWR16xx GEL required by CCS                             */
+/*                                                                 */
+/* Expected to be run from CS_DAP_0                                */
+/*******************************************************************/
+
+#define RX_DATA_AVAIL 0x00000006
+#define RX_DATA_AVAIL_MAX_POLL 100
+
+#define TX_CONTROL_UID0 0x00000000
+#define TX_CONTROL_UID1 0x00000002
+#define TX_CONTROL_UID2 0x00000004
+#define TX_CONTROL_UID3 0x00000006
+
+
+_wait_for_receive(unsigned int tx_control_val)
+{
+  unsigned int loop_count;
+  unsigned int rx_control_rd;
+
+  loop_count = 0;
+  do
+  {
+     if(loop_count > RX_DATA_AVAIL_MAX_POLL)
+     {
+        return -1;
+     }
+
+     rx_control_rd = SECAP_RCR;
+     loop_count++;
+  } while((rx_control_rd & RX_DATA_AVAIL) != tx_control_val);
+
+  return 0;
+}
+
+
+
+menuitem "Device Support"
+
+hotmenu Read_UID()
+{
+  unsigned int error_count = 0;
+  unsigned int uid_0 = 0;
+  unsigned int uid_1 = 0;
+  unsigned int uid_2 = 0;
+  unsigned int uid_3 = 0;
+
+
+  SECAP_TCR = TX_CONTROL_UID0;
+
+  if(0 == _wait_for_receive(TX_CONTROL_UID0))
+  {
+	  uid_0 = SECAP_RDR;
+  }
+  else
+  {
+	  error_count++;
+  }
+
+
+  SECAP_TCR = TX_CONTROL_UID1;
+
+  if(0 == _wait_for_receive(TX_CONTROL_UID1))
+  {
+	  uid_1 = SECAP_RDR;
+  }
+  else
+  {
+	  error_count++;
+  }
+
+  SECAP_TCR = TX_CONTROL_UID2;
+
+  if(0 == _wait_for_receive(TX_CONTROL_UID2))
+  {
+	  uid_2 = SECAP_RDR;
+  }
+  else
+  {
+	  error_count++;
+  }
+
+  SECAP_TCR = TX_CONTROL_UID3;
+
+  if(0 == _wait_for_receive(TX_CONTROL_UID3))
+  {
+	  uid_3 = SECAP_RDR;
+  }
+  else
+  {
+	  error_count++;
+  }
+
+  if(0 == error_count)
+  {
+      GEL_TextOut("--->> 128b Device UID received:\n");
+      GEL_TextOut("--->> UID[127:96] = %x\n", 0, 0, 0, 0, uid_3);
+      GEL_TextOut("--->> UID[95:64]  = %x\n", 0, 0, 0, 0, uid_2);
+      GEL_TextOut("--->> UID[63:32]  = %x\n", 0, 0, 0, 0, uid_1);
+      GEL_TextOut("--->> UID[31:0]   = %x\n", 0, 0, 0, 0, uid_0);
+  }
+  else
+  {
+      GEL_TextOut("--->> Error while retrieving UID\n");
+  }
+
+}

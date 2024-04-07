@@ -1,0 +1,166 @@
+/*******************************************************************/ 
+/* This GEL file is loaded on the command line of Code Composer    */
+/* The StartUp() function is called every time you start           */
+/* Code Composer.  You can customize this function to              */
+/* initialize wait states or to perform other initialization.      */
+/*                                                                 */
+/* AM572x cross triggerring                                        */
+/*                                                                 */
+/*                                                                 */
+/*******************************************************************/
+
+/**********************************************************************
+ *
+ *  DEFINITIONS
+ *
+ **********************************************************************/
+#define ICECRUSHER_BASE        0xE0042000
+
+#define UNLOCK_VALUE    0xC5ACCE55
+#define CLAIM_ENABLE_MASK 0xF0000000
+#define ENABLE_MASK 0x80000000
+#define CLAIM_MASK 0x40000000
+
+
+#define TRIGGER_CTRL_REG(ICECRUSHER_BASE_ADDRESS) *(unsigned int *)(ICECRUSHER_BASE_ADDRESS + 0x10)
+#define DCON_REG(ICECRUSHER_BASE_ADDRESS) *(unsigned int *)(ICECRUSHER_BASE_ADDRESS + 0xFC)
+#define LOCK_ACCESS_REG(ICECRUSHER_BASE_ADDRESS) *(unsigned int *)(ICECRUSHER_BASE_ADDRESS + 0xFB0)
+#define LOCK_ACCESS_STATUS_REG(ICECRUSHER_BASE_ADDRESS) *(unsigned int *)(ICECRUSHER_BASE_ADDRESS + 0xFB4)
+
+
+/**********************************************************************
+ *
+ *  FUNCTIONS
+ *
+ **********************************************************************/
+menuitem "Cross Triggering"
+
+EnableICECrusher()
+{
+    GEL_TextOut("--->>> enter EnableICECrusher <<<---\n");
+    
+    /* Write to Lock Access Register at offset 0xFB0 the keycode 0xC5ACCE55 */
+    LOCK_ACCESS_REG(ICECRUSHER_BASE) = UNLOCK_VALUE;
+    
+    /* Clear ContextRestore status bit */
+    DCON_REG(ICECRUSHER_BASE) = 0;
+    
+    GEL_TextOut("--->>> exit EnableICECrusher <<<---\n");
+}
+
+hotmenu SetTriggerControlRegisterCrossTrigger0Halt()
+{
+    int triggerValue;
+    
+    EnableICECrusher();
+    
+    GEL_TextOut("--->>> enter SetTriggerControlRegister <<<---\n");
+         
+    /* claim this register */
+    triggerValue = TRIGGER_CTRL_REG(ICECRUSHER_BASE);
+    triggerValue = triggerValue&~CLAIM_ENABLE_MASK;
+    triggerValue = triggerValue|CLAIM_MASK;
+    TRIGGER_CTRL_REG(ICECRUSHER_BASE) = triggerValue;
+    
+    GEL_TextOut("--->>> enter SetTriggerControlRegister1 <<<---\n");
+    
+    /* enable this register */
+    triggerValue = TRIGGER_CTRL_REG(ICECRUSHER_BASE);
+    triggerValue = triggerValue&~CLAIM_ENABLE_MASK;
+    triggerValue = triggerValue|ENABLE_MASK;
+    TRIGGER_CTRL_REG(ICECRUSHER_BASE) = triggerValue;
+    
+    GEL_TextOut("--->>> enter SetTriggerControlRegister2 <<<---\n");
+    
+    /* configure cross-trigger halt */
+    triggerValue = TRIGGER_CTRL_REG(ICECRUSHER_BASE);
+    triggerValue=triggerValue|0x1;
+    TRIGGER_CTRL_REG(ICECRUSHER_BASE)=triggerValue;
+  
+    GEL_TextOut("--->>> exit SetTriggerControlRegister <<<---\n");
+}
+
+hotmenu RemoveTriggerControlRegisterCrossTrigger0Halt()
+{
+    int triggerValue;
+    
+    EnableICECrusher();
+    
+    GEL_TextOut("--->>> enter RemoveTriggerControlRegisterCrossTrigger0Halt <<<---\n");
+    
+     
+    /* claim this register */
+    triggerValue = TRIGGER_CTRL_REG(ICECRUSHER_BASE);
+    triggerValue = triggerValue&~CLAIM_ENABLE_MASK;
+    triggerValue = triggerValue|CLAIM_MASK;
+    TRIGGER_CTRL_REG(ICECRUSHER_BASE) = triggerValue;
+    
+    GEL_TextOut("--->>> enter RemoveTriggerControlRegisterCrossTrigger0Halt1 <<<---\n");
+    
+    /* enable this register */
+    triggerValue = TRIGGER_CTRL_REG(ICECRUSHER_BASE);
+    triggerValue = triggerValue&~CLAIM_ENABLE_MASK;
+    triggerValue = triggerValue|ENABLE_MASK;
+    TRIGGER_CTRL_REG(ICECRUSHER_BASE) = triggerValue;
+    
+    GEL_TextOut("--->>> enter RemoveTriggerControlRegisterCrossTrigger0Halt2 <<<---\n");
+    
+    /* configure cross-trigger halt */
+    triggerValue = TRIGGER_CTRL_REG(ICECRUSHER_BASE);
+    triggerValue=triggerValue&~0x1;
+    TRIGGER_CTRL_REG(ICECRUSHER_BASE)=triggerValue;
+  
+    GEL_TextOut("--->>> exit RemoveTriggerControlRegisterCrossTrigger0Halt <<<---\n");
+}
+
+hotmenu SetTriggerControlRegisterCrossTrigger1Halt()
+{
+    int triggerValue;
+    
+    GEL_TextOut("--->>> enter SetTriggerControlRegisterCrossTrigger1Halt <<<---\n");
+    
+    /* claim this register */
+    triggerValue = TRIGGER_CTRL_REG(ICECRUSHER_BASE);
+    triggerValue=triggerValue&~CLAIM_ENABLE_MASK;
+    triggerValue=triggerValue|CLAIM_MASK;
+    TRIGGER_CTRL_REG(ICECRUSHER_BASE) = triggerValue;
+    
+    /* enable this register */
+    triggerValue = TRIGGER_CTRL_REG(ICECRUSHER_BASE);
+    triggerValue=triggerValue&~CLAIM_ENABLE_MASK;
+    triggerValue=triggerValue|ENABLE_MASK;
+    TRIGGER_CTRL_REG(ICECRUSHER_BASE) = triggerValue;
+    
+    /* configure cross-trigger halt */
+    triggerValue = TRIGGER_CTRL_REG(ICECRUSHER_BASE);
+    triggerValue=triggerValue|(0x1<<12);
+    TRIGGER_CTRL_REG(ICECRUSHER_BASE)=triggerValue;
+  
+    GEL_TextOut("--->>> exit SetTriggerControlRegisterCrossTrigger1Halt <<<---\n");
+}
+
+hotmenu RemoveTriggerControlRegisterCrossTrigger1Halt()
+{
+    int triggerValue;
+    
+    GEL_TextOut("--->>> enter RemoveTriggerControlRegisterCrossTrigger1Halt <<<---\n");
+    
+    /* claim this register */
+    triggerValue = TRIGGER_CTRL_REG(ICECRUSHER_BASE);
+    triggerValue=triggerValue&~CLAIM_ENABLE_MASK;
+    triggerValue=triggerValue|CLAIM_MASK;
+    TRIGGER_CTRL_REG(ICECRUSHER_BASE) = triggerValue;
+    
+    /* enable this register */
+    triggerValue = TRIGGER_CTRL_REG(ICECRUSHER_BASE);
+    triggerValue=triggerValue&~CLAIM_ENABLE_MASK;
+    triggerValue=triggerValue|ENABLE_MASK;
+    TRIGGER_CTRL_REG(ICECRUSHER_BASE) = triggerValue;
+    
+    /* configure cross-trigger halt */
+    triggerValue = TRIGGER_CTRL_REG(ICECRUSHER_BASE);
+    triggerValue=triggerValue&~(0x1<<12);
+    TRIGGER_CTRL_REG(ICECRUSHER_BASE)=triggerValue;
+  
+    GEL_TextOut("--->>> exit RemoveTriggerControlRegisterCrossTrigger1Halt <<<---\n");
+}

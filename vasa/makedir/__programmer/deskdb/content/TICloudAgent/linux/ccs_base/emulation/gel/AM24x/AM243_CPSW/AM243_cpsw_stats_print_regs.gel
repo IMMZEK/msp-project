@@ -1,0 +1,260 @@
+/*
+ *  Copyright (c) Texas Instruments Incorporated 2020
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *    Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ *    Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the
+ *    distribution.
+ *
+ *    Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#define uint32_t                    unsigned int
+#define WR_MEM_32(addr, data)       *(uint32_t*)(addr) = (uint32_t)(data)
+#define RD_MEM_32(addr)             *(uint32_t*)(addr)
+#define CPSW_3G_PORT_NUM            2
+#define CPSW_3G_BASE_ADDRESS        (0x803A000U)
+
+menuitem "CPSW Statistics Print"
+
+cpsw_print_stat_with_index_nonzero(regName, portnum, regIdx, regAddr)
+{
+    int regVal = RD_MEM_32(regAddr);
+    if (0 != regVal)
+    {
+            GEL_TextOut("STAT_%d_%s[%d]= %x\n",,,,,portnum, regName, regIdx, regVal);
+    }
+}
+
+cpsw_print_stat_nonzero(regName, portnum, regAddr)
+{
+    int regVal = RD_MEM_32(regAddr);
+    if (0 != regVal)
+    {
+            GEL_TextOut("STAT_%d_%s= %x\n",,,,,portnum, regName, regVal);
+    }
+}
+
+hotmenu cpsw_3g_statsprint_nonzero()
+{
+    uint32_t i, regAddr, portnum, port_offset_add;
+
+    GEL_TextOut("          STATS          \n");
+
+    portnum = 0;
+    GEL_TextOut("--------------------------------\n");
+    GEL_TextOut("          PORT%d STATS          \n",,,,,portnum);
+    GEL_TextOut("--------------------------------\n");
+    cpsw_print_stat_nonzero("RXGOODFRAMES              ", portnum, (CPSW_3G_BASE_ADDRESS + 0x000U));
+    cpsw_print_stat_nonzero("RXBROADCASTFRAMES         ", portnum, (CPSW_3G_BASE_ADDRESS + 0x004U));
+    cpsw_print_stat_nonzero("RXMULTICASTFRAMES         ", portnum, (CPSW_3G_BASE_ADDRESS + 0x008U));
+    cpsw_print_stat_nonzero("RXCRCERRORS               ", portnum, (CPSW_3G_BASE_ADDRESS + 0x010U));
+    cpsw_print_stat_nonzero("RXOVERSIZEDFRAMES         ", portnum, (CPSW_3G_BASE_ADDRESS + 0x018U));
+    cpsw_print_stat_nonzero("RXUNDERSIZEDFRAMES        ", portnum, (CPSW_3G_BASE_ADDRESS + 0x020U));
+    cpsw_print_stat_nonzero("ALE_DROP                  ", portnum, (CPSW_3G_BASE_ADDRESS + 0x028U));
+    cpsw_print_stat_nonzero("ALE_OVERRUN_DROP          ", portnum, (CPSW_3G_BASE_ADDRESS + 0x02CU));
+    cpsw_print_stat_nonzero("RXOCTETS                  ", portnum, (CPSW_3G_BASE_ADDRESS + 0x030U));
+    cpsw_print_stat_nonzero("TXGOODFRAMES              ", portnum, (CPSW_3G_BASE_ADDRESS + 0x034U));
+    cpsw_print_stat_nonzero("TXBROADCASTFRAMES         ", portnum, (CPSW_3G_BASE_ADDRESS + 0x038U));
+    cpsw_print_stat_nonzero("TXMULTICASTFRAMES         ", portnum, (CPSW_3G_BASE_ADDRESS + 0x03CU));
+    cpsw_print_stat_nonzero("TXSOFOVERRUN              ", portnum, (CPSW_3G_BASE_ADDRESS + 0x04CU));
+    cpsw_print_stat_nonzero("TXMOFOVERRUN              ", portnum, (CPSW_3G_BASE_ADDRESS + 0x050U));
+    cpsw_print_stat_nonzero("TXOCTETS                  ", portnum, (CPSW_3G_BASE_ADDRESS + 0x064U));
+    cpsw_print_stat_nonzero("OCTETFRAMES64             ", portnum, (CPSW_3G_BASE_ADDRESS + 0x068U));
+    cpsw_print_stat_nonzero("OCTETFRAMES65T127         ", portnum, (CPSW_3G_BASE_ADDRESS + 0x6CU));
+    cpsw_print_stat_nonzero("OCTETFRAMES128T255        ", portnum, (CPSW_3G_BASE_ADDRESS + 0x070U));
+    cpsw_print_stat_nonzero("OCTETFRAMES256T511        ", portnum, (CPSW_3G_BASE_ADDRESS + 0x074U));
+    cpsw_print_stat_nonzero("OCTETFRAMES512T1023       ", portnum, (CPSW_3G_BASE_ADDRESS + 0x078U));
+    cpsw_print_stat_nonzero("OCTETFRAMES1024TUP        ", portnum, (CPSW_3G_BASE_ADDRESS + 0x07CU));
+    cpsw_print_stat_nonzero("NETOCTETS                 ", portnum, (CPSW_3G_BASE_ADDRESS + 0x080U));
+    cpsw_print_stat_nonzero("RX_BOTTOM_OF_FIFO_DROP    ", portnum, (CPSW_3G_BASE_ADDRESS + 0x084U));
+    cpsw_print_stat_nonzero("PORTMASK_DROP             ", portnum, (CPSW_3G_BASE_ADDRESS + 0x088U));
+    cpsw_print_stat_nonzero("RX_TOP_OF_FIFO_DROP       ", portnum, (CPSW_3G_BASE_ADDRESS + 0x08CU));
+    cpsw_print_stat_nonzero("ALE_RATE_LIMIT_DROP       ", portnum, (CPSW_3G_BASE_ADDRESS + 0x090U));
+    cpsw_print_stat_nonzero("ALE_VID_INGRESS_DROP      ", portnum, (CPSW_3G_BASE_ADDRESS + 0x094U));
+    cpsw_print_stat_nonzero("ALE_DA_EQ_SA_DROP         ", portnum, (CPSW_3G_BASE_ADDRESS + 0x098U));
+    cpsw_print_stat_nonzero("ALE_BLOCK_DROP            ", portnum, (CPSW_3G_BASE_ADDRESS + 0x09CU));
+    cpsw_print_stat_nonzero("ALE_SECURE_DROP           ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0A0U));
+    cpsw_print_stat_nonzero("ALE_AUTH_DROP             ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0A4U));
+    cpsw_print_stat_nonzero("ALE_UNKN_UNI              ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0A8U));
+    cpsw_print_stat_nonzero("ALE_UNKN_UNI_BCNT         ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0ACU));
+    cpsw_print_stat_nonzero("ALE_UNKN_MLT              ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0B0U));
+    cpsw_print_stat_nonzero("ALE_UNKN_MLT_BCNT         ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0B4U));
+    cpsw_print_stat_nonzero("ALE_UNKN_BRD              ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0B8U));
+    cpsw_print_stat_nonzero("ALE_UNKN_BRD_BCNT         ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0BCU));
+    cpsw_print_stat_nonzero("ALE_POL_MATCH             ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0C0U));
+    cpsw_print_stat_nonzero("ALE_POL_MATCH_RED         ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0C4U));
+    cpsw_print_stat_nonzero("ALE_POL_MATCH_YELLOW      ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0C8U));
+    cpsw_print_stat_nonzero("ALE_MLT_SA_DROP           ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0CCU));
+    cpsw_print_stat_nonzero("ALE_DUAL_VLAN_DROP        ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0D0U));
+    cpsw_print_stat_nonzero("ALE_LEN_ERR_DROP          ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0D4U));
+    cpsw_print_stat_nonzero("ALE_IP_NXT_HDR_DROP       ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0D8U));
+    cpsw_print_stat_nonzero("ALE_IPV4_FRAG_DROP        ", portnum, (CPSW_3G_BASE_ADDRESS + 0x0DCU));
+    cpsw_print_stat_nonzero("TX_MEMORY_PROTECT_ERROR   ", portnum, (CPSW_3G_BASE_ADDRESS + 0x17CU));
+
+    for (i = 0; i < 8; i++)
+    {
+        regAddr = (CPSW_3G_BASE_ADDRESS + 0x180U + (i * 0x04U));
+        cpsw_print_stat_with_index_nonzero("TX_PRI_REG             ", portnum, i, regAddr);
+    }
+
+    for (i = 0; i < 8; i++)
+    {
+        regAddr = (CPSW_3G_BASE_ADDRESS + 0x1A0U + (i * 0x4U));
+        cpsw_print_stat_with_index_nonzero("TX_PRI_BCNT_REG        ", portnum, i, regAddr);
+    }
+
+    for (i = 0; i < 8; i++)
+    {
+        regAddr = (CPSW_3G_BASE_ADDRESS + 0x1C0U + (i * 0x4U));
+        cpsw_print_stat_with_index_nonzero("TX_PRI_DROP_REG        ", portnum, i, regAddr);
+    }
+
+    for (i = 0; i < 8; i++)
+    {
+        regAddr = (CPSW_3G_BASE_ADDRESS + 0x1E0U + (i * 0x4U));
+        cpsw_print_stat_with_index_nonzero("TX_PRI_DROP_BCNT_REG   ", portnum, i, regAddr);
+    }
+
+    for (portnum = 1; portnum <= CPSW_3G_PORT_NUM; portnum++)
+    {
+        GEL_TextOut("--------------------------------\n");
+        GEL_TextOut("          PORT%d STATS          \n",,,,,portnum);
+        GEL_TextOut("--------------------------------\n");
+
+        port_offset_add = (portnum * 0x200U);
+
+        cpsw_print_stat_nonzero("RXGOODFRAMES              ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x000U));
+        cpsw_print_stat_nonzero("RXBROADCASTFRAMES         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x004U));
+        cpsw_print_stat_nonzero("RXMULTICASTFRAMES         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x008U));
+        cpsw_print_stat_nonzero("RXPAUSEFRAMES             ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x00CU));
+        cpsw_print_stat_nonzero("RXCRCERRORS               ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x010U));
+        cpsw_print_stat_nonzero("RXALIGNCODEERRORS         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x014U));
+        cpsw_print_stat_nonzero("RXOVERSIZEDFRAMES         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x018U));
+        cpsw_print_stat_nonzero("RXJABBERFRAMES            ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x01CU));
+        cpsw_print_stat_nonzero("RXUNDERSIZEDFRAMES        ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x020U));
+        cpsw_print_stat_nonzero("RXFRAGMENTS               ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x024U));
+        cpsw_print_stat_nonzero("ALE_DROP                  ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x028U));
+        cpsw_print_stat_nonzero("ALE_OVERRUN_DROP          ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x02CU));
+        cpsw_print_stat_nonzero("RXOCTETS                  ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x030U));
+        cpsw_print_stat_nonzero("TXGOODFRAMES              ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x034U));
+        cpsw_print_stat_nonzero("TXBROADCASTFRAMES         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x038U));
+        cpsw_print_stat_nonzero("TXMULTICASTFRAMES         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x03CU));
+        cpsw_print_stat_nonzero("TXPAUSEFRAMES             ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x040U));
+        cpsw_print_stat_nonzero("TXDEFERREDFRAMES          ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x044U));
+        cpsw_print_stat_nonzero("TXCOLLISIONFRAMES         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x048U));
+        cpsw_print_stat_nonzero("TXSINGLECOLLFRAMES        ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x04CU));
+        cpsw_print_stat_nonzero("TXMULTCOLLFRAMES          ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x050U));
+        cpsw_print_stat_nonzero("TXEXCESSIVECOLLISIONS     ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x054U));
+        cpsw_print_stat_nonzero("TXLATECOLLISIONS          ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x058U));
+        cpsw_print_stat_nonzero("RXIPGERROR                ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x05CU));
+        cpsw_print_stat_nonzero("TXCARRIERSENSEERRORS      ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x060U));
+        cpsw_print_stat_nonzero("TXOCTETS                  ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x064U));
+        cpsw_print_stat_nonzero("OCTETFRAMES64             ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x068U));
+        cpsw_print_stat_nonzero("OCTETFRAMES65T127         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x06CU));
+        cpsw_print_stat_nonzero("OCTETFRAMES128T255        ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x070U));
+        cpsw_print_stat_nonzero("OCTETFRAMES256T511        ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x074U));
+        cpsw_print_stat_nonzero("OCTETFRAMES512T1023       ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x078U));
+        cpsw_print_stat_nonzero("OCTETFRAMES1024TUP        ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x07CU));
+        cpsw_print_stat_nonzero("NETOCTETS                 ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x080U));
+        cpsw_print_stat_nonzero("RX_BOTTOM_OF_FIFO_DROP    ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x084U));
+        cpsw_print_stat_nonzero("PORTMASK_DROP             ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x088U));
+        cpsw_print_stat_nonzero("RX_TOP_OF_FIFO_DROP       ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x08CU));
+        cpsw_print_stat_nonzero("ALE_RATE_LIMIT_DROP       ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x090U));
+        cpsw_print_stat_nonzero("ALE_VID_INGRESS_DROP      ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x094U));
+        cpsw_print_stat_nonzero("ALE_DA_EQ_SA_DROP         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x098U));
+        cpsw_print_stat_nonzero("ALE_BLOCK_DROP            ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x09CU));
+        cpsw_print_stat_nonzero("ALE_SECURE_DROP           ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0A0U));
+        cpsw_print_stat_nonzero("ALE_AUTH_DROP             ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0A4U));
+        cpsw_print_stat_nonzero("ALE_UNKN_UNI              ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0A8U));
+        cpsw_print_stat_nonzero("ALE_UNKN_UNI_BCNT         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0ACU));
+        cpsw_print_stat_nonzero("ALE_UNKN_MLT              ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0B0U));
+        cpsw_print_stat_nonzero("ALE_UNKN_MLT_BCNT         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0B4U));
+        cpsw_print_stat_nonzero("ALE_UNKN_BRD              ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0B8U));
+        cpsw_print_stat_nonzero("ALE_UNKN_BRD_BCNT         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0BCU));
+        cpsw_print_stat_nonzero("ALE_POL_MATCH             ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0C0U));
+        cpsw_print_stat_nonzero("ALE_POL_MATCH_RED         ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0C4U));
+        cpsw_print_stat_nonzero("ALE_POL_MATCH_YELLOW      ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0C8U));
+        cpsw_print_stat_nonzero("ALE_MLT_SA_DROP           ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0CCU));
+        cpsw_print_stat_nonzero("ALE_DUAL_VLAN_DROP        ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0D0U));
+        cpsw_print_stat_nonzero("ALE_LEN_ERR_DROP          ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0D4U));
+        cpsw_print_stat_nonzero("ALE_IP_NXT_HDR_DROP       ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0D8U));
+        cpsw_print_stat_nonzero("ALE_IPV4_FRAG_DROP        ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x0DCU));
+        cpsw_print_stat_nonzero("IET_RX_ASSEMBLY_ERROR     ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x140U));
+        cpsw_print_stat_nonzero("IET_RX_ASSEMBLY_OK        ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x144U));
+        cpsw_print_stat_nonzero("IET_RX_SMD_ERROR          ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x148U));
+        cpsw_print_stat_nonzero("IET_RX_FRAG               ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x14CU));
+        cpsw_print_stat_nonzero("IET_TX_HOLD               ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x150U));
+        cpsw_print_stat_nonzero("IET_TX_FRAG               ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x154U));
+        cpsw_print_stat_nonzero("TX_MEMORY_PROTECT_ERROR   ", portnum, (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x17CU));
+
+        for (i = 0; i < 8; i++)
+        {
+            regAddr = (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x180U + (i * 0x04U));
+            cpsw_print_stat_with_index_nonzero("TX_PRI_REG             ", portnum, i, regAddr);
+        }
+
+        for (i = 0; i < 8; i++)
+        {
+            regAddr = (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x1A0U + (i * 0x4U));
+            cpsw_print_stat_with_index_nonzero("TX_PRI_BCNT_REG        ", portnum, i, regAddr);
+        }
+
+        for (i = 0; i < 8; i++)
+        {
+            regAddr = (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x1C0U + (i * 0x4U));
+            cpsw_print_stat_with_index_nonzero("TX_PRI_DROP_REG        ", portnum, i, regAddr);
+        }
+
+        for (i = 0; i < 8; i++)
+        {
+            regAddr = (CPSW_3G_BASE_ADDRESS + port_offset_add + 0x1E0U + (i * 0x4U));
+            cpsw_print_stat_with_index_nonzero("TX_PRI_DROP_BCNT_REG   ", portnum, i, regAddr);
+        }
+    }
+}
+
+cpsw_clear_stat(regAddr)
+{
+    int regVal = RD_MEM_32(regAddr);
+    WR_MEM_32(regAddr, regVal);
+}
+
+hotmenu cpsw_3g_clear_stats()
+{
+    int portnum, baseAddr, numStats;
+
+    for (portnum = 0; portnum <= CPSW_3G_PORT_NUM; portnum++)
+    {
+        baseAddr = CPSW_3G_BASE_ADDRESS + (portnum * 0x200);
+
+        GEL_TextOut("Clearing stats for port[%d]\n",,,,,portnum);
+        for (numStats = 0; numStats < 128U; numStats++)
+        {
+            cpsw_clear_stat(baseAddr + (numStats*0x4));
+        }
+    }
+
+    GEL_TextOut("--------CLEARED ALL STATS-------\n");
+}

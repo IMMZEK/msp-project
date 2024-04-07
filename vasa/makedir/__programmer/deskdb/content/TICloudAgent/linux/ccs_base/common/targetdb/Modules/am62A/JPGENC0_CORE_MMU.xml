@@ -1,0 +1,284 @@
+<module name="JPGENC0_CORE_MMU" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+	<register id="CORE_MMU_REGS_MMU_CONTROL0" acronym="CORE_MMU_REGS_MMU_CONTROL0" offset="0x0" width="32" description="">
+		<bitfield id="RESERVED_17" width="15" begin="31" end="17" resetval="0x0" description="" range="31 - 17" rwaccess="R"/> 
+		<bitfield id="USE_TILE_STRIDE_PER_CONTEXT" width="1" begin="16" end="16" resetval="0x0" description="1: Separate MMU_TILE_CFG fields apply per context 0: All contexts use MMU_TILE_CFG for context 0" range="16" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_13" width="3" begin="15" end="13" resetval="0x0" description="" range="15 - 13" rwaccess="R"/> 
+		<bitfield id="STALL_ON_PROTOCOL_FAULT" width="1" begin="12" end="12" resetval="0x0" description="Debug only:Setting this bit to '1' causes any requestor with a protocol fault to stall" range="12" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_10" width="2" begin="11" end="10" resetval="0x0" description="" range="11 - 10" rwaccess="R"/> 
+		<bitfield id="FORCE_CACHE_POLICY_BYPASS" width="1" begin="9" end="9" resetval="0x0" description="Setting this bit to '1' causes all requests to external memory to have a cache policy of 0 [bypass], setting this bit to '0' passes internal cache policy to external interface" range="9" rwaccess="R/W"/> 
+		<bitfield id="MMU_CACHE_POLICY" width="1" begin="8" end="8" resetval="0x0" description="1: MMU Directory/Page Table reads to be flagged as cacheable [external cache must have a way of flushing/tracking changes to Directory Table and Page Tables in host memory] 0: MMU reads to be flagged to bypass external cache" range="8" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_1" width="7" begin="7" end="1" resetval="0x0" description="" range="7 - 1" rwaccess="R"/> 
+		<bitfield id="MMU_TILING_SCHEME" width="1" begin="0" end="0" resetval="0x0" description="This bit controls the tiling scheme described in MMU Address Tiling section 0: Original tiling scheme [256-byte wide by 16 row tiles] 1: Alternative tiling scheme [512-byte wide by 8 row tiles]" range="0" rwaccess="R/W"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_CONTROL1" acronym="CORE_MMU_REGS_MMU_CONTROL1" offset="0x8" width="32" description="">
+		<bitfield id="RESERVED_29" width="3" begin="31" end="29" resetval="0x0" description="" range="31 - 29" rwaccess="R"/> 
+		<bitfield id="MMU_SOFT_RESET" width="1" begin="28" end="28" resetval="0x0" description="Writing '1' to this bit causes all currently active or new memory requests to be discarded, so a reset of all active requestors is likely to also be required. External memory transactions will attempt to complete [including writing 0 data if a burst write request was sent but no corresponding data is available]. Writing '0' has no affect. Reading this field indicates if the soft reset is complete [this field will return to 0 when the soft reset is complete]" range="28" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_26" width="2" begin="27" end="26" resetval="0x0" description="" range="27 - 26" rwaccess="R"/> 
+		<bitfield id="MMU_PAUSE_CLEAR" width="1" begin="25" end="25" resetval="0x0" description="Writing '1' to this bit clears the pause bit, and allows new memory requests to resume. Writing '0' has no affect. Reading this field indicates if the pause bit is currently set. Setting both 'MMU_PAUSE_SET' and 'MMU_PAUSE_CLEAR' in the same write will clear the pause bit" range="25" rwaccess="R/W"/> 
+		<bitfield id="MMU_PAUSE_SET" width="1" begin="24" end="24" resetval="0x0" description="Writing '1' to this bit causes all new memory requests to pause [requests further down the pipeline will be allowed to complete]. Writing '0' has no affect. Reading this field indicates if the pause bit is currently set. Setting both 'MMU_PAUSE_SET' and 'MMU_PAUSE_CLEAR' in the same write will clear the pause bit" range="24" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_21" width="3" begin="23" end="21" resetval="0x0" description="" range="23 - 21" rwaccess="R"/> 
+		<bitfield id="PROTOCOL_FAULT_CLEAR" width="1" begin="20" end="20" resetval="0x0" description="Writing '1' to this bit clears all bus protocol fault flags. Writing '0' has no affect" range="20" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_17" width="3" begin="19" end="17" resetval="0x0" description="" range="19 - 17" rwaccess="R"/> 
+		<bitfield id="MMU_FAULT_CLEAR" width="1" begin="16" end="16" resetval="0x0" description="Writing '1' to this bit clears MMU fault [either page fault or read/write fault]. Writing '0' has no affect" range="16" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_12" width="4" begin="15" end="12" resetval="0x0" description="" range="15 - 12" rwaccess="R"/> 
+		<bitfield id="MMU_INVALDC" width="1" begin="11" end="11" resetval="0x0" description="For each 'dir_base_addr' used, writing '1' triggers invalidation[/flushing] of both the directory cache and page table cache for that 'dir_base_addr' [cached results for different 'dir_base_addr' can be invalidated/flushed independently]. Writing '0' has no affect" range="11" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_4" width="4" begin="7" end="4" resetval="0x0" description="" range="7 - 4" rwaccess="R"/> 
+		<bitfield id="MMU_FLUSH" width="1" begin="3" end="3" resetval="0x0" description="For each 'dir_base_addr' used, writing '1' triggers a flush of the Page Table cache and registered results for that 'dir_base_addr' [cached results for different 'dir_base_addr' can be flushed independently]. Writing '0' has no affect" range="3" rwaccess="R/W"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_BANK_INDEX" acronym="CORE_MMU_REGS_MMU_BANK_INDEX" offset="0x10" width="32" description="">
+		<bitfield id="RESERVED" width="32" begin="31" end="0" resetval="0x0" description="Specify which directory base address to use for 'group override' input n [If GROUP_OVERRIDE_SIZE is 0, this register is not used, otherwise there are '2 to the power GROUP_OVERRIDE_SIZE' entries supported in this register" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_EXT_REQUEST_PRIORITY_ENABLE" acronym="CORE_MMU_REGS_EXT_REQUEST_PRIORITY_ENABLE" offset="0x14" width="32" description="">
+		
+	</register>
+	<register id="CORE_MMU_REGS_REQUEST_PRIORITY_ENABLE" acronym="CORE_MMU_REGS_REQUEST_PRIORITY_ENABLE" offset="0x18" width="32" description="">
+		<bitfield id="RESERVED_17" width="15" begin="31" end="17" resetval="0x0" description="" range="31 - 17" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_REQUEST_LIMITED_THROUGHPUT" acronym="CORE_MMU_REGS_REQUEST_LIMITED_THROUGHPUT" offset="0x1C" width="32" description="RESERVED">
+		<bitfield id="RESERVED_28" width="4" begin="31" end="28" resetval="0x0" description="" range="31 - 28" rwaccess="R"/> 
+		<bitfield id="RESERVED_10" width="6" begin="15" end="10" resetval="0x0" description="" range="15 - 10" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_DIR_BASE_ADDR_00" acronym="CORE_MMU_REGS_MMU_DIR_BASE_ADDR_00" offset="0x20" width="32" description="">
+		<bitfield id="MMU_DIR_BASE_ADDR" width="28" begin="31" end="4" resetval="0x0" description="Base address in physical memory for MMU Directory n Entries. When MMU_ENABLE_EXT_ADDRESSING is '1', the bits 31:0 are assigned to the address 31+EXT_ADDR_RANGE:0+EXT_ADDR_RANGE, but then any address offset within a page is forced to 0. When MMU_ENABLE_EXT_ADDRESSING is '0', bits 31:12 are assigned to address 31:12" range="31 - 4" rwaccess="R/W"/> 
+		<bitfield id="MMU_DIR_BASE_ADDR_LSBS" width="4" begin="3" end="0" resetval="0x0" description="Bits 3:0 of this register are read-only, and hardcoded in RTL at 0x0" range="3 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_DIR_BASE_ADDR_01" acronym="CORE_MMU_REGS_MMU_DIR_BASE_ADDR_01" offset="0x24" width="32" description="">
+		<bitfield id="MMU_DIR_BASE_ADDR" width="32" begin="31" end="0" resetval="0x0" description="GROUP_OVERRIDE_SIZE hardcoded at 0 in RTL. Hence, this register is read only and returns 0x0" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_DIR_BASE_ADDR_02" acronym="CORE_MMU_REGS_MMU_DIR_BASE_ADDR_02" offset="0x28" width="32" description="">
+		<bitfield id="MMU_DIR_BASE_ADDR" width="32" begin="31" end="0" resetval="0x0" description="GROUP_OVERRIDE_SIZE hardcoded at 0 in RTL. Hence, this register is read only and returns 0x0" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_DIR_BASE_ADDR_03" acronym="CORE_MMU_REGS_MMU_DIR_BASE_ADDR_03" offset="0x2C" width="32" description="">
+		<bitfield id="MMU_DIR_BASE_ADDR" width="32" begin="31" end="0" resetval="0x0" description="GROUP_OVERRIDE_SIZE hardcoded at 0 in RTL. Hence, this register is read only and returns 0x0" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_TILE_CFG_00" acronym="CORE_MMU_REGS_MMU_TILE_CFG_00" offset="0x40" width="32" description="If USE_TILE_STRIDE_PER_CONTEXT is low, only the bottom byte of the register is used, and each of the four registers applies to the four regions defined by the corresponding MIN and MAX tile address ranges.
+If USE_TILE_STRIDE_PER_CONTEXT is high, the four bytes in a register applies to the four regions defined by the corresponding MIN and MAX tile address ranges. Then each of the four registers apply to four different contexts, where each context can use a different stride, but the MIN to MAX address range defining each region is common to all contexts (where context is the 2-bit index selected from the MMU_BANK_INDEX register).">
+		<bitfield id="RESERVED_29" width="3" begin="31" end="29" resetval="0x0" description="" range="31 - 29" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE_SPCR3" width="1" begin="28" end="28" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="28" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE_SPCR3" width="1" begin="27" end="27" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="27" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE_SPCR3" width="3" begin="26" end="24" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="26 - 24" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_21" width="3" begin="23" end="21" resetval="0x0" description="" range="23 - 21" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE_SPCR2" width="1" begin="20" end="20" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="20" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE_SPCR2" width="1" begin="19" end="19" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="19" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE_SPCR2" width="3" begin="18" end="16" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="18 - 16" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_13" width="3" begin="15" end="13" resetval="0x0" description="" range="15 - 13" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE_SPCR1" width="1" begin="12" end="12" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="12" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE_SPCR1" width="1" begin="11" end="11" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="11" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE_SPCR1" width="3" begin="10" end="8" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="10 - 8" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_5" width="3" begin="7" end="5" resetval="0x0" description="" range="7 - 5" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE" width="1" begin="4" end="4" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="4" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE" width="1" begin="3" end="3" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="3" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE" width="3" begin="2" end="0" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="2 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_TILE_CFG_01" acronym="CORE_MMU_REGS_MMU_TILE_CFG_01" offset="0x44" width="32" description="If USE_TILE_STRIDE_PER_CONTEXT is low, only the bottom byte of the register is used, and each of the four registers applies to the four regions defined by the corresponding MIN and MAX tile address ranges.
+If USE_TILE_STRIDE_PER_CONTEXT is high, the four bytes in a register applies to the four regions defined by the corresponding MIN and MAX tile address ranges. Then each of the four registers apply to four different contexts, where each context can use a different stride, but the MIN to MAX address range defining each region is common to all contexts (where context is the 2-bit index selected from the MMU_BANK_INDEX register).">
+		<bitfield id="RESERVED_29" width="3" begin="31" end="29" resetval="0x0" description="" range="31 - 29" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE_SPCR3" width="1" begin="28" end="28" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="28" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE_SPCR3" width="1" begin="27" end="27" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="27" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE_SPCR3" width="3" begin="26" end="24" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="26 - 24" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_21" width="3" begin="23" end="21" resetval="0x0" description="" range="23 - 21" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE_SPCR2" width="1" begin="20" end="20" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="20" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE_SPCR2" width="1" begin="19" end="19" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="19" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE_SPCR2" width="3" begin="18" end="16" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="18 - 16" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_13" width="3" begin="15" end="13" resetval="0x0" description="" range="15 - 13" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE_SPCR1" width="1" begin="12" end="12" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="12" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE_SPCR1" width="1" begin="11" end="11" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="11" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE_SPCR1" width="3" begin="10" end="8" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="10 - 8" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_5" width="3" begin="7" end="5" resetval="0x0" description="" range="7 - 5" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE" width="1" begin="4" end="4" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="4" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE" width="1" begin="3" end="3" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="3" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE" width="3" begin="2" end="0" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="2 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_TILE_CFG_02" acronym="CORE_MMU_REGS_MMU_TILE_CFG_02" offset="0x48" width="32" description="If USE_TILE_STRIDE_PER_CONTEXT is low, only the bottom byte of the register is used, and each of the four registers applies to the four regions defined by the corresponding MIN and MAX tile address ranges.
+If USE_TILE_STRIDE_PER_CONTEXT is high, the four bytes in a register applies to the four regions defined by the corresponding MIN and MAX tile address ranges. Then each of the four registers apply to four different contexts, where each context can use a different stride, but the MIN to MAX address range defining each region is common to all contexts (where context is the 2-bit index selected from the MMU_BANK_INDEX register).">
+		<bitfield id="RESERVED_29" width="3" begin="31" end="29" resetval="0x0" description="" range="31 - 29" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE_SPCR3" width="1" begin="28" end="28" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="28" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE_SPCR3" width="1" begin="27" end="27" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="27" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE_SPCR3" width="3" begin="26" end="24" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="26 - 24" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_21" width="3" begin="23" end="21" resetval="0x0" description="" range="23 - 21" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE_SPCR2" width="1" begin="20" end="20" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="20" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE_SPCR2" width="1" begin="19" end="19" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="19" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE_SPCR2" width="3" begin="18" end="16" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="18 - 16" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_13" width="3" begin="15" end="13" resetval="0x0" description="" range="15 - 13" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE_SPCR1" width="1" begin="12" end="12" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="12" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE_SPCR1" width="1" begin="11" end="11" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="11" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE_SPCR1" width="3" begin="10" end="8" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="10 - 8" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_5" width="3" begin="7" end="5" resetval="0x0" description="" range="7 - 5" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE" width="1" begin="4" end="4" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="4" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE" width="1" begin="3" end="3" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="3" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE" width="3" begin="2" end="0" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="2 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_TILE_CFG_03" acronym="CORE_MMU_REGS_MMU_TILE_CFG_03" offset="0x4C" width="32" description="If USE_TILE_STRIDE_PER_CONTEXT is low, only the bottom byte of the register is used, and each of the four registers applies to the four regions defined by the corresponding MIN and MAX tile address ranges.
+If USE_TILE_STRIDE_PER_CONTEXT is high, the four bytes in a register applies to the four regions defined by the corresponding MIN and MAX tile address ranges. Then each of the four registers apply to four different contexts, where each context can use a different stride, but the MIN to MAX address range defining each region is common to all contexts (where context is the 2-bit index selected from the MMU_BANK_INDEX register).">
+		<bitfield id="RESERVED_29" width="3" begin="31" end="29" resetval="0x0" description="" range="31 - 29" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE_SPCR3" width="1" begin="28" end="28" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="28" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE_SPCR3" width="1" begin="27" end="27" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="27" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE_SPCR3" width="3" begin="26" end="24" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="26 - 24" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_21" width="3" begin="23" end="21" resetval="0x0" description="" range="23 - 21" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE_SPCR2" width="1" begin="20" end="20" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="20" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE_SPCR2" width="1" begin="19" end="19" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="19" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE_SPCR2" width="3" begin="18" end="16" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="18 - 16" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_13" width="3" begin="15" end="13" resetval="0x0" description="" range="15 - 13" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE_SPCR1" width="1" begin="12" end="12" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="12" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE_SPCR1" width="1" begin="11" end="11" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="11" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE_SPCR1" width="3" begin="10" end="8" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="10 - 8" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_5" width="3" begin="7" end="5" resetval="0x0" description="" range="7 - 5" rwaccess="R"/> 
+		<bitfield id="TILE_128INTERLEAVE" width="1" begin="4" end="4" resetval="0x0" description="0 : Customizable address manipulation of tiled accesses is not enabled 1 : Customizable address manipulation of tiled accesses is enabled" range="4" rwaccess="R/W"/> 
+		<bitfield id="TILE_ENABLE" width="1" begin="3" end="3" resetval="0x0" description="0 : Memory Tiling Disabled 1 : Memory Tiling Enabled" range="3" rwaccess="R/W"/> 
+		<bitfield id="TILE_STRIDE" width="3" begin="2" end="0" resetval="0x0" description="Defines the X Tile Stride for the memory address range [stride is 2 to the power of [9+tile_stride+tiling_scheme]]" range="2 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_TILE_MIN_ADDR_00" acronym="CORE_MMU_REGS_MMU_TILE_MIN_ADDR_00" offset="0x50" width="32" description="">
+		<bitfield id="TILE_MIN_ADDR" width="20" begin="31" end="12" resetval="0x0" description="Defines the minimum address for tiling range, in terms of the virtual address MSB's i.e. 31:TILE_ADDR_GRANULARITY" range="31 - 12" rwaccess="R/W"/> 
+		<bitfield id="TILE_MIN_ADDR_LSBS" width="12" begin="11" end="0" resetval="0x0" description="TILE_ADDR_GRANULARITY is hardcoded in RTL at 12 [decimal]. Hence, bits 11:0 of this register are read-only, and hardcoded in RTL at 0x000" range="11 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_TILE_MIN_ADDR_01" acronym="CORE_MMU_REGS_MMU_TILE_MIN_ADDR_01" offset="0x54" width="32" description="">
+		<bitfield id="TILE_MIN_ADDR" width="20" begin="31" end="12" resetval="0x0" description="Defines the minimum address for tiling range, in terms of the virtual address MSB's i.e. 31:TILE_ADDR_GRANULARITY" range="31 - 12" rwaccess="R/W"/> 
+		<bitfield id="TILE_MIN_ADDR_LSBS" width="12" begin="11" end="0" resetval="0x0" description="TILE_ADDR_GRANULARITY is hardcoded in RTL at 12 [decimal]. Hence, bits 11:0 of this register are read-only, and hardcoded in RTL at 0x000" range="11 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_TILE_MIN_ADDR_02" acronym="CORE_MMU_REGS_MMU_TILE_MIN_ADDR_02" offset="0x58" width="32" description="">
+		<bitfield id="TILE_MIN_ADDR" width="20" begin="31" end="12" resetval="0x0" description="Defines the minimum address for tiling range, in terms of the virtual address MSB's i.e. 31:TILE_ADDR_GRANULARITY" range="31 - 12" rwaccess="R/W"/> 
+		<bitfield id="TILE_MIN_ADDR_LSBS" width="12" begin="11" end="0" resetval="0x0" description="TILE_ADDR_GRANULARITY is hardcoded in RTL at 12 [decimal]. Hence, bits 11:0 of this register are read-only, and hardcoded in RTL at 0x000" range="11 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_TILE_MIN_ADDR_03" acronym="CORE_MMU_REGS_MMU_TILE_MIN_ADDR_03" offset="0x5C" width="32" description="">
+		<bitfield id="TILE_MIN_ADDR" width="20" begin="31" end="12" resetval="0x0" description="Defines the minimum address for tiling range, in terms of the virtual address MSB's i.e. 31:TILE_ADDR_GRANULARITY" range="31 - 12" rwaccess="R/W"/> 
+		<bitfield id="TILE_MIN_ADDR_LSBS" width="12" begin="11" end="0" resetval="0x0" description="TILE_ADDR_GRANULARITY is hardcoded in RTL at 12 [decimal]. Hence, bits 11:0 of this register are read-only, and hardcoded in RTL at 0x000" range="11 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_TILE_MAX_ADDR_00" acronym="CORE_MMU_REGS_MMU_TILE_MAX_ADDR_00" offset="0x60" width="32" description="">
+		<bitfield id="TILE_MAX_ADDR" width="20" begin="31" end="12" resetval="0x0" description="Defines the maximum address for tiling range, in terms of the virtual address MSB's i.e. 31:TILE_ADDR_GRANULARITY" range="31 - 12" rwaccess="R/W"/> 
+		<bitfield id="TILE_MAX_ADDR_LSBS" width="12" begin="11" end="0" resetval="0x0" description="TILE_ADDR_GRANULARITY is hardcoded in RTL at 12 [decimal]. Hence, bits 11:0 of this register are read-only, and hardcoded in RTL at 0x000" range="11 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_TILE_MAX_ADDR_01" acronym="CORE_MMU_REGS_MMU_TILE_MAX_ADDR_01" offset="0x64" width="32" description="">
+		<bitfield id="TILE_MAX_ADDR" width="20" begin="31" end="12" resetval="0x0" description="Defines the maximum address for tiling range, in terms of the virtual address MSB's i.e. 31:TILE_ADDR_GRANULARITY" range="31 - 12" rwaccess="R/W"/> 
+		<bitfield id="TILE_MAX_ADDR_LSBS" width="12" begin="11" end="0" resetval="0x0" description="TILE_ADDR_GRANULARITY is hardcoded in RTL at 12 [decimal]. Hence, bits 11:0 of this register are read-only, and hardcoded in RTL at 0x000" range="11 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_TILE_MAX_ADDR_02" acronym="CORE_MMU_REGS_MMU_TILE_MAX_ADDR_02" offset="0x68" width="32" description="">
+		<bitfield id="TILE_MAX_ADDR" width="20" begin="31" end="12" resetval="0x0" description="Defines the maximum address for tiling range, in terms of the virtual address MSB's i.e. 31:TILE_ADDR_GRANULARITY" range="31 - 12" rwaccess="R/W"/> 
+		<bitfield id="TILE_MAX_ADDR_LSBS" width="12" begin="11" end="0" resetval="0x0" description="TILE_ADDR_GRANULARITY is hardcoded in RTL at 12 [decimal]. Hence, bits 11:0 of this register are read-only, and hardcoded in RTL at 0x000" range="11 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_TILE_MAX_ADDR_03" acronym="CORE_MMU_REGS_MMU_TILE_MAX_ADDR_03" offset="0x6C" width="32" description="">
+		<bitfield id="TILE_MAX_ADDR" width="20" begin="31" end="12" resetval="0x0" description="Defines the maximum address for tiling range, in terms of the virtual address MSB's i.e. 31:TILE_ADDR_GRANULARITY" range="31 - 12" rwaccess="R/W"/> 
+		<bitfield id="TILE_MAX_ADDR_LSBS" width="12" begin="11" end="0" resetval="0x0" description="TILE_ADDR_GRANULARITY is hardcoded in RTL at 12 [decimal]. Hence, bits 11:0 of this register are read-only, and hardcoded in RTL at 0x000" range="11 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_ADDRESS_CONTROL" acronym="CORE_MMU_REGS_MMU_ADDRESS_CONTROL" offset="0x70" width="32" description="">
+		<bitfield id="RESERVED_24" width="8" begin="31" end="24" resetval="0x0" description="" range="31 - 24" rwaccess="R"/> 
+		<bitfield id="UPPER_ADDRESS_FIXED" width="8" begin="23" end="16" resetval="0x0" description="If 'EXTENDED_ADDR_RANGE' is > 0, and MMU is used in bypass mode or MMU_ENABLE_EXT_ADDRESSING = '0', EXTENDED_ADDR_RANGE bits from this field will be used to define the state of the upper physical address bits [for all memory requests]" range="23 - 16" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_11" width="5" begin="15" end="11" resetval="0x0" description="" range="15 - 11" rwaccess="R"/> 
+		<bitfield id="SOFT_PAGE_SIZE" width="3" begin="10" end="8" resetval="0x0" description="This field selects MMU page size at run time [if this field is less than the minimum hardware configuration for PAGE_SIZE from MMU_CONFIG1, then the PAGE_SIZE will be used]" range="10 - 8" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_5" width="3" begin="7" end="5" resetval="0x0" description="" range="7 - 5" rwaccess="R"/> 
+		<bitfield id="MMU_ENABLE_EXT_ADDRESSING" width="1" begin="4" end="4" resetval="0x0" description="1: Directory/Page Table entries loaded into MSBits of physical address bus 0: Directory/Page Table entries loaded into bits 31 downwards of physical address bus" range="4" rwaccess="R/W"/> 
+		<bitfield id="RESERVED_1" width="3" begin="3" end="1" resetval="0x0" description="" range="3 - 1" rwaccess="R"/> 
+		<bitfield id="MMU_BYPASS" width="1" begin="0" end="0" resetval="0x1" description="1: All memory requests bypass the 'Address Translation' part of the MMU, but tiling can still be enabled 0: All memory requests use of the 'Address Translation' part of the MMU" range="0" rwaccess="R/W"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_CONFIG0" acronym="CORE_MMU_REGS_MMU_CONFIG0" offset="0x80" width="32" description="">
+		<bitfield id="TAGS_SUPPORTED" width="10" begin="31" end="22" resetval="0x64" description="Number of outstanding bursts supported" range="31 - 22" rwaccess="R"/> 
+		<bitfield id="NO_READ_REORDER" width="1" begin="21" end="21" resetval="0x0" description="If this field is set, it indicates there is no read data re-ordering buffer [all requestors must accept read response out of order]" range="21" rwaccess="R"/> 
+		<bitfield id="TILE_ADDR_GRANULARITY" width="5" begin="20" end="16" resetval="0x12" description="This field indicates the granularity of the tile address range [where virtual address range is matched from [31:TILE_ADDR_GRANULARITY]]" range="20 - 16" rwaccess="R"/> 
+		<bitfield id="NUM_REQUESTORS_EXT" width="2" begin="15" end="14" resetval="0x0" description="In MMU version 4.2 onwards, NUM_REQUESTORS_EXT*16 + NUM_REQUESTORS indicates the number of requestors the core has been configured for [before version 4.2 this field was always 0]" range="15 - 14" rwaccess="R"/> 
+		<bitfield id="MMU_SUPPORTED" width="1" begin="13" end="13" resetval="0x1" description="This field indicates if MMU page table mapping is supported [N.B. tiling can still be used even if the MMU is not supported]" range="13" rwaccess="R"/> 
+		<bitfield id="ADDR_COHERENCY_SUPPORTED" width="1" begin="12" end="12" resetval="0x0" description="This field indicates if address coherency checking is supported [if it is not supported requestors need to use another mechanism to gurantee reads and writes to the same address don't occur out of order]" range="12" rwaccess="R"/> 
+		<bitfield id="RESERVED_11" width="1" begin="11" end="11" resetval="0x0" description="" range="11" rwaccess="R"/> 
+		<bitfield id="GROUP_OVERRIDE_SIZE" width="3" begin="10" end="8" resetval="0x0" description="If this field is 0, only 1 directory base address is supported [MMU_DIR_BASE_ADDR0]. If this field is 1, only the first two entries in MMU_BANK_INDEX are used to select one of 4 base addresses. If this field is 2, there are 4 MMU_BANK_INDEX entries, 3 = 8 entries, 4 = 16 entries" range="10 - 8" rwaccess="R"/> 
+		<bitfield id="EXTENDED_ADDR_RANGE" width="4" begin="7" end="4" resetval="0x8" description="This field indicates the number of extended address bits [above 32] that the external memory interface uses" range="7 - 4" rwaccess="R"/> 
+		<bitfield id="NUM_REQUESTORS" width="4" begin="3" end="0" resetval="0x2" description="Before MMU version 4.2, this field indicates the number of requestors the core has been configured for [between 1 and 15, or a value of 0 =16 requestors]. In MMU version 4.2 onwards, this field + NUM_REQUESTORS_EXT*16 indicates the number of requestors the core has been configured for" range="3 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_CONFIG1" acronym="CORE_MMU_REGS_MMU_CONFIG1" offset="0x84" width="32" description="">
+		<bitfield id="RESERVED_31" width="1" begin="31" end="31" resetval="0x0" description="" range="31" rwaccess="R"/> 
+		<bitfield id="SUPPORT_EXCLUSIVE" width="1" begin="30" end="30" resetval="0x0" description="Logic included to support exclusive transactions [for doing read-modify-write without another master modifying the value]" range="30" rwaccess="R"/> 
+		<bitfield id="SUPPORT_STRIDE_PER_CONTEXT" width="1" begin="29" end="29" resetval="0x0" description="Logic included to support separate tile stride per context" range="29" rwaccess="R"/> 
+		<bitfield id="SUPPORT_READ_INTERLEAVE" width="1" begin="28" end="28" resetval="0x1" description="Logic included to support interleaved read responses [violates Bus4 protocol but may occur when Bus4 to AXI bridge is used]" range="28" rwaccess="R"/> 
+		<bitfield id="RESERVED_27" width="1" begin="27" end="27" resetval="0x0" description="" range="27" rwaccess="R"/> 
+		<bitfield id="LATENCY_COUNT_SUPPORTED" width="1" begin="26" end="26" resetval="0x0" description="Latency counts included" range="26" rwaccess="R"/> 
+		<bitfield id="STALL_COUNT_SUPPORTED" width="1" begin="25" end="25" resetval="0x0" description="Stall counts included" range="25" rwaccess="R"/> 
+		<bitfield id="BANDWIDTH_COUNT_SUPPORTED" width="1" begin="24" end="24" resetval="0x0" description="Bandwidth counts included" range="24" rwaccess="R"/> 
+		<bitfield id="RESERVED_21" width="3" begin="23" end="21" resetval="0x0" description="" range="23 - 21" rwaccess="R"/> 
+		<bitfield id="DIR_CACHE_ENTRIES" width="5" begin="20" end="16" resetval="0x1" description="DIR_CACHE_ENTRIES * 128 defines the number of Directory Table entries which can be cached" range="20 - 16" rwaccess="R"/> 
+		<bitfield id="PAGE_CACHE_ENTRIES" width="8" begin="15" end="8" resetval="0x3" description="PAGE_CACHE_ENTRIES * 128 defines the number of Page Table entries which can be cached" range="15 - 8" rwaccess="R"/> 
+		<bitfield id="RESERVED_4" width="4" begin="7" end="4" resetval="0x0" description="" range="7 - 4" rwaccess="R"/> 
+		<bitfield id="PAGE_SIZE" width="4" begin="3" end="0" resetval="0x0" description="Log2 MMU page size minus 12 [4kbyte page = 0, 16kbyte page = 2]" range="3 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_STATUS0" acronym="CORE_MMU_REGS_MMU_STATUS0" offset="0x88" width="32" description="">
+		<bitfield id="MMU_FAULT_ADDR" width="20" begin="31" end="12" resetval="0x0" description="Page-aligned virtual address causing page fault" range="31 - 12" rwaccess="R"/> 
+		<bitfield id="RESERVED_1" width="11" begin="11" end="1" resetval="0x0" description="" range="11 - 1" rwaccess="R"/> 
+		<bitfield id="MMU_PF_N_RW" width="1" begin="0" end="0" resetval="0x0" description="Indicates whether the current fault is a page fault [when high] or R/W protection fault [when low]" range="0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_STATUS1" acronym="CORE_MMU_REGS_MMU_STATUS1" offset="0x8C" width="32" description="">
+		<bitfield id="RESERVED_29" width="3" begin="31" end="29" resetval="0x0" description="" range="31 - 29" rwaccess="R"/> 
+		<bitfield id="MMU_FAULT_RNW" width="1" begin="28" end="28" resetval="0x0" description="Indicates if a read or write operation caused the current fault" range="28" rwaccess="R"/> 
+		<bitfield id="RESERVED_26" width="2" begin="27" end="26" resetval="0x0" description="" range="27 - 26" rwaccess="R"/> 
+		<bitfield id="MMU_FAULT_INDEX" width="2" begin="25" end="24" resetval="0x0" description="Indicates the directory cache index of the current fault" range="25 - 24" rwaccess="R"/> 
+		<bitfield id="RESERVED_22" width="2" begin="23" end="22" resetval="0x0" description="" range="23 - 22" rwaccess="R"/> 
+		<bitfield id="MMU_FAULT_REQ_ID" width="6" begin="21" end="16" resetval="0x0" description="Indicates the requestor ID of the request causing the current page fault" range="21 - 16" rwaccess="R"/> 
+		<bitfield id="MMU_FAULT_REQ_STAT" width="16" begin="15" end="0" resetval="0x0" description="1-bit per requestor indicating if requestor triggered a page fault [in the event there are more than 16 requestors, modulo 16 arithmetic is used to assign 1 of these bits [i.e. requestor 1, 17, and 33 would all set bit 1]" range="15 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_MEM_REQ" acronym="CORE_MMU_REGS_MMU_MEM_REQ" offset="0x90" width="32" description="">
+		<bitfield id="INT_PROTOCOL_FAULT" width="1" begin="31" end="31" resetval="0x0" description="When set, indicates the corresponding requestor had a bus protocol fault [excludes MMU requests]" range="31" rwaccess="R"/> 
+		<bitfield id="RESERVED_15" width="1" begin="15" end="15" resetval="0x0" description="" range="15" rwaccess="R"/> 
+		<bitfield id="EXT_READ_BURST_FAULT" width="1" begin="14" end="14" resetval="0x0" description="When set, indicates the external interface returned a read burst for a tag which didn't contain the expected number of words" range="14" rwaccess="R"/> 
+		<bitfield id="EXT_RDRESP_FAULT" width="1" begin="13" end="13" resetval="0x0" description="When set, indicates the external interface returned a read response for a tag which wasn't outstanding [may occur after reset]" range="13" rwaccess="R"/> 
+		<bitfield id="EXT_WRRESP_FAULT" width="1" begin="12" end="12" resetval="0x0" description="When set, indicates the external interface returned a write response for a tag which wasn't outstanding [may occur after reset]" range="12" rwaccess="R"/> 
+		<bitfield id="RESERVED_10" width="2" begin="11" end="10" resetval="0x0" description="" range="11 - 10" rwaccess="R"/> 
+		<bitfield id="TAG_OUTSTANDING" width="10" begin="9" end="0" resetval="0x0" description="Number of outstanding burst requests [TAGS which have been allocated but not yet freed, includes reads which have been returned but are still in the read re-order buffer]" range="9 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_MEM_EXT_OUTSTANDING" acronym="CORE_MMU_REGS_MMU_MEM_EXT_OUTSTANDING" offset="0x94" width="32" description="">
+		<bitfield id="RESERVED_16" width="16" begin="31" end="16" resetval="0x0" description="" range="31 - 16" rwaccess="R"/> 
+		<bitfield id="READ_WORDS_OUTSTANDING" width="16" begin="15" end="0" resetval="0x0" description="Number of outstanding read words [in which read commands have been sent to the external interface, but the corresponding words haven't been received yet, counted in 'external data bus width' words]" range="15 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_FAULT_SELECT" acronym="CORE_MMU_REGS_MMU_FAULT_SELECT" offset="0xA0" width="32" description="">
+		<bitfield id="RESERVED_4" width="28" begin="31" end="4" resetval="0x0" description="" range="31 - 4" rwaccess="R"/> 
+		<bitfield id="MMU_FAULT_SELECT" width="4" begin="3" end="0" resetval="0x0" description="The core can be configured to include protocol checkers on the input requestors, this field selects which interface is read from the PROTOCOL_FAULT register [0-15 = requestor 0-15]" range="3 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="CORE_MMU_REGS_PROTOCOL_FAULT" acronym="CORE_MMU_REGS_PROTOCOL_FAULT" offset="0xA8" width="32" description="">
+		<bitfield id="RESERVED_6" width="26" begin="31" end="6" resetval="0x0" description="" range="31 - 6" rwaccess="R"/> 
+		<bitfield id="FAULT_READ" width="1" begin="5" end="5" resetval="0x0" description="For requestor interface, indicates a read command on a requestor configured for write only" range="5" rwaccess="R"/> 
+		<bitfield id="FAULT_WRITE" width="1" begin="4" end="4" resetval="0x0" description="For requestor interface, indicates a write command on a requestor configured for read only" range="4" rwaccess="R"/> 
+		<bitfield id="RESERVED_1" width="3" begin="3" end="1" resetval="0x0" description="" range="3 - 1" rwaccess="R"/> 
+		<bitfield id="FAULT_PAGE_BREAK" width="1" begin="0" end="0" resetval="0x0" description="The command crossed a page in the middle of a burst" range="0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_TOTAL_READ_REQ" acronym="CORE_MMU_REGS_TOTAL_READ_REQ" offset="0x100" width="32" description="If MMU_CONFIG1.BANDWIDTH_COUNT_SUPPORTED is 0, this register will be fixed at 0.">
+		<bitfield id="TOTAL_READ_REQ" width="32" begin="31" end="0" resetval="0x0" description="Debug only: Total number of bytes read" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_TOTAL_WRITE_REQ" acronym="CORE_MMU_REGS_TOTAL_WRITE_REQ" offset="0x104" width="32" description="If MMU_CONFIG1.BANDWIDTH_COUNT_SUPPORTED is 0, this register will be fixed at 0.">
+		<bitfield id="TOTAL_WRITE_REQ" width="32" begin="31" end="0" resetval="0x0" description="Debug only: Total number of bytes written" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_READS_LESS_64_REQ" acronym="CORE_MMU_REGS_READS_LESS_64_REQ" offset="0x108" width="32" description="If MMU_CONFIG1.BANDWIDTH_COUNT_SUPPORTED is 0, this register will be fixed at 0.">
+		<bitfield id="READS_LESS_64_REQ" width="32" begin="31" end="0" resetval="0x0" description="Debug only: Total number of bytes read using a burst size less than 64 bytes" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_WRITES_LESS_64_REQ" acronym="CORE_MMU_REGS_WRITES_LESS_64_REQ" offset="0x10C" width="32" description="If MMU_CONFIG1.BANDWIDTH_COUNT_SUPPORTED is 0, this register will be fixed at 0.">
+		<bitfield id="WRITES_LESS_64_REQ" width="32" begin="31" end="0" resetval="0x0" description="Debug only: Total number of bytes written using a burst size less than 64 bytes" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_EXT_CMD_STALL" acronym="CORE_MMU_REGS_EXT_CMD_STALL" offset="0x120" width="32" description="If MMU_CONFIG1.STALL_COUNT_SUPPORTED is 0, this register will be fixed at 0.">
+		<bitfield id="EXT_CMD_STALL" width="32" begin="31" end="0" resetval="0x0" description="Debug only: Number of cycles in which command out of Page Table lookup stalled by external interface" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_WRITE_REQ_STALL" acronym="CORE_MMU_REGS_WRITE_REQ_STALL" offset="0x124" width="32" description="If MMU_CONFIG1.STALL_COUNT_SUPPORTED is 0, this register will be fixed at 0.">
+		<bitfield id="WRITE_REQ_STALL" width="32" begin="31" end="0" resetval="0x0" description="Debug only: Number of cycles in which command out of Page Table lookup stalled by write request FIFO" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_MISS_STALL" acronym="CORE_MMU_REGS_MMU_MISS_STALL" offset="0x128" width="32" description="If MMU_CONFIG1.STALL_COUNT_SUPPORTED is 0, this register will be fixed at 0.">
+		<bitfield id="MMU_MISS_STALL" width="32" begin="31" end="0" resetval="0x0" description="Debug only: Number of cycles in which command is stalled because MMU cache miss buffer is full" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_ADDRESS_STALL" acronym="CORE_MMU_REGS_ADDRESS_STALL" offset="0x12C" width="32" description="If MMU_CONFIG1.STALL_COUNT_SUPPORTED is 0, this register will be fixed at 0.">
+		<bitfield id="ADDRESS_STALL" width="32" begin="31" end="0" resetval="0x0" description="Debug only: Number of cycles in which command is stalled because Address coherency buffer is full" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_TAG_STALL" acronym="CORE_MMU_REGS_TAG_STALL" offset="0x130" width="32" description="If MMU_CONFIG1.STALL_COUNT_SUPPORTED is 0, this register will be fixed at 0.">
+		<bitfield id="TAG_STALL" width="32" begin="31" end="0" resetval="0x0" description="Debug only: Number of cycles in which command is stalled because no free TAGs to allocate" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_PEAK_READ_OUTSTANDING" acronym="CORE_MMU_REGS_PEAK_READ_OUTSTANDING" offset="0x140" width="32" description="If MMU_CONFIG1.LATENCY_COUNT_SUPPORTED is 0, this register will be fixed at 0.">
+		<bitfield id="PEAK_READ_LATENCY" width="16" begin="31" end="16" resetval="0x0" description="Debug only: Peak read latency detected [number of cycles a read tag remains outstanding]" range="31 - 16" rwaccess="R"/> 
+		<bitfield id="RESERVED_10" width="6" begin="15" end="10" resetval="0x0" description="" range="15 - 10" rwaccess="R"/> 
+		<bitfield id="PEAK_TAG_OUTSTANDING" width="10" begin="9" end="0" resetval="0x0" description="Debug only: Largest value on TAG_OUTSTANDING since last initialisation" range="9 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_AVERAGE_READ_LATENCY" acronym="CORE_MMU_REGS_AVERAGE_READ_LATENCY" offset="0x144" width="32" description="If MMU_CONFIG1.LATENCY_COUNT_SUPPORTED is 0, this register will be fixed at 0.">
+		<bitfield id="AVERAGE_READ_LATENCY" width="32" begin="31" end="0" resetval="0x0" description="Uses an IIR function on read latency, where the 16 MSBits are the same resolution as PEAK_READ_LATENCY" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="CORE_MMU_REGS_STATISTICS_CONTROL" acronym="CORE_MMU_REGS_STATISTICS_CONTROL" offset="0x160" width="32" description="">
+		<bitfield id="RESERVED_3" width="29" begin="31" end="3" resetval="0x0" description="" range="31 - 3" rwaccess="R"/> 
+		<bitfield id="LATENCY_STATS_INIT" width="1" begin="2" end="2" resetval="0x0" description="Writing '1' resets the latency statistics [this bit automatically clears to '0']" range="2" rwaccess="R/W"/> 
+		<bitfield id="STALL_STATS_INIT" width="1" begin="1" end="1" resetval="0x0" description="Writing '1' resets the stall count statistics [this bit automatically clears to '0']" range="1" rwaccess="R/W"/> 
+		<bitfield id="BANDWIDTH_STATS_INIT" width="1" begin="0" end="0" resetval="0x0" description="Writing '1' resets the bandwidth statistics [this bit automatically clears to '0']" range="0" rwaccess="R/W"/>
+	</register>
+	<register id="CORE_MMU_REGS_MMU_VERSION" acronym="CORE_MMU_REGS_MMU_VERSION" offset="0x1D0" width="32" description="">
+		<bitfield id="RESERVED_24" width="8" begin="31" end="24" resetval="0x0" description="" range="31 - 24" rwaccess="R"/> 
+		<bitfield id="MMU_MAJOR_REV" width="8" begin="23" end="16" resetval="0x4" description="MMU Major Revision" range="23 - 16" rwaccess="R"/> 
+		<bitfield id="MMU_MINOR_REV" width="8" begin="15" end="8" resetval="0x3" description="MMU Minor Revision" range="15 - 8" rwaccess="R"/> 
+		<bitfield id="MMU_MAINT_REV" width="8" begin="7" end="0" resetval="0x1" description="MMU Maintenance Revision" range="7 - 0" rwaccess="R"/>
+	</register>
+</module>

@@ -1,0 +1,672 @@
+<module name="ECD3_MMR_ICONT" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="ECD_PID" acronym="ECD_PID" offset="0x0" width="32" description="Product Identification">
+    <bitfield id="PID" width="32" begin="31" end="0" resetval="&#8211; TI Internal Data" description="Displays the product identification code." range="" rwaccess="R"/>
+  </register>
+  <register id="ECD_COUNT" acronym="ECD_COUNT" offset="0x4" width="32" description="Cycle Counter">
+    <bitfield id="CNT_EN" width="1" begin="31" end="31" resetval="0" description="Write 0x0: Disable the cycle counter. Write 0x1: Enable the cycle counter. While ECD_COUNT[31] CNT_EN = 0x1 and ECD_CTRL[0] EN = 0x1, the ECD3 increments the value of ECD_COUNT[15:0] COUNT for each cycle." range="" rwaccess="RW"/>
+    <bitfield id="CNT_RST" width="1" begin="30" end="30" resetval="0" description="Resets the cycle counter COUNT value to 0. Write 0x1: Clears COUNT. Write 0x0: No effect. Reads returns 0." range="" rwaccess="W"/>
+    <bitfield id="RESERVED" width="14" begin="29" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="COUNT" width="16" begin="15" end="0" resetval="0x0000" description="Displays the current counter value." range="" rwaccess="R"/>
+  </register>
+  <register id="ECD_CTRL" acronym="ECD_CTRL" offset="0x8" width="32" description="Control">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="CDM_ADD_15_12" width="4" begin="23" end="20" resetval="0x0" description="Specifies the starting byte address [15:12] of command sequence stored in ECDABUF. Note that LSB 4 bits are fixed to 0 since command codes are to be stored from an 16-byte aligned position. ECD3 reads and executes commands in a linear order from this address." range="" rwaccess="R"/>
+    <bitfield id="CDM_ADD_11_4" width="8" begin="19" end="12" resetval="0x00" description="Specifies the starting byte address [11:4] of command sequence stored in ECDABUF. Note that LSB 4 bits are fixed to 0 since command codes are to be stored from an 16-byte aligned position. ECD3 reads and executes commands in a linear order from this address." range="" rwaccess="RW"/>
+    <bitfield id="CDM_ADD_3_0" width="4" begin="11" end="8" resetval="0x0" description="Specifies the starting byte address [3:0] of command sequence stored in ECDABUF. Note that LSB 4 bits are fixed to 0 since command codes are to be stored from an 16-byte aligned position. ECD3 reads and executes commands in a linear order from this address." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="7" end="3" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="SSM" width="1" begin="2" end="2" resetval="I0" description="0x1: Enable single command mode. In single command mode, the ECD3 core executes only one command." range="" rwaccess="RW"/>
+    <bitfield id="CSB" width="1" begin="1" end="1" resetval="0" description="Read 0x1: Indicates that ECD3 found an undefined op-code during the last operation, and aborted command processing. Read 0x0: Indicates that the last command processing ended normally with an END command." range="" rwaccess="R"/>
+    <bitfield id="EN" width="1" begin="0" end="0" resetval="0" description="Write 0x1: ECD3 starts operation (command processing), and EN stays 1 until ECD3 ends its operation. When ECD3 ends its operation, EN is turned to 0 by the ECD3. While EN = 1, no write access to ECD_CTRL is allowed. If ECD_CTRL is written while EN = 1, the result is unknown." range="" rwaccess="RW"/>
+  </register>
+  <register id="ECD_STAT" acronym="ECD_STAT" offset="0xC" width="32" description="ECD Status">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="EOS_ACK_DIS" width="1" begin="30" end="30" resetval="0" description="Read 0x1: Indicates that the EOS interrupt handshake between ECD3 and SYNCBOX is disabled and the acknowledge signal is ignored. When it is disabled, the ECD3 does not wait for an acknowledge for EOS interrupt. Read 0x0: Indicates that ECD3 waits for an acknowledge from SYNCBOX after EOS is set to 1. The ECD3 stays BUSY state until the acknowledge or EOS is cleared." range="" rwaccess="RW"/>
+    <bitfield id="ERR_ACK_DIS" width="1" begin="29" end="29" resetval="0" description="Read 0x1: Indicates that the ERR interrupt handshake between ECD3 and SYNCBOX is disabled and the acknowledge signal is ignored. When it is disabled, the ECD3 does not wait for an acknowledge for ERR interrupt. Read 0x0: Indicates that ECD3 waits for an acknowledge from SYNCBOX after ERR is set to 1. The ECD3 stays BUSY state until the acknowledge or ERR is cleared." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="26" begin="28" end="3" resetval="0x0000000" description="" range="" rwaccess="R"/>
+    <bitfield id="EOS" width="1" begin="2" end="2" resetval="0" description="Read 0x1: Indicates that the last macroblock is at the end of the slice. Write 0x0: Force to exit busy state while waiting for an acknowledge of EOS interrupt from SYNCBOX." range="" rwaccess="R"/>
+    <bitfield id="ERR" width="1" begin="1" end="1" resetval="0" description="Read 0x1: Indicates an error was found in the stream while decoding. Write 0x0: Force to exit busy state while waiting for an acknowledge of ERR interrupt from SYNCBOX." range="" rwaccess="R"/>
+    <bitfield id="BUSY" width="1" begin="0" end="0" resetval="0" description="Read 0x1: Indicates that ECD3 core is busy. This bit is set when EN bit in ECD_CTRL is set and is cleared when END command is executed." range="" rwaccess="R"/>
+  </register>
+  <register id="SBC_CTRL" acronym="SBC_CTRL" offset="0x10" width="32" description="Stream Buffer Controller Control">
+    <bitfield id="SBC_RST" width="1" begin="31" end="31" resetval="0" description="Resets the Stream Buffer Controller. Write 0x1: Resets all registers of Stream Buffer Controller (SBC) and brings it back to idle state. This has the same effect as hardware reset to SBC, but no effect to other part of ECD3 core. Write 0x0: No effect." range="" rwaccess="W"/>
+    <bitfield id="RESERVED" width="14" begin="30" end="17" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="SBC_CLOSE" width="1" begin="16" end="16" resetval="0" description="Close the bitstream data. When encoding: Write 0x1: Flushes bitstream data in Stream Buffer. Write 0x0: No effect When decoding: Write 0x1: Brings it back to idle state and discard bitstream data in the buffer. Write 0x0: No effect" range="" rwaccess="W"/>
+    <bitfield id="RESERVED" width="3" begin="15" end="13" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="SBC_DMA_TRG_B" width="1" begin="12" end="12" resetval="0" description="Start DMA to fill empty page in the Buffer B manually. Write 0x1: Sends a DMA request for Buffer B." range="" rwaccess="W"/>
+    <bitfield id="RESERVED" width="3" begin="11" end="9" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="SBC_DMA_TRG_A" width="1" begin="8" end="8" resetval="0" description="Start DMA to fill empty page in the Buffer A manually. Write 0x1: Sends a DMA request for Buffer A." range="" rwaccess="W"/>
+    <bitfield id="RESERVED" width="3" begin="7" end="5" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="SBC_BIT_CNT_RST" width="1" begin="4" end="4" resetval="0" description="Reset bit counter in the Stream Buffer." range="" rwaccess="W"/>
+    <bitfield id="RESERVED" width="3" begin="3" end="1" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="SBC_BUFSEL" width="1" begin="0" end="0" resetval="0" description="Selects active buffer between A and B: Write 0x0: Buffer A is selected Write 0x1: Buffer B is selected This bit is ignored if SBC_BUFCFG[24] SBC_DBL = 0. If SBC_BUFCFG[24] SBC_DBL = 0, buffer A is always selected." range="" rwaccess="RW"/>
+  </register>
+  <register id="SBC_STAT" acronym="SBC_STAT" offset="0x14" width="32" description="Stream Buffer Controller Status">
+    <bitfield id="RESERVED" width="25" begin="31" end="7" resetval="0x0000000" description="" range="" rwaccess="R"/>
+    <bitfield id="SBC_ST_SRCH" width="1" begin="6" end="6" resetval="0" description="Read 0x1: Indicates that the Stream Buffer Controller searching start code by request from codec engine. This bit is cleared when start code is found or page counter value reaches SBC_SRCH_PG_CNT." range="" rwaccess="R"/>
+    <bitfield id="SBC_DMA_B" width="1" begin="5" end="5" resetval="0" description="Read 0x1: Indicates that the Stream Buffer Controller is waiting an acknowledge from DMA for buffer B. Write 0x0: Force to exit busy state while waiting for an acknowledge of DMA for buffer B interrupt from SYNCBOX." range="" rwaccess="RW W0toClr"/>
+    <bitfield id="SBC_DMA_A" width="1" begin="4" end="4" resetval="0" description="Read 0x1: Indicates that the Stream Buffer Controller is waiting an acknowledge from DMA for buffer A. Write 0x0: Force to exit busy state while waiting for an acknowledge of DMA for buffer A interrupt from SYNCBOX." range="" rwaccess="RW W0toClr"/>
+    <bitfield id="SBC_WR_HLT" width="1" begin="3" end="3" resetval="0" description="Read 0x1: Indicates that the Stream Buffer Controller halted while writing (encoding) and is waiting an acknowledge from DMA. If SBC_WR_HLT = 1, SBC_DMA_A or SBC_DMA_B must also be asserted." range="" rwaccess="R"/>
+    <bitfield id="SBC_RD_HLT" width="1" begin="2" end="2" resetval="0" description="Read 0x1: Indicates that the Stream Buffer Controller halted while reading (decoding) and is waiting an acknowledge from DMA." range="" rwaccess="R"/>
+    <bitfield id="SBC_WR" width="1" begin="1" end="1" resetval="0" description="Read 0x1: Indicates that the Stream Buffer Controller is in writing (encoding) mode." range="" rwaccess="R"/>
+    <bitfield id="SBC_RD" width="1" begin="0" end="0" resetval="0" description="Read 0x1: Indicates that the Stream Buffer Controller is in reading (decoding) mode." range="" rwaccess="R"/>
+  </register>
+  <register id="SBC_BUFCFG" acronym="SBC_BUFCFG" offset="0x18" width="32" description="Stream Buffer Controller Buffer Configuration">
+    <bitfield id="SBC_FLUSH_MODE" width="1" begin="31" end="31" resetval="0" description="SBC FIFO flush mode select for encoding. Write 0x0: Flush FIFO when EOS flag is sent by Codec Engine Write 0x1: Flush FIFO when DONE or EOS flag is sent by Codec Engine. (This is for debug)" range="" rwaccess="RW"/>
+    <bitfield id="SBC_FMO_MODE" width="1" begin="30" end="30" resetval="0" description="SBC FIFO flush mode select for encoding. Write 0x0: Buffer A and B pointers are used for Stream Data access. SBC_A_BITPTR[30:28] FMO_DMA_ID will be ignored. Write 0x1: Buffer A pointer and SBC_A_BITPTR[30:28] FMO_DMA_ID are used for Stream Data access." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="29" end="25" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="SBC_DBL" width="1" begin="24" end="24" resetval="0" description="Enables double buffer mode. Write 0x0: disabled (buffer A only mode) Write 0x1: enabled (buffer A and buffer B)." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="23" end="22" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="SBC_PGSZ" width="2" begin="21" end="20" resetval="0x0" description="Specifies the page size of buffer A and B in the unit of 1024 [byte]. If SBC_PGSZ = 0, it is treated as though SBC_PGSZ = 4 that is, the page size is set to 4096 [byte]." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="19" end="18" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="SBC_BUFTOP_17_4" width="14" begin="17" end="4" resetval="0x0000" description="Specifies the base address [17:4] of the bitstream buffer in SL2. Note that the LSB 4 bits are fixed to 0 because of the 128-bit alignment of the buffer area." range="" rwaccess="RW"/>
+    <bitfield id="SBC_BUFTOP_3_0" width="4" begin="3" end="0" resetval="0x0" description="Specifies the base address [3:0] of the bitstream buffer in SL2. Note that the LSB 4 bits are fixed to 0 because of the 128-bit alignment of the buffer area." range="" rwaccess="R"/>
+  </register>
+  <register id="SBC_A_BITPTR" acronym="SBC_A_BITPTR" offset="0x1C" width="32" description="Stream Buffer Controller A Bit Pointer">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="FMO_DMA_ID" width="3" begin="30" end="28" resetval="0x0" description="Indicates the ID number of bitstream data in SL2 memory. The ID number is applied to SBC_FMO_DMA_STAT[7:0] FMO_DMA. This ID is valid when SBC_BUFCFG[30] SBC_FMO_MODE=1." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="27" end="26" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="NUM_ZERO_A" width="2" begin="25" end="24" resetval="0x0" description="Indicates the number of 0 bytes in the past for buffer A. This is used for emulation prevention byte manipulation. Note that the counting 0 bytes in decoding is different from that in encoding. 0 &amp;amp;lt;= NUM_ZERO_A &amp;amp;lt;= 2. This bit field is not updated when JPEG is selected by CDC_MODE. This bit field setting must match with actual bitstream data. If it does not match, EPB or EPC may be inserted or removed wrongly. This bit field is used only for H.264, VC-1 and AVS." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="23" end="22" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="BYTEPTR_A" width="14" begin="21" end="8" resetval="0x0000" description="Indicates the current byte offset address in Buffer A of the byte containing the next bit in the bitstream. 0 &amp;amp;lt;= BYTEPTR_A &amp;amp;lt; 2 * (page size)." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="7" end="3" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="BITPTR_A" width="3" begin="2" end="0" resetval="0x0" description="Indicates the next bit position in the byte at BYTEPTR_A. 0 &amp;amp;lt;= BITPTR_A &amp;amp;lt;= 7." range="" rwaccess="RW"/>
+  </register>
+  <register id="SBC_A_DMAPG" acronym="SBC_A_DMAPG" offset="0x20" width="32" description="Stream Buffer Controller A DMA Page">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="DMAPG_A" width="8" begin="7" end="0" resetval="0x00" description="Indicates the page that is being accessed from DMA for bitstream data transferring. If DMA is not accessing to the buffer, this register indicates the page that is currently being accessed from ECD3 core. The state is toggled by DMA task complete acknowledge (ack_strm_a)." range="" rwaccess="RW"/>
+  </register>
+  <register id="SBC_B_BITPTR" acronym="SBC_B_BITPTR" offset="0x24" width="32" description="Stream Buffer Controller B Bit Pointer">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="NUM_ZERO_B" width="2" begin="25" end="24" resetval="0x0" description="Indicates the number of 0 bytes in the past for buffer B. This is used for emulation prevention byte manipulation. Note that the counting 0 bytes in decoding is different from that in encoding. 0 &amp;amp;lt;= NUM_ZERO_B &amp;amp;lt;= 2. This bit field is not updated when JPEG is selected by CDC_MODE. This bit field setting must match with actual bitstream data. If it does not match, EPB or EPC may be inserted or removed wrongly. This bit field is used only for H.264, VC-1 and AVS." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="23" end="22" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="BYTEPTR_B" width="14" begin="21" end="8" resetval="0x0000" description="Indicates the current byte offset address in Buffer B of the byte containing the next bit in the bitstream. 0 &amp;amp;lt;= BYTEPTR_B &amp;amp;lt; 2 * (page size)." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="7" end="3" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="BITPTR_B" width="3" begin="2" end="0" resetval="0x0" description="Indicates the next bit position in the byte at BYTEPTR_B. 0 &amp;amp;lt;= BITPTR_B &amp;amp;lt;= 7." range="" rwaccess="RW"/>
+  </register>
+  <register id="SBC_B_DMAPG" acronym="SBC_B_DMAPG" offset="0x28" width="32" description="Stream Buffer Controller B DMA Page">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="DMAPG_B" width="1" begin="0" end="0" resetval="0" description="Indicates the page that is being accessed from DMA for bitstream data transferring. If DMA is not accessing to the buffer, this register indicates the page that is currently being accessed from ECD3 core. This bit is toggled by DMA task complete acknowledge (ack_strm_b)." range="" rwaccess="RW"/>
+  </register>
+  <register id="SBC_TTLCNT" acronym="SBC_TTLCNT" offset="0x2C" width="32" description="Stream Buffer Controller Total Bit Counter">
+    <bitfield id="TTLCNT" width="32" begin="31" end="0" resetval="0x0000 0000" description="Displays the total bit count. This counter does not count during start code searching." range="" rwaccess="RW"/>
+  </register>
+  <register id="SBC_RSDCNT" acronym="SBC_RSDCNT" offset="0x30" width="32" description="Stream Buffer Controller Residual Layer Bit Counter">
+    <bitfield id="SBC_RSDCNT" width="32" begin="31" end="0" resetval="0x0000 0000" description="Displays the bit count for residual layer. Total bit count - header info = residual data (transform coefficients)" range="" rwaccess="RW"/>
+  </register>
+  <register id="SBC_SRCH_PG_CNT" acronym="SBC_SRCH_PG_CNT" offset="0x38" width="32" description="Buffer page counter for start code searching.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="SRCH_PG_CNT" width="16" begin="15" end="0" resetval="0x0000" description="ECD3 search start code until the page counter reach this number. If the start code is not found, error pulse is sent to codec engine and codec engine stop operation then generates an error interrupt." range="" rwaccess="RW"/>
+  </register>
+  <register id="SBC_FMO_DMA_STAT" acronym="SBC_FMO_DMA_STAT" offset="0x3C" width="32" description="FMO_DMA status register">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="FMO_DMA" width="8" begin="7" end="0" resetval="0x00" description="Indicates FMO_DMA_ID for stream interrupt at buffer page boundary. FMO_DMA_ID range is 0 to 7. When the interrupt is asserted, corresponding bit is set. Write 0 to clear the flag. Writing 1 does not affect this register." range="" rwaccess="RW W0toClr"/>
+  </register>
+  <register id="MBPC_PIC_DIM" acronym="MBPC_PIC_DIM" offset="0x40" width="32" description="Picture Dimension">
+    <bitfield id="CUR_MBAFF" width="1" begin="31" end="31" resetval="0" description="CUR_MBAFF = 1 indicates that current picture is in H.264 MBAFF mode." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="30" end="30" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="PIC_H" width="14" begin="29" end="16" resetval="0x0000" description="PIC_H specifies the picture height in macroblocks which is calculated by PIC_H = ((picture height in pixels) + 15)/16. 0 &amp;amp;lt; PIC_H &amp;amp;lt;= 8192. All codec maximum picture height in pixels is 4096 (PIC_H = 256) except JPEG." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="15" end="14" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PIC_W" width="14" begin="13" end="0" resetval="0x0000" description="PIC_W specifies the picture width in macroblocks which is calculated by PIC_W = ((picture width in pixels) + 15)/16. 0 &amp;amp;lt; PIC_W &amp;amp;lt;= 8192. All codec maximum picture width in pixels is 4096 (PIC_W = 256) except JPEG." range="" rwaccess="RW"/>
+  </register>
+  <register id="MBPC_STAT" acronym="MBPC_STAT" offset="0x50" width="32" description="MB Position Controller Status">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="PIC_END_FLAG" width="1" begin="9" end="9" resetval="0" description="PIC_END_FLAG = 1 indicates that the macroblock will be processed is at the end of the picture. (In other words, this field is set to 1 before last MB process execution.)" range="" rwaccess="RW"/>
+    <bitfield id="FIRST_MB_FLAG" width="1" begin="8" end="8" resetval="1" description="FIRST_MB_FLAG = 1 indicates that the macroblock will be processed is the first macroblock in the slice. (In other words, this field is set to 1 after last MB process execution.)" range="" rwaccess="RW"/>
+    <bitfield id="PIC_BOUND" width="4" begin="7" end="4" resetval="0x3" description="PIC_BOUND indicates that the picture boundary status of the current macroblock (in case of MBAFF mode, the unit is macroblock-pair). PIC_BOUND[0] = 1 indicates that the left macroblock edge is an picture boundary. PIC_BOUND[1] = 1 indicates that the upper edge is an picture boundary. PIC_BOUND[2] = 1 indicates that the right edge is an picture boundary. PIC_BOUND[3] = 1 indicates that the bottom edge is an picture boundary." range="" rwaccess="RW"/>
+    <bitfield id="MB_AVAIL" width="4" begin="3" end="0" resetval="0x0" description="MB_AVAIL indicates that the availabilities of neighboring macroblocks (in case of MBAFF mode, the unit is macroblock-pair). MB_AVAIL[0] : left macroblock, MB_AVAIL[1] : upper left macroblock, MB_AVAIL[2] : upper macroblock, MB_AVAIL[3] :.upper-right macroblock." range="" rwaccess="RW"/>
+  </register>
+  <register id="MBPC_POS" acronym="MBPC_POS" offset="0x54" width="32" description="Macroblock Position">
+    <bitfield id="RESERVED" width="3" begin="31" end="29" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="MB_Y" width="13" begin="28" end="16" resetval="0x0000" description="MB_Y equals the macroblock y-position in the picture. 0 &amp;amp;lt;= MB_Y &amp;amp;lt; PIC_H. All codec maximum MB Y position is 255 except JPEG." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="15" end="13" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="MB_X" width="13" begin="12" end="0" resetval="0x0000" description="MB_X equals the macroblock x-position in the picture. 0 &amp;amp;lt;= MB_X &amp;amp;lt; PIC_W. All codec maximum MB X position is 255 except JPEG." range="" rwaccess="RW"/>
+  </register>
+  <register id="MBPC_PMC" acronym="MBPC_PMC" offset="0x58" width="32" description="Macroblock Count In Picture">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="PIC_MB_CNT" width="26" begin="25" end="0" resetval="0x0000000" description="PIC_MB_CNT equals the macroblock count in the picture. 0 &amp;amp;lt;= PIC_MB_CNT &amp;amp;lt; (PIC_W * PIC_H)." range="" rwaccess="RW"/>
+  </register>
+  <register id="MBPC_SMC" acronym="MBPC_SMC" offset="0x5C" width="32" description="Macroblock Count In Slice">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="SLC_MB_CNT" width="26" begin="25" end="0" resetval="0x0000000" description="SLC_MB_CNT equals the macroblock count in the slice. 0 &amp;amp;lt;= SLC_MB_CNT &amp;amp;lt; (PIC_W * PIC_H)." range="" rwaccess="RW"/>
+  </register>
+  <register id="DTBC_BP_MB" acronym="DTBC_BP_MB" offset="0x64" width="32" description="Data Buffer Controller MB Base Buffer Pointer">
+    <bitfield id="BP_MB_UR_15_12" width="4" begin="31" end="28" resetval="0x0" description="BP_MB_UR specifies the base pointer to the upper macroblock buffer. 0x8000-0x8FFF." range="" rwaccess="R"/>
+    <bitfield id="BP_MB_UR_11_4" width="8" begin="27" end="20" resetval="0x00" description="BP_MB_UR specifies the base pointer to the upper macroblock buffer. 0x8000-0x8FFF." range="" rwaccess="RW"/>
+    <bitfield id="BP_MB_UR_3_0" width="4" begin="19" end="16" resetval="0x0" description="BP_MB_UR specifies the base pointer to the upper macroblock buffer. 0x8000-0x8FFF." range="" rwaccess="R"/>
+    <bitfield id="BP_MB_CUR_15_12" width="4" begin="15" end="12" resetval="0x0" description="BP_MB_CUR specifies the base pointer to the current macroblock buffer. 0x8000-0x8FFF." range="" rwaccess="R"/>
+    <bitfield id="BP_MB_CUR_11_4" width="8" begin="11" end="4" resetval="0x00" description="BP_MB_CUR specifies the base pointer to the current macroblock buffer. 0x8000-0x8FFF." range="" rwaccess="RW"/>
+    <bitfield id="BP_MB_CUR_3_0" width="4" begin="3" end="0" resetval="0x0" description="BP_MB_CUR specifies the base pointer to the current macroblock buffer. 0x8000-0x8FFF." range="" rwaccess="R"/>
+  </register>
+  <register id="DTBC_BP_COL" acronym="DTBC_BP_COL" offset="0x68" width="32" description="Data Buffer Controller Co-located MB Buffer Base Pointer">
+    <bitfield id="BP_COL_B_15_12" width="4" begin="31" end="28" resetval="0x0" description="BP_COL_B specifies the base pointer to the co-located macroblock buffer B. 0x8000-0x8FFF." range="" rwaccess="R"/>
+    <bitfield id="BP_COL_B_11_4" width="8" begin="27" end="20" resetval="0x00" description="BP_COL_B specifies the base pointer to the co-located macroblock buffer B. 0x8000-0x8FFF." range="" rwaccess="RW"/>
+    <bitfield id="BP_COL_B_3_0" width="4" begin="19" end="16" resetval="0x0" description="BP_COL_B specifies the base pointer to the co-located macroblock buffer B. 0x8000-0x8FFF." range="" rwaccess="R"/>
+    <bitfield id="BP_COL_A_15_12" width="4" begin="15" end="12" resetval="0x0" description="BP_COL_A specifies the base pointer to the co-located macroblock buffer A. 0x8000-0x8FFF." range="" rwaccess="R"/>
+    <bitfield id="BP_COL_A_11_4" width="8" begin="11" end="4" resetval="0x00" description="BP_COL_A specifies the base pointer to the co-located macroblock buffer A. 0x8000-0x8FFF." range="" rwaccess="RW"/>
+    <bitfield id="BP_COL_A_3_0" width="4" begin="3" end="0" resetval="0x0" description="BP_COL_A specifies the base pointer to the co-located macroblock buffer A. 0x8000-0x8FFF." range="" rwaccess="R"/>
+  </register>
+  <register id="DTBC_BP_RSD" acronym="DTBC_BP_RSD" offset="0x6C" width="32" description="Data Buffer Controller Residual Buffer Base Pointer">
+    <bitfield id="BP_RSD_15_12" width="4" begin="31" end="28" resetval="0x6" description="BP_RSD specifies the base pointer to the residual data buffer. 0xE000-0xEFFF." range="" rwaccess="R"/>
+    <bitfield id="BP_RSD_11_4" width="8" begin="27" end="20" resetval="0x00" description="BP_RSD specifies the base pointer to the residual data buffer. 0xE000-0xEFFF." range="" rwaccess="RW"/>
+    <bitfield id="BP_RSD_3_0" width="4" begin="19" end="16" resetval="0x0" description="BP_RSD specifies the base pointer to the residual data buffer. 0xE000-0xEFFF." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="16" begin="15" end="0" resetval="0x0000" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="DTBC_DP_UL" acronym="DTBC_DP_UL" offset="0x70" width="32" description="Data Buffer Controller Data Pointer 0">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_UL_15_13" width="3" begin="15" end="13" resetval="0x1" description="Current pointer [15:13] to the upper left macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_UL_12_4" width="9" begin="12" end="4" resetval="0x000" description="Current pointer [12:4] to the upper left macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="RW"/>
+    <bitfield id="PTR_MB_UL_3_0" width="4" begin="3" end="0" resetval="0x0" description="Current pointer [3:0] to the upper left macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="R"/>
+  </register>
+  <register id="DTBC_DP_UU_UR" acronym="DTBC_DP_UU_UR" offset="0x74" width="32" description="Data Buffer Controller Data Pointer 1">
+    <bitfield id="PTR_MB_UU_15_13" width="3" begin="31" end="29" resetval="0x1" description="Current pointer [15:13] to the upper macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_UU_12_4" width="9" begin="28" end="20" resetval="0x000" description="Current pointer [12:4] to the upper macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="RW"/>
+    <bitfield id="PTR_MB_UU_3_0" width="4" begin="19" end="16" resetval="0x0" description="Current pointer [3:0] to the upper macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_UR_15_13" width="3" begin="15" end="13" resetval="0x1" description="Current pointer [15:13] to the upper-right macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_UR_12_4" width="9" begin="12" end="4" resetval="0x000" description="Current pointer [12:4] to the upper-right macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="RW"/>
+    <bitfield id="PTR_MB_UR_3_0" width="4" begin="3" end="0" resetval="0x0" description="Current pointer [3:0] to the upper-right macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="R"/>
+  </register>
+  <register id="DTBC_DP_LL_CUR" acronym="DTBC_DP_LL_CUR" offset="0x78" width="32" description="Data Buffer Controller Data Pointer 2">
+    <bitfield id="PTR_MB_LL_15_13" width="3" begin="31" end="29" resetval="0x1" description="Current pointer [15:13] to the left macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_LL_12_4" width="9" begin="28" end="20" resetval="0x000" description="Current pointer [12:4] to the left macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="RW"/>
+    <bitfield id="PTR_MB_LL_3_0" width="4" begin="19" end="16" resetval="0x0" description="Current pointer [3:0] to the left macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_CUR_15_13" width="3" begin="15" end="13" resetval="0x1" description="Current pointer [15:13] to the current macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_CUR_12_4" width="9" begin="12" end="4" resetval="0x000" description="Current pointer [12:4] to the current macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="RW"/>
+    <bitfield id="PTR_MB_CUR_3_0" width="4" begin="3" end="0" resetval="0x0" description="Current pointer [3:0] to the current macroblock data in work buffer. This pointer must be written before start ECD3." range="" rwaccess="R"/>
+  </register>
+  <register id="DTBC_DP_ULUR2" acronym="DTBC_DP_ULUR2" offset="0x84" width="32" description="Data Buffer Controller Data Pointer 5">
+    <bitfield id="PTR_MB_UL2_15_13" width="3" begin="31" end="29" resetval="0x1" description="Current pointer [15:13] to the macroblock left to the upper left macroblock data in work buffer. This pointer is maintained only for On2 (CDC_mode[3:0] MODE = 0x0A). This pointer must be written before start ECD3." range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_UL2_12_4" width="9" begin="28" end="20" resetval="0x000" description="Current pointer [12:4] to the macroblock left to the upper left macroblock data in work buffer. This pointer is maintained only for On2 (CDC_mode[3:0] MODE = 0x0A). This pointer must be written before start ECD3." range="" rwaccess="RW"/>
+    <bitfield id="PTR_MB_UL2_3_0" width="4" begin="19" end="16" resetval="0x0" description="Current pointer [3:0] to the macroblock left to the upper left macroblock data in work buffer. This pointer is maintained only for On2 (CDC_mode[3:0] MODE = 0x0A). This pointer must be written before start ECD3." range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_UR2_15_13" width="3" begin="15" end="13" resetval="0x1" description="Current pointer [15:13] to the macroblock right to the upper-right macroblock data in work buffer. This pointer is maintained only for On2 (CDC_mode[3:0] MODE = 0x0A). This pointer must be written before start ECD3." range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_UR2_12_4" width="9" begin="12" end="4" resetval="0x000" description="Current pointer [12:4] to the macroblock right to the upper-right macroblock data in work buffer. This pointer is maintained only for On2 (CDC_mode[3:0] MODE = 0x0A). This pointer must be written before start ECD3." range="" rwaccess="RW"/>
+    <bitfield id="PTR_MB_UR2_3_0" width="4" begin="3" end="0" resetval="0x0" description="Current pointer [3:0] to the macroblock right to the upper-right macroblock data in work buffer. This pointer is maintained only for On2 (CDC_mode[3:0] MODE = 0x0A). This pointer must be written before start ECD3." range="" rwaccess="R"/>
+  </register>
+  <register id="DTBC_DP_SLICE" acronym="DTBC_DP_SLICE" offset="0x88" width="32" description="Slice data pointer">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="PTR_SLICE_15_13" width="3" begin="15" end="13" resetval="0x1" description="Specifies the pointer [15:13] to slice or picture information data." range="" rwaccess="R"/>
+    <bitfield id="PTR_SLICE_12_4" width="9" begin="12" end="4" resetval="0x000" description="Specifies the pointer [12:4] to slice or picture information data." range="" rwaccess="RW"/>
+    <bitfield id="PTR_SLICE_3_0" width="4" begin="3" end="0" resetval="0x0" description="Specifies the pointer [3:0] to slice or picture information data." range="" rwaccess="R"/>
+  </register>
+  <register id="DTBC_DP_LL2" acronym="DTBC_DP_LL2" offset="0x8C" width="32" description="Data Buffer Controller data pointer">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_LL2_15_13" width="3" begin="15" end="13" resetval="0x1" description="Current pointer [15:13] to the macroblock left to the left macroblock data in work buffer. This pointer is maintained only for On2 (CDC_mode[3:0] MODE = 0x0A). This pointer must be written before start ECD3." range="" rwaccess="R"/>
+    <bitfield id="PTR_MB_LL2_12_4" width="9" begin="12" end="4" resetval="0x000" description="Current pointer [12:4] to the macroblock left to the left macroblock data in work buffer. This pointer is maintained only for On2 (CDC_mode[3:0] MODE = 0x0A). This pointer must be written before start ECD3." range="" rwaccess="RW"/>
+    <bitfield id="PTR_MB_LL2_3_0" width="4" begin="3" end="0" resetval="0x0" description="Current pointer [3:0] to the macroblock left to the left macroblock data in work buffer. This pointer is maintained only for On2 (CDC_mode[3:0] MODE = 0x0A). This pointer must be written before start ECD3." range="" rwaccess="R"/>
+  </register>
+  <register id="DTBC_CUR_MB_SIZE" acronym="DTBC_CUR_MB_SIZE" offset="0x90" width="32" description="Current Picture Macro Block element size">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="CUR_MB_SIZE_11_4" width="8" begin="11" end="4" resetval="0x00" description="Data element size for Current MB, Upper-right MB in AUX buffer and Upper MB, Current/Left MB in WORK buffer." range="" rwaccess="RW"/>
+    <bitfield id="CUR_MB_SIZE_3_0" width="4" begin="3" end="0" resetval="0x0" description="Data element size for Current MB, Upper-right MB in AUX buffer and Upper MB, Current/Left MB in WORK buffer." range="" rwaccess="R"/>
+  </register>
+  <register id="CDC_MODE" acronym="CDC_MODE" offset="0xA0" width="32" description="Codec Mode (also works as view page).">
+    <bitfield id="RESERVED" width="27" begin="31" end="5" resetval="0x0000000" description="" range="" rwaccess="R"/>
+    <bitfield id="DIR" width="1" begin="4" end="4" resetval="0" description="Selects the codec direction: Write 0x0: Indicates the codec engine is decoding Write 0x1: Indicates the codec engine is encoding." range="" rwaccess="RW"/>
+    <bitfield id="MODE" width="4" begin="3" end="0" resetval="0x0" description="Selects the active codec Selected Codec (Selected Codec Engine)" range="" rwaccess="RW">
+      <bitenum value="0" id="JPEG_(JPG)" token="MODE_0" description="JPEG (JPG)"/>
+      <bitenum value="1" id="N/A" token="MODE_1" description="N/A"/>
+      <bitenum value="2" id="MPEG-1_(MP1)" token="MODE_2" description="MPEG-1 (MP1)"/>
+      <bitenum value="3" id="MPEG-2_(MP2)" token="MODE_3" description="MPEG-2 (MP2)"/>
+      <bitenum value="4" id="MPEG-4/H.263_(MP4)" token="MODE_4" description="MPEG-4/H.263 (MP4)"/>
+      <bitenum value="5" id="VC-1_Advanced_(VC-1)" token="MODE_5" description="VC-1 Advanced (VC-1)"/>
+      <bitenum value="6" id="H.264_(H.264)" token="MODE_6" description="H.264 (H.264)"/>
+      <bitenum value="7" id="VC-1_Simple/Main_(VC-1)" token="MODE_7" description="VC-1 Simple/Main (VC-1)"/>
+      <bitenum value="8" id="AVS_(AVS)" token="MODE_8" description="AVS (AVS)"/>
+      <bitenum value="9" id="RealVideo_(RV)" token="MODE_9" description="RealVideo (RV)"/>
+      <bitenum value="10" id="On2_VP6,VP7_(On2)" token="MODE_10" description="On2 VP6,VP7 (On2)"/>
+    </bitfield>
+  </register>
+  <register id="AVS_STAT" acronym="AVS_STAT" offset="0xA4" width="32" description="AVS STAT register">
+    <bitfield id="STAT_END_OF_SLICE" width="1" begin="31" end="31" resetval="0" description="stat_end_of_vop ECD sets this field to 1 when the current macroblock is the last macroblock in a VOP Once this field is set, ECD keeps this field to 1 until the next macroblock processing is started. ECD resets this field at the beginning of a macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="21" begin="30" end="10" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_NEXT_START_CODE_SEARCH" width="1" begin="9" end="9" resetval="0" description="err_ill_next_start_code_search If ECD founds error and ECD status is changed into ERR in error detection described in section 8.5., ECD starts to search the next start code search. But if ECD cannot find the start code until search counter reaches counter limit defined in the ECD3 core MMR, ECD fails start_code_search. In this case this flag is set to 1 by ECD; otherwise, 0" range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_END_OF_SLICE" width="1" begin="8" end="8" resetval="0" description="err_ill_end_of_slice Some encoder wrongly encode EOS. In this case this flag is set to 1 by ECD; otherwise, 0" range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_MB_SKIP_RUN" width="1" begin="7" end="7" resetval="0" description="err_ill_mb_skip_run If ECD founds decoded mb_skip_run is out of range, this field is set to 1 by ECD; otherwise, 0" range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_MB_TYPE" width="1" begin="6" end="6" resetval="0" description="err_ill_mb_type If ECD founds decoded mb_type is out of range, this field is set to 1 by ECD; otherwise, 0" range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_INTRA_CHROMA_PRED_MODE" width="1" begin="5" end="5" resetval="0" description="err_ill_intra_chroma_pred_mode If ECD founds decoded intra_chroma_pred_mode is out of range, this field is set to 1 by ECD; otherwise, 0" range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_MV_DIFF" width="1" begin="4" end="4" resetval="0" description="err_ill_mv_diff If ECD founds decoded mv_diff is out of range, this field is set to 1 by ECD; otherwise, 0" range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_CBP" width="1" begin="3" end="3" resetval="0" description="err_ill_cbp If ECD founds decoded cbp is out of range, this field is set to 1 by ECD; otherwise, 0" range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_MB_QP_DELTA" width="1" begin="2" end="2" resetval="0" description="err_ill_mb_qp_delta If ECD founds decoded mb_qp_delta is out of range, this field is set to 1 by ECD; otherwise, 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_COEFF" width="1" begin="1" end="1" resetval="0" description="err_ill_coeff If ECD founds decoded coefficient is out of range, this field is set to 1 by ECD; otherwise, 0" range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_EOB" width="1" begin="0" end="0" resetval="0" description="err_ill_eob If ECD cannot found end of block in 64 coefficients, this field is set to 1 by ECD; otherwise, 0." range="" rwaccess="R"/>
+  </register>
+  <register id="H264_ERR_STAT" acronym="H264_ERR_STAT" offset="0xA4" width="32" description="H.264 STAT register">
+    <bitfield id="EOS" width="1" begin="31" end="31" resetval="0" description="Read 0x1: Indicates that an EOS was found" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="26" begin="30" end="5" resetval="0x0000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SC_ERR" width="1" begin="4" end="4" resetval="0" description="Read 0x1: Indicates that there was an error while searching the next start code. This error can only occur at the EOS where EOS=1." range="" rwaccess="R"/>
+    <bitfield id="MV_ERR" width="1" begin="3" end="3" resetval="0" description="Read 0x1: Indicates that motion vector error was found in the last B-Direct motion vector calculation" range="" rwaccess="R"/>
+    <bitfield id="ALGN_ERR" width="1" begin="2" end="2" resetval="0" description="Read 0x1: Indicates that a zero bit was found in the last CABAC alignment bits" range="" rwaccess="R"/>
+    <bitfield id="IPCM_ALGN_ERR" width="1" begin="1" end="1" resetval="0" description="Read 0x1: Indicates that a non-zero bit was found in the last I_PCM alignment bits" range="" rwaccess="R"/>
+    <bitfield id="SYM_ERR" width="1" begin="0" end="0" resetval="0" description="Read 0x1: Indicates an illegal code word was found in the bitstream" range="" rwaccess="R"/>
+  </register>
+  <register id="INT_STATUS" acronym="INT_STATUS" offset="0xA4" width="32" description="INT STAT register">
+    <bitfield id="PRCS_DONE" width="1" begin="31" end="31" resetval="0" description="If encoding or decoding of a picture is finished, an interrupt pulse is asserted and this status bit becomes high. It makes no sense to write 0 to this register bit. 0: not finished. 1: processing done" range="" rwaccess="R"/>
+    <bitfield id="EOS_DONE" width="1" begin="30" end="30" resetval="0" description="If encoding of decoding of a scan is finished, an interrupt pulse is asserted and this status bit becomes high. It makes no sense to write 0 to this register bit. 0: not finished. 1: processing done" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="27" begin="29" end="3" resetval="0x0000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="BLK_COEF_NUM_ERR" width="1" begin="2" end="2" resetval="0" description="If current MCU has a block which has more than 64 coefficients, this error bit becomes high. 0: correct (all blocks inside the current MCU have 64[coef/block]) 1: incorrect (some blocks inside the current MCU have more than 64[coef/block])." range="" rwaccess="R"/>
+    <bitfield id="RSTRT_INTVL_ERR" width="1" begin="1" end="1" resetval="0" description="If number of MCU between neighbored restart markers is not equal to restart interval, this error bit becomes high. It makes no sense to write 0 to this register bit. 0: no error. 1: restart interval error occurs" range="" rwaccess="R"/>
+    <bitfield id="VLD_TBL_ERR" width="1" begin="0" end="0" resetval="0" description="If stream data which is out of table is detected, the JPEG core makes this bit high. It makes no sense to write 0 to this register bit. 0: no error. 1: out of table error occurs." range="" rwaccess="R"/>
+  </register>
+  <register id="MP2_STAT" acronym="MP2_STAT" offset="0xA4" width="32" description="MP2 STAT register">
+    <bitfield id="STAT_END_OF_SLICE" width="1" begin="31" end="31" resetval="0" description="Showing the current macroblock is the last macroblock in a slice. If STAT_END_OF_SLICE is set to 1, the ECD3 issues int_eos. Host can know whether ERR_ILL_NEXT_START_CODE_SEARCH and ERR_ILL_END_OF_SLICE are happened or not by looking MP2_STAT[14] and MP2_STAT[11] register fields when int_eos is issued." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="15" begin="30" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_DCCOEF_OVERFLOW" width="1" begin="15" end="15" resetval="0" description="Showing the result of dc prediction is overflowed or under flowed" range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_NEXT_START_CODE_SEARCH" width="1" begin="14" end="14" resetval="0" description="Showing next start code searching infinite error. In decoding, next start code searching is started when: - the current macroblock is the last macroblock in a slice or - error is found w/start_code_search_flag is 1. During next start code searching, if search counter is over the limit of the counter, this field is set to 1. In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_SLICE_START_POSITION" width="1" begin="13" end="13" resetval="0" description="In decoding, showing the following two data is mismatched: - macroblock position derived from slice_vertical_position and macroblock_address_increment - macroblock position in ECD MMR In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_QUANTISER_SCALE_CODE" width="1" begin="12" end="12" resetval="0" description="In decoding, decoded quantizer_scale_code is 0. In encoding, this field is fixed to 0" range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_END_OF_SLICE" width="1" begin="11" end="11" resetval="0" description="In decoding, EOS cannot be found at the end of picture. In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_MB_ADDR_INCREMENT" width="1" begin="10" end="10" resetval="0" description="In decoding, VLD out of table in macroblock_address_increment. In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_MB_TYPE" width="1" begin="9" end="9" resetval="0" description="In decoding, VLD out of table in macroblock_type. In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_MOTION_CODE" width="1" begin="8" end="8" resetval="0" description="In decoding, VLD out of table in motion_code and dmv. In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_CBP" width="1" begin="7" end="7" resetval="0" description="In decoding, VLD out of table in coded_block_pattern. In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_DCT_COEF" width="1" begin="6" end="6" resetval="0" description="In decoding, VLD out of table in DCT coefficient. In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_MBTYPE_D_PIC" width="1" begin="5" end="5" resetval="0" description="In decoding, decoded macroblock_type != 1 when D-picture. In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_MARKER_CONCEALMENT" width="1" begin="4" end="4" resetval="0" description="In decoding, decoded marker_bit != 0 when both the concealment_motion_vector and macroblock_intra are equal to 1. In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_MP2_ESCAPE_LVL" width="1" begin="3" end="3" resetval="0" description="In decoding, decoded level from MPEG-2 ESCAPE code is 0x000 or 0x800. In encoding, this field is fixed to 0" range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_MP1_ESCAPE_LVL" width="1" begin="2" end="2" resetval="0" description="In decoding, decoded level from MPEG-1 ESCAPE code is 0x0000 or 0x8000. In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_EOB" width="1" begin="1" end="1" resetval="0" description="In decoding, ECD cannot find EOB, end of block, in a 64 coefficient block. In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_ILL_EOM" width="1" begin="0" end="0" resetval="0" description="In decoding, ECD cannot find EOM, end of macroblock, at the end of macroblock when picture_type is D-picture. In encoding, this field is fixed to 0." range="" rwaccess="R"/>
+  </register>
+  <register id="MP4_STAT" acronym="MP4_STAT" offset="0xA4" width="32" description="MP4 STAT register">
+    <bitfield id="STAT_END_OF_PACKET" width="1" begin="31" end="31" resetval="0" description="ECD sets this field to 1 when the current macroblock is the last macroblock in a packet. In the case of data partitioned, ECD issues the last macroblock of data partition 0, 1 and 2. Here, data partition 0 means the motion and header info processing, data partition 1 means texture header processing, and data partition 2 means the TCOEF processing. ECD resets this field at the beginning of a macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="30" end="26" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_NEXT_START_CODE_SEARCH" width="1" begin="25" end="25" resetval="0" description="ECD sets this field to 1 if next start code search is 'failed'. 'Failed' means during next start code search, the search counter is over the limit of the counter which is in ECD3 SBC MMRs. Otherwise, ECD3 sets this field to 0. ECD sets this field the search counter is over the limit of the counter, this field is set to 1. Otherwise, 0." range="" rwaccess="R"/>
+    <bitfield id="ERR_PKT_RESYNC_MARKER" width="1" begin="24" end="24" resetval="0" description="ECD sets this field to 1 when resync_marker at the beginning of packet header is incorrect. At the beginning of a processing, ECD automatically reset this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_PKT_NEXT_START_CODE" width="1" begin="23" end="23" resetval="0" description="ECD sets this field to 1 when next_start_code at the end of VOP is incorrect or start_code at the beginning of slice or at the end of VOP is incorrect. At the beginning of a processing, ECD automatically reset this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_PKT_ZERO_BIT" width="1" begin="22" end="22" resetval="0" description="ECD sets this field to 1 when zero_bit at the end of GOB or slice layer is incorrect or emulation_prevention_bit in slice header is incorrect. At the beginning of a processing, ECD automatically reset this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_PKT_MBNUM" width="1" begin="21" end="21" resetval="0" description="ECD sets this field to 1 when macroblock_number in packet header is dropped. At the beginning of a processing, ECD automatically reset this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_PKT_QUANT_SCALE" width="1" begin="20" end="20" resetval="0" description="ECD sets this field to 1 when quant_scale in packet header is illegal. At the beginning of a processing, ECD automatically reset this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_PKT_TIME" width="1" begin="19" end="19" resetval="0" description="ECD sets this field to 1 when modulo_time or vop_time_increment in packet header is changed. At the beginning of a processing, ECD automatically reset this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_PKT_MARKER_BIT" width="1" begin="18" end="18" resetval="0" description="ECD sets this field to 1 when marker_bit in packet header is incorrect. At the beginning of a processing, ECD automatically reset this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_PKT_CHG_VOP_CODING_TYPE" width="1" begin="17" end="17" resetval="0" description="ECD sets this field to 1 when vop_coding_type in packet header is changed. At the beginning of a processing, ECD automatically reset this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_PKT_ILL_VOP_CODING_TYPE" width="1" begin="16" end="16" resetval="0" description="ECD sets this field to 1 when vop_coding_type in packet header is illegal. At the beginning of a processing, ECD automatically reset this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_PKT_VOP_FCODE" width="1" begin="15" end="15" resetval="0" description="ECD sets this field to 1 when vop_fcode_forward or vop_fcode_backward in packet header is illegal. At the beginning of a processing, ECD automatically reset this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_GOB_GOBNUM" width="1" begin="14" end="14" resetval="0" description="ECD sets this field to 1 when gob_number is dropped or macroblock_address in slice header is dropped. At the beginning of a processing, ECD automatically reset this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_GOB_GOB_FRAME_ID" width="1" begin="13" end="13" resetval="0" description="ECD sets this field to 1 when gob_frame_id is changed. At the beginning of a processing, ECD automatically reset this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_GOB_QUANT_SCALE" width="1" begin="12" end="12" resetval="0" description="ECD sets this field to 1 when quant_scale in GOB header is illegal or slice_quantizer_information in slice header is illegal. At the beginning of a processing, ECD automatically resets this field to 0. Even if ECD detects this error, ECD continues decoding until finishing the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_MBHD_MCBPC" width="1" begin="11" end="11" resetval="0" description="ECD sets this field to 1 when mcbpc code is illegal. At the beginning of a processing, ECD automatically reset this field to 0. If ECD detects this error, if data_partitioned is ON, ECD continues decoding the current DP0 or DP1 processing; otherwise, ECD stops decoding and immediately terminates the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_MBHD_H263_4MV" width="1" begin="10" end="10" resetval="0" description="ECD3 sets this field to 1 if one of the following two conditions is true: - H263_mode is ON, deblocking_filter_mode = 0, no_gob_header = 0, and decoded macroblock type is INTRA4V or INTRA4V_Q. - H263_mode is ON, deblocking_filter_mode = 1 and decoded macroblock type is INTRA4V_Q. - H.263_mode is ON, no_gob_header=1, and decoded macroblock type is INTRA4V_Q. If ECD detects this error, ECD stops decoding and immediately terminates the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_MBHD_CBPY" width="1" begin="9" end="9" resetval="0" description="ECD sets this field to 1 when cpby code is illegal (non-B-VOP). At the beginning of a processing, ECD automatically reset this field to 0. If ECD detects this error, if data_partitioned is ON, ECD continues decoding the current DP0 or DP1 processing; otherwise, ECD stops decoding and immediately terminates the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_MBHD_MB_TYPE" width="1" begin="7" end="7" resetval="0" description="ECD sets this field to 1 when mb_type code is illegal (B-VOP). At the beginning of a processing, ECD automatically reset this field to 0. If ECD detects this error, ECD stops decoding and immediately finishes the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_MBHD_MV_DATA" width="1" begin="6" end="6" resetval="0" description="ECD sets this field to 1 when horizontal_mv_data or vertical_mv_data code is illegal. At the beginning of a processing, ECD automatically reset this field to 0. If ECD detects this error, if data_partitioned is ON, ECD continues decoding the current DP0 or DP1 processing; otherwise, ECD stops decoding and immediately terminates the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_BLK_DCT_DC_SIZE" width="1" begin="5" end="5" resetval="0" description="ECD sets this field to 1 when dct_dc_size code is illegal. At the beginning of a processing, ECD automatically reset this field to 0. If ECD detects this error, if data_partitioned is ON, ECD continues decoding the current DP0 or DP1 processing; otherwise, ECD stops decoding and immediately terminates the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_BLK_TCOEF" width="1" begin="4" end="4" resetval="0" description="ECD sets this field to 1 when tcoef code is illegal. At the beginning of a processing, ECD automatically reset this field to 0. If ECD detects this error, ECD stops decoding and immediately finishes the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_BLK_MARKER_BIT" width="1" begin="3" end="3" resetval="0" description="ECD sets this field to 1 when marker_bit in dct_dc_size, ESCAPE3 or RVLC is incorrect. At the beginning of a processing, ECD automatically reset this field to 0. If ECD detects this error, if data_partitioned is ON and the error is in marker_bit of dct_dc_size, ECD continues decoding the current DP0 or DP1 processing; otherwise, ECD continues decoding until finishing the current macroblock decoding" range="" rwaccess="R"/>
+    <bitfield id="ERR_BLK_ESCAPE_LEVEL" width="1" begin="2" end="2" resetval="0" description="ECD sets this field to 1 when ESCAPE3 level = 0 or 0x800, RVLC ESCAPE level = 0, H.263 DC = 0x00 or 0x80 or H.263 ESCAPE level = 0 or 0x80. At the beginning of a processing, ECD automatically reset this field to 0. If ECD detects this error, ECD stops decoding and immediately terminates the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_BLK_RVLC_ESCAPE_CODE" width="1" begin="1" end="1" resetval="0" description="ECD sets this field to 1 when the last ESCAPE code of RVLC ESCAPE is not '0000s'. At the beginning of a processing, ECD automatically reset this field to 0. If ECD detects this error, ECD stops decoding and immediately terminates the current macroblock processing" range="" rwaccess="R"/>
+    <bitfield id="ERR_BLK_EOB" width="1" begin="0" end="0" resetval="0" description="ECD sets this field to 1 when ECD cannot find EOB in 64 coefficients. At the beginning of a processing, ECD automatically reset this field to 0. If ECD detects this error, ECD stops decoding and immediately finishes the current macroblock processing" range="" rwaccess="R"/>
+  </register>
+  <register id="VC1_STAT" acronym="VC1_STAT" offset="0xA4" width="32" description="VC-1 STAT register">
+    <bitfield id="INT_EOS" width="1" begin="31" end="31" resetval="0" description="Read 0x1: An end-of-slice symbol was found." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="20" begin="30" end="11" resetval="0x00000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="WARN_EOS_SYNCMARKER" width="1" begin="10" end="10" resetval="0" description="This issue is raised when ECD3 cannot find syncmarker header syntax even though a single-bit just after decoding last MB is equal to 0." range="" rwaccess="R"/>
+    <bitfield id="WARN_EOS_TRAILINGBIT" width="1" begin="9" end="9" resetval="0" description="Read 0x1: ECD3 cannot detect the presence of the trailing bit even though the next start code was detected. Even though ECD3 found this defect, the ECD3 will start to search next start code." range="" rwaccess="R"/>
+    <bitfield id="WARN_MQUANT_OVERFLOW" width="1" begin="8" end="8" resetval="0" description="warn_mquant_overflow Read 0x0: MQUANT does not overflow Read 0x1: MQUANT overflow" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="7" end="3" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_EOS" width="1" begin="2" end="2" resetval="0" description="err_eos indicates an error during search processing for next start code." range="" rwaccess="R"/>
+    <bitfield id="ERR_VLC_TABLE" width="1" begin="1" end="1" resetval="0" description="err_vlc_table indicates when the following irregular cases happen. - Total RUN of AC coefficient exceeds a limit of block size" range="" rwaccess="R"/>
+    <bitfield id="ERR_BLK_COEF" width="1" begin="0" end="0" resetval="0" description="err_blk_coef indicates when the following irregular cases happen" range="" rwaccess="R"/>
+  </register>
+  <register id="AVS_MASK" acronym="AVS_MASK" offset="0xA8" width="32" description="AVS MASK register">
+    <bitfield id="MASK_STAT_END_OF_SLICE" width="1" begin="31" end="31" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="21" begin="30" end="10" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_NEXT_START_CODE_SEARCH" width="1" begin="9" end="9" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_END_OF_SLICE" width="1" begin="8" end="8" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_MB_SKIP_RUN" width="1" begin="7" end="7" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_MB_TYPE" width="1" begin="6" end="6" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_INTRA_CHROMA_PRED_MODE" width="1" begin="5" end="5" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_MV_DIFF" width="1" begin="4" end="4" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_CBP" width="1" begin="3" end="3" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_MB_QP_DELTA" width="1" begin="2" end="2" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_COEFF" width="1" begin="1" end="1" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_EOB" width="1" begin="0" end="0" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+  </register>
+  <register id="H264_ERR_MSK" acronym="H264_ERR_MSK" offset="0xA8" width="32" description="H.264 MASK register">
+    <bitfield id="EOS_MSK" width="1" begin="31" end="31" resetval="1" description="EOS_MSK = 1 enables detection of an EOS." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="26" begin="30" end="5" resetval="0x0000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SC_ERR_MSK" width="1" begin="4" end="4" resetval="0" description="SC_ERR_MSK = 0 (fixed) which indicates that int_err will never be issued on detecting start code search error." range="" rwaccess="R"/>
+    <bitfield id="MV_ERR_MSK" width="1" begin="3" end="3" resetval="1" description="MV_ERR_MSK = 1 enables detection of mv errors (MV_ERR)." range="" rwaccess="R"/>
+    <bitfield id="ALGN_ERR_MSK" width="1" begin="2" end="2" resetval="1" description="ALGN_ERR_MSK = 1 enables detection of CABAC alignment bits errors (ALGN_ERR)" range="" rwaccess="RW"/>
+    <bitfield id="IPCM_ALGN_ERR_MSK" width="1" begin="1" end="1" resetval="1" description="IPCM_ALGN_ERR_MSK = 1 enables detection of I_PCM alignment bits errors (IPCM_ALGN_ERR)" range="" rwaccess="RW"/>
+    <bitfield id="SYM_ERR_MSK" width="1" begin="0" end="0" resetval="1" description="SYM_ERR_MSK = 1 enables detections of all other bitstream errors (SYM_ERR)." range="" rwaccess="R"/>
+  </register>
+  <register id="INT_MASK" acronym="INT_MASK" offset="0xA8" width="32" description="INT MASK register">
+    <bitfield id="PRCS_DONE_MASK" width="1" begin="31" end="31" resetval="1" description="Mask register for prcs_done signal. 0: PRCS_DONE signal disable. 1: PRCS_DONE signal enable" range="" rwaccess="R"/>
+    <bitfield id="EOS_MASK" width="1" begin="30" end="30" resetval="1" description="Mask register for eos_done pulse signal 0: EOS_DONE signal disable. 1: EOS_DONE signal enable." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="29" begin="29" end="1" resetval="0x0000 0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VLD_TBL_ERR" width="1" begin="0" end="0" resetval="1" description="Mask register for control of error interrupt assertion. 0: no error interrupt is asserted though condition is hit. 1: error interrupt is asserted if condition is hit." range="" rwaccess="R"/>
+  </register>
+  <register id="MP2_MASK" acronym="MP2_MASK" offset="0xA8" width="32" description="MP2 MASK register">
+    <bitfield id="MASK_STAT_END_OF_SLICE" width="1" begin="31" end="31" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="15" begin="30" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_DCCOEF_OVERFLOW" width="1" begin="15" end="15" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_NEXT_START_CODE_SEARCH" width="1" begin="14" end="14" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_SLICE_START_POSITION" width="1" begin="13" end="13" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_QUANTISER_SCALE_CODE" width="1" begin="12" end="12" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_END_OF_SLICE" width="1" begin="11" end="11" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_MB_ADDR_INCREMENT" width="1" begin="10" end="10" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_MB_TYPE" width="1" begin="9" end="9" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_MOTION_CODE" width="1" begin="8" end="8" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_CBP" width="1" begin="7" end="7" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_DCT_COEF" width="1" begin="6" end="6" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_MBTYPE_D_PIC" width="1" begin="5" end="5" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_MARKER_CONCEALMENT" width="1" begin="4" end="4" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="RW"/>
+    <bitfield id="MASK_ERR_ILL_MP2_ESCAPE_LVL" width="1" begin="3" end="3" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_MP1_ESCAPE_LVL" width="1" begin="2" end="2" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_EOB" width="1" begin="1" end="1" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_ILL_EOM" width="1" begin="0" end="0" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="MP4_MASK" acronym="MP4_MASK" offset="0xA8" width="32" description="MP4 MASK register">
+    <bitfield id="MASK_STAT_END_OF_PACKET" width="1" begin="31" end="31" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="30" end="26" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_NEXT_START_CODE_SEARCH" width="1" begin="25" end="25" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_PKT_RESYNC_MARKER" width="1" begin="24" end="24" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_PKT_NEXT_START_CODE" width="1" begin="23" end="23" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_PKT_ZERO_BIT" width="1" begin="22" end="22" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_PKT_MBNUM" width="1" begin="21" end="21" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_PKT_QUANT_SCALE" width="1" begin="20" end="20" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_PKT_TIME" width="1" begin="19" end="19" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_PKT_MARKER_BIT" width="1" begin="18" end="18" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="RW"/>
+    <bitfield id="MASK_ERR_PKT_CHG_VOP_CODING_TYPE" width="1" begin="17" end="17" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_PKT_ILL_VOP_CODING_TYPE" width="1" begin="16" end="16" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_PKT_VOP_FCODE" width="1" begin="15" end="15" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_GOB_GOBNUM" width="1" begin="14" end="14" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_GOB_GOB_FRAME_ID" width="1" begin="13" end="13" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_GOB_QUANT_SCALE" width="1" begin="12" end="12" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_MBHD_MCBPC" width="1" begin="11" end="11" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_MBHD_H263_4MV" width="1" begin="10" end="10" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_MBHD_CBPY" width="1" begin="9" end="9" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_MBHD_MB_TYPE" width="1" begin="7" end="7" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_MBHD_MV_DATA" width="1" begin="6" end="6" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_BLK_DCT_DC_SIZE" width="1" begin="5" end="5" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_BLK_TCOEF" width="1" begin="4" end="4" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_BLK_MARKER_BIT" width="1" begin="3" end="3" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="RW"/>
+    <bitfield id="MASK_ERR_BLK_ESCAPE_LEVEL" width="1" begin="2" end="2" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_BLK_RVLC_ESCAPE_CODE" width="1" begin="1" end="1" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_BLK_EOB" width="1" begin="0" end="0" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+  </register>
+  <register id="VC1_MASK" acronym="VC1_MASK" offset="0xA8" width="32" description="VC-1 MASK register">
+    <bitfield id="MASK_INT_EOS" width="1" begin="31" end="31" resetval="1" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="20" begin="30" end="11" resetval="0x00000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="MASK_EOS_SYNCMARKER" width="1" begin="10" end="10" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="MASK_WARN_EOS_TRAILINGBIT" width="1" begin="9" end="9" resetval="0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="MASK_MQUANT_OVERFLOW" width="1" begin="8" end="8" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="7" end="3" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_EOS" width="1" begin="2" end="2" resetval="0" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_VLC_TABLE" width="1" begin="1" end="1" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+    <bitfield id="MASK_ERR_BLK_COEF" width="1" begin="0" end="0" resetval="1" description="Mask flags correspond to status bits" range="" rwaccess="R"/>
+  </register>
+  <register id="AVS_WORK0" acronym="AVS_WORK0" offset="0xAC" width="32" description="AVS WORK0 register">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SKIPMBCOUNT" width="14" begin="29" end="16" resetval="0x0000" description="SkipMbCount This field specifies SkipMbCount described in AVS standard section 9.3." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SLICE_DATA_RD_EN" width="1" begin="9" end="9" resetval="0" description="Slice data read enable flag 0: slice data is read only at the first macroblock in a slice 1: slice data is read at every macroblocks AVS RTL can reduce the cycle not to read slice data in non-first macroblock in a slice by clearing this flag to 0. For normal bitstream encode and decode case, this bit must be cleared to 0 for faster execution of AVS. But if user wants to start processing from the non-first macroblock in a slice, user must set this flag to 1. This flag is applicable for RTL, not C-model. C-model always read slice data because there is no static data register in C-model. Then, the behavior between RTL and C-model is not matched if this flag is cleared to 0 and the processing is started from the non-first macroblock in a slice." range="" rwaccess="RW"/>
+    <bitfield id="NEXT_START_CODE_SEARCH" width="1" begin="8" end="8" resetval="0" description="next_start_code_search This field specifies ECD starts start code search or not when error is occurred. 0: non-search 1: search" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="8" begin="7" end="0" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+  </register>
+  <register id="CFG_QP" acronym="CFG_QP" offset="0xAC" width="32" description="">
+    <bitfield id="MV_FLAG_EN" width="1" begin="31" end="31" resetval="0x0" description="MV_FLAG_EN =1 enables motion vector and reference index comparison in decoding. If MV_FLAG_EN=1, motion vectors and reference indices are compared and results are reflected to mv_equal_flag_l0/1 and refidx_equal_flag_l0/1 in MBinfo. In encoding, even if MV_FLAG_EN=1, the comparisons are not executed." range="" rwaccess="RW"/>
+    <bitfield id="H264_RSV" width="1" begin="30" end="30" resetval="0x0" description="Reserved for future use" range="" rwaccess="RW"/>
+    <bitfield id="FORCE_SLC_LD" width="1" begin="29" end="29" resetval="0" description="FORCE_SLC_LD = 1 forces slice information data loading from memory for each macroblock process. If this bit is equal to 0, slice information data is loaded only when the current macroblock is the first macroblock in the slice. This feature is for debug use only so as to enable modifying slice information in the middle of slice processing. Usually, it is necessary at the beginning of each slice, and this bit must be cleared to save cycle counts for data loading" range="" rwaccess="RW"/>
+    <bitfield id="USE_CABAC" width="1" begin="28" end="28" resetval="0" description="USE_CABAC = 1 indicates that the CABAC is in use for entropy coding. If the value is equal to 0, CAVLC is used. The ECD3 automatically loads the value from slice information onto this register." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="8" begin="27" end="20" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="COL_MB_FMT" width="2" begin="19" end="18" resetval="0x0" description="COL_MB_FMT indicates the macroblock header format type for the co-located macroblock data. 00b : Bi-16-MV format 01b : 16-MV format 10b : Bi-4-MV format 11b : The reserved ECD3 automatically loads the value from slice information onto this register" range="" rwaccess="R"/>
+    <bitfield id="MB_FMT" width="2" begin="17" end="16" resetval="0x0" description="MB_FMT indicates the macroblock header format type for the current macroblock and neighboring macroblocks in the current picture. 00b : Bi-16-MV format 01b : 16-MV format 10b : Bi-4-MV format 11b : The reserved ECD3 automatically loads the value from slice information onto this register" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="2" begin="15" end="14" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="QP_DELTA" width="6" begin="13" end="8" resetval="0x00" description="QP_DELTA is equal to mb_qp_delta of the last macroblock decoded or encoded. This register value is maintained by the ECD3, so that the user does not set up the value" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="7" end="6" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="QP" width="6" begin="5" end="0" resetval="0x00" description="QP is equal to the quantizer parameter for the last macroblock decoded or encoded. This register value is maintained by the ECD3" range="" rwaccess="RW"/>
+  </register>
+  <register id="JPEG_CTRL" acronym="JPEG_CTRL" offset="0xAC" width="32" description="JPEG Control register">
+    <bitfield id="DC_PRED_Y" width="16" begin="31" end="16" resetval="0x0000" description="Luminance DC prediction value is stored in register. H/W regards this value as previous DC value (source of DC prediction) except in a block just after restart marker. In case other than tests, this register value must not be written." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="RSTRT_MRKR_CNT" width="3" begin="10" end="8" resetval="0x0" description="Restart marker counter value (during encoding only) is reflected in this register. In decoding, please ignore." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="6" begin="7" end="2" resetval="0x00" description="Reserved. Fixed to 0." range="" rwaccess="R"/>
+    <bitfield id="DC_PRED_RST" width="1" begin="1" end="1" resetval="0" description="If this register bit is high, DC prediction for the first block of the current MCU is not executed. This register bit must be used in case of error recovery, and valid in decoder. In encoder, the configured value is ignored. The configured value is automatically reset immediately after the user configures this bit to 1. 0: DC prediction is executed. 1: DC prediction is reset." range="" rwaccess="RW"/>
+    <bitfield id="INIT_EN" width="1" begin="0" end="0" resetval="0" description="This bit controls initialization of JPEG core on ECD module. If this bit is high, all counter values are reset and all address pointer for picture configuration data and Huffman code tables are loaded. Please notice that this bit must be activated once before starting processing of ECD module, and after all configuration of memory address is done. During period that this bit is high, any writing access is ignored. 0: initialize disable. 1: initialize start." range="" rwaccess="RW"/>
+  </register>
+  <register id="MP2_WORK0" acronym="MP2_WORK0" offset="0xAC" width="32" description="MP2 WORK0 register">
+    <bitfield id="MB_SKIP_RUN" width="16" begin="31" end="16" resetval="0x0000" description="Specifies the number of macroblocks to be skipped" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="START_CODE_SEARCH_FLAG" width="1" begin="11" end="11" resetval="0" description="Specifies whether ECD starts searching next start code or not when error is occurred in decoding. 0: Not search next start code 1: Search next start code In encoding, this field must be 0." range="" rwaccess="RW"/>
+    <bitfield id="MACROBLOCK_MOTION_BACKWARD" width="1" begin="10" end="10" resetval="0" description="Specifies macroblock_motion_backward described in MPEG-2 standard section 6.3.17.1." range="" rwaccess="RW"/>
+    <bitfield id="MACROBLOCK_MOTION_FORWARD" width="1" begin="9" end="9" resetval="0" description="Specifies macroblock_motion_forward described in MPEG-2 standard section 6.3.17.1." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="8" end="5" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PREV_QUANTISER_SCALE_CODE" width="5" begin="4" end="0" resetval="0x00" description="Specifies previous macroblock's quantizer_scale_code described in MPEG-2 standard section 6.3.16" range="" rwaccess="RW"/>
+  </register>
+  <register id="MP4_WORK0" acronym="MP4_WORK0" offset="0xAC" width="32" description="MP4 WORK0 register">
+    <bitfield id="RESERVED" width="3" begin="31" end="29" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="RUNNINGQP" width="5" begin="28" end="24" resetval="0x00" description="This field is used for reserving runningQp for the next macroblock, not showing the current macroblock's quantizer_scale. At the beginning of a VOP, ECD copies from vop_quant in VOP header information" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="23" end="23" resetval="0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VOP_FCODE_BACKWARD" width="3" begin="22" end="20" resetval="0x0" description="These fields specify vop_fcode_forward and vop_fcode_backward updated at packet header. In decoding, at the beginning of a VOP, ECD copies from vop_fcode_forward and vop_fcode_backward in VOP header information to these fields. ECD updates these fields at packet header decoding. In encoding, this field is not used and must be fixed to 0. ECD uses vop_fcode_forward and vop_fcode_backward in macroblock header information" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="19" end="19" resetval="0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VOP_FCODE_FORWARD" width="3" begin="18" end="16" resetval="0x0" description="These fields specify vop_fcode_forward and vop_fcode_backward updated at packet header. In decoding, at the beginning of a VOP, ECD copies from vop_fcode_forward and vop_fcode_backward in VOP header information to these fields. ECD updates these fields at packet header decoding. In encoding, this field is not used and must be fixed to 0. ECD uses vop_fcode_forward and vop_fcode_backward in macroblock header information" range="" rwaccess="RW"/>
+    <bitfield id="DP_MODE" width="2" begin="15" end="14" resetval="0x0" description="This field indicates which data is encoding or decoding in data partitioning mode. Host must reset this field to 0 at the beginning of a VOP. ECD updates automatically during a VOP. This field is reset to 0 at the beginning of a slice, and ECD automatically sets to 1 when it decodes or encodes dc_marker or motion_marker, and also automatically sets to 2 when it decodes all texture header. 0: GOB header or motion and header information processing 1: texture header processing 2: TCOEF processing or packet header, In non data partitioning mode, this field is not used" range="" rwaccess="RW"/>
+    <bitfield id="GOB_FRAME_ID" width="2" begin="13" end="12" resetval="0x0" description="This field specifies gob_frame_id which is updated at gob header. In decoding, when first_non_empty_header = 1, decoded gob_frame_id in packet header is compared with gob_frame_id in local information, and if it differs, ECD detects error named 'gob_frame_id is changed'. When first_non_empty_header = 0, decoded gob_frame_id is written to this field. If GOB header is not existed in a VOP, gob_frame_id is 0. In encoding, this field is not used and must be fixed to 0. ECD uses gob_frame_id in macroblock header information" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="INTRA_DC_VLC_THR" width="3" begin="10" end="8" resetval="0x0" description="This is a 3-bit code that specifies a threshold value of quantizer scale used to switch between two VLC's for coding of Intra DC coefficients. In decoding, at the beginning of a VOP, ECD copies from intra_dc_vlc_thr in VOP header information to the field. ECD updates the fields at packet header decoding. In encoding, this field is not used. ECD uses intra_dc_vlc_thr in macroblock header information" range="" rwaccess="RW"/>
+    <bitfield id="FIRST_NON_EMPTY_HEADER" width="1" begin="7" end="7" resetval="0" description="This is the flag to indicate the first non empty GOB header or not. In decoding, ECD sets 1 to this field at the beginning of VOP. ECD sets to 0 if ECD encounters the first non-empty GOB header. In encoding, this field is not used and must be fixed to 0" range="" rwaccess="RW"/>
+    <bitfield id="MINI_SLICE_HEADER_FLAG" width="1" begin="6" end="6" resetval="0" description="In H.263 decoding, this field specifies whether the current slice header is mini slice header or not. After decoding slice header, this field is automatically reset to 0 by the ECD3. 0: non mini slice header 1: mini slice header Otherwise, this field must be 0" range="" rwaccess="RW"/>
+    <bitfield id="START_CODE_SEARCH_FLAG" width="1" begin="5" end="5" resetval="0" description="In decoding, this field specifies whether ECD starts searching next_start_code and resync_marker or not when error is occurred in decoding. 0: Not search next start code and resync marker 1: Search next start code and resync marker In encoding, this field must be 0" range="" rwaccess="RW"/>
+    <bitfield id="GOB_NUMBER" width="5" begin="4" end="0" resetval="0x00" description="In decoding, this field specifies gob_number of the current macroblock. In encoding, this field is not used and must be fixed to 0" range="" rwaccess="RW"/>
+  </register>
+  <register id="VC1_WORK" acronym="VC1_WORK" offset="0xAC" width="32" description="VC-1 WORK register">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FIXED_LENTH_CODE" width="1" begin="8" end="8" resetval="0" description="Presence of Fixed Length Code (escape mode 3) Setting 1 specifies the first case of escape mode 3 in a frame. This register is cleared when found ESCAPE3. 0: non-first case of escape mode 3 in frame 1: first case of escape mode 3 in frame" range="" rwaccess="RW"/>
+    <bitfield id="FIXED_TO_ZERO" width="1" begin="7" end="7" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="RUN_CODE_SIZEOFESCAPE_MODE_3" width="3" begin="6" end="4" resetval="0x0" description="Run code size of escape mode 3 Run code size of escape mode 3 In decoding, this register is automatically updated when presence of fixed length code is cleared to 0" range="" rwaccess="RW"/>
+    <bitfield id="LEVEL_CODE_SIZEOFESCAPE_MODE_3" width="4" begin="3" end="0" resetval="0x0" description="Level code size of escape mode 3 Level code size of escape mode 3 In decoding, this register is automatically updated when presence of fixed length code is cleared to 0" range="" rwaccess="RW"/>
+  </register>
+  <register id="AVS_WORK1" acronym="AVS_WORK1" offset="0xB0" width="32" description="AVS WORK1 register">
+    <bitfield id="PTR_MVD_15_4" width="12" begin="31" end="20" resetval="0x000" description="PTR_MVD Start address of temporary MVD info. This value must be multiple of 8." range="" rwaccess="RW"/>
+    <bitfield id="PTR_MVD_3_0" width="4" begin="19" end="16" resetval="0x0" description="PTR_MVD Start address of temporary MVD info. This value must be multiple of 8." range="" rwaccess="R"/>
+    <bitfield id="PTR_RUNLVL_15_4" width="12" begin="15" end="4" resetval="0x000" description="PTR_RUNLVL Start address of temporary run level info. This value must be multiple of 8." range="" rwaccess="RW"/>
+    <bitfield id="PTR_RUNLVL_3_0" width="4" begin="3" end="0" resetval="0x0" description="PTR_RUNLVL Start address of temporary run level info. This value must be multiple of 8." range="" rwaccess="R"/>
+  </register>
+  <register id="CDC_VP_4" acronym="CDC_VP_4" offset="0xB0" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved1" range="" rwaccess="R"/>
+    <bitfield id="ACPREDPTR_15_3" width="13" begin="15" end="3" resetval="0x0000" description="ACPREDPTR I picture except simple/main I picture" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="2" end="0" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+  </register>
+  <register id="MP2_WORK1" acronym="MP2_WORK1" offset="0xB0" width="32" description="MP2 WORK1 register">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="DCT_DC_PRED1" width="11" begin="26" end="16" resetval="0x000" description="In decoding, this value specifies dct_dc_pred[1] described in MPEG-2 standard section 7.2.1. In encoding, this value is fixed to 0" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="DCT_DC_PRED0" width="11" begin="10" end="0" resetval="0x000" description="In decoding, this value specifies dct_dc_pred[0] described in MPEG-2 standard section 7.2.1. In encoding, this value is fixed to 0" range="" rwaccess="RW"/>
+  </register>
+  <register id="MP4_WORK1" acronym="MP4_WORK1" offset="0xB0" width="32" description="MP4 WORK1 register">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SKIPRUN" width="14" begin="29" end="16" resetval="0x0000" description="In the case of B-VOP decoding, if decoded macroblock_number in video_packet_header &amp;amp;gt; the macroblock address counter, ECD notices the macroblocks from the macroblock address counter to macroblock_number -1 would be not_coded macroblock. ECD reserves (macroblock_number - MB_NUM) value to SKIP_NUM to skip macroblocks. In the other cases, this field must be 0" range="" rwaccess="RW"/>
+    <bitfield id="SLICE_Y" width="8" begin="15" end="8" resetval="0x00" description="In data partitioning, this field shows the position of the first macroblock in a slice. Otherwise, this field must be 0. This is for data partitioning to recover the first macroblock position after texture encoding and decoding" range="" rwaccess="RW"/>
+    <bitfield id="SLICE_X" width="8" begin="7" end="0" resetval="0x00" description="In data partitioning, this field shows the position of the first macroblock in a slice. Otherwise, this field must be 0. This is for data partitioning to recover the first macroblock position after texture encoding and decoding" range="" rwaccess="RW"/>
+  </register>
+  <register id="SKIP_RUN" acronym="SKIP_RUN" offset="0xB0" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SKIP_RUN_NB" width="16" begin="15" end="0" resetval="0x0000" description="SKIP_RUN_NB indicates the number of skipped macroblocks left in CAVLC. This register is maintained by the ECD3." range="" rwaccess="RW"/>
+  </register>
+  <register id="VLC_HUFFPTR_DC" acronym="VLC_HUFFPTR_DC" offset="0xB0" width="32" description="Pointers to Huffman table for VLC DC components">
+    <bitfield id="VLCHUFFPTR_DC_CHROMA_31_29" width="3" begin="31" end="29" resetval="0x5" description="Indicating start address of Huffman table for VLC DC Chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="VLCHUFFPTR_DC_CHROMA_28_19" width="10" begin="28" end="19" resetval="0x000" description="Indicating start address of Huffman table for VLC DC Chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="RW"/>
+    <bitfield id="VLCHUFFPTR_DC_CHROMA_18_16" width="3" begin="18" end="16" resetval="0x0" description="Indicating start address of Huffman table for VLC DC Chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="VLCHUFFPTR_DC_LUMA_15_13" width="3" begin="15" end="13" resetval="0x5" description="Indicating start address of Huffman table for VLC DC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="VLCHUFFPTR_DC_LUMA_12_3" width="10" begin="12" end="3" resetval="0x000" description="Indicating start address of Huffman table for VLC DC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="RW"/>
+    <bitfield id="VLCHUFFPTR_DC_LUMA_2_0" width="3" begin="2" end="0" resetval="0x0" description="Indicating start address of Huffman table for VLC DC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+  </register>
+  <register id="CABAC_REG" acronym="CABAC_REG" offset="0xB4" width="32" description="">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PRE_SKIP" width="1" begin="29" end="29" resetval="0" description="PRE_SKIP = 1 indicates that both top and bottom macroblocks in MB-AFF mode decoding are skipped. This flag is not used in encoding or in CAVLC mode" range="" rwaccess="RW"/>
+    <bitfield id="FIRST_BIT" width="1" begin="28" end="28" resetval="0" description="FIRST_BIT = 1 indicates that the next bit put by CABAC is the first bit since the last CABAC initialization. This register is automatically set by CABAC encoder. This flag is ignored in decoding or in CAVLC mode" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="27" end="26" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="C_LOW_OFST" width="10" begin="25" end="16" resetval="0x000" description="C_LOW_OFST is equal to codILow in encoding, and codIOffset in decoding. codILow shall be in the range of [0x000, 0x3FF], and codIOffset in [0x000, 0x1FF]. This field is ignored in CAVLC" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="7" begin="15" end="9" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="C_RNG" width="9" begin="8" end="0" resetval="0x000" description="C_RNG is equal to codIRange. This field is ignored in CAVLC" range="" rwaccess="RW"/>
+  </register>
+  <register id="CDC_VP_5" acronym="CDC_VP_5" offset="0xB4" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="OVERFLAGPTR_15_3" width="13" begin="15" end="3" resetval="0x0000" description="OVERFLAGPTR I picture except simple/main I picture" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="2" end="0" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+  </register>
+  <register id="MP2_WORK2" acronym="MP2_WORK2" offset="0xB4" width="32" description="MP2 WORK2 register">
+    <bitfield id="RESERVED" width="21" begin="31" end="11" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="DCT_DC_PRED2" width="11" begin="10" end="0" resetval="0x000" description="In decoding, this value specifies dct_dc_pred[2] described in MPEG-2 standard section 7.2.1. In encoding, this value is fixed to 0" range="" rwaccess="RW"/>
+  </register>
+  <register id="MP4_WORK2" acronym="MP4_WORK2" offset="0xB4" width="32" description="MP4 WORK2 register">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SLICE_MBADDR" width="14" begin="29" end="16" resetval="0x0000" description="In data partition decoding, this field shows the macroblock address of the first macroblock in the current slice. ECD updates this field at the beginning of a slice. The value is used to recover the first macroblock position in data partitioning. Otherwise, this field must be 0" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="14" begin="15" end="2" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="GOB_MBROW" width="2" begin="1" end="0" resetval="0x0" description="In the case h263_mode = 1 and decoding, this field shows the vertical position of current macroblock in a slice or GOB. For example gob_mbrow = 0 means the current macroblock is in the first row of the current slice or GOB. In the other cases, this field is fixed to 0" range="" rwaccess="RW"/>
+  </register>
+  <register id="VLC_HUFFPTR_AC" acronym="VLC_HUFFPTR_AC" offset="0xB4" width="32" description="Pointers to Huffman table for VLC AC components">
+    <bitfield id="VLCHUFFPTR_AC_CHROMA_31_29" width="3" begin="31" end="29" resetval="0x5" description="Indicating start address of Huffman table for VLC AC Chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="VLCHUFFPTR_AC_CHROMA_28_19" width="10" begin="28" end="19" resetval="0x000" description="Indicating start address of Huffman table for VLC AC Chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="RW"/>
+    <bitfield id="VLCHUFFPTR_AC_CHROMA_18_16" width="3" begin="18" end="16" resetval="0x0" description="Indicating start address of Huffman table for VLC AC Chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="VLCHUFFPTR_AC_LUMA_15_13" width="3" begin="15" end="13" resetval="0x5" description="Indicating start address of Huffman table for VLC AC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="VLCHUFFPTR_AC_LUMA_12_3" width="10" begin="12" end="3" resetval="0x000" description="Indicating start address of Huffman table for VLC AC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="RW"/>
+    <bitfield id="VLCHUFFPTR_AC_LUMA_2_0" width="3" begin="2" end="0" resetval="0x0" description="Indicating start address of Huffman table for VLC AC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+  </register>
+  <register id="CDC_VP_6" acronym="CDC_VP_6" offset="0xB8" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="MVMODEPTR_15_3" width="13" begin="15" end="3" resetval="0x0000" description="MVMODEPTR Progressive P picture" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="2" end="0" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+  </register>
+  <register id="MP2_WORK3" acronym="MP2_WORK3" offset="0xB8" width="32" description="MP2 WORK3 register">
+    <bitfield id="PMV1" width="16" begin="31" end="16" resetval="0x0000" description="Specifies PMV[0][0][1] described in MPEG-2 standard section 7.6.3. They are half-pel precision" range="" rwaccess="RW"/>
+    <bitfield id="PMV0" width="16" begin="15" end="0" resetval="0x0000" description="Specifies PMV[0[0][0] described in MPEG-2 standard section 7.6.3. They are half-pel precision" range="" rwaccess="RW"/>
+  </register>
+  <register id="MP4_WORK3" acronym="MP4_WORK3" offset="0xB8" width="32" description="">
+    <bitfield id="RESERVED" width="17" begin="31" end="15" resetval="0x00000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PTR_MVD_14_13" width="2" begin="14" end="13" resetval="0x0" description="This field specifies temporary MVD data pointer. Temporary MVD data must be located at ECDWBUF" range="" rwaccess="R"/>
+    <bitfield id="PTR_MVD_12_4" width="9" begin="12" end="4" resetval="0x000" description="This field specifies temporary MVD data pointer. Temporary MVD data must be located at ECDWBUF" range="" rwaccess="RW"/>
+    <bitfield id="PTR_MVD_3_0" width="4" begin="3" end="0" resetval="0x0" description="This field specifies temporary MVD data pointer. Temporary MVD data must be located at ECDWBUF" range="" rwaccess="R"/>
+  </register>
+  <register id="SYM_CNT" acronym="SYM_CNT" offset="0xB8" width="32" description="">
+    <bitfield id="SYM_CNT_NB" width="32" begin="31" end="0" resetval="0x0000 0000" description="SYM_CNT_NB is equal to the total number of CABAC bin symbols encoded since the last CABAC initialization. This register is reset to 0 when H.264 core is invoked for a first macroblock in a slice. This register is not used in decoding or in CAVLC mode. This register is maintained by the ECD3" range="" rwaccess="RW"/>
+  </register>
+  <register id="UVLD_CTRL_TBPTR_DC" acronym="UVLD_CTRL_TBPTR_DC" offset="0xB8" width="32" description="Pointers to control table for UVLD DC components">
+    <bitfield id="UVLD_CTRL_DC_CHROMA_31_29" width="3" begin="31" end="29" resetval="0x5" description="Indicating start address of control table for UVLD DC-chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="UVLD_CTRL_DC_CHROMA_28_19" width="10" begin="28" end="19" resetval="0x000" description="Indicating start address of control table for UVLD DC-chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="RW"/>
+    <bitfield id="UVLD_CTRL_DC_CHROMA_18_16" width="3" begin="18" end="16" resetval="0x0" description="Indicating start address of control table for UVLD DC-chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="UVLD_CTRL_DC_LUMA_15_13" width="3" begin="15" end="13" resetval="0x5" description="Indicating start address of control table for UVLD DC-luma. The address value must be aligned to 64-bit word boundary." range="" rwaccess="R"/>
+    <bitfield id="UVLD_CTRL_DC_LUMA_12_3" width="10" begin="12" end="3" resetval="0x000" description="Indicating start address of control table for UVLD DC-luma. The address value must be aligned to 64-bit word boundary." range="" rwaccess="RW"/>
+    <bitfield id="UVLD_CTRL_DC_LUMA_2_0" width="3" begin="2" end="0" resetval="0x0" description="Indicating start address of control table for UVLD DC-luma. The address value must be aligned to 64-bit word boundary." range="" rwaccess="R"/>
+  </register>
+  <register id="BITS_OSTD" acronym="BITS_OSTD" offset="0xBC" width="32" description="">
+    <bitfield id="BITS_OSTD_NB" width="32" begin="31" end="0" resetval="0x0000 0000" description="BITS_OSTD_NB is equal to the total number of outstanding bits in CABAC encoder. This register is not used in decoding or in CAVLC mode. This register is maintained by the ECD3" range="" rwaccess="RW"/>
+  </register>
+  <register id="CDC_VP_7" acronym="CDC_VP_7" offset="0xBC" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SKIPMBPTR_15_3" width="13" begin="15" end="3" resetval="0x0000" description="SKIPMBPTR Progressive P/B picture, Interlace Frame P/B picture" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="2" end="0" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+  </register>
+  <register id="MP2_WORK4" acronym="MP2_WORK4" offset="0xBC" width="32" description="MP2 WORK4 register">
+    <bitfield id="PMV4" width="16" begin="31" end="16" resetval="0x0000" description="Specifies PMV[0][1][1] described in MPEG-2 standard section 7.6.3. They are half-pel precision" range="" rwaccess="RW"/>
+    <bitfield id="PMV3" width="16" begin="15" end="0" resetval="0x0000" description="Specifies PMV[0][1][0] described in MPEG-2 standard section 7.6.3. They are half-pel precision" range="" rwaccess="RW"/>
+  </register>
+  <register id="MP4_WORK4" acronym="MP4_WORK4" offset="0xBC" width="32" description="MP4 WORK4 register">
+    <bitfield id="MVP01" width="16" begin="31" end="16" resetval="0x0000" description="MVP[0][1]: Motion Vector Predictors for B-VOP (field forward top motion vector predictor)" range="" rwaccess="RW"/>
+    <bitfield id="MVP00" width="16" begin="15" end="0" resetval="0x0000" description="MVP[0][0]: Motion Vector Predictors for B-VOP (field forward top motion vector predictor)" range="" rwaccess="RW"/>
+  </register>
+  <register id="UVLD_CTRL_TBPTR_AC" acronym="UVLD_CTRL_TBPTR_AC" offset="0xBC" width="32" description="Pointers to control table for UVLD AC components">
+    <bitfield id="UVLD_CTRL_AC_CHROMA_31_29" width="3" begin="31" end="29" resetval="0x5" description="Indicating start address of control table for UVLD AC-chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="UVLD_CTRL_AC_CHROMA_28_19" width="10" begin="28" end="19" resetval="0x000" description="Indicating start address of control table for UVLD AC-chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="RW"/>
+    <bitfield id="UVLD_CTRL_AC_CHROMA_18_16" width="3" begin="18" end="16" resetval="0x0" description="Indicating start address of control table for UVLD AC-chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="UVLD_CTRL_AC_LUMA_15_13" width="3" begin="15" end="13" resetval="0x5" description="Indicating start address of control table for UVLD AC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="UVLD_CTRL_AC_LUMA_12_3" width="10" begin="12" end="3" resetval="0x000" description="Indicating start address of control table for UVLD AC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="RW"/>
+    <bitfield id="UVLD_CTRL_AC_LUMA_2_0" width="3" begin="2" end="0" resetval="0x0" description="Indicating start address of control table for UVLD AC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+  </register>
+  <register id="CDC_VP_8" acronym="CDC_VP_8" offset="0xC0" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="DIRECTPT_15_3" width="13" begin="15" end="3" resetval="0x0000" description="DIRECTPTR Progressive B picture, Interlace Frame B picture" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="2" end="0" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+  </register>
+  <register id="MP2_WORK5" acronym="MP2_WORK5" offset="0xC0" width="32" description="MP2 WORK5 register">
+    <bitfield id="PMV6" width="16" begin="31" end="16" resetval="0x0000" description="Specifies PMV[1][0][1] described in MPEG-2 standard section 7.6.3. They are half-pel precision" range="" rwaccess="RW"/>
+    <bitfield id="PMV5" width="16" begin="15" end="0" resetval="0x0000" description="Specifies PMV[1][0][0] described in MPEG-2 standard section 7.6.3. They are half-pel precision" range="" rwaccess="RW"/>
+  </register>
+  <register id="MP4_WORK5" acronym="MP4_WORK5" offset="0xC0" width="32" description="MP4 WORK5 register">
+    <bitfield id="MVP11" width="16" begin="31" end="16" resetval="0x0000" description="MVP[1][1]: Motion Vector Predictors for B-VOP (field forward bottom motion vector predictor)" range="" rwaccess="RW"/>
+    <bitfield id="MVP10" width="16" begin="15" end="0" resetval="0x0000" description="MVP[1][0]: Motion Vector Predictors for B-VOP (field forward bottom motion vector predictor)" range="" rwaccess="RW"/>
+  </register>
+  <register id="MVD_CUR_PTR" acronym="MVD_CUR_PTR" offset="0xC0" width="32" description="">
+    <bitfield id="DP_MVD_CUR_1_15_13" width="3" begin="31" end="29" resetval="0x5" description="DP_MVD_CUR_1 specifies the pointer to motion vector delta data for bottom macroblock of the current macroblock pair. This register is updated by the ECD3 for each macroblock. This register is used only when in MBAFF mode" range="" rwaccess="R"/>
+    <bitfield id="DP_MVD_CUR_1_12_3" width="10" begin="28" end="19" resetval="0x000" description="DP_MVD_CUR_1 specifies the pointer to motion vector delta data for bottom macroblock of the current macroblock pair. This register is updated by the ECD3 for each macroblock. This register is used only when in MBAFF mode" range="" rwaccess="RW"/>
+    <bitfield id="DP_MVD_CUR_1_2_0" width="3" begin="18" end="16" resetval="0x0" description="DP_MVD_CUR_1 specifies the pointer to motion vector delta data for bottom macroblock of the current macroblock pair. This register is updated by the ECD3 for each macroblock. This register is used only when in MBAFF mode" range="" rwaccess="R"/>
+    <bitfield id="DP_MVD_CUR_0_15_13" width="3" begin="15" end="13" resetval="0x5" description="DP_MVD_CUR_0 specifies the pointer to motion vector delta data for the current macroblock or top macroblock of the current macroblock pair. This register is updated by the ECD3 for each macroblock" range="" rwaccess="R"/>
+    <bitfield id="DP_MVD_CUR_0_12_3" width="10" begin="12" end="3" resetval="0x000" description="DP_MVD_CUR_0 specifies the pointer to motion vector delta data for the current macroblock or top macroblock of the current macroblock pair. This register is updated by the ECD3 for each macroblock" range="" rwaccess="RW"/>
+    <bitfield id="DP_MVD_CUR_0_2_0" width="3" begin="2" end="0" resetval="0x0" description="DP_MVD_CUR_0 specifies the pointer to motion vector delta data for the current macroblock or top macroblock of the current macroblock pair. This register is updated by the ECD3 for each macroblock" range="" rwaccess="R"/>
+  </register>
+  <register id="UVLD_CODE_TBPTR_DC" acronym="UVLD_CODE_TBPTR_DC" offset="0xC0" width="32" description="Pointers to code table for UVLD DC components">
+    <bitfield id="UVLD_CODE_DC_CHROMA31_29" width="3" begin="31" end="29" resetval="0x5" description="Indicating start address of code table for UVLD DC-chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="UVLD_CODE_DC_CHROMA_28_19" width="10" begin="28" end="19" resetval="0x000" description="Indicating start address of code table for UVLD DC-chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="RW"/>
+    <bitfield id="UVLD_CODE_DC_CHROMA_18_16" width="3" begin="18" end="16" resetval="0x0" description="Indicating start address of code table for UVLD DC-chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="UVLD_CODE_DC_LUMA_15_13" width="3" begin="15" end="13" resetval="0x5" description="Indicating start address of code table for UVLD DC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="UVLD_CODE_DC_LUMA_12_3" width="10" begin="12" end="3" resetval="0x000" description="Indicating start address of code table for UVLD DC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="RW"/>
+    <bitfield id="UVLD_CODE_DC_LUMA_2_0" width="3" begin="2" end="0" resetval="0x0" description="Indicating start address of code table for UVLD DC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+  </register>
+  <register id="CDC_VP_9" acronym="CDC_VP_9" offset="0xC4" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FIELDTXPTR_31_3" width="13" begin="15" end="3" resetval="0x0000" description="FIELDTXPTR Interlace Frame I picture" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="2" end="0" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+  </register>
+  <register id="MP2_WORK6" acronym="MP2_WORK6" offset="0xC4" width="32" description="MP2 WORK6 register">
+    <bitfield id="PMV8" width="16" begin="31" end="16" resetval="0x0000" description="Specifies PMV[1][1][1] described in MPEG-2 standard section 7.6.3. They are half-pel precision" range="" rwaccess="RW"/>
+    <bitfield id="PMV7" width="16" begin="15" end="0" resetval="0x0000" description="Specifies PMV[1][1][0] described in MPEG-2 standard section 7.6.3. They are half-pel precision" range="" rwaccess="RW"/>
+  </register>
+  <register id="MP4_WORK6" acronym="MP4_WORK6" offset="0xC4" width="32" description="MP4 WORK6 register">
+    <bitfield id="MVP21" width="16" begin="31" end="16" resetval="0x0000" description="MVP[2][1]: Motion Vector Predictors for B-VOP (field backward top motion vector predictor)" range="" rwaccess="RW"/>
+    <bitfield id="MVP20" width="16" begin="15" end="0" resetval="0x0000" description="MVP[2][0]: Motion Vector Predictors for B-VOP (field backward top motion vector predictor)" range="" rwaccess="RW"/>
+  </register>
+  <register id="MVD_LFT_PTR" acronym="MVD_LFT_PTR" offset="0xC4" width="32" description="">
+    <bitfield id="DP_MVD_LFT_1_15_13" width="3" begin="31" end="29" resetval="0x5" description="DP_MVD_LFT_1 specifies the pointer to motion vector delta data for bottom macroblock of the left macroblock pair. This register is updated by the ECD3 for each macroblock. This register is used only when in MBAFF mode" range="" rwaccess="R"/>
+    <bitfield id="DP_MVD_LFT_1_12_3" width="10" begin="28" end="19" resetval="0x000" description="DP_MVD_LFT_1 specifies the pointer to motion vector delta data for bottom macroblock of the left macroblock pair. This register is updated by the ECD3 for each macroblock. This register is used only when in MBAFF mode" range="" rwaccess="RW"/>
+    <bitfield id="DP_MVD_LFT_1_2_0" width="3" begin="18" end="16" resetval="0x0" description="DP_MVD_LFT_1 specifies the pointer to motion vector delta data for bottom macroblock of the left macroblock pair. This register is updated by the ECD3 for each macroblock. This register is used only when in MBAFF mode" range="" rwaccess="R"/>
+    <bitfield id="DP_MVD_LFT_0_15_13" width="3" begin="15" end="13" resetval="0x5" description="DP_MVD_LFT_0 specifies the pointer to motion vector delta data for the left macroblock or top macroblock of the left macroblock pair. This register is updated by the ECD3 for each macroblock" range="" rwaccess="R"/>
+    <bitfield id="DP_MVD_LFT_0_12_3" width="10" begin="12" end="3" resetval="0x000" description="DP_MVD_LFT_0 specifies the pointer to motion vector delta data for the left macroblock or top macroblock of the left macroblock pair. This register is updated by the ECD3 for each macroblock" range="" rwaccess="RW"/>
+    <bitfield id="DP_MVD_LFT_0_2_0" width="3" begin="2" end="0" resetval="0x0" description="DP_MVD_LFT_0 specifies the pointer to motion vector delta data for the left macroblock or top macroblock of the left macroblock pair. This register is updated by the ECD3 for each macroblock" range="" rwaccess="R"/>
+  </register>
+  <register id="UVLD_CODE_TBPTR_AC" acronym="UVLD_CODE_TBPTR_AC" offset="0xC4" width="32" description="Pointers to code table for UVLD AC components">
+    <bitfield id="UVLD_CODE_AC_CHROMA_31_29" width="3" begin="31" end="29" resetval="0x5" description="Indicating start address of code table for UVLD AC Chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="UVLD_CODE_AC_CHROMA_28_19" width="10" begin="28" end="19" resetval="0x000" description="Indicating start address of code table for UVLD AC Chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="RW"/>
+    <bitfield id="UVLD_CODE_AC_CHROMA_18_16" width="3" begin="18" end="16" resetval="0x0" description="Indicating start address of code table for UVLD AC Chroma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="UVLD_CODE_AC_LUMA_15_13" width="3" begin="15" end="13" resetval="0x5" description="Indicating start address of code table for UVLD AC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+    <bitfield id="UVLD_CODE_AC_LUMA_12_3" width="10" begin="12" end="3" resetval="0x000" description="Indicating start address of code table for UVLD AC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="RW"/>
+    <bitfield id="UVLD_CODE_AC_LUMA_2_0" width="3" begin="2" end="0" resetval="0x0" description="Indicating start address of code table for UVLD AC-luma. The address value must be aligned to 64-bit word boundary" range="" rwaccess="R"/>
+  </register>
+  <register id="CDC_VP_A" acronym="CDC_VP_A" offset="0xC8" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FWDBITPTR_15_3" width="13" begin="15" end="3" resetval="0x0000" description="FWDBITPTR Interlace Field B picture" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="2" end="0" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+  </register>
+  <register id="MP4_WORK7" acronym="MP4_WORK7" offset="0xC8" width="32" description="MP4 WORK7 register">
+    <bitfield id="MVP31" width="16" begin="31" end="16" resetval="0x0000" description="MVP[3][1]: Motion Vector Predictors for B-VOP (field backward bottom motion vector predictor)" range="" rwaccess="RW"/>
+    <bitfield id="MVP30" width="16" begin="15" end="0" resetval="0x0000" description="MVP[3][0]: Motion Vector Predictors for B-VOP (field backward bottom motion vector predictor)" range="" rwaccess="RW"/>
+  </register>
+  <register id="UVLD_TBL_TYPE" acronym="UVLD_TBL_TYPE" offset="0xC8" width="32" description="Setting for UVLD code table">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="UVLD_AC_CHROMA" width="1" begin="29" end="29" resetval="0" description="Indicating type of UVLD code table for AC-chroma data. 0: zero-leading. 1: one-leading." range="" rwaccess="RW"/>
+    <bitfield id="UVLD_AC_CHROMA_LEN_MAX" width="5" begin="28" end="24" resetval="0x00" description="This data defines maximum code length of universal VLD code table for AC-chroma. The ECD H/W checks this value only in decoder of RAM mode. Maximum value is 16 (0x10), which is restriction of JPEG standard." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="23" end="22" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="UVLD_AC_LUMA" width="1" begin="21" end="21" resetval="0" description="Indicating type of UVLD code table for AC-luma data. 0: zero-leading. 1: one-leading" range="" rwaccess="RW"/>
+    <bitfield id="UVLD_AC_LUMA_LEN_MAX" width="5" begin="20" end="16" resetval="0x00" description="This data defines maximum code length of universal VLD code table for AC-luma. The ECD H/W checks this value only in decoder of RAM mode." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="15" end="14" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="UVLD_DC_CHROMA" width="1" begin="13" end="13" resetval="0" description="Indicating type of UVLD code table for DC-chroma data. 0: zero-leading. 1: one-leading" range="" rwaccess="RW"/>
+    <bitfield id="UVLD_DC_CHROMA_LEN_MAX" width="5" begin="12" end="8" resetval="0x00" description="This data defines maximum code length of universal VLD code table for DC-chroma. The ECD H/W checks this value only in decoder of RAM mode. Maximum value is 16 (0x10), which is restriction of JPEG standard." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="7" end="6" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="UVLD_DC_LUMA" width="1" begin="5" end="5" resetval="0" description="Indicating type of UVLD code table for DC-luma data. 0: zero-leading 1: one-leading" range="" rwaccess="RW"/>
+    <bitfield id="UVLD_DC_LUMA_LEN_MAX" width="5" begin="4" end="0" resetval="0x00" description="This data defines maximum code length of universal VLD code table for DC-luma. The ECD H/W checks this value only in decoder of RAM mode. Maximum value is 16 (0x10), which is restriction of JPEG standard." range="" rwaccess="RW"/>
+  </register>
+  <register id="DC_PRED_CHROMA" acronym="DC_PRED_CHROMA" offset="0xCC" width="32" description="JPEG DC PRED Chroma register - TI internal">
+    <bitfield id="DC_PRED_CB" width="16" begin="31" end="16" resetval="0x0000" description="Chrominance (Cb) DC prediction value is stored in register. H/W regards this value as previous DC value (source of DC prediction) except in a block just after restart marker. In case other than TI internal test, this register value must not be written externally." range="" rwaccess="RW"/>
+    <bitfield id="DC_PRED_CR" width="16" begin="15" end="0" resetval="0x0000" description="Chrominance (Cr) DC prediction value is stored in register. H/W regards this value as previous DC value (source of DC prediction) except in a block just after restart marker. In case other than TI internal test, this register value must not be written externally." range="" rwaccess="RW"/>
+  </register>
+  <register id="CMDP_GPR0" acronym="CMDP_GPR0" offset="0xF0" width="32" description="Command Processor General Purpose Register 0">
+    <bitfield id="GPR0" width="32" begin="31" end="0" resetval="0x0000 0000" description="Command Processor General purpose registers (GPR0, GPR1, and GPR2) are 32-bit registers which can be used freely. They are accessible through these addresses." range="" rwaccess="R"/>
+  </register>
+  <register id="CMDP_GPR1" acronym="CMDP_GPR1" offset="0xF4" width="32" description="Command Processor General Purpose Register 1">
+    <bitfield id="GPR1" width="32" begin="31" end="0" resetval="0x0000 0000" description="Command Processor General purpose registers (GPR0, GPR1, and GPR2) are 32-bit registers which can be used freely. They are accessible through these addresses." range="" rwaccess="R"/>
+  </register>
+  <register id="CMDP_GPR2" acronym="CMDP_GPR2" offset="0xF8" width="32" description="Command Processor General Purpose Register 2">
+    <bitfield id="GPR2" width="32" begin="31" end="0" resetval="0x0000 0000" description="Command Processor General purpose registers (GPR0, GPR1, and GPR2) are 32-bit registers which can be used freely. They are accessible through these addresses." range="" rwaccess="R"/>
+  </register>
+</module>

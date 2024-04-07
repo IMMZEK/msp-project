@@ -1,0 +1,582 @@
+/**
+ * \file  AM263_Peripheral_Clocks.gel
+ *
+ * \brief GEL File to configure the clocking infrastructure on AM64
+ */
+
+/* Copyright (c) 2021, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+/* Revision history:
+ *
+ */
+
+// Register Definitions and Offsets
+#define MSS_RCM_U_BASE                  							  (0x53208000U)
+#define MSS_RCM_PID                                                   (0x00000000U)
+#define MSS_RCM_R5SS0_RST_STATUS                                      (0x00000010U)
+#define MSS_RCM_R5SS0_RST_CAUSE_CLR                                   (0x00000014U)
+#define MSS_RCM_R5SS0_DBG_RST_EN                                      (0x00000018U)
+#define MSS_RCM_R5SS0_RST_ASSERDLY                                    (0x0000001CU)
+#define MSS_RCM_R5SS0_RST2ASSERTDLY                                   (0x00000020U)
+#define MSS_RCM_R5SS0_RST_WFICHECK                                    (0x00000024U)
+#define MSS_RCM_R5SS1_RST_STATUS                                      (0x00000030U)
+#define MSS_RCM_R5SS1_RST_CAUSE_CLR                                   (0x00000034U)
+#define MSS_RCM_R5SS1_DBG_RST_EN                                      (0x00000038U)
+#define MSS_RCM_R5SS1_RST_ASSERDLY                                    (0x0000003CU)
+#define MSS_RCM_R5SS1_RST2ASSERTDLY                                   (0x00000040U)
+#define MSS_RCM_R5SS1_RST_WFICHECK                                    (0x00000044U)
+#define MSS_RCM_MCAN0_CLK_SRC_SEL                                     (0x00000100U)
+#define MSS_RCM_MCAN1_CLK_SRC_SEL                                     (0x00000104U)
+#define MSS_RCM_MCAN2_CLK_SRC_SEL                                     (0x00000108U)
+#define MSS_RCM_MCAN3_CLK_SRC_SEL                                     (0x0000010CU)
+#define MSS_RCM_QSPI0_CLK_SRC_SEL                                     (0x00000110U)
+#define MSS_RCM_RTI0_CLK_SRC_SEL                                      (0x00000114U)
+#define MSS_RCM_RTI1_CLK_SRC_SEL                                      (0x00000118U)
+#define MSS_RCM_RTI2_CLK_SRC_SEL                                      (0x0000011CU)
+#define MSS_RCM_RTI3_CLK_SRC_SEL                                      (0x00000120U)
+#define MSS_RCM_WDT0_CLK_SRC_SEL                                      (0x00000128U)
+#define MSS_RCM_WDT1_CLK_SRC_SEL                                      (0x0000012CU)
+#define MSS_RCM_WDT2_CLK_SRC_SEL                                      (0x00000130U)
+#define MSS_RCM_WDT3_CLK_SRC_SEL                                      (0x00000134U)
+#define MSS_RCM_MCSPI0_CLK_SRC_SEL                                    (0x0000013CU)
+#define MSS_RCM_MCSPI1_CLK_SRC_SEL                                    (0x00000140U)
+#define MSS_RCM_MCSPI2_CLK_SRC_SEL                                    (0x00000144U)
+#define MSS_RCM_MCSPI3_CLK_SRC_SEL                                    (0x00000148U)
+#define MSS_RCM_MCSPI4_CLK_SRC_SEL                                    (0x0000014CU)
+#define MSS_RCM_MMC0_CLK_SRC_SEL                                      (0x00000150U)
+#define MSS_RCM_ICSSM0_UART0_CLK_SRC_SEL                              (0x00000154U)
+#define MSS_RCM_CPTS_CLK_SRC_SEL                                      (0x00000158U)
+#define MSS_RCM_GPMC_CLK_SRC_SEL                                      (0x0000015CU)
+#define MSS_RCM_CONTROLSS_PLL_CLK_SRC_SEL                             (0x00000160U)
+#define MSS_RCM_I2C_CLK_SRC_SEL                                       (0x00000164U)
+#define MSS_RCM_LIN0_UART0_CLK_SRC_SEL                                (0x00000174U)
+#define MSS_RCM_LIN1_UART1_CLK_SRC_SEL                                (0x00000178U)
+#define MSS_RCM_LIN2_UART2_CLK_SRC_SEL                                (0x0000017CU)
+#define MSS_RCM_LIN3_UART3_CLK_SRC_SEL                                (0x00000180U)
+#define MSS_RCM_LIN4_UART4_CLK_SRC_SEL                                (0x00000184U)
+#define MSS_RCM_LIN5_UART5_CLK_SRC_SEL                                (0x00000188U)
+#define MSS_RCM_MCAN0_CLK_DIV_VAL                                     (0x00000200U)
+#define MSS_RCM_MCAN1_CLK_DIV_VAL                                     (0x00000204U)
+#define MSS_RCM_MCAN2_CLK_DIV_VAL                                     (0x00000208U)
+#define MSS_RCM_MCAN3_CLK_DIV_VAL                                     (0x0000020CU)
+#define MSS_RCM_QSPI0_CLK_DIV_VAL                                     (0x00000210U)
+#define MSS_RCM_RTI0_CLK_DIV_VAL                                      (0x00000214U)
+#define MSS_RCM_RTI1_CLK_DIV_VAL                                      (0x00000218U)
+#define MSS_RCM_RTI2_CLK_DIV_VAL                                      (0x0000021CU)
+#define MSS_RCM_RTI3_CLK_DIV_VAL                                      (0x00000220U)
+#define MSS_RCM_WDT0_CLK_DIV_VAL                                      (0x00000228U)
+#define MSS_RCM_WDT1_CLK_DIV_VAL                                      (0x0000022CU)
+#define MSS_RCM_WDT2_CLK_DIV_VAL                                      (0x00000230U)
+#define MSS_RCM_WDT3_CLK_DIV_VAL                                      (0x00000234U)
+#define MSS_RCM_MCSPI0_CLK_DIV_VAL                                    (0x0000023CU)
+#define MSS_RCM_MCSPI1_CLK_DIV_VAL                                    (0x00000240U)
+#define MSS_RCM_MCSPI2_CLK_DIV_VAL                                    (0x00000244U)
+#define MSS_RCM_MCSPI3_CLK_DIV_VAL                                    (0x00000248U)
+#define MSS_RCM_MCSPI4_CLK_DIV_VAL                                    (0x0000024CU)
+#define MSS_RCM_MMC0_CLK_DIV_VAL                                      (0x00000250U)
+#define MSS_RCM_ICSSM0_UART_CLK_DIV_VAL                               (0x00000254U)
+#define MSS_RCM_CPTS_CLK_DIV_VAL                                      (0x00000258U)
+#define MSS_RCM_GPMC_CLK_DIV_VAL                                      (0x0000025CU)
+#define MSS_RCM_CONTROLSS_PLL_CLK_DIV_VAL                             (0x00000260U)
+#define MSS_RCM_I2C_CLK_DIV_VAL                                       (0x00000264U)
+#define MSS_RCM_LIN0_UART0_CLK_DIV_VAL                                (0x00000274U)
+#define MSS_RCM_LIN1_UART1_CLK_DIV_VAL                                (0x00000278U)
+#define MSS_RCM_LIN2_UART2_CLK_DIV_VAL                                (0x0000027CU)
+#define MSS_RCM_LIN3_UART3_CLK_DIV_VAL                                (0x00000280U)
+#define MSS_RCM_LIN4_UART4_CLK_DIV_VAL                                (0x00000284U)
+#define MSS_RCM_LIN5_UART5_CLK_DIV_VAL                                (0x00000288U)
+#define MSS_RCM_RGMII_250_CLK_DIV_VAL                                 (0x0000028CU)
+#define MSS_RCM_RGMII_50_CLK_DIV_VAL                                  (0x00000290U)
+#define MSS_RCM_RGMII_5_CLK_DIV_VAL                                   (0x00000294U)
+#define MSS_RCM_XTAL_MMC_32K_CLK_DIV_VAL                              (0x00000298U)
+#define MSS_RCM_XTAL_TEMPSENSE_32K_CLK_DIV_VAL                        (0x0000029CU)
+#define MSS_RCM_MSS_ELM_CLK_DIV_VAL                                   (0x000002A0U)
+#define MSS_RCM_MCAN0_CLK_GATE                                        (0x00000300U)
+#define MSS_RCM_MCAN1_CLK_GATE                                        (0x00000304U)
+#define MSS_RCM_MCAN2_CLK_GATE                                        (0x00000308U)
+#define MSS_RCM_MCAN3_CLK_GATE                                        (0x0000030CU)
+#define MSS_RCM_QSPI0_CLK_GATE                                        (0x00000310U)
+#define MSS_RCM_RTI0_CLK_GATE                                         (0x00000314U)
+#define MSS_RCM_RTI1_CLK_GATE                                         (0x00000318U)
+#define MSS_RCM_RTI2_CLK_GATE                                         (0x0000031CU)
+#define MSS_RCM_RTI3_CLK_GATE                                         (0x00000320U)
+#define MSS_RCM_WDT0_CLK_GATE                                         (0x00000328U)
+#define MSS_RCM_WDT1_CLK_GATE                                         (0x0000032CU)
+#define MSS_RCM_WDT2_CLK_GATE                                         (0x00000330U)
+#define MSS_RCM_WDT3_CLK_GATE                                         (0x00000334U)
+#define MSS_RCM_MCSPI0_CLK_GATE                                       (0x0000033CU)
+#define MSS_RCM_MCSPI1_CLK_GATE                                       (0x00000340U)
+#define MSS_RCM_MCSPI2_CLK_GATE                                       (0x00000344U)
+#define MSS_RCM_MCSPI3_CLK_GATE                                       (0x00000348U)
+#define MSS_RCM_MCSPI4_CLK_GATE                                       (0x0000034CU)
+#define MSS_RCM_MMC0_CLK_GATE                                         (0x00000350U)
+#define MSS_RCM_ICSSM0_UART_CLK_GATE                                  (0x00000354U)
+#define MSS_RCM_CPTS_CLK_GATE                                         (0x00000358U)
+#define MSS_RCM_GPMC_CLK_GATE                                         (0x0000035CU)
+#define MSS_RCM_CONTROLSS_PLL_CLK_GATE                                (0x00000360U)
+#define MSS_RCM_I2C0_CLK_GATE                                         (0x00000364U)
+#define MSS_RCM_I2C1_CLK_GATE                                         (0x00000368U)
+#define MSS_RCM_I2C2_CLK_GATE                                         (0x0000036CU)
+#define MSS_RCM_I2C3_CLK_GATE                                         (0x00000370U)
+#define MSS_RCM_LIN0_CLK_GATE                                         (0x00000374U)
+#define MSS_RCM_LIN1_CLK_GATE                                         (0x00000378U)
+#define MSS_RCM_LIN2_CLK_GATE                                         (0x0000037CU)
+#define MSS_RCM_LIN3_CLK_GATE                                         (0x00000380U)
+#define MSS_RCM_LIN4_CLK_GATE                                         (0x00000384U)
+#define MSS_RCM_UART0_CLK_GATE                                        (0x0000038CU)
+#define MSS_RCM_UART1_CLK_GATE                                        (0x00000390U)
+#define MSS_RCM_UART2_CLK_GATE                                        (0x00000394U)
+#define MSS_RCM_UART3_CLK_GATE                                        (0x00000398U)
+#define MSS_RCM_UART4_CLK_GATE                                        (0x0000039CU)
+#define MSS_RCM_UART5_CLK_GATE                                        (0x000003A0U)
+#define MSS_RCM_RGMII_250_CLK_GATE                                    (0x000003A4U)
+#define MSS_RCM_RGMII_50_CLK_GATE                                     (0x000003A8U)
+#define MSS_RCM_RGMII_5_CLK_GATE                                      (0x000003ACU)
+#define MSS_RCM_MMC0_32K_CLK_GATE                                     (0x000003B0U)
+#define MSS_RCM_TEMPSENSE_32K_CLK_GATE                                (0x000003B4U)
+#define MSS_RCM_CPSW_CLK_GATE                                         (0x000003B8U)
+#define MSS_RCM_ICSSM0_IEP_CLK_GATE                                   (0x000003BCU)
+#define MSS_RCM_ICSSM0_CORE_CLK_GATE                                  (0x000003C0U)
+#define MSS_RCM_MSS_ICSSM_SYS_CLK_GATE                                (0x000003C4U)
+#define MSS_RCM_MSS_ELM_CLK_GATE                                      (0x000003C8U)
+#define MSS_RCM_R5SS0_CORE0_GATE                                      (0x000003CCU)
+#define MSS_RCM_R5SS1_CORE0_GATE                                      (0x000003D0U)
+#define MSS_RCM_R5SS0_CORE1_GATE                                      (0x000003D4U)
+#define MSS_RCM_R5SS1_CORE1_GATE                                      (0x000003D8U)
+#define MSS_RCM_MCAN0_CLK_STATUS                                      (0x00000400U)
+#define MSS_RCM_MCAN1_CLK_STATUS                                      (0x00000404U)
+#define MSS_RCM_MCAN2_CLK_STATUS                                      (0x00000408U)
+#define MSS_RCM_MCAN3_CLK_STATUS                                      (0x0000040CU)
+#define MSS_RCM_QSPI0_CLK_STATUS                                      (0x00000410U)
+#define MSS_RCM_RTI0_CLK_STATUS                                       (0x00000414U)
+#define MSS_RCM_RTI1_CLK_STATUS                                       (0x00000418U)
+#define MSS_RCM_RTI2_CLK_STATUS                                       (0x0000041CU)
+#define MSS_RCM_RTI3_CLK_STATUS                                       (0x00000420U)
+#define MSS_RCM_WDT0_CLK_STATUS                                       (0x00000428U)
+#define MSS_RCM_WDT1_CLK_STATUS                                       (0x0000042CU)
+#define MSS_RCM_WDT2_CLK_STATUS                                       (0x00000430U)
+#define MSS_RCM_WDT3_CLK_STATUS                                       (0x00000434U)
+#define MSS_RCM_MCSPI0_CLK_STATUS                                     (0x0000043CU)
+#define MSS_RCM_MCSPI1_CLK_STATUS                                     (0x00000440U)
+#define MSS_RCM_MCSPI2_CLK_STATUS                                     (0x00000444U)
+#define MSS_RCM_MCSPI3_CLK_STATUS                                     (0x00000448U)
+#define MSS_RCM_MCSPI4_CLK_STATUS                                     (0x0000044CU)
+#define MSS_RCM_MMC0_CLK_STATUS                                       (0x00000450U)
+#define MSS_RCM_ICSSM0_UART_CLK_STATUS                                (0x00000454U)
+#define MSS_RCM_CPTS_CLK_STATUS                                       (0x00000458U)
+#define MSS_RCM_GPMC_CLK_STATUS                                       (0x0000045CU)
+#define MSS_RCM_CONTROLSS_PLL_CLK_STATUS                              (0x00000460U)
+#define MSS_RCM_I2C_CLK_STATUS                                        (0x00000464U)
+#define MSS_RCM_LIN0_UART0_CLK_STATUS                                 (0x00000474U)
+#define MSS_RCM_LIN1_UART1_CLK_STATUS                                 (0x00000478U)
+#define MSS_RCM_LIN2_UART2_CLK_STATUS                                 (0x0000047CU)
+#define MSS_RCM_LIN3_UART3_CLK_STATUS                                 (0x00000480U)
+#define MSS_RCM_LIN4_UART4_CLK_STATUS                                 (0x00000484U)
+#define MSS_RCM_LIN5_UART5_CLK_STATUS                                 (0x00000488U)
+#define MSS_RCM_RGMII_250_CLK_STATUS                                  (0x0000048CU)
+#define MSS_RCM_RGMII_50_CLK_STATUS                                   (0x00000490U)
+#define MSS_RCM_RGMII_5_CLK_STATUS                                    (0x00000494U)
+#define MSS_RCM_MMC0_32K_CLK_STATUS                                   (0x0000049CU)
+#define MSS_RCM_TEMPSENSE_32K_CLK_STATUS                              (0x000004A0U)
+#define MSS_RCM_MSS_ELM_CLK_STATUS                                    (0x000004A4U)
+#define MSS_RCM_R5SS0_POR_RST_CTRL                                    (0x00000500U)
+#define MSS_RCM_R5SS1_POR_RST_CTRL                                    (0x00000504U)
+#define MSS_RCM_R5SS0_CORE0_GRST_CTRL                                 (0x00000508U)
+#define MSS_RCM_R5SS1_CORE0_GRST_CTRL                                 (0x0000050CU)
+#define MSS_RCM_R5SS0_CORE1_GRST_CTRL                                 (0x00000510U)
+#define MSS_RCM_R5SS1_CORE1_GRST_CTRL                                 (0x00000514U)
+#define MSS_RCM_R5SS0_CORE0_LRST_CTRL                                 (0x00000518U)
+#define MSS_RCM_R5SS1_CORE0_LRST_CTRL                                 (0x0000051CU)
+#define MSS_RCM_R5SS0_CORE1_LRST_CTRL                                 (0x00000520U)
+#define MSS_RCM_R5SS1_CORE1_LRST_CTRL                                 (0x00000524U)
+#define MSS_RCM_R5SS0_VIM0_RST_CTRL                                   (0x00000528U)
+#define MSS_RCM_R5SS1_VIM0_RST_CTRL                                   (0x0000052CU)
+#define MSS_RCM_R5SS0_VIM1_RST_CTRL                                   (0x00000530U)
+#define MSS_RCM_R5SS1_VIM1_RST_CTRL                                   (0x00000534U)
+#define MSS_RCM_MCRC0_RST_CTRL                                        (0x00000538U)
+#define MSS_RCM_RTI0_RST_CTRL                                         (0x0000053CU)
+#define MSS_RCM_RTI1_RST_CTRL                                         (0x00000540U)
+#define MSS_RCM_RTI2_RST_CTRL                                         (0x00000544U)
+#define MSS_RCM_RTI3_RST_CTRL                                         (0x00000548U)
+#define MSS_RCM_WDT0_RST_CTRL                                         (0x0000054CU)
+#define MSS_RCM_WDT1_RST_CTRL                                         (0x00000550U)
+#define MSS_RCM_WDT2_RST_CTRL                                         (0x00000554U)
+#define MSS_RCM_WDT3_RST_CTRL                                         (0x00000558U)
+#define MSS_RCM_TOP_ESM_RST_CTRL                                      (0x0000055CU)
+#define MSS_RCM_DCC0_RST_CTRL                                         (0x00000560U)
+#define MSS_RCM_DCC1_RST_CTRL                                         (0x00000564U)
+#define MSS_RCM_DCC2_RST_CTRL                                         (0x00000568U)
+#define MSS_RCM_DCC3_RST_CTRL                                         (0x0000056CU)
+#define MSS_RCM_MCSPI0_RST_CTRL                                       (0x00000570U)
+#define MSS_RCM_MCSPI1_RST_CTRL                                       (0x00000574U)
+#define MSS_RCM_MCSPI2_RST_CTRL                                       (0x00000578U)
+#define MSS_RCM_MCSPI3_RST_CTRL                                       (0x0000057CU)
+#define MSS_RCM_MCSPI4_RST_CTRL                                       (0x00000580U)
+#define MSS_RCM_QSPI0_RST_CTRL                                        (0x00000584U)
+#define MSS_RCM_MCAN0_RST_CTRL                                        (0x00000588U)
+#define MSS_RCM_MCAN1_RST_CTRL                                        (0x0000058CU)
+#define MSS_RCM_MCAN2_RST_CTRL                                        (0x00000590U)
+#define MSS_RCM_MCAN3_RST_CTRL                                        (0x00000594U)
+#define MSS_RCM_I2C0_RST_CTRL                                         (0x00000598U)
+#define MSS_RCM_I2C1_RST_CTRL                                         (0x0000059CU)
+#define MSS_RCM_I2C2_RST_CTRL                                         (0x000005A0U)
+#define MSS_RCM_I2C3_RST_CTRL                                         (0x000005A4U)
+#define MSS_RCM_UART0_RST_CTRL                                        (0x000005A8U)
+#define MSS_RCM_UART1_RST_CTRL                                        (0x000005ACU)
+#define MSS_RCM_UART2_RST_CTRL                                        (0x000005B0U)
+#define MSS_RCM_UART3_RST_CTRL                                        (0x000005B4U)
+#define MSS_RCM_UART4_RST_CTRL                                        (0x000005B8U)
+#define MSS_RCM_UART5_RST_CTRL                                        (0x000005BCU)
+#define MSS_RCM_LIN0_RST_CTRL                                         (0x000005C0U)
+#define MSS_RCM_LIN1_RST_CTRL                                         (0x000005C4U)
+#define MSS_RCM_LIN2_RST_CTRL                                         (0x000005C8U)
+#define MSS_RCM_LIN3_RST_CTRL                                         (0x000005CCU)
+#define MSS_RCM_LIN4_RST_CTRL                                         (0x000005D0U)
+#define MSS_RCM_EDMA_RST_CTRL                                         (0x000005D8U)
+#define MSS_RCM_INFRA_RST_CTRL                                        (0x000005DCU)
+#define MSS_RCM_CPSW_RST_CTRL                                         (0x000005E0U)
+#define MSS_RCM_ICSSM0_RST_CTRL                                       (0x000005E4U)
+#define MSS_RCM_MMC0_RST_CTRL                                         (0x000005E8U)
+#define MSS_RCM_GPIO0_RST_CTRL                                        (0x000005ECU)
+#define MSS_RCM_GPIO1_RST_CTRL                                        (0x000005F0U)
+#define MSS_RCM_GPIO2_RST_CTRL                                        (0x000005F4U)
+#define MSS_RCM_GPIO3_RST_CTRL                                        (0x000005F8U)
+#define MSS_RCM_SPINLOCK0_RST_CTRL                                    (0x000005FCU)
+#define MSS_RCM_GPMC_RST_CTRL                                         (0x00000600U)
+#define MSS_RCM_TEMPSENSE_32K_RST_CTRL                                (0x00000604U)
+#define MSS_RCM_MSS_ELM_RST_CTRL                                      (0x00000608U)
+#define MSS_RCM_L2OCRAM_BANK0_PD_CTRL                                 (0x00000700U)
+#define MSS_RCM_L2OCRAM_BANK1_PD_CTRL                                 (0x00000704U)
+#define MSS_RCM_L2OCRAM_BANK2_PD_CTRL                                 (0x00000708U)
+#define MSS_RCM_L2OCRAM_BANK3_PD_CTRL                                 (0x0000070CU)
+#define MSS_RCM_L2OCRAM_BANK0_PD_STATUS                               (0x00000710U)
+#define MSS_RCM_L2OCRAM_BANK1_PD_STATUS                               (0x00000714U)
+#define MSS_RCM_L2OCRAM_BANK2_PD_STATUS                               (0x00000718U)
+#define MSS_RCM_L2OCRAM_BANK3_PD_STATUS                               (0x0000071CU)
+#define MSS_RCM_HW_REG0                                               (0x00000720U)
+#define MSS_RCM_HW_REG1                                               (0x00000724U)
+#define MSS_RCM_HW_REG2                                               (0x00000728U)
+#define MSS_RCM_HW_REG3                                               (0x0000072CU)
+#define MSS_RCM_HSM_RTIA_CLK_SRC_SEL                                  (0x00000800U)
+#define MSS_RCM_HSM_WDT_CLK_SRC_SEL                                   (0x00000804U)
+#define MSS_RCM_HSM_RTC_CLK_SRC_SEL                                   (0x00000808U)
+#define MSS_RCM_HSM_DMTA_CLK_SRC_SEL                                  (0x0000080CU)
+#define MSS_RCM_HSM_DMTB_CLK_SRC_SEL                                  (0x00000810U)
+#define MSS_RCM_HSM_RTI_CLK_DIV_VAL                                   (0x00000814U)
+#define MSS_RCM_HSM_WDT_CLK_DIV_VAL                                   (0x00000818U)
+#define MSS_RCM_HSM_RTC_CLK_DIV_VAL                                   (0x0000081CU)
+#define MSS_RCM_HSM_DMTA_CLK_DIV_VAL                                  (0x00000820U)
+#define MSS_RCM_HSM_DMTB_CLK_DIV_VAL                                  (0x00000824U)
+#define MSS_RCM_HSM_RTI_CLK_GATE                                      (0x00000828U)
+#define MSS_RCM_HSM_WDT_CLK_GATE                                      (0x0000082CU)
+#define MSS_RCM_HSM_RTC_CLK_GATE                                      (0x00000830U)
+#define MSS_RCM_HSM_DMTA_CLK_GATE                                     (0x00000834U)
+#define MSS_RCM_HSM_DMTB_CLK_GATE                                     (0x00000838U)
+#define MSS_RCM_HSM_RTI_CLK_STATUS                                    (0x0000083CU)
+#define MSS_RCM_HSM_WDT_CLK_STATUS                                    (0x00000840U)
+#define MSS_RCM_HSM_RTC_CLK_STATUS                                    (0x00000844U)
+#define MSS_RCM_HSM_DMTA_CLK_STATUS                                   (0x00000848U)
+#define MSS_RCM_HSM_DMTB_CLK_STATUS                                   (0x0000084CU)
+#define MSS_RCM_HW_SPARE_RW0                                          (0x00000FD0U)
+#define MSS_RCM_HW_SPARE_RW1                                          (0x00000FD4U)
+#define MSS_RCM_HW_SPARE_RW2                                          (0x00000FD8U)
+#define MSS_RCM_HW_SPARE_RW3                                          (0x00000FDCU)
+#define MSS_RCM_HW_SPARE_RO0                                          (0x00000FE0U)
+#define MSS_RCM_HW_SPARE_RO1                                          (0x00000FE4U)
+#define MSS_RCM_HW_SPARE_RO2                                          (0x00000FE8U)
+#define MSS_RCM_HW_SPARE_RO3                                          (0x00000FECU)
+#define MSS_RCM_HW_SPARE_WPH                                          (0x00000FF0U)
+#define MSS_RCM_HW_SPARE_REC                                          (0x00000FF4U)
+#define MSS_RCM_LOCK0_KICK0                                           (0x00001008U)
+#define MSS_RCM_LOCK0_KICK1                                           (0x0000100CU)
+#define MSS_RCM_INTR_RAW_STATUS                                       (0x00001010U)
+#define MSS_RCM_INTR_ENABLED_STATUS_CLEAR                             (0x00001014U)
+#define MSS_RCM_INTR_ENABLE                                           (0x00001018U)
+#define MSS_RCM_INTR_ENABLE_CLEAR                                     (0x0000101CU)
+#define MSS_RCM_EOI                                                   (0x00001020U)
+#define MSS_RCM_FAULT_ADDRESS                                         (0x00001024U)
+#define MSS_RCM_FAULT_TYPE_STATUS                                     (0x00001028U)
+#define MSS_RCM_FAULT_ATTR_STATUS                                     (0x0000102CU)
+#define MSS_RCM_FAULT_CLEAR                                           (0x00001030U)
+
+menuitem "AM263x IP Clocks Configuration";
+
+
+hotmenu Program_RTI0_Clocks() 
+{	
+		unsigned int clock_sts;
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_RTI0_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_RTI0_CLK_SRC_SEL, 0x222);
+		clock_sts = Read_MMR(MSS_RCM_U_BASE + MSS_RCM_RTI0_CLK_STATUS);
+}	
+
+
+hotmenu Program_RTI1_Clocks() 
+{		
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_RTI1_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_RTI1_CLK_SRC_SEL, 0x222);
+}
+
+
+hotmenu Program_RTI2_Clocks() 
+{	
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_RTI2_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_RTI2_CLK_SRC_SEL, 0x222);
+}
+
+
+hotmenu Program_RTI3_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE + MSS_RCM_RTI3_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE + MSS_RCM_RTI3_CLK_SRC_SEL, 0x222);
+}
+
+
+hotmenu Program_RTI_WDT0_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_WDT0_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_WDT0_CLK_SRC_SEL, 0x222);
+}
+
+
+hotmenu Program_RTI_WDT1_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_WDT1_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_WDT1_CLK_SRC_SEL, 0x222);
+}
+
+
+hotmenu Program_RTI_WDT2_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_WDT2_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_WDT2_CLK_SRC_SEL, 0x222);
+}
+
+
+hotmenu Program_RTI_WDT3_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_WDT3_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_WDT3_CLK_SRC_SEL, 0x222);
+}
+
+
+hotmenu Program_LIN0_UART0_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_LIN0_UART0_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_LIN0_UART0_CLK_SRC_SEL, 0x777);
+}
+
+
+hotmenu Program_LIN1_UART1_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_LIN1_UART1_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_LIN1_UART1_CLK_SRC_SEL, 0x777);
+}
+
+
+hotmenu Program_LIN2_UART2_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_LIN2_UART2_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_LIN2_UART2_CLK_SRC_SEL, 0x777);
+}
+
+
+hotmenu Program_LIN3_UART3_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_LIN3_UART3_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_LIN3_UART3_CLK_SRC_SEL, 0x777);
+}		
+
+
+hotmenu Program_LIN4_UART4_Clocks() 
+{
+ 		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_LIN4_UART4_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_LIN4_UART4_CLK_SRC_SEL, 0x777);
+}
+
+
+hotmenu Program_LIN5_UART5_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_LIN5_UART5_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_LIN5_UART5_CLK_SRC_SEL, 0x333);
+}
+
+
+hotmenu Program_QSPI_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_QSPI0_CLK_DIV_VAL , 0x444);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_QSPI0_CLK_SRC_SEL , 0x444);
+}
+
+
+hotmenu Program_I2C_Clocks() 
+{
+	Write_MMR(MSS_RCM_U_BASE+ MSS_RCM_I2C_CLK_DIV_VAL , 0x333);
+	Write_MMR(MSS_RCM_U_BASE+ MSS_RCM_I2C_CLK_SRC_SEL, 0x333);
+}
+
+
+hotmenu Program_Trace_Clocks() 
+{
+	//250MHz PLL_CORE_CLKOUT1 is the input source clock
+	Write_MMR(MSS_TOP_RCM_U_BASE+ MSS_TOP_RCM_TRCCLKOUT_DIV_VAL , 0x111);
+	Write_MMR(MSS_TOP_RCM_U_BASE+ MSS_TOP_RCM_TRCCLKOUT_CLK_SRC_SEL, 0x222);
+}
+
+
+hotmenu Program_MCAN0_Clocks() 
+{
+	Write_MMR(MSS_RCM_U_BASE+ MSS_RCM_MCAN0_CLK_DIV_VAL , 0x444);
+	Write_MMR(MSS_RCM_U_BASE+ MSS_RCM_MCAN0_CLK_SRC_SEL, 0x444);
+}
+
+
+hotmenu Program_MCAN1_Clocks() 
+{
+	Write_MMR(MSS_RCM_U_BASE+ MSS_RCM_MCAN1_CLK_DIV_VAL , 0x444);
+	Write_MMR(MSS_RCM_U_BASE+ MSS_RCM_MCAN1_CLK_SRC_SEL, 0x444);
+}
+
+
+hotmenu Program_MCAN2_Clocks() 
+{
+	Write_MMR(MSS_RCM_U_BASE+ MSS_RCM_MCAN2_CLK_DIV_VAL , 0x444);
+	Write_MMR(MSS_RCM_U_BASE+ MSS_RCM_MCAN2_CLK_SRC_SEL, 0x444);
+}
+
+
+hotmenu Program_MCAN3_Clocks() 
+{
+	Write_MMR(MSS_RCM_U_BASE+ MSS_RCM_MCAN3_CLK_DIV_VAL , 0x444);
+	Write_MMR(MSS_RCM_U_BASE+ MSS_RCM_MCAN3_CLK_SRC_SEL, 0x444);
+}
+
+
+hotmenu Program_GPMC_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_GPMC_CLK_DIV_VAL, 0x111);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_GPMC_CLK_SRC_SEL, 0x222);
+}
+
+
+hotmenu Program_MMCSD_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MMC0_CLK_DIV_VAL, 0x333);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MMC0_CLK_SRC_SEL, 0x444);
+}
+
+
+hotmenu Program_MCSPI0_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MCSPI0_CLK_DIV_VAL, 0x333);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MCSPI0_CLK_SRC_SEL, 0x333);
+}
+
+
+hotmenu Program_MCSPI1_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MCSPI1_CLK_DIV_VAL, 0x333);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MCSPI1_CLK_SRC_SEL, 0x333);
+}
+
+
+hotmenu Program_MCSPI2_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MCSPI2_CLK_DIV_VAL, 0x333);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MCSPI2_CLK_SRC_SEL, 0x333);
+}
+
+
+hotmenu Program_MCSPI3_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MCSPI3_CLK_DIV_VAL, 0x333);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MCSPI3_CLK_SRC_SEL, 0x333);
+}
+
+
+hotmenu Program_MCSPI4_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MCSPI4_CLK_DIV_VAL, 0x333);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MCSPI4_CLK_SRC_SEL, 0x333);
+}
+
+
+hotmenu Program_CONTROLSS_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_CONTROLSS_PLL_CLK_DIV_VAL, 0x000);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_CONTROLSS_PLL_CLK_SRC_SEL, 0x222);
+}
+
+
+hotmenu Program_CPTS_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_CPTS_CLK_DIV_VAL, 0x111);
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_CPTS_CLK_SRC_SEL, 0x333);
+}
+
+
+hotmenu Program_RGMII5_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_RGMII_5_CLK_DIV_VAL, 0x636363);
+}
+
+
+hotmenu Program_RGMII50_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_RGMII_50_CLK_DIV_VAL, 0x999);
+}
+
+
+hotmenu Program_RGMII250_Clocks() 
+{
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_RGMII_250_CLK_DIV_VAL, 0x111);
+}
+
+
+hotmenu Program_MSS_ELM_Clocks() 
+{		
+		//Source SYS CLOCK
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_MSS_ELM_CLK_DIV_VAL, 0x3);
+}
+
+
+hotmenu Program_XTAL_TEMPSENSE_32K_Clocks() 
+{		
+		//Source SYS CLOCK
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_XTAL_TEMPSENSE_32K_CLK_DIV_VAL, 0x30CC330C);
+}
+
+
+hotmenu Program_XTAL_MMC_32K_Clocks() 
+{		
+		//Source SYS CLOCK
+		Write_MMR(MSS_RCM_U_BASE+MSS_RCM_XTAL_MMC_32K_CLK_DIV_VAL, 0x30CC330C);
+}

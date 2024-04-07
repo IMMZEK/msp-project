@@ -1,0 +1,256 @@
+/* M4_OBSCLK.GEL */
+
+#define CTRLMMR_WKUP_MCU_OBSCLK_CTRL    (0x00008000U)
+#define CTRLMMR_WKUP_PADCONFIG54        (0x0001C0D8U)
+#define CTRLMMR_WKUP_PADCONFIG55		(0x0001C0DCU)
+
+#define CTRLMMR_OBSCLK_CTRL             (0x00008000U)
+#define CTRLMMR_PADCONFIG192			(0x0001C300U)
+#define CTRLMMR_PADCONFIG193			(0x0001C304U)
+
+menuitem "Observation Clock"
+dialog Configure_OBSCLK(unsigned int Clock_mux_index "Observation Clock Multiplexer Index (which input do you want?):", unsigned int divider_value "Output Divider Value (+1 factored in already): "){
+	//Internal variables
+	unsigned int temp_val;
+	unsigned int reg_val;
+	unsigned int LOAD;
+	unsigned int address_offset=0;
+
+	//Initialization of internal variables
+	temp_val = 0; 
+	reg_val = 0;
+	LOAD = 0x10000; //Bit 16 is the load bit.
+	//address_offset = 0x80000000; //This is the address offset of any peripherals in the main domain.
+
+	//If this statement is true we're running from the CM3 DMSC.
+	//Make sure to account for the address offset.
+	if (*((unsigned int*)WAKEUP_PSC_BASE) != PSC_PID)
+    {
+        address_offset = 0x80000000;
+    } //Main Control MMRs use the offset of 0x8000_0000.
+
+	//Configure PADCONFIG193 for OBSCLK
+	//Unlock the kick registers
+	CTRL_Unlock(CTRL_MMR0_CFG0_BASE + CTRLMMR_PADCONFIG193 + address_offset);
+	
+	//Read the MMR
+	temp_val = Read_MMR(CTRL_MMR0_CFG0_BASE + CTRLMMR_PADCONFIG193 + address_offset);
+	GEL_TextOut("CTRLMMR_PADCONFIG193 current value: %x\n",,,,, temp_val); //just for debugging
+
+	reg_val = (temp_val & ~0x20000F) | 0x2;  //change to muxmode 2 (OBSCLK0) and enable driver (bit21)
+	
+	Write_MMR(CTRL_MMR0_CFG0_BASE + CTRLMMR_PADCONFIG193 + address_offset,reg_val);
+	
+	//Read the MMR
+	temp_val = Read_MMR(CTRL_MMR0_CFG0_BASE + CTRLMMR_PADCONFIG193 + address_offset);
+	GEL_TextOut("CTRLMMR_PADCONFIG193 new value: %x\n",,,,, temp_val); //just for debugging
+
+	//relock the kick registers
+	CTRL_Relock(CTRL_MMR0_CFG0_BASE + CTRLMMR_PADCONFIG193 + address_offset);
+		
+	GEL_TextOut("MAIN OBSCLK PADCONFIG successfully programmed.\n");
+	
+	//Error checking against user input. This should be taken care of anyhow.
+	if(divider_value > 0xFF){
+		GEL_TextOut("********ERROR: Divider Value is too large.\n");
+		return;
+	}
+	if(Clock_mux_index >= 16){
+		GEL_TextOut("********ERROR: Invalid observation clock multiplexer selection.\n");
+		return;
+	}
+
+	//Unlock the kick registers
+	CTRL_Unlock(CTRL_MMR0_CFG0_BASE + CTRLMMR_OBSCLK_CTRL + address_offset);
+	
+	//Read the MMR
+	temp_val = Read_MMR(CTRL_MMR0_CFG0_BASE + CTRLMMR_OBSCLK_CTRL + address_offset);
+	GEL_TextOut("OBSCLK control MMR current value: %x\n",,,,, temp_val); //just for debugging
+
+	//Write to the actual obsclk the actual obsclk value.
+	//First, pack the register value we want to write.
+	reg_val = Clock_mux_index;
+	temp_val = divider_value << 8; //The divider value goes in bits 8-15.
+	reg_val |= temp_val;
+	Write_MMR(CTRL_MMR0_CFG0_BASE + CTRLMMR_OBSCLK_CTRL + address_offset, reg_val);
+
+	//Now load the divider value into the programmable divider.
+	reg_val |= LOAD;
+	Write_MMR(CTRL_MMR0_CFG0_BASE + CTRLMMR_OBSCLK_CTRL + address_offset, reg_val);
+
+	//Read the MMR
+	temp_val = Read_MMR(CTRL_MMR0_CFG0_BASE + CTRLMMR_OBSCLK_CTRL + address_offset);
+	GEL_TextOut("OBSCLK control MMR new value: %x\n",,,,, temp_val); //just for debugging
+
+	//relock the kick registers
+	CTRL_Relock(CTRL_MMR0_CFG0_BASE + CTRLMMR_OBSCLK_CTRL + address_offset);
+		
+	GEL_TextOut("Main OBSCLK successfully programmed.\n\n");
+
+}
+
+//for MCU Obsclk
+dialog Configure_MCU_OBSCLK(unsigned int Clock_mux_index "Observation Clock Multiplexer Index (which input do you want?):", unsigned int divider_value "Output Divider Value (+1 factored in already): "){
+	//Internal variables
+	unsigned int temp_val;
+	unsigned int reg_val;
+	unsigned int LOAD;
+	unsigned int address_offset=0;
+
+	//Initialization of internal variables
+	temp_val = 0; 
+	reg_val = 0;
+	LOAD = 0x10000; //Bit 16 is the load bit.
+	//address_offset = 0x20000000; //This is the address offset of any peripherals in the WKUP domain outside of the DMSC.
+
+	//If this statement is true we're running from the CM3 DMSC.
+	//Make sure to account for the address offset.
+	if (*((unsigned int*)WAKEUP_PSC_BASE) != PSC_PID)
+    {
+        address_offset = 0x20000000;
+    } //WKUP Control MMRs use the offset of 0x2000_0000.
+
+	//Configure PADCONFIG55 for MCU_OBSCLK
+	//Unlock the kick registers
+	CTRL_Unlock(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG55 + address_offset);
+	
+	//Read the MMR
+	temp_val = Read_MMR(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG55 + address_offset);
+	GEL_TextOut("CTRLMMR_WKUP_PADCONFIG55 current value: %x\n",,,,, temp_val); //just for debugging
+
+	reg_val = (temp_val & ~0x200007) | 0x1;  //change to muxmode 1 (MCU_OBSCLK0) and enable driver (bit21)
+	
+	Write_MMR(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG55 + address_offset,reg_val);
+	
+	//Read the MMR
+	temp_val = Read_MMR(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG55 + address_offset);
+	GEL_TextOut("CTRLMMR_WKUP_PADCONFIG55 new value: %x\n",,,,, temp_val); //just for debugging
+
+	GEL_TextOut("MCU OBSCLK PADCONFIG successfully programmed.\n");
+	
+	//relock the kick registers
+	CTRL_Relock(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG55 + address_offset);
+		
+	//Error checking against user input. This should be taken care of anyhow.
+	if(divider_value > 0xF)
+	{
+		GEL_TextOut("********ERROR: Divider Value is too large.\n");
+		return;
+	}
+	if(Clock_mux_index >= 16){
+		GEL_TextOut("********ERROR: Invalid observation clock multiplexer selection.\n");
+		return;
+	}
+
+	//Unlock the kick registers
+	CTRL_Unlock(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_MCU_OBSCLK_CTRL + address_offset);
+	
+	//Read the MMR
+	temp_val = Read_MMR(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_MCU_OBSCLK_CTRL + address_offset);
+	GEL_TextOut("MCU OBSCLK control MMR current value: %x\n",,,,, temp_val); //just for debugging
+
+	//Write to the actual obsclk the actual obsclk value.
+	//First, pack the register value we want to write.
+	reg_val = Clock_mux_index;
+	temp_val = divider_value << 8; //The divider value goes in bits 8-11.
+	reg_val |= temp_val;
+	Write_MMR(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_MCU_OBSCLK_CTRL + address_offset, reg_val);
+
+	//Now load the divider value into the programmable divider.
+	reg_val |= LOAD;
+	Write_MMR(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_MCU_OBSCLK_CTRL + address_offset, reg_val);
+
+	//Read the MMR
+	temp_val = Read_MMR(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_MCU_OBSCLK_CTRL + address_offset);
+	GEL_TextOut("MCU OBSCLK control MMR new value: %x\n",,,,, temp_val); //just for debugging
+
+	//relock the kick registers
+	CTRL_Relock(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_MCU_OBSCLK_CTRL + address_offset);
+		
+	GEL_TextOut("MCU OBSCLK successfully programmed.\n\n");
+}
+
+//for MCU SYSCLKOUT
+hotmenu Configure_MCU_SYSCLKOUT()
+{
+	//Internal variables
+	unsigned int temp_val;
+	unsigned int reg_val;
+	unsigned int address_offset=0;
+
+	//Initialization of internal variables
+	temp_val = 0; 
+	reg_val = 0;
+	//address_offset = 0x20000000; //This is the address offset of any peripherals in the WKUP domain outside of the DMSC.
+
+	//If this statement is true we're running from the CM3 DMSC.
+	//Make sure to account for the address offset.
+	if (*((unsigned int*)WAKEUP_PSC_BASE) != PSC_PID)
+    {
+        address_offset = 0x20000000;
+    } //WKUP Control MMRs use the offset of 0x8000_0000.
+
+	//Configure PADCONFIG54 for MCU_SYSCLKOUT
+	//Unlock the kick registers
+	CTRL_Unlock(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG54 + address_offset);
+	
+	//Read the MMR
+	temp_val = Read_MMR(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG54 + address_offset);
+	GEL_TextOut("CTRLMMR_WKUP_PADCONFIG54 current value: %x\n",,,,, temp_val); //just for debugging
+
+	reg_val = (temp_val & ~0x200007) | 0x5;  //change to muxmode 5 (MCU_SYSCLKOUT) and enable driver (bit21)
+	
+	Write_MMR(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG54 + address_offset,reg_val);
+	
+	//Read the MMR
+	temp_val = Read_MMR(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG54 + address_offset);
+	GEL_TextOut("CTRLMMR_WKUP_PADCONFIG54 new value: %x\n",,,,, temp_val); //just for debugging
+
+	GEL_TextOut("MCU_SYSCLKOUT PADCONFIG successfully programmed. MCU_SYSCLKOUT = MCU_SYSCLK0 / 4\n\n");
+	
+	//relock the kick registers
+	CTRL_Relock(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG54 + address_offset);
+}
+
+//for Main SYSCLKOUT
+hotmenu Configure_SYSCLKOUT(){
+	//Internal variables
+	unsigned int temp_val;
+	unsigned int reg_val;
+	unsigned int address_offset=0;
+
+	//Initialization of internal variables
+	temp_val = 0; 
+	reg_val = 0;
+	//address_offset = 0x80000000; //This is the address offset of any peripherals in the main domain.
+
+	//If this statement is true we're running from the CM3 DMSC.
+	//Make sure to account for the address offset.
+	if (*((unsigned int*)WAKEUP_PSC_BASE) != PSC_PID)
+    {
+        address_offset = 0x80000000;
+    } //Main Control MMRs use the offset of 0x8000_0000.
+
+	//Configure PADCONFIG192 for OBSCLK
+	//Unlock the kick registers
+	CTRL_Unlock(CTRL_MMR0_CFG0_BASE + CTRLMMR_PADCONFIG192 + address_offset);
+	
+	//Read the MMR
+	temp_val = Read_MMR(CTRL_MMR0_CFG0_BASE + CTRLMMR_PADCONFIG192 + address_offset);
+	GEL_TextOut("CTRLMMR_PADCONFIG192 current value: %x\n",,,,, temp_val); //just for debugging
+
+	reg_val = (temp_val & ~0x20000F) | 0x2;  //change to muxmode 2 (SYSCLKOUT) and enable driver (bit21)
+	
+	Write_MMR(CTRL_MMR0_CFG0_BASE + CTRLMMR_PADCONFIG192 + address_offset,reg_val);
+	
+	//Read the MMR
+	temp_val = Read_MMR(CTRL_MMR0_CFG0_BASE + CTRLMMR_PADCONFIG192 + address_offset);
+	GEL_TextOut("CTRLMMR_PADCONFIG192 new value: %x\n",,,,, temp_val); //just for debugging
+
+	//relock the kick registers
+	CTRL_Relock(CTRL_MMR0_CFG0_BASE + CTRLMMR_PADCONFIG192 + address_offset);
+		
+	GEL_TextOut("MAIN SYSCLKOUT PADCONFIG successfully programmed.  SYSCLKOUT = MAIN_SYSCLK0 / 4\n\n");
+}
+
+/* END OF FILE */

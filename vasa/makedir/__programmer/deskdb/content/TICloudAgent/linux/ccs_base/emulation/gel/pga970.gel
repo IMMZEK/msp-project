@@ -1,0 +1,87 @@
+//####################################################
+//PGA970 GEL file
+//v1.0 May 15,2015
+//####################################################
+
+//*******************************************************************
+//Watchdog register
+//*******************************************************************
+#define WDOG_CTRL_STAT_ADDR (0x4000051C)
+//*******************************************************************
+//Remap register
+//*******************************************************************
+#define REMAP_ADDR (0x40000220)
+
+//*****************************************************************************
+//Read write prototype
+//*****************************************************************************
+#define WR_MEM_08(addr, data) *(unsigned char*)(addr) = (unsigned char)(data)
+#define RD_MEM_08(addr)       *(unsigned char*)(addr)
+
+//*****************************************************************************
+//Global Functions
+//*****************************************************************************
+
+//Watchdog is disabled to eliminate warm resets during debug
+Disable_Watchdog()
+{
+   WR_MEM_08(WDOG_CTRL_STAT_ADDR,0x00);
+}
+
+Config_Remap()
+{
+   WR_MEM_08(REMAP_ADDR,0x00);
+}
+//Set the processor to User mode after a file is loaded, on a 
+//restart or on a reset
+//This will facilitate code loading and debug by putting the processor in a known
+//state
+
+PGA970StartState()
+{
+   xPSR = (xPSR & ~0x1F) | 0x10;   
+}
+
+OnFileLoaded()
+{
+   GEL_TextOut("****  PGA970 OnFileLoaded .......... \n","Output",1,1,1);	
+   PGA970StartState();
+   Config_Remap();
+   GEL_TextOut("****  PGA970 OnFileLoaded is done **** \n","Output",1,1,1);	
+}
+
+OnRestart()
+{
+   GEL_TextOut("****  PGA970 OnRestart .......... \n","Output",1,1,1);	
+   PGA970StartState();     
+   Config_Remap();
+   GEL_TextOut("****  PGA970 OnRestart is done **** \n","Output",1,1,1);	
+}
+
+OnReset()
+{
+   GEL_TextOut("****  PGA970 OnReset .......... \n","Output",1,1,1);	
+   PGA970StartState();
+   Disable_Watchdog();
+   Config_Remap();
+   GEL_TextOut("****  PGA970 OnReset is done **** \n","Output",1,1,1);	
+}
+
+
+OnTargetConnect()
+{
+   GEL_MapOff();
+   GEL_MapReset();
+   GEL_MapAddStr(0x00000000, 0, 0x00004000, "R|W", 0);  // FRAM_TEXT
+   GEL_MapAddStr(0x21000000, 0, 0x00004000, "R|W", 0);  // Development RAM
+   GEL_MapAddStr(0x20000000, 0, 0x00000800, "R|W", 0);  // SRAM Internal
+   GEL_MapAddStr(0x20000800, 0, 0x00000200, "R|W", 0);  // Waveform RAM
+   GEL_MapAddStr(0x40000000, 0, 0x000005E7, "R|W", 0);  // Control and status registers
+   GEL_MapAddStr(0xE000E000, 0, 0x00000F00, "R|W", 0);  // M0 registers
+   GEL_MapOn();
+   PGA970StartState();
+   GEL_TextOut("****  PGA970 Initialization is in progress .......... \n","Output",1,1,1);	
+   Disable_Watchdog();
+   Config_Remap();
+   GEL_TextOut("****  PGA970 Initialization is Done ****************** \n","Output",1,1,1);	
+}

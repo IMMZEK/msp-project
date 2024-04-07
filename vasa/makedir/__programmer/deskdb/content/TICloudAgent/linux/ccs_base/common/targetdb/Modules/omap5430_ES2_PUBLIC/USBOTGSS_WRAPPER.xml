@@ -1,0 +1,481 @@
+<module name="USBOTGSS_WRAPPER" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="USBOTGSS_REVISION" acronym="USBOTGSS_REVISION" offset="0x0" width="32" description="USBOTGSS_WRAPPER Revision Identifier">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="See" description="USBOTGSS_WRAPPER Revision" range="" rwaccess="R"/>
+  </register>
+  <register id="USBOTGSS_SYSCONFIG" acronym="USBOTGSS_SYSCONFIG" offset="0x10" width="32" description="Controls various parameters of the master and slave interfaces.">
+    <bitfield id="RESERVED" width="14" begin="31" end="18" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="WRAPRESET" width="1" begin="17" end="17" resetval="0" description="Software reset for the USBOTGSS_WRAPPER register set. Self-clearing. Does not affect the core register set." range="" rwaccess="RW">
+      <bitenum value="0" id="noop" token="WRAPRESET_0_w" description="No action"/>
+      <bitenum value="1" id="dorst" token="WRAPRESET_1_w" description="Request wrapper reset"/>
+      <bitenum value="1" id="active" token="WRAPRESET_1_r" description="Wrapper reset is ongoing"/>
+      <bitenum value="0" id="done" token="WRAPRESET_0_r" description="Wrapper reset is done / inactive"/>
+    </bitfield>
+    <bitfield id="DMADISABLE" width="1" begin="16" end="16" resetval="1" description="Disable/Enable control of the DMA master (initiator) to block read/write accesses. Bit is auto-cleared (to 0) by HW in case of outgoing access, but must be set (to 1) manually." range="" rwaccess="RW">
+      <bitenum value="0" id="Enable" token="DMADISABLE_0_w" description="Enable the DMA. The enabling can also be done by the hardware, i.e. bit it auto-cleared."/>
+      <bitenum value="1" id="Disable" token="DMADISABLE_1_w" description="Disable the DMA. software must ensure that there are no ongoing transactions before setting this bit. The disabling can only be done by software."/>
+      <bitenum value="1" id="Disabled" token="DMADISABLE_1_r" description="DMA is disabled, outgoing read/write accesses are blocked. When in smart-standby mode, standby is requested."/>
+      <bitenum value="0" id="Enabled" token="DMADISABLE_0_r" description="DMA is enabled, outgoing read/write accesses are possible. When in smart-standby mode, standby exit is requested."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="10" begin="15" end="6" resetval="0x000" description="" range="" rwaccess="R"/>
+    <bitfield id="STANDBYMODE" width="2" begin="5" end="4" resetval="0x2" description="PM mode of local initiator (master). Initiator may generate read/write transaction as long as it is out of STANDBY state." range="" rwaccess="RW">
+      <bitenum value="0" id="force" token="STANDBYMODE_0" description="Force-standby: initiator is unconditionally placed in standby state."/>
+      <bitenum value="1" id="no" token="STANDBYMODE_1" description="No-standby: initiator is unconditionally placed out of standby state."/>
+      <bitenum value="3" id="smart_wakeup" token="STANDBYMODE_3" description="Smart-Standby, wakeup-capable: initiator's standby state depends on internal conditions, i.e. the module's functional requirements. Asynchronous wakeup events can be generated."/>
+      <bitenum value="2" id="smart" token="STANDBYMODE_2" description="Smart-standby: initiator's standby state depends on internal conditions, i.e. the module's functional requirements. Asynchronous wakeup events cannot be generated."/>
+    </bitfield>
+    <bitfield id="IDLEMODE" width="2" begin="3" end="2" resetval="0x2" description="PM mode of local target (slave). Target shall be capable of handling read/write transaction as long as it is out of IDLE state." range="" rwaccess="RW">
+      <bitenum value="0" id="force" token="IDLEMODE_0" description="Force-idle mode: local target's idle state follows (acknowledges) the system's idle requests unconditionally, regardless of the IP module's internal requirements."/>
+      <bitenum value="1" id="no" token="IDLEMODE_1" description="No-idle mode: local target never enters idle state."/>
+      <bitenum value="3" id="smart_wakeup" token="IDLEMODE_3" description="Smart-idle wakeup-capable mode: local target's idle state eventually follows (acknowledges) the system's idle requests, depending on the IP module's internal requirements. IP module may generate (IRQ- or DMA-request-related) wakeup events when in idle state."/>
+      <bitenum value="2" id="smart" token="IDLEMODE_2" description="Smart-idle mode: local target's idle state eventually follows (acknowledges) the system's idle requests, depending on the IP module's internal requirements. Module shall not generate (IRQ- or DMA-request-related) wakeup events."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="1" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="USBOTGSS_IRQSTATUS_RAW_0" acronym="USBOTGSS_IRQSTATUS_RAW_0" offset="0x24" width="32" description="Raw status of main core interrupt request. Set even if event is not enabled. Write 1 to set, used mostly for debug (regular status also gets set if enabled).">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="COREIRQ_ST" width="1" begin="0" end="0" resetval="0" description="IRQ status for core: see status registerUSBOTGSS_IMAN[0] IP" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="No_action" token="COREIRQ_ST_0_w" description="No action"/>
+      <bitenum value="1" id="Trigger_IRQ_event_by_software" token="COREIRQ_ST_1_w" description="Trigger IRQ event by software"/>
+      <bitenum value="1" id="IRQ_event_pending" token="COREIRQ_ST_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="No_event_pending" token="COREIRQ_ST_0_r" description="No event pending"/>
+    </bitfield>
+  </register>
+  <register id="USBOTGSS_IRQSTATUS_0" acronym="USBOTGSS_IRQSTATUS_0" offset="0x28" width="32" description="'regular' status of main core interrupt request. Set only when enabled, self-cleared unless it was set by writing to, for debug. Write 1 to clear (raw status also gets cleared).">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="COREIRQ_ST" width="1" begin="0" end="0" resetval="0" description="IRQ status for core: see status registerUSBOTGSS_IMAN[0] IP" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="COREIRQ_ST_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="COREIRQ_ST_1_w" description="Clear pending event, if any"/>
+      <bitenum value="1" id="pending" token="COREIRQ_ST_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="COREIRQ_ST_0_r" description="No event pending"/>
+    </bitfield>
+  </register>
+  <register id="USBOTGSS_IRQENABLE_SET_0" acronym="USBOTGSS_IRQENABLE_SET_0" offset="0x2C" width="32" description="Enable of main core interrupt request. Write 1 to set (i.e. to enable interrupt). Readout is the same as corresponding _CLR register.">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="COREIRQ_EN" width="1" begin="0" end="0" resetval="0" description="IRQ enable for main core interrupt" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="COREIRQ_EN_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="COREIRQ_EN_1_w" description="Set IRQ enable (i.e. enable event)"/>
+      <bitenum value="1" id="enabled" token="COREIRQ_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="COREIRQ_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+  </register>
+  <register id="USBOTGSS_IRQENABLE_CLR_0" acronym="USBOTGSS_IRQENABLE_CLR_0" offset="0x30" width="32" description="Enable of main core interrupt request. Write 1 to clear (i.e. to disable interrupt). Readout is the same as corresponding _SET register.">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="COREIRQ_EN" width="1" begin="0" end="0" resetval="0" description="IRQ enable for main core interrupt" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="COREIRQ_EN_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="COREIRQ_EN_1_w" description="Clear IRQ enable (i.e. disable event)"/>
+      <bitenum value="1" id="enabled" token="COREIRQ_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="COREIRQ_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+  </register>
+  <register id="USBOTGSS_IRQSTATUS_RAW_1" acronym="USBOTGSS_IRQSTATUS_RAW_1" offset="0x34" width="32" description="Raw status of secondary interrupt requests. Set even if event is not enabled. Write 1 to set the (raw) status, mostly for debug (regular status also gets set).">
+    <bitfield id="RESERVED" width="14" begin="31" end="18" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="DMADISABLECLR" width="1" begin="17" end="17" resetval="0" description="DMA-disable self-clear IRQ status:USBOTGSS_SYSCONFIG[17] DMADISABLE hardware-cleared (to 0) because of DMA access. Not triggered by a software clear." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="DMADISABLECLR_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="DMADISABLECLR_1_w" description="Trigger IRQ event by software"/>
+      <bitenum value="1" id="pending" token="DMADISABLECLR_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="DMADISABLECLR_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="OEVT" width="1" begin="16" end="16" resetval="0" description="OTG event in core, IRQ status: see status registerUSBOTGSS_OEVT" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="OEVT_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="OEVT_1_w" description="Trigger IRQ event by software"/>
+      <bitenum value="1" id="pending" token="OEVT_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="OEVT_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="15" end="14" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DRVVBUS_RISE" width="1" begin="13" end="13" resetval="0" description="Drive VBUS control rise IRQ status" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="DRVVBUS_RISE_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="DRVVBUS_RISE_1_w" description="Trigger IRQ event by software"/>
+      <bitenum value="1" id="pending" token="DRVVBUS_RISE_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="DRVVBUS_RISE_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="CHRGVBUS_RISE" width="1" begin="12" end="12" resetval="0" description="Charge VBUS control rise IRQ status" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="CHRGVBUS_RISE_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="CHRGVBUS_RISE_1_w" description="Trigger IRQ event by software"/>
+      <bitenum value="1" id="pending" token="CHRGVBUS_RISE_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="CHRGVBUS_RISE_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="DISCHRGVBUS_RISE" width="1" begin="11" end="11" resetval="0" description="Discharge VBUS control rise IRQ status" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="DISCHRGVBUS_RISE_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="DISCHRGVBUS_RISE_1_w" description="Trigger IRQ event by software"/>
+      <bitenum value="1" id="pending" token="DISCHRGVBUS_RISE_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="DISCHRGVBUS_RISE_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="10" end="9" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IDPULLUP_RISE" width="1" begin="8" end="8" resetval="0" description="ID pullup control rise IRQ status" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IDPULLUP_RISE_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="IDPULLUP_RISE_1_w" description="Trigger IRQ event by software"/>
+      <bitenum value="1" id="pending" token="IDPULLUP_RISE_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="IDPULLUP_RISE_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="7" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DRVVBUS_FALL" width="1" begin="5" end="5" resetval="0" description="Drive VBUS control fall IRQ status" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="DRVVBUS_FALL_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="DRVVBUS_FALL_1_w" description="Trigger IRQ event by software"/>
+      <bitenum value="1" id="pending" token="DRVVBUS_FALL_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="DRVVBUS_FALL_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="CHRGVBUS_FALL" width="1" begin="4" end="4" resetval="0" description="Charge VBUS control fall IRQ status" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="CHRGVBUS_FALL_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="CHRGVBUS_FALL_1_w" description="Trigger IRQ event by software"/>
+      <bitenum value="1" id="pending" token="CHRGVBUS_FALL_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="CHRGVBUS_FALL_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="DISCHRGVBUS_FALL" width="1" begin="3" end="3" resetval="0" description="Discharge VBUS control fall IRQ status" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="DISCHRGVBUS_FALL_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="DISCHRGVBUS_FALL_1_w" description="Trigger IRQ event by software"/>
+      <bitenum value="1" id="pending" token="DISCHRGVBUS_FALL_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="DISCHRGVBUS_FALL_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="2" end="1" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IDPULLUP_FALL" width="1" begin="0" end="0" resetval="0" description="ID pullup control fall IRQ status" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IDPULLUP_FALL_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="IDPULLUP_FALL_1_w" description="Trigger IRQ event by software"/>
+      <bitenum value="1" id="pending" token="IDPULLUP_FALL_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="IDPULLUP_FALL_0_r" description="No event pending"/>
+    </bitfield>
+  </register>
+  <register id="USBOTGSS_IRQSTATUS_1" acronym="USBOTGSS_IRQSTATUS_1" offset="0x38" width="32" description="Regular status of secondary interrupt requests. Set only when enabled. Write 1 to clear after interrupt is serviced (raw status also gets cleared).">
+    <bitfield id="RESERVED" width="14" begin="31" end="18" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="DMADISABLECLR" width="1" begin="17" end="17" resetval="0" description="DMA-disable self-clear IRQ status:USBOTGSS_SYSCONFIG[17] DMADISABLE hardware-cleared (to 0) because of DMA access. Not triggered by a software clear." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="DMADISABLECLR_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="DMADISABLECLR_1_w" description="Clear pending event, if any"/>
+      <bitenum value="1" id="pending" token="DMADISABLECLR_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="DMADISABLECLR_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="OEVT" width="1" begin="16" end="16" resetval="0" description="OTG event in core, IRQ status: see status registerUSBOTGSS_OEVT." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="OEVT_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="OEVT_1_w" description="Clear pending event, if any"/>
+      <bitenum value="1" id="pending" token="OEVT_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="OEVT_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="15" end="14" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DRVVBUS_RISE" width="1" begin="13" end="13" resetval="0" description="Drive VBUS control rise IRQ status" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="DRVVBUS_RISE_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="DRVVBUS_RISE_1_w" description="Clear pending event, if any"/>
+      <bitenum value="1" id="pending" token="DRVVBUS_RISE_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="DRVVBUS_RISE_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="CHRGVBUS_RISE" width="1" begin="12" end="12" resetval="0" description="Charge VBUS control rise IRQ status" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="CHRGVBUS_RISE_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="CHRGVBUS_RISE_1_w" description="Clear pending event, if any"/>
+      <bitenum value="1" id="pending" token="CHRGVBUS_RISE_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="CHRGVBUS_RISE_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="DISCHRGVBUS_RISE" width="1" begin="11" end="11" resetval="0" description="Discharge VBUS control rise IRQ status" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="DISCHRGVBUS_RISE_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="DISCHRGVBUS_RISE_1_w" description="Clear pending event, if any"/>
+      <bitenum value="1" id="pending" token="DISCHRGVBUS_RISE_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="DISCHRGVBUS_RISE_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="10" end="9" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IDPULLUP_RISE" width="1" begin="8" end="8" resetval="0" description="ID pullup control rise IRQ status" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IDPULLUP_RISE_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IDPULLUP_RISE_1_w" description="Clear pending event, if any"/>
+      <bitenum value="1" id="pending" token="IDPULLUP_RISE_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="IDPULLUP_RISE_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="7" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DRVVBUS_FALL" width="1" begin="5" end="5" resetval="0" description="Drive VBUS control fall IRQ status" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="DRVVBUS_FALL_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="DRVVBUS_FALL_1_w" description="Clear pending event, if any"/>
+      <bitenum value="1" id="pending" token="DRVVBUS_FALL_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="DRVVBUS_FALL_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="CHRGVBUS_FALL" width="1" begin="4" end="4" resetval="0" description="Charge VBUS control fall IRQ status" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="CHRGVBUS_FALL_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="CHRGVBUS_FALL_1_w" description="Clear pending event, if any"/>
+      <bitenum value="1" id="pending" token="CHRGVBUS_FALL_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="CHRGVBUS_FALL_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="DISCHRGVBUS_FALL" width="1" begin="3" end="3" resetval="0" description="Discharge VBUS control fall IRQ status" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="DISCHRGVBUS_FALL_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="DISCHRGVBUS_FALL_1_w" description="Clear pending event, if any"/>
+      <bitenum value="1" id="pending" token="DISCHRGVBUS_FALL_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="DISCHRGVBUS_FALL_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="2" end="1" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IDPULLUP_FALL" width="1" begin="0" end="0" resetval="0" description="ID pullup control fall IRQ status" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IDPULLUP_FALL_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IDPULLUP_FALL_1_w" description="Clear pending event, if any"/>
+      <bitenum value="1" id="pending" token="IDPULLUP_FALL_1_r" description="IRQ event pending"/>
+      <bitenum value="0" id="none" token="IDPULLUP_FALL_0_r" description="No event pending"/>
+    </bitfield>
+  </register>
+  <register id="USBOTGSS_IRQENABLE_SET_1" acronym="USBOTGSS_IRQENABLE_SET_1" offset="0x3C" width="32" description="Enable secondary interrupt requests. Write 1 to set (that is, to enable interrupt). Readout is the same as corresponding _CLR register.">
+    <bitfield id="RESERVED" width="14" begin="31" end="18" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="DMADISABLECLR_EN" width="1" begin="17" end="17" resetval="0" description="DMA-disable self-clear, IRQ enable" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="DMADISABLECLR_EN_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="DMADISABLECLR_EN_1_w" description="Set IRQ enable (i.e. enable event)"/>
+      <bitenum value="1" id="enabled" token="DMADISABLECLR_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="DMADISABLECLR_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="OEVT_EN" width="1" begin="16" end="16" resetval="0" description="OTG event in core, IRQ enable" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="OEVT_EN_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="OEVT_EN_1_w" description="Set IRQ enable (i.e. enable event)"/>
+      <bitenum value="1" id="enabled" token="OEVT_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="OEVT_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="15" end="14" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DRVVBUS_RISE_EN" width="1" begin="13" end="13" resetval="0" description="Drive VBUS control rise IRQ enable" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="DRVVBUS_RISE_EN_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="DRVVBUS_RISE_EN_1_w" description="Set IRQ enable (i.e. enable event)"/>
+      <bitenum value="1" id="enabled" token="DRVVBUS_RISE_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="DRVVBUS_RISE_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="CHRGVBUS_RISE_EN" width="1" begin="12" end="12" resetval="0" description="Charge VBUS control rise IRQ enable" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="CHRGVBUS_RISE_EN_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="CHRGVBUS_RISE_EN_1_w" description="Set IRQ enable (i.e. enable event)"/>
+      <bitenum value="1" id="enabled" token="CHRGVBUS_RISE_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="CHRGVBUS_RISE_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="DISCHRGVBUS_RISE_EN" width="1" begin="11" end="11" resetval="0" description="Discharge VBUS control rise IRQ enable" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="DISCHRGVBUS_RISE_EN_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="DISCHRGVBUS_RISE_EN_1_w" description="Set IRQ enable (i.e. enable event)"/>
+      <bitenum value="1" id="enabled" token="DISCHRGVBUS_RISE_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="DISCHRGVBUS_RISE_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="10" end="9" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IDPULLUP_RISE_EN" width="1" begin="8" end="8" resetval="0" description="ID pullup control rise IRQ enable" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IDPULLUP_RISE_EN_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="IDPULLUP_RISE_EN_1_w" description="Set IRQ enable (i.e. enable event)"/>
+      <bitenum value="1" id="enabled" token="IDPULLUP_RISE_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="IDPULLUP_RISE_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="7" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DRVVBUS_FALL_EN" width="1" begin="5" end="5" resetval="0" description="Drive VBUS control fall IRQ enable" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="DRVVBUS_FALL_EN_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="DRVVBUS_FALL_EN_1_w" description="Set IRQ enable (i.e. enable event)"/>
+      <bitenum value="1" id="enabled" token="DRVVBUS_FALL_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="DRVVBUS_FALL_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="CHRGVBUS_FALL_EN" width="1" begin="4" end="4" resetval="0" description="Charge VBUS control fall IRQ enable" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="CHRGVBUS_FALL_EN_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="CHRGVBUS_FALL_EN_1_w" description="Set IRQ enable (i.e. enable event)"/>
+      <bitenum value="1" id="enabled" token="CHRGVBUS_FALL_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="CHRGVBUS_FALL_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="DISCHRGVBUS_FALL_EN" width="1" begin="3" end="3" resetval="0" description="Discharge VBUS control fall IRQ enable" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="DISCHRGVBUS_FALL_EN_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="DISCHRGVBUS_FALL_EN_1_w" description="Set IRQ enable (i.e. enable event)"/>
+      <bitenum value="1" id="enabled" token="DISCHRGVBUS_FALL_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="DISCHRGVBUS_FALL_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="2" end="1" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IDPULLUP_FALL_EN" width="1" begin="0" end="0" resetval="0" description="ID pullup control fall IRQ enable" range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IDPULLUP_FALL_EN_0_w" description="No action"/>
+      <bitenum value="1" id="set" token="IDPULLUP_FALL_EN_1_w" description="Set IRQ enable (i.e. enable event)"/>
+      <bitenum value="1" id="enabled" token="IDPULLUP_FALL_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="IDPULLUP_FALL_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+  </register>
+  <register id="USBOTGSS_IRQENABLE_CLR_1" acronym="USBOTGSS_IRQENABLE_CLR_1" offset="0x40" width="32" description="Enable secondary interrupt requests. Write 1 to clear (that is, to disable interrupt). Readout is the same as corresponding _SET register.">
+    <bitfield id="RESERVED" width="14" begin="31" end="18" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="DMADISABLECLR_EN" width="1" begin="17" end="17" resetval="0" description="DMA-disable self-clear, IRQ enable" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="DMADISABLECLR_EN_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="DMADISABLECLR_EN_1_w" description="Clear IRQ enable (i.e. disable event)"/>
+      <bitenum value="1" id="enabled" token="DMADISABLECLR_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="DMADISABLECLR_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="OEVT_EN" width="1" begin="16" end="16" resetval="0" description="OTG event in core, IRQ enable" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="OEVT_EN_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="OEVT_EN_1_w" description="Clear IRQ enable (i.e. disable event)"/>
+      <bitenum value="1" id="enabled" token="OEVT_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="OEVT_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="15" end="14" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DRVVBUS_RISE_EN" width="1" begin="13" end="13" resetval="0" description="Drive VBUS control rise IRQ enable" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="DRVVBUS_RISE_EN_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="DRVVBUS_RISE_EN_1_w" description="Clear IRQ enable (i.e. disable event)"/>
+      <bitenum value="1" id="enabled" token="DRVVBUS_RISE_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="DRVVBUS_RISE_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="CHRGVBUS_RISE_EN" width="1" begin="12" end="12" resetval="0" description="Charge VBUS control rise IRQ enable" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="CHRGVBUS_RISE_EN_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="CHRGVBUS_RISE_EN_1_w" description="Clear IRQ enable (i.e. disable event)"/>
+      <bitenum value="1" id="enabled" token="CHRGVBUS_RISE_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="CHRGVBUS_RISE_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="DISCHRGVBUS_RISE_EN" width="1" begin="11" end="11" resetval="0" description="Discharge VBUS control rise IRQ enable" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="DISCHRGVBUS_RISE_EN_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="DISCHRGVBUS_RISE_EN_1_w" description="Clear IRQ enable (i.e. disable event)"/>
+      <bitenum value="1" id="enabled" token="DISCHRGVBUS_RISE_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="DISCHRGVBUS_RISE_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="10" end="9" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IDPULLUP_RISE_EN" width="1" begin="8" end="8" resetval="0" description="ID pullup control rise IRQ enable" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IDPULLUP_RISE_EN_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IDPULLUP_RISE_EN_1_w" description="Clear IRQ enable (i.e. disable event)"/>
+      <bitenum value="1" id="enabled" token="IDPULLUP_RISE_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="IDPULLUP_RISE_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="7" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DRVVBUS_FALL_EN" width="1" begin="5" end="5" resetval="0" description="Drive VBUS control fall IRQ enable" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="DRVVBUS_FALL_EN_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="DRVVBUS_FALL_EN_1_w" description="Clear IRQ enable (i.e. disable event)"/>
+      <bitenum value="1" id="enabled" token="DRVVBUS_FALL_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="DRVVBUS_FALL_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="CHRGVBUS_FALL_EN" width="1" begin="4" end="4" resetval="0" description="Charge VBUS control fall IRQ enable" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="CHRGVBUS_FALL_EN_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="CHRGVBUS_FALL_EN_1_w" description="Clear IRQ enable (i.e. disable event)"/>
+      <bitenum value="1" id="enabled" token="CHRGVBUS_FALL_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="CHRGVBUS_FALL_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="DISCHRGVBUS_FALL_EN" width="1" begin="3" end="3" resetval="0" description="Discharge VBUS control fall IRQ enable" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="DISCHRGVBUS_FALL_EN_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="DISCHRGVBUS_FALL_EN_1_w" description="Clear IRQ enable (i.e. disable event)"/>
+      <bitenum value="1" id="enabled" token="DISCHRGVBUS_FALL_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="DISCHRGVBUS_FALL_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="2" end="1" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IDPULLUP_FALL_EN" width="1" begin="0" end="0" resetval="0" description="ID pullup control fall IRQ enable" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IDPULLUP_FALL_EN_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IDPULLUP_FALL_EN_1_w" description="Clear IRQ enable (i.e. disable event)"/>
+      <bitenum value="1" id="enabled" token="IDPULLUP_FALL_EN_1_r" description="IRQ event is enabled"/>
+      <bitenum value="0" id="disabled" token="IDPULLUP_FALL_EN_0_r" description="IRQ event is disabled"/>
+    </bitfield>
+  </register>
+  <register id="USBOTGSS_UTMI_OTG_CTRL" acronym="USBOTGSS_UTMI_OTG_CTRL" offset="0x80" width="32" description="">
+    <bitfield id="RESERVED" width="26" begin="31" end="6" resetval="0x000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="DRVVBUS" width="1" begin="5" end="5" resetval="0" description="Drive 5V on VBUS. Plays the role of 'hub_vbus_ctrl' in non-OTG host mode." range="" rwaccess="R">
+      <bitenum value="1" id="drive" token="DRVVBUS_1_r" description="drive VBUS"/>
+      <bitenum value="0" id="noaction" token="DRVVBUS_0_r" description="no action"/>
+    </bitfield>
+    <bitfield id="CHRGVBUS" width="1" begin="4" end="4" resetval="0" description="Charge VBUS through a resistor for VBUS-pulsing SRP." range="" rwaccess="R">
+      <bitenum value="1" id="charge" token="CHRGVBUS_1_r" description="charge VBUS"/>
+      <bitenum value="0" id="noaction" token="CHRGVBUS_0_r" description="No action"/>
+    </bitfield>
+    <bitfield id="DISCHRGVBUS" width="1" begin="3" end="3" resetval="0" description="Discharge VBUS through a resistor, until the session-end VBUS state is reached." range="" rwaccess="R">
+      <bitenum value="1" id="Discharge" token="DISCHRGVBUS_1_r" description="discharge VBUS"/>
+      <bitenum value="0" id="NoAction" token="DISCHRGVBUS_0_r" description="no action"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="2" end="1" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IDPULLUP" width="1" begin="0" end="0" resetval="1" description="Pull-up to the (OTG) ID line to allow its sampling" range="" rwaccess="R">
+      <bitenum value="1" id="Enable" token="IDPULLUP_1_r" description="Enable sampling of ID line."/>
+      <bitenum value="0" id="Disable" token="IDPULLUP_0_r" description="Disable sampling of ID line."/>
+    </bitfield>
+  </register>
+  <register id="USBOTGSS_UTMI_OTG_STATUS" acronym="USBOTGSS_UTMI_OTG_STATUS" offset="0x84" width="32" description="">
+    <bitfield id="SW_MODE" width="1" begin="31" end="31" resetval="1" description="Controls the source of UTMI / PIPE status for VBUS and OTG ID (vbusvalid, sessvalid, sessend, iddig, powerpresent)" range="" rwaccess="RW">
+      <bitenum value="0" id="io" token="SW_MODE_0" description="Hardware mode: OTG ID and VBUS status for the USB controller are taken from the UTMI inputs signals"/>
+      <bitenum value="1" id="sw" token="SW_MODE_1" description="Software mode: OTG ID and VBUS status for the USB controller are taken from the fields of the current register."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="20" begin="30" end="11" resetval="0x0 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="PORT_OVERCURRENT" width="1" begin="10" end="10" resetval="0" description="Over-current status, for non-OTG host only." range="" rwaccess="RW">
+      <bitenum value="0" id="none" token="PORT_OVERCURRENT_0" description="No over-current indication"/>
+      <bitenum value="1" id="oc" token="PORT_OVERCURRENT_1" description="Over-current indication"/>
+    </bitfield>
+    <bitfield id="POWERPRESENT" width="1" begin="9" end="9" resetval="0" description="Software-programmed value of PIPE3.0 PowerPresent (VBUS status) seen by the core, alternative to HW input." range="" rwaccess="RW"/>
+    <bitfield id="TXBITSTUFFENABLE" width="1" begin="8" end="8" resetval="0" description="Software-programmed UTMI output txbitstuffenable[h] Note: as per UTMI+, used only in UTMI Opmode 0b11 (i.e. SYNC and EOP generation disabled)" range="" rwaccess="RW">
+      <bitenum value="0" id="nobs" token="TXBITSTUFFENABLE_0" description="No bitstuffing"/>
+      <bitenum value="1" id="bs" token="TXBITSTUFFENABLE_1" description="Data bitstuffing enabled"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="7" end="5" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IDDIG" width="1" begin="4" end="4" resetval="1" description="Software-programmed value of UTMI+ IdDig (OTG ID status) seen by the core, alternative to hardware input. Don't care until IdPullup = 1 for at least 50 ms" range="" rwaccess="RW">
+      <bitenum value="0" id="IdA" token="IDDIG_0" description="ID pin is grounded = OTG A = default Host"/>
+      <bitenum value="1" id="IdB" token="IDDIG_1" description="ID pin is floating = OTG B = default Peripheral"/>
+    </bitfield>
+    <bitfield id="SESSEND" width="1" begin="3" end="3" resetval="1" description="Software-programmed value of UTMI+ SessEnd (VBUS status) seen by the core, alternative to HW input." range="" rwaccess="RW">
+      <bitenum value="0" id="notended" token="SESSEND_0" description="VBUS is above Session-End threshold"/>
+      <bitenum value="1" id="ended" token="SESSEND_1" description="VBUS is below Session-End threshold"/>
+    </bitfield>
+    <bitfield id="SESSVALID" width="1" begin="2" end="2" resetval="0" description="Software-programmed value of UTMI+ SessValid (VBUS status) seen by the core, alternative to hardware inputs AValid and BValid." range="" rwaccess="RW">
+      <bitenum value="0" id="notvalid" token="SESSVALID_0" description="VBUS is below Session-Valid threshold"/>
+      <bitenum value="1" id="valid" token="SESSVALID_1" description="VBUS is above Session-Valid threshold"/>
+    </bitfield>
+    <bitfield id="VBUSVALID" width="1" begin="1" end="1" resetval="0" description="Software-programmed value of UTMI+ VbusValid (VBUS status) seen by the core, alternative to hardware input." range="" rwaccess="RW">
+      <bitenum value="0" id="notvalid" token="VBUSVALID_0" description="VBUS is below Vbus-Valid threshold."/>
+      <bitenum value="1" id="valid" token="VBUSVALID_1" description="VBUS is above Vbus-Valid threshold"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="0" end="0" resetval="0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="USBOTGSS_MMRAM_OFFSET" acronym="USBOTGSS_MMRAM_OFFSET" offset="0x100" width="32" description="Offset of Memory-mapped RAM accesses. Page is remapped from 0x8000 to 0xFFFF (32 KiB)">
+    <bitfield id="RESERVED" width="12" begin="31" end="20" resetval="0x000" description="" range="" rwaccess="R"/>
+    <bitfield id="OFFSET_MSB" width="5" begin="19" end="15" resetval="0x08" description="Byte offset MSBits = page offset" range="" rwaccess="RW">
+      <bitenum value="0" id="core_bot" token="OFFSET_MSB_0" description="Page offset for core register set, lower half. DO NOT USE: use static access at offset 0x1_0000+ instead."/>
+      <bitenum value="1" id="core_top" token="OFFSET_MSB_1" description="Page offset for core register set, upper half. DO NOT USE: use static access at offset 0x1_0000+ instead."/>
+      <bitenum value="24" id="RAM2_base" token="OFFSET_MSB_24" description="Base page offset for RAM2 (= core byte address 0xC_0000) RAM NOT IMPLEMENTED"/>
+      <bitenum value="16" id="RAM1_base" token="OFFSET_MSB_16" description="Base page offset for RAM1 (= core byte address 0x8_0000): Tx FIFOs. The RAM shall fit inside this page for up to 32 kByte = 8,192 x 64-bit words."/>
+      <bitenum value="8" id="RAM0_base" token="OFFSET_MSB_8" description="Base page offset for RAM0 (= core byte address 0x4_0000): Rx FIFOs, descriptors, registers. The RAM shall fit inside this page for up to 32 kByte = 8,192 x 64-bit words"/>
+    </bitfield>
+    <bitfield id="OFFSET_LSB" width="15" begin="14" end="0" resetval="0x0000" description="Byte offset LSBits, always 0" range="" rwaccess="R"/>
+  </register>
+  <register id="USBOTGSS_FLADJ" acronym="USBOTGSS_FLADJ" offset="0x104" width="32" description="Jitter adjustment parameters">
+    <bitfield id="CORE_SW_RESET" width="1" begin="31" end="31" resetval="0" description="Active-high core software reset. Static, i.e. not self-clearing. After clearing, wait for reset completion by polling USBOTGSS_USBSTS[11] CNR bit." range="" rwaccess="RW">
+      <bitenum value="0" id="noreset" token="CORE_SW_RESET_0" description="Reset inactive"/>
+      <bitenum value="1" id="reset" token="CORE_SW_RESET_1" description="Reset active"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="30" end="30" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="XHCI_REVISION" width="1" begin="29" end="29" resetval="1" description="Switches to the legacy xHCI 0.96 host SW API mode. Changes shall take place under core software reset: [31] CORE_SW_RESET = 1." range="" rwaccess="RW">
+      <bitenum value="0" id="0_96" token="XHCI_REVISION_0" description="xHCI version 0.96"/>
+      <bitenum value="1" id="1_0" token="XHCI_REVISION_1" description="xHCI version 1.0 + errata"/>
+    </bitfield>
+    <bitfield id="HOST_U3_PORT_DISABLE" width="1" begin="28" end="28" resetval="0" description="USB3 port disable, overriding xHCI driver." range="" rwaccess="RW">
+      <bitenum value="0" id="en" token="HOST_U3_PORT_DISABLE_0" description="Port can be enabled."/>
+      <bitenum value="1" id="dis" token="HOST_U3_PORT_DISABLE_1" description="Port stops reporting connect/disconnect events and remains in disabled state."/>
+    </bitfield>
+    <bitfield id="HOST_U2_PORT_DISABLE" width="1" begin="27" end="27" resetval="0" description="USB2 port disable, overriding xHCI driver." range="" rwaccess="RW">
+      <bitenum value="0" id="en" token="HOST_U2_PORT_DISABLE_0" description="Port can be enabled."/>
+      <bitenum value="1" id="dis" token="HOST_U2_PORT_DISABLE_1" description="Port stops reporting connect/disconnect events and remains in disabled state."/>
+    </bitfield>
+    <bitfield id="FLADJ_30MHZ" width="6" begin="26" end="21" resetval="0x20" description="HS Jitter Adjustment, in 30-MHz periods" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="21" begin="20" end="0" resetval="0x00 0000" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="USBOTGSS_DEBUG_CFG" acronym="USBOTGSS_DEBUG_CFG" offset="0x108" width="32" description="Configuration of debug output (observability)">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="SEL" width="3" begin="2" end="0" resetval="0x0" description="selection of observed local signals" range="" rwaccess="RW">
+      <bitenum value="1" id="UTMI" token="SEL_1" description="Debug output is a selection of UTMI (USB2 PHY) interface signals"/>
+      <bitenum value="0" id="tielo" token="SEL_0" description="Debug output is tied low (32'b0)"/>
+      <bitenum value="2" id="PIPE" token="SEL_2" description="Debug output is a selection of PIPE (USB3 PHY) interface signals"/>
+      <bitenum value="4" id="Trace_lo" token="SEL_4" description="Debug output is lower 32 bits controller core's internal trace vector, selected by[21:16] TRACEPORTMUXSEL"/>
+      <bitenum value="5" id="Trace_hi" token="SEL_5" description="Debug output is upper 32 bits controller core's internal trace vector, selected by[21:16] TRACEPORTMUXSEL"/>
+      <bitenum value="3" id="Core" token="SEL_3" description="Debug output is controller core's internal debug signals"/>
+    </bitfield>
+  </register>
+  <register id="USBOTGSS_DEBUG_DATA" acronym="USBOTGSS_DEBUG_DATA" offset="0x10C" width="32" description="Data currently visible on DEBUG output (observability) port See [2:0] SEL bit field.">
+    <bitfield id="DEBUG31" width="1" begin="31" end="31" resetval="0" description="SEL = 1: utmi_sessend SEL = 2: pipe_rxstatus[2] SEL = 3: core_sm2bl_cur_mode" range="" rwaccess="R"/>
+    <bitfield id="DEBUG30" width="1" begin="30" end="30" resetval="0" description="SEL = 1: utmi_vbusvalid SEL = 2: pipe_rxstatus[1] SEL = 3: core_suspend_n" range="" rwaccess="R"/>
+    <bitfield id="DEBUG29" width="1" begin="29" end="29" resetval="0" description="SEL = 1: utmi_bvalid SEL = 2: pipe_rxstatus[0] SEL = 3: core_suspend_com_n" range="" rwaccess="R"/>
+    <bitfield id="DEBUG28" width="1" begin="28" end="28" resetval="0" description="SEL = 1: utmi_avalid SEL = 2: pipe_elecidle SEL = 3: core_u2_dssr_state[3]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG27" width="1" begin="27" end="27" resetval="0" description="SEL = 1: utmi_iddig SEL = 2: pipe_phystatus SEL = 3: core_u2_dssr_state[2]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG26" width="1" begin="26" end="26" resetval="0" description="SEL = 1: utmi_hostdisconnect SEL = 2: pipe_rxvalid SEL = 3: core_u2_dssr_state[1]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG25" width="1" begin="25" end="25" resetval="0" description="SEL = 1: utmi_txbitstuffenableh SEL = 2: pipe_rxdatak[3] SEL = 3: core_u2_dssr_state[0]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG24" width="1" begin="24" end="24" resetval="0" description="SEL = 1: utmi_txbitstuffenable SEL = 2: pipe_rxdatak[2] SEL = 3: core_u2mac_txrx_state_1[4]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG23" width="1" begin="23" end="23" resetval="0" description="SEL = 1: utmi_dischrgvbus SEL = 2: pipe_rxdatak[1] SEL = 3: core_u2mac_txrx_state_1[3]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG22" width="1" begin="22" end="22" resetval="0" description="SEL = 1: utmi_chrgvbus SEL = 2: pipe_rxdatak[0] SEL = 3: core_u2mac_txrx_state_1[2]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG21" width="1" begin="21" end="21" resetval="0" description="SEL = 1: utmi_drvvbus SEL = 2: pipe_rxpclk SEL = 3: core_u2mac_txrx_state_1[1]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG20" width="1" begin="20" end="20" resetval="0" description="SEL = 1: utmi_dmpulldown SEL = 2: pipe_rxtermination SEL = 3: core_u2mac_txrx_state_1[0]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG19" width="1" begin="19" end="19" resetval="0" description="SEL = 1: utmi_dppulldown SEL = 2: pipe_txswing SEL = 3: core_u2mac_txrx_state_0[4]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG18" width="1" begin="18" end="18" resetval="0" description="SEL = 1: utmi_idpullup SEL = 2: pipe_txmargin[2] SEL = 3: core_u2mac_txrx_state_0[3]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG17" width="1" begin="17" end="17" resetval="0" description="SEL = 1: utmi_linestate[1] SEL = 2: pipe_txmargin[1] SEL = 3: core_u2mac_txrx_state_0[2]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG16" width="1" begin="16" end="16" resetval="0" description="SEL = 1: utmi_linestate[0] SEL = 2: pipe_txmargin[0] SEL = 3: core_u2mac_txrx_state_0[1]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG15" width="1" begin="15" end="15" resetval="0" description="SEL = 1: utmi_opmode[1] SEL = 2: pipe_txdeemph[1] SEL = 3: core_u2mac_txrx_state_0[0]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG14" width="1" begin="14" end="14" resetval="0" description="SEL = 1: utmi_opmode[0] SEL = 2: pipe_txdeemph[0] SEL = 3: core_u2_prt_state[4]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG13" width="1" begin="13" end="13" resetval="0" description="SEL = 1: utmi_termSELect SEL = 2: pipe_powerdown[1] SEL = 3: core_u2_prt_state[3]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG12" width="1" begin="12" end="12" resetval="0" description="SEL = 1: utmi_xcvrselect[1] SEL = 2: pipe_powerdown[0] SEL = 3: core_u2_prt_state[2]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG11" width="1" begin="11" end="11" resetval="0" description="SEL = 1: utmi_xcvrselect[0] SEL = 2: pipe_reset_n SEL = 3: core_u2_prt_state[1]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG10" width="1" begin="10" end="10" resetval="0" description="SEL = 1: utmi_suspendm SEL = 2: pipe_rxeqtraining SEL = 3: core_u2_prt_state[0]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG9" width="1" begin="9" end="9" resetval="0" description="SEL = 1: utmi_reset SEL = 2: pipe_rxpolarity SEL = 3: core_gsts_buserraddvld" range="" rwaccess="R"/>
+    <bitfield id="DEBUG8" width="1" begin="8" end="8" resetval="0" description="SEL = 1: utmi_rxerror SEL = 2: pipe_txoneszeros SEL = 3: debug_mclk_usof_number[0]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG7" width="1" begin="7" end="7" resetval="0" description="SEL = 1: utmi_rxvalidh SEL = 2: pipe_txelecidle SEL = 3: core_ltdb_link_state[3]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG6" width="1" begin="6" end="6" resetval="0" description="SEL = 1: utmi_rxvalid SEL = 2: pipe_txdetectrxloopback SEL = 3: core_ltdb_link_state[2]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG5" width="1" begin="5" end="5" resetval="0" description="SEL = 1: utmi_rxactive SEL = 2: pipe_elasticitybuffermode SEL = 3: core_ltdb_link_state[1]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG4" width="1" begin="4" end="4" resetval="0" description="SEL = 1: utmi_txready SEL = 2: pipe_txdatak[3] SEL = 3: core_ltdb_link_state[0]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG3" width="1" begin="3" end="3" resetval="0" description="SEL = 1: utmi_txvalidh SEL = 2: pipe_txdatak[2] SEL = 3: core_ltdb_substate[3]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG2" width="1" begin="2" end="2" resetval="0" description="SEL = 1: utmi_txvalid SEL = 2: pipe_txdatak[1] SEL = 3: core_ltdb_substate[2]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG1" width="1" begin="1" end="1" resetval="0" description="SEL = 1: utmi_databus16_8 SEL = 2: pipe_txdatak[0] SEL = 3: core_ltdb_substate[1]" range="" rwaccess="R"/>
+    <bitfield id="DEBUG0" width="1" begin="0" end="0" resetval="0" description="SEL = 1: utmi_clk SEL = 2: pipe_txpclk SEL = 3: core_ltdb_substate[0]" range="" rwaccess="R"/>
+  </register>
+  <register id="USBOTGSS_DEV_EBC_EN" acronym="USBOTGSS_DEV_EBC_EN" offset="0x110" width="32" description="Enable External Buffer Control (EBC) for selected endpoints. Device mode only.">
+    <bitfield id="OUTEP15" width="1" begin="31" end="31" resetval="0" description="Enable EBC HW throttling for OUT EP 15 (USB receive)" range="" rwaccess="RW">
+      <bitenum value="0" id="dis" token="OUTEP15_0" description="EBC disabled"/>
+      <bitenum value="1" id="en" token="OUTEP15_1" description="EBC enabled.[15] shall also be set to 1 in DEPCFG command for this EP."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="15" begin="30" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="INEP15" width="1" begin="15" end="15" resetval="0" description="Enable EBC HW throttling for IN EP 15 (USB transmit)" range="" rwaccess="RW">
+      <bitenum value="0" id="dis" token="INEP15_0" description="EBC disabled"/>
+      <bitenum value="1" id="en" token="INEP15_1" description="EBC enabled.[15] shall also be set to 1 in DEPCFG command for this EP."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="15" begin="14" end="0" resetval="0x0000" description="" range="" rwaccess="R"/>
+  </register>
+</module>

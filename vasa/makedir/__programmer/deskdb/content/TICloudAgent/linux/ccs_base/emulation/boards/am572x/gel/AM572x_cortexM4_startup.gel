@@ -1,0 +1,154 @@
+/*******************************************************************/ 
+/* This GEL file is loaded on the command line of Code Composer    */
+/* The StartUp() function is called every time you start           */
+/* Code Composer.  You can customize this function to              */
+/* initialize wait states or to perform other initialization.      */
+/*                                                                 */
+/* AM572x Cortex M4 IPU                                            */
+/*                                                                 */
+/*                                                                 */
+/*******************************************************************/
+
+
+#define WR_MEM_32(addr, data)   *(unsigned int*)(addr) =(unsigned int)(data)
+#define RD_MEM_32(addr)         *(unsigned int*)(addr)
+#define uint32_t                unsigned int
+
+
+
+StartUp()
+{
+    GEL_TextOut("--->>> AM572x Cortex M4 Startup Sequence In Progress... <<<---\n");
+
+    /*------------------ Load Common Gel Files -------------------*/
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_cortexM4_basic_emulation.gel");
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_cortexM4_cross_triggering.gel");
+
+    /*------------------ Memory Map Config -------------------*/
+    GEL_MapOff();
+    GEL_MapReset();
+    memorymap_init();
+    GEL_MapOn();
+
+    GEL_TextOut("--->>> AM572x Cortex M4 Startup Sequence DONE! <<<---\n");
+}
+
+memorymap_init()
+{
+    /* 64-bit OCP Master Port */
+    GEL_MapAddStr(0x00000000, 0, 0x00004000, "R|W|AS4", 0);     /* Boot space - 16KBytes */
+    GEL_MapAddStr(0x00004000, 0, 0x54FFC000, "R|W|AS4", 0);     /* L3 space - 1.5GBytes */
+    
+    
+    /* Private memory map */
+    GEL_MapAddStr(0x55000000, 0, 0x00004000, "R|W|AS4", 0);      /* ROM - 16KBytes */
+    GEL_MapAddStr(0x55020000, 0, 0x00010000, "R|W|AS4", 0);      /* RAM - 64KBytes */
+    GEL_MapAddStr(0x55040000, 0, 0x00020000, "R|W|AS4", 0);      /* ISP5 - 128KBytes */
+    GEL_MapAddStr(0x55060000, 0, 0x00020000, "R|W|AS4", 0);      /* SIMCOP - 128KBytes */
+    GEL_MapAddStr(0x55080000, 0, 0x00001000, "R|W|AS4", 0);      /* Unicache MMU - 4KBytes */
+    GEL_MapAddStr(0x55081000, 0, 0x00001000, "R|W|AS4", 0);     /* Local PRCM register- 4KBytes */
+    
+    GEL_MapAddStr(0x55082000, 0, 0x00001000, "R|W|AS4", 0);     /* L2 MMU- 4KBytes */
+    
+    GEL_MapAddStr(0x56000000, 0, 0x0A000000, "R|W|AS4", 0);     /* L3 main space - 160MBytes */
+    
+    /* Bit band mapping */
+    //GEL_MapAddStr(0x20000000, 0, 0x00100000, "R|W|AS4", 0);     /* Bit band region 1- 1MBytes */
+    //GEL_MapAddStr(0x22000000, 0, 0x02000000, "R|W|AS4", 0);     /* Bit band alias 1- 32MBytes */
+    //GEL_MapAddStr(0x40000000, 0, 0x00100000, "R|W|AS4", 0);     /* Bit band region 2- 1MBytes */
+    // GEL_MapAddStr(0x42000000, 0, 0x02000000, "R|W|AS4", 0);     /* Bit band alias 2- 32MBytes */
+    
+    /* 64-bit OCP Master Port */
+    GEL_MapAddStr(0x60000000, 0, 0x20000000, "R|W|AS4", 0);     /* Tiler space - 512MBytes */
+    GEL_MapAddStr(0x80000000, 0, 0x60001000, "R|W|AS4", 0);     /* EMIF - 2GBytes */
+    
+    /* Private peripheral map (different view from each cortex M4 */
+    GEL_MapAddStr(0xE0001000, 0, 0x00001000, "R|W|AS4", 0);     /* DWT- 4KBytes */
+    GEL_MapAddStr(0xE0002000, 0, 0x00001000, "R|W|AS4", 0);     /* FPB- 4KBytes */
+    GEL_MapAddStr(0xE000E000, 0, 0x00001000, "R|W|AS4", 0);     /* NVIC- 4KBytes */
+    GEL_MapAddStr(0xE0042000, 0, 0x00001000, "R|W|AS4", 0);     /* IceCrusher Space- 4KBytes */
+    GEL_MapAddStr(0xE00FE000, 0, 0x00001000, "R|W|AS4", 0);     /* RW table- 4KBytes */
+    GEL_MapAddStr(0xE00FF000, 0, 0x00001000, "R|W|AS4", 0);     /* ROM table- 4KBytes */
+    
+    GEL_MapAddStr(0xE0100000, 0, 0x1FF00000, "R|W|AS4", 0);     /* Access to LPDDR2 SDRAMs */
+}
+
+OnReset()
+{ 
+
+}
+
+OnResetDetected()
+{
+    GEL_TextOut( "Core Reset has occurred.\n\n" );
+}
+
+OnTargetConnect()
+{    
+
+} 
+
+menuitem "Memory config"
+
+hotmenu Clear_Memory()
+{
+    GEL_MapOff();
+    GEL_MapReset();
+}
+
+hotmenu Default_Config()
+{
+    GEL_MapOff();
+    GEL_MapReset();
+    memorymap_init();
+    GEL_MapOn();
+}
+
+hotmenu SMP_Config()
+{
+    GEL_MapOff();
+    GEL_MapReset();
+    memorymap_init_SMP();
+    GEL_MapOn();
+}
+
+memorymap_init_SMP()
+{
+    /* 64-bit OCP Master Port */
+    GEL_MapAddStr(0x00000000, 0, 0x00004000, "R|W|AS4", 0);     /* Boot space - 16KBytes */
+    GEL_MapAddStr(0x00004000, 0, 0x54FFC000, "R|W|AS4", 0);     /* L3 space - 1.5GBytes */
+
+
+    /* Private memory map */
+    GEL_MapAddStr(0x55000000, 0, 0x00004000, "R|W|AS4", 0);      /* ROM - 16KBytes */
+    GEL_MapAddStr(0x55020000, 0, 0x00010000, "R|W|AS4", 0);      /* RAM - 64KBytes */
+    GEL_MapAddStr(0x55040000, 0, 0x00020000, "R|W|AS4", 0);      /* ISP5 - 128KBytes */
+    GEL_MapAddStr(0x55060000, 0, 0x00020000, "R|W|AS4", 0);      /* SIMCOP - 128KBytes */
+    GEL_MapAddStr(0x55080000, 0, 0x00001000, "R|W|AS4", 0);      /* Unicache MMU - 4KBytes */
+    GEL_MapAddStr(0x55081000, 0, 0x00001000, "R|W|AS4", 0);     /* Local PRCM register- 4KBytes */
+
+    GEL_MapAddStr(0x55082000, 0, 0x00001000, "R|W|AS4", 0);     /* L2 MMU- 4KBytes */
+
+    GEL_MapAddStr(0x56000000, 0, 0x0A000000, "R|W|AS4", 0);     /* L3 main space - 160MBytes */
+
+    /* Bit band mapping */
+    //GEL_MapAddStr(0x20000000, 0, 0x00100000, "R|W|AS4", 0);     /* Bit band region 1- 1MBytes */
+    //GEL_MapAddStr(0x22000000, 0, 0x02000000, "R|W|AS4", 0);     /* Bit band alias 1- 32MBytes */
+    //GEL_MapAddStr(0x40000000, 0, 0x00100000, "R|W|AS4", 0);     /* Bit band region 2- 1MBytes */
+    // GEL_MapAddStr(0x42000000, 0, 0x02000000, "R|W|AS4", 0);     /* Bit band alias 2- 32MBytes */
+
+    /* 64-bit OCP Master Port */
+    GEL_MapAddStr(0x60000000, 0, 0x20000000, "R|W|AS4", 0);     /* Tiler space - 512MBytes */
+    GEL_MapAddStr(0x80000000, 0, 0x60001000, "R|W|SH2C", 0);    /* EMIF - 2GBytes Shared */
+
+    /* Private peripheral map (different view from each cortexM3 */
+    GEL_MapAddStr(0xE0001000, 0, 0x00001000, "R|W|AS4", 0);     /* DWT- 4KBytes */
+    GEL_MapAddStr(0xE0002000, 0, 0x00001000, "R|W|AS4", 0);     /* FPB- 4KBytes */
+    GEL_MapAddStr(0xE000E000, 0, 0x00001000, "R|W|AS4", 0);     /* NVIC- 4KBytes */
+    GEL_MapAddStr(0xE0042000, 0, 0x00001000, "R|W|AS4", 0);     /* IceCrusher Space- 4KBytes */
+    GEL_MapAddStr(0xE00FE000, 0, 0x00001000, "R|W|AS4", 0);     /* RW table- 4KBytes */
+    GEL_MapAddStr(0xE00FF000, 0, 0x00001000, "R|W|AS4", 0);     /* ROM table- 4KBytes */
+
+    GEL_MapAddStr(0xE0100000, 0, 0x1FF00000, "R|W|AS4", 0);     /* Access to LPDDR2 SDRAMs */
+}
+

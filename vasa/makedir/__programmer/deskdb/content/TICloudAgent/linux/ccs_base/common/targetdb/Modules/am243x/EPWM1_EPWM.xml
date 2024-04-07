@@ -1,0 +1,142 @@
+<module name="EPWM1_EPWM" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+	<register id="EPWM_REGS_TBCTL" acronym="EPWM_REGS_TBCTL" offset="0x0" width="16" description="Time-Base Control Register">
+		<bitfield id="FREE_SOFT" width="2" begin="15" end="14" resetval="0x0" description="Emulation Mode Bits These bits select the behavior of the ePWM time-base counter during emulation events:" range="15 - 14" rwaccess="R/W"/> 
+		<bitfield id="PHSDIR" width="1" begin="13" end="13" resetval="0x0" description="Phase Direction Bit This bit is only used when the time-base counter is configured in the up-down-count mode The PHSDIR bit indicates the direction the time-base counter [TBCNT] will count after a synchronization event occurs and a new phase value is loaded from the phase [TBPHS] register This is irrespective of the direction of the counter before the synchronization event In the up-count and down-count modes this bit is ignored" range="13" rwaccess="R/W"/> 
+		<bitfield id="CLKDIV" width="3" begin="12" end="10" resetval="0x0" description="Time-base Clock Prescale Bits These bits determine part of the time-base clock prescale value TBCLK = SYSCLKOUT/[HSPCLKDIV - CLKDIV]" range="12 - 10" rwaccess="R/W"/> 
+		<bitfield id="HSPCLKDIV" width="3" begin="9" end="7" resetval="0x1" description="High-Speed Time-base Clock Prescale Bits These bits determine part of the time-base clock prescale value TBCLK = SYSCLKOUT/[HSPCLKDIV - CLKDIV] This divisor emulates the HSPCLK in the TMS320x281x system as used on the Event Manager [EV] peripheral" range="9 - 7" rwaccess="R/W"/> 
+		<bitfield id="SWFSYNC" width="1" begin="6" end="6" resetval="0x0" description="Software Forced Synchronization Pulse" range="6" rwaccess="R/W"/> 
+		<bitfield id="SYNCOSEL" width="2" begin="5" end="4" resetval="0x0" description="Synchronization Output Select These bits select the source of the EPWMxSYNCO signal" range="5 - 4" rwaccess="R/W"/> 
+		<bitfield id="PRDLD" width="1" begin="3" end="3" resetval="0x0" description="Active Period Register Load From Shadow Register Select" range="3" rwaccess="R/W"/> 
+		<bitfield id="PHSEN" width="1" begin="2" end="2" resetval="0x0" description="Counter Register Load From Phase Register Enable" range="2" rwaccess="R/W"/> 
+		<bitfield id="CTRMODE" width="2" begin="1" end="0" resetval="0x3" description="Counter Mode The time-base counter mode is normally configured once and not changed during normal operation If you change the mode of the counter, the change will take effect at the next TBCLK edge and the current counter value shall increment or decrement from the value before the mode change These bits set the time-base counter mode of operation as follows:" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_TBSTS" acronym="EPWM_REGS_TBSTS" offset="0x2" width="16" description="Time-Base Status Register">
+		<bitfield id="CTRMAX" width="1" begin="2" end="2" resetval="0x0" description="Time-Base Counter Max Latched Status Bit" range="2" rwaccess="R/W1TC"/> 
+		<bitfield id="SYNCI" width="1" begin="1" end="1" resetval="0x0" description="Input Synchronization Latched Status Bit" range="1" rwaccess="R/W1TC"/> 
+		<bitfield id="CTRDIR" width="1" begin="0" end="0" resetval="0x0" description="Time-Base Counter Direction Status Bit At reset, the counter is frozen, therefore, this bit has no meaning To make this bit meaningful, you must first set the appropriate mode via TBCTL[CTRMODE]" range="0" rwaccess="R"/>
+	</register>
+	<register id="EPWM_REGS_TBPHSHR" acronym="EPWM_REGS_TBPHSHR" offset="0x4" width="16" description="Time Base Phase High Resolution Register">
+		<bitfield id="TBPHSH" width="8" begin="15" end="8" resetval="0x0" description="Time-base phase high-resolution bits" range="15 - 8" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_TBPHS" acronym="EPWM_REGS_TBPHS" offset="0x6" width="16" description="Time Base Phase Register. This register is only available on ePWM instances that include the high-resolution PWM (HRPWM) extension, otherwise, this location is reserved.">
+		<bitfield id="TBPHS" width="16" begin="15" end="0" resetval="0x0" description="These bits set time-base counter phase of the selected ePWM relative to the time-base that is supplying the synchronization input signal [a] If TBCTL[PHSEN] = 0, then the synchronization event is ignored and the time-base counter is not loaded with the phase [b] If TBCTL[PHSEN] = 1, then the time-base counter [TBCNT] will be loaded with the phase [TBPHS] when a synchronization event occurs The synchronization event can be initiated by the input synchronization signal [EPWMxSYNCI] or by a software forced synchronization " range="15 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_TBCNT" acronym="EPWM_REGS_TBCNT" offset="0x8" width="16" description="Time Base Counter Register">
+		<bitfield id="TBCNT" width="16" begin="15" end="0" resetval="0x0" description="Reading these bits gives the current time-base counter value Writing to these bits sets the current time-base counter value The update happens as soon as the write occurs The write is NOT synchronized to the time-base clock [TBCLK] and the register is not shadowed" range="15 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_TBPRD" acronym="EPWM_REGS_TBPRD" offset="0xA" width="16" description="Time Base Period Register">
+		<bitfield id="TBPRD" width="16" begin="15" end="0" resetval="0x0" description="These bits determine the period of the time-base counter This sets the PWM frequency Shadowing of this register is enabled and disabled by the TBCTL[PRDLD] bit By default this register is shadowed [a] If TBCTL[PRDLD] = 0, then the shadow is enabled and any write or read will automatically go to the shadow register In this case, the active register will be loaded from the shadow register when the time-base counter equals zero [b] If TBCTL[PRDLD] = 1, then the shadow is disabled and any write or read will go directly to the active register, that is the register actively controlling the hardware [c] The active and shadow registers share the same memory map address " range="15 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_CMPCTL" acronym="EPWM_REGS_CMPCTL" offset="0xE" width="16" description="Counter Compare Control Register">
+		<bitfield id="SHDWBFULL" width="1" begin="9" end="9" resetval="0x0" description="Counter-compare B [CMPB] Shadow Register Full Status Flag This bit self clears once a load-strobe occurs" range="9" rwaccess="R"/> 
+		<bitfield id="SHDWAFULL" width="1" begin="8" end="8" resetval="0x0" description="Counter-compare A [CMPA] Shadow Register Full Status Flag The flag bit is set when a 32 bit write to CMPA:CMPAHR register or a 16 bit write to CMPA register is made A 16 bit write to CMPAHR register will not affect the flag This bit self clears once a load-strobe occurs" range="8" rwaccess="R"/> 
+		<bitfield id="SHDWBMODE" width="1" begin="6" end="6" resetval="0x0" description="Counter-compare B [CMPB] Register Operating Mode" range="6" rwaccess="R/W"/> 
+		<bitfield id="SHDWAMODE" width="1" begin="4" end="4" resetval="0x0" description="Counter-compare A [CMPA] Register Operating Mode" range="4" rwaccess="R/W"/> 
+		<bitfield id="LOADBMODE" width="2" begin="3" end="2" resetval="0x0" description="Active Counter-Compare B [CMPB] Load From Shadow Select Mode This bit has no effect in immediate mode [CMPCTL[SHDWBMODE] = 1]" range="3 - 2" rwaccess="R/W"/> 
+		<bitfield id="LOADAMODE" width="2" begin="1" end="0" resetval="0x0" description="Active Counter-Compare A [CMPA] Load From Shadow Select Mode This bit has no effect in immediate mode [CMPCTL[SHDWAMODE] = 1]" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_CMPAHR" acronym="EPWM_REGS_CMPAHR" offset="0x10" width="16" description="Counter Compare A High Resolution Register. This register is only available on ePWM instances that include the high-resolution PWM (HRPWM) extension; otherwise, this location is reserved.">
+		<bitfield id="CMPAHR" width="8" begin="15" end="8" resetval="0x0" description="Compare A High-Resolution register bits for MEP step control A minimum value of 1h is needed to enable HRPWM capabilities Valid MEP range of operation 1-255h " range="15 - 8" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_CMPA" acronym="EPWM_REGS_CMPA" offset="0x12" width="16" description="Counter Compare A Register">
+		<bitfield id="CMPA" width="16" begin="15" end="0" resetval="0x0" description="The value in the active CMPA register is continuously compared to the time-base counter [TBCNT] When the values are equal, the counter-compare module generates a time-base counter equal to counter compare A event This event is sent to the action-qualifier where it is qualified and converted it into one or more actions These actions can be applied to either the EPWMxA or the EPWMxB output depending on the configuration of the AQCTLA and AQCTLB registers The actions that can be defined in the AQCTLA and AQCTLB registers include the following [a] Do nothing the event is ignored [b] Clear: Pull the EPWMxA and/or EPWMxB signal low [c] Set: Pull the EPWMxA and/or EPWMxB signal high [d] Toggle the EPWMxA and/or EPWMxB signal Shadowing of this register is enabled and disabled by the CMPCTL[SHDWAMODE] bit By default this register is shadowed [a] If CMPCTL[SHDWAMODE] = 0, then the shadow is enabled and any write or read will automatically go to the shadow register In this case, the CMPCTL[LOADAMODE] bit field determines which event will load the active register from the shadow register [b] Before a write, the CMPCTL[SHDWAFULL] bit can be read to determine if the shadow register is currently full [c] If CMPCTL[SHDWAMODE] = 1, then the shadow register is disabled and any write or read will go directly to the active register, that is the register actively controlling the hardware [d] In either mode, the active and shadow registers share the same memory map address " range="15 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_CMPB" acronym="EPWM_REGS_CMPB" offset="0x14" width="16" description="Counter Compare B Register">
+		<bitfield id="CMPB" width="16" begin="15" end="0" resetval="0x0" description="The value in the active CMPB register is continuously compared to the time-base counter [TBCNT] When the values are equal, the counter-compare module generates a time-base counter equal to counter compare B event This event is sent to the action-qualifier where it is qualified and converted it into one or more actions These actions can be applied to either the EPWMxA or the EPWMxB output depending on the configuration of the AQCTLA and AQCTLB registers The actions that can be defined in the AQCTLA and AQCTLB registers include the following [a] Do nothing, the event is ignored [b] Clear: Pull the EPWMxA and/or EPWMxB signal low [c] Set: Pull the EPWMxA and/or EPWMxB signal high [d] Toggle the EPWMxA and/or EPWMxB signal Shadowing of this register is enabled and disabled by the CMPCTL[SHDWBMODE] bit By default this register is shadowed [a] If CMPCTL[SHDWBMODE] = 0, then the shadow is enabled and any write or read will automatically go to the shadow register In this case, the CMPCTL[LOADBMODE] bit field determines which event will load the active register from the shadow register: [b] Before a write, the CMPCTL[SHDWBFULL] bit can be read to determine if the shadow register is currently full [c] If CMPCTL[SHDWBMODE] = 1, then the shadow register is disabled and any write or read will go directly to the active register, that is the register actively controlling the hardware [d] In either mode, the active and shadow registers share the same memory map address " range="15 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_AQCTLA" acronym="EPWM_REGS_AQCTLA" offset="0x16" width="16" description="Action Qualifier Control Register For Output A">
+		<bitfield id="CBD" width="2" begin="11" end="10" resetval="0x0" description="Action when the time-base counter equals the active CMPB register and the counter is decrementing" range="11 - 10" rwaccess="R/W"/> 
+		<bitfield id="CBU" width="2" begin="9" end="8" resetval="0x0" description="Action when the counter equals the active CMPB register and the counter is incrementing" range="9 - 8" rwaccess="R/W"/> 
+		<bitfield id="CAD" width="2" begin="7" end="6" resetval="0x0" description="Action when the counter equals the active CMPA register and the counter is decrementing" range="7 - 6" rwaccess="R/W"/> 
+		<bitfield id="CAU" width="2" begin="5" end="4" resetval="0x0" description="Action when the counter equals the active CMPA register and the counter is incrementing" range="5 - 4" rwaccess="R/W"/> 
+		<bitfield id="PRD" width="2" begin="3" end="2" resetval="0x0" description="Action when the counter equals the period Note: By definition, in count up-down mode when the counter equals period the direction is defined as 0 or counting down" range="3 - 2" rwaccess="R/W"/> 
+		<bitfield id="ZRO" width="2" begin="1" end="0" resetval="0x0" description="Action when counter equals zero Note: By definition, in count up-down mode when the counter equals 0 the direction is defined as 1 or counting up" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_AQCTLB" acronym="EPWM_REGS_AQCTLB" offset="0x18" width="16" description="Action Qualifier Control Register For Output B">
+		<bitfield id="CBD" width="2" begin="11" end="10" resetval="0x0" description="Action when the counter equals the active CMPB register and the counter is decrementing" range="11 - 10" rwaccess="R/W"/> 
+		<bitfield id="CBU" width="2" begin="9" end="8" resetval="0x0" description="Action when the counter equals the active CMPB register and the counter is incrementing" range="9 - 8" rwaccess="R/W"/> 
+		<bitfield id="CAD" width="2" begin="7" end="6" resetval="0x0" description="Action when the counter equals the active CMPA register and the counter is decrementing" range="7 - 6" rwaccess="R/W"/> 
+		<bitfield id="CAU" width="2" begin="5" end="4" resetval="0x0" description="Action when the counter equals the active CMPA register and the counter is incrementing" range="5 - 4" rwaccess="R/W"/> 
+		<bitfield id="PRD" width="2" begin="3" end="2" resetval="0x0" description="Action when the counter equals the period Note: By definition, in count up-down mode when the counter equals period the direction is defined as 0 or counting down" range="3 - 2" rwaccess="R/W"/> 
+		<bitfield id="ZRO" width="2" begin="1" end="0" resetval="0x0" description="Action when counter equals zero Note: By definition, in count up-down mode when the counter equals 0 the direction is defined as 1 or counting up" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_AQSFRC" acronym="EPWM_REGS_AQSFRC" offset="0x1A" width="16" description="Action Qualifier Software Force Register">
+		<bitfield id="RLDCSF" width="2" begin="7" end="6" resetval="0x0" description="AQCSFRC Active Register Reload From Shadow Options" range="7 - 6" rwaccess="R/W"/> 
+		<bitfield id="OTSFB" width="1" begin="5" end="5" resetval="0x0" description="One-Time Software Forced Event on Output B" range="5" rwaccess="R/W1TC"/> 
+		<bitfield id="ACTSFB" width="2" begin="4" end="3" resetval="0x0" description="Action when One-Time Software Force B Is invoked" range="4 - 3" rwaccess="R/W"/> 
+		<bitfield id="OTSFA" width="1" begin="2" end="2" resetval="0x0" description="One-Time Software Forced Event on Output A" range="2" rwaccess="R/W1TC"/> 
+		<bitfield id="ACTSFA" width="2" begin="1" end="0" resetval="0x0" description="Action When One-Time Software Force A Is Invoked" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_AQCSFRC" acronym="EPWM_REGS_AQCSFRC" offset="0x1C" width="16" description="Action Qualifier Continuous S/W Force Register">
+		<bitfield id="CSFB" width="2" begin="3" end="2" resetval="0x0" description="Continuous Software Force on Output B In immediate mode, a continuous force takes effect on the next TBCLK edge In shadow mode, a continuous force takes effect on the next TBCLK edge after a shadow load into the active register To configure shadow mode, use AQSFRC[RLDCSF]" range="3 - 2" rwaccess="R/W"/> 
+		<bitfield id="CSFA" width="2" begin="1" end="0" resetval="0x0" description="Continuous Software Force on Output A In immediate mode, a continuous force takes effect on the next TBCLK edge In shadow mode, a continuous force takes effect on the next TBCLK edge after a shadow load into the active register" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_DBCTL" acronym="EPWM_REGS_DBCTL" offset="0x1E" width="16" description="Dead-Band Generator Control Register">
+		<bitfield id="IN_MODE" width="2" begin="5" end="4" resetval="0x0" description="Dead Band Input Mode Control Bit 5 controls the S5 switch and bit 4 controls the S4 switch This allows you to select the input source to the falling-edge and rising-edge delay To produce classical dead-band waveforms, the default is EPWMxA In is the source for both falling and rising-edge delays" range="5 - 4" rwaccess="R/W"/> 
+		<bitfield id="POLSEL" width="2" begin="3" end="2" resetval="0x0" description="Polarity Select Control Bit 3 controls the S3 switch and bit 2 controls the S2 switch This allows you to selectively invert one of the delayed signals before it is sent out of the dead-band submodule The following descriptions correspond to classical upper/lower switch control as found in one leg of a digital motor control inverter These assume that DBCTL[OUT_MODE] = 1,1 and DBCTL[IN_MODE] = 0,0 Other enhanced modes are also possible, but not regarded as typical usage modes " range="3 - 2" rwaccess="R/W"/> 
+		<bitfield id="OUT_MODE" width="2" begin="1" end="0" resetval="0x0" description="Dead-band Output Mode Control Bit 1 controls the S1 switch and bit 0 controls the S0 switch This allows you to selectively enable or bypass the dead-band generation for the falling-edge and rising-edge delay" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_DBRED" acronym="EPWM_REGS_DBRED" offset="0x20" width="16" description="Dead-Band Generator Rising Edge Delay Count Register">
+		<bitfield id="DEL" width="10" begin="9" end="0" resetval="0x0" description="Rising Edge Delay Count 10 bit counter" range="9 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_DBFED" acronym="EPWM_REGS_DBFED" offset="0x22" width="16" description="Dead-Band Generator Falling Edge Delay Count Register">
+		<bitfield id="DEL" width="10" begin="9" end="0" resetval="0x0" description="Falling Edge Delay Count 10 bit counter" range="9 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_TZSEL" acronym="EPWM_REGS_TZSEL" offset="0x24" width="16" description="Trip Zone Select Register">
+		<bitfield id="OSHTN" width="8" begin="15" end="8" resetval="0x0" description="Trip-zone n [TZn] select One-Shot [OSHT] trip-zone enable/disable When any of the enabled pins go low, a one-shot trip event occurs for this ePWM module When the event occurs, the action defined in the TZCTL register is taken on the EPWMxA and EPWMxB outputs The one-shot trip condition remains latched until you clear the condition via the TZCLR register" range="15 - 8" rwaccess="R/W"/> 
+		<bitfield id="CBCN" width="8" begin="7" end="0" resetval="0x0" description="Trip-zone n [TZn] select Cycle-by-Cycle [CBC] trip-zone enable/disable When any of the enabled pins go low, a cycle-by-cycle trip event occurs for this ePWM module When the event occurs, the action defined in the TZCTL register is taken on the EPWMxA and EPWMxB outputs A cycle-by-cycle trip condition is automatically cleared when the time-base counter reaches zero" range="7 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_TZCTL" acronym="EPWM_REGS_TZCTL" offset="0x28" width="16" description="Trip Zone Control Register">
+		<bitfield id="TZB" width="2" begin="3" end="2" resetval="0x0" description="When a trip event occurs the following action is taken on output EPWMxB Which trip-zone pins can cause an event is defined in the TZSEL register" range="3 - 2" rwaccess="R/W"/> 
+		<bitfield id="TZA" width="2" begin="1" end="0" resetval="0x0" description="When a trip event occurs the following action is taken on output EPWMxA Which trip-zone pins can cause an event is defined in the TZSEL register" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_TZEINT" acronym="EPWM_REGS_TZEINT" offset="0x2A" width="16" description="Trip Zone Enable Interrupt Register">
+		<bitfield id="OST" width="1" begin="2" end="2" resetval="0x0" description="Trip-zone One-Shot Interrupt Enable" range="2" rwaccess="R/W"/> 
+		<bitfield id="CBC" width="1" begin="1" end="1" resetval="0x0" description="Trip-zone Cycle-by-Cycle Interrupt Enable" range="1" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_TZFLG" acronym="EPWM_REGS_TZFLG" offset="0x2C" width="16" description="Trip Zone Flag Register">
+		<bitfield id="OST" width="1" begin="2" end="2" resetval="0x0" description="Latched Status Flag for A One-Shot Trip Event" range="2" rwaccess="R"/> 
+		<bitfield id="CBC" width="1" begin="1" end="1" resetval="0x0" description="Latched Status Flag for Cycle-By-Cycle Trip Event" range="1" rwaccess="R"/> 
+		<bitfield id="INT" width="1" begin="0" end="0" resetval="0x0" description="Latched Trip Interrupt Status Flag" range="0" rwaccess="R"/>
+	</register>
+	<register id="EPWM_REGS_TZCLR" acronym="EPWM_REGS_TZCLR" offset="0x2E" width="16" description="Trip Zone Clear Register">
+		<bitfield id="OST" width="1" begin="2" end="2" resetval="0x0" description="Clear Flag for One-Shot Trip [OST] Latch" range="2" rwaccess="R/W"/> 
+		<bitfield id="CBC" width="1" begin="1" end="1" resetval="0x0" description="Clear Flag for Cycle-By-Cycle [CBC] Trip Latch" range="1" rwaccess="R/W"/> 
+		<bitfield id="INT" width="1" begin="0" end="0" resetval="0x0" description="Global Interrupt Clear Flag" range="0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_TZFRC" acronym="EPWM_REGS_TZFRC" offset="0x30" width="16" description="Trip Zone Force Register">
+		<bitfield id="OST" width="1" begin="2" end="2" resetval="0x0" description="Force a One-Shot Trip Event via Software" range="2" rwaccess="R/W"/> 
+		<bitfield id="CBC" width="1" begin="1" end="1" resetval="0x0" description="Force a Cycle-by-Cycle Trip Event via Software" range="1" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_ETSEL" acronym="EPWM_REGS_ETSEL" offset="0x32" width="16" description="Event Trigger Selection Register">
+		<bitfield id="INTEN" width="1" begin="3" end="3" resetval="0x0" description="Enable ePWM Interrupt [EPWMx_INT] Generation" range="3" rwaccess="R/W"/> 
+		<bitfield id="INTSEL" width="3" begin="2" end="0" resetval="0x0" description="ePWM Interrupt [EPWMx_INT] Selection Options" range="2 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_ETPS" acronym="EPWM_REGS_ETPS" offset="0x34" width="16" description="Event Trigger Pre-Scale Register">
+		<bitfield id="INTCNT" width="2" begin="3" end="2" resetval="0x0" description="ePWM Interrupt Event [EPWMx_INT] Counter Register These bits indicate how many selected ETSEL[INTSEL] events have occurred These bits are automatically cleared when an interrupt pulse is generated If interrupts are disabled, ETSEL[INT] = 0 or the interrupt flag is set, ETFLG[INT] = 1, the counter will stop counting events when it reaches the period value ETPS[INTCNT] = ETPS[INTPRD]" range="3 - 2" rwaccess="R"/> 
+		<bitfield id="INTPRD" width="2" begin="1" end="0" resetval="0x0" description="ePWM Interrupt [EPWMx_INT] Period Select These bits determine how many selected ETSEL[INTSEL] events need to occur before an interrupt is generated To be generated, the interrupt must be enabled [ETSEL[INT] = 1] If the interrupt status flag is set from a previous interrupt [ETFLG[INT] = 1] then no interrupt will be generated until the flag is cleared via the ETCLR[INT] bit This allows for one interrupt to be pending while another is still being serviced Once the interrupt is generated, the ETPS[INTCNT] bits will automatically be cleared Writing a INTPRD value that is the same as the current counter value will trigger an interrupt if it is enabled and the status flag is clear Writing a INTPRD value that is less than the current counter value will result in an undefined state If a counter event occurs at the same instant as a new zero or non-zero INTPRD value is written, the counter is incremented" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_ETFLG" acronym="EPWM_REGS_ETFLG" offset="0x36" width="16" description="Event Trigger Flag Register">
+		<bitfield id="INT" width="1" begin="0" end="0" resetval="0x0" description="Latched ePWM Interrupt [EPWMx_INT] Status Flag" range="0" rwaccess="R"/>
+	</register>
+	<register id="EPWM_REGS_ETCLR" acronym="EPWM_REGS_ETCLR" offset="0x38" width="16" description="Event Trigger Clear Register">
+		<bitfield id="INT" width="1" begin="0" end="0" resetval="0x0" description="ePWM Interrupt [EPWMx_INT] Flag Clear Bit" range="0" rwaccess="R"/>
+	</register>
+	<register id="EPWM_REGS_ETFRC" acronym="EPWM_REGS_ETFRC" offset="0x3A" width="16" description="Event Trigger Force Register">
+		<bitfield id="INT" width="1" begin="0" end="0" resetval="0x0" description="INT Force Bit The interrupt will only be generated if the event is enabled in the ETSEL register The INT flag bit will be set regardless" range="0" rwaccess="R"/>
+	</register>
+	<register id="EPWM_REGS_PCCTL" acronym="EPWM_REGS_PCCTL" offset="0x3C" width="16" description="PWM Chopper Control Register">
+		<bitfield id="CHPDUTY" width="3" begin="10" end="8" resetval="0x0" description="Chopping Clock Duty Cycle" range="10 - 8" rwaccess="R/W"/> 
+		<bitfield id="CHPFREQ" width="3" begin="7" end="5" resetval="0x0" description="Chopping Clock Frequency" range="7 - 5" rwaccess="R/W"/> 
+		<bitfield id="OSHTWTH" width="4" begin="4" end="1" resetval="0x0" description="One-Shot Pulse Width" range="4 - 1" rwaccess="R/W"/> 
+		<bitfield id="CHPEN" width="1" begin="0" end="0" resetval="0x0" description="PWM-chopping Enable" range="0" rwaccess="R/W"/>
+	</register>
+	<register id="EPWM_REGS_PID" acronym="EPWM_REGS_PID" offset="0x5C" width="32" description="EHRPWM Peripheral ID Register. The IP revision register is used by software to track features, bugs, and compatibility.">
+		<bitfield id="SCHEME" width="2" begin="31" end="30" resetval="0x1" description="Used to distinguish between the old scheme and current" range="31 - 30" rwaccess="R"/> 
+		<bitfield id="FUNC" width="12" begin="27" end="16" resetval="0x1233" description="FUNC" range="27 - 16" rwaccess="R"/> 
+		<bitfield id="R_RTL" width="5" begin="15" end="11" resetval="0x1" description="RTL version [R], maintained by IP design owner" range="15 - 11" rwaccess="R"/> 
+		<bitfield id="X_MAJOR" width="3" begin="10" end="8" resetval="0x1" description="Major revision [X]" range="10 - 8" rwaccess="R"/> 
+		<bitfield id="CUSTOM" width="2" begin="7" end="6" resetval="0x0" description="CUSTOM" range="7 - 6" rwaccess="R"/> 
+		<bitfield id="Y_MINOR" width="6" begin="5" end="0" resetval="0x3" description="Minor revision [Y]" range="5 - 0" rwaccess="R"/>
+	</register>
+</module>

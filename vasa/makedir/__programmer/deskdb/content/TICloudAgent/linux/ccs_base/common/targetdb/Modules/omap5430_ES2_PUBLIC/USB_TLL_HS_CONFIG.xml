@@ -1,0 +1,370 @@
+<module name="USB_TLL_HS_CONFIG" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="USBTLL_REVISION" acronym="USBTLL_REVISION" offset="0x0" width="32" description="OCP standard revision number, BCD encoded">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="Ti internal data" description="Revision number" range="" rwaccess="R"/>
+  </register>
+  <register id="USBTLL_HWINFO" acronym="USBTLL_HWINFO" offset="0x4" width="32" description="Information on hardware configuration of host">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="SAR_CNTX_SIZE" width="8" begin="7" end="0" resetval="0x07" description="Save-and-Restore context size, in 32-bit words, i.e. number of 32-bit registers with significant context information, mapped from offset 0x400 upward." range="" rwaccess="R"/>
+  </register>
+  <register id="USBTLL_SYSCONFIG" acronym="USBTLL_SYSCONFIG" offset="0x10" width="32" description="OCP standard system configuration register">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="CLOCKACTIVITY" width="1" begin="8" end="8" resetval="0" description="Enable autogating of OCP-derived internal clocks while module is idle." range="" rwaccess="RW">
+      <bitenum value="0" id="OFF_0" token="CLOCKACTIVITY_0" description="OCP-derived internal clocks OFF during idle"/>
+      <bitenum value="1" id="ON_1" token="CLOCKACTIVITY_1" description="OCP-derived internal clocks ON during idle"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="7" end="5" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SIDLEMODE" width="2" begin="4" end="3" resetval="0x0" description="Slave interface power management control. Idle Req/ack control" range="" rwaccess="RW">
+      <bitenum value="0" id="forceidle" token="SIDLEMODE_0" description="Force-idle mode. Sidleack[1] asserted after Sidlereq assertion"/>
+      <bitenum value="1" id="noidle" token="SIDLEMODE_1" description="No-idle mode. Sidleack[1] never asserted."/>
+      <bitenum value="2" id="smartidle" token="SIDLEMODE_2" description="Smart-idle mode. Sidleack[1] asserted after Sidlereq assertion when no more activity on the OCP."/>
+    </bitfield>
+    <bitfield id="ENAWAKEUP" width="1" begin="2" end="2" resetval="0" description="Asynchronous wake-up generation control (Swakeup)" range="" rwaccess="RW">
+      <bitenum value="0" id="disabled" token="ENAWAKEUP_0" description="Wake-up generation disabled"/>
+      <bitenum value="1" id="enabled" token="ENAWAKEUP_1" description="Wake-up generation enabled"/>
+    </bitfield>
+    <bitfield id="SOFTRESET" width="1" begin="1" end="1" resetval="0" description="Module software reset" range="" rwaccess="W">
+      <bitenum value="0" id="no_action" token="SOFTRESET_0_w" description="No effect"/>
+      <bitenum value="1" id="do_reset" token="SOFTRESET_1_w" description="Starts softreset sequence."/>
+    </bitfield>
+    <bitfield id="AUTOIDLE" width="1" begin="0" end="0" resetval="1" description="Internal autogating control" range="" rwaccess="RW">
+      <bitenum value="0" id="disabled" token="AUTOIDLE_0" description="Clock always running"/>
+      <bitenum value="1" id="enabled" token="AUTOIDLE_1" description="When no activity on OCP, clock is cut off."/>
+    </bitfield>
+  </register>
+  <register id="USBTLL_SYSSTATUS" acronym="USBTLL_SYSSTATUS" offset="0x14" width="32" description="OCP standard system status register">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="RESETDONE" width="1" begin="0" end="0" resetval="0" description="Indicates when the module has entirely come out of reset" range="" rwaccess="R">
+      <bitenum value="0" id="ongoing" token="RESETDONE_0_r" description="Reset is ongoing"/>
+      <bitenum value="1" id="done" token="RESETDONE_1_r" description="Reset is done"/>
+    </bitfield>
+  </register>
+  <register id="USBTLL_IRQSTATUS" acronym="USBTLL_IRQSTATUS" offset="0x18" width="32" description="OCP standard IRQ status vector. Write 1 to clear a bit.">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="ACCESS_ERROR" width="1" begin="2" end="2" resetval="0" description="Access error to ULPI register over OCP: USB clock must run for that type of access to succeed." range="" rwaccess="RW">
+      <bitenum value="0" id="Pending" token="ACCESS_ERROR_0" description="No event pending"/>
+      <bitenum value="1" id="Pending" token="ACCESS_ERROR_1" description="Event pending"/>
+    </bitfield>
+    <bitfield id="FCLK_END" width="1" begin="1" end="1" resetval="0" description="Functional clock is no longer requested for USB clocking" range="" rwaccess="RW">
+      <bitenum value="0" id="Pending" token="FCLK_END_0" description="No event pending"/>
+      <bitenum value="1" id="Pending" token="FCLK_END_1" description="Event pending"/>
+    </bitfield>
+    <bitfield id="FCLK_START" width="1" begin="0" end="0" resetval="0" description="Functional clock is requested for USB clocking" range="" rwaccess="RW">
+      <bitenum value="0" id="Pending" token="FCLK_START_0" description="No event pending"/>
+      <bitenum value="1" id="Pending" token="FCLK_START_1" description="Event pending"/>
+    </bitfield>
+  </register>
+  <register id="USBTLL_IRQENABLE" acronym="USBTLL_IRQENABLE" offset="0x1C" width="32" description="OCP standard IRQ enable vector">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x00000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ACCESS_ERROR_EN" width="1" begin="2" end="2" resetval="0x0" description="Enable IRQ generation upon access error to ULPI register over L3 interconnect" range="" rwaccess="RW">
+      <bitenum value="0" id="Masked" token="ACCESS_ERROR_EN_0" description="IRQ event is masked"/>
+      <bitenum value="1" id="Enabled" token="ACCESS_ERROR_EN_1" description="IRQ event is enabled"/>
+    </bitfield>
+    <bitfield id="FCLK_END_EN" width="1" begin="1" end="1" resetval="0x0" description="IRQ event mask for FCLK_END interrupt (seeUSBTLL_IRQSTATUS[1])" range="" rwaccess="RW">
+      <bitenum value="0" id="Masked" token="FCLK_END_EN_0" description="IRQ event is masked"/>
+      <bitenum value="1" id="Enabled" token="FCLK_END_EN_1" description="IRQ event is enabled"/>
+    </bitfield>
+    <bitfield id="FCLK_START_EN" width="1" begin="0" end="0" resetval="0x0" description="IRQ event mask for FCLK_START interrupt (seeUSBTLL_IRQSTATUS[0])" range="" rwaccess="RW">
+      <bitenum value="0" id="Masked" token="FCLK_START_EN_0" description="IRQ event is masked"/>
+      <bitenum value="1" id="Enabled" token="FCLK_START_EN_1" description="IRQ event is enabled"/>
+    </bitfield>
+  </register>
+  <register id="TLL_SHARED_CONF" acronym="TLL_SHARED_CONF" offset="0x30" width="32" description="Common control register for all TLL channels">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FCLK_REQ" width="1" begin="1" end="1" resetval="0x0" description="Functional clock request, ORed from all channels depending on their respective USB bus state. Combined with the Fclk_is_on status to generate fclk_start/end IRQs." range="" rwaccess="R">
+      <bitenum value="0" id="NoRequest" token="FCLK_REQ_0" description="Func clock input is not requested by TLL"/>
+      <bitenum value="1" id="Request" token="FCLK_REQ_1" description="Func clock input is requested by TLL"/>
+    </bitfield>
+    <bitfield id="FCLK_IS_ON" width="1" begin="0" end="0" resetval="0x0" description="Status of the functional clock input, provided by the system to the TLL module. The TLL module will only use that clock if the current status indicated that it is ready. Combined with the Fclk_request to generate fclk_start/end IRQs." range="" rwaccess="RW">
+      <bitenum value="0" id="not_ready" token="FCLK_IS_ON_0" description="Functional clock input is not guaranteed ON (can actually be ON, OFF, or unstable)"/>
+      <bitenum value="1" id="ready" token="FCLK_IS_ON_1" description="Functional clock input is guaranteed ON and stable"/>
+    </bitfield>
+  </register>
+  <register id="TLL_CHANNEL_CONF_i_0" acronym="TLL_CHANNEL_CONF_i_0" offset="0x40" width="32" description="Control and Status register for channel i.">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="FSLSLINESTATE" width="2" begin="29" end="28" resetval="0x0" description="Line state for Full/low speed serial modes Bit 1 = D&#8211;/ Bit0 = D+" range="" rwaccess="R">
+      <bitenum value="0" id="Single-ended_0" token="FSLSLINESTATE_0_r" description="Single-ended 0"/>
+      <bitenum value="1" id="Full-Speed_J_=_differential_1" token="FSLSLINESTATE_1_r" description="Full-Speed J = differential 1"/>
+      <bitenum value="2" id="Full-Speed_K_=_differential_0" token="FSLSLINESTATE_2_r" description="Full-Speed K = differential 0"/>
+      <bitenum value="3" id="Single-ended_1_(illegal_in_USB)" token="FSLSLINESTATE_3_r" description="Single-ended 1 (illegal in USB)"/>
+    </bitfield>
+    <bitfield id="FSLSMODE" width="4" begin="27" end="24" resetval="0x0" description="Multiple-mode serial interface's mode select. Only when main channel mode is serial. No effect in other main modes." range="" rwaccess="RW">
+      <bitenum value="0" id="PHY_TX_0" token="FSLSMODE_0" description="6-pin unidirectional PHY i/f mode. TX encoding is Dat/Se0 (default)."/>
+      <bitenum value="1" id="PHY_TX_1" token="FSLSMODE_1" description="6-pin unidirectional PHY i/f mode. TX encoding is Dp/Dm."/>
+      <bitenum value="2" id="3-pin_bidirectional_PHY_i/f_mode" token="FSLSMODE_2" description="3-pin bidirectional PHY i/f mode"/>
+      <bitenum value="3" id="4-pin_bidirectional_PHY_i/f_mode" token="FSLSMODE_3" description="4-pin bidirectional PHY i/f mode"/>
+      <bitenum value="4" id="TLL_TX_4" token="FSLSMODE_4" description="6-pin unidirectional TLL mode. TX encoding is Dat/Se0."/>
+      <bitenum value="5" id="TLL_TX_5" token="FSLSMODE_5" description="6-pin unidirectional TLL mode. TX encoding is Dp/Dm."/>
+      <bitenum value="6" id="3-pin_bidirectional_TLL_mode" token="FSLSMODE_6" description="3-pin bidirectional TLL mode"/>
+      <bitenum value="7" id="4-pin_bidirectional_TLL_mode" token="FSLSMODE_7" description="4-pin bidirectional TLL mode"/>
+      <bitenum value="10" id="TLL_10" token="FSLSMODE_10" description="2-pin bidirectional TLL mode. Encoding is Dat/Se0."/>
+      <bitenum value="11" id="TLL_11" token="FSLSMODE_11" description="2-pin bidirectional TLL mode. Encoding is Dp/Dm."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="23" end="21" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="TESTTXSE0" width="1" begin="20" end="20" resetval="0" description="Force-Se0 transmit override value for serial mode test Don't care if TestEn = 0 (functional mode) or = TestTxen = 1 (TX = hiz)" range="" rwaccess="RW">
+      <bitenum value="0" id="TX_0" token="TESTTXSE0_0" description="drive differential value on TX according to TestTxDat"/>
+      <bitenum value="1" id="drive_SE0_on_TX" token="TESTTXSE0_1" description="drive SE0 on TX"/>
+    </bitfield>
+    <bitfield id="TESTTXDAT" width="1" begin="19" end="19" resetval="0" description="Differential data transmit override value for serial mode test Don't care if TestEn = 0 (functional mode) or = TestTxen = 1 (TX = hiz) or TestSe0 = 1 (TX = se0)" range="" rwaccess="RW">
+      <bitenum value="0" id="Drive_full-speed_K_=_differential_0" token="TESTTXDAT_0" description="Drive full-speed K = differential 0"/>
+      <bitenum value="1" id="Drive_full-speed_J_=_differential_1" token="TESTTXDAT_1" description="Drive full-speed J = differential 1"/>
+    </bitfield>
+    <bitfield id="TESTTXEN" width="1" begin="18" end="18" resetval="0" description="Differential data transmit override value for serial mode test Don't care if TestEn = 0 (functional mode)" range="" rwaccess="RW">
+      <bitenum value="0" id="Drive_Tx_according_to_TestTxDat/Se0" token="TESTTXEN_0" description="Drive Tx according to TestTxDat/Se0"/>
+      <bitenum value="1" id="1" token="TESTTXEN_1" description="Drive Tx Hiz (no drive: pullups determine line state)"/>
+    </bitfield>
+    <bitfield id="TESTEN" width="1" begin="17" end="17" resetval="0" description="Enable manual test override for serial mode TX path (from local controller UTMI port)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="TESTEN_0" description="No override. Tx is from local link controller"/>
+      <bitenum value="1" id="Override_enabled" token="TESTEN_1" description="Override enabled"/>
+    </bitfield>
+    <bitfield id="DRVVBUS" width="1" begin="16" end="16" resetval="0" description="VBUS-drive for ChanMode = serial * In TLL config, write 1 to emulate serial-side VBUS drive * In PHY config, write 1 to report 'VBUS valid' status (of actual VBUS) to UTMI controller" range="" rwaccess="RW">
+      <bitenum value="0" id="VBUS_not_driven" token="DRVVBUS_0" description="VBUS not driven"/>
+      <bitenum value="1" id="VBUS_driven_to_5_V" token="DRVVBUS_1" description="VBUS driven to 5 V"/>
+    </bitfield>
+    <bitfield id="CHRGVBUS" width="1" begin="15" end="15" resetval="0" description="VBUS-drive for ChanMode = serial * In TLL config, write 1 to emulate serial-side VBUS charge/pullup (OTG) * In PHY config, write 1 to reports 'session valid' status (of actual VBUS) to UTMI controller" range="" rwaccess="RW">
+      <bitenum value="0" id="VBUS_not_charged,_session_not_valid" token="CHRGVBUS_0" description="VBUS not charged, session not valid"/>
+      <bitenum value="1" id="VBUS_charged,_session_valid" token="CHRGVBUS_1" description="VBUS charged, session valid"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="14" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ULPINOBITSTUFF" width="1" begin="11" end="11" resetval="0" description="Disable bitstuff emulation in ULPI TLL for ULPI ChanMode" range="" rwaccess="RW">
+      <bitenum value="0" id="USB_0" token="ULPINOBITSTUFF_0" description="Bitstuff enabled, following USB standard"/>
+      <bitenum value="1" id="1" token="ULPINOBITSTUFF_1" description="No bitstuff or associated delays (nonstandard)"/>
+    </bitfield>
+    <bitfield id="ULPIAUTOIDLE" width="1" begin="10" end="10" resetval="1" description="For ChanMode = ULPI TLL only. Allow the ULPI output clock to be stopped when ULPI goes into asynchronous mode (low-power, 3-pin serial, 6-pin serial). No effect in ULPI input clock mode." range="" rwaccess="RW">
+      <bitenum value="0" id="ULPI_output_clock_always-on" token="ULPIAUTOIDLE_0" description="ULPI output clock always-on"/>
+      <bitenum value="1" id="ULPI_ULPI_1" token="ULPIAUTOIDLE_1" description="ULPI output clock stops during asynchronous ULPI modes"/>
+    </bitfield>
+    <bitfield id="UTMIAUTOIDLE" width="1" begin="9" end="9" resetval="1" description="For ChanMode = ULPI TLL only. Allow the UTMI clock (output) to be stopped when UTMII goes to suspended mode (suspendm = 0)" range="" rwaccess="RW">
+      <bitenum value="0" id="UTMI_clock_output_always_on" token="UTMIAUTOIDLE_0" description="UTMI clock output always on"/>
+      <bitenum value="1" id="UTMI_clock_output_gated_upon_suspend" token="UTMIAUTOIDLE_1" description="UTMI clock output gated upon suspend"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="ULPIOUTCLKMODE" width="1" begin="7" end="7" resetval="1" description="ULPI clocking mode select for ULPI TLL ChanMode. Hardcoded, for legacy only." range="" rwaccess="R Rreturns1s">
+      <bitenum value="1" id="ULPI_PHY_TLL,_ULPI_1" token="ULPIOUTCLKMODE_1_r" description="ULPI clock provided by PHY side (i.e. TLL, from functional clock). ULPI clock is output"/>
+    </bitfield>
+    <bitfield id="TLLFULLSPEED" width="1" begin="6" end="6" resetval="1" description="Sets PHY speed emulation in TLL (full/slow), which determines the line to pull up upon connect. The two connect source controls are: input m(N)_tllpuen, register field TllConnect." range="" rwaccess="RW">
+      <bitenum value="0" id="Connect_is_Low-speed:_D&#8211;_pullup" token="TLLFULLSPEED_0" description="Connect is Low-speed: D&#8211; pullup"/>
+      <bitenum value="1" id="Connect_is_Full-Speed:_D+_pullup" token="TLLFULLSPEED_1" description="Connect is Full-Speed: D+ pullup"/>
+    </bitfield>
+    <bitfield id="TLLCONNECT" width="1" begin="5" end="5" resetval="0" description="Emulation of Full/Low-Speed connect (that is, D+ resp D&#8211; pullup) for serial TLL modes. Speed is determined by field TllSpeed." range="" rwaccess="RW">
+      <bitenum value="0" id="Unconnected" token="TLLCONNECT_0" description="Unconnected"/>
+      <bitenum value="1" id="Connected" token="TLLCONNECT_1" description="Connected"/>
+    </bitfield>
+    <bitfield id="TLLATTACH" width="1" begin="4" end="4" resetval="1" description="Emulates cable attach/detach for all serial TLL modes: * ChanMode = serial, in TLL mode (FsLsMode) * ChanMode = ULPI, in serial mode (6pin/3pin TLL)" range="" rwaccess="RW">
+      <bitenum value="0" id="Cable_detach_emulated_on_serial_TLL" token="TLLATTACH_0" description="Cable detach emulated on serial TLL"/>
+      <bitenum value="1" id="Cable_attach_emulated_on_serial_TLL" token="TLLATTACH_1" description="Cable attach emulated on serial TLL"/>
+    </bitfield>
+    <bitfield id="UTMIISADEV" width="1" begin="3" end="3" resetval="1" description="Select the cable end 'seen' by UTMI side of TLL, i.e. the emulated USB cable's orientation. The host must always be on A-side, peripheral on B-side. Reset value depends on generic DEFUTMIISHOST." range="" rwaccess="RW">
+      <bitenum value="0" id="UTMI_ULPI_0" token="UTMIISADEV_0" description="UTMI side is peripheral, ULPI side is host"/>
+      <bitenum value="1" id="UTMI_ULPI_1" token="UTMIISADEV_1" description="UTMI side is host, ULPI side is peripheral"/>
+    </bitfield>
+    <bitfield id="CHANMODE" width="2" begin="2" end="1" resetval="0x0" description="Main channel mode selection" range="" rwaccess="RW">
+      <bitenum value="0" id="TLL_(HS_ULPI_0" token="CHANMODE_0" description="UTMI-to-ULPI TLL mode (HS capable): to ULPI controller"/>
+      <bitenum value="1" id="(FS/LS)_(TLL)_PHY_1" token="CHANMODE_1" description="UTMI-to-serial (FS/LS) mode: to serial controller (TLL) or serial PHY"/>
+      <bitenum value="2" id="Transparent_UTMI_mode:_to_UTMI_PHY" token="CHANMODE_2" description="Transparent UTMI mode: to UTMI PHY"/>
+      <bitenum value="3" id="No_mode_selected" token="CHANMODE_3" description="No mode selected"/>
+    </bitfield>
+    <bitfield id="CHANEN" width="1" begin="0" end="0" resetval="0" description="Active-high channel enable. A disabled channel is unclocked and kept under reset." range="" rwaccess="RW">
+      <bitenum value="0" id="Channel_i_disabled" token="CHANEN_0" description="Channel i disabled"/>
+      <bitenum value="1" id="Channel_i_enabled" token="CHANEN_1" description="Channel i enabled"/>
+    </bitfield>
+  </register>
+  <register id="TLL_CHANNEL_CONF_i_1" acronym="TLL_CHANNEL_CONF_i_1" offset="0x44" width="32" description="Control and Status register for channel i.">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="FSLSLINESTATE" width="2" begin="29" end="28" resetval="0x0" description="Line state for Full/low speed serial modes Bit 1 = D&#8211;/ Bit0 = D+" range="" rwaccess="R">
+      <bitenum value="0" id="Single-ended_0" token="FSLSLINESTATE_0_r" description="Single-ended 0"/>
+      <bitenum value="1" id="Full-Speed_J_=_differential_1" token="FSLSLINESTATE_1_r" description="Full-Speed J = differential 1"/>
+      <bitenum value="2" id="Full-Speed_K_=_differential_0" token="FSLSLINESTATE_2_r" description="Full-Speed K = differential 0"/>
+      <bitenum value="3" id="Single-ended_1_(illegal_in_USB)" token="FSLSLINESTATE_3_r" description="Single-ended 1 (illegal in USB)"/>
+    </bitfield>
+    <bitfield id="FSLSMODE" width="4" begin="27" end="24" resetval="0x0" description="Multiple-mode serial interface's mode select. Only when main channel mode is serial. No effect in other main modes." range="" rwaccess="RW">
+      <bitenum value="0" id="PHY_TX_0" token="FSLSMODE_0" description="6-pin unidirectional PHY i/f mode. TX encoding is Dat/Se0 (default)."/>
+      <bitenum value="1" id="PHY_TX_1" token="FSLSMODE_1" description="6-pin unidirectional PHY i/f mode. TX encoding is Dp/Dm."/>
+      <bitenum value="2" id="3-pin_bidirectional_PHY_i/f_mode" token="FSLSMODE_2" description="3-pin bidirectional PHY i/f mode"/>
+      <bitenum value="3" id="4-pin_bidirectional_PHY_i/f_mode" token="FSLSMODE_3" description="4-pin bidirectional PHY i/f mode"/>
+      <bitenum value="4" id="TLL_TX_4" token="FSLSMODE_4" description="6-pin unidirectional TLL mode. TX encoding is Dat/Se0."/>
+      <bitenum value="5" id="TLL_TX_5" token="FSLSMODE_5" description="6-pin unidirectional TLL mode. TX encoding is Dp/Dm."/>
+      <bitenum value="6" id="3-pin_bidirectional_TLL_mode" token="FSLSMODE_6" description="3-pin bidirectional TLL mode"/>
+      <bitenum value="7" id="4-pin_bidirectional_TLL_mode" token="FSLSMODE_7" description="4-pin bidirectional TLL mode"/>
+      <bitenum value="10" id="TLL_10" token="FSLSMODE_10" description="2-pin bidirectional TLL mode. Encoding is Dat/Se0."/>
+      <bitenum value="11" id="TLL_11" token="FSLSMODE_11" description="2-pin bidirectional TLL mode. Encoding is Dp/Dm."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="23" end="21" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="TESTTXSE0" width="1" begin="20" end="20" resetval="0" description="Force-Se0 transmit override value for serial mode test Don't care if TestEn = 0 (functional mode) or = TestTxen = 1 (TX = hiz)" range="" rwaccess="RW">
+      <bitenum value="0" id="TX_0" token="TESTTXSE0_0" description="drive differential value on TX according to TestTxDat"/>
+      <bitenum value="1" id="drive_SE0_on_TX" token="TESTTXSE0_1" description="drive SE0 on TX"/>
+    </bitfield>
+    <bitfield id="TESTTXDAT" width="1" begin="19" end="19" resetval="0" description="Differential data transmit override value for serial mode test Don't care if TestEn = 0 (functional mode) or = TestTxen = 1 (TX = hiz) or TestSe0 = 1 (TX = se0)" range="" rwaccess="RW">
+      <bitenum value="0" id="Drive_full-speed_K_=_differential_0" token="TESTTXDAT_0" description="Drive full-speed K = differential 0"/>
+      <bitenum value="1" id="Drive_full-speed_J_=_differential_1" token="TESTTXDAT_1" description="Drive full-speed J = differential 1"/>
+    </bitfield>
+    <bitfield id="TESTTXEN" width="1" begin="18" end="18" resetval="0" description="Differential data transmit override value for serial mode test Don't care if TestEn = 0 (functional mode)" range="" rwaccess="RW">
+      <bitenum value="0" id="Drive_Tx_according_to_TestTxDat/Se0" token="TESTTXEN_0" description="Drive Tx according to TestTxDat/Se0"/>
+      <bitenum value="1" id="1" token="TESTTXEN_1" description="Drive Tx Hiz (no drive: pullups determine line state)"/>
+    </bitfield>
+    <bitfield id="TESTEN" width="1" begin="17" end="17" resetval="0" description="Enable manual test override for serial mode TX path (from local controller UTMI port)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="TESTEN_0" description="No override. Tx is from local link controller"/>
+      <bitenum value="1" id="Override_enabled" token="TESTEN_1" description="Override enabled"/>
+    </bitfield>
+    <bitfield id="DRVVBUS" width="1" begin="16" end="16" resetval="0" description="VBUS-drive for ChanMode = serial * In TLL config, write 1 to emulate serial-side VBUS drive * In PHY config, write 1 to report 'VBUS valid' status (of actual VBUS) to UTMI controller" range="" rwaccess="RW">
+      <bitenum value="0" id="VBUS_not_driven" token="DRVVBUS_0" description="VBUS not driven"/>
+      <bitenum value="1" id="VBUS_driven_to_5_V" token="DRVVBUS_1" description="VBUS driven to 5 V"/>
+    </bitfield>
+    <bitfield id="CHRGVBUS" width="1" begin="15" end="15" resetval="0" description="VBUS-drive for ChanMode = serial * In TLL config, write 1 to emulate serial-side VBUS charge/pullup (OTG) * In PHY config, write 1 to reports 'session valid' status (of actual VBUS) to UTMI controller" range="" rwaccess="RW">
+      <bitenum value="0" id="VBUS_not_charged,_session_not_valid" token="CHRGVBUS_0" description="VBUS not charged, session not valid"/>
+      <bitenum value="1" id="VBUS_charged,_session_valid" token="CHRGVBUS_1" description="VBUS charged, session valid"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="14" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ULPINOBITSTUFF" width="1" begin="11" end="11" resetval="0" description="Disable bitstuff emulation in ULPI TLL for ULPI ChanMode" range="" rwaccess="RW">
+      <bitenum value="0" id="USB_0" token="ULPINOBITSTUFF_0" description="Bitstuff enabled, following USB standard"/>
+      <bitenum value="1" id="1" token="ULPINOBITSTUFF_1" description="No bitstuff or associated delays (nonstandard)"/>
+    </bitfield>
+    <bitfield id="ULPIAUTOIDLE" width="1" begin="10" end="10" resetval="1" description="For ChanMode = ULPI TLL only. Allow the ULPI output clock to be stopped when ULPI goes into asynchronous mode (low-power, 3-pin serial, 6-pin serial). No effect in ULPI input clock mode." range="" rwaccess="RW">
+      <bitenum value="0" id="ULPI_output_clock_always-on" token="ULPIAUTOIDLE_0" description="ULPI output clock always-on"/>
+      <bitenum value="1" id="ULPI_ULPI_1" token="ULPIAUTOIDLE_1" description="ULPI output clock stops during asynchronous ULPI modes"/>
+    </bitfield>
+    <bitfield id="UTMIAUTOIDLE" width="1" begin="9" end="9" resetval="1" description="For ChanMode = ULPI TLL only. Allow the UTMI clock (output) to be stopped when UTMII goes to suspended mode (suspendm = 0)" range="" rwaccess="RW">
+      <bitenum value="0" id="UTMI_clock_output_always_on" token="UTMIAUTOIDLE_0" description="UTMI clock output always on"/>
+      <bitenum value="1" id="UTMI_clock_output_gated_upon_suspend" token="UTMIAUTOIDLE_1" description="UTMI clock output gated upon suspend"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="ULPIOUTCLKMODE" width="1" begin="7" end="7" resetval="1" description="ULPI clocking mode select for ULPI TLL ChanMode. Hardcoded, for legacy only." range="" rwaccess="R Rreturns1s">
+      <bitenum value="1" id="ULPI_PHY_TLL,_ULPI_1" token="ULPIOUTCLKMODE_1_r" description="ULPI clock provided by PHY side (i.e. TLL, from functional clock). ULPI clock is output"/>
+    </bitfield>
+    <bitfield id="TLLFULLSPEED" width="1" begin="6" end="6" resetval="1" description="Sets PHY speed emulation in TLL (full/slow), which determines the line to pull up upon connect. The two connect source controls are: input m(N)_tllpuen, register field TllConnect." range="" rwaccess="RW">
+      <bitenum value="0" id="Connect_is_Low-speed:_D&#8211;_pullup" token="TLLFULLSPEED_0" description="Connect is Low-speed: D&#8211; pullup"/>
+      <bitenum value="1" id="Connect_is_Full-Speed:_D+_pullup" token="TLLFULLSPEED_1" description="Connect is Full-Speed: D+ pullup"/>
+    </bitfield>
+    <bitfield id="TLLCONNECT" width="1" begin="5" end="5" resetval="0" description="Emulation of Full/Low-Speed connect (that is, D+ resp D&#8211; pullup) for serial TLL modes. Speed is determined by field TllSpeed." range="" rwaccess="RW">
+      <bitenum value="0" id="Unconnected" token="TLLCONNECT_0" description="Unconnected"/>
+      <bitenum value="1" id="Connected" token="TLLCONNECT_1" description="Connected"/>
+    </bitfield>
+    <bitfield id="TLLATTACH" width="1" begin="4" end="4" resetval="1" description="Emulates cable attach/detach for all serial TLL modes: * ChanMode = serial, in TLL mode (FsLsMode) * ChanMode = ULPI, in serial mode (6pin/3pin TLL)" range="" rwaccess="RW">
+      <bitenum value="0" id="Cable_detach_emulated_on_serial_TLL" token="TLLATTACH_0" description="Cable detach emulated on serial TLL"/>
+      <bitenum value="1" id="Cable_attach_emulated_on_serial_TLL" token="TLLATTACH_1" description="Cable attach emulated on serial TLL"/>
+    </bitfield>
+    <bitfield id="UTMIISADEV" width="1" begin="3" end="3" resetval="1" description="Select the cable end 'seen' by UTMI side of TLL, i.e. the emulated USB cable's orientation. The host must always be on A-side, peripheral on B-side. Reset value depends on generic DEFUTMIISHOST." range="" rwaccess="RW">
+      <bitenum value="0" id="UTMI_ULPI_0" token="UTMIISADEV_0" description="UTMI side is peripheral, ULPI side is host"/>
+      <bitenum value="1" id="UTMI_ULPI_1" token="UTMIISADEV_1" description="UTMI side is host, ULPI side is peripheral"/>
+    </bitfield>
+    <bitfield id="CHANMODE" width="2" begin="2" end="1" resetval="0x0" description="Main channel mode selection" range="" rwaccess="RW">
+      <bitenum value="0" id="TLL_(HS_ULPI_0" token="CHANMODE_0" description="UTMI-to-ULPI TLL mode (HS capable): to ULPI controller"/>
+      <bitenum value="1" id="(FS/LS)_(TLL)_PHY_1" token="CHANMODE_1" description="UTMI-to-serial (FS/LS) mode: to serial controller (TLL) or serial PHY"/>
+      <bitenum value="2" id="Transparent_UTMI_mode:_to_UTMI_PHY" token="CHANMODE_2" description="Transparent UTMI mode: to UTMI PHY"/>
+      <bitenum value="3" id="No_mode_selected" token="CHANMODE_3" description="No mode selected"/>
+    </bitfield>
+    <bitfield id="CHANEN" width="1" begin="0" end="0" resetval="0" description="Active-high channel enable. A disabled channel is unclocked and kept under reset." range="" rwaccess="RW">
+      <bitenum value="0" id="Channel_i_disabled" token="CHANEN_0" description="Channel i disabled"/>
+      <bitenum value="1" id="Channel_i_enabled" token="CHANEN_1" description="Channel i enabled"/>
+    </bitfield>
+  </register>
+  <register id="TLL_CHANNEL_CONF_i_2" acronym="TLL_CHANNEL_CONF_i_2" offset="0x48" width="32" description="Control and Status register for channel i.">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="FSLSLINESTATE" width="2" begin="29" end="28" resetval="0x0" description="Line state for Full/low speed serial modes Bit 1 = D&#8211;/ Bit0 = D+" range="" rwaccess="R">
+      <bitenum value="0" id="Single-ended_0" token="FSLSLINESTATE_0_r" description="Single-ended 0"/>
+      <bitenum value="1" id="Full-Speed_J_=_differential_1" token="FSLSLINESTATE_1_r" description="Full-Speed J = differential 1"/>
+      <bitenum value="2" id="Full-Speed_K_=_differential_0" token="FSLSLINESTATE_2_r" description="Full-Speed K = differential 0"/>
+      <bitenum value="3" id="Single-ended_1_(illegal_in_USB)" token="FSLSLINESTATE_3_r" description="Single-ended 1 (illegal in USB)"/>
+    </bitfield>
+    <bitfield id="FSLSMODE" width="4" begin="27" end="24" resetval="0x0" description="Multiple-mode serial interface's mode select. Only when main channel mode is serial. No effect in other main modes." range="" rwaccess="RW">
+      <bitenum value="0" id="PHY_TX_0" token="FSLSMODE_0" description="6-pin unidirectional PHY i/f mode. TX encoding is Dat/Se0 (default)."/>
+      <bitenum value="1" id="PHY_TX_1" token="FSLSMODE_1" description="6-pin unidirectional PHY i/f mode. TX encoding is Dp/Dm."/>
+      <bitenum value="2" id="3-pin_bidirectional_PHY_i/f_mode" token="FSLSMODE_2" description="3-pin bidirectional PHY i/f mode"/>
+      <bitenum value="3" id="4-pin_bidirectional_PHY_i/f_mode" token="FSLSMODE_3" description="4-pin bidirectional PHY i/f mode"/>
+      <bitenum value="4" id="TLL_TX_4" token="FSLSMODE_4" description="6-pin unidirectional TLL mode. TX encoding is Dat/Se0."/>
+      <bitenum value="5" id="TLL_TX_5" token="FSLSMODE_5" description="6-pin unidirectional TLL mode. TX encoding is Dp/Dm."/>
+      <bitenum value="6" id="3-pin_bidirectional_TLL_mode" token="FSLSMODE_6" description="3-pin bidirectional TLL mode"/>
+      <bitenum value="7" id="4-pin_bidirectional_TLL_mode" token="FSLSMODE_7" description="4-pin bidirectional TLL mode"/>
+      <bitenum value="10" id="TLL_10" token="FSLSMODE_10" description="2-pin bidirectional TLL mode. Encoding is Dat/Se0."/>
+      <bitenum value="11" id="TLL_11" token="FSLSMODE_11" description="2-pin bidirectional TLL mode. Encoding is Dp/Dm."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="23" end="21" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="TESTTXSE0" width="1" begin="20" end="20" resetval="0" description="Force-Se0 transmit override value for serial mode test Don't care if TestEn = 0 (functional mode) or = TestTxen = 1 (TX = hiz)" range="" rwaccess="RW">
+      <bitenum value="0" id="TX_0" token="TESTTXSE0_0" description="drive differential value on TX according to TestTxDat"/>
+      <bitenum value="1" id="drive_SE0_on_TX" token="TESTTXSE0_1" description="drive SE0 on TX"/>
+    </bitfield>
+    <bitfield id="TESTTXDAT" width="1" begin="19" end="19" resetval="0" description="Differential data transmit override value for serial mode test Don't care if TestEn = 0 (functional mode) or = TestTxen = 1 (TX = hiz) or TestSe0 = 1 (TX = se0)" range="" rwaccess="RW">
+      <bitenum value="0" id="Drive_full-speed_K_=_differential_0" token="TESTTXDAT_0" description="Drive full-speed K = differential 0"/>
+      <bitenum value="1" id="Drive_full-speed_J_=_differential_1" token="TESTTXDAT_1" description="Drive full-speed J = differential 1"/>
+    </bitfield>
+    <bitfield id="TESTTXEN" width="1" begin="18" end="18" resetval="0" description="Differential data transmit override value for serial mode test Don't care if TestEn = 0 (functional mode)" range="" rwaccess="RW">
+      <bitenum value="0" id="Drive_Tx_according_to_TestTxDat/Se0" token="TESTTXEN_0" description="Drive Tx according to TestTxDat/Se0"/>
+      <bitenum value="1" id="1" token="TESTTXEN_1" description="Drive Tx Hiz (no drive: pullups determine line state)"/>
+    </bitfield>
+    <bitfield id="TESTEN" width="1" begin="17" end="17" resetval="0" description="Enable manual test override for serial mode TX path (from local controller UTMI port)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="TESTEN_0" description="No override. Tx is from local link controller"/>
+      <bitenum value="1" id="Override_enabled" token="TESTEN_1" description="Override enabled"/>
+    </bitfield>
+    <bitfield id="DRVVBUS" width="1" begin="16" end="16" resetval="0" description="VBUS-drive for ChanMode = serial * In TLL config, write 1 to emulate serial-side VBUS drive * In PHY config, write 1 to report 'VBUS valid' status (of actual VBUS) to UTMI controller" range="" rwaccess="RW">
+      <bitenum value="0" id="VBUS_not_driven" token="DRVVBUS_0" description="VBUS not driven"/>
+      <bitenum value="1" id="VBUS_driven_to_5_V" token="DRVVBUS_1" description="VBUS driven to 5 V"/>
+    </bitfield>
+    <bitfield id="CHRGVBUS" width="1" begin="15" end="15" resetval="0" description="VBUS-drive for ChanMode = serial * In TLL config, write 1 to emulate serial-side VBUS charge/pullup (OTG) * In PHY config, write 1 to reports 'session valid' status (of actual VBUS) to UTMI controller" range="" rwaccess="RW">
+      <bitenum value="0" id="VBUS_not_charged,_session_not_valid" token="CHRGVBUS_0" description="VBUS not charged, session not valid"/>
+      <bitenum value="1" id="VBUS_charged,_session_valid" token="CHRGVBUS_1" description="VBUS charged, session valid"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="14" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ULPINOBITSTUFF" width="1" begin="11" end="11" resetval="0" description="Disable bitstuff emulation in ULPI TLL for ULPI ChanMode" range="" rwaccess="RW">
+      <bitenum value="0" id="USB_0" token="ULPINOBITSTUFF_0" description="Bitstuff enabled, following USB standard"/>
+      <bitenum value="1" id="1" token="ULPINOBITSTUFF_1" description="No bitstuff or associated delays (nonstandard)"/>
+    </bitfield>
+    <bitfield id="ULPIAUTOIDLE" width="1" begin="10" end="10" resetval="1" description="For ChanMode = ULPI TLL only. Allow the ULPI output clock to be stopped when ULPI goes into asynchronous mode (low-power, 3-pin serial, 6-pin serial). No effect in ULPI input clock mode." range="" rwaccess="RW">
+      <bitenum value="0" id="ULPI_output_clock_always-on" token="ULPIAUTOIDLE_0" description="ULPI output clock always-on"/>
+      <bitenum value="1" id="ULPI_ULPI_1" token="ULPIAUTOIDLE_1" description="ULPI output clock stops during asynchronous ULPI modes"/>
+    </bitfield>
+    <bitfield id="UTMIAUTOIDLE" width="1" begin="9" end="9" resetval="1" description="For ChanMode = ULPI TLL only. Allow the UTMI clock (output) to be stopped when UTMII goes to suspended mode (suspendm = 0)" range="" rwaccess="RW">
+      <bitenum value="0" id="UTMI_clock_output_always_on" token="UTMIAUTOIDLE_0" description="UTMI clock output always on"/>
+      <bitenum value="1" id="UTMI_clock_output_gated_upon_suspend" token="UTMIAUTOIDLE_1" description="UTMI clock output gated upon suspend"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="ULPIOUTCLKMODE" width="1" begin="7" end="7" resetval="1" description="ULPI clocking mode select for ULPI TLL ChanMode. Hardcoded, for legacy only." range="" rwaccess="R Rreturns1s">
+      <bitenum value="1" id="ULPI_PHY_TLL,_ULPI_1" token="ULPIOUTCLKMODE_1_r" description="ULPI clock provided by PHY side (i.e. TLL, from functional clock). ULPI clock is output"/>
+    </bitfield>
+    <bitfield id="TLLFULLSPEED" width="1" begin="6" end="6" resetval="1" description="Sets PHY speed emulation in TLL (full/slow), which determines the line to pull up upon connect. The two connect source controls are: input m(N)_tllpuen, register field TllConnect." range="" rwaccess="RW">
+      <bitenum value="0" id="Connect_is_Low-speed:_D&#8211;_pullup" token="TLLFULLSPEED_0" description="Connect is Low-speed: D&#8211; pullup"/>
+      <bitenum value="1" id="Connect_is_Full-Speed:_D+_pullup" token="TLLFULLSPEED_1" description="Connect is Full-Speed: D+ pullup"/>
+    </bitfield>
+    <bitfield id="TLLCONNECT" width="1" begin="5" end="5" resetval="0" description="Emulation of Full/Low-Speed connect (that is, D+ resp D&#8211; pullup) for serial TLL modes. Speed is determined by field TllSpeed." range="" rwaccess="RW">
+      <bitenum value="0" id="Unconnected" token="TLLCONNECT_0" description="Unconnected"/>
+      <bitenum value="1" id="Connected" token="TLLCONNECT_1" description="Connected"/>
+    </bitfield>
+    <bitfield id="TLLATTACH" width="1" begin="4" end="4" resetval="1" description="Emulates cable attach/detach for all serial TLL modes: * ChanMode = serial, in TLL mode (FsLsMode) * ChanMode = ULPI, in serial mode (6pin/3pin TLL)" range="" rwaccess="RW">
+      <bitenum value="0" id="Cable_detach_emulated_on_serial_TLL" token="TLLATTACH_0" description="Cable detach emulated on serial TLL"/>
+      <bitenum value="1" id="Cable_attach_emulated_on_serial_TLL" token="TLLATTACH_1" description="Cable attach emulated on serial TLL"/>
+    </bitfield>
+    <bitfield id="UTMIISADEV" width="1" begin="3" end="3" resetval="1" description="Select the cable end 'seen' by UTMI side of TLL, i.e. the emulated USB cable's orientation. The host must always be on A-side, peripheral on B-side. Reset value depends on generic DEFUTMIISHOST." range="" rwaccess="RW">
+      <bitenum value="0" id="UTMI_ULPI_0" token="UTMIISADEV_0" description="UTMI side is peripheral, ULPI side is host"/>
+      <bitenum value="1" id="UTMI_ULPI_1" token="UTMIISADEV_1" description="UTMI side is host, ULPI side is peripheral"/>
+    </bitfield>
+    <bitfield id="CHANMODE" width="2" begin="2" end="1" resetval="0x0" description="Main channel mode selection" range="" rwaccess="RW">
+      <bitenum value="0" id="TLL_(HS_ULPI_0" token="CHANMODE_0" description="UTMI-to-ULPI TLL mode (HS capable): to ULPI controller"/>
+      <bitenum value="1" id="(FS/LS)_(TLL)_PHY_1" token="CHANMODE_1" description="UTMI-to-serial (FS/LS) mode: to serial controller (TLL) or serial PHY"/>
+      <bitenum value="2" id="Transparent_UTMI_mode:_to_UTMI_PHY" token="CHANMODE_2" description="Transparent UTMI mode: to UTMI PHY"/>
+      <bitenum value="3" id="No_mode_selected" token="CHANMODE_3" description="No mode selected"/>
+    </bitfield>
+    <bitfield id="CHANEN" width="1" begin="0" end="0" resetval="0" description="Active-high channel enable. A disabled channel is unclocked and kept under reset." range="" rwaccess="RW">
+      <bitenum value="0" id="Channel_i_disabled" token="CHANEN_0" description="Channel i disabled"/>
+      <bitenum value="1" id="Channel_i_enabled" token="CHANEN_1" description="Channel i enabled"/>
+    </bitfield>
+  </register>
+  <register id="USBTLL_SAR_CNTX_j_0" acronym="USBTLL_SAR_CNTX_j_0" offset="0x400" width="32" description="Save and Restore context array. Array size is indicated in. When in SAR mode, read to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="USBTLL_SAR_CNTX_j_1" acronym="USBTLL_SAR_CNTX_j_1" offset="0x404" width="32" description="Save and Restore context array. Array size is indicated in. When in SAR mode, read to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="USBTLL_SAR_CNTX_j_2" acronym="USBTLL_SAR_CNTX_j_2" offset="0x408" width="32" description="Save and Restore context array. Array size is indicated in. When in SAR mode, read to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="USBTLL_SAR_CNTX_j_3" acronym="USBTLL_SAR_CNTX_j_3" offset="0x40C" width="32" description="Save and Restore context array. Array size is indicated in. When in SAR mode, read to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="USBTLL_SAR_CNTX_j_4" acronym="USBTLL_SAR_CNTX_j_4" offset="0x410" width="32" description="Save and Restore context array. Array size is indicated in. When in SAR mode, read to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="USBTLL_SAR_CNTX_j_5" acronym="USBTLL_SAR_CNTX_j_5" offset="0x414" width="32" description="Save and Restore context array. Array size is indicated in. When in SAR mode, read to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="USBTLL_SAR_CNTX_j_6" acronym="USBTLL_SAR_CNTX_j_6" offset="0x418" width="32" description="Save and Restore context array. Array size is indicated in. When in SAR mode, read to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+</module>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module id="CRCP0" HW_revision="1.0">
+    <group id="CRCP0_GPRCM" name="CRCP0_GPRCM" instances="1" offset="0x800" instaddr="0x100" description="">
+        <register id="CRCP0_PWREN" width="32" offset="0x0" description="Power enable">
+            <bitfield id="ENABLE" description="Enable the power" begin="0" end="0" width="1" rwaccess="R/W">
+                <bitenum id="DISABLE" value="0x0" description="Disable Power"/>
+                <bitenum id="ENABLE" value="0x1" description="Enable Power"/>
+            </bitfield>
+        </register>
+        <register id="CRCP0_RSTCTL" width="32" offset="0x4" description="Reset Control">
+            <bitfield id="RESETSTKYCLR" description="Clear the RESETSTKY bit in the STAT register" begin="1" end="1" width="1" rwaccess="R/W">
+                <bitenum id="NOP" value="0x0" description="Writing 0 has no effect"/>
+                <bitenum id="CLR" value="0x1" description="Clear reset sticky bit"/>
+            </bitfield>
+            <bitfield id="RESETASSERT" description="Assert reset to the peripheral" begin="0" end="0" width="1" rwaccess="R/W">
+                <bitenum id="NOP" value="0x0" description="Writing 0 has no effect"/>
+                <bitenum id="ASSERT" value="0x1" description="Assert reset"/>
+            </bitfield>
+        </register>
+        <register id="CRCP0_STAT" width="32" offset="0x14" description="Status Register">
+            <bitfield id="RESETSTKY" description="This bit indicates, if the peripheral was reset, since this bit was cleared by RESETSTKYCLR in the RSTCTL register" begin="16" end="16" width="1" rwaccess="R">
+                <bitenum id="NORES" value="0x0" description="The peripheral has not been reset since this bit was last cleared by RESETSTKYCLR in the RSTCTL register"/>
+                <bitenum id="RESET" value="0x1" description="The peripheral was reset since the last bit clear"/>
+            </bitfield>
+        </register>
+    </group>
+    <register id="CRCP0_DESC" width="32" offset="0x10FC" description="Module Description">
+        <bitfield id="MINREV" description="Minor rev of the IP" begin="3" end="0" width="4" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Smallest value"/>
+            <bitenum id="MAXIMUM" value="0xF" description="Highest possible value"/>
+        </bitfield>
+        <bitfield id="MAJREV" description="Major rev of the IP" begin="7" end="4" width="4" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Smallest value"/>
+            <bitenum id="MAXIMUM" value="0xF" description="Highest possible value"/>
+        </bitfield>
+        <bitfield id="INSTNUM" description="Instance Number within the device. This will be a parameter to the RTL for modules that can have multiple instances" begin="11" end="8" width="4" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Smallest value"/>
+            <bitenum id="MAXIMUM" value="0xF" description="Highest possible value"/>
+        </bitfield>
+        <bitfield id="FEATUREVER" description="Feature Set for the module *instance*" begin="15" end="12" width="4" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Smallest value"/>
+            <bitenum id="MAXIMUM" value="0xF" description="Highest possible value"/>
+        </bitfield>
+        <bitfield id="MODULEID" description="Module identification contains a unique peripheral identification number. The assignments are maintained in a central database for all of the platform modules to ensure uniqueness." begin="31" end="16" width="16" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Smallest value"/>
+            <bitenum id="MAXIMUM" value="0xFFFF" description="Highest possible value"/>
+        </bitfield>
+    </register>
+    <register id="CRCP0_CRCCTRL" width="32" offset="0x1100" description="CRC Control Register">
+        <bitfield id="POLYSIZE" description="This bit indicates which CRC calculation is performed by the generator." begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="CRC32" value="0x0" description="CRC-32 ISO-3309 calulation is performed"/>
+            <bitenum id="CRC16" value="0x1" description="CRC-16 CCITT is performed"/>
+        </bitfield>
+        <bitfield id="BITREVERSE" description="CRC Bit Input and output Reverse. This bit indictes that the bit order of each input byte used for the CRC calculation is reversed before it is passed to the generator, and that the bit order of the calculated CRC is be reversed when read from CRC_RESULT." begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="NOT_REVERSED" value="0x0" description="Bit order is not reversed."/>
+            <bitenum id="REVERSED" value="0x1" description="Bit order is reversed."/>
+        </bitfield>
+        <bitfield id="INPUT_ENDIANNESS" description="CRC Endian. This bit indicates the byte order within a word or half word of input data." begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="LITTLE_ENDIAN" value="0x0" description="LSB is lowest memory address and first to be processed."/>
+            <bitenum id="BIG_ENDIAN" value="0x1" description="LSB is highest memory address and last to be processed."/>
+        </bitfield>
+        <bitfield id="OUTPUT_BYTESWAP" description="CRC Output Byteswap Enable. This bit controls whether the output is byte-swapped upon a read of the CRCOUT register.
+If CRCOUT is accessed as a half-word, and the OUTPUT_BYTESWAP is set to to 1, then the two bytes in the 16-bit access are swapped and returned.
+B1 is returned as B0
+B0 is returned as B1
+
+If CRCOUT is accessed as a word, and the OUTPUT_BYTESWAP is set to 1, then the four bytes in the 32-bit read are swapped.
+B3 is returned as B0
+B2 is returned as B1
+B1 is returned as B2
+B0 is returned as B3
+
+Note that if the CRC POLYSIZE is 16-bit and a 32-bit read of CRCOUT is performed with OUTPUT_BYTESWAP enabled, 
+then the output is:
+MSB                LSB
+0x0   0x0   B0   B1
+
+If the CRC POLYSIZE is 16-bit and a 32-bit read of CRCOUT is performed with OUTPUT_BYTESWAP disabled, 
+then the output is:
+MSB                LSB
+0x0   0x0   B1   B0" begin="4" end="4" width="1" rwaccess="R/W">
+            <bitenum id="DISABLE" value="0x0" description="Output byteswapping is disabled"/>
+            <bitenum id="ENABLE" value="0x1" description="Output byteswapping is enabled."/>
+        </bitfield>
+    </register>
+    <register id="CRCP0_CRCSEED" width="32" offset="0x1104" description="CRC Seed Register">
+        <bitfield id="SEED" description="Seed Data" begin="31" end="0" width="32" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Mnimum value"/>
+            <bitenum id="MAXIMUM" value="0xFFFFFFFF" description="Maximum value"/>
+        </bitfield>
+    </register>
+    <register id="CRCP0_CRCIN" width="32" offset="0x1108" description="CRC Input Data Register">
+        <bitfield id="DATA" description="Input Data" begin="31" end="0" width="32" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Mnimum value"/>
+            <bitenum id="MAXIMUM" value="0xFFFFFFFF" description="Maximum value"/>
+        </bitfield>
+    </register>
+    <register id="CRCP0_CRCOUT" width="32" offset="0x110C" description="CRC Output Result Register">
+        <bitfield id="RESULT" description="Result" begin="31" end="0" width="32" rwaccess="R">
+            <bitenum id="MINIMUM" value="0x0" description="Mnimum value"/>
+            <bitenum id="MAXIMUM" value="0xFFFFFFFF" description="Maximum value"/>
+        </bitfield>
+    </register>
+    <register id="CRCP0_CRCPOLY" width="32" offset="0x1110" description="CRC Polynomial configuration register">
+    </register>
+    <register id="CRCP0_CRCIN_IDX" width="32" offset="0x1800" instances="512" instaddr="0x4" description="CRC Input Data Array Register">
+        <bitfield id="DATA" description="Input Data" begin="31" end="0" width="32" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value"/>
+            <bitenum id="MAXIMUM" value="0xFFFFFFFF" description="Maximum value"/>
+        </bitfield>
+    </register>
+</module>

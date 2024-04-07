@@ -1,0 +1,291 @@
+/*                                                                            */
+/* (c) Texas Instruments 2006-2011, All rights reserved.                      */
+/*                                                                            */
+/*                                                                            */
+/* File:            RM46L852.gel	                                          */
+/* Versions:        1.0                                                       */
+/*                                                                            */
+/* Note: This GEL file is provided as an example and might be used for        */
+/*       software development for the RM46L852 microcontroller. Before		  */
+/*       usage it is recommended to check if the file provides the            */
+/*       functionality expected.                                              */
+/*                                                                            */
+/*                                                                            */
+
+/*----------------------------------------------------------------------------*/
+/* Definitions - Memory Map Specifiers                                        */
+#define FLASH   0
+#define RAM     1
+#define nEMIF   0
+#define EMIF    1
+
+/*----------------------------------------------------------------------------*/
+/* Definitions - Text Format Specifiers                                       */
+#define BLACK   0
+#define BLUE    1
+#define RED     2 
+
+/*----------------------------------------------------------------------------*/
+/* Definitions - Memory Switch                                                */
+#define STARTED 0
+#define COMPL   1
+
+/*----------------------------------------------------------------------------*/
+/* Global Variables - Default Memory Map                                      */
+unsigned int MemoryMap  = FLASH;
+
+/*----------------------------------------------------------------------------*/
+/* Global Variables - Memory Switch                                           */
+unsigned int MemSwitchState = COMPL;
+
+/*----------------------------------------------------------------------------*/
+/* Function - StartUp()                                                       */
+/*                                                                            */
+StartUp(){
+
+} /* StartUp() */
+
+/*----------------------------------------------------------------------------*/
+/* Function - OnResetDetected()                                               */
+/*                                                                            */
+OnResetDetected(){
+
+    if(MemSwitchState == COMPL){
+    
+        memmap(FLASH, EMIF);
+        MemoryMap = FLASH;
+        GEL_TextOut("\tMemory Map Setup for Flash @ Address 0x0 due to System Reset\n",,,,,);
+    }
+    
+    if(MemSwitchState == STARTED)
+     
+        MemSwitchState == COMPL;
+    }
+/*----------------------------------------------------------------------------*/
+/* Function - OnTargetConnect()                                               */
+/*                                                                            */
+OnTargetConnect(){
+
+    if(MemoryMap == FLASH){
+        memmap(FLASH, EMIF);
+        GEL_TextOut("\tMemory Map Setup for Flash @ Address 0x0",,,,,);
+    }    
+    if(MemoryMap == RAM){
+        memmap(RAM, EMIF);
+        GEL_TextOut("\tMemory Map Setup for RAM @ Address 0x0.",,,,,);
+        GEL_TextOut("\tFor Debugging Only!",,,,,);
+    }   
+} /* OnTargetConnect() */
+
+/*----------------------------------------------------------------------------*/
+/* Function - memmap(memSel, extMem)                                          */
+/*                                                                            */
+memmap(memSel, extMem){
+
+    GEL_MapOff();
+    GEL_MapReset();	
+
+    /* Flash / RAM Definition */
+    if(memSel == FLASH){
+
+        /* Flash Definition */
+        GEL_MapAdd(0x00000000, 0, 0x00140000, 1, 0); /* Internal Flash ()     */
+        GEL_MapAddStr(0xF0400000, 0, 0x00028000, "R|AS2", 0); /* Internal Flash ECC    */        
+        GEL_MapAdd(0x08000000, 0, 0x00030000, 1, 1); /* Internal RAM          */
+        GEL_MapAdd(0x08400000, 0, 0x00030000, 1, 1); /* Internal RAM ECC      */
+        GEL_MapAdd(0x20000000, 0, 0x00140000, 1, 0); /* Mirrored Flash        */        
+        GEL_MapAdd(0xFE000000, 0, 0x01000000, 1, 1); /* CRC/PSA               */
+    }
+
+    if(memSel == RAM){
+
+        /* RAM Definition */
+        GEL_MapAdd(0x00000000, 0, 0x00030000, 1, 1); /* Internal RAM          */
+        GEL_MapAdd(0x00400000, 0, 0x00030000, 1, 1); /* Internal RAM ECC      */
+        GEL_MapAdd(0x08000000, 0, 0x00140000, 1, 0); /* Internal Flash ()     */
+        GEL_MapAddStr(0xF0400000, 0, 0x00028000, "R|AS2", 0); /* Internal Flash ECC    */        
+        GEL_MapAdd(0x20000000, 0, 0x00140000, 1, 0); /* Mirrored Flash        */        
+        GEL_MapAdd(0xFE000000, 0, 0x01000000, 1, 1); /* CRC/PSA               */
+    }
+
+    if(extMem == EMIF){
+
+        GEL_MapAdd(0x60000000, 0, 0x10000000, 1, 1); /* External Async Memory       */
+        GEL_MapAdd(0x80000000, 0, 0x08000000, 1, 1); /* External Sync SDRAM Memory       */
+    }
+
+	/* Other Flash Related Memories*/
+	GEL_MapAdd(0xF0200000, 0, 0x00010000, 1, 0); /* EEPROM					  */
+	GEL_MapAddStr(0xF0100000, 0, 0x00002000, "R|AS2", 0); /* EEPROM	ECC				  */
+	GEL_MapAdd(0xF0000000, 0, 0x00004000, 1, 0); /* Customer OTP					  */
+	GEL_MapAddStr(0xF0040000, 0, 0x00000800, "R|AS2", 0); /* Customer OTP ECC		  */
+	GEL_MapAdd(0xF000E000, 0, 0x00001000, 1, 0); /* Customer OTP, EEPROM			  */
+	GEL_MapAddStr(0xF0041C00, 0, 0x00000400, "R|AS2", 0); /* Customer OTP, EEPROM ECC		  */
+
+	
+    /* Peripheral Register Definition */
+    GEL_MapAdd(0xFFF7FC00, 0, 0x00000200, 1, 1); /* SPI5       - PS00         */
+    GEL_MapAdd(0xFFF7FA00, 0, 0x00000200, 1, 1); /* SPI4       - PS01         */
+    GEL_MapAdd(0xFFF7F800, 0, 0x00000200, 1, 1); /* SPI3       - PS01         */
+    GEL_MapAdd(0xFFF7F600, 0, 0x00000200, 1, 1); /* SPI2       - PS02         */
+    GEL_MapAdd(0xFFF7F400, 0, 0x00000200, 1, 1); /* MIBSPI1    - PS02         */
+    GEL_MapAdd(0xFFF7E400, 0, 0x00000100, 1, 1); /* LIN        - PS06         */
+    GEL_MapAdd(0xFFF7E500, 0, 0x00000100, 1, 1); /* SCI        - PS06         */
+    GEL_MapAdd(0xFFF7E000, 0, 0x00000200, 1, 1); /* DCAN3      - PS07         */
+    GEL_MapAdd(0xFFF7DE00, 0, 0x00000200, 1, 1); /* DCAN2      - PS08         */
+    GEL_MapAdd(0xFFF7DC00, 0, 0x00000200, 1, 1); /* DCAN1      - PS08         */
+    GEL_MapAdd(0xFFF7D400, 0, 0x00000100, 1, 1); /* I2C        - PS10         */
+    GEL_MapAdd(0xFFF7C200, 0, 0x00000200, 1, 1); /* MIBADC2    - PS15         */
+    GEL_MapAdd(0xFFF7C000, 0, 0x00000200, 1, 1); /* MIBADC1    - PS15         */
+    GEL_MapAdd(0xFFF7BC00, 0, 0x00000100, 1, 1); /* GIO        - PS16         */
+    GEL_MapAdd(0xFFF7B800, 0, 0x00000100, 1, 1); /* NHET1      - PS17         */
+    GEL_MapAdd(0xFFF7B900, 0, 0x00000100, 1, 1); /* NHET2      - PS17         */
+    GEL_MapAdd(0xFFF7A400, 0, 0x00000100, 1, 1); /* HET TU     - PS22         */
+    GEL_MapAdd(0xFFF7A500, 0, 0x00000100, 1, 1); /* HET TU2     - PS22         */
+
+    
+    /* Peripheral Memory */
+    GEL_MapAdd(0xFC520000, 0, 0x00002000, 1, 1); /* CPPI, Ethernet RAM - PS05 */
+    GEL_MapAdd(0xFF0A0000, 0, 0x00000800, 1, 1); /* MibSPI5 RAM    - PS05     */
+    GEL_MapAdd(0xFF0C0000, 0, 0x00000800, 1, 1); /* MibSPI3 RAM    - PS06     */
+    GEL_MapAdd(0xFF0E0000, 0, 0x00000800, 1, 1); /* MibSPI1 RAM    - PS07     */
+    GEL_MapAdd(0xFF1A0000, 0, 0x00000800, 1, 1); /* CAN3 RAM       - PS13     */
+    GEL_MapAdd(0xFF1C0000, 0, 0x00000800, 1, 1); /* CAN2 RAM       - PS14     */
+    GEL_MapAdd(0xFF1E0000, 0, 0x00000800, 1, 1); /* CAN1 RAM       - PS15     */
+    GEL_MapAdd(0xFF3A0000, 0, 0x00002000, 1, 1); /* MIBADC2 RAM    - PS29     */
+	GEL_MapAdd(0xFF3A2000, 0, 0x00000180, 1, 1); /* MIBADC2 LUT    - PS29     */
+    GEL_MapAdd(0xFF3E0000, 0, 0x00002000, 1, 1); /* MIBADC1 RAM    - PS31     */
+    GEL_MapAdd(0xFF3E2000, 0, 0x00000180, 1, 1); /* MIBADC1 LUT    - PS31     */
+    GEL_MapAdd(0xFF440000, 0, 0x00004000, 1, 1); /* NHET2 RAM       - PS34     */
+    GEL_MapAdd(0xFF460000, 0, 0x00004000, 1, 1); /* NHET1 RAM       - PS35     */
+    GEL_MapAdd(0xFF4C0000, 0, 0x00000400, 1, 1); /* HET2 TU RAM     - PS38     */
+    GEL_MapAdd(0xFF4E0000, 0, 0x00000400, 1, 1); /* HET1 TU RAM     - PS39     */
+
+    /* System Peripheral Register */
+    GEL_MapAdd(0xFE000000, 0, 0x01000000, 1, 1); /* CRC                       */
+   	GEL_MapAdd(0xFFA00000, 0, 0x00001000, 1, 1); /* CoreSight Debug ROM       */
+   	GEL_MapAdd(0xFFA01000, 0, 0x00001000, 1, 1); /* R4 Debug Register         */
+   	GEL_MapAdd(0xFFA04000, 0, 0x00001000, 1, 1); /* POM Register              */
+    GEL_MapAdd(0xFFF80000, 0, 0x00001000, 1, 1); /* DMA RAM                   */
+    GEL_MapAdd(0xFFF82000, 0, 0x00001000, 1, 1); /* VIM RAM                   */
+    GEL_MapAdd(0xFFF87000, 0, 0x00001000, 1, 1); /* Flash Wrapper Register    */
+    GEL_MapAdd(0xFFF8C000, 0, 0x00001000, 1, 1); /* eFuse Farm Controller     */
+    GEL_MapAdd(0xFFFF0000, 0, 0x00000200, 1, 1); /* Power Management Register */
+    GEL_MapAdd(0xFFFFE000, 0, 0x00000100, 1, 1); /* PCR Register              */
+    GEL_MapAdd(0xFFFFE100, 0, 0x00000100, 1, 1); /* System 2 Register         */
+    GEL_MapAdd(0xFFFFE400, 0, 0x00000200, 1, 1); /* PBIST                     */
+    GEL_MapAdd(0xFFFFE600, 0, 0x00000100, 1, 1); /* STC                       */    
+    GEL_MapAdd(0xFFFFEA00, 0, 0x00000200, 1, 1); /* IOMM                      */    
+    GEL_MapAdd(0xFFFFEC00, 0, 0x00000100, 1, 1); /* DCC1                      */    
+    GEL_MapAdd(0xFFFFF000, 0, 0x00000400, 1, 1); /* DMA                       */
+    GEL_MapAdd(0xFFFFF400, 0, 0x00000100, 1, 1); /* DCC2                       */    
+    GEL_MapAdd(0xFFFFF500, 0, 0x00000100, 1, 1); /* ESM                       */
+	GEL_MapAdd(0xFFFFF600, 0, 0x00000100, 1, 1); /* CCMR4                     */
+	GEL_MapAdd(0xFFFFF800, 0, 0x00000100, 1, 1); /* RAM ECC even              */
+	GEL_MapAdd(0xFFFFF900, 0, 0x00000100, 1, 1); /* RAM ECC odd               */
+    GEL_MapAdd(0xFFFFFC00, 0, 0x00000100, 1, 1); /* RTI Register              */
+    GEL_MapAdd(0xFFFFFD00, 0, 0x00000100, 1, 1); /* VIM Parity                */
+    GEL_MapAdd(0xFFFFFE00, 0, 0x00000100, 1, 1); /* VIM Register              */
+    GEL_MapAdd(0xFFFFFF00, 0, 0x00000100, 1, 1); /* System Register           */
+    
+    /* EMIF/Ethernet Registers */
+    GEL_MapAdd(0xFCFFE800, 0, 0x00000100, 1, 1); /* EMIF                      */
+    GEL_MapAdd(0xFCF78000, 0, 0x00000400, 1, 1); /* CPGMAC Slave              */
+    GEL_MapAdd(0xFCF78800, 0, 0x00000100, 1, 1); /* CPGMACSS Wrapper          */
+    GEL_MapAdd(0xFCF78900, 0, 0x00000100, 1, 1); /* Ethernet MDIO             */
+    GEL_MapAddStr(0xFCF78A00, 0, 0x00000080, "R|W|AS2", 1); /* W2FC USB Device           */
+    GEL_MapAdd(0xFCF78B00, 0, 0x00000100, 1, 1); /* OHCI USB HOST           */
+    
+	/* ePWMx, eCAPx, eQEPx Registers */
+    GEL_MapAdd(0xFCF78C00, 0, 0x00000100, 1, 1); /*   ePWM1   */
+    GEL_MapAdd(0xFCF78D00, 0, 0x00000100, 1, 1); /*   ePWM2   */
+    GEL_MapAdd(0xFCF78E00, 0, 0x00000100, 1, 1); /*   ePWM3   */
+    GEL_MapAdd(0xFCF78F00, 0, 0x00000100, 1, 1); /*   ePWM4   */
+    GEL_MapAdd(0xFCF79000, 0, 0x00000100, 1, 1); /*   ePWM5   */
+    GEL_MapAdd(0xFCF79100, 0, 0x00000100, 1, 1); /*   ePWM6   */
+    GEL_MapAdd(0xFCF79200, 0, 0x00000100, 1, 1); /*   ePWM7   */
+    GEL_MapAdd(0xFCF79300, 0, 0x00000100, 1, 1); /*   eCAP1   */
+    GEL_MapAdd(0xFCF79400, 0, 0x00000100, 1, 1); /*   eCAP2   */
+    GEL_MapAdd(0xFCF79500, 0, 0x00000100, 1, 1); /*   eCAP3   */
+    GEL_MapAdd(0xFCF79600, 0, 0x00000100, 1, 1); /*   eCAP4   */
+    GEL_MapAdd(0xFCF79700, 0, 0x00000100, 1, 1); /*   eCAP5   */
+    GEL_MapAdd(0xFCF79800, 0, 0x00000100, 1, 1); /*   eCAP6   */
+    GEL_MapAdd(0xFCF79900, 0, 0x00000100, 1, 1); /*   eQEP1   */
+    GEL_MapAdd(0xFCF79A00, 0, 0x00000100, 1, 1); /*   eQEP2   */
+
+    GEL_MapOn();
+
+} /* Function - memmap(memSel, extMem) */
+
+/*----------------------------------------------------------------------------*/
+/* Function - swap_mem(memSel)                                                */
+/*                                                                            */
+swap_mem(memSel){
+    
+    GEL_TextOut("NOTES:\n\tThe Flash/RAM memory adresses of the device will be switched.");
+    GEL_TextOut("\tAt the end of this routine the device will be reset.");
+    GEL_TextOut("\tThis might lead to an popup message stating an error!");
+    GEL_TextOut("\tJust re-connect after the message appeared.");
+
+    MemSwitchState = STARTED;
+    
+    if(memSel == RAM){
+
+        memmap(RAM, EMIF);
+        MemoryMap = RAM;
+        *(int *) 0xffffffc4 = 0x05050505;
+        *(int *) 0xffffffcc = 0x00000001;
+        *(int *) 0xffffffcc = 0x00000000;
+    }
+
+    if(memSel == FLASH){
+
+        memmap(FLASH, EMIF);
+        MemoryMap = FLASH;
+        *(int *) 0xffffffc4 = 0x0A0A0A0A;
+        *(int *) 0xffffffcc = 0x00000001;
+        *(int *) 0xffffffcc = 0x00000000;
+    }
+    
+    MemSwitchState = COMPL;
+    
+    GEL_TextOut("\tMemory swap is done.");
+    GEL_TextOut("\tIn case a popup message appears, re-connect to the device.");
+    
+    
+} /* swap_mem(memSel) */
+
+/*----------------------------------------------------------------------------*/
+/* MenuItem - "RM46L852 Memory Map Setup"                                */
+/*                                                                            */
+menuitem "RM46L852 Memory Map Setup";
+
+    hotmenu CCS_MemMap_FLASH_at_0x0(){
+
+        memmap(FLASH, EMIF);
+        GEL_TextOut("\tMemory Map Setup for Flash @ Address 0x0",,,,,);
+        
+    }
+
+    hotmenu CCS_MemMap_RAM_at_0x0(){
+    
+        memmap(RAM, EMIF);
+        GEL_TextOut("\tMemory Map Setup for RAM @ Address 0x0.",,,,,);
+        GEL_TextOut("\tFor Debugging Only!",,,,,);
+
+    }
+
+/*----------------------------------------------------------------------------*/
+/* MenuItem - "RM46L852 Memory Switch"                                   */
+/*                                                                            */
+menuitem "RM46L852 Memory Switch";
+
+    hotmenu Target_Flash_to_0x0(){
+
+        swap_mem(FLASH);
+    }
+
+    hotmenu Target_RAM_to_0x0(){
+    
+        swap_mem(RAM);
+    }

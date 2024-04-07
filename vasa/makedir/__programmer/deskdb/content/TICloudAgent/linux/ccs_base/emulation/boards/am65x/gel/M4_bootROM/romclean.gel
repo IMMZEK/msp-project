@@ -1,0 +1,160 @@
+/* ------------------------------------------------------------------------- */
+/* romclean.gel                                                              */
+
+/* Copyright (c) 2018, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+/* ************************************************************************* */
+
+menuitem "rom"
+
+/* Secure control registers */
+#define M3_CORE0_PMCTRL     *((unsigned int *)(0x45a50000 + 0x120))
+#define M3_CORE1_PMCTRL     *((unsigned int *)(0x45a50000 + 0x1a0))
+#define M3_CORE0_ADDR_LO    *((unsigned int *)(0x45a50000 + 0x110))
+#define M3_CORE1_ADDR_LO    *((unsigned int *)(0x45a50000 + 0x190))
+
+/* PSC registers - The addresses here are as seen through RAT entry 2 in the
+   rat table left by the M3 ROM
+ */
+#define WKUP_PSC_MDCTL_R50  *((unsigned int *)(0xa2000000 + (0xa00 + (19*4))))
+#define WKUP_PSC_MDCTL_R51  *((unsigned int *)(0xa2000000 + (0xa00 + (20*4))))
+#define WKUP_PSC_PTCMD      *((unsigned int *)(0xa2000000 + 0x120))
+#define WKUP_PSC_PTSTAT     *((unsigned int *)(0xa2000000 + 0x128))
+#define WKUP_PSC_R5_PDOMAIN  2
+
+/* Watchdog registers */
+#define WWRTI_KICK0     *((unsigned int *)(0x44135100 + 0x20))
+#define WWRTI_KICK1     *((unsigned int *)(0x44135100 + 0x24))
+#define WWRTI_CLK_CTRL  *((unsigned int *)(0x44135100 + 0x50))
+
+/* M3 systick timer */
+#define M3_SYSTICK_CTRL *((unsigned int *)0xe000e010)
+
+/* OCMC RAM as seen through M3 rat */
+#define OCMCRAM(x)      *((unsigned int *)(0xa1c00000 + ((x)*4)))
+
+/* Secure proxy registers - these are mapped as seen through the M3 RAT entry
+ * setup by ROM
+ */
+#define MCU_SEC_PROXY_BUFFER_LOW    *((unsigned int *)(0x8a400000 + 0x0))
+#define MCU_SEC_PROXY_BUFFER_HIGH   *((unsigned int *)(0x8a400000 + 0x4))
+#define MCU_SEC_PROXY_TARGET_LOW    *((unsigned int *)(0x8a400000 + 0x8))
+#define MCU_SEC_PROXY_TARGET_HIGH   *((unsigned int *)(0x8a400000 + 0xc))
+
+#define SECPROXY_2_W0       *((unsigned int *)(0x8a480000 + (2 * 0x1000) + 0x04))
+#define SECPROXY_2_W1       *((unsigned int *)(0x8a480000 + (2 * 0x1000) + 0x08))
+#define SECPROXY_2_W14      *((unsigned int *)(0x8a480000 + (2 * 0x1000) + 0x3c))
+
+#define SECPROXY_3_W14      *((unsigned int *)(0x8a480000 + (3 * 0x1000) + 0x3c))
+#define SECPROXY_THREAD_3_STATUS  *((unsigned int *)(0x8a380000 + (3 * 0x1000) + 0x00))
+
+#define MCU_SEC_PROXY_THREAD_DEST(x)     *((unsigned int *)(0x8a400000 + ((x) * 0x1000) + 0x1000 + 0x8))
+#define MCU_SEC_PROXY_THREAD_EVTMAP(x)   *((unsigned int *)(0x8a400000 + ((x) * 0x1000) + 0x1000 + 0x4))
+#define MCU_SEC_PROXY_THREAD_CTL(x)      *((unsigned int *)(0x8a400000 + ((x) * 0x1000) + 0x1000 + 0x0))
+
+/* MCU ring configuration */
+#define MCU_RINGACC_BASELOW(x)      *((unsigned int *)(0x88440000 + ((x) * 0x100) + 0x40))
+#define MCU_RINGACC_BASEHIGH(x)     *((unsigned int *)(0x88440000 + ((x) * 0x100) + 0x44))
+#define MCU_RINGACC_SIZE(x)         *((unsigned int *)(0x88440000 + ((x) * 0x100) + 0x48))
+#define MCU_RINGACC_EVT(x)          *((unsigned int *)(0x88440000 + ((x) * 0x100) + 0x4c))
+#define MCU_RINGACC_ORDERID(x)      *((unsigned int *)(0x88440000 + ((x) * 0x100) + 0x50))
+
+/* Main ring configuration */
+#define MAIN_RINGACC_SIZE(x)        *((unsigned int *)(0x91080000 + ((x) * 0x100) + 0x40))
+#define MAIN_RINGACC_BASELOW(x)     *((unsigned int *)(0x91080000 + ((x) * 0x100) + 0x44))
+#define MAIN_RINGACC_BASEHIGH(x)    *((unsigned int *)(0x91080000 + ((x) * 0x100) + 0x48))
+#define MAIN_RINGACC_EVT(x)         *((unsigned int *)(0x91080000 + ((x) * 0x100) + 0x4c))
+#define MAIN_RINGACC_ORDERID(x)     *((unsigned int *)(0x91080000 + ((x) * 0x100) + 0x50))
+
+hotmenu romclean_gel()
+{
+    unsigned int resp;
+    int i;
+    *((unsigned int *)0x45a50100) = (1 << 11) | (1 << 3)|(1 << 7);
+
+    OCMCRAM(0) = 0xe320f003;
+    OCMCRAM(1) = 0xeafffffd;
+
+    /* Tell the R5 to sleep by sending a sleep message */
+    SECPROXY_2_W0  = 0x00068800;    /* high priority (6) sleep message (0x8800) */
+    SECPROXY_2_W1  = 0x08000000;    /* message length = 8 bytes */
+    SECPROXY_2_W14 = 0x11111111;    /* trigger the message */
+
+    /* Any message from the R5 in the high priority thread (6) means that
+     * the R5 is ready to go down
+     */
+    while ((SECPROXY_THREAD_3_STATUS & 0xff)== 0);
+
+    /* Extract the message */
+    resp = SECPROXY_3_W14;
+
+    /* Need a bit of delay while the R5 gets ready for reset */
+    for (i = 0; i < 10000; i++);
+
+    /* Halt the cores */
+    M3_CORE0_PMCTRL = 0;
+    M3_CORE1_PMCTRL = 0;
+
+    /* Assert reset to the R5 */
+    WKUP_PSC_MDCTL_R50 &= ~0x1f;
+    WKUP_PSC_MDCTL_R51 &= ~0x1f;
+    WKUP_PSC_PTCMD      =  1 << WKUP_PSC_R5_PDOMAIN;
+
+    /* Disable the watchdog timer */
+    WWRTI_KICK0    = 0x4658fc21;
+    WWRTI_KICK1    = 0x3ac4f102;
+    WWRTI_CLK_CTRL = 0xa;
+    WWRTI_KICK0    = 0;
+    WWRTI_KICK1    = 0;
+
+    /* Disable the systick timer */
+    M3_SYSTICK_CTRL = 6;
+
+    /* Start the R5 cores at the base of OCMCRAM */
+    M3_CORE0_ADDR_LO = 0x41c00000;
+    M3_CORE1_ADDR_LO = 0x41c00000;
+
+    /* Wait a bit for things to settle down */
+    for (i = 0; i < 10000; i++);
+
+    /* Release the halt */
+    M3_CORE0_PMCTRL = 1;
+    M3_CORE1_PMCTRL = 1;
+
+    /* de-assert reset to the R5 */
+    WKUP_PSC_MDCTL_R50 |= 3;
+    WKUP_PSC_MDCTL_R51 |= 3;
+
+    while (WKUP_PSC_PTSTAT != 0);
+
+    WKUP_PSC_PTCMD      =  1 << WKUP_PSC_R5_PDOMAIN;
+}
+

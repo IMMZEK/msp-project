@@ -1,0 +1,1003 @@
+/********************************************************************/
+/* f280036.gel                                                     */
+/* Version 1.00.00.00                                               */
+/*                                                                  */
+/* This GEL file is to be used with the TMS320f280036 DSP.         */
+/* Changes may be required to support specific hardware designs.    */
+/*                                                                  */
+/* Code Composer Studio supports six reserved GEL functions that    */
+/* automatically get executed if they are defined. They are:        */
+/*                                                                  */
+/* StartUp()              - Executed whenever CCS is invoked        */
+/* OnReset()              - Executed after Debug->Reset CPU         */
+/* OnRestart()            - Executed after Debug->Restart           */
+/* OnPreFileLoaded()      - Executed before File->Load Program      */
+/* OnFileLoaded()         - Executed after File->Load Program       */
+/* OnTargetConnect()      - Executed after Debug->Connect           */
+/*                                                                  */
+/********************************************************************/
+
+#define FLASH_ECC_ENABLE            0x5FB00
+#define WATCHDOG_CNTRL              0x7029
+#define WATCHDOG_KEY                0x7025
+#define NMI_CFG                     0x7060
+
+#define DCSM_Z1_BASE                0x0005F000
+#define DCSM_Z2_BASE                0x0005F080
+#define DCSMBANK0_Z1OTP_BASE        0x00078000
+#define DCSMBANK0_Z2OTP_BASE        0x00078200
+
+#define DCSM_O_Z1OTP_LINKPOINTER1   0x0    // Zone 1 Link Pointer1
+#define DCSM_O_Z1OTP_LINKPOINTER2   0x2    // Zone 1 Link Pointer2
+#define DCSM_O_Z1OTP_LINKPOINTER3   0x4    // Zone 1 Link Pointer3
+#define DCSM_O_Z1OTP_JLM_ENABLE     0x6    // Zone 1 JTAGLOCK Enable Register
+#define DCSM_O_Z1OTP_GPREG1         0x8    // Zone 1 General Purpose Register 1
+#define DCSM_O_Z1OTP_GPREG2         0xA    // Zone 1 General Purpose Register 2
+#define DCSM_O_Z1OTP_GPREG3         0xC    // Zone 1 General Purpose Register 3
+#define DCSM_O_Z1OTP_GPREG4         0xE    // Zone 1 General Purpose Register 4
+#define DCSM_O_Z1OTP_PSWDLOCK       0x10   // Secure Password Lock
+#define DCSM_O_Z1OTP_CRCLOCK        0x12   // Secure CRC Lock
+#define DCSM_O_Z1OTP_JTAGPSWDH0     0x14   // JTAG Lock Permanent Password 0
+#define DCSM_O_Z1OTP_JTAGPSWDH1     0x16   // JTAG Lock Permanent Password 1
+
+#define DCSM_O_Z2OTP_LINKPOINTER1   0x0    // Zone 2 Link Pointer1
+#define DCSM_O_Z2OTP_LINKPOINTER2   0x2    // Zone 2 Link Pointer2
+#define DCSM_O_Z2OTP_LINKPOINTER3   0x4    // Zone 2 Link Pointer3
+#define DCSM_O_Z2OTP_GPREG1         0x8    // Zone 2 General Purpose Register 1
+#define DCSM_O_Z2OTP_GPREG2         0xA    // Zone 2 General Purpose Register 2
+#define DCSM_O_Z2OTP_GPREG3         0xC    // Zone 2 General Purpose Register 3
+#define DCSM_O_Z2OTP_GPREG4         0xE    // Zone 2 General Purpose Register 4
+#define DCSM_O_Z2OTP_PSWDLOCK       0x10   // Secure Password Lock
+#define DCSM_O_Z2OTP_CRCLOCK        0x12   // Secure CRC Lock
+
+#define DCSM_O_Z1_LINKPOINTER      0x0    // Zone 1 Link Pointer
+#define DCSM_O_Z1_GPREG1           0x8    // Zone 1 General Purpose Register-1
+#define DCSM_O_Z1_GPREG2           0xA    // Zone 1 General Purpose Register-2
+#define DCSM_O_Z1_GPREG3           0xC    // Zone 1 General Purpose Register-3
+#define DCSM_O_Z1_GPREG4           0xE    // Zone 1 General Purpose Register-4
+#define DCSM_O_Z1_CSMKEY0          0x10   // Zone 1 CSM Key 0
+#define DCSM_O_Z1_CSMKEY1          0x12   // Zone 1 CSM Key 1
+#define DCSM_O_Z1_CSMKEY2          0x14   // Zone 1 CSM Key 2
+#define DCSM_O_Z1_CSMKEY3          0x16   // Zone 1 CSM Key 3
+#define DCSM_O_Z1_CR               0x18   // Zone 1 CSM Control Register
+
+#define DCSM_O_Z2_LINKPOINTER      0x0    // Zone 2 Link Pointer
+#define DCSM_O_Z2_GPREG1           0x8    // Zone 2 General Purpose Register-1
+#define DCSM_O_Z2_GPREG2           0xA    // Zone 2 General Purpose Register-2
+#define DCSM_O_Z2_GPREG3           0xC    // Zone 2 General Purpose Register-3
+#define DCSM_O_Z2_GPREG4           0xE    // Zone 2 General Purpose Register-4
+#define DCSM_O_Z2_CSMKEY0          0x10   // Zone 2 CSM Key 0
+#define DCSM_O_Z2_CSMKEY1          0x12   // Zone 2 CSM Key 1
+#define DCSM_O_Z2_CSMKEY2          0x14   // Zone 2 CSM Key 2
+#define DCSM_O_Z2_CSMKEY3          0x16   // Zone 2 CSM Key 3
+#define DCSM_O_Z2_CR               0x18   // Zone 2 CSM Control Register
+
+#define DCSM_Z1_CR_UNSECURE        0x200000     // CSMPSWD Match CSMKEY
+#define DCSM_Z2_CR_UNSECURE        0x200000     // CSMPSWD Match CSMKEY
+
+//DCSM ZSB Content Offsets
+#define DCSM_O_Zx_CSMPSWD0              0x0
+#define DCSM_O_Zx_CSMPSWD1              0x2
+#define DCSM_O_Zx_CSMPSWD2              0x4
+#define DCSM_O_Zx_CSMPSWD3              0x6
+#define DCSM_O_Zx_GRABSECT1             0x8
+#define DCSM_O_Zx_GRABSECT2             0xA
+#define DCSM_O_Zx_GRABSECT3             0xC
+#define DCSM_O_Zx_GRABRAM1              0xE
+#define DCSM_O_Zx_GRABRAM2              0x10
+#define DCSM_O_Zx_GRABRAM3              0x12
+#define DCSM_O_Zx_EXEONLYSECT1          0x14
+#define DCSM_O_Zx_EXEONLYSECT2          0x16
+#define DCSM_O_Zx_EXEONLYRAM1           0x18
+#define DCSM_O_Zx_RESERVED3             0x1A
+#define DCSM_O_Z1_JTAGPSWDL0            0x1C
+#define DCSM_O_Z1_JTAGPSWDL1            0x1E
+
+#define TIOTP1_SECDC                0x703F0
+
+#define GPIO_CTRL_BASE              0x7C00
+#define GPIO_O_GPAMUX2              0x8         // GPIO A Mux 2 Register (GPIO16 to 31)
+#define GPIO_O_GPAGMUX2             0x22        // GPIO A Peripheral Group Mux (GPIO16 to 31)
+#define GPIO_O_GPALOCK              0x3C        // GPIO A Lock Configuration Register (GPIO0 to 31)
+#define GPIO_O_GPAPUD               0xC
+#define GPIO_O_GPBPUD               0x4C
+
+#define DEVCFG_BASE                 0x0005D000
+#define PKG_TYPE_KEY                0x5A
+
+#define TI_OTP_PARTID_L                 (0x70240)
+#define TI_OTP_PARTID_H                 (0x70242)
+#define TI_OTP_PKG_TYPE                 (0x70244)
+#define TI_OTP_ADDR_DC01                (0x70245)
+#define TI_OTP_ADDR_DC11                (0x70246)
+#define TI_OTP_ADDR_DC18                (0x70247)
+#define TI_OTP_ADDR_DC20                (0x70248)
+#define TI_OTP_ADDR_DC21                (0x70249)
+#define TI_OTP_ADDR_DC29                (0x7024A)
+#define TI_OTP_CPUROM_DC1_ADDR          (0x7024E)
+#define TI_OTP_CPUROM_DC2_ADDR          (0x7024F)
+#define TI_OTP_CPUROM_DC3_ADDR          (0x70250)
+#define TI_OTP_CPUROM_DC4_ADDR          (0x70251)
+#define TI_OTP_CLAROM_DC1_ADDR          (0x70252)
+#define TI_OTP_CLAROM_DC2_ADDR          (0x70253)
+#define TI_OTP_CLAROM_DC3_ADDR          (0x70254)
+#define TI_OTP_CLAROM_DC4_ADDR          (0x70255)
+
+#define DCX_ALWAYS_ENABLED          0xFFFFFFFF
+#define DCX_ENABLE_HIGH             0xFFFF0000
+
+#define SYSCTL_O_PARTIDL       0x8     // Lower 32-bit of Device PART Identification Number
+#define SYSCTL_O_PARTIDH       0xA     // Upper 32-bit of Device PART Identification Number
+#define SYSCTL_O_DC1           0x12    // Device Capability: Processing Block Customization
+#define SYSCTL_O_DC3           0x16    // Device Capability: ETPWM
+#define SYSCTL_O_DC4           0x18    // Device Capability: ECAP
+#define SYSCTL_O_DC5           0x1A    // Device Capability: EQEP
+#define SYSCTL_O_DC7           0x1E    // Device Capability: SDFM
+#define SYSCTL_O_DC8           0x20    // Device Capability: SCI
+#define SYSCTL_O_DC9           0x22    // Device Capability: SPI
+#define SYSCTL_O_DC10          0x24    // Device Capability: I2C
+#define SYSCTL_O_DC11          0x26    // Device Capability: CAN
+#define SYSCTL_O_DC14          0x2C    // Device Capability: ADC
+#define SYSCTL_O_DC15          0x2E    // Device Capability: CMPSS
+#define SYSCTL_O_DC17          0x32    // Device Capability: DAC
+#define SYSCTL_O_DC18          0x34    // Device Capability: Lx.1 SRAM Customization
+#define SYSCTL_O_DC20          0x38    // Device Capability: GSx SRAM Customization
+#define SYSCTL_O_DC21          0x3A    // Device Capability: CLB
+#define SYSCTL_O_DC22          0x3C    // Device Capability: FSI
+#define SYSCTL_O_DC23          0x3E    // Device Capability: LIN
+#define SYSCTL_O_DC24          0x40    // Device Capability: PMBUS
+#define SYSCTL_O_DC25          0x42    // Device Capability: DCC
+#define SYSCTL_O_DC27          0x46    // Device Capability: BGCRC
+#define SYSCTL_O_DC28          0x48    // Device Capability: HIC
+#define SYSCTL_O_DC29          0x4A    // Device Capability: AES
+#define SYSCTL_O_DC30          0x4C    // Device Capability: EPG
+#define SYSCTL_O_CPUROM_DC1    0x140   // Device Capabiity registers for ROM
+#define SYSCTL_O_CPUROM_DC2    0x142   // Device Capabiity registers for ROM
+#define SYSCTL_O_CPUROM_DC3    0x144   // Device Capabiity registers for ROM
+#define SYSCTL_O_CPUROM_DC4    0x146   // Device Capabiity registers for ROM
+#define SYSCTL_O_CLAROM_DC1    0x160   // Device Capabiity registers for ROM
+#define SYSCTL_O_CLAROM_DC2    0x162   // Device Capabiity registers for ROM
+#define SYSCTL_O_CLAROM_DC3    0x164   // Device Capabiity registers for ROM
+#define SYSCTL_O_CLAROM_DC4    0x166   // Device Capabiity registers for ROM
+#define SYSCTL_O_PKGTYPE       0x12E   // Package type info. for internal connections/programming
+
+#define MEMCFG_BASE                 0x0005F400
+#define MEMCFG_O_DXINIT             0x12
+#define MEMCFG_O_DXINITDONE         0x14
+#define MEMCFG_O_LSXINIT            0x32
+#define MEMCFG_O_LSXINITDONE        0x34
+#define MEMCFG_O_GSXINIT            0x52
+#define MEMCFG_O_GSXINITDONE        0x54
+
+#define CPUSYS_BASE         0x0005D300U
+#define SYSCTL_O_PCLKCR0    0x22U   // Peripheral Clock Gating Registers
+
+
+StartUp()
+{
+
+}
+
+OnReset(int nErrorCode)
+{
+
+    *(int *)FLASH_ECC_ENABLE = 0;       /* Disable Flash ECC */
+    *(int *)WATCHDOG_CNTRL = 0x68;      /* Disable WD */
+
+    *(unsigned long *)NMI_CFG = 0x0001;  /* Enable NMI */
+
+    SetupDCSM();                        /* Initialize DCSM */
+
+    SetupErrorStatusPin();              /* setup error status pin */
+
+    Device_Config();
+
+    Device_UnbondedGPIO_Pullup();
+
+    CLA_Clock_Enable();
+    
+    ERAD_Clock_Enable();
+
+    if (GEL_IsInRealtimeMode())     /* If in real-time-mode */
+    {
+    }
+    else                            /* Put device into C28x Mode */
+    {
+      C28x_Mode();
+    }
+
+}
+
+OnRestart(int nErrorCode)
+{
+/* CCS will call OnRestart() when you do a Debug->Restart and   */
+/* after you load a new file*/
+    if (GEL_IsInRealtimeMode())     /* If in real-time-mode */
+    {
+    }
+    else                            /* Put device into C28x Mode */
+    {
+      C28x_Mode();
+    }
+     IER = 0;
+     IFR = 0;
+}
+
+OnPreFileLoaded()
+{
+    GEL_Reset();
+}
+
+OnFileLoaded(int nErrorCode, int bSymbolsOnly)
+{
+
+}
+
+OnTargetConnect()
+{
+
+    *(int *)(MEMCFG_BASE + MEMCFG_O_DXINIT)  = 0x0003;               /* RAM INIT FOR M0/M1 Memory      */
+    while(!(*(int *) (MEMCFG_BASE + MEMCFG_O_DXINITDONE) == 0x3));   /* Wait for InitDone Status       */
+
+    *(int *)(MEMCFG_BASE + MEMCFG_O_LSXINIT) = 0x00FF;               /* RAM INIT FOR LS1..LS7  Memory  */
+    while(!(*(int *) (MEMCFG_BASE + MEMCFG_O_LSXINITDONE) == 0xFF)); /* Wait for InitDone Status       */
+
+    *(int *)(MEMCFG_BASE + MEMCFG_O_GSXINIT) = 0x000F;               /* RAM INIT FOR GS0.GS3 Memory    */
+    while(!(*(int *) (MEMCFG_BASE + MEMCFG_O_GSXINITDONE) == 0xF));  /* Wait for InitDone Status       */
+
+    GEL_TextOut("\n\nRAM initialization done\n\n");
+
+    if (GEL_IsInRealtimeMode())     /* If in real-time-mode */
+    {
+    }
+    else                            /* Put device into C28x Mode */
+    {
+        C28x_Mode();
+    }
+
+    f280036_Memory_Map();        /* Initialize the CCS memory map */
+
+    /* Check to see if CCS has been started-up with the DSP already */
+    /* running in real-time mode.  The user can add whatever        */
+    /* custom initialization stuff they want to each case.          */
+
+    if (GEL_IsInRealtimeMode())     /* Do real-time mode target initialization */
+    {
+
+    }
+    else                            /* Do stop-mode target initialization */
+    {
+        GEL_Reset();                /* Reset DSP */
+    }
+}
+
+
+/********************************************************************/
+/* These functions are useful to engage/disengage realtime          */
+/* emulation mode during debug.  They save the user from having to  */
+/* manually perform these steps in CCS.                             */
+/********************************************************************/
+menuitem "Realtime Emulation Control";
+
+hotmenu Run_Realtime_with_Reset()
+{
+    GEL_Reset();                /* Reset the DSP */
+    ST1 = ST1 & 0xFFFD;         /* clear DBGM bit in ST1 */
+    GEL_EnableRealtime();       /* Enable Realtime mode */
+    GEL_Run();                  /* Run the DSP */
+}
+hotmenu Run_Realtime_with_Restart()
+{
+    GEL_Restart();              /* Reset the DSP */
+    ST1 = ST1 & 0xFFFD;         /* clear DBGM bit in ST1 */
+    GEL_EnableRealtime();       /* Enable Realtime mode */
+    GEL_Run();                  /* Run the DSP */
+}
+hotmenu Full_Halt()
+{
+    GEL_DisableRealtime();      /* Disable Realtime mode */
+    GEL_Halt();                 /* Halt the DSP */
+}
+hotmenu Full_Halt_with_Reset()
+{
+    GEL_DisableRealtime();      /* Disable Realtime mode */
+    GEL_Halt();                 /* Halt the DSP */
+    GEL_Reset();                /* Reset the DSP */
+}
+
+/*********************************************************************/
+/*                         f280036 Memory Map                       */
+/*                                                                   */
+/*********************************************************************/
+menuitem "Initialize Memory Map";
+
+hotmenu f280036_Memory_Map()
+{
+    /* GEL_MapReset(); */
+    GEL_MapOn();
+
+    /* Program memory maps */
+    GEL_MapAddStr(0x00000000,0, 0x400, "R|W|AS2",0);                     /*   M0 RAM (with ECC) (2 KByte)                             */
+    GEL_MapAddStr(0x00000400,0, 0x400, "R|W|AS2",0);                     /*   M1 RAM (with ECC) (2 KByte)                             */
+    GEL_MapAddStr(0x00008000,0, 0x800, "R|W|AS2",0);                     /*   LS0 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x00008800,0, 0x800, "R|W|AS2",0);                     /*   LS1 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x00009000,0, 0x800, "R|W|AS2",0);                     /*   LS2 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x00009800,0, 0x800, "R|W|AS2",0);                     /*   LS3 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000A000,0, 0x800, "R|W|AS2",0);                     /*   LS4 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000A800,0, 0x800, "R|W|AS2",0);                     /*   LS5 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000B000,0, 0x800, "R|W|AS2",0);                     /*   LS6 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000B800,0, 0x800, "R|W|AS2",0);                     /*   LS7 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000C000,0, 0x1000, "R|W|AS2",0);                    /*   GS0 RAM (with PARITY) (16KBytes)                        */
+    GEL_MapAddStr(0x0000D000,0, 0x1000, "R|W|AS2",0);                    /*   GS1 RAM (with PARITY) (16KBytes)                        */
+    GEL_MapAddStr(0x0000E000,0, 0x1000, "R|W|AS2",0);                    /*   GS2 RAM (with PARITY) (16KBytes)                        */
+    GEL_MapAddStr(0x0000F000,0, 0x1000, "R|W|AS2",0);                    /*   GS3 RAM (with PARITY) (16KBytes)                        */
+    GEL_MapAddStr(0x00070000,0, 0x400, "R|AS2",0);                       /*   TI OTP BANK0 (2 KBytes)                                 */
+    GEL_MapAddStr(0x00070400,0, 0x400, "R|AS2",0);                       /*   TI OTP BANK1 (Reserved)                                 */  
+    GEL_MapAddStr(0x00078000,0, 0x400, "R|AS2",0);                       /*   USER OTP BANK0 (2 KBytes)                               */  
+    GEL_MapAddStr(0x00078400,0, 0x400, "R|AS2",0);                       /*   USER OTP BANK1 (Reserved)                               */  
+    GEL_MapAddStr(0x00080000,0, 0x10000, "R|AS2",0);                     /*   FLASH BANK0 (128 KBytes)                                */
+    GEL_MapAddStr(0x00090000,0, 0x10000, "R|AS2",0);                     /*   FLASH BANK1 (128 KBytes)                                */
+
+    GEL_MapAddStr(0x003E8000,0, 0x8000, "R|AS2",0);                      /*   Secure ROM (64 KBytes)                                  */
+    GEL_MapAddStr(0x003F0000,0, 0x10000, "R|AS2",0);                     /*   Boot ROM (master) (128 KBytes)                          */
+
+    /* Data memory maps */
+    GEL_MapAddStr(0x00000000,1, 0x400, "R|W|AS2",0);                     /*   M0 RAM (with ECC) (2 KByte)                             */
+    GEL_MapAddStr(0x00000400,1, 0x400, "R|W|AS2",0);                     /*   M1 RAM (with ECC) (2 KByte)                             */
+    GEL_MapAddStr(0x00000800,1, 0x200, "R|W|AS2",0);                     /*   Peripheral Space (512 Bytes)                            */
+    GEL_MapAddStr(0x00000B00,1, 0x20, "R|AS2",0);                        /*   ADCA Result Registers                                   */
+    GEL_MapAddStr(0x00000B20,1, 0x20, "R|AS2",0);                        /*   ADCB Result Registers                                   */
+    GEL_MapAddStr(0x00000B40,1, 0x20, "R|AS2",0);                        /*   ADCC Result Registers                                   */
+    GEL_MapAddStr(0x00000C00,1, 0x18, "R|W|AS2",0);                      /*   CPU Timer Registers                                     */
+    GEL_MapAddStr(0x00000CE0,1, 0x20, "R|AS2",0);                        /*   PIE Registers                                           */
+    GEL_MapAddStr(0x00000D00,1, 0x200, "R|W|AS2",0);                     /*   PIE Vectors                                             */
+    GEL_MapAddStr(0x00000F00,1, 0x100, "R|W|AS2",0);                     /*   FPU Registers                                           */
+    GEL_MapAddStr(0x00001000,1, 0x200, "R|W|AS2",0);                     /*   DMA Registers                                           */
+    GEL_MapAddStr(0x00001400,1, 0x80, "R|W|AS2",0);                      /*   CLA1 Registers                                          */
+    GEL_MapAddStr(0x00001480,1, 0x80, "R|W|AS2",0);                      /*   CLA1toCPU1 MSG RAM (with PARITY) (256 bytes)            */
+    GEL_MapAddStr(0x00001500,1, 0x80, "R|W|AS2",0);                      /*   CPU1toCLA1 MSG RAM (with PARITY) (256 bytes)            */
+    GEL_MapAddStr(0x00003000,1, 0x1000, "R|W|AS2",0);                    /*   Configurable Logic Registers (8 KBytes)                 */
+    GEL_MapAddStr(0x00004000,1, 0x800, "R|W|AS2",0);                     /*   EPWM Peripheral Space                                   */
+    GEL_MapAddStr(0x00005100,1, 0x80, "R|W|AS2",0);                      /*   EQEP Peripheral Space                                   */
+    GEL_MapAddStr(0x00005200,1, 0xC0, "R|W|AS2",0);                      /*   ECAP Peripheral Space                                   */
+    GEL_MapAddStr(0x00005C00,1, 0x20, "R|W|AS2",0);                      /*   DAC Peripheral Space                                    */
+    GEL_MapAddStr(0x00005C80,1, 0x80, "R|W|AS2",0);                      /*   CMPSS Peripheral Space                                  */
+    GEL_MapAddStr(0x00005E00,1, 0x100, "R|W|AS2",0);                     /*   SDFM Registers                                          */
+    GEL_MapAddStr(0x00006100,1, 0x20, "R|W|AS2",0);                      /*   SPI Registers                                           */
+    GEL_MapAddStr(0x00006340,1, 0x80, "R|W|AS2",0);                      /*   BGCRC Registers                                         */
+    GEL_MapAddStr(0x00006400,1, 0x20, "R|W|AS2",0);                      /*   PMBUS Registers                                         */
+    GEL_MapAddStr(0x00006500,1, 0x200, "R|W|AS2",0);                     /*   HIC,FSI Registers                                       */
+    GEL_MapAddStr(0x00006A00,1, 0x200, "R|W|AS2",0);                     /*   LIN Registers                                           */
+    GEL_MapAddStr(0x00007000,1, 0x40, "R|W|AS2",0);                      /*   Watchdog Registers                                      */
+    GEL_MapAddStr(0x00007060,1, 0x20, "R|W|AS2",0);                      /*   NMI,Interrupt Registers                                 */
+    GEL_MapAddStr(0x00007200,1, 0x20, "R|W|AS2",0);                      /*   SCI Registers                                           */
+    GEL_MapAddStr(0x00007300,1, 0x80, "R|W|AS2",0);                      /*   I2C Registers                                           */
+    GEL_MapAddStr(0x00007400,1, 0x80, "R|W|AS2",0);                      /*   ADCA Config Registers                                   */
+    GEL_MapAddStr(0x00007480,1, 0x80, "R|W|AS2",0);                      /*   ADCB Config Registers                                   */
+    GEL_MapAddStr(0x00007500,1, 0x80, "R|W|AS2",0);                      /*   ADCC Config Registers                                   */
+    GEL_MapAddStr(0x00007900,1, 0x700, "R|W|AS2",0);                     /*   GPIO Mux Select Registers                               */
+    GEL_MapAddStr(0x00008000,1, 0x800, "R|W|AS2",0);                     /*   LS0 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x00008800,1, 0x800, "R|W|AS2",0);                     /*   LS1 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x00009000,1, 0x800, "R|W|AS2",0);                     /*   LS2 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x00009800,1, 0x800, "R|W|AS2",0);                     /*   LS3 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000A000,1, 0x800, "R|W|AS2",0);                     /*   LS4 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000A800,1, 0x800, "R|W|AS2",0);                     /*   LS5 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000B000,1, 0x800, "R|W|AS2",0);                     /*   LS6 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000B800,1, 0x800, "R|W|AS2",0);                     /*   LS7 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000C000,1, 0x1000, "R|W|AS2",0);                    /*   GS0 RAM                                                 */
+    GEL_MapAddStr(0x0000D000,1, 0x1000, "R|W|AS2",0);                    /*   GS1 RAM                                                 */
+    GEL_MapAddStr(0x0000E000,1, 0x1000, "R|W|AS2",0);                    /*   GS2 RAM                                                 */
+    GEL_MapAddStr(0x0000F000,1, 0x1000, "R|W|AS2",0);                    /*   GS3 RAM                                                 */
+    GEL_MapAddStr(0x00042000,1, 0x1000, "R|W|AS4",0);                    /*   AES Registers                                           */
+    GEL_MapAddStr(0x00048000,1, 0x800, "R|W|AS4",0);                     /*   CANA Registers                                          */
+    GEL_MapAddStr(0x0005C400,1, 0x400, "R|W|AS4",0);                     /*   MCANA Registers                                         */
+    GEL_MapAddStr(0x0005D000,1, 0x800, "R|W|AS2",0);                     /*   Device Config Registers                                 */
+    GEL_MapAddStr(0x0005E000,1, 0x700, "R|W|AS2",0);                     /*   System Diagnostics Registers                            */
+    GEL_MapAddStr(0x0005E700,1, 0x80,  "R|W|AS4",0);                     /*   DCC0,1 Registers                                        */
+    GEL_MapAddStr(0x0005E800,1, 0x800, "R|W|AS2",0);                     /*   Enhanced Debug Registers                                */
+    GEL_MapAddStr(0x0005F000,1, 0x400, "R|W|AS2",0);                     /*   Security Registers                                      */
+    GEL_MapAddStr(0x0005F400,1, 0x400, "R|W|AS2",0);                     /*   RAM Config Registers                                    */
+    GEL_MapAddStr(0x0005F800,1, 0x300, "R|W|AS2",0);                     /*   Flash Wrapper Registers                                 */
+    GEL_MapAddStr(0x0005FB00,1, 0x40, "R|W|AS2",0);                      /*   Flash Wrapper ECC Registers                             */
+
+    GEL_MapAddStr(0x00070000,1, 0x400, "R|AS2",0);                       /*   TI OTP BANK0 (2 KBytes)                                 */
+    GEL_MapAddStr(0x00070400,1, 0x400, "R|AS2",0);                       /*   TI OTP BANK1 (Reserved)                                 */  
+    GEL_MapAddStr(0x00078000,1, 0x400, "R|AS2",0);                       /*   USER OTP BANK0 (2 KBytes)                               */  
+    GEL_MapAddStr(0x00078400,1, 0x400, "R|AS2",0);                       /*   USER OTP BANK1 (Reserved)                               */  
+    GEL_MapAddStr(0x00080000,1, 0x10000, "R|AS2",0);                     /*   FLASH BANK0 (128 KBytes)                                */
+    GEL_MapAddStr(0x00090000,1, 0x10000, "R|AS2",0);                     /*   FLASH BANK1 (128 KBytes)                                */
+    GEL_MapAddStr(0x003E8000,1, 0x8000, "R|AS2",0);                      /*   Secure ROM (64 KBytes)                                  */
+    GEL_MapAddStr(0x003F0000,1, 0x10000, "R|AS2",0);                     /*   Boot ROM (master) (128 KBytes)                          */
+    GEL_MapAddStr(0x01070080,1, 0x80, "R|AS2",0);                        /*   TI OTP BANK1 ECC (256 Bytes)                            */
+    GEL_MapAddStr(0x01071000,1, 0x80, "R|AS2",0);                        /*   USER OTP BANK1 ECC (256 Bytes)                          */
+    GEL_MapAddStr(0x01080000,1, 0x2000, "R|AS2",0);                      /*   FLASH BANK0 ECC (16 KBytes)                             */
+    GEL_MapAddStr(0x01082000,1, 0x2000, "R|AS2",0);                      /*   FLASH BANK1 ECC (16 KBytes)                             */
+
+     /* Peripheral memory maps */
+    GEL_MapAddStr(0x00006A00,3, 0x200, "R|W|AS2",0);                     /*   LIN Registers                                           */
+    GEL_MapAddStr(0x00048000,3, 0x800, "R|W|AS4",0);                     /*   CANA Registers                                          */
+    GEL_MapAddStr(0x0005E700,3, 0x80, "R|W|AS4",0);                      /*   DCC0,1 Registers                                        */
+
+    GEL_TextOut("\nMemory Map Initialization Complete\n");
+}
+
+/********************************************************************/
+/* The ESTOP0 fill functions are useful for debug.  They fill the   */
+/* RAM with software breakpoints that will trap runaway code.       */
+/********************************************************************/
+hotmenu Fill_f280036_RAM_with_ESTOP0()
+{
+    GEL_MemoryFill(0x000000,1,0x000800,0x7625);      /* Fill M0/M1  */
+
+    GEL_MemoryFill(0x008000,1,0x000800,0x7625);      /* Fill L0  */
+    GEL_MemoryFill(0x008800,1,0x000800,0x7625);      /* Fill L1  */
+    GEL_MemoryFill(0x009000,1,0x000800,0x7625);      /* Fill L2  */
+    GEL_MemoryFill(0x009800,1,0x000800,0x7625);      /* Fill L3  */
+    GEL_MemoryFill(0x00A000,1,0x000800,0x7625);      /* Fill L4  */
+    GEL_MemoryFill(0x00A800,1,0x000800,0x7625);      /* Fill L5  */
+    GEL_MemoryFill(0x00B000,1,0x000800,0x7625);      /* Fill L6  */
+    GEL_MemoryFill(0x00B800,1,0x000800,0x7625);      /* Fill L7  */
+
+    GEL_MemoryFill(0x00C000,1,0x001000,0x7625);      /* Fill G0  */
+    GEL_MemoryFill(0x00D000,1,0x001000,0x7625);      /* Fill G1  */
+    GEL_MemoryFill(0x00E000,1,0x001000,0x7625);      /* Fill G2  */
+    GEL_MemoryFill(0x00F000,1,0x001000,0x7625);      /* Fill G3  */
+}
+
+/********************************************************************/
+/*              TI OTP and USER OTP Memory Dump                     */
+/********************************************************************/
+menuitem "OTP Dump";
+hotmenu OTP_Dump()
+{
+    GEL_MemorySave(0x00070000,1, 0x400, "TI_OTP_Bank1.dat");
+    GEL_MemorySave(0x00078000,1, 0x400, "USER_OTP_Bank1.dat");
+
+    GEL_TextOut("\n**********************************************************************
+                 \nTI OTP and USER OTP Memory Dump Complete!
+                 \nFile Output Directory: <CCS Install Directory>\\ccs<version>\\eclipse
+                 \n                       (e.g. C:\ti\ccs910\ccs\eclipse)
+
+                 \n**********************************************************************\n");
+}
+
+/********************************************************************/
+menuitem "Watchdog";
+hotmenu Disable_WD()
+{
+    *WATCHDOG_CNTRL = *WATCHDOG_CNTRL | 0x0068;      /* Set the WDDIS bit */
+    *WATCHDOG_KEY = 0x0055;                          /* Service the WD    */
+    *WATCHDOG_KEY = 0x00AA;                          /*  once to be safe. */
+    GEL_TextOut("\nWatchdog Timer Disabled");
+}
+
+
+
+/********************************************************************/
+menuitem "Addressing Modes";
+
+hotmenu C28x_Mode()
+{
+    ST1 = ST1 & (~0x0100);      /*   AMODE = 0  */
+    ST1 = ST1 | 0x0200;         /* OBJMODE = 1  */
+}
+
+hotmenu C24x_Mode()
+{
+    ST1 = ST1 | 0x0100;         /*   AMODE = 1  */
+    ST1 = ST1 | 0x0200;         /* OBJMODE = 1  */
+}
+
+hotmenu C27x_Mode()
+{
+    ST1 = ST1 & (~0x0100);      /*   AMODE = 0  */
+    ST1 = ST1 & (~0x0200);      /* OBJMODE = 0  */
+}
+
+
+
+
+
+
+/********************************************************************/
+/* EMU Boot Mode - Set Boot Mode During Debug                       */
+/********************************************************************/
+menuitem "EMU Boot Mode Select"
+hotmenu EMU_BOOT_RAM()
+{
+    *(unsigned long *)0xD00 = 0x5AFFFFFF;
+    *0xD04 = 0x0005;
+}
+hotmenu EMU_BOOT_FLASH()
+{
+    *(unsigned long *)0xD00 = 0x5AFFFFFF;
+    *0xD04 = 0x0003;
+}
+
+
+
+hotmenu SetupDCSM()
+{
+    int i;
+    int j;
+    unsigned long linkPointer;
+    unsigned long Z1_ZSB;
+    unsigned long Z2_ZSB;
+    int bitPos;
+    int zeroFound;
+    unsigned long z1_key1 = 0;
+    unsigned long z2_key1 = 0;
+    
+
+    GEL_TextOut("... DCSM Initialization Start ... \n");
+
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z1OTP_BASE + DCSM_O_Z1OTP_LINKPOINTER1); //Zone 1 Contents
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z1OTP_BASE + DCSM_O_Z1OTP_LINKPOINTER2);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z1OTP_BASE + DCSM_O_Z1OTP_LINKPOINTER3);
+
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z2OTP_BASE + DCSM_O_Z2OTP_LINKPOINTER1); //Zone 2 Contents
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z2OTP_BASE + DCSM_O_Z2OTP_LINKPOINTER2);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z2OTP_BASE + DCSM_O_Z2OTP_LINKPOINTER3);
+
+    XAR0 = *(unsigned long *)(TIOTP1_SECDC); // TI OTP SECDC register read
+
+    //
+    // OTPSECLOCK and other boot related register reads from
+    // Zone 1 and Zone 2 of USER OTP
+    //
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z1OTP_BASE + DCSM_O_Z1OTP_JLM_ENABLE);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z1OTP_BASE + DCSM_O_Z1OTP_PSWDLOCK);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z1OTP_BASE + DCSM_O_Z1OTP_CRCLOCK);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z1OTP_BASE + DCSM_O_Z1OTP_GPREG1);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z1OTP_BASE + DCSM_O_Z1OTP_GPREG2);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z1OTP_BASE + DCSM_O_Z1OTP_GPREG3);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z1OTP_BASE + DCSM_O_Z1OTP_GPREG4);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z1OTP_BASE + DCSM_O_Z1OTP_JTAGPSWDH0);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z1OTP_BASE + DCSM_O_Z1OTP_JTAGPSWDH1);
+
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z2OTP_BASE + DCSM_O_Z2OTP_PSWDLOCK);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z2OTP_BASE + DCSM_O_Z2OTP_CRCLOCK);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z2OTP_BASE + DCSM_O_Z2OTP_GPREG1);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z2OTP_BASE + DCSM_O_Z2OTP_GPREG2);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z2OTP_BASE + DCSM_O_Z2OTP_GPREG3);
+    XAR0 = *(unsigned long *)(DCSMBANK0_Z2OTP_BASE + DCSM_O_Z2OTP_GPREG4);
+
+    //
+    // Gather Z1 ZSB
+    //
+    bitPos = 13;
+    zeroFound = 0;
+
+    linkPointer = *(unsigned long *)(DCSM_Z1_BASE + DCSM_O_Z1_LINKPOINTER);
+    linkPointer = linkPointer << 18; // Bits 31 - 14 as most-significant 0 are
+                                     //invalid LinkPointer options
+
+    while((zeroFound == 0) && (bitPos > -1))
+    {
+        if((linkPointer & 0x80000000U) == 0U)
+        {
+            zeroFound = 1;
+            Z1_ZSB = (DCSMBANK0_Z1OTP_BASE + ((bitPos + 2U) * 0x20U));
+        }
+        else
+        {
+            bitPos--;
+            linkPointer = linkPointer << 1;
+        }
+    }
+
+    if(zeroFound == 0)
+    {
+        Z1_ZSB = (DCSMBANK0_Z1OTP_BASE + 0X20U);
+    }
+
+    if((bitPos + 1) == 0)  z1_key1 = 0x4d7fffff;         //Z1-ZSB0-CSMPSWD1
+    if((bitPos + 1) == 1)  z1_key1 = 0x5f7fffff;         //Z1-ZSB1-CSMPSWD1
+    if((bitPos + 1) == 2)  z1_key1 = 0x1dffffff;         //Z1-ZSB2-CSMPSWD1
+    if((bitPos + 1) == 3)  z1_key1 = 0xaf7fffff;         //Z1-ZSB3-CSMPSWD1
+    if((bitPos + 1) == 4)  z1_key1 = 0x1bffffff;         //Z1-ZSB4-CSMPSWD1
+    if((bitPos + 1) == 5)  z1_key1 = 0x17ffffff;         //Z1-ZSB5-CSMPSWD1
+    if((bitPos + 1) == 6)  z1_key1 = 0xbd7fffff;         //Z1-ZSB6-CSMPSWD1
+    if((bitPos + 1) == 7)  z1_key1 = 0x9f7fffff;         //Z1-ZSB7-CSMPSWD1
+    if((bitPos + 1) == 8)  z1_key1 = 0x2bffffff;         //Z1-ZSB8-CSMPSWD1
+    if((bitPos + 1) == 9)  z1_key1 = 0x27ffffff;         //Z1-ZSB9-CSMPSWD1
+    if((bitPos + 1) == 10) z1_key1 = 0x7b7fffff;         //Z1-ZSB10-CSMPSWD1
+    if((bitPos + 1) == 11) z1_key1 = 0xc9ffffff;         //Z1-ZSB11-CSMPSWD1
+    if((bitPos + 1) == 12) z1_key1 = 0x7d7fffff;         //Z1-ZSB12-CSMPSWD1
+    if((bitPos + 1) == 13) z1_key1 = 0x6f7fffff;         //Z1-ZSB13-CSMPSWD1
+    if((bitPos + 1) == 14) z1_key1 = 0x33ffffff;         //Z1-ZSB14-CSMPSWD1
+
+    //
+    // Gather Z2 ZSB
+    //
+    bitPos = 13;
+    zeroFound = 0;
+
+    linkPointer = *(unsigned long *)(DCSM_Z2_BASE + DCSM_O_Z2_LINKPOINTER);
+    linkPointer = linkPointer << 18; // Bits 31 - 14 as most-significant 0 are
+                                     //invalid LinkPointer options
+
+    while((zeroFound == 0) && (bitPos > -1))
+    {
+        if((linkPointer & 0x80000000U) == 0U)
+        {
+            zeroFound = 1;
+            Z2_ZSB = (DCSMBANK0_Z2OTP_BASE + ((bitPos + 2U) * 0x20U));
+        }
+        else
+        {
+            bitPos--;
+            linkPointer = linkPointer << 1;
+        }
+    }
+
+    if(zeroFound == 0)
+    {
+        Z2_ZSB = (DCSMBANK0_Z2OTP_BASE + 0X20U);
+    }
+
+    if((bitPos + 1) == 0)  z2_key1 = 0x1f7fffff;         //Z2-ZSB0-CSMPSWD1
+    if((bitPos + 1) == 1)  z2_key1 = 0xe57fffff;         //Z2-ZSB1-CSMPSWD1
+    if((bitPos + 1) == 2)  z2_key1 = 0x4fffffff;         //Z2-ZSB2-CSMPSWD1
+    if((bitPos + 1) == 3)  z2_key1 = 0xe37fffff;         //Z2-ZSB3-CSMPSWD1
+    if((bitPos + 1) == 4)  z2_key1 = 0x57ffffff;         //Z2-ZSB4-CSMPSWD1
+    if((bitPos + 1) == 5)  z2_key1 = 0x5bffffff;         //Z2-ZSB5-CSMPSWD1
+    if((bitPos + 1) == 6)  z2_key1 = 0xf17fffff;         //Z2-ZSB6-CSMPSWD1
+    if((bitPos + 1) == 7)  z2_key1 = 0x3b7fffff;         //Z2-ZSB7-CSMPSWD1
+    if((bitPos + 1) == 8)  z2_key1 = 0x8fffffff;         //Z2-ZSB8-CSMPSWD1
+    if((bitPos + 1) == 9)  z2_key1 = 0x6bffffff;         //Z2-ZSB9-CSMPSWD1
+    if((bitPos + 1) == 10) z2_key1 = 0x377fffff;         //Z2-ZSB10-CSMPSWD1
+    if((bitPos + 1) == 11) z2_key1 = 0x9bffffff;         //Z2-ZSB11-CSMPSWD1
+    if((bitPos + 1) == 12) z2_key1 = 0x2f7fffff;         //Z2-ZSB12-CSMPSWD1
+    if((bitPos + 1) == 13) z2_key1 = 0xcb7fffff;         //Z2-ZSB13-CSMPSWD1
+    if((bitPos + 1) == 14) z2_key1 = 0x97ffffff;         //Z2-ZSB14-CSMPSWD1
+
+    //
+    // Zone 1 ZSB
+    //
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_GRABSECT1);// Zone Select Block contents
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_GRABSECT2);
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_GRABSECT3);
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_GRABRAM1);
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_GRABRAM2);
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_GRABRAM3);
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_EXEONLYSECT1);
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_EXEONLYSECT2);
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_EXEONLYRAM1);
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Z1_JTAGPSWDL0);
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Z1_JTAGPSWDL1);
+
+    //
+    // Zone 2 ZSB
+    //
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_GRABSECT1);// Zone Select Block contents
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_GRABSECT2);
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_GRABSECT3);
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_GRABRAM1);
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_GRABRAM2);
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_GRABRAM3);
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_EXEONLYSECT1);
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_EXEONLYSECT2);
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_EXEONLYRAM1);
+
+    //
+    // BLOCKED State --> LOCKED State
+    //
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_CSMPSWD0);
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_CSMPSWD1);
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_CSMPSWD2);
+    XAR0 = *(unsigned long *)(Z1_ZSB + DCSM_O_Zx_CSMPSWD3);
+
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_CSMPSWD0);
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_CSMPSWD1);
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_CSMPSWD2);
+    XAR0 = *(unsigned long *)(Z2_ZSB + DCSM_O_Zx_CSMPSWD3);
+
+    if ((*(unsigned long *)(DCSM_Z1_BASE + DCSM_O_Z1_CR) & DCSM_Z1_CR_UNSECURE) == 0U)
+    {
+        //LOCKED State --> ARMED State
+        *(unsigned long *)(DCSM_Z1_BASE + DCSM_O_Z1_CSMKEY0) = 0xFFFFFFFF; //Zone 1 CSMKEY Loads
+        *(unsigned long *)(DCSM_Z1_BASE + DCSM_O_Z1_CSMKEY1) = z1_key1;
+        *(unsigned long *)(DCSM_Z1_BASE + DCSM_O_Z1_CSMKEY2) = 0xFFFFFFFF;
+        *(unsigned long *)(DCSM_Z1_BASE + DCSM_O_Z1_CSMKEY3) = 0xFFFFFFFF;
+    }
+
+    if ((*(unsigned long *)(DCSM_Z2_BASE + DCSM_O_Z2_CR) & DCSM_Z2_CR_UNSECURE) == 0U)
+    {
+        *(unsigned long *)(DCSM_Z2_BASE + DCSM_O_Z2_CSMKEY0) = 0xFFFFFFFF; //Zone 2 CSMKEY Loads
+        *(unsigned long *)(DCSM_Z2_BASE + DCSM_O_Z2_CSMKEY1) = z2_key1;
+        *(unsigned long *)(DCSM_Z2_BASE + DCSM_O_Z2_CSMKEY2) = 0xFFFFFFFF;
+        *(unsigned long *)(DCSM_Z2_BASE + DCSM_O_Z2_CSMKEY3) = 0xFFFFFFFF;
+    }
+
+    GEL_TextOut("... DCSM Initialization Done ...\n");
+}
+
+hotmenu SetupErrorStatusPin()
+{
+    unsigned long pin_number;
+    unsigned long key_programmed=0;
+
+    if(((*(unsigned long *)(DCSM_Z2_BASE + DCSM_O_Z2_GPREG2) & (unsigned long)0xFF000000) >> 24) == 0x5A)
+    {
+        pin_number = ((*(unsigned long *)(DCSM_Z2_BASE + DCSM_O_Z2_GPREG2) & (unsigned long)0x00000030) >> 4);
+        key_programmed = 1 ;
+    }
+    if(((*(unsigned long *)(DCSM_Z1_BASE + DCSM_O_Z1_GPREG2) & (unsigned long)0xFF000000) >> 24) == 0x5A)
+    {
+        pin_number = ((*(unsigned long *)(DCSM_Z1_BASE + DCSM_O_Z1_GPREG2) & (unsigned long)0x00000030) >> 4);
+        key_programmed = 1;
+    }
+
+    if(key_programmed == 1)
+    {
+        //set ERROR_STS pin if enabled by user
+        if(pin_number == 0x0)
+        {
+            GEL_TextOut("Error Status Pin: GPIO24\n");
+            //configure GPIO24 for Error Status Pin
+            //write to GPAMUX2
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAMUX2) &= ~((unsigned long)0x03 << 16);
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAMUX2) |= ((unsigned long)0x01 << 16);
+            //write to GPAGMUX2
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAGMUX2) &= ~((unsigned long)0x03 << 16);
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAGMUX2) |= ((unsigned long)0x03 << 16);
+            //lock GPIO24
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPALOCK) |= ((unsigned long)0x01 << 24);
+        }
+        else if(pin_number == 0x1)
+        {
+            GEL_TextOut("Error Status Pin: GPIO28\n");
+            //configure GPIO28 for Error Status Pin
+            //write to GPAMUX2
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAMUX2) &= ~((unsigned long)0x03 << 24);
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAMUX2) |= ((unsigned long)0x01 << 24);
+            //write to GPAGMUX2
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAGMUX2) &= ~((unsigned long)0x03 << 24);
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAGMUX2) |= ((unsigned long)0x03 << 24);
+            //lock GPIO28
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPALOCK) |= ((unsigned long)0x01 << 28);
+        }
+        else if(pin_number == 0x2)
+        {
+            GEL_TextOut("Error Status Pin: GPIO29\n");
+            //configure GPIO29 for Error Status Pin
+            //write to GPAMUX2
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAMUX2) &= ~((unsigned long)0x03 << 26);
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAMUX2) |= ((unsigned long)0x01 << 26);
+            //write to GPAGMUX2
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAGMUX2) &= ~((unsigned long)0x03 << 26);
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAGMUX2) |= ((unsigned long)0x03 << 26);
+            //lock GPIO29
+            *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPALOCK) |= ((unsigned long)0x01 << 29);
+        }
+    }
+}
+
+menuitem "Device Configuration"
+hotmenu Device_Config()
+{
+    //
+    // Set PARTIDL
+    //
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_PARTIDL)   = *(unsigned long *)TI_OTP_PARTID_L;    // LOAD PARTIDL Value
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_PARTIDH )  = *(unsigned long *)TI_OTP_PARTID_H;    // LOAD PARTIDH Value
+
+    //
+    // DCx - Always Enabled
+    //
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC3)   = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC4)   = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC5)   = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC7)   = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC8)   = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC9)   = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC10)  = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC14)  = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC15)  = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC17)  = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC22)  = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC23)  = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC24)  = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC25)  = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC27)  = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC28)  = DCX_ALWAYS_ENABLED;
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC30)  = DCX_ALWAYS_ENABLED;
+
+    //
+    // DCx - Configurable
+    //
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC1)   = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_ADDR_DC01);
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC11)  = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_ADDR_DC11);
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC18)  = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_ADDR_DC18);
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC20)  = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_ADDR_DC20);
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC21)  = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_ADDR_DC21);
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_DC29)  = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_ADDR_DC29);
+
+    //
+    // load CPUROM_DCx
+    //
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_CPUROM_DC1) = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_CPUROM_DC1_ADDR);
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_CPUROM_DC2) = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_CPUROM_DC2_ADDR);
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_CPUROM_DC3) = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_CPUROM_DC3_ADDR);
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_CPUROM_DC4) = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_CPUROM_DC4_ADDR);
+
+    //
+    // load CLAROM_DCx
+    //
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_CLAROM_DC1) = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_CLAROM_DC1_ADDR);
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_CLAROM_DC2) = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_CLAROM_DC2_ADDR);
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_CLAROM_DC3) = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_CLAROM_DC3_ADDR);
+    *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_CLAROM_DC4) = DCX_ENABLE_HIGH | *(unsigned long *)(TI_OTP_CLAROM_DC4_ADDR);
+
+
+    //Load PKGTYPE -  only if KEY is programmed
+    if (((unsigned long)(*(unsigned long *)TI_OTP_PKG_TYPE & 0xFF00U) >> 8) == PKG_TYPE_KEY)
+    {
+        *(unsigned long *)(DEVCFG_BASE + SYSCTL_O_PKGTYPE) = (((unsigned long)PKG_TYPE_KEY << 24) |
+                                                             ((*(unsigned long *)TI_OTP_PKG_TYPE) & (unsigned long)0x00000000F));
+    }
+}
+/******* Unbonded GPIO Pull up ***********/
+
+//
+// Enable pullups for the unbonded GPIOs on the 80 pin PROBE package.
+//
+// Unbonded: 39,42,43,61-63
+// Bonded: 0-7,9-19,22-35,37,41,44-46
+//
+enable_unbonded_pullups_80_P_pin()
+{
+    //Write 0 to unbonded pin in order to pull-up.
+    //if an available pin is already pulled-up, then the pin stays pulled-up.
+    //Logical AND with 0 does both of these.
+
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAPUD) &= 0xFFFFFFFF;
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPBPUD) &= 0x1FFFF27F;
+}
+
+//
+// Enable pullups for the unbonded GPIOs on the 80 pin Qual package.
+//
+// Unbonded: 61-63
+// Bonded: 0-19,22-35,37,39-46
+//
+enable_unbonded_pullups_80_Q_pin()
+{
+    //Write 0 to unbonded pin in order to pull-up.
+    //if an available pin is already pulled-up, then the pin stays pulled-up.
+    //Logical AND with 0 does both of these.
+
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAPUD) &= 0xFFFFFFFF;
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPBPUD) &= 0x1FFFFFFF;
+}
+
+//
+// Enable pullups for the unbonded GPIOs on the 64 pin Non-Qual package.
+//
+// Unbonded: 14,15,25-27,30,31,34,42-46,61-63
+// Bonded: 0-13,16-19,22-24,28,29,32,33,35,37,39-41
+//
+enable_unbonded_pullups_64_pin()
+{
+    //Write 0 to unbonded pin in order to pull-up.
+    //if an available pin is already pulled-up, then the pin stays pulled-up.
+    //Logical AND with 0 does both of these.
+
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAPUD) &= 0x31FF3FFF;
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPBPUD) &= 0x1FFF83FB;
+}
+
+
+//
+// Enable pullups for the unbonded GPIOs on the 64 pin Qual package.
+//
+// Unbonded: 12-15,25-27,30,31,34,42-46,61-63
+// Bonded: 0-11,16-19,22-24,28,29,32,33,35,37,39-41
+//
+enable_unbonded_pullups_64_Q_pin()
+{
+    //Write 0 to unbonded pin in order to pull-up.
+    //if an available pin is already pulled-up, then the pin stays pulled-up.
+    //Logical AND with 0 does both of these.
+
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAPUD) &= 0x31FF0FFF;
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPBPUD) &= 0x1FFF83FB;
+}
+
+//
+// Enable pullups for the unbonded GPIOs on the 48 pin Non-Qual package.
+//
+// Unbonded: 8-15,17,22,23,25-27,30,31,34,39-46,61-63
+// Bonded: 0-7,16,18,19,24,28,29,32,33,35,37
+//
+enable_unbonded_pullups_48_QFN_pin()
+{
+    //Write 0 to unbonded pin in order to pull-up.
+    //if an available pin is already pulled-up, then the pin stays pulled-up.
+    //Logical AND with 0 does both of these.
+
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAPUD) &= 0x31BD33FF;
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPBPUD) &= 0x1FFF807B;
+}
+
+//
+// Enable pullups for the unbonded GPIOs on the 48 pin Qual package.
+//
+// Unbonded: 10,11,14,15,17,22,25-27,30,31,34,39-46,61-63
+// Bonded: 0-9,12,13,16,18,19,23,24,28,29,32,33,35,37
+//
+enable_unbonded_pullups_48_QFP_pin()
+{
+    //Write 0 to unbonded pin in order to pull-up.
+    //if an available pin is already pulled-up, then the pin stays pulled-up.
+    //Logical AND with 0 does both of these.
+
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAPUD) &= 0x313D00FF;
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPBPUD) &= 0x1FFF807B;
+}
+
+//
+// Enable pullups for the unbonded GPIOs on the 40 pin Non-Qual package.
+//
+// Unbonded: 0,9,10,13,14,15,17,25,26,27,34,46,61,62,63
+// Bonded: 1-8,11,12,16,24,28,29,30,31,32,33,35,37
+//
+enable_unbonded_pullups_40_pin()
+{
+    //Write 0 to unbonded pin in order to pull-up.
+    //if an available pin is already pulled-up, then the pin stays pulled-up.
+    //Logical AND with 0 does both of these.
+
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPAPUD) &= 0xF13D19FE;
+    *(unsigned long *)(GPIO_CTRL_BASE + GPIO_O_GPBPUD) &= 0x1FFF807B;
+}
+
+
+Device_UnbondedGPIO_Pullup()
+{
+    unsigned long pin_count;
+
+    if(((*(unsigned long *)TI_OTP_PKG_TYPE & 0xFF00U) >> 8U) == PKG_TYPE_KEY)
+    {
+        pin_count = (*(unsigned long *)TI_OTP_PKG_TYPE & 0x0000F);
+
+        if(pin_count == 1U)
+            enable_unbonded_pullups_40_pin();
+        if(pin_count == 2U)
+            enable_unbonded_pullups_48_QFP_pin();
+        if(pin_count == 3U)
+            enable_unbonded_pullups_48_QFN_pin();
+        if(pin_count == 6U)
+            enable_unbonded_pullups_64_Q_pin();
+        if(pin_count == 7U)
+            enable_unbonded_pullups_64_pin();
+        if(pin_count == 8U)
+            enable_unbonded_pullups_80_Q_pin();
+        if(pin_count == 9U)
+            enable_unbonded_pullups_80_P_pin();
+
+    }
+}
+
+/********************************************************************/
+/* CLA Clock Enable                                                 */
+/* Allows debugger to enable CLA breakpoints (esp. after Reset)     */
+/********************************************************************/
+menuitem "CLA Clock Enable"
+hotmenu CLA_Clock_Enable()
+{
+	*(unsigned long *)(CPUSYS_BASE + SYSCTL_O_PCLKCR0) |= 0x1;   /* Set PCLKCR0 bit 0 */
+}
+
+/********************************************************************/
+/* ERAD Clock Enable                                                 */
+/* Allows debugger to enable HW breakpoints                          */
+/********************************************************************/
+menuitem "ERAD Clock Enable"
+hotmenu ERAD_Clock_Enable()
+{
+	*(unsigned long *)(CPUSYS_BASE + SYSCTL_O_PCLKCR0) |= 0x01000000;   /* Set PCLKCR0 bit 24 */
+}
+
+/*** End of file ***/

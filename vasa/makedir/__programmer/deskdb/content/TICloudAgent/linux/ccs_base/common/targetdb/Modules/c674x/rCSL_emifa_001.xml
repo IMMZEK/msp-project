@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="utf-8"?>
+<module id="EMIFA" HW_revision="" XML_version="1" description="This module provides an interface between TI DSP device and SDRAM &amp; SRAM/NAND devices">
+	<register id="MIDR" acronym="MIDR" offset="0x00" width="32" description="This register contains the revision ID of EMIFA">
+		<bitfield id="Reserved" width="1" begin="31" end="31" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="FULL_RATE" width="1" begin="30" end="30" resetval="1" description="Indicates that EMIFA operates in full rate" range="" rwaccess="R"/>
+		<bitfield id="MODULE_ID" width="14" begin="29" end="16" resetval="0" description="EMIFA Module ID" range="" rwaccess="R"/>
+		<bitfield id="MAJOR_REVISION" width="8" begin="15" end="8" resetval="2" description="Major Revision" range="" rwaccess="R"/>
+		<bitfield id="MINOR_REVISION" width="8" begin="7" end="0" resetval="5" description="Minor Revision" range="" rwaccess="R"/>
+	</register>
+	<register id="AWCC" acronym="AWCC" offset="0x04" width="32" description="This register is used to configure the parameters for extended wait cycles.Both the polarity of the EMA_WAIT pin and the maximum allowable number of extended wait cycles can be configured.">
+		<bitfield id="Reserved" width="3" begin="31" end="29" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="WP" width="1" begin="28" end="28" resetval="1" description="WAIT polarity bit. This bit defines the polarity of the EM_WAIT pin." range="" rwaccess="RW">
+			<bitenum id="WAIT_ONLOW" value="0" token="WAIT_ONLOW" description="0: Insert wait cycles if EM_WAIT is low."/>
+			<bitenum id="WAIT_ONHIGH" value="1" token="WAIT_ONHIGH" description="1: Insert wait cycles if EM_WAIT is high."/>
+		</bitfield>
+		<bitfield id="Reserved" width="20" begin="27" end="8" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="MAX_EXT_WAIT" width="8" begin="7" end="0" resetval="128" description="Maximum extended wait cycles. The EMIFA will wait for a maximum of (MAX_EXT_WAIT + 1) *16 clock cycles before it stops inserting asynchronous wait cycles and proceeds to the hold period of the access." range="" rwaccess="RW"/>
+	</register>
+	<register id="SDCR" acronym="SDCR" offset="0x08" width="32" description="The SDRAM Configuration Register (SDCR) is used to configure various parameters of the SDRAM controller such as the number of internal banks, the internal page size, and the CAS  latency to match those of the attached SDRAM device. In addition, this register is used to put the attached SDRAM device into Self-Refresh mode.">
+		<bitfield id="SR" width="1" begin="31" end="31" resetval="0" description="Self-Refresh mode bit. This bit controls entering and exiting of the Self-Refresh mode. The field should be written using a byte-write to the upper byte of SDCR to avoid triggering the SDRAM initialization sequence." range="" rwaccess="RW">
+			<bitenum id="SELF_REFRESH" value="1" token="SELF_REFRESH" description="Writing a 1 to this bit will cause connected SDRAM devices and the EMIF to enter the Self-Refresh mode. "/>
+			<bitenum id="NON_SELF_REFRESH" value="0" token="NON_SELF_REFRESH" description="Writing a 0 to this bit will cause connected SDRAM devices and the EMIF to exit the Self-Refresh mode."/>
+		</bitfield>
+		<bitfield id="PD" width="1" begin="30" end="30" resetval="0" description="Power Down bit. This bit controls entering and exiting of the Power down mode. The field should be written using a byte-write to the upper byte of SDCR to avoid triggering the SDRAM initialization sequence. If both SR and PD bits are set, the EMIFA will go into Self Refresh." range="" rwaccess="RW">
+			<bitenum id="POWER_DOWN" value="1" token="POWER_DOWN" description="SDRAM placed in Power down mode. "/>
+			<bitenum id="NON_POWER_DOWN" value="0" token="NON_POWER_DOWN" description="SDRAM comes out of Power down mode."/>
+		</bitfield>
+		<bitfield id="PDWR" width="1" begin="29" end="29" resetval="0" description="Perform refreshes during Power Down. Writing a 1 to this bit will cause the EMIF to exit the power down state and issue an AUTO REFRESH command every time Refresh May level is set." range="" rwaccess="RW">
+			<bitenum id="SET_PDWR" value="1" token="SET_PDWR" description="Perform refreshes during powerdown"/>
+			<bitenum id="UNSET_PDWR" value="0" token="UNSET_PDWR" description="No refreshes done during powerdown"/>
+		</bitfield>
+		<bitfield id="Reserved" width="14" begin="28" end="15" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="NM" width="1" begin="14" end="14" resetval="0" description="Narrow mode bit. This bit defines whether a 16- or 32-bit-wide SDRAM is connected to the EMIFA. This bit field must be set to 1 if the EMIFA on your device only has 16 data bus pins. Writing to this field triggers the SDRAM initialization sequence." range="" rwaccess="RW">
+			<bitenum id="32BIT" value="0" token="32BIT" description="32-bit SDRAM data bus is used. "/>
+			<bitenum id="16BIT" value="1" token="16BIT" description="16-bit SDRAM data bus is used."/>
+		</bitfield>
+		<bitfield id="Reserved" width="2" begin="13" end="12" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="CL" width="3" begin="11" end="9" resetval="3" description="CAS Latency. This field defines the CAS latency to be used when   accessing connected SDRAM devices. A 1 must be simultaniously written to the BIT11_9LOCK bit field of this register in order to write to the CL bit field. Writing to this field triggers the SDRAM initialization sequence." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="1" token="RSVD" description=""/>
+			<bitenum id="CL2" value="2" token="CL2" description="CAS latency of 2"/>
+			<bitenum id="CL3" value="3" token="CL3" description="CAS latency of 3"/>
+		</bitfield>
+		<bitfield id="BIT11_9LOCK" width="1" begin="8" end="8" resetval="0" description="Bits 11 to 9 lock. CL can only be written if BIT11_9LOCK is simultaniously written with a 1. BIT11_9LOCK is always read as 0. Writing to this field triggers the SDRAM initialization sequence." range="" rwaccess="RW">
+			<bitenum id="CL_NO_WRITE" value="0" token="CL_NO_WRITE" description="0: CL cannot be written. "/>
+			<bitenum id="CL_WRITE" value="1" token="CL_WRITE" description="1: CL can be written."/>
+		</bitfield>
+		<bitfield id="Reserved" width="1" begin="7" end="7" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="IBANK" width="3" begin="6" end="4" resetval="2" description="Internal SDRAM Bank size. This field defines number of banks inside the connected SDRAM devices. Writing to this field triggers the SDRAM initialization sequence." range="" rwaccess="RW">
+			<bitenum id="1BANK" value="0" token="1BANK" description="0: 1 bank SDRAM devices. "/>
+			<bitenum id="2BANK" value="1" token="2BANK" description="1: 2 bank SDRAM devices."/>
+			<bitenum id="4BANK" value="2" token="4BANK" description="2: 4 bank SDRAM devices."/>
+			<bitenum id="RSVD" value="775" token="RSVD" description=" 3-7: Reserved."/>
+		</bitfield>
+		<bitfield id="Reserved" width="1" begin="3" end="3" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="PAGESIZE" width="3" begin="2" end="0" resetval="0" description="Page Size. This field defines the internal page size of connected SDRAM devices. Writing to this field triggers the SDRAM initialization sequence." range="" rwaccess="RW">
+			<bitenum id="256WORD_PAGE" value="0" token="256WORD_PAGE" description="256-word pages requiring 8 column address bits.                                             "/>
+			<bitenum id="512WORD_PAGE" value="1" token="512WORD_PAGE" description="512-word pages requiring 9 column address bits. "/>
+			<bitenum id="1024WORD_PAGE" value="2" token="1024WORD_PAGE" description="1024-word pages requiring 10 column address bits. "/>
+			<bitenum id="2048WORD_PAGE" value="3" token="2048WORD_PAGE" description="2048-word pages requiring 11 column address bits."/>
+			<bitenum id="RSVD" value="1031" token="RSVD" description="Reserved."/>
+		</bitfield>
+	</register>
+	<register id="SDRCR" acronym="SDRCR" offset="0x0C" width="32" description="This register is used to program SDRAM refresh rate..">
+		<bitfield id="Reserved" width="19" begin="31" end="13" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="RR" width="13" begin="12" end="0" resetval="1250" description="Refresh Rate. This field is used to define the SDRAM refresh period in terms of EM_CLK cycles. SDRAM refresh rate = EMIF rate / RR where EMIF rate is equal to clk rate." range="" rwaccess="RW"/>
+	</register>
+	<register id="CE2CFG" acronym="CE2CFG" offset="0x10" width="32" description="The asynchronous 1 configuration register (corresponding to chip select 2) is used to configure the shaping of the address and control signals during an access to asynchronous memory via CS2. It is also used to program the width of asynchronous interface and to select from various modes of operation. This register can be written prior to any transfer, and any asynchronous transfer following the write will use the new configuration.">
+		<bitfield id="SS" width="1" begin="31" end="31" resetval="0" description="Select Strobe bit. This bit defines whether the asynchronous interface operates in WE Strobe Mode or Select Strobe Mode." range="" rwaccess="RW">
+			<bitenum id="SELSTRB_DISABLE" value="0" token="SELSTRB_DISABLE" description="WE Strobe Mode enabled."/>
+			<bitenum id="SELSTRB_ENABLE" value="1" token="SELSTRB_ENABLE" description="Select Strobe Mode Enable"/>
+		</bitfield>
+		<bitfield id="EW" width="1" begin="30" end="30" resetval="0" description="Extend Wait bit. This bit defines whether extended wait cycles will be enabled. This bit field must be set to 0 if the EMIF on your device does not have an EMA_WAIT pin." range="" rwaccess="RW">
+			<bitenum id="EXTWAIT_DISABLE" value="0" token="EXTWAIT_DISABLE" description="Extended wait cycles disabled."/>
+			<bitenum id="EXTWAIT_ENABLE" value="1" token="EXTWAIT_ENABLE" description="Extended wait cycles enabled."/>
+		</bitfield>
+		<bitfield id="W_SETUP" width="4" begin="29" end="26" resetval="15" description="Write setup width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="W_STROBE" width="6" begin="25" end="20" resetval="63" description="Write strobe width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="W_HOLD" width="3" begin="19" end="17" resetval="7" description="Write hold width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="R_SETUP" width="4" begin="16" end="13" resetval="15" description="Read setup width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="R_STROBE" width="6" begin="12" end="7" resetval="63" description="Read strobe width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="R_HOLD" width="3" begin="6" end="4" resetval="7" description="Read hold width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="TA" width="2" begin="3" end="2" resetval="3" description="Minimum Turn-Around time. This field defines the minimum number of EMA_CLK cycles between reads and writes, minus one cycle. This delay is not incurred by a read followed by a read or a write followed by a write to the same CS space." range="" rwaccess="RW"/>
+		<bitfield id="ASIZE" width="2" begin="1" end="0" resetval="0" description="Asynchronous Data Bus Width. This field defines the width of the asynchronous device's data bus." range="" rwaccess="RW">
+			<bitenum id="8BIT" value="0" token="8BIT" description="8 bit data bus"/>
+			<bitenum id="16BIT" value="1" token="16BIT" description="16 bit data bus"/>
+			<bitenum id="RSVD" value="515" token="RSVD" description="Reserved."/>
+		</bitfield>
+	</register>
+	<register id="CE3CFG" acronym="CE3CFG" offset="0x14" width="32" description="The asynchronous 2 configuration register (corresponding to chip select 3) is used to configure the shaping of the address and control signals during an access to asynchronous memory via CS3. It is also used to program the width of asynchronous interface and to select from various modes of operation. This register can be written prior to any transfer, and any asynchronous transfer following the write will use the new configuration.">
+		<bitfield id="SS" width="1" begin="31" end="31" resetval="0" description="Select Strobe bit. This bit defines whether the asynchronous interface operates in WE Strobe Mode or Select Strobe Mode." range="" rwaccess="RW">
+			<bitenum id="SELSTRB_DISABLE" value="0" token="SELSTRB_DISABLE" description="WE Strobe Mode enabled."/>
+			<bitenum id="SELSTRB_ENABLE" value="1" token="SELSTRB_ENABLE" description="Select Strobe Mode Enable"/>
+		</bitfield>
+		<bitfield id="EW" width="1" begin="30" end="30" resetval="0" description="Extend Wait bit. This bit defines whether extended wait cycles will be enabled. This bit field must be set to 0 if the EMIFA on your device does not have an EMA_WAIT pin." range="" rwaccess="RW">
+			<bitenum id="EXTWAIT_DISABLE" value="0" token="EXTWAIT_DISABLE" description="Extended wait cycles disabled."/>
+			<bitenum id="EXTWAIT_ENABLE" value="1" token="EXTWAIT_ENABLE" description="Extended wait cycles enabled."/>
+		</bitfield>
+		<bitfield id="W_SETUP" width="4" begin="29" end="26" resetval="15" description="Write setup width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="W_STROBE" width="6" begin="25" end="20" resetval="63" description="Write strobe width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="W_HOLD" width="3" begin="19" end="17" resetval="7" description="Write hold width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="R_SETUP" width="4" begin="16" end="13" resetval="15" description="Read setup width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="R_STROBE" width="6" begin="12" end="7" resetval="63" description="Read strobe width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="R_HOLD" width="3" begin="6" end="4" resetval="7" description="Read hold width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="TA" width="2" begin="3" end="2" resetval="3" description="Minimum Turn-Around time. This field defines the minimum number of EMA_CLK cycles between reads and writes, minus one cycle. This delay is not incurred by a read followed by a read or a write followed by a write to the same CS space." range="" rwaccess="RW"/>
+		<bitfield id="ASIZE" width="2" begin="1" end="0" resetval="0" description="Asynchronous Data Bus Width. This field defines the width of the asynchronous device's data bus." range="" rwaccess="RW">
+			<bitenum id="8BIT" value="0" token="8BIT" description="8 bit data bus"/>
+			<bitenum id="16BIT" value="1" token="16BIT" description="16 bit data bus"/>
+			<bitenum id="RSVD" value="515" token="RSVD" description="Reserved."/>
+		</bitfield>
+	</register>
+	<register id="CE4CFG" acronym="CE4CFG" offset="0x18" width="32" description="The asynchronous 3 configuration register (corresponding to chip select 4) is used to configure the shaping of the address and control signals during an access to asynchronous memory via CS4. It is also used to program the width of asynchronous interface and to select from various modes of operation. This register can be written prior to any transfer, and any asynchronous transfer following the write will use the new configuration.">
+		<bitfield id="SS" width="1" begin="31" end="31" resetval="0" description="Select Strobe bit. This bit defines whether the asynchronous interface operates in WE Strobe Mode or Select Strobe Mode." range="" rwaccess="RW">
+			<bitenum id="SELSTRB_DISABLE" value="0" token="SELSTRB_DISABLE" description="WE Strobe Mode enabled."/>
+			<bitenum id="SELSTRB_ENABLE" value="1" token="SELSTRB_ENABLE" description="Select Strobe Mode Enable"/>
+		</bitfield>
+		<bitfield id="EW" width="1" begin="30" end="30" resetval="0" description="Extend Wait bit. This bit defines whether extended wait cycles will be enabled. This bit field must be set to 0 if the EMIF on your device does not have an EMA_WAIT pin." range="" rwaccess="RW">
+			<bitenum id="EXTWAIT_DISABLE" value="0" token="EXTWAIT_DISABLE" description="Extended wait cycles disabled."/>
+			<bitenum id="EXTWAIT_ENABLE" value="1" token="EXTWAIT_ENABLE" description="Extended wait cycles enabled."/>
+		</bitfield>
+		<bitfield id="W_SETUP" width="4" begin="29" end="26" resetval="15" description="Write setup width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="W_STROBE" width="6" begin="25" end="20" resetval="63" description="Write strobe width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="W_HOLD" width="3" begin="19" end="17" resetval="7" description="Write hold width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="R_SETUP" width="4" begin="16" end="13" resetval="15" description="Read setup width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="R_STROBE" width="6" begin="12" end="7" resetval="63" description="Read strobe width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="R_HOLD" width="3" begin="6" end="4" resetval="7" description="Read hold width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="TA" width="2" begin="3" end="2" resetval="3" description="Minimum Turn-Around time. This field defines the minimum number of EMA_CLK cycles between reads and writes, minus one cycle. This delay is not incurred by a read followed by a read or a write followed by a write to the same CS space." range="" rwaccess="RW"/>
+		<bitfield id="ASIZE" width="2" begin="1" end="0" resetval="0" description="Asynchronous Data Bus Width. This field defines the width of the asynchronous device's data bus." range="" rwaccess="RW">
+			<bitenum id="8BIT" value="0" token="8BIT" description="8 bit data bus"/>
+			<bitenum id="16BIT" value="1" token="16BIT" description="16 bit data bus"/>
+			<bitenum id="RSVD" value="515" token="RSVD" description="Reserved."/>
+		</bitfield>
+	</register>
+	<register id="CE5CFG" acronym="CE5CFG" offset="0x1C" width="32" description="The asynchronous 4 configuration register (corresponding to chip select 5) is used to configure the shaping of the address and control signals during an access to asynchronous memory via CS5. It is also used to program the width of asynchronous interface and to select from various modes of operation. This register can be written prior to any transfer, and any asynchronous transfer following the write will use the new configuration.">
+		<bitfield id="SS" width="1" begin="31" end="31" resetval="0" description="Select Strobe bit. This bit defines whether the asynchronous interface operates in WE Strobe Mode or Select Strobe Mode." range="" rwaccess="RW">
+			<bitenum id="SELSTRB_DISABLE" value="0" token="SELSTRB_DISABLE" description="WE Strobe Mode enabled."/>
+			<bitenum id="SELSTRB_ENABLE" value="1" token="SELSTRB_ENABLE" description="Select Strobe Mode Enable"/>
+		</bitfield>
+		<bitfield id="EW" width="1" begin="30" end="30" resetval="0" description="Extend Wait bit. This bit defines whether extended wait cycles will be enabled. This bit field must be set to 0 if the EMIFA on your device does not have an EMA_WAIT pin." range="" rwaccess="RW">
+			<bitenum id="EXTWAIT_DISABLE" value="0" token="EXTWAIT_DISABLE" description="Extended wait cycles disabled."/>
+			<bitenum id="EXTWAIT_ENABLE" value="1" token="EXTWAIT_ENABLE" description="Extended wait cycles enabled."/>
+		</bitfield>
+		<bitfield id="W_SETUP" width="4" begin="29" end="26" resetval="15" description="Write setup width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="W_STROBE" width="6" begin="25" end="20" resetval="63" description="Write strobe width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="W_HOLD" width="3" begin="19" end="17" resetval="7" description="Write hold width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="R_SETUP" width="4" begin="16" end="13" resetval="15" description="Read setup width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="R_STROBE" width="6" begin="12" end="7" resetval="63" description="Read strobe width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="R_HOLD" width="3" begin="6" end="4" resetval="7" description="Read hold width in EMA_CLK cycles, minus one cycle." range="" rwaccess="RW"/>
+		<bitfield id="TA" width="2" begin="3" end="2" resetval="3" description="Minimum Turn-Around time. This field defines the minimum number of EMA_CLK cycles between reads and writes, minus one cycle. This delay is not incurred by a read followed by a read or a write followed by a write to the same CS space." range="" rwaccess="RW"/>
+		<bitfield id="ASIZE" width="2" begin="1" end="0" resetval="0" description="Asynchronous Data Bus Width. This field defines the width of the asynchronous device's data bus." range="" rwaccess="RW">
+			<bitenum id="8BIT" value="0" token="8BIT" description="8 bit data bus"/>
+			<bitenum id="16BIT" value="1" token="16BIT" description="16 bit data bus"/>
+			<bitenum id="RSVD" value="515" token="RSVD" description="Reserved."/>
+		</bitfield>
+	</register>
+	<register id="SDTIMR" acronym="SDTIMR" offset="0x20" width="32" description="The SDRAM Timing Register (SDTIMR) is used to program many of the SDRAM timing parameters. Consult the SDRAM datasheet for information on the appropriate values to program into each field.">
+		<bitfield id="T_RFC" width="5" begin="31" end="27" resetval="8" description="Specifies the Trfc value of the SDRAM. This defines the minimum number of EMA_CLK cycles from Refresh (REFR) to Refresh (REFR), minus 1: T_RFC = (Trfc/tEMA_CLK) - 1" range="" rwaccess="RW"/>
+		<bitfield id="T_RP" width="3" begin="26" end="24" resetval="2" description="Specifies the Trp value of the SDRAM. This defines the minimum number of EMA_CLK cycles from Precharge (PRE) to Activate (ACTV) or Refresh (REFR) command, minus 1: T_RP = (Trp/tEMA_CLK) - 1" range="" rwaccess="RW"/>
+		<bitfield id="Reserved" width="1" begin="23" end="23" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="T_RCD" width="3" begin="22" end="20" resetval="2" description="Specifies the Trcd value of the SDRAM. This defines the minimum number of EMA_CLK cycles from Active (ACTV) to Read (READ) or Write (WRT), minus 1: T_RCD = (Trcd/tEMA_CLK) - 1" range="" rwaccess="RW"/>
+		<bitfield id="Reserved" width="1" begin="19" end="19" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="T_WR" width="3" begin="18" end="16" resetval="1" description="Specifies the Twr value of the SDRAM. This defines the minimum number of EMA_CLK cycles from last Write (WRT) to Precharge (PRE), minus 1: T_WR = (Twr/tEMA_CLK) - 1" range="" rwaccess="RW"/>
+		<bitfield id="T_RAS" width="4" begin="15" end="12" resetval="5" description="Specifies the Tras value of the SDRAM. This defines the minimum number of EMA_CLK clock cycles from Activate (ACTV) to Precharge (PRE), minus 1: T_RAS = (Tras/tEMA_CLK) - 1" range="" rwaccess="RW"/>
+		<bitfield id="T_RC" width="4" begin="11" end="8" resetval="8" description="Specifies the Trc value of the SDRAM. This defines the minimum number of EMA_CLK clock cycles from Activate (ACTV) to Activate (ACTV), minus 1: T_RC = (Trc/tEMA_CLK) - 1" range="" rwaccess="RW"/>
+		<bitfield id="Reserved" width="1" begin="7" end="7" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="T_RRD" width="3" begin="6" end="4" resetval="1" description="Specifies the Trrd value of the SDRAM. This defines the minimum number of EMA_CLK clock cycles from Activate (ACTV) to Activate (ACTV) for a different bank, minus 1: T_RRD = (Trrd/tEMA_CLK) - 1" range="" rwaccess="RW"/>
+		<bitfield id="Reserved" width="4" begin="3" end="0" resetval="0" description="Reserved" range="" rwaccess="N"/>
+	</register>
+	<register id="SDSRETR" acronym="SDSRETR" offset="0x3C" width="32" description="The SDRAM Self Refresh Exit Timing Register (SDSRETR) is used to program the amount of time between when the SDRAM exits Self-Refresh mode and when the EMIFA issues another command.">
+		<bitfield id="Reserved" width="27" begin="31" end="5" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="T_XS" width="5" begin="4" end="0" resetval="9" description="This field specifies the minimum number of ECLKOUT cycles from Self-Refresh exit to any command, minus one. T_XS = Txsr / tEMA_CLK - 1" range="" rwaccess="RW"/>
+	</register>
+	<register id="INTRAW" acronym="INTRAW" offset="0x40" width="32" description="EMIF Interrupt Raw Register">
+		<bitfield id="Reserved" width="29" begin="31" end="3" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="WR" width="1" begin="2" end="2" resetval="0" description="Wait Rise. Set to 1 by hardware to indicate that a rising edge on the EMA_WAIT pin has occurred." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Indicates that a rising edge has not occurred on the EM_WAIT pin. Writing a 0 has no effect."/>
+			<bitenum id="CLEAR" value="1" token="CLEAR" description="Indicates that a rising edge has occurred on the EM_WAIT pin. Writing a 1 will clear this bit and the WR_MASKED bit in the EMIF interrupt mask register (EIMR)."/>
+		</bitfield>
+		<bitfield id="LT" width="1" begin="1" end="1" resetval="0" description="Line Trap. Set to 1 by hardware to indicate illegal memory access type." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Indicates that a line trap has not occurred. Writing a 0 has no effect."/>
+			<bitenum id="CLEAR" value="1" token="CLEAR" description="Indicates that a line trap has occurred. Writing a 1 will clear this bit and the LT_MASKED bit in the EMIF interrupt mask register (EIMR)."/>
+		</bitfield>
+		<bitfield id="AT" width="1" begin="0" end="0" resetval="0" description="Asynchronous Timeout. This bit is set to 1 by hardware to indicate that during an extended asynchronous memory access cycle the EMA_WAIT pin did not go inactive within the number of cycles defined by the MAX_EXT_WAIT field in the asynchronous wait cycle configuration register (AWCCR)." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Indicates that an asynchronous timeout has not occurred. Writing a 0 has no effect."/>
+			<bitenum id="CLEAR" value="1" token="CLEAR" description="Indicates that an asynchronous timeout has occurred. Writing a 1 will clear this bit and the AT_MASKED bit in the EMIF interrupt mask register (EIMR)."/>
+		</bitfield>
+	</register>
+	<register id="INTMSK" acronym="INTMSK" offset="0x44" width="32" description="EMIF Interrupt Mask Register">
+		<bitfield id="Reserved" width="29" begin="31" end="3" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="WR_MASKED" width="1" begin="2" end="2" resetval="0" description="Wait Rise Masked. This bit is set to 1 by hardware to indicate that a rising edge has occurred on the EMA_WAIT pin, provided that the WR_MASK_SET bit is set to 1 in the EMIF interrupt mask set register (EIMSR)." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Indicates that a wait rise interrupt has not been generated. Writing a 0 has no effect."/>
+			<bitenum id="CLEAR" value="1" token="CLEAR" description="Indicates that a wait rise interrupt has been generated. Writing a 1 will clear this bit and the WR bit in the EMIF interrupt raw register (EIRR)."/>
+		</bitfield>
+		<bitfield id="LT_MASKED" width="1" begin="1" end="1" resetval="0" description="Masked Line Trap. Set to 1 by hardware to indicate illegal memory access type, only if the LT_MASK_SET bit in the EIMSR is set to 1. Writing a 1 will clear this bit as well as the LT bit in the EIRR. Writing a 0 has no effect." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Indicates that a line trap interrupt has not been generated. Writing a 0 has no effect."/>
+			<bitenum id="CLEAR" value="1" token="CLEAR" description="Indicates that a line trap interrupt has been generated. Writing a 1 will clear this bit and the LT bit in the EMIF interrupt raw register (EIRR)."/>
+		</bitfield>
+		<bitfield id="AT_MASKED" width="1" begin="0" end="0" resetval="0" description="Asynchronous Timeout Masked. This bit is set to 1 by hardware to indicate that during an extended asynchronous memory access cycle the EMA_WAIT pin did not go inactive within the number of cycles defined by the MAX_EXT_WAIT field in the asynchronous wait cycle configuration register (AWCCR), provided that the AT_MASK_SET bit is set to 1 in the EMIF interrupt mask set register (EIMSR)." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Indicates that an asynchronous timeout interrupt has not been generated. Writing a 0 has no effect."/>
+			<bitenum id="CLEAR" value="1" token="CLEAR" description="Indicates that an asynchronous timeout interrupt has been generated. Writing a 1 will clear this bit and the AT bit in the EMIF interrupt raw register (EIRR)."/>
+		</bitfield>
+	</register>
+	<register id="INTMSKSET" acronym="INTMSKSET" offset="0x48" width="32" description="EMIF Interrupt Mask Set Register">
+		<bitfield id="Reserved" width="29" begin="31" end="3" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="WR_MASK_SET" width="1" begin="2" end="2" resetval="0" description="Wait Rise Mask Set. This bit determines whether or not the wait rise Interrupt is enabled. Writing a 1 to this bit sets this bit, sets the WR_MASK_CLR bit in the EMIF interrupt mask clear register (EIMCR), and enables the wait rise interrupt. To clear this bit, a 1 must be written to the WR_MASK_CLR bit in EIMCR." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Indicates that the wait rise interrupt is disabled. Writing a 0 has no effect."/>
+			<bitenum id="SET" value="1" token="SET" description="Indicates that the wait rise interrupt is enabled. Writing a 1 sets this bit and the WR_MASK_CLR bit in the EMIF interrupt mask clear register (EIMCR)."/>
+		</bitfield>
+		<bitfield id="LT_MASK_SET" width="1" begin="1" end="1" resetval="0" description="Mask set for LT_MASKED bit in the EIMR. Writing a 1 will enable the interrupt, and set this bit as well as the LT_MASK_CLR bit in the EIMCR. The interrupt will not be enabled, and this bit as well as the LT_MASK_CLR bit will not be set if a 1 is written to this bit and the LT_MASK_CLR bit at the same time. Writing a 0 has no effect." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Indicates that the line trap interrupt is disabled. Writing a 0 has no effect."/>
+			<bitenum id="SET" value="1" token="SET" description="Indicates that the line trap interrupt is enabled. Writing a 1 sets this bit and the LT_MASK_CLR bit in the EMIF interrupt mask clear register (EIMCR)."/>
+		</bitfield>
+		<bitfield id="AT_MASK_SET" width="1" begin="0" end="0" resetval="0" description="Asynchronous Timeout Mask Set. This bit determines whether or not the asynchronous timeout interrupt is enabled. Writing a 1 to this bit sets this bit, sets the AT_MASK_CLR bit in the EMIF interrupt mask clear register (EIMCR), and enables the asynchronous timeout interrupt. To clear this bit, a 1 must be written to the AT_MASK_CLR bit in EIMCR." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Indicates that the asynchronous timeout interrupt is disabled. Writing a 0 has no effect."/>
+			<bitenum id="SET" value="1" token="SET" description="Indicates that the asynchronous timeout interrupt is enabled. Writing a 1 sets this bit and the AT_MASK_CLR bit in the EMIF interrupt mask clear register (EIMCR)."/>
+		</bitfield>
+	</register>
+	<register id="INTMSKCLR" acronym="INTMSKCLR" offset="0x4C" width="32" description="EMIF Interrupt Mask Clear Register">
+		<bitfield id="Reserved" width="29" begin="31" end="3" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="WR_MASK_CLR" width="1" begin="2" end="2" resetval="0" description="Wait Rise Mask Clear. This bit determines whether or not the wait rise interrupt is enabled. Writing a 1 to this bit clears this bit, clears the WR_MASK_SET bit in the EMIF interrupt mask set register (EIMSR), and disables the wait rise interrupt. To set this bit, a 1 must be written to the WR_MASK_SET bit in EIMSR." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Indicates that the wait rise interrupt is disabled. Writing a 0 has no effect."/>
+			<bitenum id="CLEAR" value="1" token="CLEAR" description="Indicates that the wait rise interrupt is enabled. Writing a 1 clears this bit and the WR_MASK_SET bit in them EMIF interrupt mask set register (EIMSR)."/>
+		</bitfield>
+		<bitfield id="LT_MASK_CLR" width="1" begin="1" end="1" resetval="0" description="Mask clear for LT_MASKED bit in the EIMR. Writing a 1 will disable the interrupt, and clear this bit as well as the LT_MASK_SET bit in the EIMSR. Writing a 0 has no effect." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Indicates that the line trap interrupt is disabled. Writing a 0 has no effect."/>
+			<bitenum id="CLEAR" value="1" token="CLEAR" description="Indicates that the line trap interrupt is enabled. Writing a 1 clears this bit and the LT_MASK_SET bit in them EMIF interrupt mask set register (EIMSR)."/>
+		</bitfield>
+		<bitfield id="AT_MASK_CLR" width="1" begin="0" end="0" resetval="0" description="Asynchronous Timeout Mask Clear. This bit determines whether or not the asynchronous timeout interrupt is enabled. Writing a 1 to this bit clears this bit, clears the AT_MASK_SET bit in the EMIF interrupt mask set register (EIMSR), and disables the asynchronous timeout interrupt. To set this bit, a 1 must  be written to the AT_MASK_SET bit in EIMSR." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Indicates that the asynchronous timeout interrupt is disabled. Writing a 0 has no effect."/>
+			<bitenum id="CLEAR" value="1" token="CLEAR" description="Indicates that the asynchronous timeout interrupt is enabled. Writing a 1 clears this bit and the AT_MASK_SET bit in the EMIF interrupt mask set register (EIMSR)."/>
+		</bitfield>
+	</register>
+	<register id="NANDFCR" acronym="NANDFCR" offset="0x60" width="32" description="NAND Flash Control Register">
+		<bitfield id="Reserved" width="18" begin="31" end="14" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECC_ADD_CALC_START" width="1" begin="13" end="13" resetval="0" description="NAND Flash 4-bit ECC address and error value calculation Start. Set to 1 to start 4_bit ECC error address and error value calculation on read syndrome. This bit is cleared when any of the NAND Flash Error Address registers or NAND Flash Error Value registers are read." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description=""/>
+			<bitenum id="START" value="1" token="START" description="Begins 4-bit ECC Address and Value Calculation"/>
+		</bitfield>
+		<bitfield id="_4BITECC_START" width="1" begin="12" end="12" resetval="0" description="Nand Flash 4-bit ECC start for the selected chip select. Set to 1 to start 4_bit ECC calculation on data for NAND Flash on chip select selected by bit 4BITECCSEL. This bit is cleared when ay of the NAND Flash 4_bit ECC registers are read." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description=""/>
+			<bitenum id="START" value="1" token="START" description="Begins 4-bit ECC Calculation"/>
+		</bitfield>
+		<bitfield id="CS5ECC" width="1" begin="11" end="11" resetval="0" description="NAND Flash ECC start for chip select 5. Set to 1 to start 1_bit ECC calculation on data for NAND Flash for this chip select. This bit is cleared when CS5 1_bit ECC register is read." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Do not start ECC calculation on this chip select"/>
+			<bitenum id="START" value="1" token="START" description="Start ECC calculation on this chip select"/>
+		</bitfield>
+		<bitfield id="CS4ECC" width="1" begin="10" end="10" resetval="0" description="NAND Flash ECC start for chip select 4. Set to 1 to start 1_bit ECC calculation on data for NAND Flash for this chip select. This bit is cleared when CS4 1_bit ECC register is read." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Do not start ECC calculation on this chip select"/>
+			<bitenum id="START" value="1" token="START" description="Start ECC calculation on this chip select"/>
+		</bitfield>
+		<bitfield id="CS3ECC" width="1" begin="9" end="9" resetval="0" description="NAND Flash 1_bit ECC start for chip select 3. Set to 1 to start 1_bit ECC calculation on data for NAND Flash for this chip select. This bit is cleared when CS3 1_bit ECC register is read." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Do not start ECC calculation on this chip select"/>
+			<bitenum id="START" value="1" token="START" description="Start ECC calculation on this chip select"/>
+		</bitfield>
+		<bitfield id="CS2ECC" width="1" begin="8" end="8" resetval="0" description="NAND Flash ECC start for chip select 2. Set to 1 to start 1_bit ECC calculation on data for NAND Flash for this chip select. This bit is cleared when CS2 1_bit ECC register is read." range="" rwaccess="RW">
+			<bitenum id="RSVD" value="0" token="RSVD" description="Do not start ECC calculation on this chip select"/>
+			<bitenum id="START" value="1" token="START" description="Start ECC calculation on this chip select"/>
+		</bitfield>
+		<bitfield id="Reserved" width="2" begin="7" end="6" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCSEL" width="2" begin="5" end="4" resetval="0" description="4Bit ECC CS selection. This field selects the chip select on which the 4_bit ECC will be calculated." range="" rwaccess="RW">
+			<bitenum id="CS2ECC" value="0" token="CS2ECC" description="CS2 selected for ECC calculation"/>
+			<bitenum id="CS3ECC" value="1" token="CS3ECC" description="CS3 selected for ECC calculation"/>
+			<bitenum id="CS4ECC" value="2" token="CS4ECC" description="CS4 selected for ECC calculation"/>
+			<bitenum id="CS5ECC" value="3" token="CS5ECC" description="CS5 selected for ECC calculation"/>
+		</bitfield>
+		<bitfield id="CS5NAND" width="1" begin="3" end="3" resetval="0" description="NAND Flash mode for chip select 5." range="" rwaccess="RW">
+			<bitenum id="NAND_DISABLE" value="0" token="NAND_DISABLE" description="Do not enable NAND Flash on this chip select"/>
+			<bitenum id="NAND_ENABLE" value="1" token="NAND_ENABLE" description="Enable NAND Flash on this chip select"/>
+		</bitfield>
+		<bitfield id="CS4NAND" width="1" begin="2" end="2" resetval="0" description="NAND Flash mode for chip select 4." range="" rwaccess="RW">
+			<bitenum id="NAND_DISABLE" value="0" token="NAND_DISABLE" description="Do not enable NAND Flash on this chip select"/>
+			<bitenum id="NAND_ENABLE" value="1" token="NAND_ENABLE" description="Enable NAND Flash on this chip select"/>
+		</bitfield>
+		<bitfield id="CS3NAND" width="1" begin="1" end="1" resetval="0" description="NAND Flash mode for chip select 3." range="" rwaccess="RW">
+			<bitenum id="NAND_DISABLE" value="0" token="NAND_DISABLE" description="Do not enable NAND Flash on this chip select"/>
+			<bitenum id="NAND_ENABLE" value="1" token="NAND_ENABLE" description="Enable NAND Flash on this chip select"/>
+		</bitfield>
+		<bitfield id="CS2NAND" width="1" begin="0" end="0" resetval="0" description="NAND Flash mode for chip select 2." range="" rwaccess="RW">
+			<bitenum id="NAND_DISABLE" value="0" token="NAND_DISABLE" description="Do not enable NAND Flash on this chip select"/>
+			<bitenum id="NAND_ENABLE" value="1" token="NAND_ENABLE" description="Enable NAND Flash on this chip select"/>
+		</bitfield>
+	</register>
+	<register id="NANDFSR" acronym="NANDFSR" offset="0x64" width="32" description="NAND Flash Status Register">
+		<bitfield id="Reserved" width="14" begin="31" end="18" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="ECC_ERRNUM" width="2" begin="17" end="16" resetval="0" description="Number of Errors found after the 4-Bit ECC Error Address and Error Value Calculation." range="" rwaccess="R">
+			<bitenum id="1ERR" value="0" token="1ERR" description="1 error found"/>
+			<bitenum id="2ERR" value="1" token="2ERR" description="2 errors found"/>
+			<bitenum id="3ERR" value="2" token="3ERR" description="3 errors found"/>
+			<bitenum id="4ERR" value="3" token="4ERR" description="4 errors found"/>
+		</bitfield>
+		<bitfield id="Reserved" width="4" begin="15" end="12" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="ECC_STATE" width="4" begin="11" end="8" resetval="0" description="ECC correction state while performing 4-bit ECC Address and Error Value Calculation" range="" rwaccess="R">
+			<bitenum id="NOERR" value="0" token="NOERR" description="No errors detected"/>
+			<bitenum id="5ERR" value="1" token="5ERR" description="Errors cannot be corrected (5 or more)"/>
+			<bitenum id="ERR_CORRECT" value="2" token="ERR_CORRECT" description="Error correction complete(errors on bit 8 or 9)."/>
+			<bitenum id="ERR_EXIST" value="3" token="ERR_EXIST" description="Error correction complete(error exists)."/>
+			<bitenum id="RSVD" value="4" token="RSVD" description="Reserved"/>
+			<bitenum id="ERR_CALC" value="5" token="ERR_CALC" description="Calculating number of errors"/>
+			<bitenum id="ERRSEARCH_PREPARE1" value="6" token="ERRSEARCH_PREPARE1" description="Preparing for error search"/>
+			<bitenum id="ERRSEARCH_PREPARE2" value="7" token="ERRSEARCH_PREPARE2" description="Preparing for error search"/>
+			<bitenum id="ERRSEARCH" value="8" token="ERRSEARCH" description="Searching for errors"/>
+			<bitenum id="RSVD1" value="9" token="RSVD1" description="Reserved"/>
+			<bitenum id="RSVD2" value="16" token="RSVD2" description="Reserved"/>
+			<bitenum id="RSVD3" value="17" token="RSVD3" description="Reserved"/>
+			<bitenum id="ERRVALUE_CALC1" value="18" token="ERRVALUE_CALC1" description="Calculating error value"/>
+			<bitenum id="ERRVALUE_CALC2" value="19" token="ERRVALUE_CALC2" description="Calculating error value"/>
+			<bitenum id="ERRVALUE_CALC3" value="20" token="ERRVALUE_CALC3" description="Calculating error value"/>
+			<bitenum id="ERRVALUE_CALC4" value="21" token="ERRVALUE_CALC4" description="Calculating error value"/>
+		</bitfield>
+		<bitfield id="Reserved" width="4" begin="7" end="4" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="WAITST" width="4" begin="3" end="0" resetval="0" description="Raw status of the EMA_WAIT input pin. WP0 bit in the asynchronous wait cycle configuration register (AWCCR) has no effect on WAITST." range="" rwaccess="R">
+			<bitenum id="HIGH" value="1" token="HIGH" description=""/>
+			<bitenum id="LOW" value="0" token="LOW" description=""/>
+		</bitfield>
+	</register>
+	<register id="PMCR" acronym="PMCR" offset="0x68" width="32" description="Page Mode Control Register">
+		<bitfield id="CS5_PG_DEL" width="6" begin="31" end="26" resetval="63" description="Page access delay for NOR Flash connected on CS5. Number of EMA_CLK cycles required for the page read data to be valid, minus one cycle. This value must not be set to 0." range="" rwaccess="RW"/>
+		<bitfield id="CS5_PG_SIZE" width="1" begin="25" end="25" resetval="0" description="Page Size for NOR Flash connected on CS5. " range="" rwaccess="RW">
+			<bitenum id="4WORDS" value="0" token="4WORDS" description="Page size is 4 words"/>
+			<bitenum id="8WORDS" value="1" token="8WORDS" description="Page size is 8 words"/>
+		</bitfield>
+		<bitfield id="CS5_PG_MD_EN" width="1" begin="24" end="24" resetval="0" description="Page Mode enable for NOR Flash connected on CS5." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="Page mode disabled for this chip select"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="Page mode enabled for this chip select"/>
+		</bitfield>
+		<bitfield id="CS4_PG_DEL" width="6" begin="23" end="18" resetval="63" description="Page access delay for NOR Flash connected on CS4. Number of EMA_CLK cycles required for the page read data to be valid, minus one cycle. This value must not be set to 0." range="" rwaccess="RW"/>
+		<bitfield id="CS4_PG_SIZE" width="1" begin="17" end="17" resetval="0" description="Page Size for NOR Flash connected on CS4." range="" rwaccess="RW">
+			<bitenum id="4WORDS" value="0" token="4WORDS" description="Page size is 4 words"/>
+			<bitenum id="8WORDS" value="1" token="8WORDS" description="Page size is 8 words"/>
+		</bitfield>
+		<bitfield id="CS4_PG_MD_EN" width="1" begin="16" end="16" resetval="0" description="Page Mode enable for NOR Flash connected on CS4. " range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="Page mode disabled for this chip select"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="Page mode enabled for this chip select"/>
+		</bitfield>
+		<bitfield id="CS3_PG_DEL" width="6" begin="15" end="10" resetval="63" description="Page access delay for NOR Flash connected on CS3. Number of EMA_CLK cycles required for the page read data to be valid, minus one cycle. This value must not be set to 0." range="" rwaccess="RW"/>
+		<bitfield id="CS3_PG_SIZE" width="1" begin="9" end="9" resetval="0" description="Page Size for NOR Flash connected on CS3." range="" rwaccess="RW">
+			<bitenum id="4WORDS" value="0" token="4WORDS" description="Page size is 4 words"/>
+			<bitenum id="8WORDS" value="1" token="8WORDS" description="Page size is 8 words"/>
+		</bitfield>
+		<bitfield id="CS3_PG_MD_EN" width="1" begin="8" end="8" resetval="0" description="Page Mode enable for NOR Flash connected on CS3. " range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="Page mode disabled for this chip select"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="Page mode enabled for this chip select"/>
+		</bitfield>
+		<bitfield id="CS2_PG_DEL" width="6" begin="7" end="2" resetval="63" description="Page access delay for NOR Flash connected on CS2. Number of EMA_CLK cycles required for the page read data to be valid, minus one cycle. This value must not be set to 0." range="" rwaccess="RW"/>
+		<bitfield id="CS2_PG_SIZE" width="1" begin="1" end="1" resetval="0" description="Page Size for NOR Flash connected on CS2.  " range="" rwaccess="RW">
+			<bitenum id="4WORDS" value="0" token="4WORDS" description="Page size is 4 words"/>
+			<bitenum id="8WORDS" value="1" token="8WORDS" description="Page size is 8 words"/>
+		</bitfield>
+		<bitfield id="CS2_PG_MD_EN" width="1" begin="0" end="0" resetval="0" description="Page Mode enable for NOR Flash connected on CS2. " range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="Page mode disabled for this chip select"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="Page mode enabled for this chip select"/>
+		</bitfield>
+	</register>
+	<register id="NANDF1ECC" acronym="NANDF1ECC" offset="0x70" width="32" description="NAND Flash 1 ECC Register">
+		<bitfield id="Reserved" width="4" begin="31" end="28" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="P2048O" width="1" begin="27" end="27" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1024O" width="1" begin="26" end="26" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P512O" width="1" begin="25" end="25" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P256O" width="1" begin="24" end="24" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P128O" width="1" begin="23" end="23" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P64O" width="1" begin="22" end="22" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P32O" width="1" begin="21" end="21" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P16O" width="1" begin="20" end="20" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P8O" width="1" begin="19" end="19" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P4O" width="1" begin="18" end="18" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P2O" width="1" begin="17" end="17" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1O" width="1" begin="16" end="16" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="Reserved" width="4" begin="15" end="12" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="P2048E" width="1" begin="11" end="11" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1024E" width="1" begin="10" end="10" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P512E" width="1" begin="9" end="9" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P256E" width="1" begin="8" end="8" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P128E" width="1" begin="7" end="7" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P64E" width="1" begin="6" end="6" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P32E" width="1" begin="5" end="5" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P16E" width="1" begin="4" end="4" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P8E" width="1" begin="3" end="3" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P4E" width="1" begin="2" end="2" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P2E" width="1" begin="1" end="1" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1E" width="1" begin="0" end="0" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+	</register>
+	<register id="NANDF2ECC" acronym="NANDF2ECC" offset="0x74" width="32" description="NAND Flash 2 ECC Register">
+		<bitfield id="Reserved" width="4" begin="31" end="28" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="P2048O" width="1" begin="27" end="27" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1024O" width="1" begin="26" end="26" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P512O" width="1" begin="25" end="25" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P256O" width="1" begin="24" end="24" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P128O" width="1" begin="23" end="23" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P64O" width="1" begin="22" end="22" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P32O" width="1" begin="21" end="21" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P16O" width="1" begin="20" end="20" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P8O" width="1" begin="19" end="19" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P4O" width="1" begin="18" end="18" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P2O" width="1" begin="17" end="17" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1O" width="1" begin="16" end="16" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="Reserved" width="4" begin="15" end="12" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="P2048E" width="1" begin="11" end="11" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1024E" width="1" begin="10" end="10" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P512E" width="1" begin="9" end="9" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P256E" width="1" begin="8" end="8" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P128E" width="1" begin="7" end="7" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P64E" width="1" begin="6" end="6" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P32E" width="1" begin="5" end="5" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P16E" width="1" begin="4" end="4" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P8E" width="1" begin="3" end="3" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P4E" width="1" begin="2" end="2" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P2E" width="1" begin="1" end="1" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1E" width="1" begin="0" end="0" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+	</register>
+	<register id="NANDF3ECC" acronym="NANDF3ECC" offset="0x78" width="32" description="NAND Flash 3 ECC Register">
+		<bitfield id="Reserved" width="4" begin="31" end="28" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="P2048O" width="1" begin="27" end="27" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1024O" width="1" begin="26" end="26" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P512O" width="1" begin="25" end="25" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P256O" width="1" begin="24" end="24" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P128O" width="1" begin="23" end="23" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P64O" width="1" begin="22" end="22" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P32O" width="1" begin="21" end="21" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P16O" width="1" begin="20" end="20" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P8O" width="1" begin="19" end="19" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P4O" width="1" begin="18" end="18" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P2O" width="1" begin="17" end="17" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1O" width="1" begin="16" end="16" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="Reserved" width="4" begin="15" end="12" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="P2048E" width="1" begin="11" end="11" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1024E" width="1" begin="10" end="10" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P512E" width="1" begin="9" end="9" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P256E" width="1" begin="8" end="8" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P128E" width="1" begin="7" end="7" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P64E" width="1" begin="6" end="6" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P32E" width="1" begin="5" end="5" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P16E" width="1" begin="4" end="4" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P8E" width="1" begin="3" end="3" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P4E" width="1" begin="2" end="2" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P2E" width="1" begin="1" end="1" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1E" width="1" begin="0" end="0" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+	</register>
+	<register id="NANDF4ECC" acronym="NANDF4ECC" offset="0x7C" width="32" description="NAND Flash 4 ECC Register">
+		<bitfield id="Reserved" width="4" begin="31" end="28" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="P2048O" width="1" begin="27" end="27" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1024O" width="1" begin="26" end="26" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P512O" width="1" begin="25" end="25" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P256O" width="1" begin="24" end="24" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P128O" width="1" begin="23" end="23" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P64O" width="1" begin="22" end="22" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P32O" width="1" begin="21" end="21" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P16O" width="1" begin="20" end="20" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P8O" width="1" begin="19" end="19" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P4O" width="1" begin="18" end="18" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P2O" width="1" begin="17" end="17" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1O" width="1" begin="16" end="16" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="Reserved" width="4" begin="15" end="12" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="P2048E" width="1" begin="11" end="11" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1024E" width="1" begin="10" end="10" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P512E" width="1" begin="9" end="9" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P256E" width="1" begin="8" end="8" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P128E" width="1" begin="7" end="7" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P64E" width="1" begin="6" end="6" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P32E" width="1" begin="5" end="5" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P16E" width="1" begin="4" end="4" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P8E" width="1" begin="3" end="3" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P4E" width="1" begin="2" end="2" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P2E" width="1" begin="1" end="1" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+		<bitfield id="P1E" width="1" begin="0" end="0" resetval="0" description="1-Bit ECC code calculated while reading/writing NAND Flash." range="" rwaccess="R"/>
+	</register>
+	<register id="NAND4BITECCLOAD" acronym="NAND4BITECCLOAD" offset="0xBC" width="32" description="NAND Flash 4-bit ECC LOAD Register">
+		<bitfield id="Reserved" width="22" begin="31" end="10" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCLOAD" width="10" begin="9" end="0" resetval="0" description="4-bit ECC load. This register is used to load the ECC values when performing the Syndrome calculation during reads" range="" rwaccess="RW"/>
+	</register>
+	<register id="NAND4BITECC1" acronym="NAND4BITECC1" offset="0xC0" width="32" description="NAND Flash 4-bit ECC Register 1">
+		<bitfield id="Reserved" width="6" begin="31" end="26" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCVAL2" width="10" begin="25" end="16" resetval="0" description="Calculated 4-bit ECC or Syndrom Value 2" range="" rwaccess="R"/>
+		<bitfield id="Reserved" width="6" begin="15" end="10" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCVAL1" width="10" begin="9" end="0" resetval="0" description="Calculated 4-bit ECC or Syndrom Value 1" range="" rwaccess="R"/>
+	</register>
+	<register id="NAND4BITECC2" acronym="NAND4BITECC2" offset="0xC4" width="32" description="NAND Flash 4-bit ECC Register 2">
+		<bitfield id="Reserved" width="6" begin="31" end="26" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCVAL4" width="10" begin="25" end="16" resetval="0" description="Calculated 4-bit ECC or Syndrom Value 4" range="" rwaccess="R"/>
+		<bitfield id="Reserved" width="6" begin="15" end="10" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCVAL3" width="10" begin="9" end="0" resetval="0" description="Calculated 4-bit ECC or Syndrom Value 3" range="" rwaccess="R"/>
+	</register>
+	<register id="NAND4BITECC3" acronym="NAND4BITECC3" offset="0xC8" width="32" description="NAND Flash 4-bit ECC Register 3">
+		<bitfield id="Reserved" width="6" begin="31" end="26" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCVAL6" width="10" begin="25" end="16" resetval="0" description="Calculated 4-bit ECC or Syndrom Value 6" range="" rwaccess="R"/>
+		<bitfield id="Reserved" width="6" begin="15" end="10" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCVAL5" width="10" begin="9" end="0" resetval="0" description="Calculated 4-bit ECC or Syndrom Value 5" range="" rwaccess="R"/>
+	</register>
+	<register id="NAND4BITECC4" acronym="NAND4BITECC4" offset="0xCC" width="32" description="NAND Flash 4-bit ECC Register 4">
+		<bitfield id="Reserved" width="6" begin="31" end="26" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCVAL8" width="10" begin="25" end="16" resetval="0" description="Calculated 4-bit ECC or Syndrom Value 8" range="" rwaccess="R"/>
+		<bitfield id="Reserved" width="6" begin="15" end="10" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCVAL7" width="10" begin="9" end="0" resetval="0" description="Calculated 4-bit ECC or Syndrom Value 7" range="" rwaccess="R"/>
+	</register>
+	<register id="NANDERRADD1" acronym="NANDERRADD1" offset="0xD0" width="32" description="NAND Flash 4-bit ECC Error Address Register 1">
+		<bitfield id="Reserved" width="6" begin="31" end="26" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCERRADD2" width="10" begin="25" end="16" resetval="0" description="Calculated 4-bit ECC Error Address 2" range="" rwaccess="R"/>
+		<bitfield id="Reserved" width="6" begin="15" end="10" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCERRADD1" width="10" begin="9" end="0" resetval="0" description="Calculated 4-bit ECC Error Address 1" range="" rwaccess="R"/>
+	</register>
+	<register id="NANDERRADD2" acronym="NANDERRADD2" offset="0xD4" width="32" description="NAND Flash 4-bit ECC Error Address Register 2">
+		<bitfield id="Reserved" width="6" begin="31" end="26" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCERRADD4" width="10" begin="25" end="16" resetval="0" description="Calculated 4-bit ECC Error Address 4" range="" rwaccess="R"/>
+		<bitfield id="Reserved" width="6" begin="15" end="10" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCERRADD3" width="10" begin="9" end="0" resetval="0" description="Calculated 4-bit ECC Error Address 3" range="" rwaccess="R"/>
+	</register>
+	<register id="NANDERRVAL1" acronym="NANDERRVAL1" offset="0xD8" width="32" description="NAND Flash 4-bit ECC Error Value Register 1">
+		<bitfield id="Reserved" width="6" begin="31" end="26" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCERRVAL2" width="10" begin="25" end="16" resetval="0" description="Calculated 4-bit ECC Error Value 2" range="" rwaccess="R"/>
+		<bitfield id="Reserved" width="6" begin="15" end="10" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCERRVAL1" width="10" begin="9" end="0" resetval="0" description="Calculated 4-bit ECC Error Value 1" range="" rwaccess="R"/>
+	</register>
+	<register id="NANDERRVAL2" acronym="NANDERRVAL2" offset="0xDC" width="32" description="NAND Flash 4-bit ECC Error Value Register 2">
+		<bitfield id="Reserved" width="6" begin="31" end="26" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCERRVAL4" width="10" begin="25" end="16" resetval="0" description="Calculated 4-bit ECC Error Value 4" range="" rwaccess="R"/>
+		<bitfield id="Reserved" width="6" begin="15" end="10" resetval="0" description="Reserved" range="" rwaccess="N"/>
+		<bitfield id="_4BITECCERRVAL3" width="10" begin="9" end="0" resetval="0" description="Calculated 4-bit ECC Error Value 3" range="" rwaccess="R"/>
+	</register>
+</module>

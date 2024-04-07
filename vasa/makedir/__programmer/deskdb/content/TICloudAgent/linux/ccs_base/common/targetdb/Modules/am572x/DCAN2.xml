@@ -1,0 +1,827 @@
+<module name="DCAN2" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="DCAN_CTL" acronym="DCAN_CTL" offset="0x0" width="32" description="DCAN control register NOTE: The Bus-Off recovery sequence (refer to CAN specification) cannot be shortened by setting or resetting INIT bit. If the module goes Bus-Off, it will automatically set the INIT bit and stop all bus activities. When the INIT bit is cleared by the application again, the module will then wait for 129 occurrences of Bus Idle (129 &#215; 11 consecutive recessive bits) before resuming normal operation. At the end of the bus-off recovery sequence, the error counters will be reset. After the INIT bit is reset, each time when a sequence of 11 recessive bits is monitored, a Bit0 error code is written to , enabling the software to check whether the CAN bus is stuck at dominant or continuously disturbed, and to monitor the proceeding of the bus-off recovery sequence.">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="WUBA" width="1" begin="25" end="25" resetval="0" description="Automatic wake up on bus activity when in local power-down mode. Note: The CAN message, which initiates the bus activity, cannot be received. This means that the first message received in power down and automatic wake-up mode, will be lost." range="" rwaccess="RW">
+      <bitenum value="0" id="CAN_0" token="WUBA_0" description="No detection of a dominant CAN bus level while in local power-down mode."/>
+      <bitenum value="1" id="CAN_CAN_1" token="WUBA_1" description="Detection of a dominant CAN bus level while in local power-down mode is enabled. On occurrence of a dominant CAN bus level, the wake up sequence is started (Additional information can be found inLocal Power-Down Mode)."/>
+    </bitfield>
+    <bitfield id="PDR" width="1" begin="24" end="24" resetval="0" description="Request for local low power-down mode" range="" rwaccess="RW">
+      <bitenum value="0" id="DCAN_INIT_0" token="PDR_0" description="No application request for local low power-down mode. If the application has cleared this bit while DCAN in local power-down mode, also the INIT bit has to be cleared."/>
+      <bitenum value="1" id="DCAN_PDA_DCAN_1" token="PDR_1" description="Local power-down mode has been requested by application. The DCAN will acknowledge the local power-down mode by setting bit PDA in the register. The local clocks will be turned off by DCAN internal logic (Additional information can be found in Local Power-Down Mode)."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="23" end="21" resetval="0x0" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="DE3" width="1" begin="20" end="20" resetval="0" description="Enable DMA request line for IF3. Note: A pending DMA request for IF3 remains active until first access to one of the IF3 registers." range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="DE3_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled" token="DE3_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="DE2" width="1" begin="19" end="19" resetval="0" description="Enable DMA request line for IF2. Note: A pending DMA request for IF2 remains active until first access to one of the IF2 registers." range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="DE2_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled" token="DE2_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="DE1" width="1" begin="18" end="18" resetval="0" description="Enable DMA request line for IF1. Note: A pending DMA request for IF1 remains active until first access to one of the IF1 registers." range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="DE1_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled" token="DE1_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="IE1" width="1" begin="17" end="17" resetval="0" description="Interrupt line 1 enable" range="" rwaccess="RW">
+      <bitenum value="0" id="INT1_0" token="IE1_0" description="Disabled - Module interrupt INT1 is always low."/>
+      <bitenum value="1" id="INT1_1" token="IE1_1" description="Enabled - interrupts will assert line INT1 to one; line remains active until pending interrupts are processed."/>
+    </bitfield>
+    <bitfield id="INITDBG" width="1" begin="16" end="16" resetval="0" description="Internal init state while debug access" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="INITDBG_0" description="Not in debug mode, or debug mode requested but not entered."/>
+      <bitenum value="1" id="DCAN_1" token="INITDBG_1" description="Debug mode requested and internally entered; the DCAN is ready for debug accesses."/>
+    </bitfield>
+    <bitfield id="SWR" width="1" begin="15" end="15" resetval="0" description="Software reset enable. Note: To execute software reset, the following procedure is necessary:" range="" rwaccess="RW">
+      <bitenum value="0" id="Normal_Operation" token="SWR_0" description="Normal Operation"/>
+      <bitenum value="1" id="OCP_1" token="SWR_1" description="Module is forced to reset state. This bit will automatically get cleared after execution of software reset after one OCP clock cycle."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="14" end="14" resetval="0" description="This bit is always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="PMD" width="4" begin="13" end="10" resetval="0x5" description="Parityon/offOthers: function enabled ." range="" rwaccess="RW">
+      <bitenum value="5" id="function_disabled" token="PMD_5" description="function disabled"/>
+    </bitfield>
+    <bitfield id="ABO" width="1" begin="9" end="9" resetval="0" description="Auto-Bus-On enable" range="" rwaccess="RW">
+      <bitenum value="0" id="The_Auto-Bus-On_feature_is_disabled" token="ABO_0" description="The Auto-Bus-On feature is disabled"/>
+      <bitenum value="1" id="The_Auto-Bus-On_feature_is_enabled" token="ABO_1" description="The Auto-Bus-On feature is enabled"/>
+    </bitfield>
+    <bitfield id="IDS" width="1" begin="8" end="8" resetval="0" description="Interruption debug support enable" range="" rwaccess="RW">
+      <bitenum value="0" id="DCAN_0" token="IDS_0" description="When Debug/Suspend mode is requested, DCAN will wait for a started transmission or reception to be completed before entering Debug/Suspend mode"/>
+      <bitenum value="1" id="DCAN_1" token="IDS_1" description="When Debug/Suspend mode is requested, DCAN will interrupt any transmission or reception, and enter Debug/Suspend mode immediately."/>
+    </bitfield>
+    <bitfield id="TEST" width="1" begin="7" end="7" resetval="0" description="Test mode enable" range="" rwaccess="RW">
+      <bitenum value="0" id="Normal_Operation" token="TEST_0" description="Normal Operation"/>
+      <bitenum value="1" id="Test_Mode" token="TEST_1" description="Test Mode"/>
+    </bitfield>
+    <bitfield id="CCE" width="1" begin="6" end="6" resetval="0" description="Configuration change enable" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="CCE_0" description="The software has no write access to the configuration registers."/>
+      <bitenum value="1" id="INIT_1" token="CCE_1" description="The software has write access to the configuration registers (when INIT bit is set)."/>
+    </bitfield>
+    <bitfield id="DAR" width="1" begin="5" end="5" resetval="0" description="Disable automatic retransmission" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="DAR_0" description="Automatic retransmission of not successful messages enabled."/>
+      <bitenum value="1" id="Automatic_retransmission_disabled." token="DAR_1" description="Automatic retransmission disabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="4" end="4" resetval="0" description="This bit is always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="EIE" width="1" begin="3" end="3" resetval="0" description="Error interrupt enable" range="" rwaccess="RW">
+      <bitenum value="0" id="PER,_BOFF_EWARN_0" token="EIE_0" description="Disabled - PER, BOFF and EWARN bits can not generate an interrupt."/>
+      <bitenum value="1" id="PER,_BOFF_EWARN_INT0_1" token="EIE_1" description="Enabled - PER, BOFF and EWARN bits can generate an interrupt at INT0 line and affect the interrupt register."/>
+    </bitfield>
+    <bitfield id="SIE" width="1" begin="2" end="2" resetval="0" description="Status change interrupt enable" range="" rwaccess="RW">
+      <bitenum value="0" id="WAKEUPPND,_RXOK,_TXOK_LEC_0" token="SIE_0" description="Disabled - WAKEUPPND, RXOK, TXOK and LEC bits can not generate an interrupt."/>
+      <bitenum value="1" id="WAKEUPPND,_RXOK,_TXOK_LEC_INT0_1" token="SIE_1" description="Enabled - WAKEUPPND, RXOK, TXOK and LEC can generate an interrupt at INT0 line and affect the interrupt register."/>
+    </bitfield>
+    <bitfield id="IE0" width="1" begin="1" end="1" resetval="0" description="Interrupt line 0 enable" range="" rwaccess="RW">
+      <bitenum value="0" id="INT0_0" token="IE0_0" description="Disabled - Module interrupt INT0 is always low."/>
+      <bitenum value="1" id="INT0_1" token="IE0_1" description="Enabled - interrupts will assert line INT0 to one; line remains active until pending interrupts are processed."/>
+    </bitfield>
+    <bitfield id="INIT" width="1" begin="0" end="0" resetval="1" description="Initialization" range="" rwaccess="RW">
+      <bitenum value="0" id="Normal_operation" token="INIT_0" description="Normal operation"/>
+      <bitenum value="1" id="Initialization_mode_is_entered" token="INIT_1" description="Initialization mode is entered"/>
+    </bitfield>
+  </register>
+  <register id="DCAN_ES" acronym="DCAN_ES" offset="0x4" width="32" description="Error and Status Register Interrupts are generated by bits PER, BOFF and EWARN (if EIE bit in is 1) and by bits WAKEUPPND, RXOK, TXOK, and LEC (if SIE bit in is 1). A change of bit EPASS will not generate an interrupt. Reading the clears the WAKEUPPND, PER, RXOK and TXOK bits and set the LEC to value '7.' Additionally, the status interrupt value (0x8000) in the will be replaced by the next lower priority interrupt value. For debug support, the auto clear functionality of (clear of status flags by read) is disabled when in debug/suspend mode.">
+    <bitfield id="RESERVED" width="21" begin="31" end="11" resetval="0x00 0000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="PDA" width="1" begin="10" end="10" resetval="0" description="Local power-down mode acknowledge" range="" rwaccess="R">
+      <bitenum value="0" id="DCAN_is_not_in_local_power-down_mode." token="PDA_0" description="DCAN is not in local power-down mode."/>
+      <bitenum value="1" id="DCAN_DCAN_1" token="PDA_1" description="Application request for setting DCAN to local power-down mode was successful. DCAN is in local power-down mode."/>
+    </bitfield>
+    <bitfield id="WAKEUPPND" width="1" begin="9" end="9" resetval="0" description="Wake up pending. This bit can be used by the software to identify the DCAN as the source to wake up the system. This bit will be reset ifDCAN_ES is read. ." range="" rwaccess="R">
+      <bitenum value="0" id="No_Wake_Up_is_requested_by_DCAN." token="WAKEUPPND_0" description="No Wake Up is requested by DCAN."/>
+      <bitenum value="1" id="DCAN_CAN_1" token="WAKEUPPND_1" description="DCAN has initiated a wake up of the system due to dominant CAN bus while module power down."/>
+    </bitfield>
+    <bitfield id="PER" width="1" begin="8" end="8" resetval="0" description="Parity error detected. This bit will be reset ifDCAN_ES register is read." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="PER_0_r" description="No parity error has been detected since last read access."/>
+      <bitenum value="1" id="RAM._1" token="PER_1_r" description="The parity check mechanism has detected a parity error in the Message RAM."/>
+      <bitenum value="0" id="No_effect" token="PER_0_w" description="No effect"/>
+      <bitenum value="1" id="(EOI)_DCAN_PARITY_1" token="PER_1_w" description="End of interrupt (EOI) for parity error on DCAN_PARITY interrupt line"/>
+    </bitfield>
+    <bitfield id="BOFF" width="1" begin="7" end="7" resetval="0" description="Bus-Off state" range="" rwaccess="R">
+      <bitenum value="0" id="The_CAN_module_is_not_bus-off_state." token="BOFF_0" description="The CAN module is not bus-off state."/>
+      <bitenum value="1" id="The_CAN_module_is_in_bus-off_state." token="BOFF_1" description="The CAN module is in bus-off state."/>
+    </bitfield>
+    <bitfield id="EWARN" width="1" begin="6" end="6" resetval="0" description="Warning state" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="EWARN_0" description="Both error counters are below the error warning limit of 96."/>
+      <bitenum value="1" id="1" token="EWARN_1" description="At least one of the error counters has reached the error warning limit of 96."/>
+    </bitfield>
+    <bitfield id="EPASS" width="1" begin="5" end="5" resetval="0" description="Error passive state" range="" rwaccess="R">
+      <bitenum value="0" id="CAN_DCAN_0" token="EPASS_0" description="On CAN Bus error, the DCAN could send active error frames."/>
+      <bitenum value="1" id="CAN_CAN_1" token="EPASS_1" description="The CAN core is in the error passive state as defined in the CAN Specification."/>
+    </bitfield>
+    <bitfield id="RXOK" width="1" begin="4" end="4" resetval="0" description="Received a message successfully. This bit will be reset ifDCAN_ES register is read. ." range="" rwaccess="R">
+      <bitenum value="0" id="DCAN_0" token="RXOK_0" description="No message has been successfully received since the last time when this bit was read by the software. This bit is never reset by DCAN internal events."/>
+      <bitenum value="1" id="A_1" token="RXOK_1" description="A message has been successfully received since the last time when this bit was reset by a read access of the software (independent of the result of acceptance filtering)."/>
+    </bitfield>
+    <bitfield id="TXOK" width="1" begin="3" end="3" resetval="0" description="Transmitted a message successfully. This bit will be reset ifDCAN_ES register is read. ." range="" rwaccess="R">
+      <bitenum value="0" id="DCAN_0" token="TXOK_0" description="No message has been successfully transmitted since the last time when this bit was read by the software. This bit is never reset by DCAN internal events."/>
+      <bitenum value="1" id="A_1" token="TXOK_1" description="A message has been successfully transmitted (error free and acknowledged by at least one other node) since the last time when this bit was reset by a read access of the software."/>
+    </bitfield>
+    <bitfield id="LEC" width="3" begin="2" end="0" resetval="0x7" description="Last error code. The LEC field indicates the type of the last error on the CAN bus. This field will be cleared to '0' when a message has been transferred (reception or transmission) without error." range="" rwaccess="R">
+      <bitenum value="0" id="No_error" token="LEC_0" description="No error"/>
+      <bitenum value="1" id="1" token="LEC_1" description="Stuff error: More than five equal bits in a row have been detected in a part of a received message where this is not allowed."/>
+      <bitenum value="2" id="A_2" token="LEC_2" description="Form error: A fixed format part of a received frame has the wrong format."/>
+      <bitenum value="3" id="CAN_3" token="LEC_3" description="Ack error: The message this CAN core transmitted was not acknowledged by another node."/>
+      <bitenum value="4" id="4" token="LEC_4" description="Bit1 error: During the transmission of a message (with the exception of the arbitration field), the device wanted to send a recessive level (bit of logical value '1'), but the monitored bus value was dominant."/>
+      <bitenum value="5" id="5" token="LEC_5" description="Bit0 error: During the transmission of a message (or acknowledge bit, or active error flag, or overload flag), the device wanted to send a dominant level (logical value '0'), but the monitored bus level was recessive. During Bus-Off recovery, this status is set each time a sequence of 11 recessive bits has been monitored. This enables the software to monitor the proceeding of the Bus-Off recovery sequence (indicating the bus is not stuck at dominant or continuously disturbed)."/>
+      <bitenum value="6" id="CRC_CRC_(CRC_CRC_6" token="LEC_6" description="CRC error: In a received message, the CRC check sum was incorrect. (CRC received for an incoming message does not match the calculated CRC for the received data)."/>
+      <bitenum value="7" id="CAN_LEC_7" token="LEC_7" description="No CAN bus event was detected since the last time the software read. Any read access to re-initializes the LEC to value '7.'"/>
+    </bitfield>
+  </register>
+  <register id="DCAN_ERRC" acronym="DCAN_ERRC" offset="0x8" width="32" description="Error Counter Register">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="RP" width="1" begin="15" end="15" resetval="0" description="Receive error passive" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="RP_0" description="The receive error counter is below the error passive level."/>
+      <bitenum value="1" id="CAN_1" token="RP_1" description="The receive error counter has reached the error passive level as defined in the CAN specification."/>
+    </bitfield>
+    <bitfield id="REC" width="7" begin="14" end="8" resetval="0x00" description="Receive error counter. Actual state of the receive error counter" range="" rwaccess="R"/>
+    <bitfield id="TEC" width="8" begin="7" end="0" resetval="0x00" description="Transmit error counter. Actual state of the transmit error counter" range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_BTR" acronym="DCAN_BTR" offset="0xC" width="32" description="Bit timing register This register is only writable if CCE and INIT bits in the are set. The CAN bit time may be programmed in the range of 8 to 25 time quanta The CAN time quantum may be programmed in the range of 1 to 1024 CAN_CLK periods.">
+    <bitfield id="RESERVED" width="12" begin="31" end="20" resetval="0x000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="BRPE" width="4" begin="19" end="16" resetval="0x0" description="Baud rate prescaler extension.Valid programmed values are 0 to 15. . By programming BRPE the baud rate prescaler can be extended to values up to 1024. ." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="TSEG2" width="3" begin="14" end="12" resetval="0x2" description="Time segment after the sample pointValid programmed values are 0 to 7. . The actual TSeg2 value which is interpreted for the bit timing will be the programmed TSeg2 value + 1. ." range="" rwaccess="RW"/>
+    <bitfield id="TSEG1" width="4" begin="11" end="8" resetval="0x3" description="Time segment before the sample pointValid programmed values are 1 to15. . The actual TSeg1 value interpreted for the bit timing will be the programmed TSeg1 value + 1. ." range="" rwaccess="RW"/>
+    <bitfield id="SJW" width="2" begin="7" end="6" resetval="0x0" description="Synchronization Jump WidthValid programmed values are 0 to 3. . The actual SJW value interpreted for the synchronization will be the programmed SJW value + 1. ." range="" rwaccess="RW"/>
+    <bitfield id="BRP" width="6" begin="5" end="0" resetval="0x1" description="Baud rate prescalerValue by which the CAN_CLK frequency is divided for generating the bit time quanta. The bit time is built up from a multiple of this quanta. . Valid programmed values are 0 to 63. . The actual BRP value interpreted for the bit timing will be the programmed BRP value + 1. ." range="" rwaccess="RW"/>
+  </register>
+  <register id="DCAN_INT" acronym="DCAN_INT" offset="0x10" width="32" description="Interrupt register">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="INT1ID" width="8" begin="23" end="16" resetval="0x00" description="Interrupt 1 Identifier (indicates the message object with the highest pending interrupt)0x01-0x80: Number of message object which caused the interrupt. . 0x81-0xFF: Unused . If several interrupts are pending, will point to the pending interrupt with the highest priority. The INT1 interrupt line remains active until INT1ID reaches value 0 (the cause of the interrupt is reset) or until IE1 is cleared. . A message interrupt is cleared by clearing the message object's IntPnd bit. . Among the message interrupts, the message object's interrupt priority decreases with increasing message number. ." range="" rwaccess="R">
+      <bitenum value="0" id="No_interrupt_is_pending" token="INT1ID_0" description="No interrupt is pending"/>
+    </bitfield>
+    <bitfield id="INT0ID" width="16" begin="15" end="0" resetval="0x0000" description="Interrupt Identifier (the number here indicates the source of the interrupt)0x0001-0x0080: Number of message object which caused the interrupt. . 0x0081-0x7FFF: Unused . 0x8001-0xFFFF: Unused . If several interrupts are pending,DCAN_INTwill point to the pending interrupt with the highest priority. The INT0 interrupt line remains active until INT0ID reaches value 0 (the cause of the interrupt is reset) or until IE0 is cleared. . The Status interrupt has the highest priority. Among the message interrupts, the message object's interrupt priority decreases with increasing message number. ." range="" rwaccess="R">
+      <bitenum value="0" id="No_interrupt_is_pending" token="INT0ID_0" description="No interrupt is pending"/>
+      <bitenum value="32768" id="value_is_not_0x07." token="INT0ID_32768" description="value is not 0x07."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_TEST" acronym="DCAN_TEST" offset="0x14" width="32" description="Test Register For all test modes, the TEST bit in control register needs to be set to 1. If TEST bit is set, the RDA, EXL, TX1, TX0, LBACK and SILENT bits are writable. Bit RX monitors the state of pin CAN_RX and therefore is only readable. All test register functions are disabled when TEST bit is cleared.">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x00 0000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="RDA" width="1" begin="9" end="9" resetval="0" description="RAM direct access enable" range="" rwaccess="RW">
+      <bitenum value="0" id="Normal_operation" token="RDA_0" description="Normal operation"/>
+      <bitenum value="1" id="RAM_1" token="RDA_1" description="Direct access to the RAM is enabled while in test mode"/>
+    </bitfield>
+    <bitfield id="EXL" width="1" begin="8" end="8" resetval="0" description="External loopback mode. When the internal loop-back mode is active (bit LBACK is set), bit EXL will be ignored." range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="EXL_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled" token="EXL_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="RX" width="1" begin="7" end="7" resetval="-" description="Receive pin. Monitors the actual value of the CAN_RX pin" range="" rwaccess="R">
+      <bitenum value="0" id="The_CAN_bus_is_dominant" token="RX_0" description="The CAN bus is dominant"/>
+      <bitenum value="1" id="The_CAN_bus_is_recessive" token="RX_1" description="The CAN bus is recessive"/>
+    </bitfield>
+    <bitfield id="TX" width="2" begin="6" end="5" resetval="0x0" description="Control of CAN_TX pin. Setting Tx[1:0] other than '00' will disturb message transfer." range="" rwaccess="RW">
+      <bitenum value="0" id="CAN_TX_CAN_0" token="TX_0" description="Normal operation, CAN_TX is controlled by the CAN core."/>
+      <bitenum value="1" id="CAN_TX_1" token="TX_1" description="Sample point can be monitored at CAN_TX pin."/>
+      <bitenum value="2" id="CAN_TX_pin_drives_a_dominant_value." token="TX_2" description="CAN_TX pin drives a dominant value."/>
+      <bitenum value="3" id="CAN_TX_pin_drives_a_recessive_value." token="TX_3" description="CAN_TX pin drives a recessive value."/>
+    </bitfield>
+    <bitfield id="LBACK" width="1" begin="4" end="4" resetval="0" description="Loopback mode. When the internal loop-back mode is active (bit LBACK is set), bit EXL will be ignored." range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="LBACK_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled" token="LBACK_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="SILENT" width="1" begin="3" end="3" resetval="0" description="Silent mode" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="SILENT_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled" token="SILENT_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="2" end="0" resetval="0x0" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_PERR" acronym="DCAN_PERR" offset="0x1C" width="32" description="Parity Error Code Register If a parity error is detected, the PER flag will be set in the . This bit is not reset by the parity check mechanism; it must be reset by reading . In addition to the PER flag, the parity error code register will indicate the memory area where the parity error has been detected (message number and word number). If more than one word with a parity error was detected, the highest word number with a parity error will be displayed. After a parity error has been detected, the register will hold the last error code until power is removed.">
+    <bitfield id="RESERVED" width="21" begin="31" end="11" resetval="0x00 0000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="WORD_NUMBER" width="3" begin="10" end="8" resetval="0x-" description="Word number where parity error has been detectedRDA word number (1 to 5) of the message object (according to the message RAM representation in RDA mode). ." range="" rwaccess="R"/>
+    <bitfield id="MESSAGE_NUMBER" width="8" begin="7" end="0" resetval="0x-" description="Message object number where parity error has been detected (0x01-0x80)" range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_REL" acronym="DCAN_REL" offset="0x20" width="32" description="Core revision register">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="0x-" description="DCAN core revision number" range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_ABOTR" acronym="DCAN_ABOTR" offset="0x80" width="32" description="Auto-Bus-On Time Register On write access to the while Auto-Bus-On timer is running, the Auto-Bus-On procedure will be aborted. During Debug/Suspend mode, running Auto-Bus-On timer will be paused.">
+    <bitfield id="ABO_TIME" width="32" begin="31" end="0" resetval="0x0000 0000" description="Number of OCP clock cycles before a Bus-Off recovery sequence is started by clearing the INIT bit. This function has to be enabled by setting bit ABO inDCAN_CTL. The Auto-Bus-On timer is realized by a 32-bit counter which starts to count down to zero when the module goes Bus-Off. The counter will be reloaded with the preload value of the DCAN_ABOTR after this phase." range="" rwaccess="RW"/>
+  </register>
+  <register id="DCAN_TXRQ_X" acronym="DCAN_TXRQ_X" offset="0x84" width="32" description="Transmission Request X Register The software can detect if one or more bits in the different transmission request registers are set. Each register bit represents a group of eight message objects. If at least one of the TxRqst bits of these message objects are set, the corresponding bit in the transmission request X register will be set.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="RESERVED" range="" rwaccess="R"/>
+    <bitfield id="TXRQSTREG8" width="2" begin="15" end="14" resetval="0x0" description="Transmission request bits (aggregate for 113-128 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="TXRQSTREG7" width="2" begin="13" end="12" resetval="0x0" description="Transmission request bits (aggregate for 97-112 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="TXRQSTREG6" width="2" begin="11" end="10" resetval="0x0" description="Transmission request bits (aggregate for 81-96 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="TXRQSTREG5" width="2" begin="9" end="8" resetval="0x0" description="Transmission request bits (aggregate for 65-80 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="TXRQSTREG4" width="2" begin="7" end="6" resetval="0x0" description="Transmission request bits (aggregate for 49-64 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="TXRQSTREG3" width="2" begin="5" end="4" resetval="0x0" description="Transmission request bits (aggregate for 33-48 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="TXRQSTREG2" width="2" begin="3" end="2" resetval="0x0" description="Transmission request bits (aggregate for 17-32 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="TXRQSTREG1" width="2" begin="1" end="0" resetval="0x0" description="Transmission request bits (aggregate for 1-16 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_TXRQ12" acronym="DCAN_TXRQ12" offset="0x88" width="32" description="Transmission Request Register This register holds the TxRqst bits of the implemented message objects. By reading out these bits, the software can check for pending transmission requests. The TxRqst bit in a specific message object can be set/reset by the software via the IF1/IF2 message interface registers, or by the message handler after reception of a remote frame or after a successful transmission.">
+    <bitfield id="TXRQS" width="32" begin="31" end="0" resetval="0x0000 0000" description="Transmission request bits (for 1-32 message objects) 0: No transmission has been requested for this message object. 1: The transmission of this message object is requested and is not yet done." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_TXRQ34" acronym="DCAN_TXRQ34" offset="0x8C" width="32" description="Transmission Request Register This register holds the TxRqst bits of the implemented message objects. By reading out these bits, the software can check for pending transmission requests. The TxRqst bit in a specific message object can be set/reset by the software via the IF1/IF2 message interface registers, or by the message handler after reception of a remote frame or after a successful transmission.">
+    <bitfield id="TXRQS" width="32" begin="31" end="0" resetval="0x0000 0000" description="Transmission request bits (for 33-64 message objects) 0: No transmission has been requested for this message object. 1: The transmission of this message object is requested and is not yet done." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_TXRQ56" acronym="DCAN_TXRQ56" offset="0x90" width="32" description="Transmission Request Register This register holds the TxRqst bits of the implemented message objects. By reading out these bits, the software can check for pending transmission requests. The TxRqst bit in a specific message object can be set/reset by the software via the IF1/IF2 message interface registers, or by the message handler after reception of a remote frame or after a successful transmission.">
+    <bitfield id="TXRQS" width="32" begin="31" end="0" resetval="0x0000 0000" description="Transmission request bits (for 65-96 message objects) 0: No transmission has been requested for this message object. 1: The transmission of this message object is requested and is not yet done." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_TXRQ78" acronym="DCAN_TXRQ78" offset="0x94" width="32" description="Transmission Request Register This register holds the TxRqst bits of the implemented message objects. By reading out these bits, the software can check for pending transmission requests. The TxRqst bit in a specific message object can be set/reset by the software via the IF1/IF2 message interface registers, or by the message handler after reception of a remote frame or after a successful transmission.">
+    <bitfield id="TXRQS" width="32" begin="31" end="0" resetval="0x0000 0000" description="Transmission request bits (for 97-128 message objects) 0: No transmission has been requested for this message object. 1: The transmission of this message object is requested and is not yet done." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_NWDAT_X" acronym="DCAN_NWDAT_X" offset="0x98" width="32" description="New Data X Register With the new data X register, the software can detect if one or more bits in the different new data registers are set. Each register bit represents a group of eight message objects. If at least on of the NewDat bits of these message objects are set, the corresponding bit in the new data X register will be set">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="NEWDATREG8" width="2" begin="15" end="14" resetval="0x0" description="New data bits (aggregate for 113-128 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="NEWDATREG7" width="2" begin="13" end="12" resetval="0x0" description="New data bits (aggregate for 97-112 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="NEWDATREG6" width="2" begin="11" end="10" resetval="0x0" description="New data bits (aggregate for 81-96 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="NEWDATREG5" width="2" begin="9" end="8" resetval="0x0" description="New data bits (aggregate for 65-80 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="NEWDATREG4" width="2" begin="7" end="6" resetval="0x0" description="New data bits (aggregate for 49-64 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="NEWDATREG3" width="2" begin="5" end="4" resetval="0x0" description="New data bits (aggregate for 33-48 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="NEWDATREG2" width="2" begin="3" end="2" resetval="0x0" description="New data bits (aggregate for 17-32 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="NEWDATREG1" width="2" begin="1" end="0" resetval="0x0" description="New data bits (aggregate for 1-16 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_NWDAT12" acronym="DCAN_NWDAT12" offset="0x9C" width="32" description="New Data Register This register hold the NewDat bits of the implemented message objects. By reading out these bits, the software can check for new data in the message objects. The NewDat bit of a specific message object can be set/reset by the software via the IF1/IF2 interface register sets, or by the message handler after reception of a data frame or after a successful transmission.">
+    <bitfield id="NEWDAT" width="32" begin="31" end="0" resetval="0x0000 0000" description="New Data Bits (for 1-32 message objects) 0: No new data has been written into the data portion of this message object by the Message Handler since the last time when this flag was cleared by the software. 1: The Message Handler or the software has written new data into the data portion of this message object." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_NWDAT34" acronym="DCAN_NWDAT34" offset="0xA0" width="32" description="New Data Register This register hold the NewDat bits of the implemented message objects. By reading out these bits, the software can check for new data in the message objects. The NewDat bit of a specific message object can be set/reset by the software via the IF1/IF2 interface register sets, or by the message handler after reception of a data frame or after a successful transmission.">
+    <bitfield id="NEWDAT" width="32" begin="31" end="0" resetval="0x0000 0000" description="New Data Bits (for 33-64 message objects) 0: No new data has been written into the data portion of this message object by the Message Handler since the last time when this flag was cleared by the software. 1: The Message Handler or the software has written new data into the data portion of this message object." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_NWDAT56" acronym="DCAN_NWDAT56" offset="0xA4" width="32" description="New Data Register This register hold the NewDat bits of the implemented message objects. By reading out these bits, the software can check for new data in the message objects. The NewDat bit of a specific message object can be set/reset by the software via the IF1/IF2 interface register sets, or by the message handler after reception of a data frame or after a successful transmission.">
+    <bitfield id="NEWDAT" width="32" begin="31" end="0" resetval="0x0000 0000" description="New Data Bits (for 65-96 message objects) 0: No new data has been written into the data portion of this message object by the Message Handler since the last time when this flag was cleared by the software. 1: The Message Handler or the software has written new data into the data portion of this message object." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_NWDAT78" acronym="DCAN_NWDAT78" offset="0xA8" width="32" description="New Data Register This register hold the NewDat bits of the implemented message objects. By reading out these bits, the software can check for new data in the message objects. The NewDat bit of a specific message object can be set/reset by the software via the IF1/IF2 interface register sets, or by the message handler after reception of a data frame or after a successful transmission.">
+    <bitfield id="NEWDAT" width="32" begin="31" end="0" resetval="0x0000 0000" description="New Data Bits (for 97-128 message objects) 0: No new data has been written into the data portion of this message object by the Message Handler since the last time when this flag was cleared by the software. 1: The Message Handler or the software has written new data into the data portion of this message object." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_INTPND_X" acronym="DCAN_INTPND_X" offset="0xAC" width="32" description="Interrupt Pending X Register With the interrupt pending X register, the software can detect if one or more bits in the different interrupt pending registers are set. Each bit of this register represents a group of eight message objects. If at least one of the IntPnd bits of these message objects are set, the corresponding bit in the interrupt pending X register will be set.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="INTPNDREG8" width="2" begin="15" end="14" resetval="0x0" description="Interrupt Pending bits (aggregate for 113-128 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="INTPNDREG7" width="2" begin="13" end="12" resetval="0x0" description="Interrupt Pending bits (aggregate for 97-112 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="INTPNDREG6" width="2" begin="11" end="10" resetval="0x0" description="Interrupt Pendingbits (aggregate for 81-96 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="INTPNDREG5" width="2" begin="9" end="8" resetval="0x0" description="Interrupt Pending bits (aggregate for 65-80 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="INTPNDREG4" width="2" begin="7" end="6" resetval="0x0" description="Interrupt Pending bits (aggregate for 49-64 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="INTPNDREG3" width="2" begin="5" end="4" resetval="0x0" description="Interrupt Pending bits (aggregate for 33-48 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="INTPNDREG2" width="2" begin="3" end="2" resetval="0x0" description="Interrupt Pending bits (aggregate for 17-32 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="INTPNDREG1" width="2" begin="1" end="0" resetval="0x0" description="Interrupt Pending bits (aggregate for 1-16 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_INTPND12" acronym="DCAN_INTPND12" offset="0xB0" width="32" description="Interrupt Pending Register This register holds the IntPnd bits of the implemented message objects. By reading out these bits, the software can check for pending interrupts in the message objects. The IntPnd bit of a specific message object can be set/reset by the software via the IF1/IF2 interface register sets, or by the message handler after a reception or a successful transmission.">
+    <bitfield id="INTPND" width="32" begin="31" end="0" resetval="0x0000 0000" description="Interrupt Pending Bits (for 1-32 message objects)" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="INTPND_0" description="This message object is not the source of an interrupt."/>
+      <bitenum value="1" id="1" token="INTPND_1" description="This message object is the source of an interrupt."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_INTPND34" acronym="DCAN_INTPND34" offset="0xB4" width="32" description="Interrupt Pending Register This register holds the IntPnd bits of the implemented message objects. By reading out these bits, the software can check for pending interrupts in the message objects. The IntPnd bit of a specific message object can be set/reset by the software via the IF1/IF2 interface register sets, or by the message handler after a reception or a successful transmission.">
+    <bitfield id="INTPND" width="32" begin="31" end="0" resetval="0x0000 0000" description="Interrupt Pending Bits (for 33-64 message objects)" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="INTPND_0" description="This message object is not the source of an interrupt."/>
+      <bitenum value="1" id="1" token="INTPND_1" description="This message object is the source of an interrupt."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_INTPND56" acronym="DCAN_INTPND56" offset="0xB8" width="32" description="Interrupt Pending Register This register holds the IntPnd bits of the implemented message objects. By reading out these bits, the software can check for pending interrupts in the message objects. The IntPnd bit of a specific message object can be set/reset by the software via the IF1/IF2 interface register sets, or by the message handler after a reception or a successful transmission.">
+    <bitfield id="INTPND" width="32" begin="31" end="0" resetval="0x0000 0000" description="Interrupt Pending Bits (for 65-96 message objects)" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="INTPND_0" description="This message object is not the source of an interrupt."/>
+      <bitenum value="1" id="1" token="INTPND_1" description="This message object is the source of an interrupt."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_INTPND78" acronym="DCAN_INTPND78" offset="0xBC" width="32" description="Interrupt Pending Register This register holds the IntPnd bits of the implemented message objects. By reading out these bits, the software can check for pending interrupts in the message objects. The IntPnd bit of a specific message object can be set/reset by the software via the IF1/IF2 interface register sets, or by the message handler after a reception or a successful transmission.">
+    <bitfield id="INTPND" width="32" begin="31" end="0" resetval="0x0000 0000" description="Interrupt Pending Bits (for 97-128 message objects)" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="INTPND_0" description="This message object is not the source of an interrupt."/>
+      <bitenum value="1" id="1" token="INTPND_1" description="This message object is the source of an interrupt."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_MSGVAL_X" acronym="DCAN_MSGVAL_X" offset="0xC0" width="32" description="Message Valid X Register With the message valid X register, the software can detect if one or more bits in the different message valid registers are set. Each bit of this register represents a group of eight message objects. If at least one of the MsgVal bits of these message objects are set, the corresponding bit in the message valid X register will be set.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="MSGVALREG8" width="2" begin="15" end="14" resetval="0x0" description="Message valid bits (aggregate for 113-128 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="MSGVALREG7" width="2" begin="13" end="12" resetval="0x0" description="Message valid bits (aggregate for 97-112 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="MSGVALREG6" width="2" begin="11" end="10" resetval="0x0" description="Message valid bits (aggregate for 81-96 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="MSGVALREG5" width="2" begin="9" end="8" resetval="0x0" description="Message valid bits (aggregate for 65-80 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="MSGVALREG4" width="2" begin="7" end="6" resetval="0x0" description="Message valid bits (aggregate for 49-64 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="MSGVALREG3" width="2" begin="5" end="4" resetval="0x0" description="Message valid bits (aggregate for 33-48 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="MSGVALREG2" width="2" begin="3" end="2" resetval="0x0" description="Message valid bits (aggregate for 17-32 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+    <bitfield id="MSGVALREG1" width="2" begin="1" end="0" resetval="0x0" description="Message valid bits (aggregate for 1-16 message objects). Lower bit represents first 8 message objects. Higher bit represents second 8 message objects." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_MSGVAL12" acronym="DCAN_MSGVAL12" offset="0xC4" width="32" description="Message Valid Register These registers hold the MsgVal bits of the implemented message objects. By reading out these bits, the software can check which message objects are valid. The MsgVal bit of a specific message object can be set/reset by the software via the IF1/IF2 interface register sets, or by the message handler after a reception or a successful transmission">
+    <bitfield id="MSGVAL" width="32" begin="31" end="0" resetval="0x0000 0000" description="Message valid Bits (for 1-32 message objects)" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="MSGVAL_0" description="This message object is ignored by the message handler."/>
+      <bitenum value="1" id="1" token="MSGVAL_1" description="This message object is configured and will be considered by the message handler."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_MSGVAL34" acronym="DCAN_MSGVAL34" offset="0xC8" width="32" description="Message Valid Register These registers hold the MsgVal bits of the implemented message objects. By reading out these bits, the software can check which message objects are valid. The MsgVal bit of a specific message object can be set/reset by the software via the IF1/IF2 interface register sets, or by the message handler after a reception or a successful transmission">
+    <bitfield id="MSGVAL" width="32" begin="31" end="0" resetval="0x0000 0000" description="Message valid Bits (for 33-64 message objects)" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="MSGVAL_0" description="This message object is ignored by the message handler."/>
+      <bitenum value="1" id="1" token="MSGVAL_1" description="This message object is configured and will be considered by the message handler."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_MSGVAL56" acronym="DCAN_MSGVAL56" offset="0xCC" width="32" description="Message Valid Register These registers hold the MsgVal bits of the implemented message objects. By reading out these bits, the software can check which message objects are valid. The MsgVal bit of a specific message object can be set/reset by the software via the IF1/IF2 interface register sets, or by the message handler after a reception or a successful transmission">
+    <bitfield id="MSGVAL" width="32" begin="31" end="0" resetval="0x0000 0000" description="Message valid Bits (for 65-96 message objects)" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="MSGVAL_0" description="This message object is ignored by the message handler."/>
+      <bitenum value="1" id="1" token="MSGVAL_1" description="This message object is configured and will be considered by the message handler."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_MSGVAL78" acronym="DCAN_MSGVAL78" offset="0xD0" width="32" description="Message Valid Register These registers hold the MsgVal bits of the implemented message objects. By reading out these bits, the software can check which message objects are valid. The MsgVal bit of a specific message object can be set/reset by the software via the IF1/IF2 interface register sets, or by the message handler after a reception or a successful transmission">
+    <bitfield id="MSGVAL" width="32" begin="31" end="0" resetval="0x0000 0000" description="Message valid Bits (for 97-128 message objects)" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="MSGVAL_0" description="This message object is ignored by the message handler."/>
+      <bitenum value="1" id="1" token="MSGVAL_1" description="This message object is configured and will be considered by the message handler."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_INTMUX12" acronym="DCAN_INTMUX12" offset="0xD8" width="32" description="Interrupt Multiplexer Register The IntMux flag determine for each message object, which of the two interrupt lines (INT0 or INT1) will be asserted when the IntPnd of this message object is set. Both interrupt lines can be globally enabled or disabled by setting or clearing IE0 and IE1 bits in . The IntPnd bit of a specific message object can be set or reset by the software via the IF1/IF2 interface register sets, or by message handler after reception or successful transmission of a frame. This will also affect the INT0ID resp. INT1ID flags in the register.">
+    <bitfield id="INTMUX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Multiplexes IntPnd value to either INT0 or INT1 interrupt lines (bit 0 -&amp;amp;gt; last implemented message object) ( bits 1:31 -&amp;amp;gt; 1-31 message objects)" range="" rwaccess="RW">
+      <bitenum value="0" id="INT0_0" token="INTMUX_0" description="INT0 line is active if corresponding IntPnd flag is one."/>
+      <bitenum value="1" id="INT1_1" token="INTMUX_1" description="INT1 line is active if corresponding IntPnd flag is one."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_INTMUX34" acronym="DCAN_INTMUX34" offset="0xDC" width="32" description="Interrupt Multiplexer Register The IntMux flag determine for each message object, which of the two interrupt lines (INT0 or INT1) will be asserted when the IntPnd of this message object is set. Both interrupt lines can be globally enabled or disabled by setting or clearing IE0 and IE1 bits in CAN control register. The IntPnd bit of a specific message object can be set or reset by the software via the IF1/IF2 interface register sets, or by message handler after reception or successful transmission of a frame. This will also affect the INT0ID resp INT1ID flags in the register.">
+    <bitfield id="INTMUX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Multiplexes IntPnd value to either INT0 or INT1 interrupt lines ( bits 0:31 -&amp;amp;gt; 32-63 message objects)" range="" rwaccess="RW">
+      <bitenum value="0" id="INT0_0" token="INTMUX_0" description="INT0 line is active if corresponding IntPnd flag is one."/>
+      <bitenum value="1" id="INT1_1" token="INTMUX_1" description="INT1 line is active if corresponding IntPnd flag is one."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_INTMUX56" acronym="DCAN_INTMUX56" offset="0xE0" width="32" description="Interrupt Multiplexer Register The IntMux flag determine for each message object, which of the two interrupt lines (INT0 or INT1) will be asserted when the IntPnd of this message object is set. Both interrupt lines can be globally enabled or disabled by setting or clearing IE0 and IE1 bits in CAN control register. The IntPnd bit of a specific message object can be set or reset by the software via the IF1/IF2 interface register sets, or by message handler after reception or successful transmission of a frame. This will also affect the INT0ID resp INT1ID flags in the register.">
+    <bitfield id="INTMUX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Multiplexes IntPnd value to either INT0 or INT1 interrupt lines ( bits 0:31 -&amp;amp;gt; 64-95 message objects)" range="" rwaccess="RW">
+      <bitenum value="0" id="INT0_0" token="INTMUX_0" description="INT0 line is active if corresponding IntPnd flag is one."/>
+      <bitenum value="1" id="INT1_1" token="INTMUX_1" description="INT1 line is active if corresponding IntPnd flag is one."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_INTMUX78" acronym="DCAN_INTMUX78" offset="0xE4" width="32" description="Interrupt Multiplexer Register The IntMux flag determine for each message object, which of the two interrupt lines (INT0 or INT1) will be asserted when the IntPnd of this message object is set. Both interrupt lines can be globally enabled or disabled by setting or clearing IE0 and IE1 bits in CAN control register. The IntPnd bit of a specific message object can be set or reset by the software via the IF1/IF2 interface register sets, or by message handler after reception or successful transmission of a frame. This will also affect the INT0ID resp INT1ID flags in the register.">
+    <bitfield id="INTMUX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Multiplexes IntPnd value to either INT0 or INT1 interrupt lines ( bits 0:31 -&amp;amp;gt; 96-127 message objects)" range="" rwaccess="RW">
+      <bitenum value="0" id="INT0_0" token="INTMUX_0" description="INT0 line is active if corresponding IntPnd flag is one."/>
+      <bitenum value="1" id="INT1_1" token="INTMUX_1" description="INT1 line is active if corresponding IntPnd flag is one."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_IF1CMD" acronym="DCAN_IF1CMD" offset="0x100" width="32" description="IF1 Command Register The IF1 Command Register () configure and initiate the transfer between the IF1 register set and the message RAM. It is configurable which portions of the message object should be transferred. A transfer is started when the software writes the message number to bits [7:0] MESSAGE_NUMBER. With this write operation, the BUSY bit is automatically set to 1 to indicate that a transfer is in progress. After 4 to 14 OCP clock cycles, the transfer between the interface register and the message RAM will be completed and the BUSY bit is cleared. The maximum number of cycles is needed when the message transfer concurs with a CAN message transmission, acceptance filtering, or message storage. If the software writes to both / consecutively (request of a second transfer while first transfer is still in progress), the second transfer will start after the first one has been completed. While BUSY bit is one, IF1/IF2 register sets are write protected. For debug support, the auto clear functionality of the IF1/IF2 command registers (clear of DMAACTIVE flag by r/w) is disabled during Debug/Suspend mode. If an invalid Message Number is written to bits [7:0] MESSAGE_NUMBER, the message handler may access an implemented (valid) message object instead.">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="WR_RD" width="1" begin="23" end="23" resetval="0" description="Write/Read" range="" rwaccess="RW">
+      <bitenum value="0" id="MESSAGE_NUMBER_IF1_0" token="WR_RD_0" description="Direction = Read: Transfer direction is from the message object addressed by MESSAGE_NUMBER to the IF1 register set."/>
+      <bitenum value="1" id="IF1_MESSAGE_NUMBER._1" token="WR_RD_1" description="Direction = Write: Transfer direction is from the IF1 register set to the message object addressed by MESSAGE_NUMBER."/>
+    </bitfield>
+    <bitfield id="MASK" width="1" begin="22" end="22" resetval="0" description="Access mask bits" range="" rwaccess="RW">
+      <bitenum value="0" id="Mask_bits_will_not_be_changed" token="MASK_0" description="Mask bits will not be changed"/>
+      <bitenum value="1" id="MESSAGE_NUMBER_IF1_1" token="MASK_1" description="Direction = Read: The mask bits (identifier mask + MDir + MXtd) will be transferred from the message object addressed by MESSAGE_NUMBER to the IF1 register set."/>
+      <bitenum value="1" id="IF1_MESSAGE_NUMBER._1" token="MASK_1" description="Direction = Write: The mask bits (identifier mask + MDir + MXtd) will be transferred from the IF1 register set to the message object addressed by MESSAGE_NUMBER."/>
+    </bitfield>
+    <bitfield id="ARB" width="1" begin="21" end="21" resetval="0" description="Access arbitration bits" range="" rwaccess="RW">
+      <bitenum value="0" id="Arbitration_bits_will_not_be_changed" token="ARB_0" description="Arbitration bits will not be changed"/>
+      <bitenum value="1" id="MESSAGE_NUMBER_IF1_1" token="ARB_1" description="Direction = Read: The Arbitration bits (Identifier + Dir + Xtd + MsgVal) will be transferred from the message object addressed by MESSAGE_NUMBER to the corresponding IF1 register set."/>
+      <bitenum value="1" id="IF1_MESSAGE_NUMBER._1" token="ARB_1" description="Direction = Write: The Arbitration bits (Identifier + Dir + Xtd + MsgVal) will be transferred from the IF1 register set to the message object addressed by MESSAGE_NUMBER."/>
+    </bitfield>
+    <bitfield id="CONTROL" width="1" begin="20" end="20" resetval="0" description="Access control bitsIf the TXRQST_NEWDAT bit in this register(Bit [18]) is set, the TXRQST/ NEWDAT bits in the will be ignored. ." range="" rwaccess="RW">
+      <bitenum value="0" id="Control_bits_will_not_be_changed" token="CONTROL_0" description="Control bits will not be changed"/>
+      <bitenum value="1" id="MESSAGE_NUMBER_IF1_1" token="CONTROL_1" description="Direction = Read: The message control bits will be transferred from the message object addressed by MESSAGE_NUMBER to the IF1 register set."/>
+      <bitenum value="1" id="IF1_MESSAGE_NUMBER._1" token="CONTROL_1" description="Direction = Write: The message control bits will be transferred from the IF1 registerset to the message object addressed by MESSAGE_NUMBER."/>
+    </bitfield>
+    <bitfield id="CLRINTPND" width="1" begin="19" end="19" resetval="0" description="Clear interrupt pending bit" range="" rwaccess="RW">
+      <bitenum value="0" id="IntPnd_bit_will_not_be_changed" token="CLRINTPND_0" description="IntPnd bit will not be changed"/>
+      <bitenum value="1" id="1" token="CLRINTPND_1" description="Direction = Read: Clears IntPnd bit in the message object."/>
+      <bitenum value="1" id="IF1_RAM_CONTROL_1" token="CLRINTPND_1" description="Direction = Write: This bit is ignored. Copying of IntPnd flag from IF1 Registers to message RAM can only be controlled by the CONTROL flag (Bit [20])."/>
+    </bitfield>
+    <bitfield id="TXRQST_NEWDAT" width="1" begin="18" end="18" resetval="0" description="Access transmission request bitNote: If a CAN transmission is requested by setting TXRQST_NEWDAT in this register, the TxRqst/NewDat bits in the message object will be set to one independent of the values in. . Note: A read access to a message object can be combined with the reset of the control bits IntPnd and NewDat. The values of these bits transferred to the always reflect the status before resetting them. ." range="" rwaccess="RW">
+      <bitenum value="0" id="CONTROL_0" token="TXRQST_NEWDAT_0" description="Direction = Read: NewDat bit will not be changed. Direction = Write: TxRqst/NewDat bit will be handled according to the CONTROL bit."/>
+      <bitenum value="1" id="1" token="TXRQST_NEWDAT_1" description="Direction = Read: Clears NewDat bit in the message object. 1: Direction = Write: Sets TxRqst/NewDat in message object."/>
+    </bitfield>
+    <bitfield id="DATA_A" width="1" begin="17" end="17" resetval="0" description="Access Data Bytes 0-3Note: The duration of the message transfer is independent of the number of bytes to be transferred. ." range="" rwaccess="RW">
+      <bitenum value="0" id="Data_Bytes_0-3_will_not_be_changed." token="DATA_A_0" description="Data Bytes 0-3 will not be changed."/>
+      <bitenum value="1" id="MESSAGE_NUMBER_IF1_1" token="DATA_A_1" description="Direction = Read: The data bytes 0-3 will be transferred from the message object addressed by the MESSAGE_NUMBER to the corresponding IF1 registerset."/>
+      <bitenum value="1" id="IF1_MESSAGE_NUMBER._1" token="DATA_A_1" description="Direction = Write: The data bytes 0-3 will be transferred from the IF1 registerset to the message object addressed by the MESSAGE_NUMBER."/>
+    </bitfield>
+    <bitfield id="DATA_B" width="1" begin="16" end="16" resetval="0" description="Access Data Bytes 4-7Note: The duration of the message transfer is independent of the number of bytes to be transferred. ." range="" rwaccess="RW">
+      <bitenum value="0" id="Data_Bytes_4-7_will_not_be_changed." token="DATA_B_0" description="Data Bytes 4-7 will not be changed."/>
+      <bitenum value="1" id="MESSAGE_NUMBER_IF1_1" token="DATA_B_1" description="Direction = Read: The data bytes 4-7 will be transferred from the message object addressed by MESSAGE_NUMBER to the corresponding IF1 registerset."/>
+      <bitenum value="1" id="IF1_MESSAGE_NUMBER._1" token="DATA_B_1" description="Direction = Write: The data bytes 4-7 will be transferred from the IF1 registerset to the message object addressed by MESSAGE_NUMBER."/>
+    </bitfield>
+    <bitfield id="BUSY" width="1" begin="15" end="15" resetval="0" description="Busy flagThis bit is set to one after the message number has been written to bits [7:0] MESSAGE_NUMBER. IF1 register set will be write protected. The bit is cleared after read/write action has been finished. ." range="" rwaccess="RW">
+      <bitenum value="0" id="IF1_RAM_0" token="BUSY_0" description="No transfer between IF1 register set and message RAM is in progress."/>
+      <bitenum value="1" id="IF1_RAM_1" token="BUSY_1" description="Transfer between IF1 register set and message RAM is in progress."/>
+    </bitfield>
+    <bitfield id="DMAACTIVE" width="1" begin="14" end="14" resetval="0" description="Activation of DMA feature for subsequent internal IF1 updateThe DMA request remains active until the first read or write to one of the IF1 registers; an exception is a write to MESSAGE_NUMBER when DMAACTIVE is one. . Note: Due to the auto reset feature of the DMAACTIVE bit, this bit has to be set for each subsequent DMA cycle separately. ." range="" rwaccess="RW">
+      <bitenum value="0" id="DMA_IF1_0" token="DMAACTIVE_0" description="DMA request line is independent of IF1 activities."/>
+      <bitenum value="1" id="DMA_IF1_RAM._1" token="DMAACTIVE_1" description="DMA is requested after completed transfer between IF1 register set and message RAM."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="13" end="8" resetval="0x00" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="MESSAGE_NUMBER" width="8" begin="7" end="0" resetval="0x1" description="Number of message object in message RAM which is used for data transfer0x01-0x80: Valid message numbers . 0x81-0xFF: Invalid message numbers ." range="" rwaccess="RW">
+      <bitenum value="0" id="Invalid_message_number" token="MESSAGE_NUMBER_0" description="Invalid message number"/>
+    </bitfield>
+  </register>
+  <register id="DCAN_IF1MSK" acronym="DCAN_IF1MSK" offset="0x104" width="32" description="IF1 Mask Register The bits of the IF1/IF2 mask registers mirror the mask bits of a message object. The function of the relevant message objects bits is described in Structure of Message Objects. While BUSY bit of / register is one, IF1/IF2 register set is write protected.">
+    <bitfield id="MXTD" width="1" begin="31" end="31" resetval="1" description="Mask Extended IdentifierWhen 11-bit (&#8220;standard&#8221;) identifiers are used for a message object, the identifiers of received data frames are written into bits ID[28:18]. For acceptance filtering, only these bits together with mask bits Msk[28:18] are considered. ." range="" rwaccess="RW">
+      <bitenum value="0" id="(IDE)_0" token="MXTD_0" description="The extended identifier bit (IDE) has no effect on the acceptance filtering."/>
+      <bitenum value="1" id="(IDE)_1" token="MXTD_1" description="The extended identifier bit (IDE) is used for acceptance filtering."/>
+    </bitfield>
+    <bitfield id="MDIR" width="1" begin="30" end="30" resetval="1" description="Mask Message Direction" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="MDIR_0" description="The message direction bit (Dir) has no effect on the acceptance filtering."/>
+      <bitenum value="1" id="1" token="MDIR_1" description="The message direction bit (Dir) is used for acceptance filtering."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="29" end="29" resetval="1" description="This bit is always read as 1. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="MSK" width="29" begin="28" end="0" resetval="0x1FFF FFFF" description="Identifier Mask" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="MSK_0" description="The corresponding bit in the identifier of the message object is not used for acceptance filtering (don't care)."/>
+      <bitenum value="1" id="1" token="MSK_1" description="The corresponding bit in the identifier of the message object is used for acceptance filtering."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_IF1ARB" acronym="DCAN_IF1ARB" offset="0x108" width="32" description="IF1 arbitration register The Arbitration bits ID[28:0], XTD, and DIR are used to define the identifier and type of outgoing messages and (together with the mask bits MSK[28:0], MXTD, and MDIR) for acceptance filtering of incoming messages. A received message is stored into the valid message object with matching identifier and Direction = receive (data frame) or Direction = transmit (remote frame). Extended frames can be stored only in message objects with XTD = 1, standard frames in message objects with XTD = 0. If a received message (data frame or remote frame) matches more than one valid message objects, it is stored into the one with the lowest message number. The bits of the IF1/IF2 arbitration registers mirror the arbitration bits of a message object. The function of the relevant message objects bits is described in Structure of Message Objects While BUSY bit of / register is one, IF1/IF2 register set is write protected.">
+    <bitfield id="MSGVAL" width="1" begin="31" end="31" resetval="0" description="Message validThe software should reset the MsgVal bit of all unused Messages Objects during the initialization before it resets bit INIT in the. This bit must also be reset if the messages object is no longer required. ." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="MSGVAL_0" description="The message object is ignored by the message handler."/>
+      <bitenum value="1" id="1" token="MSGVAL_1" description="The message object is to be used by the message handler."/>
+    </bitfield>
+    <bitfield id="XTD" width="1" begin="30" end="30" resetval="0" description="Extended identifier" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="XTD_0" description="The 11-bit (&#8220;standard&#8221;) Identifier is used for this message object."/>
+      <bitenum value="1" id="1" token="XTD_1" description="The 29-bit (&#8220;extended&#8221;) Identifier is used for this message object."/>
+    </bitfield>
+    <bitfield id="DIR" width="1" begin="29" end="29" resetval="0" description="Message direction" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="DIR_0" description="Direction = receive: On TxRqst, a remote frame with the identifier of this message object is transmitted. On reception of a data frame with matching identifier, this message is stored in this message object."/>
+      <bitenum value="1" id="1" token="DIR_1" description="Direction = transmit: On TxRqst, the respective message object is transmitted as a data frame. On reception of a remote frame with matching identifier, the TxRqst bit of this message object is set (if RmtEn = 1)."/>
+    </bitfield>
+    <bitfield id="ID" width="29" begin="28" end="0" resetval="0x0000 0000" description="Message identifierID[28:0]: 29-bit identifier (extended frame) . ID[28:18]: 11-bit identifier (standard frame) ." range="" rwaccess="RW"/>
+  </register>
+  <register id="DCAN_IF1MCTL" acronym="DCAN_IF1MCTL" offset="0x10C" width="32" description="IF1 Message Control Register The bits of the IF1/IF2 message control registers mirror the message control bits of a message object. The function of the relevant message objects bits is described in Structure of Message Objects While BUSY bit of / register is one, IF1/IF2 register set is write protected.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="NEWDAT" width="1" begin="15" end="15" resetval="0" description="New data" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="NEWDAT_0" description="No new data has been written into the data portion of this message object by the message handler since the last time when this flag was cleared by the software."/>
+      <bitenum value="1" id="1" token="NEWDAT_1" description="The message handler or the software has written new data into the data portion of this message object."/>
+    </bitfield>
+    <bitfield id="MSGLST" width="1" begin="14" end="14" resetval="0" description="Message lost (only valid for message objects with direction = receive)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="MSGLST_0" description="No message lost since the last time when this bit was reset by the software."/>
+      <bitenum value="1" id="1" token="MSGLST_1" description="The message handler stored a new message into this object when NewDat was still set, so the previous message has been overwritten."/>
+    </bitfield>
+    <bitfield id="INTPND" width="1" begin="13" end="13" resetval="0" description="Interrupt pending" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="INTPND_0" description="This message object is not the source of an interrupt."/>
+      <bitenum value="1" id="1" token="INTPND_1" description="This message object is the source of an interrupt. The Interrupt Identifier in will point to this message object if there is no other interrupt source with higher priority."/>
+    </bitfield>
+    <bitfield id="UMASK" width="1" begin="12" end="12" resetval="0" description="Use acceptance maskIf the UMASK bit is set to one, the message object's mask bits have to be programmed during initialization of the message object before MsgVal is set to one. ." range="" rwaccess="RW">
+      <bitenum value="0" id="Mask_ignored" token="UMASK_0" description="Mask ignored"/>
+      <bitenum value="1" id="1" token="UMASK_1" description="Use mask (Msk[28:0], MXtd, and MDir) for acceptance filtering"/>
+    </bitfield>
+    <bitfield id="TXIE" width="1" begin="11" end="11" resetval="0" description="Transmit interrupt enable" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="TXIE_0" description="IntPnd will not be triggered after the successful transmission of a frame."/>
+      <bitenum value="1" id="1" token="TXIE_1" description="IntPnd will be triggered after the successful transmission of a frame."/>
+    </bitfield>
+    <bitfield id="RXIE" width="1" begin="10" end="10" resetval="0" description="Receive interrupt enable" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="RXIE_0" description="IntPnd will not be triggered after the successful reception of a frame."/>
+      <bitenum value="1" id="1" token="RXIE_1" description="IntPnd will be triggered after the successful reception of a frame."/>
+    </bitfield>
+    <bitfield id="RMTEN" width="1" begin="9" end="9" resetval="0" description="Remote enable" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="RMTEN_0" description="At the reception of a remote frame, TxRqst is not changed."/>
+      <bitenum value="1" id="1" token="RMTEN_1" description="At the reception of a remote frame, TxRqst is set."/>
+    </bitfield>
+    <bitfield id="TXRQST" width="1" begin="8" end="8" resetval="0" description="Transmit request" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="TXRQST_0" description="This message object is not waiting for a transmission."/>
+      <bitenum value="1" id="1" token="TXRQST_1" description="The transmission of this message object is requested and is not yet done."/>
+    </bitfield>
+    <bitfield id="EOB" width="1" begin="7" end="7" resetval="0" description="End of BlockNote: This bit is used to concatenate multiple message objects to build a FIFO Buffer. For single message objects (not belonging to a FIFO Buffer), this bit must always be set to 1. ." range="" rwaccess="RW">
+      <bitenum value="0" id="FIFO_FIFO_0" token="EOB_0" description="The message object is part of a FIFO Buffer block and is not the last message object of the FIFO Buffer block."/>
+      <bitenum value="1" id="FIFO_1" token="EOB_1" description="The message object is a single message object or the last message object in a FIFO Buffer Block."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="6" end="4" resetval="0x0" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="DLC" width="4" begin="3" end="0" resetval="0x0" description="Data length code0-8: Data frame has 0-8 data bytes. . 9-15 Data frame has 8 data bytes. . Note: The data length code of a message object must be defined the same as in all the corresponding objects with the same identifier at other nodes. When the message handler stores a data frame, it will write the DLC to the value given by the received message. ." range="" rwaccess="RW"/>
+  </register>
+  <register id="DCAN_IF1DATA" acronym="DCAN_IF1DATA" offset="0x110" width="32" description="IF1 Data A Register The data bytes of CAN messages are stored in the IF1/IF2 registers in the following order: In a CAN data frame, Data 0 is the first, and Data 7 is the last byte to be transmitted or received. In CAN's serial bit stream, the MSB of each byte will be transmitted first. While BUSY bit of / register is one, IF1/IF2 register set is write protected.">
+    <bitfield id="DATA_3" width="8" begin="31" end="24" resetval="0x0" description="Data byte 3" range="" rwaccess="RW"/>
+    <bitfield id="DATA_2" width="8" begin="23" end="16" resetval="0x0" description="Data byte 2" range="" rwaccess="RW"/>
+    <bitfield id="DATA_1" width="8" begin="15" end="8" resetval="0x0" description="Data byte 1" range="" rwaccess="RW"/>
+    <bitfield id="DATA_0" width="8" begin="7" end="0" resetval="0x0" description="Data byte 0" range="" rwaccess="RW"/>
+  </register>
+  <register id="DCAN_IF1DATB" acronym="DCAN_IF1DATB" offset="0x114" width="32" description="IF1 Data B Register The data bytes of CAN messages are stored in the IF1/IF2 registers in the following order: In a CAN data frame, Data 0 is the first, and Data 7 is the last byte to be transmitted or received. In CAN's serial bit stream, the MSB of each byte will be transmitted first. While BUSY bit of / register is one, IF1/IF2 register set is write protected.">
+    <bitfield id="DATA_7" width="8" begin="31" end="24" resetval="0x0" description="Data byte 7" range="" rwaccess="RW"/>
+    <bitfield id="DATA_6" width="8" begin="23" end="16" resetval="0x0" description="Data byte 6" range="" rwaccess="RW"/>
+    <bitfield id="DATA_5" width="8" begin="15" end="8" resetval="0x0" description="Data byte 5" range="" rwaccess="RW"/>
+    <bitfield id="DATA_4" width="8" begin="7" end="0" resetval="0x0" description="Data byte 4" range="" rwaccess="RW"/>
+  </register>
+  <register id="DCAN_IF2CMD" acronym="DCAN_IF2CMD" offset="0x120" width="32" description="IF2 Command Register The IF2 Command Register () configure and initiate the transfer between the IF2 register set and the message RAM. It is configurable which portions of the message object should be transferred. A transfer is started when the software writes the message number to bits [7:0] MESSAGE_NUMBER. With this write operation, the BUSY bit is automatically set to 1 to indicate that a transfer is in progress. After 4 to 14 OCP clock cycles, the transfer between the interface register and the message RAM will be completed and the BUSY bit is cleared. The maximum number of cycles is needed when the message transfer concurs with a CAN message transmission, acceptance filtering, or message storage. If the software writes to both / consecutively (request of a second transfer while first transfer is still in progress), the second transfer will start after the first one has been completed. While BUSY bit is one, IF1/IF2 register sets are write protected. For debug support, the auto clear functionality of the IF1/IF2 command registers (clear of DMAACTIVE flag by r/w) is disabled during Debug/Suspend mode. If an invalid Message Number is written to bits [7:0] MESSAGE_NUMBER, the message handler may access an implemented (valid) message object instead.">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="WR_RD" width="1" begin="23" end="23" resetval="0" description="Write/Read" range="" rwaccess="RW">
+      <bitenum value="0" id="MESSAGE_NUMBER_IF2_0" token="WR_RD_0" description="Direction = Read: Transfer direction is from the message object addressed by MESSAGE_NUMBER to the IF2 register set."/>
+      <bitenum value="1" id="IF2_MESSAGE_NUMBER._1" token="WR_RD_1" description="Direction = Write: Transfer direction is from the IF2 register set to the message object addressed by MESSAGE_NUMBER."/>
+    </bitfield>
+    <bitfield id="MASK" width="1" begin="22" end="22" resetval="0" description="Access mask bits" range="" rwaccess="RW">
+      <bitenum value="0" id="Mask_bits_will_not_be_changed" token="MASK_0" description="Mask bits will not be changed"/>
+      <bitenum value="1" id="MESSAGE_NUMBER_IF2_1" token="MASK_1" description="Direction = Read: The mask bits (identifier mask + MDir + MXtd) will be transferred from the message object addressed by MESSAGE_NUMBER to the IF2 register set."/>
+      <bitenum value="1" id="IF2_MESSAGE_NUMBER._1" token="MASK_1" description="Direction = Write: The mask bits (identifier mask + MDir + MXtd) will be transferred from the IF2 register set to the message object addressed by MESSAGE_NUMBER."/>
+    </bitfield>
+    <bitfield id="ARB" width="1" begin="21" end="21" resetval="0" description="Access arbitration bits" range="" rwaccess="RW">
+      <bitenum value="0" id="Arbitration_bits_will_not_be_changed" token="ARB_0" description="Arbitration bits will not be changed"/>
+      <bitenum value="1" id="MESSAGE_NUMBER_IF2_1" token="ARB_1" description="Direction = Read: The Arbitration bits (Identifier + Dir + Xtd + MsgVal) will be transferred from the message object addressed by MESSAGE_NUMBER to the corresponding IF2 register set."/>
+      <bitenum value="1" id="IF2_MESSAGE_NUMBER._1" token="ARB_1" description="Direction = Write: The Arbitration bits (Identifier + Dir + Xtd + MsgVal) will be transferred from the IF2 register set to the message object addressed by MESSAGE_NUMBER."/>
+    </bitfield>
+    <bitfield id="CONTROL" width="1" begin="20" end="20" resetval="0" description="Access control bitsIf the TXRQST_NEWDAT bit in this register(Bit [18]) is set, the TXRQST/ NEWDAT bits in the/ will be ignored. ." range="" rwaccess="RW">
+      <bitenum value="0" id="Control_bits_will_not_be_changed" token="CONTROL_0" description="Control bits will not be changed"/>
+      <bitenum value="1" id="MESSAGE_NUMBER_IF2_1" token="CONTROL_1" description="Direction = Read: The message control bits will be transferred from the message object addressed by MESSAGE_NUMBER to the IF2 register set."/>
+      <bitenum value="1" id="IF2_MESSAGE_NUMBER._1" token="CONTROL_1" description="Direction = Write: The message control bits will be transferred from the IF2 registerset to the message object addressed by MESSAGE_NUMBER."/>
+    </bitfield>
+    <bitfield id="CLRINTPND" width="1" begin="19" end="19" resetval="0" description="Clear interrupt pending bit" range="" rwaccess="RW">
+      <bitenum value="0" id="IntPnd_bit_will_not_be_changed" token="CLRINTPND_0" description="IntPnd bit will not be changed"/>
+      <bitenum value="1" id="1" token="CLRINTPND_1" description="Direction = Read: Clears IntPnd bit in the message object."/>
+      <bitenum value="1" id="IF2_RAM_CONTROL_1" token="CLRINTPND_1" description="Direction = Write: This bit is ignored. Copying of IntPnd flag from IF2 Registers to message RAM can only be controlled by the CONTROL flag (Bit [20])."/>
+    </bitfield>
+    <bitfield id="TXRQST_NEWDAT" width="1" begin="18" end="18" resetval="0" description="Access transmission request bitNote: If a CAN transmission is requested by setting TXRQST_NEWDAT in this register, the TxRqst/NewDat bits in the message object will be set to one independent of the values in/. . Note: A read access to a message object can be combined with the reset of the control bits IntPnd and NewDat. The values of these bits transferred to the/ always reflect the status before resetting them. ." range="" rwaccess="RW">
+      <bitenum value="0" id="CONTROL_0" token="TXRQST_NEWDAT_0" description="Direction = Read: NewDat bit will not be changed. Direction = Write: TxRqst/NewDat bit will be handled according to the CONTROL bit."/>
+      <bitenum value="1" id="1" token="TXRQST_NEWDAT_1" description="Direction = Read: Clears NewDat bit in the message object. 1: Direction = Write: Sets TxRqst/NewDat in message object."/>
+    </bitfield>
+    <bitfield id="DATA_A" width="1" begin="17" end="17" resetval="0" description="Access Data Bytes 0-3Note: The duration of the message transfer is independent of the number of bytes to be transferred. ." range="" rwaccess="RW">
+      <bitenum value="0" id="Data_Bytes_0-3_will_not_be_changed." token="DATA_A_0" description="Data Bytes 0-3 will not be changed."/>
+      <bitenum value="1" id="MESSAGE_NUMBER_IF2_1" token="DATA_A_1" description="Direction = Read: The data bytes 0-3 will be transferred from the message object addressed by the MESSAGE_NUMBER to the corresponding IF2 registerset."/>
+      <bitenum value="1" id="IF2_MESSAGE_NUMBER._1" token="DATA_A_1" description="Direction = Write: The data bytes 0-3 will be transferred from the IF2 registerset to the message object addressed by the MESSAGE_NUMBER."/>
+    </bitfield>
+    <bitfield id="DATA_B" width="1" begin="16" end="16" resetval="0" description="Access Data Bytes 4-7Note: The duration of the message transfer is independent of the number of bytes to be transferred. ." range="" rwaccess="RW">
+      <bitenum value="0" id="Data_Bytes_4-7_will_not_be_changed." token="DATA_B_0" description="Data Bytes 4-7 will not be changed."/>
+      <bitenum value="1" id="MESSAGE_NUMBER_IF2_1" token="DATA_B_1" description="Direction = Read: The data bytes 4-7 will be transferred from the message object addressed by MESSAGE_NUMBER to the corresponding IF2 registerset."/>
+      <bitenum value="1" id="IF2_MESSAGE_NUMBER._1" token="DATA_B_1" description="Direction = Write: The data bytes 4-7 will be transferred from the IF2 registerset to the message object addressed by MESSAGE_NUMBER."/>
+    </bitfield>
+    <bitfield id="BUSY" width="1" begin="15" end="15" resetval="0" description="Busy flagThis bit is set to one after the message number has been written to bits [7:0] MESSAGE_NUMBER. IF2 register set will be write protected. The bit is cleared after read/write action has been finished. ." range="" rwaccess="RW">
+      <bitenum value="0" id="IF2_RAM_0" token="BUSY_0" description="No transfer between IF2 register set and message RAM is in progress."/>
+      <bitenum value="1" id="IF2_RAM_1" token="BUSY_1" description="Transfer between IF2 register set and message RAM is in progress."/>
+    </bitfield>
+    <bitfield id="DMAACTIVE" width="1" begin="14" end="14" resetval="0" description="Activation of DMA feature for subsequent internal IF2 updateThe DMA request remains active until the first read or write to one of the IF2 registers; an exception is a write to MESSAGE_NUMBER when DMAACTIVE is one. . Note: Due to the auto reset feature of the DMAACTIVE bit, this bit has to be set for each subsequent DMA cycle separately. ." range="" rwaccess="RW">
+      <bitenum value="0" id="DMA_IF2_0" token="DMAACTIVE_0" description="DMA request line is independent of IF2 activities."/>
+      <bitenum value="1" id="DMA_IF2_RAM._1" token="DMAACTIVE_1" description="DMA is requested after completed transfer between IF2 register set and message RAM."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="13" end="8" resetval="0x00" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="MESSAGE_NUMBER" width="8" begin="7" end="0" resetval="0x1" description="Number of message object in message RAM which is used for data transfer0x01-0x80: Valid message numbers . 0x81-0xFF: Invalid message numbers ." range="" rwaccess="RW">
+      <bitenum value="0" id="Invalid_message_number" token="MESSAGE_NUMBER_0" description="Invalid message number"/>
+    </bitfield>
+  </register>
+  <register id="DCAN_IF2MSK" acronym="DCAN_IF2MSK" offset="0x124" width="32" description="IF2 Mask Register The bits of the IF1/IF2 mask registers mirror the mask bits of a message object. The function of the relevant message objects bits is described in Structure of Message Objects. While BUSY bit of / register is one, IF1/IF2 register set is write protected.">
+    <bitfield id="MXTD" width="1" begin="31" end="31" resetval="1" description="Mask Extended IdentifierWhen 11-bit (&#8220;standard&#8221;) identifiers are used for a message object, the identifiers of received data frames are written into bits ID[28:18]. For acceptance filtering, only these bits together with mask bits Msk[28:18] are considered. ." range="" rwaccess="RW">
+      <bitenum value="0" id="(IDE)_0" token="MXTD_0" description="The extended identifier bit (IDE) has no effect on the acceptance filtering."/>
+      <bitenum value="1" id="(IDE)_1" token="MXTD_1" description="The extended identifier bit (IDE) is used for acceptance filtering."/>
+    </bitfield>
+    <bitfield id="MDIR" width="1" begin="30" end="30" resetval="1" description="Mask Message Direction" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="MDIR_0" description="The message direction bit (Dir) has no effect on the acceptance filtering."/>
+      <bitenum value="1" id="1" token="MDIR_1" description="The message direction bit (Dir) is used for acceptance filtering."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="29" end="29" resetval="1" description="This bit is always read as 1. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="MSK" width="29" begin="28" end="0" resetval="0x1FFF FFFF" description="Identifier Mask" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="MSK_0" description="The corresponding bit in the identifier of the message object is not used for acceptance filtering (don't care)."/>
+      <bitenum value="1" id="1" token="MSK_1" description="The corresponding bit in the identifier of the message object is used for acceptance filtering."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_IF2ARB" acronym="DCAN_IF2ARB" offset="0x128" width="32" description="IF2 arbitration register The Arbitration bits ID[28:0], XTD, and DIR are used to define the identifier and type of outgoing messages and (together with the mask bits MSK[28:0], MXTD, and MDIR) for acceptance filtering of incoming messages. A received message is stored into the valid message object with matching identifier and Direction = receive (data frame) or Direction = transmit (remote frame). Extended frames can be stored only in message objects with Xtd = 1, standard frames in message objects with Xtd = 0. If a received message (data frame or remote frame) matches more than one valid message objects, it is stored into the one with the lowest message number. The bits of the IF1/IF2 arbitration registers mirror the arbitration bits of a message object. The function of the relevant message objects bits is described in Structure of Message Objects While BUSY bit of / register is one, IF1/IF2 register set is write protected.">
+    <bitfield id="MSGVAL" width="1" begin="31" end="31" resetval="0" description="Message validThe software should reset the MsgVal bit of all unused Messages Objects during the initialization before it resets bit INIT in the. This bit must also be reset if the messages object is no longer required. ." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="MSGVAL_0" description="The message object is ignored by the message handler."/>
+      <bitenum value="1" id="1" token="MSGVAL_1" description="The message object is to be used by the message handler."/>
+    </bitfield>
+    <bitfield id="XTD" width="1" begin="30" end="30" resetval="0" description="Extended identifier" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="XTD_0" description="The 11-bit (&#8220;standard&#8221;) Identifier is used for this message object."/>
+      <bitenum value="1" id="1" token="XTD_1" description="The 29-bit (&#8220;extended&#8221;) Identifier is used for this message object."/>
+    </bitfield>
+    <bitfield id="DIR" width="1" begin="29" end="29" resetval="0" description="Message direction" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="DIR_0" description="Direction = receive: On TxRqst, a remote frame with the identifier of this message object is transmitted. On reception of a data frame with matching identifier, this message is stored in this message object."/>
+      <bitenum value="1" id="1" token="DIR_1" description="Direction = transmit: On TxRqst, the respective message object is transmitted as a data frame. On reception of a remote frame with matching identifier, the TxRqst bit of this message object is set (if RmtEn = 1)."/>
+    </bitfield>
+    <bitfield id="ID" width="29" begin="28" end="0" resetval="0x000 0000" description="Message identifierID[28:0]: 29-bit identifier (extended frame) . ID[28:18]: 11-bit identifier (standard frame) ." range="" rwaccess="RW"/>
+  </register>
+  <register id="DCAN_IF2MCTL" acronym="DCAN_IF2MCTL" offset="0x12C" width="32" description="IF2 Message Control Register The bits of the IF1/IF2 message control registers mirror the message control bits of a message object. The function of the relevant message objects bits is described in Structure of Message Objects While BUSY bit of / register is one, IF1/IF2 register set is write protected.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="NEWDAT" width="1" begin="15" end="15" resetval="0" description="New data" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="NEWDAT_0" description="No new data has been written into the data portion of this message object by the message handler since the last time when this flag was cleared by the software."/>
+      <bitenum value="1" id="1" token="NEWDAT_1" description="The message handler or the software has written new data into the data portion of this message object."/>
+    </bitfield>
+    <bitfield id="MSGLST" width="1" begin="14" end="14" resetval="0" description="Message lost (only valid for message objects with direction = receive)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="MSGLST_0" description="No message lost since the last time when this bit was reset by the software."/>
+      <bitenum value="1" id="1" token="MSGLST_1" description="The message handler stored a new message into this object when NewDat was still set, so the previous message has been overwritten."/>
+    </bitfield>
+    <bitfield id="INTPND" width="1" begin="13" end="13" resetval="0" description="Interrupt pending" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="INTPND_0" description="This message object is not the source of an interrupt."/>
+      <bitenum value="1" id="1" token="INTPND_1" description="This message object is the source of an interrupt. The Interrupt Identifier in will point to this message object if there is no other interrupt source with higher priority."/>
+    </bitfield>
+    <bitfield id="UMASK" width="1" begin="12" end="12" resetval="0" description="Use acceptance maskIf the UMask bit is set to one, the message object's mask bits have to be programmed during initialization of the message object before MsgVal is set to one. ." range="" rwaccess="RW">
+      <bitenum value="0" id="Mask_ignored" token="UMASK_0" description="Mask ignored"/>
+      <bitenum value="1" id="1" token="UMASK_1" description="Use mask (Msk[28:0], MXtd, and MDir) for acceptance filtering"/>
+    </bitfield>
+    <bitfield id="TXIE" width="1" begin="11" end="11" resetval="0" description="Transmit interrupt enable" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="TXIE_0" description="IntPnd will not be triggered after the successful transmission of a frame."/>
+      <bitenum value="1" id="1" token="TXIE_1" description="IntPnd will be triggered after the successful transmission of a frame."/>
+    </bitfield>
+    <bitfield id="RXIE" width="1" begin="10" end="10" resetval="0" description="Receive interrupt enable" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="RXIE_0" description="IntPnd will not be triggered after the successful reception of a frame."/>
+      <bitenum value="1" id="1" token="RXIE_1" description="IntPnd will be triggered after the successful reception of a frame."/>
+    </bitfield>
+    <bitfield id="RMTEN" width="1" begin="9" end="9" resetval="0" description="Remote enable" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="RMTEN_0" description="At the reception of a remote frame, TxRqst is not changed."/>
+      <bitenum value="1" id="1" token="RMTEN_1" description="At the reception of a remote frame, TxRqst is set."/>
+    </bitfield>
+    <bitfield id="TXRQST" width="1" begin="8" end="8" resetval="0" description="Transmit request" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="TXRQST_0" description="This message object is not waiting for a transmission."/>
+      <bitenum value="1" id="1" token="TXRQST_1" description="The transmission of this message object is requested and is not yet done."/>
+    </bitfield>
+    <bitfield id="EOB" width="1" begin="7" end="7" resetval="0" description="End of BlockNote: This bit is used to concatenate multiple message objects to build a FIFO Buffer. For single message objects (not belonging to a FIFO Buffer), this bit must always be set to one. ." range="" rwaccess="RW">
+      <bitenum value="0" id="FIFO_FIFO_0" token="EOB_0" description="The message object is part of a FIFO Buffer block and is not the last message object of the FIFO Buffer block."/>
+      <bitenum value="1" id="FIFO_1" token="EOB_1" description="The message object is a single message object or the last message object in a FIFO Buffer Block."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="6" end="4" resetval="0x0" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="DLC" width="4" begin="3" end="0" resetval="0x0" description="Data length code0-8: Data frame has 0-8 data bytes. . 9-15 Data frame has 8 data bytes. . Note: The data length code of a message object must be defined the same as in all the corresponding objects with the same identifier at other nodes. When the message handler stores a data frame, it will write the DLC to the value given by the received message. ." range="" rwaccess="RW"/>
+  </register>
+  <register id="DCAN_IF2DATA" acronym="DCAN_IF2DATA" offset="0x130" width="32" description="IF2 Data A Register The data bytes of CAN messages are stored in the IF1/IF2 registers in the following order: In a CAN data frame, Data 0 is the first, and Data 7 is the last byte to be transmitted or received. In CAN's serial bit stream, the MSB of each byte will be transmitted first. While BUSY bit of / register is one, IF1/IF2 register set is write protected.">
+    <bitfield id="DATA_3" width="8" begin="31" end="24" resetval="0x0" description="Data byte 3" range="" rwaccess="RW"/>
+    <bitfield id="DATA_2" width="8" begin="23" end="16" resetval="0x0" description="Data byte 2" range="" rwaccess="RW"/>
+    <bitfield id="DATA_1" width="8" begin="15" end="8" resetval="0x0" description="Data byte 1" range="" rwaccess="RW"/>
+    <bitfield id="DATA_0" width="8" begin="7" end="0" resetval="0x0" description="Data byte 0" range="" rwaccess="RW"/>
+  </register>
+  <register id="DCAN_IF2DATB" acronym="DCAN_IF2DATB" offset="0x134" width="32" description="IF2 Data B Register The data bytes of CAN messages are stored in the IF1/IF2 registers in the following order: In a CAN data frame, Data 0 is the first, and Data 7 is the last byte to be transmitted or received. In CAN's serial bit stream, the MSB of each byte will be transmitted first. While BUSY bit of / register is one, IF1/IF2 register set is write protected.">
+    <bitfield id="DATA_7" width="8" begin="31" end="24" resetval="0x0" description="Data byte 7" range="" rwaccess="RW"/>
+    <bitfield id="DATA_6" width="8" begin="23" end="16" resetval="0x0" description="Data byte 6" range="" rwaccess="RW"/>
+    <bitfield id="DATA_5" width="8" begin="15" end="8" resetval="0x0" description="Data byte 5" range="" rwaccess="RW"/>
+    <bitfield id="DATA_4" width="8" begin="7" end="0" resetval="0x0" description="Data byte 4" range="" rwaccess="RW"/>
+  </register>
+  <register id="DCAN_IF3OBS" acronym="DCAN_IF3OBS" offset="0x140" width="32" description="IF3 Observation Register The IF3 register set can automatically be updated with received message objects without the need to initiate the transfer from message RAM by software (Additional information can be found in NOTE: If IF3 Update Enable is used and no Observation flag is set, the corresponding message objects will be copied to IF3 without activating the DMA request line and without waiting for DMA read accesses. A write access to this register aborts a pending DMA cycle by resetting the DMA line and enables updating of IF3 interface register set with new data. To avoid data inconsistency, the DMA controller should be disabled before reconfiguring IF3 observation register. The status of the current read-cycle can be observed via status flags (Bits [12:8]).">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="IF3_UPD" width="1" begin="15" end="15" resetval="0" description="IF3 Update Data" range="" rwaccess="R">
+      <bitenum value="0" id="IF3_0" token="IF3_UPD_0" description="No new data has been loaded since last IF3 read."/>
+      <bitenum value="1" id="IF3_1" token="IF3_UPD_1" description="New data has been loaded since last IF3 read."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="14" end="13" resetval="0x0" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="IF3_SDB" width="1" begin="12" end="12" resetval="0" description="IF3 Status of Data B read access" range="" rwaccess="R">
+      <bitenum value="0" id="B_0" token="IF3_SDB_0" description="All Data B bytes are already read out, or are not marked to be read."/>
+      <bitenum value="1" id="B_1" token="IF3_SDB_1" description="Data B section has still data to be read out."/>
+    </bitfield>
+    <bitfield id="IF3_SDA" width="1" begin="11" end="11" resetval="0" description="IF3 Status of Data A read access" range="" rwaccess="R">
+      <bitenum value="0" id="A_0" token="IF3_SDA_0" description="All Data A bytes are already read out, or are not marked to be read."/>
+      <bitenum value="1" id="A_1" token="IF3_SDA_1" description="Data A section has still data to be read out."/>
+    </bitfield>
+    <bitfield id="IF3_SC" width="1" begin="10" end="10" resetval="0" description="IF3 Status of control bits read access" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="IF3_SC_0" description="All control section bytes are already read out, or are not marked to be read."/>
+      <bitenum value="1" id="1" token="IF3_SC_1" description="Control section has still data to be read out."/>
+    </bitfield>
+    <bitfield id="IF3_SA" width="1" begin="9" end="9" resetval="0" description="IF3 Status of Arbitration data read access" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="IF3_SA_0" description="All Arbitration data bytes are already read out, or are not marked to be read."/>
+      <bitenum value="1" id="1" token="IF3_SA_1" description="Arbitration section has still data to be read out."/>
+    </bitfield>
+    <bitfield id="IF3_SM" width="1" begin="8" end="8" resetval="0" description="IF3 Status of Mask data read access" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="IF3_SM_0" description="All mask data bytes are already read out, or are not marked to be read."/>
+      <bitenum value="1" id="1" token="IF3_SM_1" description="Mask section has still data to be read out."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="7" end="5" resetval="0x0" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="DATAB" width="1" begin="4" end="4" resetval="0" description="Data B read observation" range="" rwaccess="RW">
+      <bitenum value="0" id="Data_B_section_has_not_to_be_read." token="DATAB_0" description="Data B section has not to be read."/>
+      <bitenum value="1" id="B_IF3_1" token="DATAB_1" description="Data B section has to be read to enable next IF3 update."/>
+    </bitfield>
+    <bitfield id="DATAA" width="1" begin="3" end="3" resetval="0" description="Data A read observation" range="" rwaccess="RW">
+      <bitenum value="0" id="Data_A_section_has_not_to_be_read." token="DATAA_0" description="Data A section has not to be read."/>
+      <bitenum value="1" id="A_IF3_1" token="DATAA_1" description="Data A section has to be read to enable next IF3 update."/>
+    </bitfield>
+    <bitfield id="CTRL" width="1" begin="2" end="2" resetval="0" description="Ctrl read observation" range="" rwaccess="RW">
+      <bitenum value="0" id="Ctrl_section_has_not_to_be_read." token="CTRL_0" description="Ctrl section has not to be read."/>
+      <bitenum value="1" id="IF3_1" token="CTRL_1" description="Ctrl section has to be read to enable next IF3 update."/>
+    </bitfield>
+    <bitfield id="ARB" width="1" begin="1" end="1" resetval="0" description="Arbitration data read observation" range="" rwaccess="RW">
+      <bitenum value="0" id="Arbitration_data_has_not_to_be_read." token="ARB_0" description="Arbitration data has not to be read."/>
+      <bitenum value="1" id="IF3_1" token="ARB_1" description="Arbitration data has to be read to enable next IF3 update."/>
+    </bitfield>
+    <bitfield id="MASK" width="1" begin="0" end="0" resetval="0" description="Mask data read observation" range="" rwaccess="RW">
+      <bitenum value="0" id="Mask_data_has_not_to_be_read." token="MASK_0" description="Mask data has not to be read."/>
+      <bitenum value="1" id="IF3_1" token="MASK_1" description="Mask data has to be read to enable next IF3 update."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_IF3MSK" acronym="DCAN_IF3MSK" offset="0x144" width="32" description="IF3 Mask Register">
+    <bitfield id="MXTD" width="1" begin="31" end="31" resetval="1" description="Mask Extended IdentifierWhen 11-bit (&#8220;standard&#8221;) identifiers are used for a message object, the identifiers of received data frames are written into bits ID[28:18]. For acceptance filtering, only these bits together with mask bits Msk[28:18] are considered. ." range="" rwaccess="R">
+      <bitenum value="0" id="(IDE)_0" token="MXTD_0" description="The extended identifier bit (IDE) has no effect on the acceptance filtering."/>
+      <bitenum value="1" id="(IDE)_1" token="MXTD_1" description="The extended identifier bit (IDE) is used for acceptance filtering."/>
+    </bitfield>
+    <bitfield id="MDIR" width="1" begin="30" end="30" resetval="1" description="Mask Message Direction" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="MDIR_0" description="The message direction bit (Dir) has no effect on the acceptance filtering."/>
+      <bitenum value="1" id="1" token="MDIR_1" description="The message direction bit (Dir) is used for acceptance filtering."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="29" end="29" resetval="1" description="These bits are always read as 1. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="MSK" width="29" begin="28" end="0" resetval="0x1FFF FFFF" description="Identifier Mask" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="MSK_0" description="The corresponding bit in the identifier of the message object is not used for acceptance filtering (don't care)."/>
+      <bitenum value="1" id="1" token="MSK_1" description="The corresponding bit in the identifier of the message object is used for acceptance filtering."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_IF3ARB" acronym="DCAN_IF3ARB" offset="0x148" width="32" description="IF3 Arbitration Register">
+    <bitfield id="MSGVAL" width="1" begin="31" end="31" resetval="0" description="Message ValidThe software should reset the MsgVal bit of all unused Messages Objects during the initialization before it resets bit INIT in the. This bit must also be reset before the identifier ID[28:0], the control bits Xtd, Dir or DLC[3:0] are modified, or if the messages object is no longer required. ." range="" rwaccess="R">
+      <bitenum value="0" id="0" token="MSGVAL_0" description="The message object is ignored by the message handler."/>
+      <bitenum value="1" id="1" token="MSGVAL_1" description="The message object is to be used by the message handler."/>
+    </bitfield>
+    <bitfield id="XTD" width="1" begin="30" end="30" resetval="0" description="Extended Identifier" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="XTD_0" description="The 11-bit (&#8220;standard&#8221;) Identifier is used for this message object."/>
+      <bitenum value="1" id="1" token="XTD_1" description="The 29-bit (&#8220;extended&#8221;) Identifier is used for this message object."/>
+    </bitfield>
+    <bitfield id="DIR" width="1" begin="29" end="29" resetval="0" description="Message Direction" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="DIR_0" description="Direction = receive: On TxRqst, a remote frame with the identifier of this message object is transmitted. On reception of a data frame with matching identifier, this message is stored in this message object."/>
+      <bitenum value="1" id="1" token="DIR_1" description="Direction = transmit: On TxRqst, the respective message object is transmitted as a data frame. On reception of a remote frame with matching identifier, the TxRqst bit of this message object is set (if RmtEn = 1)."/>
+    </bitfield>
+    <bitfield id="ID" width="29" begin="28" end="0" resetval="0x0000 0000" description="Message IdentifierID[28:0]: 29-bit Identifier (&#8220;extended frame&#8221;) . ID[28:18]: 11-bit Identifier (&#8220;standard frame&#8221;) ." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_IF3MCTL" acronym="DCAN_IF3MCTL" offset="0x14C" width="32" description="IF3 Message Control Register">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="NEWDAT" width="1" begin="15" end="15" resetval="0" description="New Data" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="NEWDAT_0" description="No new data has been written into the data portion of this message object by the message handler since the last time when this flag was cleared by the software."/>
+      <bitenum value="1" id="1" token="NEWDAT_1" description="The message handler or the software has written new data into the data portion of this message object."/>
+    </bitfield>
+    <bitfield id="MSGLST" width="1" begin="14" end="14" resetval="0" description="Message Lost (only valid for message objects with direction = receive)" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="MSGLST_0" description="No message lost since the last time when this bit was reset by the software."/>
+      <bitenum value="1" id="1" token="MSGLST_1" description="The message handler stored a new message into this object when NewDat was still set, so the previous message has been overwritten."/>
+    </bitfield>
+    <bitfield id="INTPND" width="1" begin="13" end="13" resetval="0" description="Interrupt Pending" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="INTPND_0" description="This message object is not the source of an interrupt."/>
+      <bitenum value="1" id="1" token="INTPND_1" description="This message object is the source of an interrupt. The Interrupt Identifier in will point to this message object if there is no other interrupt source with higher priority."/>
+    </bitfield>
+    <bitfield id="UMASK" width="1" begin="12" end="12" resetval="0" description="Use Acceptance MaskIf the UMASK bit is set to one, the message object's mask bits have to be programmed during initialization of the message object before MsgVal is set to one. ." range="" rwaccess="R">
+      <bitenum value="0" id="Mask_ignored" token="UMASK_0" description="Mask ignored"/>
+      <bitenum value="1" id="1" token="UMASK_1" description="Use mask (Msk[28:0], MXtd, and MDir) for acceptance filtering"/>
+    </bitfield>
+    <bitfield id="TXIE" width="1" begin="11" end="11" resetval="0" description="Transmit Interrupt enable" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="TXIE_0" description="IntPnd will not be triggered after the successful transmission of a frame."/>
+      <bitenum value="1" id="1" token="TXIE_1" description="IntPnd will be triggered after the successful transmission of a frame."/>
+    </bitfield>
+    <bitfield id="RXIE" width="1" begin="10" end="10" resetval="0" description="Receive Interrupt enable" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="RXIE_0" description="IntPnd will not be triggered after the successful reception of a frame."/>
+      <bitenum value="1" id="1" token="RXIE_1" description="IntPnd will be triggered after the successful reception of a frame."/>
+    </bitfield>
+    <bitfield id="RMTEN" width="1" begin="9" end="9" resetval="0" description="Remote enable" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="RMTEN_0" description="At the reception of a remote frame, TxRqst is not changed."/>
+      <bitenum value="1" id="1" token="RMTEN_1" description="At the reception of a remote frame, TxRqst is set."/>
+    </bitfield>
+    <bitfield id="TXRQST" width="1" begin="8" end="8" resetval="0" description="Transmit Request" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="TXRQST_0" description="This message object is not waiting for a transmission."/>
+      <bitenum value="1" id="1" token="TXRQST_1" description="The transmission of this message object is requested and is not yet done."/>
+    </bitfield>
+    <bitfield id="EOB" width="1" begin="7" end="7" resetval="0" description="End of BlockNote: This bit is used to concatenate multiple message objects to build a FIFO Buffer. For single message objects (not belonging to a FIFO Buffer), this bit must always be set to one. ." range="" rwaccess="R">
+      <bitenum value="0" id="FIFO_FIFO_0" token="EOB_0" description="The message object is part of a FIFO Buffer block and is not the last message object of the FIFO Buffer block."/>
+      <bitenum value="1" id="FIFO_1" token="EOB_1" description="The message object is a single message object or the last message object in a FIFO Buffer Block."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="6" end="4" resetval="0x0" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="DLC" width="4" begin="3" end="0" resetval="0x0" description="Data Length Code0-8: Data frame has 0-8 data bits. . 9-15: Data frame has 8 data bytes. . Note: The data length code of a message object must be defined the same as in all the corresponding objects with the same identifier at other nodes. When the message handler stores a data frame, it will write the DLC to the value given by the received message. ." range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_IF3DATA" acronym="DCAN_IF3DATA" offset="0x150" width="32" description="IF3 Data A The data bytes of CAN messages are stored in the IF3 registers in the following order: In a CAN data frame, Data 0 is the first, and Data 7 is the last byte to be transmitted or received. In CAN's serial bit stream, the MSB of each byte will be transmitted first.">
+    <bitfield id="DATA_3" width="8" begin="31" end="24" resetval="0x0" description="Data byte 3" range="" rwaccess="R"/>
+    <bitfield id="DATA_2" width="8" begin="23" end="16" resetval="0x0" description="Data byte 2" range="" rwaccess="R"/>
+    <bitfield id="DATA_1" width="8" begin="15" end="8" resetval="0x0" description="Data byte 1" range="" rwaccess="R"/>
+    <bitfield id="DATA_0" width="8" begin="7" end="0" resetval="0x0" description="Data byte 0" range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_IF3DATB" acronym="DCAN_IF3DATB" offset="0x154" width="32" description="IF3 Data B The data bytes of CAN messages are stored in the IF3 registers in the following order: In a CAN data frame, Data 0 is the first, and Data 7 is the last byte to be transmitted or received. In CAN's serial bit stream, the MSB of each byte will be transmitted first.">
+    <bitfield id="DATA_7" width="8" begin="31" end="24" resetval="0x0" description="Data byte 7" range="" rwaccess="R"/>
+    <bitfield id="DATA_6" width="8" begin="23" end="16" resetval="0x0" description="Data byte 6" range="" rwaccess="R"/>
+    <bitfield id="DATA_5" width="8" begin="15" end="8" resetval="0x0" description="Data byte 5" range="" rwaccess="R"/>
+    <bitfield id="DATA_4" width="8" begin="7" end="0" resetval="0x0" description="Data byte 4" range="" rwaccess="R"/>
+  </register>
+  <register id="DCAN_IF3UPD12" acronym="DCAN_IF3UPD12" offset="0x160" width="32" description="Update Enable Register The automatic update functionality of the IF3 register set can be configured for each message object. A message object is enabled for automatic IF3 update, if the dedicated IF3UPDEN flag is set. This means that an active NewDat flag of this message object (e.g due to reception of a CAN frame) will trigger an automatic copy of the whole message object to IF3 register set NOTE: IF3 Update enable should not be set for transmit objects.">
+    <bitfield id="IF3UPDEN" width="32" begin="31" end="0" resetval="0x0000 0000" description="IF3 Update Enabled (for 1-32 message objects)" range="" rwaccess="RW">
+      <bitenum value="0" id="IF3_0" token="IF3UPDEN_0" description="Automatic IF3 update is disabled for this message object."/>
+      <bitenum value="1" id="IF3_A_IF3_1" token="IF3UPDEN_1" description="Automatic IF3 update is enabled for this message object. A message object is scheduled to be copied to IF3 register set, if NewDat flag of the message object is active."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_IF3UPD34" acronym="DCAN_IF3UPD34" offset="0x164" width="32" description="Update Enable Register The automatic update functionality of the IF3 register set can be configured for each message object. A message object is enabled for automatic IF3 update, if the dedicated IF3UPDEN flag is set. This means that an active NewDat flag of this message object (e.g due to reception of a CAN frame) will trigger an automatic copy of the whole message object to IF3 register set NOTE: IF3 Update enable should not be set for transmit objects.">
+    <bitfield id="IF3UPDEN" width="32" begin="31" end="0" resetval="0x0000 0000" description="IF3 Update Enabled (for 33-64 message objects)" range="" rwaccess="RW">
+      <bitenum value="0" id="IF3_0" token="IF3UPDEN_0" description="Automatic IF3 update is disabled for this message object."/>
+      <bitenum value="1" id="IF3_A_IF3_1" token="IF3UPDEN_1" description="Automatic IF3 update is enabled for this message object. A message object is scheduled to be copied to IF3 register set, if NewDat flag of the message object is active."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_IF3UPD56" acronym="DCAN_IF3UPD56" offset="0x168" width="32" description="Update Enable Register The automatic update functionality of the IF3 register set can be configured for each message object. A message object is enabled for automatic IF3 update, if the dedicated IF3UPDEN flag is set. This means that an active NewDat flag of this message object (e.g due to reception of a CAN frame) will trigger an automatic copy of the whole message object to IF3 register set NOTE: IF3 Update enable should not be set for transmit objects.">
+    <bitfield id="IF3UPDEN" width="32" begin="31" end="0" resetval="0x0000 0000" description="IF3 Update Enabled (for 65-96 message objects)" range="" rwaccess="RW">
+      <bitenum value="0" id="IF3_0" token="IF3UPDEN_0" description="Automatic IF3 update is disabled for this message object."/>
+      <bitenum value="1" id="IF3_A_IF3_1" token="IF3UPDEN_1" description="Automatic IF3 update is enabled for this message object. A message object is scheduled to be copied to IF3 register set, if NewDat flag of the message object is active."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_IF3UPD78" acronym="DCAN_IF3UPD78" offset="0x16C" width="32" description="Update Enable Register The automatic update functionality of the IF3 register set can be configured for each message object. A message object is enabled for automatic IF3 update, if the dedicated IF3UPDEN flag is set. This means that an active NewDat flag of this message object (e.g due to reception of a CAN frame) will trigger an automatic copy of the whole message object to IF3 register set NOTE: IF3 Update enable should not be set for transmit objects.">
+    <bitfield id="IF3UPDEN" width="32" begin="31" end="0" resetval="0x0000 0000" description="IF3 Update Enabled (for 97-128 message objects)" range="" rwaccess="RW">
+      <bitenum value="0" id="IF3_0" token="IF3UPDEN_0" description="Automatic IF3 update is disabled for this message object."/>
+      <bitenum value="1" id="IF3_A_IF3_1" token="IF3UPDEN_1" description="Automatic IF3 update is enabled for this message object. A message object is scheduled to be copied to IF3 register set, if NewDat flag of the message object is active."/>
+    </bitfield>
+  </register>
+  <register id="DCAN_TIOC" acronym="DCAN_TIOC" offset="0x1E0" width="32" description="TX I/O Control Register The CAN_TX pin of the DCAN module can be used as general purpose IO pin if CAN function is not needed. The values of the IO control registers are only writable if INIT bit of the is set to 1.">
+    <bitfield id="RESERVED" width="13" begin="31" end="19" resetval="0x0000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="PU" width="1" begin="18" end="18" resetval="0" description="CAN_TX pull up/pull down select. This bit is only active when CAN_TX is configured to be an input." range="" rwaccess="RW">
+      <bitenum value="0" id="CAN_TX_(PD_0" token="PU_0" description="CAN_TX pull down is selected, when pull logic is active (PD = 0)."/>
+      <bitenum value="1" id="CAN_TX_1" token="PU_1" description="CAN_TX pull up is selected, when pull logic is active(PD = 0)."/>
+    </bitfield>
+    <bitfield id="PD" width="1" begin="17" end="17" resetval="0" description="CAN_TX pull disable. This bit is only active when CAN_TX is configured to be an input." range="" rwaccess="RW">
+      <bitenum value="0" id="CAN_TX_pull_is_active" token="PD_0" description="CAN_TX pull is active"/>
+      <bitenum value="1" id="CAN_TX_pull_is_disabled" token="PD_1" description="CAN_TX pull is disabled"/>
+    </bitfield>
+    <bitfield id="OD" width="1" begin="16" end="16" resetval="0" description="CAN_TX open drain enable. This bit is only active when CAN_TX is configured to be in GIO mode (FUNC=0).Forced to '0' if INIT bit of is reset. ." range="" rwaccess="RW">
+      <bitenum value="0" id="CAN_TX_0" token="OD_0" description="The CAN_TX pin is configured in push/pull mode."/>
+      <bitenum value="1" id="CAN_TX_1" token="OD_1" description="The CAN_TX pin is configured in open drain mode."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="12" begin="15" end="4" resetval="0x000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="FUNC" width="1" begin="3" end="3" resetval="0" description="CAN_TX function. This bit changes the function of the CAN_TX pinForced to Tx output of the CAN core, if INIT bit of is reset. ." range="" rwaccess="RW">
+      <bitenum value="0" id="CAN_TX_pin_is_in_GIO_mode." token="FUNC_0" description="CAN_TX pin is in GIO mode."/>
+      <bitenum value="1" id="CAN_TX_CAN_1" token="FUNC_1" description="CAN_TX pin is in functional mode (as an output to transmit CAN data)."/>
+    </bitfield>
+    <bitfield id="DIR" width="1" begin="2" end="2" resetval="0" description="CAN_TX data direction. This bit controls the direction of the CAN_TX pin when it is configured to be in GIO mode only (FUNC=0)Forced to '1' if INIT bit of is reset. ." range="" rwaccess="RW">
+      <bitenum value="0" id="The_CAN_TX_pin_is_an_input." token="DIR_0" description="The CAN_TX pin is an input."/>
+      <bitenum value="1" id="The_CAN_TX_pin_is_an_output" token="DIR_1" description="The CAN_TX pin is an output"/>
+    </bitfield>
+    <bitfield id="OUT" width="1" begin="1" end="1" resetval="0" description="CAN_TX data out write. This bit is only active when CAN_TX pin is configured to be in GIO mode (FUNC = 0) and configured to be an output pin (DIR = 1). The value of this bit indicates the value to be output to the CAN_TX pin.Forced to 1 if INIT bit of is reset. ." range="" rwaccess="RW">
+      <bitenum value="0" id="The_CAN_TX_pin_is_driven_to_logic_low" token="OUT_0" description="The CAN_TX pin is driven to logic low"/>
+      <bitenum value="1" id="The_CAN_TX_pin_is_driven_to_logic_high" token="OUT_1" description="The CAN_TX pin is driven to logic high"/>
+    </bitfield>
+    <bitfield id="IN" width="1" begin="0" end="0" resetval="-" description="CAN_TX data inNote: When CAN_TX pin is connected to a CAN transceiver, an external pullup resistor has to be used to ensure that the CAN bus will not be disturbed (e.g. while reset of the DCAN module). ." range="" rwaccess="RW">
+      <bitenum value="0" id="The_CAN_TX_pin_is_at_logic_low" token="IN_0" description="The CAN_TX pin is at logic low"/>
+      <bitenum value="1" id="The_CAN_TX_pin_is_at_logic_high" token="IN_1" description="The CAN_TX pin is at logic high"/>
+    </bitfield>
+  </register>
+  <register id="DCAN_RIOC" acronym="DCAN_RIOC" offset="0x1E4" width="32" description="RX I/O Control Register The CAN_RX pin of the DCAN_module can be used as general purpose IO pin if CAN function is not needed. The values of the IO control registers are only writable if INIT bit of the is set to 1.">
+    <bitfield id="RESERVED" width="13" begin="31" end="19" resetval="0x0000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="PU" width="1" begin="18" end="18" resetval="0" description="CAN_RX pull up/pull down select. This bit is only active when CAN_RX is configured to be an input." range="" rwaccess="RW">
+      <bitenum value="0" id="CAN_RX_(PD_0" token="PU_0" description="CAN_RX pull down is selected, when pull logic is active (PD = 0)."/>
+      <bitenum value="1" id="CAN_RX_1" token="PU_1" description="CAN_RX pull up is selected, when pull logic is active(PD = 0)."/>
+    </bitfield>
+    <bitfield id="PD" width="1" begin="17" end="17" resetval="0" description="CAN_RX pull disable. This bit is only active when CAN_TX is configured to be an input." range="" rwaccess="RW">
+      <bitenum value="0" id="CAN_RX_pull_is_active" token="PD_0" description="CAN_RX pull is active"/>
+      <bitenum value="1" id="CAN_RX_pull_is_disabled" token="PD_1" description="CAN_RX pull is disabled"/>
+    </bitfield>
+    <bitfield id="OD" width="1" begin="16" end="16" resetval="0" description="CAN_RX open drain enable. This bit is only active when CAN_RX is configured to be in GIO mode (FUNC=0).Forced to '0' if INIT bit of is reset. ." range="" rwaccess="RW">
+      <bitenum value="0" id="CAN_RX_0" token="OD_0" description="The CAN_RX pin is configured in push/pull mode."/>
+      <bitenum value="1" id="CAN_RX_1" token="OD_1" description="The CAN_RX pin is configured in open drain mode."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="12" begin="15" end="4" resetval="0x000" description="These bits are always read as 0. Writes have no effect." range="" rwaccess="R"/>
+    <bitfield id="FUNC" width="1" begin="3" end="3" resetval="0" description="CAN_RX function. This bit changes the function of the CAN_RX pinForced to '1' if INIT bit of is reset. ." range="" rwaccess="RW">
+      <bitenum value="0" id="CAN_RX_pin_is_in_GIO_mode." token="FUNC_0" description="CAN_RX pin is in GIO mode."/>
+      <bitenum value="1" id="CAN_RX_CAN_1" token="FUNC_1" description="CAN_RX pin is in functional mode (as an input to receive CAN data)."/>
+    </bitfield>
+    <bitfield id="DIR" width="1" begin="2" end="2" resetval="0" description="CAN_RX data direction. This bit controls the direction of the CAN_RX pin when it is configured to be in GIO mode only (FUNC=0)Forced to '0' if INIT bit is reset. ." range="" rwaccess="RW">
+      <bitenum value="0" id="The_CAN_RX_pin_is_an_input." token="DIR_0" description="The CAN_RX pin is an input."/>
+      <bitenum value="1" id="The_CAN_RX_pin_is_an_output" token="DIR_1" description="The CAN_RX pin is an output"/>
+    </bitfield>
+    <bitfield id="OUT" width="1" begin="1" end="1" resetval="0" description="CAN_RX data out write. This bit is only active when CAN_RX pin is configured to be in GIO mode (FUNC = 0) and configured to be an output pin (DIR = 1). The value of this bit indicates the value to be output to the CAN_RX pin. ." range="" rwaccess="RW">
+      <bitenum value="0" id="The_CAN_RX_pin_is_driven_to_logic_low" token="OUT_0" description="The CAN_RX pin is driven to logic low"/>
+      <bitenum value="1" id="The_CAN_RX_pin_is_driven_to_logic_high" token="OUT_1" description="The CAN_RX pin is driven to logic high"/>
+    </bitfield>
+    <bitfield id="IN" width="1" begin="0" end="0" resetval="-" description="CAN_RX data in ." range="" rwaccess="RW">
+      <bitenum value="0" id="The_CAN_RX_pin_is_at_logic_low" token="IN_0" description="The CAN_RX pin is at logic low"/>
+      <bitenum value="1" id="The_CAN_RX_pin_is_at_logic_high" token="IN_1" description="The CAN_RX pin is at logic high"/>
+    </bitfield>
+  </register>
+</module>

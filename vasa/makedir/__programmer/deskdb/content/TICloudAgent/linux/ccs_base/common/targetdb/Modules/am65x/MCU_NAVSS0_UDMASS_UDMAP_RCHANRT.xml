@@ -1,0 +1,74 @@
+<module name="MCU_NAVSS0_UDMASS_UDMAP_RCHANRT" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="UDMA_RRT_CTL_j" acronym="UDMA_RRT_CTL_j" offset="0x0" width="32" description="The Rx Channel Realtime Control Register contains real-time control and status information for the Rx DMA channel. The fields in this register can safely be changed while the channel is in operation. Offset = 0h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="EN" width="1" begin="31" end="31" resetval="0x0" description="This field enables or disables the channel. Disabling a channel halts operation on the channel after the current block transfer is completed. Disabling a channel in the middle of a packet transfer may result in overflow conditions in the attached application and data loss. When a channel is disabled, the implementation may choose to reset all state for the channel. The pause bit shoudl be asserted instead of clearing enable directly if the intent is to temporarily pause the channel. This field is encoded as follows: 0 = channel is disabled 1 = channel is enabled This field will be cleared by HW after a teardown is requested to indicate tha the channel teardown is complete. If the host is enabling a channel that is just being set up, the host must initialize all of the other channel configuration fields before setting this bit." range="" rwaccess="RW"/>
+    <bitfield id="TDOWN" width="1" begin="30" end="30" resetval="0x0" description="This field indicates whether or not an Rx teardown operation is complete. This field should be cleared when a channel is initialized. This field will be set after a channel teardown is complete." range="" rwaccess="RW"/>
+    <bitfield id="PAUSE" width="1" begin="29" end="29" resetval="0x0" description="Channel pause: Setting this bit will cause the channel to pause processing immediately." range="" rwaccess="RW"/>
+    <bitfield id="FTDOWN" width="1" begin="28" end="28" resetval="0x0" description="Channel forced teardown: Setting this bit will cause the channel to stop waiting on trigger events. When this bit is set, teh implementation may choose to bypass data transfers and event generation. This bit is a modifier to the normal rx_teardown and is intended to flush the channel to recover any descriptor or TR references which are currently being held by the UDMA even if the trigger source is no longer functioning. Use of this bit is considered a 'catastrophic' condition and it is assumed that SW will need to perform some re-initialization in the system to re-align e vents, data buffers, etc. This bit should be set in addition to the rx_teardown bit in order to cause a forced teardown. This field will remain set after a channel teardown is complete." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="27" begin="27" end="1" resetval="0xX" description="" range="" rwaccess="RW"/>
+    <bitfield id="ERROR" width="1" begin="0" end="0" resetval="0x0" description="Channel error: This bit will be set anytime an error has occurred on the channel. This bit is cleared when the channel is disabled and re-enabled." range="" rwaccess="R"/>
+  </register>
+  <register id="UDMA_RRT_SWTRIG_j" acronym="UDMA_RRT_SWTRIG_j" offset="0x8" width="32" description="The Software Trigger Register provides a mechanism by which software can directly trigger the channel in a secure way. This register is only used when the rx_chan_type is configured as a Third Party DMA channel. This register has no function when the channel is configured for packet mode transfers. A write to this register will cause an event to be sent to this channel. Offset = 8h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0xX" description="" range="" rwaccess="W"/>
+    <bitfield id="TRIGGER" width="1" begin="0" end="0" resetval="0x0" description="Trigger: writing this bit with a value of 1 will cause the trigger event to be sent to this channel" range="" rwaccess="W"/>
+  </register>
+  <register id="UDMA_RRT_STDATA_j_y" acronym="UDMA_RRT_STDATA_j_y" offset="0x80" width="32" description="The State Data Registers contain the current working state of the Rx DMA channel. These registers are provided so that the Host can determine the potential cause of an error or exception condition which was reported by the channel. These registers should not be accessed without reason while the UDMA-P is operating as accesses will cause performance to decrease as these MMRs are just providing a window into the actual state RAM Offset = 80h + (j * 1000h) + (y * 4h); where j = 0h to 95h, y = 0h to 1Fh for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh, y = 0h to 1Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="STATE_INFO" width="32" begin="31" end="0" resetval="0x0" description="See Rx state mapping table" range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER0_j" acronym="UDMA_RRT_PEER0_j" offset="0x200" width="32" description="This register provides access to the remote peer's realtime register at 0x400. Offset = 200h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER1_j" acronym="UDMA_RRT_PEER1_j" offset="0x204" width="32" description="This register provides access to the remote peer's realtime register at 0x401. Offset = 204h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER2_j" acronym="UDMA_RRT_PEER2_j" offset="0x208" width="32" description="This register provides access to the remote peer's realtime register at 0x402. Offset = 208h + (j * 1000h); where j = 0h to 95h j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER3_j" acronym="UDMA_RRT_PEER3_j" offset="0x20C" width="32" description="This register provides access to the remote peer's realtime register at 0x403. Offset = 20Ch + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER4_j" acronym="UDMA_RRT_PEER4_j" offset="0x210" width="32" description="This register provides access to the remote peer's realtime register at 0x404. Offset = 210h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER5_j" acronym="UDMA_RRT_PEER5_j" offset="0x214" width="32" description="This register provides access to the remote peer's realtime register at 0x405. Offset = 214h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER6_j" acronym="UDMA_RRT_PEER6_j" offset="0x218" width="32" description="This register provides access to the remote peer's realtime register at 0x406. Offset = 218h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER7_j" acronym="UDMA_RRT_PEER7_j" offset="0x21C" width="32" description="This register provides access to the remote peer's realtime register at 0x407. Offset = 21Ch + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER8_j" acronym="UDMA_RRT_PEER8_j" offset="0x220" width="32" description="This register provides access to the remote peer's realtime register at 0x408. Offset = 220h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER9_j" acronym="UDMA_RRT_PEER9_j" offset="0x224" width="32" description="This register provides access to the remote peer's realtime register at 0x409. Offset = 224h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER10_j" acronym="UDMA_RRT_PEER10_j" offset="0x228" width="32" description="This register provides access to the remote peer's realtime register at 0x40A. Offset = 228h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER11_j" acronym="UDMA_RRT_PEER11_j" offset="0x22C" width="32" description="This register provides access to the remote peer's realtime register at 0x40B. Offset = 22Ch + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER12_j" acronym="UDMA_RRT_PEER12_j" offset="0x230" width="32" description="This register provides access to the remote peer's realtime register at 0x40C. Offset = 230h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER13_j" acronym="UDMA_RRT_PEER13_j" offset="0x234" width="32" description="This register provides access to the remote peer's realtime register at 0x40D. Offset = 234h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER14_j" acronym="UDMA_RRT_PEER14_j" offset="0x238" width="32" description="This register provides access to the remote peer's realtime register at 0x40E. Offset = 238h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PEER15_j" acronym="UDMA_RRT_PEER15_j" offset="0x23C" width="32" description="This register provides access to the remote peer's realtime register at 0x40F. Offset = 23Ch + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PEER_DATA" width="32" begin="31" end="0" resetval="0x0" description="Peer realtime register data (varies by paired peer)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_PCNT_j" acronym="UDMA_RRT_PCNT_j" offset="0x400" width="32" description="The statistics registers are supplied to give software applications operational progress status for the channel. Offset = 400h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="PCNT" width="32" begin="31" end="0" resetval="0x0" description="Current completed packet count for the channel." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_BCNT_j" acronym="UDMA_RRT_BCNT_j" offset="0x408" width="32" description="The statistics registers are supplied to give software applications operational progress status for the channel. Offset = 408h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="BCNT" width="32" begin="31" end="0" resetval="0x0" description="Current completed payload byte count for the channel." range="" rwaccess="RW"/>
+  </register>
+  <register id="UDMA_RRT_SBCNT_j" acronym="UDMA_RRT_SBCNT_j" offset="0x410" width="32" description="The statistics registers are supplied to give software applications operational progress status for the channel. Offset = 410h + (j * 1000h); where j = 0h to 95h for NAVSS0_UDMASS_UDMAP0_CFG_RCHANRT j = 0h to 2Fh for MCU_NAVSS0_UDMASS_UDMAP_RCHANRT">
+    <bitfield id="SBCNT" width="32" begin="31" end="0" resetval="0x0" description="Current started byte count for the channel." range="" rwaccess="RW"/>
+  </register>
+</module>

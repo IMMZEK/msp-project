@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+
+<module description="MSS_TRNG" id="MSS_TRNG">
+  
+  
+  <register acronym="TRNG_OUTPUT_L_1" id="TRNG_OUTPUT_L_1" offset="0x0" width="32">
+    
+  <bitfield begin="31" description="Least significant word half of 64-bit word of random data, only valid when the ‘ready’ bit in the TRNG_STATUS register has value ‘1’." end="0" id="RNG_OUT_L" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_OUTPUT_H" id="TRNG_OUTPUT_H" offset="0x4" width="32">
+    
+  <bitfield begin="31" description="Most significant word half of 64-bit word of random data, only valid when the ‘ready’ bit in the TRNG_STATUS register has value ‘1’." end="0" id="RNG_OUT_H" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_STATUS" id="TRNG_STATUS" offset="0x8" width="32">
+    
+  <bitfield begin="31" description="‘1’ indicates that the TRNG is busy generating entropy or is in one of its test modes – clocks may not be turned off and the power supply voltage must be kept stable. This bit is a direct mirror of the ‘TRNG_need_clock’ output signal of the module." end="31" id="NEED_CLOCK" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="30" description="Bits should be ignored on a read." end="2" id="RESERVED" rwaccess="R" width="29"></bitfield>
+    
+  <bitfield begin="1" description="‘1’ = the number of FROs shut down after a second ‘error event’ (i.e. the number of ‘1’ bits in the TRNG_ALARMSTOP register) has exceeded the threshold set by ‘shutdown_threshold’ in the TRNG_ERRORCNT register. Writing a ‘1’ to bit [1] of the TRNG_INTACK register clears this bit to ‘0’ again." end="1" id="SHUTDOWN_OFLO" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="1’ = data is available in the TRNG_OUTPUT_H/L registers. Acknowledging this state by writing a ‘1’ to bit [0] of the TRNG_INTACK register clears this bit to ‘0’, if a new number is already available in the internal register of the TRNG, the number is directly clocked into the result register. In this case the status bit is asserted again, after one clock cycle" end="0" id="READY" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_INTMASK" id="TRNG_INTMASK" offset="0xC" width="32">
+    
+  <bitfield begin="31" description="Bits should be ignored on a read." end="2" id="RESERVED" rwaccess="R" width="30"></bitfield>
+    
+  <bitfield begin="1" description="‘1’ = allow the ‘shutdown_oflo’ bit in the TRNG_STATUS register to activate the (active LOW) ‘SINTREQUEST’ output." end="1" id="SHUTDOWN_OFLO" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="‘1’ = allow the ‘ready’ bit in the TRNG_STATUS register to activate the (active LOW) ‘SINTREQUEST’ output." end="0" id="READY" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_INTACK" id="TRNG_INTACK" offset="0x10" width="32">
+    
+  <bitfield begin="31" description="Bits should be ignored on a read." end="2" id="RESERVED" rwaccess="W" width="30"></bitfield>
+    
+  <bitfield begin="1" description="Write a ‘1’ to clear the ‘shutdown_oflo’ bit in the TRNG_STATUS register. Need not be written with a ‘0’ after writing a ‘1’, always reads ‘0’." end="1" id="SHUTDOWN_OFLO" rwaccess="W" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Write a ‘1’ to clear the ‘ready’ bit in the TRNG_STATUS register. Need not be written with a ‘0’ after writing a ‘1’, always reads ‘0’." end="0" id="READY" rwaccess="W" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_CONTROL" id="TRNG_CONTROL" offset="0x14" width="32">
+    
+  <bitfield begin="31" description="This field determines the number of samples (between 2^8 and 2^24) taken to gather entropy from the FROs during startup. If the written value of this field is zero, the number of samples is 2^24, otherwise the number of samples equals the written value times 2^8. This field can only be written when ‘enable_trng’ was ‘0’ before the write." end="16" id="STARTUP_CYCLES" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Bits should be written with ‘0’ and should be ignored on a read." end="11" id="RESERVED" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="10" description="Setting this bit to ‘1’ starts the TRNG, gathering entropy from the FROs for the number of samples determined by the value in the ‘startup_cycles’ field. Resetting this bit to ‘0’ forces all TRNG logic back into the idle state immediately." end="10" id="ENABLE_TRNG" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="9" description="Bits should be written with ‘0’ and should be ignored on a read." end="3" id="RESERVED1" rwaccess="R" width="7"></bitfield>
+    
+  <bitfield begin="2" description="‘1’ = Remove XNOR feedback from the main LFSR, converting it into a normal shift register for the XOR-ed outputs of the FROs (shifting data in on the LSB side). A ‘1’ also forces the LFSR to sample continuously. This bit can only be set to ‘1’ when ‘test_mode’ is also set to ‘1’." end="2" id="NO_LFSR_FB" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="‘1’ = Enables access to the TRNG_COUNT and TRNG_LFSR_L/M/H registers (the latter are cleared before enabling access) and keep ‘TRNG_need_clock’ output active HIGH for testing purposes." end="1" id="TEST_MODE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Bits should be written with ‘0’ and should be ignored on a read." end="0" id="RESERVED2" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_CONFIG" id="TRNG_CONFIG" offset="0x18" width="32">
+    
+  <bitfield begin="31" description="This field determines the maximum number of samples (between 2^8 and 2^24) taken to re-generate entropy from the FROs after reading out a 64 bits random number. If the written value of this field is zero, the number of samples is 2^24, otherwise the number of samples equals the written value times 2^8. This field can only be modified while ‘enable_trng’ in TRNG_CONTROL is ‘0’." end="16" id="MAX_REFILL_CYCLES" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Bits should be written with ‘0’ and should be ignored on a read." end="12" id="RESERVED" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="11" description="This field directly controls the number of CLK input cycles between samples taken from the FROs. Default value 0 indicates that samples are taken every CLK cycle, maximum value 15d takes one sample every 16 CLK cycles. This field must be set to a value such that the slowest FRO (even under worst-case conditions) has a cycle time less than twice the sample period. This field can only be modified while ‘enable_trng’ in TRNG_CONTROL is ‘0’." end="8" id="SAMPLE_DIV" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="7" description="This field determines the minimum number of samples (between 2^6 and 2^24) taken to re-generate entropy from the FROs after reading out a 64 bits random number. If the value of this field is zero, the number of samples is fixed to the value determined by the ‘max_refill_cycles’ field, otherwise the minimum number of samples equals the written value times 64 (which can be up to 2^14). The number of samples defined here cannot be higher than the number defined by the ‘max_refill_cycles’ field (i.e. that field takes precedence). This field can only be modified while ‘enable_trng’ in TRNG_CONTROL is ‘0’." end="0" id="MIN_REFILL_CYCLES" rwaccess="RW" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_ALARMCNT" id="TRNG_ALARMCNT" offset="0x1C" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="30" id="RESERVED" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="29" description="Read-only, indicates the number of ‘1’ bits in the TRNG_ALARMSTOP register. This field is 6 bits wide to allow up to 32 ‘ones’ to be indicated; the actual maximum value equals the number of FROs." end="24" id="SHUTDOWN_COUNT" rwaccess="RW" width="6"></bitfield>
+    
+  <bitfield begin="23" description="Bits should be written with ‘0’ and should be ignored on a read." end="21" id="RESERVED1" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="20" description="Threshold setting for generating the ‘shutdown_oflo’ interrupt, which is activated when the ‘shutdown_count’ value in this register exceeds the value set here." end="16" id="SHUTDOWN_THRESHOLD" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="15" description="Bits should be written with ‘0’ and should be ignored on a read." end="8" id="RESERVED2" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="7" description="Alarm detection threshold for the repeating pattern detectors on each FRO. An FRO ‘alarm event’ is declared when a repeating pattern (of up to four samples length) is detected continuously for the number of samples defined by this field’s value. Reset value 255d should keep the number of ‘alarm events’ to a manageable level." end="0" id="ALARM_THRESHOLD" rwaccess="RW" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_FROENABLE" id="TRNG_FROENABLE" offset="0x20" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="24" id="RESERVED" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Enable bits for the individual FROs, a ‘1’ in bit [n] enables FRO ‘n’. Default state is all ‘1’s to enable all FROs after power-up (note that they are not actually started up before the ‘enable_trng’ bit in the TRNG_CONTROL register is set to ‘1’). Bits are automatically forced to ‘0’ here (and cannot be written to ‘1’) while the corresponding bit in the TRNG_ALARMSTOP register has value ‘1’." end="0" id="FRO_ENABLES" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_FRODETUNE" id="TRNG_FRODETUNE" offset="0x24" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="24" id="RESERVED" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="De-tune bits for the individual FROs, a ‘1’ in bit [n] lets FRO ‘n’ run approximately 5% faster. The value of one of these bits may only be changed while the corresponding FRO is turned off (by temporarily writing a ‘0’ in the corresponding bit of the TRNG_FROENABLE register)." end="0" id="FRO_DETUNES" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_ALARMMASK" id="TRNG_ALARMMASK" offset="0x28" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="24" id="RESERVED" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Logging bits for the ‘alarm events’ of individual FROs. A ‘1’ in bit [n] indicates FRO ‘n’ experienced an ‘alarm event’." end="0" id="FRO_ALARMMASKS" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_ALARMSTOP" id="TRNG_ALARMSTOP" offset="0x2C" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="24" id="RESERVED" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Logging bits for the ‘alarm events’ of individual FROs, a ‘1’ in bit [n] indicates FRO ‘n’ experienced more than one ‘alarm event’ in quick succession and has been turned off. A ‘1’ in this field forces the corresponding bit in the TRNG_FROENABLE register to ‘0’." end="0" id="FRO_ALARMSTOPS" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_LFSR_L" id="TRNG_LFSR_L" offset="0x30" width="32">
+    
+  <bitfield begin="31" description="Bits [31:0] of the main entropy accumulation LFSR. Register can only be accessed when ‘test_mode’ bit in TRNG_CONTROL is set to ‘1’, register contents will be cleared to zero before access is enabled." end="0" id="LFSR_31_0" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_LFSR_M" id="TRNG_LFSR_M" offset="0x34" width="32">
+    
+  <bitfield begin="31" description="Bits [63:32] of the main entropy accumulation LFSR. Register can only be accessed when ‘test_mode’ bit in TRNG_CONTROL is set to ‘1’, register contents will be cleared to zero before access is enabled." end="0" id="LFSR_63_32" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_LFSR_H" id="TRNG_LFSR_H" offset="0x38" width="32">
+    
+  <bitfield begin="31" description="Bits [80:64] of the main entropy accumulation LFSR. Register can only be accessed when ‘test_mode’ bit in TRNG_CONTROL is set to ‘1’, register contents will be cleared to zero before access is enabled. Note: [31:17] is reserved" end="0" id="LFSR_80_64" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_COUNT" id="TRNG_COUNT" offset="0x3C" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="24" id="RESERVED" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Sample counter used by control FSM. Counter can only be accessed when ‘test_mode’ bit in TRNG_CONTROL is set to ‘1’." end="0" id="SAMPLE_COUNTER" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_TEST" id="TRNG_TEST" offset="0x40" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="28" id="RESERVED" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="27" description="Repeating sequence of bits to be fed into the selected FRO delay chain (‘test_patt_fro’ = ‘1’) and/or the selected FRO error detection circuit (‘test_patt_det’ = ‘1’). This field is rotated right over one bit once every sample period when either of these control bits is ‘1’, bit [16] is the actual pattern bit fed into the test target." end="16" id="TEST_PATTERN" rwaccess="RW" width="12"></bitfield>
+    
+  <bitfield begin="15" description="Bits should be written with ‘0’ and should be ignored on a read." end="13" id="RESERVED1" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="12" description="Number of the FRO to be tested, value should be in range 0 – 23." end="8" id="TEST_SELECT" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="7" description="Bits should be written with ‘0’ and should be ignored on a read." end="3" id="RESERVED2" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="2" description="‘1’ = Repeatedly feed ‘test_pattern’ into the error detection circuit of the FRO selected by the ‘test_select’ field. This bit can only be set to ‘1’ when ‘test_mode’ in TRNG_CONTROL is ‘1’ too." end="2" id="TEST_PATT_DET" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="‘1’ = Repeatedly feed ‘test_pattern’ into the delay chain of the FRO selected by the ‘test_select’ field by forcing the corresponding ‘TEST_fro_enable’ output LOW and forcing the corresponding ‘TEST_fro_testin’ output to the state of bit [16] of this register. This bit can only be set to ‘1’ when ‘test_mode’ in TRNG_CONTROL is ‘1’ too." end="1" id="TEST_PATT_FRO" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="‘1’ = Enable the ‘tst_fro_clk_out’ output, connecting to the FRO selected by the ‘test_select’ field. This bit can only be set to ‘1’ when ‘test_mode’ in TRNG_CONTROL is ‘1’ too." end="0" id="TEST_EN_OUT" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_OPTIONS" id="TRNG_OPTIONS" offset="0x78" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="12" id="RESERVED" rwaccess="R" width="20"></bitfield>
+    
+  <bitfield begin="11" description="Number of FROs implemented in this TRNG, value 24 (decimal) for now." end="6" id="NR_OF_FROS" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="5" description="Bits should be written with ‘0’ and should be ignored on a read." end="0" id="RESERVED1" rwaccess="R" width="6"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_EIP_REV" id="TRNG_EIP_REV" offset="0x7C" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="28" id="RESERVED" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="27" description="4 bits binary encoding of the major hardware revision number." end="24" id="MAJOR_HW_REVISION" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="23" description="4 bits binary encoding of the minor hardware revision number." end="20" id="MINOR_HW_REVISION" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="19" description="4 bits binary encoding of the hardware patch level, initial release will carry value zero." end="16" id="HW_PATCH_LEVEL" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="15" description="Bit-by-bit logic complement of bits [7:0], EIP 75t gives 0xB4." end="8" id="COMPLEMENT_OF_BASIC_EIP_NUMBER" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="7" description="8 bits binary encoding of the EIP number, EIP 75t gives 0x4B." end="0" id="BASIC_EIP_NUMBER" rwaccess="R" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="MMR_STATUS_EN" id="MMR_STATUS_EN" offset="0x1FD8" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="2" id="RESERVED" rwaccess="R" width="30"></bitfield>
+    
+  <bitfield begin="1" description="‘1’ = the number of FROs shut down after a second ‘error event’ (i.e. the number of ‘1’ bits in the TRNG_ALARMSTOP register) has exceeded the threshold set by ‘shutdown_threshold’ in the TRNG_ERRORCNT register. Writing a ‘1’ to bit [1] of the TRNG_INTACK register clears this bit to ‘0’ again." end="1" id="SHUTDOWN_OFLO" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="1’ = data is available in the TRNG_OUTPUT_H/L registers. Acknowledging this state by writing a ‘1’ to bit [0] of the TRNG_INTACK register clears this bit to ‘0’, if a new number is already available in the internal register of the TRNG, the number is directly clocked into the result register. In this case the status bit is asserted again, after one clock cycle" end="0" id="READY" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_REV" id="TRNG_REV" offset="0x1FE0" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="8" id="RESERVED" rwaccess="R" width="24"></bitfield>
+    
+  <bitfield begin="7" description="TRNG Revision number" end="0" id="REVISION" rwaccess="R" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="SYS_CONFIG_REG" id="SYS_CONFIG_REG" offset="0x1FE4" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="5" id="RESERVED" rwaccess="R" width="27"></bitfield>
+    
+  <bitfield begin="4" description="To Specity the IDLE Type" end="3" id="IDLE_TYPE" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="2" description="Bits should be written with ‘0’ and should be ignored on a read." end="1" id="RESERVED1" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="0" description="Auto IDLE Mode" end="0" id="AUTOIDLE" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="MMR_STATUS_SET" id="MMR_STATUS_SET" offset="0x1FEC" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="2" id="RESERVED" rwaccess="RW" width="30"></bitfield>
+    
+  <bitfield begin="1" description="software interrupt set" end="0" id="SW_INTR_STATUS_SET" rwaccess="RW" width="2"></bitfield>
+  </register>
+  
+  
+  <register acronym="SOFT_RESET_REG" id="SOFT_RESET_REG" offset="0x1FF0" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="1" id="RESERVED" rwaccess="R" width="31"></bitfield>
+    
+  <bitfield begin="0" description="sofware reset control" end="0" id="SOFT_RESET" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="IRQ_EOI_REG" id="IRQ_EOI_REG" offset="0x1FF4" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="1" id="RESERVED" rwaccess="W" width="31"></bitfield>
+    
+  <bitfield begin="0" description="Write only will clear the interrupt when asserted" end="0" id="PULSE_INT_CLEAR" rwaccess="W" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRNG_IRQSTATUS" id="TRNG_IRQSTATUS" offset="0x1FF8" width="32">
+    
+  <bitfield begin="31" description="Bits should be written with ‘0’ and should be ignored on a read." end="1" id="RESERVED" rwaccess="R" width="31"></bitfield>
+    
+  <bitfield begin="0" description="TRNG interrupt status" end="0" id="TRNGIRQEN" rwaccess="R" width="1"></bitfield>
+  </register>
+</module>

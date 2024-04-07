@@ -1,0 +1,1021 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+
+<module description="DSS_HW_ACC" id="DSS_HW_ACC">
+  
+  
+  <register acronym="HWACCREG1" id="HWACCREG1" offset="0x0" width="32">
+    
+  <bitfield begin="31" description="" end="29" id="NU" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="28" description="ADC buffer sharing mode (AR14xx): This register is relevant in AR14xx, where the Radar Hardware Accelerator is included in a single device along with the mmWave RF front-end.  In such a case, during active chirp transmission and inline 1st dimension FFT processing, the ACCEL_MEM0 and ACCEL_MEM1 memories of the accelerator are shared as ping-pong ADC buffers.  This register bit needs to be set during this time, so that while the Digital Front End writes ADC samples to the ping buffer, the accelerator automatically accesses (only) the pong buffer, and vice versa.  At the end of the active transmission portion of a frame, this bit can be cleared, so that the accelerator has access to all the four local memories independently." end="28" id="FFT1DEN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="27" description="These registers are used to control the start and stop index of the parameter-set through which the state machine loops through.  The state machine starts at the parameter-set specified by PARAM_START and loads each parameter-set one after another and runs the accelerator as per that configuration.  When the state machine reaches the parameter-set specified by PARAM_STOP, it loops back to the start index as specified by PARAM_START." end="24" id="PARAMSTOP" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="23" description="These registers are used to control the start and stop index of the parameter-set through which the state machine loops through.  The state machine starts at the parameter-set specified by PARAM_START and loads each parameter-set one after another and runs the accelerator as per that configuration.  When the state machine reaches the parameter-set specified by PARAM_STOP, it loops back to the start index as specified by PARAM_START." end="20" id="PARAMSTART" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="19" description="Number of loops: This register controls the number of times the State Machine will loop through the parameter-sets (from a programmed start index till a programmed end index) and run them.  The maximum number of times the loop can be made is run is 4094.  A value of zero programmed in this register means that the looping mechanism is disabled." end="8" id="NLOOPS" rwaccess="RW" width="12"></bitfield>
+    
+  <bitfield begin="7" description="" end="7" id="NU2" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Software Reset Control:   This register provides software reset control for the Radar Hardware Accelerator.  The assertion of these register bits by the main processor will bring the Accelerator Engine to a known reset state.  This is mostly applicable for resetting the accelerator in case of unexpected behavior.  The  sequence to be followed in case software reset is to write 111b to this register and then a 000b" end="4" id="ACCRESET" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="3" description="Clock-gating Control:   This register bit controls the enable/disable for the clock of the Radar Accelerator.  This register bit can be set to 0 to clock-gate the accelerator when not using the accelerator.  Before enabling the accelerator or before configuring the accelerator’s registers, this register bit should be set first, so that the clock is available" end="3" id="ACCCLKEN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Enable/Disable Control:    A value of ACC_ENABLE = 111b enables the Radar Hardware Accelerator and any other value of the register keeps the Accelerator Engine in disabled state." end="0" id="ACCENABLE" rwaccess="RW" width="3"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG2" id="HWACCREG2" offset="0x4" width="32">
+    
+  <bitfield begin="31" description="" end="16" id="NU" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="DMA trigger register: This register is relevant whenever DMA triggered mode is used (i.e., TRIGMODE = 011b).  Whenever a DMA channel has finished copying input samples into the local memory of the accelerator and wants to trigger the accelerator, the procedure to follow is to use a second linked DMA channel to write a 16-bit one-hot signature into this register to trigger the accelerator.  In DMA triggered mode, the State Machine keeps monitoring this 16-bit register and waits as long as a specific bit (see DMA2ACC_CHANNEL_TRIGSRC) in this register is zero.  The second linked DMA channel writes a one-hot signature that sets the specific bit, so that the State Machine gets triggered and starts the accelerator operations for that parameter-set." end="0" id="DMA2ACCTRIG" rwaccess="" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG3" id="HWACCREG3" offset="0x8" width="32">
+    
+  <bitfield begin="31" description="Override accelerator Trigger to DMA.Can be used for triggering the first and second DMA transfer thorugh processor" end="16" id="CR42DMATRIG" rwaccess="" width="16"></bitfield>
+    
+  <bitfield begin="15" description="" end="1" id="NU" rwaccess="R" width="15"></bitfield>
+    
+  <bitfield begin="0" description="Software trigger bit: This register bit is relevant whenever software triggered mode is used (i.e., TRIGMODE = 001b). The main processor software can set this register bit, so that the State Machine gets triggered and starts the accelerator operations for that parameter-set." end="0" id="CR42ACCTRIG" rwaccess="" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG4" id="HWACCREG4" offset="0xC" width="32">
+    
+  <bitfield begin="31" description="Status bits in PARAMDONESTAT are not automatically cleared, but they can be individually cleared by writing to  16-bit register PARAM_DONE_CLR." end="16" id="PARAMDONECLR" rwaccess="" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Parameter-set done status: This read-only status register can be used by the main processor to see which parameter-sets are complete that led to the interrupt to the main processor.  The individual bits in this 16-bit status register indicate which of the 16 parameter-sets have completed." end="0" id="PARAMDONESTAT" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG5" id="HWACCREG5" offset="0x10" width="32">
+    
+  <bitfield begin="31" description="BPM pattern MSB: Specifies the BPM pattern to be used to multiply the input samples if BPM removal is enabled" end="0" id="BPMPATTERNMSB" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG6" id="HWACCREG6" offset="0x14" width="32">
+    
+  <bitfield begin="31" description="BPM pattern LSB: Specifies the BPM pattern to be used to multiply the input samples if BPM removal is enabled" end="0" id="BPMPATTERNLSB" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG7" id="HWACCREG7" offset="0x18" width="32">
+    
+  <bitfield begin="31" description="" end="25" id="NU3" rwaccess="R" width="7"></bitfield>
+    
+  <bitfield begin="24" description="Select Window RAM or Internal RAM: The Internal RAM for Vector Multiplication mode is mapped to the same address space as the Window RAM – Hence, this register bit is required to specify which of these two needs to be selected, when loading the co-efficients via DMA or R4F.  ‘0’-> Window RAM is selected ‘1’-> Internal RAM for Vector Multiplication mode is selected.  Keep this register bit as 0 always, except during the period when Internal RAM needs to be loaded." end="24" id="STG1LUTSELWR" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="" end="17" id="NU2" rwaccess="R" width="7"></bitfield>
+    
+  <bitfield begin="16" description="Twiddle factor dithering enable: This register-bit is used to enable/disable dithering of twiddle factors in the FFT." end="16" id="DITHERTWIDEN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="" end="10" id="NU1" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="9" description="BPM rate: Specifies the number of input samples corresponding to each BPM bit.  Minimum valid value for this register is 1." end="0" id="BPMRATE" rwaccess="RW" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG8" id="HWACCREG8" offset="0x1C" width="32">
+    
+  <bitfield begin="31" description="" end="29" id="NU" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="28" description="Right-shifting for Sum Statistic: This register specifies how many LSBs to drop to convert the sum statistics to 24-bit value going to the Output Formatter" end="24" id="FFTSUMDIV" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="23" description="Interference threshold:   This register is used to specify the threshold for zero-ing out samples affected by interference.  Any sample whose magnitude exceeds this threshold is zero-ed out, if the feature is enabled using INTERF_THRESH_EN register bit in HW_ACC_PARAM register set" end="0" id="INTERFTHRESH" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG9" id="HWACCREG9" offset="0x20" width="32">
+    
+  <bitfield begin="31" description="" end="21" id="NU" rwaccess="R" width="11"></bitfield>
+    
+  <bitfield begin="20" description="In Scalar Multiplication mode(CMULT_MODE in HW_ACC_PARAM register set  = 101b) , the complex multiplier will multiply each input sample with a 21-bit scalar complex number that is programmed in I_CMULT_SCALE and Q_CMULT_SCALE registers" end="0" id="ICMULTSCALE" rwaccess="RW" width="21"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG10" id="HWACCREG10" offset="0x24" width="32">
+    
+  <bitfield begin="31" description="" end="21" id="NU" rwaccess="R" width="11"></bitfield>
+    
+  <bitfield begin="20" description="In Scalar Multiplication mode(CMULT_MODE in HW_ACC_PARAM register set  = 101b) , the complex multiplier will multiply each input sample with a 21-bit scalar complex number that is programmed in I_CMULT_SCALE and Q_CMULT_SCALE registers" end="0" id="QCMULTSCALE" rwaccess="RW" width="21"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG11" id="HWACCREG11" offset="0x28" width="32">
+    
+  <bitfield begin="31" description="To load the LFSR seed, a pulse signal needs to be provided, by writing a 1 to  the LFSR_LOAD register-bit. Self clearing" end="31" id="LFSRLOAD" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="30" description="" end="29" id="NU" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="28" description="LFSR seed value  (random pattern) for twiddle factor dithering," end="0" id="LFSRSEED" rwaccess="RW" width="29"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG12" id="HWACCREG12" offset="0x2C" width="32">
+    
+  <bitfield begin="31" description="" end="25" id="NU2" rwaccess="RW" width="7"></bitfield>
+    
+  <bitfield begin="23" description="" end="19" id="NU1" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="19" description="Clear trigger status read-only register: This register-bit when set clears the trigger status register ACC_TRIG_IN_STAT described above" end="19" id="ACC_TRIGGER_IN_CLR" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="18" description="Debug register for trigger status: This is a read-only status register, which indicates the trigger status of the accelerator, i.e., whether a specific DMA trigger or a Ping-pong trigger or a SW trigger was ever received (refer TRIGMODE in HW_ACC_PARAM register set).  The MSB 16 bits of this register indicate whether a trigger was received via DMA trigger method.  The next two bits (i.e., bit indices 2 and 1) indicate the status of DFE ping-pong switch-based trigger and SW trigger respectively.  The LSB bit is always 1 and can be ignored {DMA2ACCTRIG[15:0],adc_buffer_done,CR42ACCTRIG,1}" end="0" id="ACC_TRIGGER_IN_STAT" rwaccess="R" width="19"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG13" id="HWACCREG13" offset="0x30" width="32">
+    
+  <bitfield begin="31" description="" end="18" id="NU" rwaccess="R" width="14"></bitfield>
+    
+  <bitfield begin="17" description="CFAR Threshold scale factor: This value is used to either multiply or add to the ‘surrounding noise average’ to determine the threshold used for detection of the present cell under test.  If logarithmic CFAR mode is disabled (i.e., in magnitude or magnitude-squared mode), then the register value is multiplied with the surrounding noise average to determine the threshold, else it is added to the surrounding noise average.  In the former case, this 18-bit register is interpreted as a 14.4 value.  In the latter case (i.e., logarithmic mode), the 18-bit register is interpreted as a 7.11 value." end="0" id="CFAR_THRESH" rwaccess="RW" width="18"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG14" id="HWACCREG14" offset="0x34" width="32">
+    
+  <bitfield begin="31" description="" end="11" id="NU3" rwaccess="RW" width="21"></bitfield>
+    
+  <bitfield begin="10" description="Control for powering down  ACCEL_MEM*. Reserved. Do not change Default value" end="8" id="OUTRAMAONIN" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="7" description="" end="7" id="NU2" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Control for powering down  ACCEL_MEM*. Reserved. Do not change Default value" end="4" id="OUTRAMAGOODIN" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="3" description="" end="3" id="NU1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Control for powering down  ACCEL_MEM*. Reserved. Do not change Default value" end="0" id="OUTRAMISO" rwaccess="RW" width="3"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWACCREG15" id="HWACCREG15" offset="0x38" width="32">
+    
+  <bitfield begin="31" description="" end="0" id="SPARE2" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG1" id="TI_RESERVED_REG1" offset="0x3C" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="24" id="TI_RESERVED2" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="TI Reserved register" end="0" id="TI_RESERVED1" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="MAX1VALUE" id="MAX1VALUE" offset="0x40" width="32">
+    
+  <bitfield begin="31" description="" end="24" id="NU" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Max value: These registers contain the max value on a per-iteration basis.  These registers are meaningful only when Magnitude or Log-Magnitude is enabled.  Only the max values for up to four iterations are recorded in these registers.  For larger number of iterations, use Statistics output mode (FFT_OUT_MODE in  HW_ACC_PARAM register set)." end="0" id="MAX1VALUE" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="MAX1INDEX" id="MAX1INDEX" offset="0x44" width="32">
+    
+  <bitfield begin="31" description="" end="12" id="NU" rwaccess="R" width="20"></bitfield>
+    
+  <bitfield begin="11" description="Max index: These registers contain the max index on a per-iteration basis, corresponding to each max value in the MAXn_VALUE registers." end="0" id="MAX1INDEX" rwaccess="R" width="12"></bitfield>
+  </register>
+  
+  
+  <register acronym="ISUM1LSB" id="ISUM1LSB" offset="0x48" width="32">
+    
+  <bitfield begin="31" description="Sum statistics: These registers contain the sum of the I outputs and Q outputs on a per-iteration basis.  Only the statistics for up to four iterations are recorded in these registers.  For larger number of iterations, use Statistics output mode (FFT_OUT_MODE in  HW_ACC_PARAM register set)." end="0" id="ISUM1LSB" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="ISUM1MSB" id="ISUM1MSB" offset="0x4C" width="32">
+    
+  <bitfield begin="31" description="" end="4" id="NU" rwaccess="R" width="28"></bitfield>
+    
+  <bitfield begin="3" description="Refer ISUM1LSB" end="0" id="ISUM1MSB" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="QSUM1LSB" id="QSUM1LSB" offset="0x50" width="32">
+    
+  <bitfield begin="31" description="Refer ISUM1LSB" end="0" id="QSUM1LSB" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="QSUM1MSB" id="QSUM1MSB" offset="0x54" width="32">
+    
+  <bitfield begin="31" description="" end="4" id="NU" rwaccess="R" width="28"></bitfield>
+    
+  <bitfield begin="3" description="Refer ISUM1LSB" end="0" id="QSUM1MSB" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="MAX2VALUE" id="MAX2VALUE" offset="0x58" width="32">
+    
+  <bitfield begin="31" description="" end="24" id="NU" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Refer MAX1VALUE" end="0" id="MAX2VALUE" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="MAX2INDEX" id="MAX2INDEX" offset="0x5C" width="32">
+    
+  <bitfield begin="31" description="" end="12" id="NU" rwaccess="R" width="20"></bitfield>
+    
+  <bitfield begin="11" description="Refer MAX1INDEX" end="0" id="MAX2INDEX" rwaccess="R" width="12"></bitfield>
+  </register>
+  
+  
+  <register acronym="ISUM2LSB" id="ISUM2LSB" offset="0x60" width="32">
+    
+  <bitfield begin="31" description="Refer ISUM1LSB" end="0" id="ISUM2LSB" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="ISUM2MSB" id="ISUM2MSB" offset="0x64" width="32">
+    
+  <bitfield begin="31" description="" end="4" id="NU" rwaccess="R" width="28"></bitfield>
+    
+  <bitfield begin="3" description="Refer ISUM1LSB" end="0" id="ISUM2MSB" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="QSUM2LSB" id="QSUM2LSB" offset="0x68" width="32">
+    
+  <bitfield begin="31" description="Refer ISUM1LSB" end="0" id="QSUM2LSB" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="QSUM2MSB" id="QSUM2MSB" offset="0x6C" width="32">
+    
+  <bitfield begin="31" description="" end="4" id="NU" rwaccess="R" width="28"></bitfield>
+    
+  <bitfield begin="3" description="Refer ISUM1LSB" end="0" id="QSUM2MSB" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="MAX3VALUE" id="MAX3VALUE" offset="0x70" width="32">
+    
+  <bitfield begin="31" description="" end="24" id="NU" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Refer MAX1VALUE" end="0" id="MAX3VALUE" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="MAX3INDEX" id="MAX3INDEX" offset="0x74" width="32">
+    
+  <bitfield begin="31" description="" end="12" id="NU" rwaccess="R" width="20"></bitfield>
+    
+  <bitfield begin="11" description="Refer MAX1INDEX" end="0" id="MAX3INDEX" rwaccess="R" width="12"></bitfield>
+  </register>
+  
+  
+  <register acronym="ISUM3LSB" id="ISUM3LSB" offset="0x78" width="32">
+    
+  <bitfield begin="31" description="Refer ISUM1LSB" end="0" id="ISUM3LSB" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="ISUM3MSB" id="ISUM3MSB" offset="0x7C" width="32">
+    
+  <bitfield begin="31" description="" end="4" id="NU" rwaccess="R" width="28"></bitfield>
+    
+  <bitfield begin="3" description="Refer ISUM1LSB" end="0" id="ISUM3MSB" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="QSUM3LSB" id="QSUM3LSB" offset="0x80" width="32">
+    
+  <bitfield begin="31" description="Refer ISUM1LSB" end="0" id="QSUM3LSB" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="QSUM3MSB" id="QSUM3MSB" offset="0x84" width="32">
+    
+  <bitfield begin="31" description="" end="4" id="NU" rwaccess="R" width="28"></bitfield>
+    
+  <bitfield begin="3" description="Refer ISUM1LSB" end="0" id="QSUM3MSB" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="MAX4VALUE" id="MAX4VALUE" offset="0x88" width="32">
+    
+  <bitfield begin="31" description="" end="24" id="NU" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Refer MAX1INDEX" end="0" id="MAX4VALUE" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="MAX4INDEX" id="MAX4INDEX" offset="0x8C" width="32">
+    
+  <bitfield begin="31" description="" end="12" id="NU" rwaccess="R" width="20"></bitfield>
+    
+  <bitfield begin="11" description="Refer MAX1VALUE" end="0" id="MAX4INDEX" rwaccess="R" width="12"></bitfield>
+  </register>
+  
+  
+  <register acronym="ISUM4LSB" id="ISUM4LSB" offset="0x90" width="32">
+    
+  <bitfield begin="31" description="Refer ISUM1LSB" end="0" id="ISUM4LSB" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="ISUM4MSB" id="ISUM4MSB" offset="0x94" width="32">
+    
+  <bitfield begin="31" description="" end="4" id="NU" rwaccess="R" width="28"></bitfield>
+    
+  <bitfield begin="3" description="Refer ISUM1LSB" end="0" id="ISUM4MSB" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="QSUM4LSB" id="QSUM4LSB" offset="0x98" width="32">
+    
+  <bitfield begin="31" description="Refer ISUM1LSB" end="0" id="QSUM4LSB" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="QSUM4MSB" id="QSUM4MSB" offset="0x9C" width="32">
+    
+  <bitfield begin="31" description="" end="4" id="NU" rwaccess="R" width="28"></bitfield>
+    
+  <bitfield begin="3" description="Refer ISUM1LSB" end="0" id="QSUM4MSB" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG2" id="TI_RESERVED_REG2" offset="0xA0" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="24" id="TI_RESERVED4" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="TI Reserved register" end="0" id="TI_RESERVED3" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG3" id="TI_RESERVED_REG3" offset="0xA4" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="24" id="TI_RESERVED6" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="TI Reserved register" end="0" id="TI_RESERVED5" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG4" id="TI_RESERVED_REG4" offset="0xA8" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="24" id="TI_RESERVED8" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="TI Reserved register" end="0" id="TI_RESERVED7" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="RDSTATUS" id="RDSTATUS" offset="0xAC" width="32">
+    
+  <bitfield begin="31" description="" end="16" id="NU" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Running value of the  loop count  when the HWA is executing from PARAM RAM . For Debug only" end="4" id="LOOPCNT" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="3" description="Index of the current parameter set  being executed from  PARAM RAM . For Debug only" end="0" id="PARAMADDR" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH1DONE" id="SIGDMACH1DONE" offset="0xB0" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 1 completion (tied to “0x0001”in HW). Linked DMA can  copy from one of these ‘SIG_DMACHx_DONE’ registers into DMA2ACC_TRIG register to set the appropriate register bit to signal the completion of DMA and trigger the accelerator" end="0" id="SIGDMACH1DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH2DONE" id="SIGDMACH2DONE" offset="0xB4" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 2 completion (tied to “0x0002” in HW)" end="0" id="SIGDMACH2DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH3DONE" id="SIGDMACH3DONE" offset="0xB8" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 3 completion (tied to “0x0004”in HW)" end="0" id="SIGDMACH3DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH4DONE" id="SIGDMACH4DONE" offset="0xBC" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 4 completion (tied to “0x0008” in HW)" end="0" id="SIGDMACH4DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH5DONE" id="SIGDMACH5DONE" offset="0xC0" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 5 completion (tied to “0x0010” in HW)" end="0" id="SIGDMACH5DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH6DONE" id="SIGDMACH6DONE" offset="0xC4" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 6 completion (tied to “0x0020” in HW)" end="0" id="SIGDMACH6DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH7DONE" id="SIGDMACH7DONE" offset="0xC8" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 7 completion (tied to “0x0040” in HW)" end="0" id="SIGDMACH7DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH8DONE" id="SIGDMACH8DONE" offset="0xCC" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 8 completion (tied to “0x0080” in HW)" end="0" id="SIGDMACH8DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH9DONE" id="SIGDMACH9DONE" offset="0xD0" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 9 completion (tied to “0x0100” in HW)" end="0" id="SIGDMACH9DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH10DONE" id="SIGDMACH10DONE" offset="0xD4" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 10 completion (tied to “0x0200” in HW)" end="0" id="SIGDMACH10DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH11DONE" id="SIGDMACH11DONE" offset="0xD8" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 11 completion (tied to “0x0040” in HW)" end="0" id="SIGDMACH11DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH12DONE" id="SIGDMACH12DONE" offset="0xDC" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 12 completion (tied to “0x0080” in HW)" end="0" id="SIGDMACH12DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH13DONE" id="SIGDMACH13DONE" offset="0xE0" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 13 completion (tied to “0x1000”  in HW)" end="0" id="SIGDMACH13DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH14DONE" id="SIGDMACH14DONE" offset="0xE4" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 14 completion (tied to “0x2000” in HW)" end="0" id="SIGDMACH14DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH15DONE" id="SIGDMACH15DONE" offset="0xE8" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 15 completion (tied to “0x4000” in HW)" end="0" id="SIGDMACH15DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH16DONE" id="SIGDMACH16DONE" offset="0xEC" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 16 completion (tied to “0x8000” in HW)" end="0" id="SIGDMACH16DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="MEMACCESSERR" id="MEMACCESSERR" offset="0xF0" width="32">
+    
+  <bitfield begin="31" description="" end="20" id="NU3" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="19" description="Error status :  Memory access error: This 4-bit read-only register indicates if there is a memory access error caused by incorrect configuration or usage of the accelerator, where both the DMA and the accelerator are attempting to access the same 16KB memory at the same time.  The 4-bit register indicates the error status for the 4 16KB memories (MSB bit corresponds to ACCEL_MEM0)." end="16" id="STATERRCODE" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="15" description="" end="12" id="NU2" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="11" description="Mask for STATERRCODE  This register can be used to mask the memory access error.  If set, the memory access error indication is disabled." end="8" id="ERRCODEMASK" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="7" description="" end="4" id="NU1" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="3" description="Clear memory access error: This register can be used to clear the memory access error indication.  Setting this register clears the error indication." end="0" id="ERRCODECLR" rwaccess="" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="FFTCLIP" id="FFTCLIP" offset="0xF4" width="32">
+    
+  <bitfield begin="31" description="" end="17" id="NU2" rwaccess="R" width="15"></bitfield>
+    
+  <bitfield begin="16" description="FFTCLCIPSTAT can  be cleared by setting  single-bit register CLRFFTCLIPSTAT, so that the saturation status indication gets cleared back to 0 and any subsequent saturation events can be freshly monitored." end="16" id="CLRFFTCLIPSTAT" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="15" description="" end="10" id="NU1" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="9" description="FFT Clip Status (read-only): This is a read-only status register, which indicates any saturation/clipping events that have happened in the FFT butterfly stages.  Note that each of the 10 butterfly stages in the FFT can be programmed to either saturate the MSB or round the LSB.  Whenever saturation of MSB is used in any stage, there is a possibility that that stage can saturate/clip samples.  In that case, this saturation event is indicated in the corresponding bit in this status registert.  If multiple FFTs are performed, this status register includes any saturation events happening in any of them." end="0" id="FFTCLCIPSTAT" rwaccess="R" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="FFTPEAKCNT" id="FFTPEAKCNT" offset="0xF8" width="32">
+    
+  <bitfield begin="31" description="" end="12" id="NU" rwaccess="R" width="20"></bitfield>
+    
+  <bitfield begin="11" description="CFAR Detected Peak Count: This is a read-only register that contains the number of detected peaks that are logged in the destination memory, when CFAR Engine is configured in ‘Detected Peaks List’ mode." end="0" id="FFTPEAKCNT" rwaccess="R" width="12"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG5" id="TI_RESERVED_REG5" offset="0xFC" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="0" id="TI_RESERVED9" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG6" id="TI_RESERVED_REG6" offset="0x100" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="0" id="TI_RESERVED10" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG7" id="TI_RESERVED_REG7" offset="0x104" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="0" id="TI_RESERVED11" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG8" id="TI_RESERVED_REG8" offset="0x120" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="29" id="TI_RESERVED19" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="28" description="TI Reserved register" end="24" id="TI_RESERVED18" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="23" description="TI Reserved register" end="21" id="TI_RESERVED17" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="20" description="TI Reserved register" end="16" id="TI_RESERVED16" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="13" id="TI_RESERVED15" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="12" description="TI Reserved register" end="8" id="TI_RESERVED14" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="7" description="TI Reserved register" end="5" id="TI_RESERVED13" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="4" description="TI Reserved register" end="0" id="TI_RESERVED12" rwaccess="RW" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG9" id="TI_RESERVED_REG9" offset="0x124" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="29" id="TI_RESERVED27" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="28" description="TI Reserved register" end="24" id="TI_RESERVED26" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="23" description="TI Reserved register" end="21" id="TI_RESERVED25" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="20" description="TI Reserved register" end="16" id="TI_RESERVED24" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="13" id="TI_RESERVED23" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="12" description="TI Reserved register" end="8" id="TI_RESERVED22" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="7" description="TI Reserved register" end="5" id="TI_RESERVED21" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="4" description="TI Reserved register" end="0" id="TI_RESERVED20" rwaccess="RW" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG10" id="TI_RESERVED_REG10" offset="0x128" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="29" id="TI_RESERVED35" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="28" description="TI Reserved register" end="24" id="TI_RESERVED34" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="23" description="TI Reserved register" end="21" id="TI_RESERVED33" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="20" description="TI Reserved register" end="16" id="TI_RESERVED32" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="13" id="TI_RESERVED31" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="12" description="TI Reserved register" end="8" id="TI_RESERVED30" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="7" description="TI Reserved register" end="5" id="TI_RESERVED29" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="4" description="TI Reserved register" end="0" id="TI_RESERVED28" rwaccess="RW" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG11" id="TI_RESERVED_REG11" offset="0x12C" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="29" id="TI_RESERVED43" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="28" description="TI Reserved register" end="24" id="TI_RESERVED42" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="23" description="TI Reserved register" end="21" id="TI_RESERVED41" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="20" description="TI Reserved register" end="16" id="TI_RESERVED40" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="13" id="TI_RESERVED39" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="12" description="TI Reserved register" end="8" id="TI_RESERVED38" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="7" description="TI Reserved register" end="5" id="TI_RESERVED37" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="4" description="TI Reserved register" end="0" id="TI_RESERVED36" rwaccess="RW" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="ECCENABLE" id="ECCENABLE" offset="0x200" width="32">
+    
+  <bitfield begin="31" description="" end="18" id="NU2" rwaccess="R" width="14"></bitfield>
+    
+  <bitfield begin="17" description="‘1’: Enable Selftest  for Accelerator FSM" end="17" id="FSM_LOCKSTEP_SELFTEST_EN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="16" description="‘1’: Enable Lockstep for Accelerator FSM" end="16" id="FSM_LOCKSTEP_EN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="‘1’: Enable ECC for ACCEL_MEM3" end="15" id="OPONG_ECC_EN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="14" description="‘1’: Enable ECC for ACCEL_MEM2" end="14" id="OPING_ECC_EN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="13" description="‘1’: Enable ECC for ACCEL_MEM1" end="13" id="IPONG_ECC_EN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="12" description="‘1’: Enable ECC for ACCEL_MEM0" end="12" id="IPING_ECC_EN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="11" description="TI Reserved register" end="11" id="TI_RESERVED53" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="10" description="TI Reserved register" end="10" id="TI_RESERVED52" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="9" description="TI Reserved register" end="9" id="TI_RESERVED51" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="TI Reserved register" end="8" id="TI_RESERVED50" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="TI Reserved register" end="7" id="TI_RESERVED49" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="TI Reserved register" end="6" id="TI_RESERVED48" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="TI Reserved register" end="5" id="TI_RESERVED47" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="TI Reserved register" end="4" id="TI_RESERVED46" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="TI Reserved register" end="3" id="TI_RESERVED45" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="TI Reserved register" end="2" id="TI_RESERVED44" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="‘1’: Enable ECC for Parameter set RAM" end="1" id="PARAM_ECC_EN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="‘1’: Enable ECC for Window RAM" end="0" id="WIN_RAM_ECC_EN" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="ECCERRCLR" id="ECCERRCLR" offset="0x204" width="32">
+    
+  <bitfield begin="31" description="" end="16" id="NU" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="'1': Clear Error registers(status,address and bit location) for ACCEL_MEM3" end="15" id="OPONG_ECC_ERRCLR" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="14" description="'1': Clear Error registers(status,address and bit location) for ACCEL_MEM2" end="14" id="OPING_ECC_ERRCLR" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="13" description="'1': Clear Error registers(status,address and bit location) for ACCEL_MEM1" end="13" id="IPONG_ECC_ERRCLR" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="12" description="'1': Clear Error registers(status,address and bit location) for ACCEL_MEM0" end="12" id="IPING_ECC_ERRCLR" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="11" description="TI Reserved register" end="11" id="TI_RESERVED63" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="10" description="TI Reserved register" end="10" id="TI_RESERVED62" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="9" description="TI Reserved register" end="9" id="TI_RESERVED61" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="8" description="TI Reserved register" end="8" id="TI_RESERVED60" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="7" description="TI Reserved register" end="7" id="TI_RESERVED59" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="6" description="TI Reserved register" end="6" id="TI_RESERVED58" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="5" description="TI Reserved register" end="5" id="TI_RESERVED57" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="4" description="TI Reserved register" end="4" id="TI_RESERVED56" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="3" description="TI Reserved register" end="3" id="TI_RESERVED55" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="2" description="TI Reserved register" end="2" id="TI_RESERVED54" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="1" description="'1': Clear Error registers(address and bit location) for Parameter set RAM" end="1" id="PARAM_ECC_ERRCLR" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="0" description="'1': Clear Error registers(address and bit location) for Window RAM" end="0" id="WIN_RAM_ECC_ERRCLR" rwaccess="" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="MEMINIT" id="MEMINIT" offset="0x208" width="32">
+    
+  <bitfield begin="31" description="" end="16" id="NU" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="'1': Start initialing  ACCEL_MEM3 with all '0's" end="15" id="OPONG_INIT" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="14" description="'1': Start initialing  ACCEL_MEM2 with all '0's" end="14" id="OPING_INIT" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="13" description="'1': Start initialing  ACCEL_MEM1 with all '0's" end="13" id="IPONG_INIT" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="12" description="'1': Start initialing  ACCEL_MEM0 with all '0's" end="12" id="IPING_INIT" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="11" description="TI Reserved register" end="11" id="TI_RESERVED73" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="10" description="TI Reserved register" end="10" id="TI_RESERVED72" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="9" description="TI Reserved register" end="9" id="TI_RESERVED71" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="8" description="TI Reserved register" end="8" id="TI_RESERVED70" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="7" description="TI Reserved register" end="7" id="TI_RESERVED69" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="6" description="TI Reserved register" end="6" id="TI_RESERVED68" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="5" description="TI Reserved register" end="5" id="TI_RESERVED67" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="4" description="TI Reserved register" end="4" id="TI_RESERVED66" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="3" description="TI Reserved register" end="3" id="TI_RESERVED65" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="2" description="TI Reserved register" end="2" id="TI_RESERVED64" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="1" description="'1': Start initialing  Parameter set RAM with all '0's" end="1" id="PARAM_INIT" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="0" description="'1': Start initialing Window RAM with all '0's" end="0" id="WIN_RAM_INIT" rwaccess="" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="MEMINITDONE" id="MEMINITDONE" offset="0x20C" width="32">
+    
+  <bitfield begin="31" description="" end="16" id="NU" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="'1': Init done status for ACCEL_MEM3" end="15" id="OPONG_INITDONE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="14" description="'1': Init done status for ACCEL_MEM2" end="14" id="OPING_INITDONE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="13" description="'1': Init done status for ACCEL_MEM1" end="13" id="IPONG_INITDONE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="12" description="'1': Init done status for ACCEL_MEM0" end="12" id="IPING_INITDONE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="11" description="TI Reserved register" end="11" id="TI_RESERVED83" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="10" description="TI Reserved register" end="10" id="TI_RESERVED82" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="9" description="TI Reserved register" end="9" id="TI_RESERVED81" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="TI Reserved register" end="8" id="TI_RESERVED80" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="TI Reserved register" end="7" id="TI_RESERVED79" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="TI Reserved register" end="6" id="TI_RESERVED78" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="TI Reserved register" end="5" id="TI_RESERVED77" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="TI Reserved register" end="4" id="TI_RESERVED76" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="TI Reserved register" end="3" id="TI_RESERVED75" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="TI Reserved register" end="2" id="TI_RESERVED74" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="'1': Init done status for Parameter set RAM" end="1" id="PARAM_INITDONE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="'1': Init done status for Window RAM" end="0" id="WIN_RAM_INITDONE" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="ECC_SBE_STATUS" id="ECC_SBE_STATUS" offset="0x210" width="32">
+    
+  <bitfield begin="31" description="" end="16" id="NU3" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="'1': Single bit error status for ACCEL_MEM3" end="15" id="OPONG_ECC_SBE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="14" description="'1': Single bit error status for ACCEL_MEM2" end="14" id="OPING_ECC_SBE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="13" description="'1': Single bit error status for ACCEL_MEM1" end="13" id="IPONG_ECC_SBE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="12" description="'1': Single bit error status for ACCEL_MEM0" end="12" id="IPING_ECC_SBE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="11" description="TI Reserved register" end="11" id="TI_RESERVED93" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="10" description="TI Reserved register" end="10" id="TI_RESERVED92" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="9" description="TI Reserved register" end="9" id="TI_RESERVED91" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="TI Reserved register" end="8" id="TI_RESERVED90" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="TI Reserved register" end="7" id="TI_RESERVED89" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="TI Reserved register" end="6" id="TI_RESERVED88" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="TI Reserved register" end="5" id="TI_RESERVED87" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="TI Reserved register" end="4" id="TI_RESERVED86" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="TI Reserved register" end="3" id="TI_RESERVED85" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="TI Reserved register" end="2" id="TI_RESERVED84" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="" end="1" id="NU2" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="" end="0" id="NU1" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="ECC_DBE_STATUS" id="ECC_DBE_STATUS" offset="0x214" width="32">
+    
+  <bitfield begin="31" description="" end="16" id="NU3" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="'1': Double bit error status for ACCEL_MEM3" end="15" id="OPONG_ECC_DBE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="14" description="'1': Double bit error status for ACCEL_MEM2" end="14" id="OPING_ECC_DBE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="13" description="'1': Double bit error status for ACCEL_MEM1" end="13" id="IPONG_ECC_DBE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="12" description="'1': Double bit error status for ACCEL_MEM0" end="12" id="IPING_ECC_DBE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="11" description="TI Reserved register" end="11" id="TI_RESERVED103" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="10" description="TI Reserved register" end="10" id="TI_RESERVED102" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="9" description="TI Reserved register" end="9" id="TI_RESERVED101" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="TI Reserved register" end="8" id="TI_RESERVED100" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="TI Reserved register" end="7" id="TI_RESERVED99" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="TI Reserved register" end="6" id="TI_RESERVED98" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="TI Reserved register" end="5" id="TI_RESERVED97" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="TI Reserved register" end="4" id="TI_RESERVED96" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="TI Reserved register" end="3" id="TI_RESERVED95" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="TI Reserved register" end="2" id="TI_RESERVED94" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="" end="1" id="NU2" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="" end="0" id="NU1" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="WINRAMERRLOC" id="WINRAMERRLOC" offset="0x218" width="32">
+    
+  <bitfield begin="31" description="[Debug] Single bit error location within error address of Window RAM" end="16" id="WIN_RAM_ERR_BIT" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="[Debug] Address of SBE/DBE location within Window RAM" end="0" id="WIN_RAM_ERR_ADDR" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="PARAMRAMERRLOC" id="PARAMRAMERRLOC" offset="0x21C" width="32">
+    
+  <bitfield begin="31" description="[Debug]Single bit error location within error address of  Parameter set RAM" end="16" id="PARAM_ERR_BIT" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="[Debug] Address of SBE/DBE location within  Parameter set RAM" end="0" id="PARAM_ERR_ADDR" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG12" id="TI_RESERVED_REG12" offset="0x220" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="16" id="TI_RESERVED105" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="0" id="TI_RESERVED104" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG13" id="TI_RESERVED_REG13" offset="0x224" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="16" id="TI_RESERVED107" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="0" id="TI_RESERVED106" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG14" id="TI_RESERVED_REG14" offset="0x228" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="16" id="TI_RESERVED109" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="0" id="TI_RESERVED108" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG15" id="TI_RESERVED_REG15" offset="0x22C" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="16" id="TI_RESERVED111" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="0" id="TI_RESERVED110" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG16" id="TI_RESERVED_REG16" offset="0x230" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="16" id="TI_RESERVED113" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="0" id="TI_RESERVED112" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG17" id="TI_RESERVED_REG17" offset="0x234" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="16" id="TI_RESERVED115" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="0" id="TI_RESERVED114" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG18" id="TI_RESERVED_REG18" offset="0x238" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="16" id="TI_RESERVED117" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="0" id="TI_RESERVED116" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG19" id="TI_RESERVED_REG19" offset="0x23C" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="16" id="TI_RESERVED119" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="0" id="TI_RESERVED118" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG20" id="TI_RESERVED_REG20" offset="0x240" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="16" id="TI_RESERVED121" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="0" id="TI_RESERVED120" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG21" id="TI_RESERVED_REG21" offset="0x244" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="16" id="TI_RESERVED123" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="0" id="TI_RESERVED122" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="IPINGERRLOC" id="IPINGERRLOC" offset="0x248" width="32">
+    
+  <bitfield begin="31" description="[Debug] [16]->1 , SBE is located in Region0 (column [15: 0]  ) [17]->1 , SBE is located in Region1 (column [31:16] ) [18]->1 , SBE is located in Region2 (column [47:32] ) [19]->1 , SBE is located in Region3 (column [63:48] ) [20]->1 , SBE is located in Region4 (column [79:63] ) [21]->1 , SBE is located in Region5 (column [95:80] ) [23]->1 , SBE is located in Region6 (column [127:96] )" end="16" id="IPING_ERR_BIT_REGION" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="[Debug ]Address of error location – rows 0-1023" end="0" id="IPING_ERR_ADDR" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="IPINGSBELOC" id="IPINGSBELOC" offset="0x24C" width="32">
+    
+  <bitfield begin="31" description="[Debug] [3:0]->SBE bit location in region0 [7:4]->SBE bit location in region1 [11:8]->SBE bit location in region2 [15:12]->SBE bit location in region3 [19:16]->SBE bit location in region4 [23:20]->SBE bit location in region5 [27:24]->SBE bit location in region6 [31:28]->SBE bit location in region7" end="0" id="IPING_ERR_BIT_LOC" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="IPONGERRLOC" id="IPONGERRLOC" offset="0x250" width="32">
+    
+  <bitfield begin="31" description="[Debug] Refer IPING_ERR_BIT_LOC" end="16" id="IPONG_ERR_BIT_REGION" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="[Debug] Refer IPING_ERR_BIT_REGION" end="0" id="IPONG_ERR_ADDR" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="IPONGSBELOC" id="IPONGSBELOC" offset="0x254" width="32">
+    
+  <bitfield begin="31" description="[Debug] Refer IPING_ERR_BIT_REGION" end="0" id="IPONG_ERR_BIT_LOC" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="OPINGERRLOC" id="OPINGERRLOC" offset="0x258" width="32">
+    
+  <bitfield begin="31" description="[Debug] Refer IPING_ERR_BIT_REGION" end="16" id="OPING_ERR_BIT_REGION" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="[Debug] Refer IPING_ERR_BIT_LOC" end="0" id="OPING_ERR_ADDR" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="OPINGSBELOC" id="OPINGSBELOC" offset="0x25C" width="32">
+    
+  <bitfield begin="31" description="[Debug] Refer IPING_ERR_BIT_LOC" end="0" id="OPING_ERR_BIT_LOC" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="OPONGERRLOC" id="OPONGERRLOC" offset="0x260" width="32">
+    
+  <bitfield begin="31" description="[Debug] Refer IPING_ERR_BIT_LOC" end="16" id="OPONG_ERR_BIT_REGION" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="[Debug] Refer IPING_ERR_BIT_REGION" end="0" id="OPONG_ERR_ADDR" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="OPONGSBELOC" id="OPONGSBELOC" offset="0x264" width="32">
+    
+  <bitfield begin="31" description="[Debug] Refer IPING_ERR_BIT_REGION" end="0" id="OPONG_ERR_BIT_LOC" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG22" id="TI_RESERVED_REG22" offset="0x268" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="25" id="TI_RESERVED130" rwaccess="R" width="7"></bitfield>
+    
+  <bitfield begin="24" description="TI Reserved register" end="24" id="TI_RESERVED129" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="TI Reserved register" end="17" id="TI_RESERVED128" rwaccess="R" width="7"></bitfield>
+    
+  <bitfield begin="16" description="TI Reserved register" end="16" id="TI_RESERVED127" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="15" description="TI Reserved register" end="12" id="TI_RESERVED126" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="11" description="TI Reserved register" end="9" id="TI_RESERVED125" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="8" description="TI Reserved register" end="0" id="TI_RESERVED124" rwaccess="RW" width="9"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG23" id="TI_RESERVED_REG23" offset="0x26C" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="0" id="TI_RESERVED131" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TI_RESERVED_REG24" id="TI_RESERVED_REG24" offset="0x270" width="32">
+    
+  <bitfield begin="31" description="TI Reserved register" end="0" id="TI_RESERVED132" rwaccess="R" width="32"></bitfield>
+  </register>
+</module>

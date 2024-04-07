@@ -1,0 +1,402 @@
+<module name="ADC0" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+	<register id="ADCREGS_REVISION" acronym="ADCREGS_REVISION" offset="0x0" width="32" description="IP Revision Identifier (X.Y.R) Used by software to track features, bugs, and compatibility">
+		<bitfield id="MODID" width="16" begin="31" end="16" resetval="0x27072" description="Module ID field" range="31 - 16" rwaccess="R"/> 
+		<bitfield id="REVRTL" width="5" begin="15" end="11" resetval="0x7" description="RTL revision. Will vary depending on release." range="15 - 11" rwaccess="R"/> 
+		<bitfield id="REVMAJ" width="3" begin="10" end="8" resetval="0x1" description="Major revision" range="10 - 8" rwaccess="R"/> 
+		<bitfield id="CUSTOM" width="2" begin="7" end="6" resetval="0x0" description="Custom" range="7 - 6" rwaccess="R"/> 
+		<bitfield id="REVMIN" width="6" begin="5" end="0" resetval="0x0" description="Minor revision" range="5 - 0" rwaccess="R"/>
+	</register>
+	<register id="ADCREGS_DMAENABLE_SET" acronym="ADCREGS_DMAENABLE_SET" offset="0x38" width="32" description="The DMAENABLE_SET register allows the enabling of DMA requests">
+		<bitfield id="ENABLE1" width="1" begin="1" end="1" resetval="0x0" description="enable DMA reguest FIFO1" range="1" rwaccess="R/W1TS"/> 
+		<bitfield id="ENABLE0" width="1" begin="0" end="0" resetval="0x0" description="enable DMA reguest FIFO0" range="0" rwaccess="R/W1TS"/>
+	</register>
+	<register id="ADCREGS_DMAENABLE_CLR" acronym="ADCREGS_DMAENABLE_CLR" offset="0x3C" width="32" description="The DMAENABLE_CLR register allows the disabling of DMA requests">
+		<bitfield id="ENABLE1" width="1" begin="1" end="1" resetval="0x0" description="clears the enable of the DMA reguest FIFO1. Disables DMA request when writing 1" range="1" rwaccess="R/W1TC"/> 
+		<bitfield id="ENABLE0" width="1" begin="0" end="0" resetval="0x0" description="clears the enable of the DMA reguest FIFO0. Disables DMA request when writing 1" range="0" rwaccess="R/W1TC"/>
+	</register>
+	<register id="ADCREGS_CONTROL" acronym="ADCREGS_CONTROL" offset="0x40" width="32" description="Controls various parameters of the cotroller state.">
+		<bitfield id="HI_MID_SEL" width="1" begin="11" end="11" resetval="0x0" description="Functional safety debug mode. =1 choose ADCREFP, =0 VMID reference input to ADC" range="11" rwaccess="R/W"/> 
+		<bitfield id="HI_MID_EN" width="1" begin="10" end="10" resetval="0x0" description="Functional safety debug mode. enable fixed reference to ADC for testing" range="10" rwaccess="R/W"/> 
+		<bitfield id="HW_PREEMPT" width="1" begin="9" end="9" resetval="0x0" description="1 steps are preempted" range="9" rwaccess="R/W"/> 
+		<bitfield id="HW_MAP" width="1" begin="8" end="8" resetval="0x0" description="1 = hw events enabled" range="8" rwaccess="R/W"/> 
+		<bitfield id="PD" width="1" begin="4" end="4" resetval="0x1" description="AFE powered down" range="4" rwaccess="R/W"/> 
+		<bitfield id="BIAS_SEL" width="1" begin="3" end="3" resetval="0x0" description="AFE select bias control" range="3" rwaccess="R/W"/> 
+		<bitfield id="STEP_ID_EN" width="1" begin="1" end="1" resetval="0x0" description="writing 1 will store the stepid number with the captured adc data in the fifo" range="1" rwaccess="R/W"/> 
+		<bitfield id="MODULE_ENABLE" width="1" begin="0" end="0" resetval="0x0" description="ADC12_SS module enable bit.  After programming all the configuration and step enable registers, write a 1 to this bit to start conversion. Writing a 0 will disable the module after the current conversion. Before turning on again, the ADC_SEQUENCER_STATUS  register show read back STEP_ID=Idle and FSM_BUSY=0. Enabling the controller will be held off until mem_init_done =1." range="0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_SEQUENCER_STAT" acronym="ADCREGS_SEQUENCER_STAT" offset="0x44" width="32" description="SW can read this register to find out the currently 
+scheduled step id being converted on the ADC port.
+If you want to turn the controller off and then back on, 
+the step_id bit should be checked and compared to IDLE 
+before enabling the ADC12_SS module again.
+Also, before enabling the controller again, 
+the user should wait for the FSM bit 5 to read idl.">
+		<bitfield id="GPADC_BUSY" width="1" begin="8" end="8" resetval="0x0" description="Monitor the AFE internal calibration, busy bit" range="8" rwaccess="R"/> 
+		<bitfield id="MEM_INIT_DONE" width="1" begin="6" end="6" resetval="0x0" description="status of ram initialization, 1= ram initialization to 0 after reset is done." range="6" rwaccess="R"/> 
+		<bitfield id="FSM_BUSY" width="1" begin="5" end="5" resetval="0x1" description="status of fsm, 1= conversion in progress" range="5" rwaccess="R"/> 
+		<bitfield id="STEP_IDLE" width="5" begin="4" end="0" resetval="0x0" description="10000 = idle, 000000 -> 01111 corresponds to step 1 -> step 16" range="4 - 0" rwaccess="R"/>
+	</register>
+	<register id="ADCREGS_RANGE" acronym="ADCREGS_RANGE" offset="0x48" width="32" description="This feature requires the range check interrupt bit to be enabled first.
+The user can decide  which channel input is compared by programming the RangeCheck bit of the StepConfig Registers.
+It is up to software to sort through FIFO data to determine which channel data was out of range. 
+Software should only use LSB 10 bits for comparison and make sure bits 11,12 are 0.">
+		<bitfield id="HIRANGE" width="12" begin="27" end="16" resetval="0x0" description="If the sampled data is > value, then interrupt is generated" range="27 - 16" rwaccess="R/W"/> 
+		<bitfield id="LOWRANGE" width="12" begin="11" end="0" resetval="0x0" description="If the sampled data is &#60; value, then interrupt is generated" range="11 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_MISC" acronym="ADCREGS_MISC" offset="0x50" width="32" description="Spare inputs of the AFE are driven by this register, spare outputs from the AFE are read.">
+		<bitfield id="AFE_SPARE_OUT" width="4" begin="11" end="8" resetval="0x0" description="Spare outputs from AFE" range="11 - 8" rwaccess="R"/> 
+		<bitfield id="AFE_SPARE_IN" width="4" begin="3" end="0" resetval="0x0" description="Spare inputs to AFE" range="3 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPENABLE" acronym="ADCREGS_STEPENABLE" offset="0x54" width="32" description="Contains the enable bit for each step in the sequencer.
+When all steps are disabled, the FSM will stay in IDLE state.
+These bits can be enabled or disabled dynamically during operation.
+When a write to this register occurs during operational mode, 
+the HW will make sure the new settings are updated after the END_OF_SEQUENCE event">
+		<bitfield id="STEP16" width="1" begin="16" end="16" resetval="0x0" description="Enable step" range="16" rwaccess="R/W"/> 
+		<bitfield id="STEP15" width="1" begin="15" end="15" resetval="0x0" description="Enable step" range="15" rwaccess="R/W"/> 
+		<bitfield id="STEP14" width="1" begin="14" end="14" resetval="0x0" description="Enable step" range="14" rwaccess="R/W"/> 
+		<bitfield id="STEP13" width="1" begin="13" end="13" resetval="0x0" description="Enable step" range="13" rwaccess="R/W"/> 
+		<bitfield id="STEP12" width="1" begin="12" end="12" resetval="0x0" description="Enable step" range="12" rwaccess="R/W"/> 
+		<bitfield id="STEP11" width="1" begin="11" end="11" resetval="0x0" description="Enable step" range="11" rwaccess="R/W"/> 
+		<bitfield id="STEP10" width="1" begin="10" end="10" resetval="0x0" description="Enable step" range="10" rwaccess="R/W"/> 
+		<bitfield id="STEP9" width="1" begin="9" end="9" resetval="0x0" description="Enable step" range="9" rwaccess="R/W"/> 
+		<bitfield id="STEP8" width="1" begin="8" end="8" resetval="0x0" description="Enable step" range="8" rwaccess="R/W"/> 
+		<bitfield id="STEP7" width="1" begin="7" end="7" resetval="0x0" description="Enable step" range="7" rwaccess="R/W"/> 
+		<bitfield id="STEP6" width="1" begin="6" end="6" resetval="0x0" description="Enable step" range="6" rwaccess="R/W"/> 
+		<bitfield id="STEP5" width="1" begin="5" end="5" resetval="0x0" description="Enable step" range="5" rwaccess="R/W"/> 
+		<bitfield id="STEP4" width="1" begin="4" end="4" resetval="0x0" description="Enable step" range="4" rwaccess="R/W"/> 
+		<bitfield id="STEP3" width="1" begin="3" end="3" resetval="0x0" description="Enable step" range="3" rwaccess="R/W"/> 
+		<bitfield id="STEP2" width="1" begin="2" end="2" resetval="0x0" description="Enable step" range="2" rwaccess="R/W"/> 
+		<bitfield id="STEP1" width="1" begin="1" end="1" resetval="0x0" description="Enable step" range="1" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_FIFO0WC" acronym="ADCREGS_FIFO0WC" offset="0xE4" width="32" description="FIFO word count status">
+		<bitfield id="NUMWDS" width="9" begin="8" end="0" resetval="0x0" description="number of words in the FIFO" range="8 - 0" rwaccess="R"/>
+	</register>
+	<register id="ADCREGS_FIFO0THRESHOLD" acronym="ADCREGS_FIFO0THRESHOLD" offset="0xE8" width="32" description="FIFO threshold">
+		<bitfield id="THRESHOLD" width="8" begin="7" end="0" resetval="0x0" description="Program the desired FIFO0 data sample level minus 1 to reach before generating interrupt to CPU" range="7 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_FIFO0DMAREQ" acronym="ADCREGS_FIFO0DMAREQ" offset="0xEC" width="32" description="dma request.">
+		<bitfield id="DMAREQLEVEL" width="8" begin="7" end="0" resetval="0x0" description="Number of words minus 1 in FIFO0 before generating a DMA request " range="7 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_FIFO1WC" acronym="ADCREGS_FIFO1WC" offset="0xF0" width="32" description="FIFO word count status">
+		<bitfield id="NUMWDS" width="9" begin="8" end="0" resetval="0x0" description="number of words in the FIFO" range="8 - 0" rwaccess="R"/>
+	</register>
+	<register id="ADCREGS_FIFO1THRESHOLD" acronym="ADCREGS_FIFO1THRESHOLD" offset="0xF4" width="32" description="FIFO threshold">
+		<bitfield id="THRESHOLD" width="8" begin="7" end="0" resetval="0x0" description="Program the desired FIFO1 data sample level minus 1 to reach before generating interrupt to CPU" range="7 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_FIFO1DMAREQ" acronym="ADCREGS_FIFO1DMAREQ" offset="0xF8" width="32" description="dma request.">
+		<bitfield id="DMAREQLEVEL" width="8" begin="7" end="0" resetval="0x0" description="Number of words minus 1 in FIFO1 before generating a DMA request " range="7 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_FIFO0DATA" acronym="ADCREGS_FIFO0DATA" offset="0x100" width="32" description="A read from this register will auto increment the FIFO read pointer. 
+If you read when FIFO is empty,it will trigger an underflow interrupt">
+		<bitfield id="ADCCHANLID" width="4" begin="19" end="16" resetval="0x0" description="Optional ID tag of channel that captured the data. If tag option is disabled, these bits will be 0" range="19 - 16" rwaccess="R"/> 
+		<bitfield id="ADCDATA" width="12" begin="11" end="0" resetval="0x0" description="sampled ADC converted data value stored in FIFO" range="11 - 0" rwaccess="R"/>
+	</register>
+	<register id="ADCREGS_FIFO1DATA" acronym="ADCREGS_FIFO1DATA" offset="0x200" width="32" description="A read from this register will auto increment the FIFO read pointer. 
+If you read when FIFO is empty,it will trigger an underflow interrupt">
+		<bitfield id="ADCCHANLID" width="4" begin="19" end="16" resetval="0x0" description="Optional ID tag of channel that captured the data. If tag option is disabled, these bits will be 0" range="19 - 16" rwaccess="R"/> 
+		<bitfield id="ADCDATA" width="12" begin="11" end="0" resetval="0x0" description="sampled ADC converted data value stored in FIFO" range="11 - 0" rwaccess="R"/>
+	</register>
+	<register id="ADCREGS_EOI" acronym="ADCREGS_EOI" offset="0x20" width="32" description="The End of Interrupt (EOI) MISC Register allows the CPU to acknowledge completion of an interrupt by writing to the EOI for MISC interrupt sources. An eoi_write signal will be generated and another interrupt will be triggered if interrupt sources remain.  This register will be reset one cycle after it has been written to.">
+		<bitfield id="LINENUMEOI" width="1" begin="0" end="0" resetval="0x0" description="Write 0 to flag End Of Interrupt." range="0" rwaccess="W"/>
+	</register>
+	<register id="ADCREGS_STATUS_RAW" acronym="ADCREGS_STATUS_RAW" offset="0x24" width="32" description="The IRQ_STATUS_RAW register allows the adc12 interrupt sources to be manually set when writing a 1 to a specific bit.  Write 0: No action Write 1: Set event Read 0: No event pending Read 1: Event pending">
+		<bitfield id="OUTOFRANGE" width="1" begin="8" end="8" resetval="0x0" description="sample out of range" range="8" rwaccess="R/W1TS"/> 
+		<bitfield id="FIFO1UNFL" width="1" begin="7" end="7" resetval="0x0" description="fifo under flow" range="7" rwaccess="R/W1TS"/> 
+		<bitfield id="FIFO1OVFL" width="1" begin="6" end="6" resetval="0x0" description="fifo over flow" range="6" rwaccess="R/W1TS"/> 
+		<bitfield id="FIFO1THRS" width="1" begin="5" end="5" resetval="0x0" description="fifo thresholds met" range="5" rwaccess="R/W1TS"/> 
+		<bitfield id="FIFO0UNFL" width="1" begin="4" end="4" resetval="0x0" description="fifo under flow" range="4" rwaccess="R/W1TS"/> 
+		<bitfield id="FIFO0OVFL" width="1" begin="3" end="3" resetval="0x0" description="fifo over flow" range="3" rwaccess="R/W1TS"/> 
+		<bitfield id="FIFO0THRS" width="1" begin="2" end="2" resetval="0x0" description="fifo thresholds met" range="2" rwaccess="R/W1TS"/> 
+		<bitfield id="ENDOFEQUENCE" width="1" begin="1" end="1" resetval="0x0" description="end of sequence" range="1" rwaccess="R/W1TS"/> 
+		<bitfield id="AFE_EOC_MISSING" width="1" begin="0" end="0" resetval="0x0" description="eoc from the analog front end missing at expected time after soc" range="0" rwaccess="R/W1TS"/>
+	</register>
+	<register id="ADCREGS_STATUS" acronym="ADCREGS_STATUS" offset="0x28" width="32" description="The IRQ_STATUS register allows the adc12 interrupt sources to be manually cleared when writing a 1 to a specific bit.   Write 0: No action Write 1: Clear event Read 0: No event pending Read 1: Event pending">
+		<bitfield id="OUTOFRANGE" width="1" begin="8" end="8" resetval="0x0" description="sample out of range" range="8" rwaccess="R/W1TC"/> 
+		<bitfield id="FIFO1UNFL" width="1" begin="7" end="7" resetval="0x0" description="fifo under flow" range="7" rwaccess="R/W1TC"/> 
+		<bitfield id="FIFO1OVFL" width="1" begin="6" end="6" resetval="0x0" description="fifo over flow" range="6" rwaccess="R/W1TC"/> 
+		<bitfield id="FIFO1THRS" width="1" begin="5" end="5" resetval="0x0" description="fifo thresholds met" range="5" rwaccess="R/W1TC"/> 
+		<bitfield id="FIFO0UNFL" width="1" begin="4" end="4" resetval="0x0" description="fifo under flow" range="4" rwaccess="R/W1TC"/> 
+		<bitfield id="FIFO0OVFL" width="1" begin="3" end="3" resetval="0x0" description="fifo over flow" range="3" rwaccess="R/W1TC"/> 
+		<bitfield id="FIFO0THRS" width="1" begin="2" end="2" resetval="0x0" description="fifo thresholds met" range="2" rwaccess="R/W1TC"/> 
+		<bitfield id="ENDOFEQUENCE" width="1" begin="1" end="1" resetval="0x0" description="end of sequence" range="1" rwaccess="R/W1TC"/> 
+		<bitfield id="AFE_EOC_MISSING" width="1" begin="0" end="0" resetval="0x0" description="eoc from the analog front end missing at expected time after soc" range="0" rwaccess="R/W1TC"/>
+	</register>
+	<register id="ADCREGS_ENABLE_SET" acronym="ADCREGS_ENABLE_SET" offset="0x2C" width="32" description="The IRQ_ENABLE_SET register allows the adc12 interrupt sources to be manually enabled when writing a 1 to a specific bit.  Write 0: No action Write 1: Enable event Read 0: Event is disabled Read 1: Event is enabled">
+		<bitfield id="OUTOFRANGE" width="1" begin="8" end="8" resetval="0x0" description="sample out of range" range="8" rwaccess="R/W1TS"/> 
+		<bitfield id="FIFO1UNFL" width="1" begin="7" end="7" resetval="0x0" description="fifo under flow" range="7" rwaccess="R/W1TS"/> 
+		<bitfield id="FIFO1OVFL" width="1" begin="6" end="6" resetval="0x0" description="fifo over flow" range="6" rwaccess="R/W1TS"/> 
+		<bitfield id="FIFO1THRS" width="1" begin="5" end="5" resetval="0x0" description="fifo thresholds met" range="5" rwaccess="R/W1TS"/> 
+		<bitfield id="FIFO0UNFL" width="1" begin="4" end="4" resetval="0x0" description="fifo under flow" range="4" rwaccess="R/W1TS"/> 
+		<bitfield id="FIFO0OVFL" width="1" begin="3" end="3" resetval="0x0" description="fifo over flow" range="3" rwaccess="R/W1TS"/> 
+		<bitfield id="FIFO0THRS" width="1" begin="2" end="2" resetval="0x0" description="fifo thresholds met" range="2" rwaccess="R/W1TS"/> 
+		<bitfield id="ENDOFEQUENCE" width="1" begin="1" end="1" resetval="0x0" description="end of sequence" range="1" rwaccess="R/W1TS"/> 
+		<bitfield id="AFE_EOC_MISSING" width="1" begin="0" end="0" resetval="0x0" description="eoc from the analog front end missing at expected time after soc" range="0" rwaccess="R/W1TS"/>
+	</register>
+	<register id="ADCREGS_ENABLE_CLR" acronym="ADCREGS_ENABLE_CLR" offset="0x30" width="32" description="The IRQ_ENABLE_CLR register allows the adc12 interrupt sources to be manually disabled when writing a 1 to a specific bit.  Write 0: No action Write 1: Disable event Read 0: Event is disabled Read 1: Event is enabled">
+		<bitfield id="OUTOFRANGE" width="1" begin="8" end="8" resetval="0x0" description="sample out of range" range="8" rwaccess="R/W1TC"/> 
+		<bitfield id="FIFO1UNFL" width="1" begin="7" end="7" resetval="0x0" description="fifo under flow" range="7" rwaccess="R/W1TC"/> 
+		<bitfield id="FIFO1OVFL" width="1" begin="6" end="6" resetval="0x0" description="fifo over flow" range="6" rwaccess="R/W1TC"/> 
+		<bitfield id="FIFO1THRS" width="1" begin="5" end="5" resetval="0x0" description="fifo thresholds met" range="5" rwaccess="R/W1TC"/> 
+		<bitfield id="FIFO0UNFL" width="1" begin="4" end="4" resetval="0x0" description="fifo under flow" range="4" rwaccess="R/W1TC"/> 
+		<bitfield id="FIFO0OVFL" width="1" begin="3" end="3" resetval="0x0" description="fifo over flow" range="3" rwaccess="R/W1TC"/> 
+		<bitfield id="FIFO0THRS" width="1" begin="2" end="2" resetval="0x0" description="fifo thresholds met" range="2" rwaccess="R/W1TC"/> 
+		<bitfield id="ENDOFEQUENCE" width="1" begin="1" end="1" resetval="0x0" description="end of sequence" range="1" rwaccess="R/W1TC"/> 
+		<bitfield id="AFE_EOC_MISSING" width="1" begin="0" end="0" resetval="0x0" description="eoc from the analog front end missing at expected time after soc" range="0" rwaccess="R/W1TC"/>
+	</register>
+	<register id="ADCREGS_STEPCONFIG_0" acronym="ADCREGS_STEPCONFIG_0" offset="0x64" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_0" acronym="ADCREGS_STEPDELAY_0" offset="0x68" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPCONFIG_1" acronym="ADCREGS_STEPCONFIG_1" offset="0x6C" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_1" acronym="ADCREGS_STEPDELAY_1" offset="0x70" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_2" acronym="ADCREGS_STEPCONFIG_2" offset="0x74" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_2" acronym="ADCREGS_STEPDELAY_2" offset="0x78" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_3" acronym="ADCREGS_STEPCONFIG_3" offset="0x7C" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_3" acronym="ADCREGS_STEPDELAY_3" offset="0x80" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_4" acronym="ADCREGS_STEPCONFIG_4" offset="0x84" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_4" acronym="ADCREGS_STEPDELAY_4" offset="0x88" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_5" acronym="ADCREGS_STEPCONFIG_5" offset="0x8C" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_5" acronym="ADCREGS_STEPDELAY_5" offset="0x90" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_6" acronym="ADCREGS_STEPCONFIG_6" offset="0x94" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_6" acronym="ADCREGS_STEPDELAY_6" offset="0x98" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_7" acronym="ADCREGS_STEPCONFIG_7" offset="0x9C" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_7" acronym="ADCREGS_STEPDELAY_7" offset="0xA0" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_8" acronym="ADCREGS_STEPCONFIG_8" offset="0xA4" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_8" acronym="ADCREGS_STEPDELAY_8" offset="0xA8" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_9" acronym="ADCREGS_STEPCONFIG_9" offset="0xAC" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_9" acronym="ADCREGS_STEPDELAY_9" offset="0xB0" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_10" acronym="ADCREGS_STEPCONFIG_10" offset="0xB4" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_10" acronym="ADCREGS_STEPDELAY_10" offset="0xB8" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_11" acronym="ADCREGS_STEPCONFIG_11" offset="0xBC" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_11" acronym="ADCREGS_STEPDELAY_11" offset="0xC0" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_12" acronym="ADCREGS_STEPCONFIG_12" offset="0xC4" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_12" acronym="ADCREGS_STEPDELAY_12" offset="0xC8" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_13" acronym="ADCREGS_STEPCONFIG_13" offset="0xCC" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_13" acronym="ADCREGS_STEPDELAY_13" offset="0xD0" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_14" acronym="ADCREGS_STEPCONFIG_14" offset="0xD4" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_14" acronym="ADCREGS_STEPDELAY_14" offset="0xD8" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+	<register id="ADCREGS_STEPCONFIG_15" acronym="ADCREGS_STEPCONFIG_15" offset="0xDC" width="32" description="The user should write to this register the values 
+of the input pins send to the AFE during step 1.
+the StepConfig WriteEnable bit should be set to 1 before a write can occur.">
+		<bitfield id="RANGECHECK" width="1" begin="27" end="27" resetval="0x0" description="0 = no range sel  1 = compare ADC data with range" range="27" rwaccess="R/W"/> 
+		<bitfield id="FIFOSEL" width="1" begin="26" end="26" resetval="0x0" description="Sampled data will be stored in FIFO0 when = 0, FIFO1 when = 1" range="26" rwaccess="R/W"/> 
+		<bitfield id="DIFF_CNTRL" width="1" begin="25" end="25" resetval="0x0" description="Differential control. Single ended when = 0, differential input when = 1" range="25" rwaccess="R/W"/> 
+		<bitfield id="SEL_INP_SWC" width="4" begin="22" end="19" resetval="0x0" description="SEL_INP pins SW configuration" range="22 - 19" rwaccess="R/W"/> 
+		<bitfield id="SEL_INM_SWM" width="4" begin="18" end="15" resetval="0x8" description="SEL_INM pins, negative differential" range="18 - 15" rwaccess="R/W"/> 
+		<bitfield id="AVERAGING" width="3" begin="4" end="2" resetval="0x0" description="000 -> no average 001 -> 2 samples average 010 -> 4 samples average 011 -> 8 samples average   100 -> 16 samples average" range="4 - 2" rwaccess="R/W"/> 
+		<bitfield id="MODE" width="2" begin="1" end="0" resetval="0x0" description="00  SW enabled one shot  01  SW enabled continuous    10  HW synchronized one-shot 11  HW synchronized continuous" range="1 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="ADCREGS_STEPDELAY_15" acronym="ADCREGS_STEPDELAY_15" offset="0xE0" width="32" description="Controls number of clock periods to sample and delay">
+		<bitfield id="SAMPLEDELAY" width="8" begin="31" end="24" resetval="0x0" description="number of ADC clock cycles to sample. Any value programmed here will be added to the minimum requirement of 1 clock cycle." range="31 - 24" rwaccess="R/W"/> 
+		<bitfield id="OPENDELAY" width="18" begin="17" end="0" resetval="0x0" description="Program the number of ADC clock cycles to wait after applying the step  configuration registers and before sending the start of ADC conversion" range="17 - 0" rwaccess="R/W"/>
+	</register>
+
+</module>

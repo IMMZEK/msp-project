@@ -1,0 +1,656 @@
+<module name="Display Controller" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="DISPC_REVISION" acronym="DISPC_REVISION" offset="0x0" width="32" description="This register contains the IP revision code.">
+    <bitfield id="Reserved" width="24" begin="31" end="8" resetval="0x000000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="REV" width="8" begin="7" end="0" resetval="TI internal data" description="IP revision[7:4]Major revision[3:0]Minor revision" range="" rwaccess="R"/>
+  </register>
+  <register id="DISPC_SYSCONFIG" acronym="DISPC_SYSCONFIG" offset="0x10" width="32" description="This register allows the control of various parameters of the interconnect interface.">
+    <bitfield id="Reserved" width="18" begin="31" end="14" resetval="0x00000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="MIDLEMODE" width="2" begin="13" end="12" resetval="0x0" description="Master interface power management, standby/waitcontrol" range="" rwaccess="RW">
+      <bitenum value="0" token="MIDLEMODE_0" description="Force standby. MStandby is asserted only when the module is disabled."/>
+      <bitenum value="1" token="MIDLEMODE_1" description="No standby: MStandby is never asserted."/>
+      <bitenum value="2" token="MIDLEMODE_2" description="Smart Standby. MStandby is asserted based on the internal activity of the module."/>
+      <bitenum value="3" token="MIDLEMODE_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="Reserved" width="2" begin="11" end="10" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="CLOCKACTIVITY" width="2" begin="9" end="8" resetval="0x0" description="Clock activity during wakeup mode period" range="" rwaccess="RW">
+      <bitenum value="0" token="CLOCKACTIVITY_0" description="interface and functional clocks can be switched off."/>
+      <bitenum value="1" token="CLOCKACTIVITY_1" description="Functional clocks can be switched off and interface clocks are maintained during wakeup period."/>
+      <bitenum value="2" token="CLOCKACTIVITY_2" description="Interface clocks can be switched off and functional clocks are maintained during wakeup period."/>
+      <bitenum value="3" token="CLOCKACTIVITY_3" description="Interface and functional clocks are maintained during wakeup period."/>
+    </bitfield>
+    <bitfield id="Reserved" width="3" begin="7" end="5" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="SIDLEMODE" width="2" begin="4" end="3" resetval="0x0" description="Slave interface power management, idle req/ack control" range="" rwaccess="RW">
+      <bitenum value="0" token="SIDLEMODE_0" description="Force idle. An idle request is acknowledged unconditionally."/>
+      <bitenum value="1" token="SIDLEMODE_1" description="No idle. An idle request is never acknowledged."/>
+      <bitenum value="2" token="SIDLEMODE_2" description="Smart idle. Idle request is acknowledged based on the internal activity of the module."/>
+      <bitenum value="3" token="SIDLEMODE_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="ENWAKEUP" width="1" begin="2" end="2" resetval="0" description="Wakeup feature control" range="" rwaccess="RW">
+      <bitenum value="0" token="ENWAKEUP_0" description="Wakeup is disabled."/>
+      <bitenum value="1" token="ENWAKEUP_1" description="Wakeup is enabled."/>
+    </bitfield>
+    <bitfield id="SOFTRESET" width="1" begin="1" end="1" resetval="0" description="Software reset. Set this bit to 1 to trigger a module reset. The bit is automatically reset by the hardware. During reads, it always returns 0." range="" rwaccess="RW">
+      <bitenum value="0" token="SOFTRESET_0" description="Normal mode"/>
+      <bitenum value="1" token="SOFTRESET_1" description="The module is reset."/>
+    </bitfield>
+    <bitfield id="AUTOIDLE" width="1" begin="0" end="0" resetval="1" description="Internal interface clock gating strategy" range="" rwaccess="RW">
+      <bitenum value="0" token="AUTOIDLE_0" description="Interface clock is free-running."/>
+      <bitenum value="1" token="AUTOIDLE_1" description="Automatic L3 and L4 interface clock gating strategy is applied based on interface activity."/>
+    </bitfield>
+  </register>
+  <register id="DISPC_SYSSTATUS" acronym="DISPC_SYSSTATUS" offset="0x14" width="32" description="This register provides status information about the module, excluding interrupt status information.">
+    <bitfield id="Reserved" width="24" begin="31" end="8" resetval="0x000000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="Reserved" width="7" begin="7" end="1" resetval="0x00" description="Reserved. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="RESETDONE" width="1" begin="0" end="0" resetval="0" description="Internal reset monitoring" range="" rwaccess="R">
+      <bitenum value="0" token="RESETDONE_0_r" description="Internal module reset is ongoing."/>
+      <bitenum value="1" token="RESETDONE_1_r" description="Reset complete"/>
+    </bitfield>
+  </register>
+  <register id="DISPC_IRQSTATUS" acronym="DISPC_IRQSTATUS" offset="0x18" width="32" description="This register regroups all the status of module internal events that generate an interrupt. A write of 1 to a given bit resets the bit.">
+    <bitfield id="Reserved" width="15" begin="31" end="17" resetval="0x0000" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="WAKEUP" width="1" begin="16" end="16" resetval="0" description="Wakeup" range="" rwaccess="RW">
+      <bitenum value="0" token="WAKEUP_0_r" description="Wakeup is false."/>
+      <bitenum value="0" token="WAKEUP_0_w" description="Wakeup status bit unchanged"/>
+      <bitenum value="1" token="WAKEUP_1_r" description="Wakeup is true (pending)."/>
+      <bitenum value="1" token="WAKEUP_1_w" description="Wakeup status bit reset"/>
+    </bitfield>
+    <bitfield id="SYNCLOSTDIGITAL" width="1" begin="15" end="15" resetval="0" description="SyncLostDigital" range="" rwaccess="RW">
+      <bitenum value="0" token="SYNCLOSTDIGITAL_0_r" description="SyncLostDigital is false."/>
+      <bitenum value="0" token="SYNCLOSTDIGITAL_0_w" description="SyncLostDigital status bit unchanged"/>
+      <bitenum value="1" token="SYNCLOSTDIGITAL_1_r" description="SyncLostDigital is true (pending)."/>
+      <bitenum value="1" token="SYNCLOSTDIGITAL_1_w" description="SyncLostDigital status bit reset"/>
+    </bitfield>
+    <bitfield id="SYNCLOST" width="1" begin="14" end="14" resetval="0" description="SyncLost" range="" rwaccess="RW">
+      <bitenum value="0" token="SYNCLOST_0_r" description="SyncLost is false."/>
+      <bitenum value="0" token="SYNCLOST_0_w" description="SyncLost status bit unchanged"/>
+      <bitenum value="1" token="SYNCLOST_1_r" description="SyncLost is true (pending)."/>
+      <bitenum value="1" token="SYNCLOST_1_w" description="SyncLost status bit reset"/>
+    </bitfield>
+    <bitfield id="VID2ENDWINDOW" width="1" begin="13" end="13" resetval="0" description="Vid2EndWindow" range="" rwaccess="RW">
+      <bitenum value="0" token="VID2ENDWINDOW_0_r" description="Vid2EndWindow is false."/>
+      <bitenum value="0" token="VID2ENDWINDOW_0_w" description="Vid2EndWindow status bit unchanged"/>
+      <bitenum value="1" token="VID2ENDWINDOW_1_r" description="Vid2EndWindow is true (pending)."/>
+      <bitenum value="1" token="VID2ENDWINDOW_1_w" description="Vid2EndWindow status bit reset"/>
+    </bitfield>
+    <bitfield id="VID2FIFOUNDERFLOW" width="1" begin="12" end="12" resetval="0" description="Vid2FIFOUnderflow" range="" rwaccess="RW">
+      <bitenum value="0" token="VID2FIFOUNDERFLOW_0_r" description="Vid2FIFOUnderflow is false."/>
+      <bitenum value="0" token="VID2FIFOUNDERFLOW_0_w" description="Vid2FIFOUnderflow status bit unchanged"/>
+      <bitenum value="1" token="VID2FIFOUNDERFLOW_1_r" description="Vid2FIFOUnderflow is true (pending)."/>
+      <bitenum value="1" token="VID2FIFOUNDERFLOW_1_w" description="Vid2FIFOUnderflow status bit reset"/>
+    </bitfield>
+    <bitfield id="VID1ENDWINDOW" width="1" begin="11" end="11" resetval="0" description="Vid1EndWindow" range="" rwaccess="RW">
+      <bitenum value="0" token="VID1ENDWINDOW_0_r" description="Vid1EndWindow is false."/>
+      <bitenum value="0" token="VID1ENDWINDOW_0_w" description="Vid1EndWindow status bit unchanged"/>
+      <bitenum value="1" token="VID1ENDWINDOW_1_r" description="Vid1EndWindow is true (pending)."/>
+      <bitenum value="1" token="VID1ENDWINDOW_1_w" description="Vid1EndWindow status bit reset"/>
+    </bitfield>
+    <bitfield id="VID1FIFOUNDERFLOW" width="1" begin="10" end="10" resetval="0" description="Vid1FIFOUnderflow" range="" rwaccess="RW">
+      <bitenum value="0" token="VID1FIFOUNDERFLOW_0_r" description="Vid1FIFOUnderflow is false."/>
+      <bitenum value="0" token="VID1FIFOUNDERFLOW_0_w" description="Vid1FIFOUnderflow status bit unchanged"/>
+      <bitenum value="1" token="VID1FIFOUNDERFLOW_1_r" description="Vid1FIFOUnderflow is true (pending)."/>
+      <bitenum value="1" token="VID1FIFOUNDERFLOW_1_w" description="Vid1FIFOUnderflow status bit reset"/>
+    </bitfield>
+    <bitfield id="OCPERROR" width="1" begin="9" end="9" resetval="0" description="OCPError" range="" rwaccess="RW">
+      <bitenum value="0" token="OCPERROR_0_r" description="OCPError is false."/>
+      <bitenum value="0" token="OCPERROR_0_w" description="OCPError status bit unchanged"/>
+      <bitenum value="1" token="OCPERROR_1_r" description="OCPError is true (pending)."/>
+      <bitenum value="1" token="OCPERROR_1_w" description="OCPError status bit reset"/>
+    </bitfield>
+    <bitfield id="PALETTEGAMMALOADING" width="1" begin="8" end="8" resetval="0" description="PaletteGammaLoading" range="" rwaccess="RW">
+      <bitenum value="0" token="PALETTEGAMMALOADING_0_r" description="PaletteGammaLoading is false."/>
+      <bitenum value="0" token="PALETTEGAMMALOADING_0_w" description="PaletteGammaLoading status bit unchanged"/>
+      <bitenum value="1" token="PALETTEGAMMALOADING_1_r" description="PaletteGammaLoading is true (pending)."/>
+      <bitenum value="1" token="PALETTEGAMMALOADING_1_w" description="PaletteGammaLoading status bit reset"/>
+    </bitfield>
+    <bitfield id="GFXENDWINDOW" width="1" begin="7" end="7" resetval="0" description="GfxEndWindow" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXENDWINDOW_0_r" description="GfxEndWindow is false."/>
+      <bitenum value="0" token="GFXENDWINDOW_0_w" description="GfxEndWindow status bit unchanged"/>
+      <bitenum value="1" token="GFXENDWINDOW_1_r" description="GfxEndWindow is true (pending)."/>
+      <bitenum value="1" token="GFXENDWINDOW_1_w" description="GfxEndWindow status bit reset"/>
+    </bitfield>
+    <bitfield id="GFXFIFOUNDERFLOW" width="1" begin="6" end="6" resetval="0" description="GfxFIFOUnderflow" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXFIFOUNDERFLOW_0_r" description="GfxFIFOUnderflow is false."/>
+      <bitenum value="0" token="GFXFIFOUNDERFLOW_0_w" description="GfxFIFOUnderflow status bit unchanged"/>
+      <bitenum value="1" token="GFXFIFOUNDERFLOW_1_r" description="GfxFIFOUnderflow is true (pending)."/>
+      <bitenum value="1" token="GFXFIFOUNDERFLOW_1_w" description="GfxFIFOUnderflow status bit reset"/>
+    </bitfield>
+    <bitfield id="PROGRAMMEDLINENUMBER" width="1" begin="5" end="5" resetval="0" description="ProgrammedLineNumber" range="" rwaccess="RW">
+      <bitenum value="0" token="PROGRAMMEDLINENUMBER_0_r" description="ProgrammedLineNumber is false."/>
+      <bitenum value="0" token="PROGRAMMEDLINENUMBER_0_w" description="ProgrammedLineNumber status bit unchanged"/>
+      <bitenum value="1" token="PROGRAMMEDLINENUMBER_1_r" description="ProgrammedLineNumber is true (pending)."/>
+      <bitenum value="1" token="PROGRAMMEDLINENUMBER_1_w" description="ProgrammedLineNumber status bit reset"/>
+    </bitfield>
+    <bitfield id="ACBIASCOUNTSTATUS" width="1" begin="4" end="4" resetval="0" description="ACBiasCountStatus" range="" rwaccess="RW">
+      <bitenum value="0" token="ACBIASCOUNTSTATUS_0_r" description="ACBiasCountStatus is false."/>
+      <bitenum value="0" token="ACBIASCOUNTSTATUS_0_w" description="ACBiasCountStatus status bit unchanged"/>
+      <bitenum value="1" token="ACBIASCOUNTSTATUS_1_r" description="ACBiasCountStatus is true (pending)."/>
+      <bitenum value="1" token="ACBIASCOUNTSTATUS_1_w" description="ACBiasCountStatus status bit reset"/>
+    </bitfield>
+    <bitfield id="EVSYNC_ODD" width="1" begin="3" end="3" resetval="0" description="EVSYNC_ODD" range="" rwaccess="RW">
+      <bitenum value="0" token="EVSYNC_ODD_0_r" description="EVSYNC_ODD is false."/>
+      <bitenum value="0" token="EVSYNC_ODD_0_w" description="EVSYNC_ODD status bit unchanged"/>
+      <bitenum value="1" token="EVSYNC_ODD_1_r" description="EVSYNC_ODD is true (pending)."/>
+      <bitenum value="1" token="EVSYNC_ODD_1_w" description="EVSYNC_ODD status bit reset"/>
+    </bitfield>
+    <bitfield id="EVSYNC_EVEN" width="1" begin="2" end="2" resetval="0" description="EVSYNC_EVEN" range="" rwaccess="RW">
+      <bitenum value="0" token="EVSYNC_EVEN_0_r" description="EVSYNC_EVEN is false."/>
+      <bitenum value="0" token="EVSYNC_EVEN_0_w" description="EVSYNC_EVEN status bit unchanged"/>
+      <bitenum value="1" token="EVSYNC_EVEN_1_r" description="EVSYNC_EVEN is true (pending)."/>
+      <bitenum value="1" token="EVSYNC_EVEN_1_w" description="EVSYNC_EVEN status bit reset"/>
+    </bitfield>
+    <bitfield id="VSYNC" width="1" begin="1" end="1" resetval="0" description="VSYNC" range="" rwaccess="RW">
+      <bitenum value="0" token="VSYNC_0_r" description="VSYNC is false."/>
+      <bitenum value="0" token="VSYNC_0_w" description="VSYNC status bit unchanged"/>
+      <bitenum value="1" token="VSYNC_1_r" description="VSYNC is true (pending)."/>
+      <bitenum value="1" token="VSYNC_1_w" description="VSYNC status bit reset"/>
+    </bitfield>
+    <bitfield id="FRAMEDONE" width="1" begin="0" end="0" resetval="0" description="FrameDone" range="" rwaccess="RW">
+      <bitenum value="0" token="FRAMEDONE_0_r" description="FrameDone is false."/>
+      <bitenum value="0" token="FRAMEDONE_0_w" description="FrameDone status bit unchanged"/>
+      <bitenum value="1" token="FRAMEDONE_1_r" description="FrameDone is true (pending)."/>
+      <bitenum value="1" token="FRAMEDONE_1_w" description="FrameDone status bit reset"/>
+    </bitfield>
+  </register>
+  <register id="DISPC_IRQENABLE" acronym="DISPC_IRQENABLE" offset="0x1C" width="32" description="This register allows the masking/unmasking of module internal interrupt sources, on an event-by-event basis.">
+    <bitfield id="Reserved" width="15" begin="31" end="17" resetval="0x0000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="WAKEUP" width="1" begin="16" end="16" resetval="0" description="Wakeup mask" range="" rwaccess="RW">
+      <bitenum value="0" token="WAKEUP_0" description="Wakeup is masked."/>
+      <bitenum value="1" token="WAKEUP_1" description="Wakeup generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="SYNCLOSTDIGITAL" width="1" begin="15" end="15" resetval="0" description="SyncLostDigital" range="" rwaccess="RW">
+      <bitenum value="0" token="SYNCLOSTDIGITAL_0" description="SyncLostDigital is masked."/>
+      <bitenum value="1" token="SYNCLOSTDIGITAL_1" description="SyncLostDigital generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="SYNCLOST" width="1" begin="14" end="14" resetval="0" description="SyncLost" range="" rwaccess="RW">
+      <bitenum value="0" token="SYNCLOST_0" description="SyncLost is masked."/>
+      <bitenum value="1" token="SYNCLOST_1" description="SyncLost generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="VID2ENDWINDOW" width="1" begin="13" end="13" resetval="0" description="Vid2EndWindow" range="" rwaccess="RW">
+      <bitenum value="0" token="VID2ENDWINDOW_0" description="Vid2EndWindow is masked."/>
+      <bitenum value="1" token="VID2ENDWINDOW_1" description="Vid2EndWindow generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="VID2FIFOUNDERFLOW" width="1" begin="12" end="12" resetval="0" description="Vid2FIFOUnderflow" range="" rwaccess="RW">
+      <bitenum value="0" token="VID2FIFOUNDERFLOW_0" description="Vid2FIFOUnderflow is masked."/>
+      <bitenum value="1" token="VID2FIFOUNDERFLOW_1" description="Vid2FIFOUnderflow generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="ENDVID1WINDOW" width="1" begin="11" end="11" resetval="0" description="EndVid1Window" range="" rwaccess="RW">
+      <bitenum value="0" token="ENDVID1WINDOW_0" description="EndVid1Window is masked."/>
+      <bitenum value="1" token="ENDVID1WINDOW_1" description="EndVid1Window generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="VID1FIFOUNDERFLOW" width="1" begin="10" end="10" resetval="0" description="Vid1FIFOUnderflow" range="" rwaccess="RW">
+      <bitenum value="0" token="VID1FIFOUNDERFLOW_0" description="Vid1FIFOUnderflow is masked."/>
+      <bitenum value="1" token="VID1FIFOUNDERFLOW_1" description="Vid1FIFOUnderflow generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="OCPERROR" width="1" begin="9" end="9" resetval="0" description="OCPError" range="" rwaccess="RW">
+      <bitenum value="0" token="OCPERROR_0" description="OCPError is masked."/>
+      <bitenum value="1" token="OCPERROR_1" description="OCPError generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="PALETTEGAMMAMASK" width="1" begin="8" end="8" resetval="0" description="PaletteGammaMask" range="" rwaccess="RW">
+      <bitenum value="0" token="PALETTEGAMMAMASK_0" description="PaletteGammaMask is masked."/>
+      <bitenum value="1" token="PALETTEGAMMAMASK_1" description="PaletteGammaMask generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="GFXENDWINDOW" width="1" begin="7" end="7" resetval="0" description="GfxEndWindow" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXENDWINDOW_0" description="GfxEndWindow is masked."/>
+      <bitenum value="1" token="GFXENDWINDOW_1" description="GfxEndWindow generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="GFXFIFOUNDERFLOW" width="1" begin="6" end="6" resetval="0" description="GfxFIFOUnderflow" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXFIFOUNDERFLOW_0" description="GfxFIFOUnderflow is masked."/>
+      <bitenum value="1" token="GFXFIFOUNDERFLOW_1" description="GfxFIFOUnderflow generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="PROGRAMMEDLINENUMBER" width="1" begin="5" end="5" resetval="0" description="ProgrammedLineNumber" range="" rwaccess="RW">
+      <bitenum value="0" token="PROGRAMMEDLINENUMBER_0" description="ProgrammedLineNumber is masked."/>
+      <bitenum value="1" token="PROGRAMMEDLINENUMBER_1" description="ProgrammedLineNumber generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="ACBIASCOUNTSTATUS" width="1" begin="4" end="4" resetval="0" description="ACBiasCountStatus" range="" rwaccess="RW">
+      <bitenum value="0" token="ACBIASCOUNTSTATUS_0" description="ACBiasCountStatus is masked."/>
+      <bitenum value="1" token="ACBIASCOUNTSTATUS_1" description="ACBiasCountStatus generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="EVSYNC_ODD" width="1" begin="3" end="3" resetval="0" description="EVSYNC_ODD" range="" rwaccess="RW">
+      <bitenum value="0" token="EVSYNC_ODD_0" description="EVSYNC_ODD is masked."/>
+      <bitenum value="1" token="EVSYNC_ODD_1" description="EVSYNC_ODD generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="EVSYNC_EVEN" width="1" begin="2" end="2" resetval="0" description="EVSYNC_EVEN" range="" rwaccess="RW">
+      <bitenum value="0" token="EVSYNC_EVEN_0" description="EVSYNC_EVEN is masked."/>
+      <bitenum value="1" token="EVSYNC_EVEN_1" description="EVSYNC_EVEN generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="VSYNC" width="1" begin="1" end="1" resetval="0" description="VSYNC" range="" rwaccess="RW">
+      <bitenum value="0" token="VSYNC_0" description="VSYNC is masked."/>
+      <bitenum value="1" token="VSYNC_1" description="VSYNC generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="FRAMEMASK" width="1" begin="0" end="0" resetval="0" description="FrameMask" range="" rwaccess="RW">
+      <bitenum value="0" token="FRAMEMASK_0" description="FrameMask is masked."/>
+      <bitenum value="1" token="FRAMEMASK_1" description="FrameMask generates an interrupt when it occurs."/>
+    </bitfield>
+  </register>
+  <register id="DISPC_CONTROL" acronym="DISPC_CONTROL" offset="0x40" width="32" description="The control register configures the display controller module.">
+    <bitfield id="SPATIALTEMPORALDITHERINGFRAMES" width="2" begin="31" end="30" resetval="0x0" description="Spatial/Temporal dithering number of frameswr: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="SPATIALTEMPORALDITHERINGFRAMES_0" description="Spatial only"/>
+      <bitenum value="1" token="SPATIALTEMPORALDITHERINGFRAMES_1" description="Spatial and temporal over two frames"/>
+      <bitenum value="2" token="SPATIALTEMPORALDITHERINGFRAMES_2" description="Spatial and temporal over four frames"/>
+      <bitenum value="3" token="SPATIALTEMPORALDITHERINGFRAMES_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="LCDENABLEPOL" width="1" begin="29" end="29" resetval="0" description="LCD Enable Signal Polarity" range="" rwaccess="RW">
+      <bitenum value="0" token="LCDENABLEPOL_0" description="Active low"/>
+      <bitenum value="1" token="LCDENABLEPOL_1" description="Active high"/>
+    </bitfield>
+    <bitfield id="LCDENABLESIGNAL" width="1" begin="28" end="28" resetval="0" description="LCD Enable Signal: LCD interface active/inactive" range="" rwaccess="RW">
+      <bitenum value="0" token="LCDENABLESIGNAL_0" description="Signal disabled"/>
+      <bitenum value="1" token="LCDENABLESIGNAL_1" description="Signal enabled"/>
+    </bitfield>
+    <bitfield id="PCKFREEENABLE" width="1" begin="27" end="27" resetval="0" description="Pixel clock free-running enabled/disabled" range="" rwaccess="RW">
+      <bitenum value="0" token="PCKFREEENABLE_0" description="Clock disabled"/>
+      <bitenum value="1" token="PCKFREEENABLE_1" description="Clock enabled"/>
+    </bitfield>
+    <bitfield id="TDMUNUSEDBITS" width="2" begin="26" end="25" resetval="0x0" description="State of unused bits (TDM mode only)WR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="TDMUNUSEDBITS_0" description="Low level (0)"/>
+      <bitenum value="1" token="TDMUNUSEDBITS_1" description="High level (1)"/>
+      <bitenum value="2" token="TDMUNUSEDBITS_2" description="Unchanged from previous state"/>
+      <bitenum value="3" token="TDMUNUSEDBITS_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="TDMCYCLEFORMAT" width="2" begin="24" end="23" resetval="0x0" description="Cycle format (TDM mode only)WR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="TDMCYCLEFORMAT_0" description="1 cycle for 1 pixel"/>
+      <bitenum value="1" token="TDMCYCLEFORMAT_1" description="2 cycles for 1 pixel"/>
+      <bitenum value="2" token="TDMCYCLEFORMAT_2" description="3 cycles for 1 pixel"/>
+      <bitenum value="3" token="TDMCYCLEFORMAT_3" description="3 cycles for 2 pixels"/>
+    </bitfield>
+    <bitfield id="TDMPARALLELMODE" width="2" begin="22" end="21" resetval="0x0" description="Output Interface width (TDM mode only)WR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="TDMPARALLELMODE_0" description="8-bit parallel output interface selected"/>
+      <bitenum value="1" token="TDMPARALLELMODE_1" description="9-bit parallel output interface selected"/>
+      <bitenum value="2" token="TDMPARALLELMODE_2" description="12-bit parallel output interface selected"/>
+      <bitenum value="3" token="TDMPARALLELMODE_3" description="16-bit parallel output interface selected"/>
+    </bitfield>
+    <bitfield id="TDMENABLE" width="1" begin="20" end="20" resetval="0" description="Enable the multiple cycle format (TDM mode used only for Active Matrix mode with the RFBI enable bit off).WR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="TDMENABLE_0" description="TDM disabled"/>
+      <bitenum value="1" token="TDMENABLE_1" description="TDM enabled"/>
+    </bitfield>
+    <bitfield id="HT" width="3" begin="19" end="17" resetval="0x0" description="Hold Time for digital outputWR: EVSYNCEncoded value (from 0 to 7) holds time for digital output. The data will be held for (HT + 1) external digital clock periods." range="" rwaccess="RW"/>
+    <bitfield id="GPOUT1" width="1" begin="16" end="16" resetval="0" description="General Purpose Output Signal" range="" rwaccess="RW">
+      <bitenum value="0" token="GPOUT1_0" description="The GPout1 is reset."/>
+      <bitenum value="1" token="GPOUT1_1" description="The GPout1 is set."/>
+    </bitfield>
+    <bitfield id="GPOUT0" width="1" begin="15" end="15" resetval="0" description="General Purpose Output Signal" range="" rwaccess="RW">
+      <bitenum value="0" token="GPOUT0_0" description="The GPout0 is reset."/>
+      <bitenum value="1" token="GPOUT0_1" description="The GPout0 is set."/>
+    </bitfield>
+    <bitfield id="GPIN1" width="1" begin="14" end="14" resetval="0" description="General Purpose Input SignalWR: VFP" range="" rwaccess="R">
+      <bitenum value="0" token="GPIN1_0_r" description="The GPin1 has been reset."/>
+      <bitenum value="1" token="GPIN1_1_r" description="The GPin1 has been set."/>
+    </bitfield>
+    <bitfield id="GPIN0" width="1" begin="13" end="13" resetval="0" description="General Purpose Input SignalWR: VFP" range="" rwaccess="R">
+      <bitenum value="0" token="GPIN0_0_r" description="The GPin0 has been reset."/>
+      <bitenum value="1" token="GPIN0_1_r" description="The GPin0 has been set."/>
+    </bitfield>
+    <bitfield id="OVERLAYOPTIMIZATION" width="1" begin="12" end="12" resetval="0" description="Overlay Optimization (available when graphics format is NOT is 1-, 2, and 4-BPP)WR: VFP or EVSYNC" range="" rwaccess="RW">
+      <bitenum value="0" token="OVERLAYOPTIMIZATION_0" description="Graphics data below video1 window fetched from memory or no overlap between graphics and video1 windows."/>
+      <bitenum value="1" token="OVERLAYOPTIMIZATION_1" description="Graphics data below video1 window not fetched from memory."/>
+    </bitfield>
+    <bitfield id="STALLMODE" width="1" begin="11" end="11" resetval="0" description="Stall mode for the LCD outputwr: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="STALLMODE_0" description="Normal mode selected"/>
+      <bitenum value="1" token="STALLMODE_1" description="Stall mode selected. The Display Controller sends the data without considering the VSYNC/HSYNC. The LCD output is disabled at the end of the transfer of the frame. The S/W has to re-enable the LCD output to generate a new frame. The stall mode is used in RFBI and DSI command modes."/>
+    </bitfield>
+    <bitfield id="Reserved" width="1" begin="10" end="10" resetval="0" description="Reserved for non-GP devices" range="" rwaccess="RW"/>
+    <bitfield id="TFTDATALINES" width="2" begin="9" end="8" resetval="0x0" description="Number of lines of the LCD interfaceWR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="TFTDATALINES_0" description="12-bit output aligned on the LSB of the pixel data interface"/>
+      <bitenum value="1" token="TFTDATALINES_1" description="16-bit output aligned on the LSB of the pixel data interface"/>
+      <bitenum value="2" token="TFTDATALINES_2" description="18-bit output aligned on the LSB of the pixel data interface"/>
+      <bitenum value="3" token="TFTDATALINES_3" description="24-bit output aligned on the LSB of the pixel data interface"/>
+    </bitfield>
+    <bitfield id="STDITHERENABLE" width="1" begin="7" end="7" resetval="0" description="Spatial temporal dithering enableWR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="STDITHERENABLE_0" description="Spatial/temporal dithering logic disabled"/>
+      <bitenum value="1" token="STDITHERENABLE_1" description="Spatial/temporal dithering logic enabled"/>
+    </bitfield>
+    <bitfield id="GODIGITAL" width="1" begin="6" end="6" resetval="0" description="Digital GO Command" range="" rwaccess="RW">
+      <bitenum value="0" token="GODIGITAL_0" description="The hardware has finished updating the internal shadow registers of the pipeline(s) associated with the digital output using the user values. The hardware resets the bit when the update is completed."/>
+      <bitenum value="1" token="GODIGITAL_1" description="Users have finished programming the shadow registers of the pipeline(s) associated with the digital output and the hardware can update the internal registers at the external VSYNC."/>
+    </bitfield>
+    <bitfield id="GOLCD" width="1" begin="5" end="5" resetval="0" description="LCD GO Command" range="" rwaccess="RW">
+      <bitenum value="0" token="GOLCD_0" description="The hardware has finished updating the internal shadow registers of the pipeline(s) connected to the LCD output using the user values. The hardware resets the bit when the update is completed."/>
+      <bitenum value="1" token="GOLCD_1" description="Users have finished programming the shadow registers of the pipeline(s) associated with the LCD output and the hardware can update the internal registers at the VFP start period."/>
+    </bitfield>
+    <bitfield id="M8B" width="1" begin="4" end="4" resetval="0" description="Mono 8-bit modeWR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="M8B_0" description="Pixel data [3:0] is used to output four pixel values to the panel at each pixel clock transition (only in Passive Mono 8-bit mode)."/>
+      <bitenum value="1" token="M8B_1" description="Pixel data [7:0] is used to output eight pixel values to the panel each pixel clock transition (only in Passive Mono 8-bit mode)."/>
+    </bitfield>
+    <bitfield id="STNTFT" width="1" begin="3" end="3" resetval="0" description="LCD display typeWR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="STNTFT_0" description="Passive or Passive Matrix display operation enabled. Passive Matrix dither logic enabled."/>
+      <bitenum value="1" token="STNTFT_1" description="Active Matrix display operation enabled. Passive Matrix Dither logic and output FIFO bypassed."/>
+    </bitfield>
+    <bitfield id="MONOCOLOR" width="1" begin="2" end="2" resetval="0" description="Monochrome/ColorWR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="MONOCOLOR_0" description="Color operation enabled (Passive Matrix mode only)"/>
+      <bitenum value="1" token="MONOCOLOR_1" description="Monochrome operation enabled (Passive Matrix mode only)"/>
+    </bitfield>
+    <bitfield id="DIGITALENABLE" width="1" begin="1" end="1" resetval="0" description="Digital enable" range="" rwaccess="RW">
+      <bitenum value="0" token="DIGITALENABLE_0" description="Digital output disabled (at the end of the current field if interlace output when the bit is reset)"/>
+      <bitenum value="1" token="DIGITALENABLE_1" description="Digital output enabled"/>
+    </bitfield>
+    <bitfield id="LCDENABLE" width="1" begin="0" end="0" resetval="0" description="LCD enable" range="" rwaccess="RW">
+      <bitenum value="0" token="LCDENABLE_0" description="LCD output disabled (at the end of the frame when the bit is reset)"/>
+      <bitenum value="1" token="LCDENABLE_1" description="LCD output enabled"/>
+    </bitfield>
+  </register>
+  <register id="DISPC_CONFIG" acronym="DISPC_CONFIG" offset="0x44" width="32" description="This control register configures the display controller module.Shadow register, updated on VFP start period or EVSYNC">
+    <bitfield id="Reserved" width="12" begin="31" end="20" resetval="0x00000" description="Write 0s for future compatibility. Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="TVALPHABLENDERENABLE" width="1" begin="19" end="19" resetval="0" description="Selects the alpha blender (TV output)" range="" rwaccess="RW">
+      <bitenum value="0" token="TVALPHABLENDERENABLE_0" description="Alpha blender is disabled."/>
+      <bitenum value="1" token="TVALPHABLENDERENABLE_1" description="The alpha blender is enabled."/>
+    </bitfield>
+    <bitfield id="LCDALPHABLENDERENABLE" width="1" begin="18" end="18" resetval="0" description="Selects the alpha blender (LCD output)" range="" rwaccess="RW">
+      <bitenum value="0" token="LCDALPHABLENDERENABLE_0" description="Alpha blender is disabled."/>
+      <bitenum value="1" token="LCDALPHABLENDERENABLE_1" description="The alpha blender is enabled."/>
+    </bitfield>
+    <bitfield id="FIFOFILLING" width="1" begin="17" end="17" resetval="0" description="Controls if the FIFO are refilled only when the LOW threshold is reached or if all FIFO are refilled when at least one of them reaches the LOW threshold." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFOFILLING_0" description="Each FIFO is refilled when it reaches LOW threshold."/>
+      <bitenum value="1" token="FIFOFILLING_1" description="All FIFOs are refilled up to high threshold when at least one of them reaches the LOW threshold. (only active FIFOs should be considered and when reaching the end of the frame the FIFO goes to empty condition so no need to fill it again)."/>
+    </bitfield>
+    <bitfield id="FIFOHANDCHECK" width="1" begin="16" end="16" resetval="0" description="Controls the handshake between FIFO and RFBI STALL to prevent from underflow. The bit should be set to 0 when the module is not in STALL mode." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFOHANDCHECK_0" description="Only the STALL signal from RFBI is used regardless of the FIFO fullness information to provide data to the RFBI module."/>
+      <bitenum value="1" token="FIFOHANDCHECK_1" description="The STALL signal from RFBI is used in combination with the FIFO fullness information to provide data to the RFBI module only when it does not generated FIFO underflow."/>
+    </bitfield>
+    <bitfield id="CPR" width="1" begin="15" end="15" resetval="0" description="Color phase rotation control wr: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="CPR_0" description="Color phase rotation disabled"/>
+      <bitenum value="1" token="CPR_1" description="Color phase rotation enabled"/>
+    </bitfield>
+    <bitfield id="FIFOMERGE" width="1" begin="14" end="14" resetval="0" description="FIFO merge controlwr: EVSYNC or VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="FIFOMERGE_0" description="FIFO merge disabledEach FIFO is dedicated to one pipeline."/>
+      <bitenum value="1" token="FIFOMERGE_1" description="FIFO merge enabledAll the FIFOS are merged into a single one to be used by the single active pipeline."/>
+    </bitfield>
+    <bitfield id="TCKDIGSELECTION" width="1" begin="13" end="13" resetval="0" description="Transparency color key selection (digital output)wr: EVSYNC" range="" rwaccess="RW">
+      <bitenum value="0" token="TCKDIGSELECTION_0" description="Graphics destination transparency color key selected in normal mode or graphics source transparency color key selected in alpha mode"/>
+      <bitenum value="1" token="TCKDIGSELECTION_1" description="Video source transparency color key selected in normal mode"/>
+    </bitfield>
+    <bitfield id="TCKDIGENABLE" width="1" begin="12" end="12" resetval="0" description="Transparency color key enabled (digital output)wr: EVSYNC" range="" rwaccess="RW">
+      <bitenum value="0" token="TCKDIGENABLE_0" description="Disable the transparency color key for digital output"/>
+      <bitenum value="1" token="TCKDIGENABLE_1" description="Enable the transparency color key for digital output"/>
+    </bitfield>
+    <bitfield id="TCKLCDSELECTION" width="1" begin="11" end="11" resetval="0" description="Transparency color key selection (LCD output)WR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="TCKLCDSELECTION_0" description="Graphics destination transparency color key selected in normal mode or graphics source transparency color key selected in alpha mode"/>
+      <bitenum value="1" token="TCKLCDSELECTION_1" description="Video source transparency color key selected in normal mode"/>
+    </bitfield>
+    <bitfield id="TCKLCDENABLE" width="1" begin="10" end="10" resetval="0" description="Transparency color key enabled (LCD output)WR: VFP *" range="" rwaccess="RW">
+      <bitenum value="0" token="TCKLCDENABLE_0" description="Disable the transparency color key for the LCD"/>
+      <bitenum value="1" token="TCKLCDENABLE_1" description="Enable the transparency color key for the LCD"/>
+    </bitfield>
+    <bitfield id="FUNCGATED" width="1" begin="9" end="9" resetval="0" description="Functional clocks gated enabledWR: immediate" range="" rwaccess="RW">
+      <bitenum value="0" token="FUNCGATED_0" description="Functional clocks gated disabled"/>
+      <bitenum value="1" token="FUNCGATED_1" description="Functional clocks gated enabled"/>
+    </bitfield>
+    <bitfield id="ACBIASGATED" width="1" begin="8" end="8" resetval="0" description="ACBias Gated EnabledWR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="ACBIASGATED_0" description="AcBias Gated Disabled"/>
+      <bitenum value="1" token="ACBIASGATED_1" description="AcBias Gated Enabled"/>
+    </bitfield>
+    <bitfield id="VSYNCGATED" width="1" begin="7" end="7" resetval="0" description="VSYNC Gated EnabledWR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="VSYNCGATED_0" description="VSYNC Gated Disabled"/>
+      <bitenum value="1" token="VSYNCGATED_1" description="VSYNC Gated Enabled"/>
+    </bitfield>
+    <bitfield id="HSYNCGATED" width="1" begin="6" end="6" resetval="0" description="HSYNC Gated EnabledWR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="HSYNCGATED_0" description="HSYNC Gated Disabled"/>
+      <bitenum value="1" token="HSYNCGATED_1" description="HSYNC Gated Enabled"/>
+    </bitfield>
+    <bitfield id="PIXELCLOCKGATED" width="1" begin="5" end="5" resetval="0" description="Pixel Clock Gated EnabledWR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="PIXELCLOCKGATED_0" description="Pixel Clock Gated Disabled"/>
+      <bitenum value="1" token="PIXELCLOCKGATED_1" description="Pixel Clock Gated Enabled"/>
+    </bitfield>
+    <bitfield id="PIXELDATAGATED" width="1" begin="4" end="4" resetval="0" description="Pixel Data Gated EnabledWR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="PIXELDATAGATED_0" description="Pixel Data Gated Disabled"/>
+      <bitenum value="1" token="PIXELDATAGATED_1" description="Pixel Data Gated Enabled"/>
+    </bitfield>
+    <bitfield id="PALETTEGAMMATABLE" width="1" begin="3" end="3" resetval="0" description="Palette/Gamma Table selectionWR: EVSYNC or VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="PALETTEGAMMATABLE_0" description="LUT used as palette (only if graphics format is BITMAP1, 2, 4, and 8)"/>
+      <bitenum value="1" token="PALETTEGAMMATABLE_1" description="LUT used as gamma table (only if graphics format is NOT BITMAP1, 2, 4, and 8 or no graphics window present)"/>
+    </bitfield>
+    <bitfield id="LOADMODE" width="2" begin="2" end="1" resetval="0x0" description="Loading Mode for the Palette/Gamma TableWR: EVSYNC or VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="LOADMODE_0" description="Palette/Gamma Table and data are loaded every frame."/>
+      <bitenum value="1" token="LOADMODE_1" description="Palette/Gamma Table to be loaded. Users set the bit when the palette/gamma table has to be loaded. H/W resets the bit when table has been loaded. (. GfxEnable has to be set to 1)."/>
+      <bitenum value="2" token="LOADMODE_2" description="Frame data only loaded every frame"/>
+      <bitenum value="3" token="LOADMODE_3" description="Palette/Gamma Table and frame data loaded on first frame then switch to 10 (H/W)."/>
+    </bitfield>
+    <bitfield id="PIXELGATED" width="1" begin="0" end="0" resetval="0" description="Pixel Gated Enable (only for Active Matrix Display)WR: VFP" range="" rwaccess="RW">
+      <bitenum value="0" token="PIXELGATED_0" description="Pixel clock always toggles (only in Active Matrix mode)"/>
+      <bitenum value="1" token="PIXELGATED_1" description="Pixel clock only toggles when there is valid data to display. (only in Active Matrix mode)"/>
+    </bitfield>
+  </register>
+  <register id="DISPC_DEFAULT_COLOR_m_0" acronym="DISPC_DEFAULT_COLOR_m_0" offset="0x4C" width="32" description="The control register allows to configure the default solid background color for the LCD (DISPC_DEFAULT_COLOR_0) and for 24-bit digital output (DISPC_DEFAULT_COLOR_1).Shadow register, updated on VFP start period for DISPC_DEFAULT_COLOR_0 and EVSYNC for DISPC_DEFAULT_COLOR_1">
+    <bitfield id="Reserved" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="DEFAULTCOLOR" width="24" begin="23" end="0" resetval="0x000000" description="24-bit RGB color value to specify the default solid color to display when there is no data from the overlays." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_DEFAULT_COLOR_m_1" acronym="DISPC_DEFAULT_COLOR_m_1" offset="0x50" width="32" description="The control register allows to configure the default solid background color for the LCD (DISPC_DEFAULT_COLOR_0) and for 24-bit digital output (DISPC_DEFAULT_COLOR_1).Shadow register, updated on VFP start period for DISPC_DEFAULT_COLOR_0 and EVSYNC for DISPC_DEFAULT_COLOR_1">
+    <bitfield id="Reserved" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="DEFAULTCOLOR" width="24" begin="23" end="0" resetval="0x000000" description="24-bit RGB color value to specify the default solid color to display when there is no data from the overlays." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_TRANS_COLOR_m_0" acronym="DISPC_TRANS_COLOR_m_0" offset="0x54" width="32" description="The register sets the transparency color value for the video/graphics overlays for the LCD output (DISPC_TRANS_COLOR_0) for 24-bit digital output(DISPC_TRANS_COLOR_1).Shadow register, updated on VFP start period for DISPC_TRANS_COLOR_0 and EVSYNC for DISPC_TRANS_COLOR_1">
+    <bitfield id="Reserved" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="TRANSCOLORKEY" width="24" begin="23" end="0" resetval="0x000000" description="Transparency Color Key Value in RGB format[0] BITMAP 1 (CLUT), [23,1] set to 0s[1:0] BITMAP 2 (CLUT), [23,2] set to 0s[3:0] BITMAP 4 (CLUT), [23,4] set to 0s[7:0] BITMAP 8 (CLUT), [23,8] set to 0s[11:0] RGB 12, [23,12] set to 0s[15:0] RGB 16, [23,16] set to 0s[23:0] RGB 24" range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_TRANS_COLOR_m_1" acronym="DISPC_TRANS_COLOR_m_1" offset="0x58" width="32" description="The register sets the transparency color value for the video/graphics overlays for the LCD output (DISPC_TRANS_COLOR_0) for 24-bit digital output(DISPC_TRANS_COLOR_1).Shadow register, updated on VFP start period for DISPC_TRANS_COLOR_0 and EVSYNC for DISPC_TRANS_COLOR_1">
+    <bitfield id="Reserved" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="TRANSCOLORKEY" width="24" begin="23" end="0" resetval="0x000000" description="Transparency Color Key Value in RGB format[0] BITMAP 1 (CLUT), [23,1] set to 0s[1:0] BITMAP 2 (CLUT), [23,2] set to 0s[3:0] BITMAP 4 (CLUT), [23,4] set to 0s[7:0] BITMAP 8 (CLUT), [23,8] set to 0s[11:0] RGB 12, [23,12] set to 0s[15:0] RGB 16, [23,16] set to 0s[23:0] RGB 24" range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_LINE_STATUS" acronym="DISPC_LINE_STATUS" offset="0x5C" width="32" description="The control register indicates the current LCD panel display line number.">
+    <bitfield id="Reserved" width="21" begin="31" end="11" resetval="0x000000" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="R"/>
+    <bitfield id="LINENUMBER" width="11" begin="10" end="0" resetval="0x7FF" description="Current LCD panel line numberCurrent display line number. The first active line has the value 0. During blanking lines the line number is not incremented." range="" rwaccess="R"/>
+  </register>
+  <register id="DISPC_LINE_NUMBER" acronym="DISPC_LINE_NUMBER" offset="0x60" width="32" description="The control register indicates the LCD panel display line number for the interrupt and the DMA request.Shadow register, updated on VFP start period.">
+    <bitfield id="Reserved" width="21" begin="31" end="11" resetval="0x000000" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="LINENUMBER" width="11" begin="10" end="0" resetval="0x000" description="LCD panel line number programmingLCD line number defines the line on which the programmable interrupt is generated and the DMA request occurs." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_TIMING_H" acronym="DISPC_TIMING_H" offset="0x64" width="32" description="The register configures the timing logic for the HSYNC signal.Shadow register, updated on VFP start period">
+    <bitfield id="HBP" width="12" begin="31" end="20" resetval="0x00" description="Horizontal Back Porch.Encoded value (from 1 to 4096) to specify the number of pixel clock periods to add to the beginning of a line transmission before the first set of pixels is output to the display (program to value minus 1)." range="" rwaccess="RW"/>
+    <bitfield id="HFP" width="12" begin="19" end="8" resetval="0x00" description="Horizontal front porch.Encoded value (from 1 to 4096) to specify the number of pixel clock periods to add to the end of a line transmission before line clock is asserted (program to value minus 1)." range="" rwaccess="RW"/>
+    <bitfield id="HSW" width="8" begin="7" end="0" resetval="0x00" description="Horizontal synchronization pulse widthEncoded value (from 1 to 256) to specify the number of pixel clock periods to pulse the line clock at the end of each line (program to value minus 1)." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_TIMING_V" acronym="DISPC_TIMING_V" offset="0x68" width="32" description="The register configures the timing logic for the VSYNC signal.Shadow register, updated on VFP start period">
+    <bitfield id="VBP" width="12" begin="31" end="20" resetval="0x00" description="Vertical back porchEncoded value (from 0 to 4095) to specify the number of line clock periods to add to the beginning of a frame before the first set of pixels is output to the display." range="" rwaccess="RW"/>
+    <bitfield id="VFP" width="12" begin="19" end="8" resetval="0x00" description="Vertical front porchEncoded value (from 0 to 4095) to specify the number of line clock periods to add to the end of each frame." range="" rwaccess="RW"/>
+    <bitfield id="VSW" width="8" begin="7" end="0" resetval="0x00" description="Vertical synchronization pulse widthIn active mode, encoded value (from 1 to 256) to specify the number of line clock periods (program to value minus one) to pulse the frame clock (VSYNC) pin at the end of each frame after the end of frame wait (VFP) period elapses. Frame clock uses as VSYNC signal in active mode.In passive mode, encoded value (from 1 to 256) to specify the number of extra line clock periods (program to value minus one) to insert after the vertical front porch (VFP) period has elapsed." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_POL_FREQ" acronym="DISPC_POL_FREQ" offset="0x6C" width="32" description="The register configures the signal configuration.Shadow register, updated on VFP start period">
+    <bitfield id="Reserved" width="14" begin="31" end="18" resetval="0x0000" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="ONOFF" width="1" begin="17" end="17" resetval="0" description="HSYNC/VSYNC Pixel clock Control On/Off" range="" rwaccess="RW">
+      <bitenum value="0" token="ONOFF_0" description="HSYNC and VSYNC are driven on opposite edges of pixel clock than pixel data"/>
+      <bitenum value="1" token="ONOFF_1" description="HSYNC and VSYNC are driven according to bit 16"/>
+    </bitfield>
+    <bitfield id="RF" width="1" begin="16" end="16" resetval="0" description="Program HSYNC/VSYNC Rise or Fall" range="" rwaccess="RW">
+      <bitenum value="0" token="RF_0" description="HSYNC and VSYNC are driven on falling edge of pixel clock (if bit 17 set to 1)"/>
+      <bitenum value="1" token="RF_1" description="HSYNC and VSYNC are driven on the rising edge of pixel clock (if bit 17 set to 1)"/>
+    </bitfield>
+    <bitfield id="IEO" width="1" begin="15" end="15" resetval="0" description="Invert output enable" range="" rwaccess="RW">
+      <bitenum value="0" token="IEO_0" description="Ac-bias is active high (active display mode)"/>
+      <bitenum value="1" token="IEO_1" description="Ac-bias is active low (active display mode)"/>
+    </bitfield>
+    <bitfield id="IPC" width="1" begin="14" end="14" resetval="0" description="Invert pixel clock" range="" rwaccess="RW">
+      <bitenum value="0" token="IPC_0" description="Data is driven on the LCD data lines on the rising-edge of the pixel clock"/>
+      <bitenum value="1" token="IPC_1" description="Data is driven on the LCD data lines on the falling-edge of the pixel clock"/>
+    </bitfield>
+    <bitfield id="IHS" width="1" begin="13" end="13" resetval="0" description="Invert HSYNC" range="" rwaccess="RW">
+      <bitenum value="0" token="IHS_0" description="Line clock pin is active high and inactive low"/>
+      <bitenum value="1" token="IHS_1" description="Line clock pin is active low and inactive high"/>
+    </bitfield>
+    <bitfield id="IVS" width="1" begin="12" end="12" resetval="0" description="Invert VSYNC" range="" rwaccess="RW">
+      <bitenum value="0" token="IVS_0" description="Frame clock pin is active high and inactive low"/>
+      <bitenum value="1" token="IVS_1" description="Frame clock pin is active low and inactive high"/>
+    </bitfield>
+    <bitfield id="ACBI" width="4" begin="11" end="8" resetval="0x0" description="AC-bias pin transitions per interruptValue (from 0 to 15) used to specify the number of AC Bias pin transitions" range="" rwaccess="RW"/>
+    <bitfield id="ACB" width="8" begin="7" end="0" resetval="0x00" description="AC-bias pin frequencyValue (from 0 to 255) used to specify the number of line clocks to count before transitioning the ac-bias pin. This pin is used to periodically invert the polarity of the power supply to prevent DC charge build-up within the display." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_DIVISOR" acronym="DISPC_DIVISOR" offset="0x70" width="32" description="The register configures the divisors.Shadow register, updated on VFP start period">
+    <bitfield id="Reserved" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="LCD" width="8" begin="23" end="16" resetval="0x01" description="Display Controller Logic Clock DivisorValue (from 1 to 255) to specify the frequency of the display controller logic clock based on the function clock. The value 0 is invalid." range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="8" begin="15" end="8" resetval="0x00" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="PCD" width="8" begin="7" end="0" resetval="0x02" description="Pixel Clock DivisorValue (from 1 to 255) to specify the frequency of the pixel clock based on the Logic clock which is the functional clock divided by LCD. The values 0 and 1 are invalid." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_GLOBAL_ALPHA" acronym="DISPC_GLOBAL_ALPHA" offset="0x74" width="32" description="The register defines the global alpha value for the graphics and video 2 pipelines. Shadow register, updated on VFP start period or EVSYNC for each bit field depending on the association of the each pipeline with the LCD or TV output.">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility.Reads return 0" range="" rwaccess="RW"/>
+    <bitfield id="VID2GLOBALALPHA" width="8" begin="23" end="16" resetval="0x00" description="Global alpha value from 0 to 255. 0 corresponds to fully transparent and 255 to fully opaque." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="8" begin="15" end="8" resetval="0x00" description="Write 0s for future compatibility.Reads return 0" range="" rwaccess="RW"/>
+    <bitfield id="GFXGLOBALALPHA" width="8" begin="7" end="0" resetval="0x00" description="Global alpha value from 0 to 255. 0 corresponds to fully transparent and 255 to fully opaque." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_SIZE_DIG" acronym="DISPC_SIZE_DIG" offset="0x78" width="32" description="The register configures the size of the digital output field (interlace), frame (progressive) (horizontal and vertical).Shadow register, updated on EVSYNC.">
+    <bitfield id="Reserved" width="5" begin="31" end="27" resetval="0x00" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="LPP" width="11" begin="26" end="16" resetval="0x000" description="Lines per panel Encoded value (from 1 to 2048) to specify the number of lines per panel (program to value minus one)." range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="5" begin="15" end="11" resetval="0x00" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="PPL" width="11" begin="10" end="0" resetval="0x000" description="Pixels per lineEncoded value (from 1 to 2048) to specify the number of pixels contained within each line on the display (program to value minus one)" range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_SIZE_LCD" acronym="DISPC_SIZE_LCD" offset="0x7C" width="32" description="The register configures the panel size (horizontal and vertical).Shadow register, updated on VFP start period">
+    <bitfield id="Reserved" width="5" begin="31" end="27" resetval="0x00" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="LPP" width="11" begin="26" end="16" resetval="0x000" description="Lines per panelEncoded value (from 1 to 2048) to specify the number of lines per panel (program to value minus one)." range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="5" begin="15" end="11" resetval="0x00" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="PPL" width="11" begin="10" end="0" resetval="0x000" description="Pixels per lineEncoded value (from 1 to 2048) to specify the number of pixels contains within each line on the display (program to value minus one). When running in normal mode (stall mode is bypassed by setting DSS.DISPC_CONTROL[11] STALLMODE =0) the line width must be set to a value multiple of 8 pixels (ex: PPL=0x7)" range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_GFX_BAj_0" acronym="DISPC_GFX_BAj_0" offset="0x80" width="32" description="The register configures the base address of the graphics buffer displayed in the graphics window (0 &amp;amp; 1 :for ping-pong mechanism with external trigger, based on the field polarity, 0 only used when graphics pipeline on the LCD output and 0 &amp;amp; 1 when on the 24-bit digital output).Shadow register, updated on VFP start period or EVSYNC.">
+    <bitfield id="GFXBA" width="32" begin="31" end="0" resetval="0x00000000" description="Graphics base addressBase address of the graphics buffer (aligned on pixel size boundary) (in case 1-, 2-, and 4-BPP, byte alignment is required)" range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_GFX_BAj_1" acronym="DISPC_GFX_BAj_1" offset="0x84" width="32" description="The register configures the base address of the graphics buffer displayed in the graphics window (0 &amp;amp; 1 :for ping-pong mechanism with external trigger, based on the field polarity, 0 only used when graphics pipeline on the LCD output and 0 &amp;amp; 1 when on the 24-bit digital output).Shadow register, updated on VFP start period or EVSYNC.">
+    <bitfield id="GFXBA" width="32" begin="31" end="0" resetval="0x00000000" description="Graphics base addressBase address of the graphics buffer (aligned on pixel size boundary) (in case 1-, 2-, and 4-BPP, byte alignment is required)" range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_GFX_POSITION" acronym="DISPC_GFX_POSITION" offset="0x88" width="32" description="The register configures the position of the graphics window.Shadow register, updated on VFP start period or EVSYNC.">
+    <bitfield id="Reserved" width="5" begin="31" end="27" resetval="0x00" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="GFXPOSY" width="11" begin="26" end="16" resetval="0x000" description="Y position of the graphics window.Encoded value (from 0 to 2047) to specify the Y position of the graphics window on the screen. The line at the top has the Y-position 0." range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="5" begin="15" end="11" resetval="0x00" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="GFXPOSX" width="11" begin="10" end="0" resetval="0x000" description="X position of the graphics window.Encoded value (from 0 to 2047) to specify the X position of the graphics window on the screen. The first pixel on the left of the screen has the X-position 0." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_GFX_SIZE" acronym="DISPC_GFX_SIZE" offset="0x8C" width="32" description="The register configures the size of the graphics window.Shadow register, updated on VFP start period or EVSYNC.">
+    <bitfield id="Reserved" width="5" begin="31" end="27" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="GFXSIZEY" width="11" begin="26" end="16" resetval="0x000" description="Number of lines of the graphics window.Encoded value (from 1 to 2048) to specify the number of lines of the graphics window (program to value minus one)." range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="5" begin="15" end="11" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="GFXSIZEX" width="11" begin="10" end="0" resetval="0x000" description="Number of pixels of the graphics window.Encoded value (from 1 to 2048) to specify the number of pixels per line of the graphics window (program to value minus one)." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_GFX_ATTRIBUTES" acronym="DISPC_GFX_ATTRIBUTES" offset="0xA0" width="32" description="The register configures the graphics attributes.Shadow register, updated on VFP start period or EVSYNC.">
+    <bitfield id="Reserved" width="16" begin="31" end="16" resetval="0x000000" description="Write 0s for future compatibility.Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="GFXSELFREFRESH" width="1" begin="15" end="15" resetval="0" description="Enables the self refresh of the graphics window from its own FIFO only." range="" rwaccess="RW">
+      <bitenum value="0" token="GFXSELFREFRESH_0" description="The graphics pipeline accesses the interconnect to fetch data from the system memory"/>
+      <bitenum value="1" token="GFXSELFREFRESH_1" description="The graphics pipeline does not need anymore to fetch data from memory. Only the graphics FIFO is used. It takes effect after the frame has been loaded in the FIFO"/>
+    </bitfield>
+    <bitfield id="GFXARBITRATION" width="1" begin="14" end="14" resetval="0" description="Determines the priority of the graphics pipeline. The graphics pipeline is one of the high priority pipeline. The arbitration wheel gives always the priority first to the high priority pipelines using round-robin between them. When there is only normal priority pipelines sending requests, the round-robin applies between them." range="" rwaccess="RW">
+      <bitenum value="0" token="GFXARBITRATION_0" description="The graphics pipeline is one of the normal priority pipeline."/>
+      <bitenum value="1" token="GFXARBITRATION_1" description="The graphics pipeline is one of the high priority pipeline."/>
+    </bitfield>
+    <bitfield id="GFXROTATION" width="2" begin="13" end="12" resetval="0x0" description="Graphics rotation flag (used only in case of RGB24 packed format)" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXROTATION_0" description="No rotation"/>
+      <bitenum value="1" token="GFXROTATION_1" description="Rotation by 90 degrees"/>
+      <bitenum value="2" token="GFXROTATION_2" description="Rotation by 180 degrees"/>
+      <bitenum value="3" token="GFXROTATION_3" description="Rotation by 270 degrees"/>
+    </bitfield>
+    <bitfield id="GFXFIFOPRELOAD" width="1" begin="11" end="11" resetval="0" description="Graphics preload value" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXFIFOPRELOAD_0" description="H/W prefetches pixels up to the preload value defined in the preload register."/>
+      <bitenum value="1" token="GFXFIFOPRELOAD_1" description="H/W prefetches pixels up to high threshold value."/>
+    </bitfield>
+    <bitfield id="GFXENDIANNESS" width="1" begin="10" end="10" resetval="0" description="Graphics endianness" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXENDIANNESS_0" description="Little endian operation is selected."/>
+      <bitenum value="1" token="GFXENDIANNESS_1" description="Big endian operation is selected."/>
+    </bitfield>
+    <bitfield id="GFXNIBBLEMODE" width="1" begin="9" end="9" resetval="0" description="Graphics Nibble Mode (only for 1-, 2- and 4-BPP)" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXNIBBLEMODE_0" description="Nibble mode is disabled"/>
+      <bitenum value="1" token="GFXNIBBLEMODE_1" description="Nibble mode is enabled"/>
+    </bitfield>
+    <bitfield id="GFXCHANNELOUT" width="1" begin="8" end="8" resetval="0" description="Graphics Channel Out configurationwr: immediate" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXCHANNELOUT_0" description="LCD output selected"/>
+      <bitenum value="1" token="GFXCHANNELOUT_1" description="24-bit output selected"/>
+    </bitfield>
+    <bitfield id="GFXBURSTSIZE" width="2" begin="7" end="6" resetval="0x0" description="Graphics DMA Burst Size" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXBURSTSIZE_0" description="4x32bit bursts"/>
+      <bitenum value="1" token="GFXBURSTSIZE_1" description="8x32bit bursts"/>
+      <bitenum value="2" token="GFXBURSTSIZE_2" description="16x32bit bursts"/>
+      <bitenum value="3" token="GFXBURSTSIZE_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="GFXREPLICATIONENABLE" width="1" begin="5" end="5" resetval="0" description="GfxReplicationEnable" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXREPLICATIONENABLE_0" description="Disable Graphics replication logic"/>
+      <bitenum value="1" token="GFXREPLICATIONENABLE_1" description="Enable Graphics replication logic"/>
+    </bitfield>
+    <bitfield id="GFXFORMAT" width="4" begin="4" end="1" resetval="0x0" description="Graphics format; Other enums: Reserved(0x7, 0xA, 0xB and 0xF)" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXFORMAT_0" description="BITMAP 1 (CLUT)"/>
+      <bitenum value="1" token="GFXFORMAT_1" description="BITMAP 2 (CLUT)"/>
+      <bitenum value="2" token="GFXFORMAT_2" description="BITMAP 4 (CLUT)"/>
+      <bitenum value="3" token="GFXFORMAT_3" description="BITMAP 8 (CLUT)"/>
+      <bitenum value="4" token="GFXFORMAT_4" description="RGB 12 (un-packed in 16-bit container)"/>
+      <bitenum value="5" token="GFXFORMAT_5" description="ARGB16"/>
+      <bitenum value="6" token="GFXFORMAT_6" description="RGB 16"/>
+      <bitenum value="8" token="GFXFORMAT_8" description="RGB 24 (un-packed in 32-bit container)"/>
+      <bitenum value="9" token="GFXFORMAT_9" description="RGB 24 (packed in 24-bit container)"/>
+      <bitenum value="12" token="GFXFORMAT_12" description="ARGB32"/>
+      <bitenum value="13" token="GFXFORMAT_13" description="RGBA32"/>
+      <bitenum value="14" token="GFXFORMAT_14" description="RGBx 32 (24-bit RGB aligned on MSB of the 32-bit container)"/>
+    </bitfield>
+    <bitfield id="GFXENABLE" width="1" begin="0" end="0" resetval="0" description="GfxEnable" range="" rwaccess="RW">
+      <bitenum value="0" token="GFXENABLE_0" description="Graphics disabled (graphics pipeline inactive and graphics window not present)"/>
+      <bitenum value="1" token="GFXENABLE_1" description="Graphics enabled (graphics pipeline active and graphics window present on the screen)"/>
+    </bitfield>
+  </register>
+  <register id="DISPC_GFX_FIFO_THRESHOLD" acronym="DISPC_GFX_FIFO_THRESHOLD" offset="0xA4" width="32" description="The register configures the graphics FIFO.Shadow register, updated on VFP start period or EVSYNC.">
+    <bitfield id="Reserved" width="4" begin="31" end="28" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="GFXFIFOHIGHTHRESHOLD" width="12" begin="27" end="16" resetval="0x3FF" description="Graphics FIFO High ThresholdNumber of bytes defining the threshold value." range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="4" begin="15" end="12" resetval="0x00" description="Write 0s for future compatibility. Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="GFXFIFOLOWTHRESHOLD" width="12" begin="11" end="0" resetval="0x3C0" description="Graphics FIFO Low ThresholdNumber of bytes defining the threshold value" range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_GFX_FIFO_SIZE_STATUS" acronym="DISPC_GFX_FIFO_SIZE_STATUS" offset="0xA8" width="32" description="This register defines the graphics FIFO size.">
+    <bitfield id="Reserved" width="21" begin="31" end="11" resetval="0x000000" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="R"/>
+    <bitfield id="GFXFIFOSIZE" width="11" begin="10" end="0" resetval="0x400" description="Graphics FIFO SizeNumber of bytes defining the FIFO value." range="" rwaccess="R"/>
+  </register>
+  <register id="DISPC_GFX_ROW_INC" acronym="DISPC_GFX_ROW_INC" offset="0xAC" width="32" description="The register configures the number of bytes to increment at the end of the row.Shadow register, updated on VFP start period or EVSYNC.">
+    <bitfield id="GFXROWINC" width="32" begin="31" end="0" resetval="0x00000001" description="Number of bytes to increment at the end of the rowEncoded signed value (from -2- 1 to 2) to specify the number of bytes to increment at the end of the row in the graphics buffer.The value 0 is invalid. The value 1 means next pixel. The value 1+n*BPP means increment of n pixels. The value 1- (n+1)*BPP means decrement of n pixels." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_GFX_PIXEL_INC" acronym="DISPC_GFX_PIXEL_INC" offset="0xB0" width="32" description="The register configures the number of bytes to increment between two pixels.Shadow register, updated on VFP start period or EVSYNC.">
+    <bitfield id="Reserved" width="16" begin="31" end="16" resetval="0x0000" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="GFXPIXELINC" width="16" begin="15" end="0" resetval="0x0001" description="Number of bytes to increment between two pixelsEncoded signed value (from -2- 1 to 2) to specify the number of bytes between two pixels in the graphics buffer.The value 0 is invalid. The value 1 means next pixel. The value 1+n*BPP means increment of n pixels. The value 1- (n+1)*BPP means decrement of n pixels." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_GFX_WINDOW_SKIP" acronym="DISPC_GFX_WINDOW_SKIP" offset="0xB4" width="32" description="The register configures the number of bytes to skip during video window display.Shadow register, updated on VFP start period or EVSYNC.">
+    <bitfield id="GFXWINDOWSKIP" width="32" begin="31" end="0" resetval="0x00000000" description="Number of bytes to skip during video window #1.Encoded signed value (from -2-1 to 2) to specify the number of bytes to skip in the graphics buffer when video window #1 is displayed on top of the graphics and no transparency color is enabled." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_GFX_TABLE_BA" acronym="DISPC_GFX_TABLE_BA" offset="0xB8" width="32" description="The register configures the base address of the palette buffer or the gamma table buffer.Shadow register, updated on VFP start period or EVSYNC.">
+    <bitfield id="GFXTABLEBA" width="32" begin="31" end="0" resetval="0x00000000" description="Base address of the palette/gamma table buffer (24-bit entries in 32-bit containers, aligned on 32-bit boundary)." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_DATA_CYCLEk_0" acronym="DISPC_DATA_CYCLEk_0" offset="0x1D4" width="32" description="The control register configures the output data format for ith (1st, 2nd or 3rd) cycle.Shadow register, updated on VFP start period.">
+    <bitfield id="Reserved" width="4" begin="31" end="28" resetval="0x0" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="BITALIGNMENTPIXEL2" width="4" begin="27" end="24" resetval="0x0" description="Bit alignmentAlignment of the bits from pixel#2 on the output interface" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="3" begin="23" end="21" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="NBBITSPIXEL2" width="5" begin="20" end="16" resetval="0x00" description="Number of bitsNumber of bits from the pixel #2 (value from 0 to 16 bits). The values from 17 to 31 are invalid." range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="4" begin="15" end="12" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="BITALIGNMENTPIXEL1" width="4" begin="11" end="8" resetval="0x0" description="Bit alignmentAlignment of the bits from pixel#1 on the output interface" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="3" begin="7" end="5" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="NBBITSPIXEL1" width="5" begin="4" end="0" resetval="0x00" description="Number of bitsNumber of bits from the pixel #1 (value from 0 to 16 bits). The values from 17 to 31 are invalid." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_DATA_CYCLEk_1" acronym="DISPC_DATA_CYCLEk_1" offset="0x1D8" width="32" description="The control register configures the output data format for ith (1st, 2nd or 3rd) cycle.Shadow register, updated on VFP start period.">
+    <bitfield id="Reserved" width="4" begin="31" end="28" resetval="0x0" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="BITALIGNMENTPIXEL2" width="4" begin="27" end="24" resetval="0x0" description="Bit alignmentAlignment of the bits from pixel#2 on the output interface" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="3" begin="23" end="21" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="NBBITSPIXEL2" width="5" begin="20" end="16" resetval="0x00" description="Number of bitsNumber of bits from the pixel #2 (value from 0 to 16 bits). The values from 17 to 31 are invalid." range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="4" begin="15" end="12" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="BITALIGNMENTPIXEL1" width="4" begin="11" end="8" resetval="0x0" description="Bit alignmentAlignment of the bits from pixel#1 on the output interface" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="3" begin="7" end="5" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="NBBITSPIXEL1" width="5" begin="4" end="0" resetval="0x00" description="Number of bitsNumber of bits from the pixel #1 (value from 0 to 16 bits). The values from 17 to 31 are invalid." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_DATA_CYCLEk_2" acronym="DISPC_DATA_CYCLEk_2" offset="0x1DC" width="32" description="The control register configures the output data format for ith (1st, 2nd or 3rd) cycle.Shadow register, updated on VFP start period.">
+    <bitfield id="Reserved" width="4" begin="31" end="28" resetval="0x0" description="Write 0s for future compatibility.Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="BITALIGNMENTPIXEL2" width="4" begin="27" end="24" resetval="0x0" description="Bit alignmentAlignment of the bits from pixel#2 on the output interface" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="3" begin="23" end="21" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="NBBITSPIXEL2" width="5" begin="20" end="16" resetval="0x00" description="Number of bitsNumber of bits from the pixel #2 (value from 0 to 16 bits). The values from 17 to 31 are invalid." range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="4" begin="15" end="12" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="BITALIGNMENTPIXEL1" width="4" begin="11" end="8" resetval="0x0" description="Bit alignmentAlignment of the bits from pixel#1 on the output interface" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="3" begin="7" end="5" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="NBBITSPIXEL1" width="5" begin="4" end="0" resetval="0x00" description="Number of bitsNumber of bits from the pixel #1 (value from 0 to 16 bits). The values from 17 to 31 are invalid." range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_CPR_COEF_R" acronym="DISPC_CPR_COEF_R" offset="0x220" width="32" description="This register configures the color phase rotation matrix coefficients for the red component. Shadow register, updated on VFP start period.">
+    <bitfield id="RR" width="10" begin="31" end="22" resetval="0x000" description="RR coefficientEncoded signed value (from -512 to 511)" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="1" begin="21" end="21" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RG" width="10" begin="20" end="11" resetval="0x000" description="RG coefficientEncoded signed value (from -512 to 511)" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="1" begin="10" end="10" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RB" width="10" begin="9" end="0" resetval="0x000" description="RB coefficientEncoded signed value (from -512 to 511)" range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_CPR_COEF_G" acronym="DISPC_CPR_COEF_G" offset="0x224" width="32" description="This register configures the color phase rotation matrix coefficients for the green component. Shadow register, updated on VFP start period.">
+    <bitfield id="GR" width="10" begin="31" end="22" resetval="0x000" description="GR coefficientEncoded signed value (from -512 to 511)" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="1" begin="21" end="21" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="GG" width="10" begin="20" end="11" resetval="0x000" description="GG coefficientEncoded signed value (from -512 to 511)" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="1" begin="10" end="10" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="GB" width="10" begin="9" end="0" resetval="0x000" description="GB coefficientEncoded signed value (from -512 to 511)" range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_CPR_COEF_B" acronym="DISPC_CPR_COEF_B" offset="0x228" width="32" description="This register configures the color phase rotation matrix coefficients for the blue component. Shadow register, updated on VFP start period.">
+    <bitfield id="BR" width="10" begin="31" end="22" resetval="0x000" description="BR coefficientEncoded signed value (from -512 to 511)" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="1" begin="21" end="21" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="BG" width="10" begin="20" end="11" resetval="0x000" description="BG coefficientEncoded signed value (from -512 to 511)" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="1" begin="10" end="10" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="BB" width="10" begin="9" end="0" resetval="0x000" description="BB coefficientEncoded signed value (from -512 to 511)" range="" rwaccess="RW"/>
+  </register>
+  <register id="DISPC_GFX_PRELOAD" acronym="DISPC_GFX_PRELOAD" offset="0x22C" width="32" description="This register configures the graphics FIFO. Shadow register, updated on VFP start period or EVSYNC.">
+    <bitfield id="Reserved" width="20" begin="31" end="12" resetval="0x00000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="PRELOAD" width="12" begin="11" end="0" resetval="0x100" description="Graphics preload value: Number of bytes defining the preload value." range="" rwaccess="RW"/>
+  </register>
+</module>

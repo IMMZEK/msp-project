@@ -1,0 +1,376 @@
+/*******************************************************************/
+/* AM572x Sequences for TPIU processor trace                       */
+/*                                                                 */
+/*                                                                 */
+/*  Author: Madhav Vij (SDO)                                       */
+/*******************************************************************/
+
+/**********************************************************************
+ *
+ *  DEFINITIONS
+ *
+ **********************************************************************/
+
+#define SEC_EMU_MRM_PERM_REG_LOW_0     0x4A226088
+
+
+// AM572x control core: PAD CONF Registers
+#define PAD0_SYS_BOOT5_PAD1_DPM_EMU0   0x4A1001AC
+#define PAD0_DPM_EMU1_PAD1_DPM_EMU2    0x4A1001B0
+#define PAD0_DPM_EMU3_PAD1_DPM_EMU4    0x4A1001b4
+#define PAD0_DPM_EMU5_PAD1_DPM_EMU6    0x4A1001b8
+#define PAD0_DPM_EMU7_PAD1_DPM_EMU8    0x4A1001bc
+#define PAD0_DPM_EMU9_PAD1_DPM_EMU10   0x4A1001c0
+#define PAD0_DPM_EMU11_PAD1_DPM_EMU12  0x4A1001c4
+#define PAD0_DPM_EMU13_PAD1_DPM_EMU14  0x4A1001c8
+#define PAD0_DPM_EMU15_PAD1_DPM_EMU16  0x4A1001cc
+#define PAD0_DPM_EMU17_PAD1_DPM_EMU18  0x4A1001d0
+#define PAD0_DPM_EMU19                 0x4A1001d4
+
+
+
+#define DRM_CLKGEN_CFG                 0x54160020
+
+#define CM_EMU_DEBUGSS_CLKCTRL         0x4A307A20
+#define CM_L3INSTR_L3_3_CLKCTRL        0x4A008E20
+#define CM_L3INSTR_L3_INSTR_CLKCTRL    0x4A008E28
+
+#define DRM_CLAIM                      0x54160050
+#define DPM_CTRL0                      0x54160080
+#define DPM_CTRL1                      0x54160084
+#define DPM_CTRL2                      0x54160088
+#define DPM_CTRL3                      0x5416008C
+#define DPM_CTRL4                      0x54160090
+
+#define DPM_CTRL5                      0x54160094
+#define DPM_CTRL6                      0x54160098
+#define DPM_CTRL7                      0x5416009C
+#define DPM_CTRL8                      0x541600A0
+#define DPM_CTRL9                      0x541600A4
+#define DPM_CTRL10                     0x541600A8
+#define DPM_CTRL11                     0x541600AC
+#define DPM_CTRL12                     0x541600B0
+#define DPM_CTRL13                     0x541600B4
+#define DPM_CTRL14                     0x541600B8
+#define DPM_CTRL15                     0x541600BC
+#define DPM_CTRL16                     0x541600C0
+#define DPM_CTRL17                     0x541600C4
+#define DPM_CTRL18                     0x541600C8
+#define DPM_CTRL19                     0x541600CC
+
+
+#define CONTROL_SMART2IO_PADCONF_0     0x4A1005B0
+#define CONTROL_SMART2IO_PADCONF_1     0x4A1005B4
+
+#define DEBUGSS_CFGBUS_PLLCTRL_PLL_STATUS           *(unsigned int *) 0x80031804
+#define DEBUGSS_CFGBUS_PLLCTRL_PLL_GO               *(unsigned int *) 0x80031808
+#define DEBUGSS_CFGBUS_PLLCTRL_PLL_CONFIGURATION1   *(unsigned int *) 0x8003180C
+#define DEBUGSS_CFGBUS_PLLCTRL_PLL_CONFIGURATION2   *(unsigned int *) 0x80031810
+#define DEBUGSS_CFGBUS_PLLCTRL_PLL_CONFIGURATION3   *(unsigned int *) 0x80031814
+
+menuitem "TPIU_Utility";
+
+
+/**********************************************************************
+ *
+ *  FUNCTIONS
+ *
+ *  Two solutions to change the frequency of the TPIU clock
+ *   1/ Use Setup_TPIU_Clocking_Modes_166_TPIU_Clock() for 166MHz TPIU clock
+ *   (TRACECLK output will be 83MHz DDR)
+ *
+ *   2/ Use Setup_TPIU_Clocking_Modes_256_TPIU_Clock
+ *   (TRACECLK output will be 256MHz DDR)
+ *
+ *    The sequences in this gel FILE SHOULD BE used in the following order:
+ *    (Cortex-A9)
+ *    1/ Setup_TPIU_Clocking_Modes_XXX_TPIU_Clock()
+ *    2/ Configure_EMU2_19_For_TPIU() for 16BIT tpiu TRACE from EM2..EMU19
+ *    OR
+ *    2/ Configure_EMU0_19_For_TPIU() for 18bit tpiu trace from EMU0..EMU19
+ *
+ *    If Lauterbach expects TRACEDATA[0] to appear on EMU0 use 18 bit configuration
+ *    even if Lauterbach trace port is 16 bits wide.
+ *
+ *    If Lauterbach expects TRACEDATA[0] to appear on EMU4 use 16 bit configuration.
+ *
+ *    Note that the drive strength of the I/O (EMU0..19) are for 1-10pF external
+ *    load. It can be changed by using the hotmenu GEL functions to use 10-16pF
+ *    external load (Configure_EMU0_19_SmartIO_Load_10pF_16pF())
+ *
+ **********************************************************************/
+
+
+hotmenu Configure_EMU2_19_For_TPIU()
+{
+    // Configure_DRM_to_assign_TPIU_to_DP2_19();
+    tpiu_config_board_slow();
+    Configure_PADIO_For_TPIU_trace_Pins_EMU2_EMU19_16bitmode();
+}
+
+
+hotmenu Configure_EMU0_19_For_TPIU()
+{
+    // Configure_DRM_to_assign_TPIU_to_DP0_19();
+    tpiu_config_board_slow();
+    Configure_PADIO_For_TPIU_trace_Pins_EMU0_EMU19_18bitmode();
+}
+
+hotmenu Configure_EMU0_4_For_TPIU()
+{
+    tpiu_config_board_slow();
+    Configure_DRM_to_assign_TPIU_to_DP0_4();
+    Configure_PADIO_For_TPIU_trace_Pins_EMU0_EMU4();
+}
+
+Configure_PADIO_For_TPIU_trace_Pins_EMU0_EMU4()
+{
+    GEL_TextOut("Configure PADIO for TPIU trace pins, EMU0 to EMU4 for 5-bit mode \n ");
+
+    *(int*)0x4a003848 = 0x000d0000;      //EMU0-tpiu-data0
+    *(int*)0x4a00384c = 0x000d0000;      //EMU1
+    *(int*)0x4a0035e4 = 0x00090002;      //EMU2-tpiu-clk
+    *(int*)0x4a003604 = 0x00090002;      //EMU3
+    *(int*)0x4a003624 = 0x00090002;      //EMU4
+    *(int*)0x4a0035e8 = 0x00090002;      //EMU5
+    *(int*)0x4a0035ec = 0x00090002;      //EMU6
+}
+
+Configure_PADIO_For_TPIU_trace_Pins_EMU2_EMU19_16bitmode()
+{
+    GEL_TextOut("Configure PADIO for TPIU trace pins, EMU2 to EMU19 for 16-bit mode \n ");
+
+    *(int*)0x4a003848 = 0x000d0000;      //EMU0-tpiu-trigger
+    *(int*)0x4a00384c = 0x000d0000;      //EMU1
+    *(int*)0x4a0035e4 = 0x00090002;      //EMU2-tpiu-clk
+    *(int*)0x4a003604 = 0x00090002;      //EMU3-tpiu-ctrl
+    *(int*)0x4a003624 = 0x00090002;      //EMU4
+    *(int*)0x4a0035e8 = 0x00090002;      //EMU5
+    *(int*)0x4a0035ec = 0x00090002;      //EMU6
+    *(int*)0x4a0035f0 = 0x00090002;      //EMU7
+    *(int*)0x4a0035f4 = 0x00090002;      //EMU8
+    *(int*)0x4a0035f8 = 0x00090002;      //EMU9
+    *(int*)0x4a003608 = 0x00090002;      //EMU10
+    *(int*)0x4a00360c = 0x00090002;      //EMU11
+    *(int*)0x4a003610 = 0x00090002;      //EMU12
+    *(int*)0x4a003614 = 0x00090002;      //EMU13
+    *(int*)0x4a003618 = 0x00090002;      //EMU14
+    *(int*)0x4a003628 = 0x00090002;      //EMU15
+    *(int*)0x4a00362c = 0x00090002;      //EMU16
+    *(int*)0x4a003630 = 0x00090002;      //EMU17
+    *(int*)0x4a003634 = 0x00090002;      //EMU18
+    *(int*)0x4a003638 = 0x00090002;      //EMU19
+    *(int*)0x4a00363c = 0x00090002;      //EMU20-tpiu-data18
+
+}
+
+Configure_PADIO_For_TPIU_trace_Pins_EMU0_EMU19_18bitmode()
+{
+    GEL_TextOut("Configure PADIO for TPIU trace pins, EMU0 to EMU19 for 18-bit mode \n ");
+
+    *(int*)0x4a003848 = 0x000d0000;      //EMU0-trigger
+    *(int*)0x4a00384c = 0x000d0000;      //EMU1-trigger
+    *(int*)0x4a0035e4 = 0x00090002;      //EMU2-tpiu-clk
+    *(int*)0x4a003604 = 0x00090002;      //EMU3-tpiu-ctrl
+    *(int*)0x4a003624 = 0x00090002;      //EMU4-tpiu-data0
+    *(int*)0x4a0035e8 = 0x00090002;      //EMU5
+    *(int*)0x4a0035ec = 0x00090002;      //EMU6
+    *(int*)0x4a0035f0 = 0x00090002;      //EMU7
+    *(int*)0x4a0035f4 = 0x00090002;      //EMU8
+    *(int*)0x4a0035f8 = 0x00090002;      //EMU9
+    *(int*)0x4a003608 = 0x00090002;      //EMU10
+    *(int*)0x4a00360c = 0x00090002;      //EMU11
+    *(int*)0x4a003610 = 0x00090002;      //EMU12
+    *(int*)0x4a003614 = 0x00090002;      //EMU13
+    *(int*)0x4a003618 = 0x00090002;      //EMU14
+    *(int*)0x4a003628 = 0x00090002;      //EMU15
+    *(int*)0x4a00362c = 0x00090002;      //EMU16
+    *(int*)0x4a003630 = 0x00090002;      //EMU17
+    *(int*)0x4a003634 = 0x00090002;      //EMU18
+    *(int*)0x4a003638 = 0x00090002;      //EMU19
+    *(int*)0x4a00363c = 0x00090002;      //EMU20-tpiu-data15
+}
+
+Configure_DRM_to_assign_TPIU_to_DP2_19()
+{
+   /* Claim application ownership from DRM */
+   *(int*)DRM_CLAIM = (0x1 << 30);
+   /* Enable application ownership from DRM */
+   *(int*)DRM_CLAIM = (0x2 << 30);
+
+   *(int*)DPM_CTRL2  = 0xA; // TPIU_CLK      (DP2)
+   *(int*)DPM_CTRL3  = 0x9; // TPIU_CTRL     (DP3)
+   *(int*)DPM_CTRL4  = 0x7; // TPIU_DATA[0]  (DP4)
+   *(int*)DPM_CTRL5  = 0x7; // TPIU_DATA[1]  (DP5)
+   *(int*)DPM_CTRL6  = 0x7; // TPIU_DATA[2]  (DP6)
+   *(int*)DPM_CTRL7  = 0x7; // TPIU_DATA[3]  (DP7)
+   *(int*)DPM_CTRL8  = 0x7; // TPIU_DATA[4]  (DP8)
+   *(int*)DPM_CTRL9  = 0x7; // TPIU_DATA[5]  (DP9)
+   *(int*)DPM_CTRL10 = 0x7; // TPIU_DATA[6]  (DP10)
+   *(int*)DPM_CTRL11 = 0x7; // TPIU_DATA[7]  (DP11)
+   *(int*)DPM_CTRL12 = 0x7; // TPIU_DATA[8]  (DP12)
+   *(int*)DPM_CTRL13 = 0x7; // TPIU_DATA[9]  (DP13)
+   *(int*)DPM_CTRL14 = 0x7; // TPIU_DATA[10] (DP14)
+   *(int*)DPM_CTRL15 = 0x7; // TPIU_DATA[11] (DP15)
+   *(int*)DPM_CTRL16 = 0x7; // TPIU_DATA[12] (DP16)
+   *(int*)DPM_CTRL17 = 0x7; // TPIU_DATA[13] (DP17)
+   *(int*)DPM_CTRL18 = 0x7; // TPIU_DATA[14] (DP18)
+   *(int*)DPM_CTRL19 = 0x7; // TPIU_DATA[15] (DP19)
+
+
+   // Note the app owned state status bit should be '0' after PAD configuration
+   // (i checked, it appears to work)
+
+   // Debug only status bit is always '0' because on OMAP-4 no DP pin is exclusively
+   // available for debug
+
+   // The output and output enable status bits should reflect the way TPIU is driving
+   // the pins (output enable should go to zero and stay zero)
+
+    GEL_TextOut("Programmed DRM to select debug function for DP pins, 16 pin TPIU data \n");
+
+}
+
+
+Configure_DRM_to_assign_TPIU_to_DP0_19()
+{
+   /* Claim application ownership from DRM */
+   *(int*)DRM_CLAIM = (0x1 << 30);
+   /* Enable application ownership from DRM */
+   *(int*)DRM_CLAIM = (0x2 << 30);
+
+   *(int*)DPM_CTRL0  = 0x8; // TPIU_DATA[0]  (DP0)
+   *(int*)DPM_CTRL1  = 0x8; // TPIU_DTA[1]   (DP1)
+   *(int*)DPM_CTRL2  = 0xA; // TPIU_CLK      (DP2)
+   *(int*)DPM_CTRL3  = 0x9; // TPIU_CTRL     (DP3)
+   *(int*)DPM_CTRL4  = 0x8; // TPIU_DATA[2]  (DP4)
+   *(int*)DPM_CTRL5  = 0x8; // TPIU_DATA[3]  (DP5)
+   *(int*)DPM_CTRL6  = 0x8; // TPIU_DATA[4]  (DP6)
+   *(int*)DPM_CTRL7  = 0x8; // TPIU_DATA[5]  (DP7)
+   *(int*)DPM_CTRL8 =  0x8; // TPIU_DATA[6]  (DP8)
+   *(int*)DPM_CTRL9 =  0x8; // TPIU_DATA[7]  (DP9)
+   *(int*)DPM_CTRL10 = 0x8; // TPIU_DATA[8]  (DP10)
+   *(int*)DPM_CTRL11 = 0x8; // TPIU_DATA[9]  (DP11)
+   *(int*)DPM_CTRL12 = 0x8; // TPIU_DATA[10] (DP12)
+   *(int*)DPM_CTRL13 = 0x8; // TPIU_DATA[11] (DP13)
+   *(int*)DPM_CTRL14 = 0x8; // TPIU_DATA[12] (DP14)
+   *(int*)DPM_CTRL15 = 0x8; // TPIU_DATA[13] (DP15)
+   *(int*)DPM_CTRL16 = 0x8; // TPIU_DATA[14] (DP16)
+   *(int*)DPM_CTRL17 = 0x8; // TPIU_DATA[15] (DP17)
+   *(int*)DPM_CTRL18 = 0x8; // TPIU_DATA[16] (DP18)
+   *(int*)DPM_CTRL19 = 0x8; // TPIU_DATA[17] (DP19)
+
+
+   // Note the app owned state status bit should be '0' after PAD configuration
+   // (i checked, it appears to work)
+
+   // Debug only status bit is always '0' because on OMAP-4 no DP pin is exclusively
+   // available for debug
+
+   // The output and output enable status bits should reflect the way tpiu is driving
+   // the pins (output enable should go to zero and stay zero)
+
+    GEL_TextOut("Programmed DRM to select debug function for DP pins, 18 pin TPIU data \n");
+
+}
+
+Configure_DRM_to_assign_TPIU_to_DP0_4()
+{
+   /* Claim application ownership from DRM */
+   *(int*)DRM_CLAIM = (0x1 << 30);
+   /* Enable application ownership from DRM */
+   *(int*)DRM_CLAIM = (0x2 << 30);
+
+   *(int*)DPM_CTRL0  = 0x8; // TPIU_DATA[0]  (DP0)
+   *(int*)DPM_CTRL1  = 0x8; // TPIU_DTA[1]   (DP1)
+   *(int*)DPM_CTRL2  = 0xA; // TPIU_CLK      (DP2)
+   *(int*)DPM_CTRL3  = 0x9; // TPIU_CTRL     (DP3)
+   *(int*)DPM_CTRL4  = 0x8; // TPIU_DATA[2]  (DP4)
+   *(int*)DPM_CTRL5  = 0x8; // TPIU_DATA[3]  (DP5)
+
+   // Note the app owned state status bit should be '0' after PAD configuration
+   // (i checked, it appears to work)
+
+   // Debug only status bit is always '0' because on OMAP-4 no DP pin is exclusively
+   // available for debug
+
+   // The output and output enable status bits should reflect the way tpiu is driving
+   // the pins (output enable should go to zero and stay zero)
+
+    GEL_TextOut("Programmed DRM to select debug function for DP pins, 18 pin TPIU data \n");
+
+}
+
+Configure_EMU0_19_SmartIO_Load_1pF_10pF()
+{
+   GEL_TextOut("Configuring EMU0..19 for drive strength based upon external load 1-10pF which is default \n");
+
+   // Pin /  Pin Group in device control module for Smart2Io
+   // DP0 -- DPM_DR1
+   // DP1 -- DPM_DR2
+   // DP2 -- USBA0_DR0
+   // DP3 -- USBA0_DR1
+   // DP4 -- USBA0_DR1
+   // DP5 -- USBA0_DR1
+   // DP6 -- UART3_DR2
+   // DP7 -- UART3_DR3
+   // DP8 -- UART3_DR4
+   // DP9 -- UART3_DR5
+   // DP10 --USBA_DR2
+   // DP11 --USBA_DR2
+   // DP12 --USBA_DR2
+   // DP13 --USBA_DR2
+   // DP14 --GPIO_DR10
+   // DP15 --GPIO_DR10
+   // DP16 --DPM_DR2
+   // DP17 --DPM_DR2
+   // DP18 --DPM_DR3
+   // DP19 --DPM_DR3
+
+    // Setting up 1pF-10pF load for  DPM_DR1_LB, DPM_DR2_LB, USBA0_DR1_LB, DPM_DR3_LB
+    // UART3_DR2, UART3_DR3, UART3_DR4, UART3_DR5, USBA_DR2, GPIO_DR10
+   *(int*)CONTROL_SMART2IO_PADCONF_0 &= ~((1 << 30) | (1 << 29) | (1 << 25) |  (1 << 2) | (1 << 28) | (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 1));
+
+    // USBA0_DR0_LB
+   *(int*)CONTROL_SMART2IO_PADCONF_1 &= ~((1 << 29));
+
+}
+
+Configure_EMU0_19_SmartIO_Load_10pF_16pF()
+{
+    GEL_TextOut("Configuring EMU0..19 for drive strength based upon external load 10-16pF \n");
+
+    // Setting up 10pF-16pF load for DPM_DR1_LB, DPM_DR2_LB, USBA0_DR1_LB, DPM_DR3_LB
+    // UART3_DR2, UART3_DR3, UART3_DR4, UART3_DR5, USBA_DR2, GPIO_DR10
+    *(int*)CONTROL_SMART2IO_PADCONF_0 |= ((1 << 30) | (1 << 29) | (1 << 25) |  (1 << 2) | (1 << 28) | (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 1));
+
+    // USBA0_DR0_LB
+    *(int*)CONTROL_SMART2IO_PADCONF_1 |= ((1 << 29));
+
+}
+
+hotmenu tpiu_config_board_slow()
+{
+    // PLL CONFIGURATION3
+    // Divider for TPIU export clock at 97 Mhz
+    // M6 [4:0] = 0x9;
+    DEBUGSS_CFGBUS_PLLCTRL_PLL_CONFIGURATION3@data = 0x9;
+
+    // REQUEST DPLL
+    DEBUGSS_CFGBUS_PLLCTRL_PLL_GO@data = 0x1;
+
+    GEL_TextOut("< Done with Setup DebugSS Trace export clock (TPIU) to 97MHz \n");
+}
+
+hotmenu tpiu_config_board_fast()
+{
+    // PLL CONFIGURATION3
+    // Divider for TPIU export clock at 135 Mhz
+    // M6 [4:0] = 0x6;
+    DEBUGSS_CFGBUS_PLLCTRL_PLL_CONFIGURATION3@data = 0x6;
+
+    // REQUEST DPLL
+    DEBUGSS_CFGBUS_PLLCTRL_PLL_GO@data = 0x1;
+
+    GEL_TextOut("< Done with Setup DebugSS Trace export clock (TPIU) to 135MHz \n");
+}

@@ -1,0 +1,195 @@
+/* \file        cc2538_xds.gel
+ * \brief       GEL script for CC2538 device family + XDS debuggers.
+ *
+ * \revision    $Revision$
+ */
+
+unsigned int _GEL_Backup_FP_COMP0;
+unsigned int _GEL_Backup_FP_COMP1;
+unsigned int _GEL_Backup_FP_COMP2;
+unsigned int _GEL_Backup_FP_COMP3;
+unsigned int _GEL_Backup_FP_COMP4;
+unsigned int _GEL_Backup_FP_COMP5;
+unsigned int _GEL_WaitTimeout = 0;
+int _GEL_Timer1Lock = 0;
+int _GEL_Timer2Lock = 0;
+int _GEL_RestartDueToLoad = 0;
+
+menuitem "CC2538"
+/** \brief Function for erasing CC2538 flash */
+hotmenu MassErase()
+{
+    // Store connect states
+    int ctxWasConnected = GEL_IsConnected();
+    GEL_EvalOnTarget("<parent>", "ConnectStateStore()", 1);
+    GEL_EvalOnTarget("<parent>", "GEL_EvalOnTarget(\"<parent>\",\"ConnectStateStore()\", 1)", 1);
+
+
+    // If connected to Cortex, disconnect
+    if(ctxWasConnected == 1)
+    {
+        GEL_Disconnect();
+    }
+
+    // Disconnect DAP
+    GEL_EvalOnTarget("<parent>", "DisconnectIfConnected()", 1);
+
+    // Connect to icepick and do mass erase
+    GEL_EvalOnTarget("<parent>", "GEL_EvalOnTarget(\"<parent>\",\"ConnectIfDisconnected()\", 1)", 1);
+    GEL_EvalOnTarget("<parent>", "GEL_EvalOnTarget(\"<parent>\",\"IP_CC2538_MASSERASE = 1\", 1)", 1);
+
+
+    // Restore connect state
+    if(ctxWasConnected == 1)
+    {
+        // Connects to cortex, dap and icepick
+        GEL_Connect();
+
+        // Reset device
+        GEL_Reset();
+    }
+    else
+    {
+        GEL_EvalOnTarget("<parent>", "ConnectStateRestore()", 1);
+        GEL_EvalOnTarget("<parent>", "GEL_EvalOnTarget(\"<parent>\",\"ConnectStateRestore()\", 1)", 1);
+    }
+
+    GEL_TextOut("Mass Erase Complete.\n");
+}
+
+/** \brief Function implementing workaround for CC2538 system reset bug */
+hotmenu SystemReset()
+{
+    _GEL_Timer1Lock = 0;
+    _GEL_Timer2Lock = 0;
+
+    GEL_Halt();
+
+    // 1. Store and clear existing debug state (breakpoints etc.)
+    GEL_RemoveDebugState();
+
+    // Write to RAM area that signals ResetISR to stop execution
+    *((int*)(0x20003000)) = 0xA5F01248;
+
+    // Let the CPU run freely
+    GEL_RunF();
+
+    GEL_SetTimer( 100, 1, "WaitForRun()", 1 );
+
+    // Don't let this function return until all the callbacks are finished
+    GEL_EvalOnTarget("IcePick_C", "GEL_Waiting = 1", 1);
+    GEL_EvalOnTarget("IcePick_C", "WaitForSignal()", 1);
+
+    // Restart if "Auto Run Options > On a reset" is enabled
+    if( DEBUG_GetBoolProperty("AutoRunToLabelOnReset") )
+    {
+        GEL_Restart();
+    }
+ }
+
+/** \brief Helper function for CC2538 system reset workaround */
+WaitForRun()
+{
+    int wasFirstThread = ++_GEL_Timer1Lock;
+    if( 1 != wasFirstThread ) return;
+
+    GEL_CancelTimer( 1);
+    _GEL_WaitTimeout = 0;
+
+    // 2. Issue reset from icepick
+    GEL_EvalOnTarget("IcePick_C", "GEL_AdvancedReset(\"System Reset\")");
+
+    // Wait for reset to complete by using a timer and checking
+    // every 100 ms
+    GEL_SetTimer( 100, 2, "WaitForReset()", 1 );
+}
+
+/** \brief Helper function for CC2538 system reset workaround */
+WaitForReset()
+{
+    unsigned int isAtResetIsr;
+    unsigned int FP_CTRL;
+
+    int wasFirstThread = ++_GEL_Timer2Lock;
+    if(1 != wasFirstThread) return;
+
+    GEL_CancelTimer(2);
+
+    // Wait for reset to complete
+
+    // 3. Halt CPU
+    GEL_Halt();
+    isAtResetIsr = *((int*)(0x20003004));
+    if(isAtResetIsr != 0xAABBAABB && _GEL_WaitTimeout == 0)
+    {
+        // Target SW have not signalled it has reached workaround code.
+        // Starting timer again to wait a last time.
+        _GEL_WaitTimeout = 1;
+        GEL_RunF();
+        _GEL_Timer2Lock = 0;
+        GEL_SetTimer( 100, 2, "WaitForReset()", 1 );
+        return;
+    }
+
+    // 4. Restore debug state (breakpoints etc.)
+    GEL_RestoreDebugState();
+
+    // Signal to resetISR it can continue run
+    *((int*)(0x20003000)) = 0;
+
+    // Issue CPU reset
+    GEL_Reset();
+
+    // Let SystemReset() complete
+    GEL_EvalOnTarget("IcePick_C", "GEL_Waiting = 0", 1);
+
+    if(_GEL_WaitTimeout == 1)
+    {
+        // Target code does not implement "catch" for system reset workaround
+        GEL_TextOut("CPU Reset.\n","");
+    }
+}
+
+/** \brief Function is called when debugger connects to target */
+OnTargetConnect()
+{
+    SetUpResets();
+}
+
+OnPreFileLoaded()
+{
+    _GEL_RestartDueToLoad = 1;
+}
+
+OnFileLoaded(int nErrorCode, int bSymbolsOnly)
+{
+    _GEL_RestartDueToLoad = 0;
+}
+
+OnRestart()
+{
+    if(_GEL_RestartDueToLoad)
+    {
+        SystemReset();
+    }
+}
+
+/** \brief Function sets up resets visible in CCS "Reset menu" */
+SetUpResets()
+{
+    // Remove all resets except CPU reset
+    // System reset does not work due to HW bug in CC2538.
+    DEBUG_RemoveResets(1);
+
+    // Add system reset that implements hw bug workaround
+    DEBUG_DefineReset("System Reset", "", 1 /* target must be halted*/, "SystemReset()");
+
+    // Re-define Emulator Reset
+    DEBUG_DefineReset("Reset Emulator", "", 8 /* All targets for the specific emulator connection must be halted*/, "EmulatorReset()");
+}
+
+/** \brief Function issues "Emulator Reset" */
+EmulatorReset()
+{
+    GEL_EvalOnTarget("<parent>","GEL_AdvancedReset(\"Reset Emulator\")", 1);
+}

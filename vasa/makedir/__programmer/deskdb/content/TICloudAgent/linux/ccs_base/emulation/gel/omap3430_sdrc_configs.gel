@@ -1,0 +1,405 @@
+/**********************************************************************/
+/*                                                                                                                                        */
+/* Author: Marcin Nowak (TI)  June 01 2006                                                                            */
+/*         Based on file originally created by Xavier Hanin                                                            */
+/**********************************************************************/
+
+/*
+;------------------------------------------------------------------------------------------;
+;
+; __MEMORY__ = 1
+   ; mDDR (Samsung K4X51323PC, 1x512Mbits)
+   ; x32-bits memory on CS0 (DATA LANE [31:0])
+   ; Organization: 16Mx32, Bank: BA0-BA1, Row: A0-A12, COlumn: A0-A8 
+   ; MUX mode is 24 (2 bit bank, 13bit row, 9 bit column)
+   ; RamSize = 32 * 2MB chunks = 64MB
+;
+;
+; __MEMORY__ = 2
+   ; mDDR (Micron MT46HM32LFCM, 1x512Mbits)
+   ; x32-bits memory on CS0 (DATA LANE [31:0])
+   ; MUX mode is 24 ( 2 bit bank, 13bit row, 9 bit column  ( 16M x 32-bit ) )
+   ; RamSize = 32 * 2MB chunks = 64MB
+;
+;
+; __MEMORY__ = 3
+   ; mDDR (Elpida EDK5132CABH, 1x512Mbits)
+   ; x32-bits memory on CS0 (DATA LANE [31:0])
+   ; MUX mode is 24 ( 2 bit bank, 13bit row, 9 bit column  ( 16M x 32-bit ) )
+   ; RamSize = 32 * 2MB chunks = 64MB
+;
+;
+;
+; __MEMORY__ = 4
+   ; SDR (Elpida EDK5432CABH, 1x512Mbits)
+   ; x32-bits memory on CS0 (DATA LANE [31:0])
+   ; MUX mode is 24 ( 2 bit bank, 13bit row, 9 bit column  ( 16M x 32-bit ) )
+   ; RamSize = 32 * 2MB chunks = 64MB
+;
+; __MEMORY__ = 5   Not available
+;
+; __MEMORY__ = 6
+   ; mDDR EDK2532_1111 (133MHz memory) for MODELSIM simulation
+   ; x32-bit memory from controller perspective [DATA LANE [31:0] on CS0]
+   ; MUX mode is 9
+   ; RamSize = 16 * 2MB chunks = 32MB
+;
+;
+;
+; __MEMORY__ = 7
+   ; mDDR 2xEDK2532_1111 (133MHz memory) for MODELSIM simulation
+   ; MUX mode is 9
+   ; RamSize = 16 * 2MB chunks = 32MB
+;
+; __MEMORY__ = 8   Not available
+; __MEMORY__ = 9   Not available
+; __MEMORY__ = 10  Not available
+;
+; __MEMORY__ = 11
+   ; mDDR Micron MT46H16M32 memory on CS0: 4M x 32bit x 4Banks 
+   ; x32-bit memory from controller perspective on CS0
+   ; Row address:    A0-A12 (JEDEC Standard Option); A0-A13 (Reduced Page-Size Option)
+   ; Column address: A0-A8  (JEDEC Standard Option); A0-A7  (Reduced Page-Size Option)
+   ; RamSize = 32 x 2MB chunks, Flexible address scheme selected!
+;
+;
+;------------------------------------------------------------------------------------------;
+*/
+
+menuitem "DRAMS"
+
+#define SDRC_ENADISCLK           (1 << 3)
+#define SDRC_PWDENABLE           (1 << 2)
+#define SDRC_SRFRONIDLEREQ       (1 << 6)
+#define SDRC_SMARTIDLEMODE       (2 << 3)
+
+#define SDRC_BURSTLENGTH_SDR     1  /*BurstLength = 2 (for SDR memory only)*/
+#define SDRC_BURSTLENGTH_DDR     2  /*BurstLength = 4 (for DDR memory only)*/
+
+#define SDRC_RAMSIZE_OFFSET      8
+
+#define SDRC_RAMTYPE_SDR         0
+#define SDRC_RAMTYPE_DDR         1
+#define SDRC_RAMTYPE_OFFSET      0
+#define SDRC_RAMTYPE_MASK        (0x3 << SDRC_RAMTYPE_OFFSET)
+
+#define SDRC_CS1MUXCFG_OFFSET       12
+#define SDRC_CS0MUXCFG_OFFSET       9
+#define SDRC_SDRCTRISTATE_OFFSET    8
+
+#define SDRC_32BIT_31_0             0  /*or 1*/
+#define SDRC_16BIT_31_16            2  /*or 7*/
+#define SDRC_16BIT_15_0             3
+#define SDRC_TRISTATED_PINS         0
+#define SDRC_NORMALMODE_PINS        1
+
+#define SDRC_DLL_LOCK_STATUS        (1 << 2)
+
+/*------------------------------------------------------------------------*/  
+/*Common configuration for all memories*/
+/* CASL=3, Serial mode, ;BurstLength set to 0! 
+   Needs to be specified in initialization routine 
+*/
+#define SDRC_MR_VALUE            ( (3 << 4) | (0 << 3) | (0 << 0) )
+
+/* Half Strength Driver Strength -> (1 << 5 )
+   Reserved - Quarter Strength   -> (2 << 5 )
+   Fulll Strength                -> (0 << 5 ) 
+*/
+#define SDRC_EMR2_VALUE          (1 << 5 )   /*DDR is close to OMAP*/
+
+/* Phase Offset, EnableDLL, UnLockDLL, DLLPhase
+   Enabled  Unlocked   90 degree 
+*/
+/*                                OFFSET  WriteDDRClkx2 ENADLL    LOCKDLL    DLL_PHASE */
+#define SDRC_DLL_CTRL_DDR_VALUE  (0 << 24) | (0 << 7) | (1 << 3) | (0 << 2) | (1 << 1)
+#define SDRC_DLL_CTRL_SDR_VALUE  (0 << 24) | (0 << 7) | (0 << 3) | (1 << 2) | (1 << 1)
+
+/* Set for 12MHz, single refresh used*/
+#define SDRC_RFR_CTRL_VALUE      ( (93 << 8) | (1 << 0))
+
+   
+/*------------------------------------------------------------------------*/
+#define SMS_BASE_ADDR               0x6C000000
+#define SDRC_BASE_ADDR              0x6D000000
+#define CTRL_MODULE_BASE            0x48000000
+
+/*SDRC registers*/
+   unsigned char* CONTROL_PADCONF_SDRC_NCS0_REG = (CTRL_MODULE_BASE + 0xA0);
+   unsigned char* SYSCONFIG_PADCONF_SDRC_A12_REG = (CTRL_MODULE_BASE + 0x32);
+   unsigned char* SYSCONFIG_PADCONF_SDRC_A13_REG = (CTRL_MODULE_BASE + 0x31);  
+   unsigned int*              SDRC_REVISION_REG = (SDRC_BASE_ADDR + 0x00);
+   unsigned int*             SDRC_SYSCONFIG_REG = (SDRC_BASE_ADDR + 0x10);
+   unsigned int*             SDRC_SYSSTATUS_REG = (SDRC_BASE_ADDR + 0x14);
+   unsigned int*                SDRC_CS_CFG_REG = (SDRC_BASE_ADDR + 0x40);
+   unsigned int*               SDRC_SHARING_REG = (SDRC_BASE_ADDR + 0x44);
+   unsigned int*              SDRC_ERR_ADDR_REG = (SDRC_BASE_ADDR + 0x48);
+   unsigned int*              SDRC_ERR_TYPE_REG = (SDRC_BASE_ADDR + 0x4C);
+   unsigned int*             SDRC_DLLA_CTRL_REG = (SDRC_BASE_ADDR + 0x60);
+   unsigned int*           SDRC_DLLA_STATUS_REG = (SDRC_BASE_ADDR + 0x64);
+   unsigned int*             SDRC_DLLB_CTRL_REG = (SDRC_BASE_ADDR + 0x68);
+   unsigned int*           SDRC_DLLB_STATUS_REG = (SDRC_BASE_ADDR + 0x6C);
+   unsigned int*                 SDRC_POWER_REG = (SDRC_BASE_ADDR + 0x70);
+   unsigned int*                SDRC_MCFG_0_REG = (SDRC_BASE_ADDR + 0x80);
+   unsigned int*                  SDRC_MR_0_REG = (SDRC_BASE_ADDR + 0x84);
+   unsigned int*                SDRC_EMR1_0_REG = (SDRC_BASE_ADDR + 0x88);
+   unsigned int*                SDRC_EMR2_0_REG = (SDRC_BASE_ADDR + 0x8C);
+   unsigned int*                SDRC_EMR3_0_REG = (SDRC_BASE_ADDR + 0x90);
+   unsigned int*            SDRC_DCDL1_CTRL_REG = (SDRC_BASE_ADDR + 0x94);
+   unsigned int*            SDRC_DCDL2_CTRL_REG = (SDRC_BASE_ADDR + 0x98);
+   unsigned int*         SDRC_ACTIM_CTRLA_0_REG = (SDRC_BASE_ADDR + 0x9C);
+   unsigned int*         SDRC_ACTIM_CTRLB_0_REG = (SDRC_BASE_ADDR + 0xA0);
+   unsigned int*            SDRC_RFR_CTRL_0_REG = (SDRC_BASE_ADDR + 0xA4);
+   unsigned int*              SDRC_MANUAL_0_REG = (SDRC_BASE_ADDR + 0xA8);
+   unsigned int*                SDRC_MCFG_1_REG = (SDRC_BASE_ADDR + 0xB0);
+   unsigned int*                  SDRC_MR_1_REG = (SDRC_BASE_ADDR + 0xB4);
+   unsigned int*                SDRC_EMR1_1_REG = (SDRC_BASE_ADDR + 0xB8);
+   unsigned int*                SDRC_EMR2_1_REG = (SDRC_BASE_ADDR + 0xBC);
+   unsigned int*                SDRC_EMR3_1_REG = (SDRC_BASE_ADDR + 0xC0);
+   unsigned int*         SDRC_ACTIM_CTRLA_1_REG = (SDRC_BASE_ADDR + 0xC4);
+   unsigned int*         SDRC_ACTIM_CTRLB_1_REG = (SDRC_BASE_ADDR + 0xC8);
+   unsigned int*            SDRC_RFR_CTRL_1_REG = (SDRC_BASE_ADDR + 0xD4);
+   unsigned int*              SDRC_MANUAL_1_REG = (SDRC_BASE_ADDR + 0xD8);
+   unsigned int*              SMS_SYSCONFIG_REG = (SMS_BASE_ADDR + 0x10);
+
+/*Global variables*/
+	unsigned int SDRC_MCFG0_VALUE;
+	unsigned int SDRC_MCFG1_VALUE;
+	unsigned int SDRC_SHARING_VALUE;
+	unsigned int SDRC_ACTIM_CTRLA_VALUE;
+	unsigned int SDRC_ACTIM_CTRLB_VALUE;
+
+
+hotmenu mDDR_Micron_MT46H16M32()
+{
+   GEL_TextOut("MM11: mDDR Micron MT46H16M32 - 512 Mbit(64MB) on CS0, 4M x 32bit x 4Banks\n" );
+   
+   /*                   RasWidth,   CasWidth,  AddrLegacy,   RamSize,   BankAloc,  B32Not16,   DeepPD,   DDRType,   RamType */
+	SDRC_MCFG0_VALUE = ( (2 << 24) | (4 << 20) | (1 << 19) | (32 << 8) | (0 << 6) | (1 << 4) | (0 << 3) | (1 << 2) | (1 << 0) );
+	SDRC_MCFG1_VALUE = ( (2 << 24) | (4 << 20) | (1 << 19) | (0 << 8)  | (0 << 6) | (1 << 4) | (0 << 3) | (1 << 2) | (1 << 0) );
+	SDRC_SHARING_VALUE = ( (SDRC_32BIT_31_0 << SDRC_CS0MUXCFG_OFFSET) | (SDRC_NORMALMODE_PINS << SDRC_SDRCTRISTATE_OFFSET) );
+   
+   /* All values optimised for 166MHz, safe values for all memories
+      Tdpl=Twr=Tcdlr
+      Tdal=Twr+Trp
+      Trfc,    Trc,  Tras,    Trp,  Trcd,    Trrd,    Tdpl,    Tdal 
+      Tcke, Txsr 
+   */
+   SDRC_ACTIM_CTRLA_VALUE = ( (12 << 27) | (10 << 22) | (7 << 18) | (3 << 15) | (3 << 12) | (2 << 9) | (2 << 6) | (5 << 0) );
+   SDRC_ACTIM_CTRLB_VALUE = ( (2 <<12) | (20 << 0) );
+   
+   /*Configure only memory on CS0*/
+   common_sdram_init(1 /*in_bMem0*/, 0 /*in_bMem1*/, SDRC_BURSTLENGTH_DDR /*in_nBurstLength*/);
+   
+   GEL_TextOut("SDRC initilization for mDDR_Micron_MT46H16M32 completed \n" );   
+}
+
+
+hotmenu mDDR_Samsung_K4X51323PC()
+{
+   GEL_TextOut("MM01: mDDR Samsung K4X51323PC - 512 Mbit(64MB) on CS0, 4M x 32bit x 4Banks\n" );
+   
+   /*                     MuxMode,  AddrLegacy,   RamSize,   BankAloc,  B32Not16,    DeepPD,   DDRType,   RamType */
+	SDRC_MCFG0_VALUE = ( (23 << 20) | (0 << 19) | (32 << 8) | (0 << 6) | (1 << 4) | ( 1 << 3) | (0 << 2) | (1 << 0) );
+	SDRC_MCFG1_VALUE = ( (23 << 20) | (0 << 19) | (0 << 8)  | (0 << 6) | (1 << 4) | ( 1 << 3) | (0 << 2) | (1 << 0) );
+	SDRC_SHARING_VALUE = ( (SDRC_32BIT_31_0 << SDRC_CS0MUXCFG_OFFSET) | (SDRC_NORMALMODE_PINS << SDRC_SDRCTRISTATE_OFFSET) );
+   
+   /* All values optimised for 166MHz, safe values for all memories
+      Tdpl=Twr=Tcdlr
+      Tdal=Twr+Trp
+      Trfc,    Trc,  Tras,    Trp,  Trcd,    Trrd,    Tdpl,    Tdal 
+      Tcke, Txsr 
+   */
+   SDRC_ACTIM_CTRLA_VALUE = ( (12 << 27) | (10 << 22) | (7 << 18) | (3 << 15) | (3 << 12) | (2 << 9) | (2 << 6) | (5 << 0) );
+   SDRC_ACTIM_CTRLB_VALUE = ( (1 << 12) | (18 << 0) );
+   
+   /*Configure only memory on CS0*/
+   common_sdram_init(1 /*in_bMem0*/, 0 /*in_bMem1*/, SDRC_BURSTLENGTH_DDR /*in_nBurstLength*/);
+   
+   GEL_TextOut("SDRC initilization for mDDR_Samsung_K4X51323PC completed \n" );   
+}
+
+
+hotmenu mDDR_Micron_MT46HM32LFCM()
+{
+   GEL_TextOut("MM02: mDDR Micron MT46HM32LFCM - 512 Mbit(64MB) on CS0, 4M x 32bit x 4Banks\n" );
+   
+   /*                     MuxMode,  AddrLegacy,   RamSize,   BankAloc,  B32Not16,    DeepPD,   DDRType,   RamType */
+	SDRC_MCFG0_VALUE = ( (23 << 20) | (0 << 19) | (32 << 8) | (0 << 6) | (1 << 4) | ( 1 << 3) | (0 << 2) | (1 << 0) );
+	SDRC_MCFG1_VALUE = ( (23 << 20) | (0 << 19) | (0 << 8)  | (0 << 6) | (1 << 4) | ( 1 << 3) | (0 << 2) | (1 << 0) );
+	SDRC_SHARING_VALUE = ( (SDRC_32BIT_31_0 << SDRC_CS0MUXCFG_OFFSET) | (SDRC_NORMALMODE_PINS << SDRC_SDRCTRISTATE_OFFSET) );
+   
+   /* All values optimised for 166MHz, safe values for all memories
+      Tdpl=Twr=Tcdlr
+      Tdal=Twr+Trp
+      Trfc,    Trc,  Tras,    Trp,  Trcd,    Trrd,    Tdpl,    Tdal 
+      Tcke, Txsr 
+   */
+   SDRC_ACTIM_CTRLA_VALUE = ( (12 << 27) | (10 << 22) | (7 << 18) | (3 << 15) | (3 << 12) | (2 << 9) | (2 << 6) | (5 << 0) );
+   SDRC_ACTIM_CTRLB_VALUE = ( (2 << 12) | (20 << 0) );
+   
+   /*Configure only memory on CS0*/
+   common_sdram_init(1 /*in_bMem0*/, 0 /*in_bMem1*/, SDRC_BURSTLENGTH_DDR /*in_nBurstLength*/);
+   
+   GEL_TextOut("SDRC initilization for mDDR_Micron_MT46HM32LFCM completed \n" );   
+}
+
+
+hotmenu mDDR_Elpida_EDK5132CABH()
+{
+   GEL_TextOut("MM03: mDDR Elpida EDK5132CABH, 1x512Mbits on CS0, 4M x 32bit x 4Banks\n" );
+   
+   /*                     MuxMode,  AddrLegacy,   RamSize,   BankAloc,  B32Not16,    DeepPD,   DDRType,   RamType */
+	SDRC_MCFG0_VALUE = ( (23 << 20) | (0 << 19) | (32 << 8) | (0 << 6) | (1 << 4) | ( 1 << 3) | (0 << 2) | (1 << 0) );
+	SDRC_MCFG1_VALUE = ( (23 << 20) | (0 << 19) | (0 << 8)  | (0 << 6) | (1 << 4) | ( 1 << 3) | (0 << 2) | (1 << 0) );
+	SDRC_SHARING_VALUE = ( (SDRC_32BIT_31_0 << SDRC_CS0MUXCFG_OFFSET) | (SDRC_NORMALMODE_PINS << SDRC_SDRCTRISTATE_OFFSET) );
+   
+   /* All values optimised for 166MHz, safe values for all memories
+      Tdpl=Twr=Tcdlr
+      Tdal=Twr+Trp
+      Trfc,    Trc,  Tras,    Trp,  Trcd,    Trrd,    Tdpl,    Tdal 
+      Tcke, Txsr 
+   */
+   SDRC_ACTIM_CTRLA_VALUE = ( (12 << 27) | (10 << 22) | (7 << 18) | (3 << 15) | (3 << 12) | (2 << 9) | (2 << 6) | (5 << 0) );
+   SDRC_ACTIM_CTRLB_VALUE = ( (2 << 12) | (20 << 0) );
+   
+   /*Configure only memory on CS0*/
+   common_sdram_init(1 /*in_bMem0*/, 0 /*in_bMem1*/, SDRC_BURSTLENGTH_DDR /*in_nBurstLength*/);
+   
+   GEL_TextOut("SDRC initilization for mDDR_Elpida_EDK5132CABH completed \n" );   
+}
+
+
+hotmenu SDR_Elpida_EDK5432CABH()
+{
+   GEL_TextOut("MM04: SDR Elpida EDK5432CABH, 1x512Mbits on CS0, 4M x 32bit x 4Banks\n" );
+   
+   /*                     MuxMode,  AddrLegacy,   RamSize,   BankAloc,  B32Not16,    DeepPD,   DDRType,   RamType */
+	SDRC_MCFG0_VALUE = ( (23 << 20) | (0 << 19) | (32 << 8) | (0 << 6) | (1 << 4) | ( 1 << 3) | (0 << 2) | (0 << 0) );
+	SDRC_MCFG1_VALUE = ( (23 << 20) | (0 << 19) | (0 << 8)  | (0 << 6) | (1 << 4) | ( 1 << 3) | (0 << 2) | (0 << 0) );
+	SDRC_SHARING_VALUE = ( (SDRC_32BIT_31_0 << SDRC_CS0MUXCFG_OFFSET) | (SDRC_NORMALMODE_PINS << SDRC_SDRCTRISTATE_OFFSET) );
+   
+   /* All values optimised for 166MHz, safe values for all memories
+      Tdpl=Twr=Tcdlr
+      Tdal=Twr+Trp
+      Trfc,    Trc,  Tras,    Trp,  Trcd,    Trrd,    Tdpl,    Tdal 
+      Tcke, Txsr 
+   */
+   SDRC_ACTIM_CTRLA_VALUE = ( (12 << 27) | (10 << 22) | (7 << 18) | (3 << 15) | (3 << 12) | (2 << 9) | (2 << 6) | (5 << 0) );
+   SDRC_ACTIM_CTRLB_VALUE = ( (2 << 12) | (20 << 0) );
+   
+   /*Configure only memory on CS0*/
+   common_sdram_init(1 /*in_bMem0*/, 0 /*in_bMem1*/, SDRC_BURSTLENGTH_SDR /*in_nBurstLength*/);
+   
+   GEL_TextOut("SDRC initilization for SDR_Elpida_EDK5432CABH() completed \n" );   
+}
+
+
+common_sdram_init(unsigned int in_bMem0, unsigned int in_bMem1, unsigned int in_nBurstLength)
+{
+   int i;
+   
+  /* SYS Control register to allow sdrc_a12 & sdrc_a13 to be connected at top level */
+  /* Need to ensure memory map allows 8-bit access to SYS control PAD conf registers */
+/* commented out by [mn]
+  *SYSCONFIG_PADCONF_SDRC_A12 &= ~(F << 0);
+  *SYSCONFIG_PADCONF_SDRC_A13 &= ~(F << 0);
+*/
+   
+// commented out by [mn]
+//   if (in_bMem1)
+//   {
+      /* Mux mode 0 (CS1) */
+//      *(CONTROL_PADCONF_SDRC_NCS0_REG) &= ~(0x07);
+//      *(CONTROL_PADCONF_SDRC_NCS0_REG + 1) &= ~(0x07);
+   
+      /* Mux mode 0 (CKE1) */
+//      *(CONTROL_PADCONF_SDRC_NCS0_REG + 2) &= ~(0x07);
+//      *(CONTROL_PADCONF_SDRC_NCS0_REG + 3) &= ~(0x07);
+   
+//      *SDRC_CS_CFG_REG = 0x00000004; /* Put CS1 at 0xA0000000*/
+//   }
+
+
+   /* Disable power saving mode */
+   *SDRC_POWER_REG &= ~(SDRC_PWDENABLE);
+
+   *SDRC_MCFG_0_REG = SDRC_MCFG0_VALUE;
+   *SDRC_MCFG_1_REG = SDRC_MCFG1_VALUE;
+
+   *SDRC_SHARING_REG = SDRC_SHARING_VALUE;
+
+   /* Wait loop of at least 200uS */
+   for (i = 0; i < 1000; i++);
+
+   /*Autorefresh set for 12MHz - safe configuration*/
+   *SDRC_RFR_CTRL_0_REG = SDRC_RFR_CTRL_VALUE;
+   *SDRC_RFR_CTRL_1_REG = SDRC_RFR_CTRL_VALUE;
+
+   /* SDRC_ACTIM_CTRLA register (optimized for clk = 166MHz -> safe configuration)  */
+   *SDRC_ACTIM_CTRLA_0_REG = SDRC_ACTIM_CTRLA_VALUE;
+   *SDRC_ACTIM_CTRLA_1_REG = SDRC_ACTIM_CTRLA_VALUE;
+
+   /* SDRC_ACTIM_CTRLB register (optimized for clk = 166MHz) */
+   *SDRC_ACTIM_CTRLB_0_REG = SDRC_ACTIM_CTRLB_VALUE;
+   *SDRC_ACTIM_CTRLB_1_REG = SDRC_ACTIM_CTRLB_VALUE;
+
+   if (in_bMem0)
+   {  
+      *SDRC_MANUAL_0_REG = 0x00000000;
+      *SDRC_MANUAL_0_REG = 0x00000001;
+      *SDRC_MANUAL_0_REG = 0x00000002;
+      *SDRC_MANUAL_0_REG = 0x00000002;
+      *SDRC_MR_0_REG = SDRC_MR_VALUE | in_nBurstLength;   
+   }
+
+   if (in_bMem1)
+   {  
+      *SDRC_MANUAL_1_REG = 0x00000000; /*NOP*/
+      *SDRC_MANUAL_1_REG = 0x00000001; /*PRECHARGE_ALL*/
+      *SDRC_MANUAL_1_REG = 0x00000002; /*AUTOREFRESH*/
+      *SDRC_MANUAL_1_REG = 0x00000002; /*AUTOREFRESH*/
+
+      *SDRC_MR_1_REG = SDRC_MR_VALUE | in_nBurstLength;
+   }
+   
+   /* Re-enable power saving mode */
+   *SDRC_POWER_REG |= (SDRC_PWDENABLE);
+
+   /* SDRC DLLA control register - applicable for DDR memopry only*/
+   /* Note that SDRC DLL is not working in unlock mode for OMAP3430 ES1.0 */
+   if (in_nBurstLength == SDRC_BURSTLENGTH_DDR)
+   {
+      /*DDR memory connected*/
+      *SDRC_DLLA_CTRL_REG = 0; /* Reset first <madhav vij - omap3430 es1.0 */
+
+      *SDRC_DLLA_CTRL_REG = SDRC_DLL_CTRL_DDR_VALUE;
+      
+      /*Wait for DLL locking*/
+      while ( (*SDRC_DLLA_STATUS_REG & SDRC_DLL_LOCK_STATUS) != SDRC_DLL_LOCK_STATUS );
+   }
+   else
+   {
+      /*SDR memory connected*/
+      *SDRC_DLLA_CTRL_REG = SDRC_DLL_CTRL_SDR_VALUE;
+   }
+
+   /* SDRC DLLB control register */
+   /* reserved for futire usage*/
+
+   /* Put the SDRC into smart idle mode (bits 4:3)*/
+   *SDRC_SYSCONFIG_REG |=  (SDRC_SMARTIDLEMODE);
+
+   /* Put the SMS into smart idle mode (bits 4:3)*/
+   *SMS_SYSCONFIG_REG |=  (SDRC_SMARTIDLEMODE);
+
+   /* Set the self refresh on idle bit in SDRC POWER register */
+   *SDRC_POWER_REG |= (SDRC_SRFRONIDLEREQ);
+
+   *SDRC_EMR2_0_REG = SDRC_EMR2_VALUE;
+   *SDRC_EMR2_1_REG = SDRC_EMR2_VALUE;
+
+   GEL_TextOut("common_sdram_init() completed \n" );
+}
+
+/* EOF */

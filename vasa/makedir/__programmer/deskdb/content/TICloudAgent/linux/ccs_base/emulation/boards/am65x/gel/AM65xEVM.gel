@@ -1,0 +1,238 @@
+/* ------------------------------------------------------------------------- */
+/* AM65xEVM.gel                                                            */
+
+
+/* Copyright (c) 2018, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+/* ************************************************************************* */
+
+#define MAIN_PSC_BASE       (0x00400000)
+#define PSC_PID             (0x44827A00)
+#define M3_RAT_CTRL         (0x44200020)
+
+#define CTRLMMR_WKUP_JTAGID	(0x43000014)
+#define CSL_MCU_SEC_MMR_CFG0_CLSTR0_CORE0_CFG   (0x00000100U)
+#define REV0 (0x17F84)
+#define REV1 (0x17F88)
+
+/* This function will run upon connecting to a core. */
+OnTargetConnect()
+{
+	GEL_LoadGel("$(GEL_file_dir)//M4_Common//M4_Common.gel");
+
+	// bootROM cleanup GEL.
+	GEL_LoadGel("$(GEL_file_dir)//M4_bootROM//romclean.gel");
+
+	// load the pll common gel
+	GEL_LoadGel( "$(GEL_file_dir)//M4_Common//M4_PLL_Common.gel" );
+
+	// load the pll gel
+	GEL_LoadGel( "$(GEL_file_dir)//M4_PLL//M4_PLL.gel" );
+
+	// load the psc gel
+	if ( (Read_MMR(REV0) == 0x312F3230) && (Read_MMR(REV1) == 0x38312F38) )
+	{
+		GEL_TextOut("Detected Silicon Rev 1.0\n");
+		GEL_LoadGel( "$(GEL_file_dir)//M4_PSC//M4_PSC.gel");
+	}
+	else if ( (Read_MMR(REV0) == 0x312F3031) && (Read_MMR(REV1) == 0x39312F30) )
+	{
+		GEL_TextOut("Detected Silicon Rev 2.0\n");
+		GEL_LoadGel( "$(GEL_file_dir)//M4_PSC//M4_PSC_PG2.gel");
+	}
+
+	// load the register poke gel
+	GEL_LoadGel( "$(GEL_file_dir)//registerpoke.gel" );
+
+	//Load the Padconfig GEL.
+	GEL_LoadGel( "$(GEL_file_dir)//M4_PADCONFIG//M4_PADCONFIG.gel");
+
+	//Load the Observation Clock configuration GEL.
+	GEL_LoadGel( "$(GEL_file_dir)//M4_Debug//M4_OBSCLK.gel");
+
+	// load the thermal gel
+	GEL_LoadGel( "$(GEL_file_dir)//M4_Debug//M4_THERMAL.gel" );
+
+	//Test if M3 was previously connected
+	if (Read_MMR(0x45a50000 + CSL_MCU_SEC_MMR_CFG0_CLSTR0_CORE0_CFG) == 0x888)
+	{
+		GEL_TextOut("Reconnecting to the M3.\n");
+		GEL_TextOut("Nothing to do. AM65xEVM is already configured.\n");
+	}
+	else
+	{
+		GEL_TextOut("Configuring AM65xEVM...\n");
+
+		*((unsigned int *)0x45a50100) = (1 << 11) | (1 << 3)| (1 << 7);
+
+		//run the ROMClean GEL
+		romclean_gel();
+
+		//Configure ATCM
+		Configure_ATCM();
+
+		//Configure RAT
+		Configure_RAT();
+
+		//Set the PLL
+		Set_All_PLL();
+
+		//Turn on all PSCs
+		Set_PSC_All_On();
+	}
+}
+
+menuitem "Start Up"
+/* This function will configure the M3 RAT, configure all PLLs for OFC-5 and
+ * turn on all PSCs. */
+hotmenu Configure_AM65xEVM(){
+
+	//Configure RAT
+	Configure_RAT();
+
+	//Test if M3 was previously connected
+	if (!(Read_MMR(0x45a50000 + CSL_MCU_SEC_MMR_CFG0_CLSTR0_CORE0_CFG) == 0x888))
+	{
+		// load the pll gel just in case the user didn't do it.
+		GEL_LoadGel( "$(GEL_file_dir)//M4_PLL//M4_PLL.gel" );
+
+		// load the power sleep controller gels just in case the user didn't do it.
+		if ( (Read_MMR(REV0) == 0x312F3230) && (Read_MMR(REV1) == 0x38312F38) )
+		{
+			GEL_TextOut("Detected Silicon Rev 1.0\n");
+			GEL_LoadGel( "$(GEL_file_dir)//M4_PSC//M4_PSC.gel");
+		}
+		else if ( (Read_MMR(REV0) == 0x31302F31) && (Read_MMR(REV1) == 0x302F3139) )
+		{
+			GEL_TextOut("Detected Silicon Rev 2.0\n");
+			GEL_LoadGel( "$(GEL_file_dir)//M4_PSC//M4_PSC_PG2.gel");
+		}
+	}
+
+	//Set the PLL
+	Set_All_PLL();
+
+	//Turn on all PSCs
+	Set_PSC_All_On();
+}
+
+menuitem "Initial Device Configuration"
+/* This function configures the M3's RAT to see outside the DMSC slave CBASS. */
+hotmenu Configure_RAT(){
+	//Configure RAT
+	unsigned int read_pid = 0;
+	unsigned int i0 = 0;
+	read_pid = *((unsigned int *)MAIN_PSC_BASE);
+
+	if (read_pid == PSC_PID)
+	{
+		GEL_TextOut( "Executing scripts from A53 core.\n");
+		// lock the DDR address space until DDR gel is run
+		//GEL_MapOn();
+		// turn on everything up to DDR
+		//GEL_MapAdd(0x00000000, 0, 0x80000000, 1, 1);
+		// turn off DDR
+		//GEL_MapAdd(0x80000000, 0, 0x80000000, 0, 0);
+		//GEL_MapAdd(0x800000000, 0, 0x800000000, 0, 0);
+		// Enable the PCIE upper address space for viewing
+		//GEL_MapAdd(0x4000000000,0, 0x100000000, 1,1);
+		//GEL_MapAdd(0x4100000000,0, 0x100000000, 1,1);
+		//GEL_TextOut("DDR addresses locked until DDR gel is run.\n");
+	}
+	else
+	{
+		GEL_TextOut( "Assuming execution from M3.\n");
+		GEL_TextOut( "This script sets the first address translation region to [0x8000_0000, 0x0000_0000].\n");
+		GEL_TextOut( "It also sets the second address translation region to    [0x6000_0000, 0x4000_0000].\n");
+
+		// Configure the RAT for view into the SoC
+		// enable and set region size for first two regions
+
+		//map 512KB region  0x00000000-0x20000000 ==> 0x80000000-0xA0000000
+		*((unsigned int *)(M3_RAT_CTRL + 0x4)) = 0x80000000;
+		*((unsigned int *)(M3_RAT_CTRL + 0x8)) = 0x00000000;
+		*((unsigned int *)(M3_RAT_CTRL)) = 0x8000001D;
+
+		//map 512KB region  0x40000000-0x60000000 ==> 0x60000000-0x80000000
+		*((unsigned int *)(M3_RAT_CTRL + 0x14)) = 0x60000000;
+		*((unsigned int *)(M3_RAT_CTRL + 0x18)) = 0x40000000;
+		*((unsigned int *)(M3_RAT_CTRL + 0x10)) = 0x8000001D;
+
+	}
+}
+
+/*
+ * remove R5F lockstep
+ */
+hotmenu Change_MCUSS_to_SplitMode()
+{
+	unsigned int * p_address = 0x45a50040;
+	*p_address = 0x8;
+	GEL_TextOut ("--->>> Configured R5s to be in split mode ... <<<---\n");
+
+}
+
+/* This function enabled the A-region of the tightly-coupled memory for the R5F.
+ * It's necessary if a user wants to run a testcase where the SW will access
+ * ATCM. */
+hotmenu Configure_ATCM(){
+	unsigned int init_value;
+	unsigned int ATCM_enable;
+	unsigned int ATCM_remap;
+	init_value = 0;
+	ATCM_enable = 0x8;
+	ATCM_remap = 0x800;
+
+	//Read the MMR
+	init_value = Read_MMR(0x45a50000 + CSL_MCU_SEC_MMR_CFG0_CLSTR0_CORE0_CFG);
+	if(init_value == 0x880){
+		GEL_TextOut("Init value is 0x880.\n");
+	}
+	GEL_TextOut("Init value actual value: %x\n",,,,, init_value);
+
+	//The initial value of the MMR is NOT zero. Combine it with ATCM_enable, setting bit 3 to "1".
+	init_value |= ATCM_enable;
+	//Combine that init value with ATCM_remap, setting bit 11 to "1".
+	//init_value |= ATCM_remap;
+	//Write to the MMR
+	Write_MMR(0x45a50000 + CSL_MCU_SEC_MMR_CFG0_CLSTR0_CORE0_CFG, init_value);
+
+	//Read it again to check what the value is
+	init_value = Read_MMR(0x45a50000 + CSL_MCU_SEC_MMR_CFG0_CLSTR0_CORE0_CFG);
+	if(init_value == 0x888){
+		GEL_TextOut("Register value: %x\n",,,,, init_value); //for debugging only
+		GEL_TextOut("ATCM is on\n");
+	}
+
+	GEL_TextOut("ATCM configured.\n");
+}
+
+/* END OF FILE */

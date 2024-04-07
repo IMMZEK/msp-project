@@ -1,0 +1,1267 @@
+<module name="HSUSBHOST" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="UHH_REVISION" acronym="UHH_REVISION" offset="0x0" width="32" description="USB high-speed host (UHH) revision identifier (X.Y.R) Used by software to track features, bugs, and compatibility">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="TI Internal data" description="IP revision" range="" rwaccess="R"/>
+  </register>
+  <register id="UHH_HWINFO" acronym="UHH_HWINFO" offset="0x4" width="32" description="Information on host hardware configuration">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="SAR_CNTX_SIZE" width="10" begin="9" end="0" resetval="0x180" description="Save-and-restore context size, in 32-bit words; that is, number of 32-bit registers with significant context information, mapped from offset 0x100 upward." range="" rwaccess="R"/>
+  </register>
+  <register id="UHH_SYSCONFIG" acronym="UHH_SYSCONFIG" offset="0x10" width="32" description="OCP standard system configuration register">
+    <bitfield id="RESERVED" width="26" begin="31" end="6" resetval="0x0000000" description="" range="" rwaccess="R"/>
+    <bitfield id="STANDBYMODE" width="2" begin="5" end="4" resetval="0x0" description="Mstandby/Mwait/[Mwakeup] initiator power-management interface configuration" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="STANDBYMODE_0" description="Force-standby mode. Mstandby asserted unconditionally. Asynchronous (master) wake-up disabled."/>
+      <bitenum value="1" id="1" token="STANDBYMODE_1" description="No-standby mode. Mstandby never asserted. Asynchronous (master) wakeup disabled."/>
+      <bitenum value="2" id="2" token="STANDBYMODE_2" description="Smart-standby mode. Mstandby asserted when initiator activity stops. Asynchronous (master) wake-up disabled."/>
+      <bitenum value="3" id="3" token="STANDBYMODE_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="IDLEMODE" width="2" begin="3" end="2" resetval="0x2" description="Sidlereq/Sidleack(1:0)/[Swakeup] target power management interface configuration." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="IDLEMODE_0" description="Force-Idle mode. Sidleack asserted after Idlereq assertion. Asynchronous (slave) wake-up disabled."/>
+      <bitenum value="1" id="1" token="IDLEMODE_1" description="No-idle mode. Sidleack never asserted. Asynchronous (slave) wakeup disabled."/>
+      <bitenum value="2" id="2" token="IDLEMODE_2" description="Smart-idle mode. Sidleack asserted upon Idlereq assertion, after target activity is over. Asynchronous (slave) wake-up disabled."/>
+      <bitenum value="3" id="3" token="IDLEMODE_3" description="Smart-idle wake-up mode. Like smart mode with asynchronous (slave) wakeup enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="1" end="1" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="SOFTRESET" width="1" begin="0" end="0" resetval="0" description="Module software reset" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="SOFTRESET_0_r" description="No reset pending"/>
+      <bitenum value="0" id="0" token="SOFTRESET_0_w" description="No effect"/>
+      <bitenum value="1" id="1" token="SOFTRESET_1_w" description="Starts softreset sequence."/>
+      <bitenum value="1" id="1" token="SOFTRESET_1_r" description="Reset (soft or other) is pending."/>
+    </bitfield>
+  </register>
+  <register id="UHH_SYSSTATUS" acronym="UHH_SYSSTATUS" offset="0x14" width="32" description="Module-specific system status">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="EHCI_RESETDONE" width="1" begin="2" end="2" resetval="1" description="Indicates when the EHCI HS host is out of reset" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="EHCI_RESETDONE_0_r" description="Under reset"/>
+      <bitenum value="1" id="1" token="EHCI_RESETDONE_1_r" description="Out of reset"/>
+    </bitfield>
+    <bitfield id="OHCI_RESETDONE" width="1" begin="1" end="1" resetval="1" description="Indicates when the OHCI FS/LS host is out of reset" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="OHCI_RESETDONE_0_r" description="Under reset"/>
+      <bitenum value="1" id="1" token="OHCI_RESETDONE_1_r" description="Out of reset"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="0" end="0" resetval="0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="UHH_HOSTCONFIG" acronym="UHH_HOSTCONFIG" offset="0x40" width="32" description="Static configuration of the USB HS host">
+    <bitfield id="APP_START_CLK" width="1" begin="31" end="31" resetval="0" description="When the OHCI clocks are suspended, the system must assert this signal to start the clocks (12 and 48 MHz).This must be deasserted after the clocks are started and before the host is suspended again. . (Host is suspended means HCFS = SUSPEND or all the OHCI ports are suspended.) ." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="11" begin="30" end="20" resetval="0X000" description="" range="" rwaccess="R"/>
+    <bitfield id="P2_MODE" width="2" begin="19" end="18" resetval="0x0" description="Port 2 interface configuration. Each bit corresponds to an internal 'strap' signal, and output: Bit 0 = ulpi_bypass Bit 1 = hsic_en" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="P2_MODE_0" description="To external ULPI PHY, HS only"/>
+      <bitenum value="1" id="1" token="P2_MODE_1" description="To UTMI PHY (or ULPI TLL), FS/LS capable"/>
+      <bitenum value="2" id="2" token="P2_MODE_2" description="Forbidden"/>
+      <bitenum value="3" id="3" token="P2_MODE_3" description="To HSIC digital front-end (DFE), HS only"/>
+    </bitfield>
+    <bitfield id="P1_MODE" width="2" begin="17" end="16" resetval="0x0" description="Port 1 interface configuration. Each bit corresponds to an internal 'strap' signal, and output: Bit 0 = ulpi_bypass Bit 1 = hsic_en" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="P1_MODE_0" description="To external ULPI PHY, HS only"/>
+      <bitenum value="1" id="1" token="P1_MODE_1" description="To UTMI PHY (or ULPI TLL), FS/LS capable"/>
+      <bitenum value="2" id="2" token="P1_MODE_2" description="Forbidden"/>
+      <bitenum value="3" id="3" token="P1_MODE_3" description="To HSIC digital front-end (DFE), HS only"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="P2_CONNECT_STATUS" width="1" begin="9" end="9" resetval="0x0" description="Connection status for port 2" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="P2_CONNECT_STATUS_0_r" description="Disconnected"/>
+      <bitenum value="1" id="1" token="P2_CONNECT_STATUS_1_r" description="Peripheral connected and active on port"/>
+    </bitfield>
+    <bitfield id="P1_CONNECT_STATUS" width="1" begin="8" end="8" resetval="0x0" description="Connection status for port 1" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="P1_CONNECT_STATUS_0_r" description="Disconnected"/>
+      <bitenum value="1" id="1" token="P1_CONNECT_STATUS_1_r" description="Peripheral connected and active on port"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="7" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ENA_INCR_ALIGN" width="1" begin="5" end="5" resetval="0" description="Force alignment of bursts to the respective burst-size boundaries" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="ENA_INCR_ALIGN_0" description="Disable burst type"/>
+      <bitenum value="1" id="1" token="ENA_INCR_ALIGN_1" description="Enable burst type"/>
+    </bitfield>
+    <bitfield id="ENA_INCR16" width="1" begin="4" end="4" resetval="1" description="Control the use of INCR16-type bursts (in AHB sense)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="ENA_INCR16_0" description="Disable burst type"/>
+      <bitenum value="1" id="1" token="ENA_INCR16_1" description="Enable burst type"/>
+    </bitfield>
+    <bitfield id="ENA_INCR8" width="1" begin="3" end="3" resetval="1" description="Control the use of INCR8-type bursts (in AHB sense)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="ENA_INCR8_0" description="Disable burst type"/>
+      <bitenum value="1" id="1" token="ENA_INCR8_1" description="Enable burst type"/>
+    </bitfield>
+    <bitfield id="ENA_INCR4" width="1" begin="2" end="2" resetval="1" description="Control the use of INCR4-type bursts (in AHB sense)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="ENA_INCR4_0" description="Disable burst type"/>
+      <bitenum value="1" id="1" token="ENA_INCR4_1" description="Enable burst type"/>
+    </bitfield>
+    <bitfield id="AUTOPPD_ON_OVERCUR_EN" width="1" begin="1" end="1" resetval="0X0" description="Configure reaction upon port overcurrent condition. This function is not supported at the device level." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="AUTOPPD_ON_OVERCUR_EN_0" description="Port remains on upon overcurrent."/>
+      <bitenum value="1" id="1" token="AUTOPPD_ON_OVERCUR_EN_1" description="Port is powered down automatically upon overcurrent."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="0" end="0" resetval="0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="UHH_DEBUG_CSR" acronym="UHH_DEBUG_CSR" offset="0x44" width="32" description="Debug control and status for the EHCI, OHCI hosts">
+    <bitfield id="RESERVED" width="13" begin="31" end="19" resetval="0x000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="OHCI_CCS_2" width="1" begin="18" end="18" resetval="0" description="Current connect status of port 2" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="OHCI_CCS_2_0_r" description="No peripheral connected"/>
+      <bitenum value="1" id="1" token="OHCI_CCS_2_1_r" description="Peripheral connected"/>
+    </bitfield>
+    <bitfield id="OHCI_CCS_1" width="1" begin="17" end="17" resetval="0" description="Current connect status of port 1" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="OHCI_CCS_1_0_r" description="No peripheral connected"/>
+      <bitenum value="1" id="1" token="OHCI_CCS_1_1_r" description="Peripheral connected"/>
+    </bitfield>
+    <bitfield id="OHCI_GLOBALSUSPEND" width="1" begin="16" end="16" resetval="0" description="OHCI global suspend status, asserted 5 ms after the suspend order." range="" rwaccess="R">
+      <bitenum value="0" id="0" token="OHCI_GLOBALSUSPEND_0_r" description="Host is not suspended."/>
+      <bitenum value="1" id="1" token="OHCI_GLOBALSUSPEND_1_r" description="Host is suspended."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="8" begin="15" end="8" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="OCHI_CNTSEL" width="1" begin="7" end="7" resetval="0" description="Selection of a shorter '1 ms' counter in OHCI host, to speed up long USB phases such as reset, resume, etc. (used only for simulation)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="OCHI_CNTSEL_0" description="Functional mode, 1ms = 12,000 &#215; 12 MHz cycles"/>
+      <bitenum value="1" id="1" token="OCHI_CNTSEL_1" description="Simulation mode, 1ms = 7 &#215; 12 MHz cycles = 583 ns"/>
+    </bitfield>
+    <bitfield id="EHCI_SIMULATION_MODE" width="1" begin="6" end="6" resetval="0" description="Sets the PHY to nondriving mode (used only for simulation)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="EHCI_SIMULATION_MODE_0" description="Functional mode"/>
+      <bitenum value="1" id="1" token="EHCI_SIMULATION_MODE_1" description="PHY set to nondriving"/>
+    </bitfield>
+    <bitfield id="EHCI_FLADJ" width="6" begin="5" end="0" resetval="0x20" description="EHCI host frame length adjust. Modify only when EHCI Bit FieldUSBSTS.HCHalted = 1 Field value + 59,488 = 60,000 by default = Number of 60-MHz UTMI/ULPI clock cycles per 1 ms USB frame = Number of 480-MHz HS bits per 125 &#181;s HS USB microframe" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_0" acronym="UHH_SAR_CNTX_i_0" offset="0x100" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_1" acronym="UHH_SAR_CNTX_i_1" offset="0x104" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_2" acronym="UHH_SAR_CNTX_i_2" offset="0x108" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_3" acronym="UHH_SAR_CNTX_i_3" offset="0x10C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_4" acronym="UHH_SAR_CNTX_i_4" offset="0x110" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_5" acronym="UHH_SAR_CNTX_i_5" offset="0x114" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_6" acronym="UHH_SAR_CNTX_i_6" offset="0x118" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_7" acronym="UHH_SAR_CNTX_i_7" offset="0x11C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_8" acronym="UHH_SAR_CNTX_i_8" offset="0x120" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_9" acronym="UHH_SAR_CNTX_i_9" offset="0x124" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_10" acronym="UHH_SAR_CNTX_i_10" offset="0x128" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_11" acronym="UHH_SAR_CNTX_i_11" offset="0x12C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_12" acronym="UHH_SAR_CNTX_i_12" offset="0x130" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_13" acronym="UHH_SAR_CNTX_i_13" offset="0x134" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_14" acronym="UHH_SAR_CNTX_i_14" offset="0x138" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_15" acronym="UHH_SAR_CNTX_i_15" offset="0x13C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_16" acronym="UHH_SAR_CNTX_i_16" offset="0x140" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_17" acronym="UHH_SAR_CNTX_i_17" offset="0x144" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_18" acronym="UHH_SAR_CNTX_i_18" offset="0x148" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_19" acronym="UHH_SAR_CNTX_i_19" offset="0x14C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_20" acronym="UHH_SAR_CNTX_i_20" offset="0x150" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_21" acronym="UHH_SAR_CNTX_i_21" offset="0x154" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_22" acronym="UHH_SAR_CNTX_i_22" offset="0x158" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_23" acronym="UHH_SAR_CNTX_i_23" offset="0x15C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_24" acronym="UHH_SAR_CNTX_i_24" offset="0x160" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_25" acronym="UHH_SAR_CNTX_i_25" offset="0x164" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_26" acronym="UHH_SAR_CNTX_i_26" offset="0x168" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_27" acronym="UHH_SAR_CNTX_i_27" offset="0x16C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_28" acronym="UHH_SAR_CNTX_i_28" offset="0x170" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_29" acronym="UHH_SAR_CNTX_i_29" offset="0x174" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_30" acronym="UHH_SAR_CNTX_i_30" offset="0x178" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_31" acronym="UHH_SAR_CNTX_i_31" offset="0x17C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_32" acronym="UHH_SAR_CNTX_i_32" offset="0x180" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_33" acronym="UHH_SAR_CNTX_i_33" offset="0x184" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_34" acronym="UHH_SAR_CNTX_i_34" offset="0x188" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_35" acronym="UHH_SAR_CNTX_i_35" offset="0x18C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_36" acronym="UHH_SAR_CNTX_i_36" offset="0x190" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_37" acronym="UHH_SAR_CNTX_i_37" offset="0x194" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_38" acronym="UHH_SAR_CNTX_i_38" offset="0x198" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_39" acronym="UHH_SAR_CNTX_i_39" offset="0x19C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_40" acronym="UHH_SAR_CNTX_i_40" offset="0x1A0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_41" acronym="UHH_SAR_CNTX_i_41" offset="0x1A4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_42" acronym="UHH_SAR_CNTX_i_42" offset="0x1A8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_43" acronym="UHH_SAR_CNTX_i_43" offset="0x1AC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_44" acronym="UHH_SAR_CNTX_i_44" offset="0x1B0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_45" acronym="UHH_SAR_CNTX_i_45" offset="0x1B4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_46" acronym="UHH_SAR_CNTX_i_46" offset="0x1B8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_47" acronym="UHH_SAR_CNTX_i_47" offset="0x1BC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_48" acronym="UHH_SAR_CNTX_i_48" offset="0x1C0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_49" acronym="UHH_SAR_CNTX_i_49" offset="0x1C4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_50" acronym="UHH_SAR_CNTX_i_50" offset="0x1C8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_51" acronym="UHH_SAR_CNTX_i_51" offset="0x1CC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_52" acronym="UHH_SAR_CNTX_i_52" offset="0x1D0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_53" acronym="UHH_SAR_CNTX_i_53" offset="0x1D4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_54" acronym="UHH_SAR_CNTX_i_54" offset="0x1D8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_55" acronym="UHH_SAR_CNTX_i_55" offset="0x1DC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_56" acronym="UHH_SAR_CNTX_i_56" offset="0x1E0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_57" acronym="UHH_SAR_CNTX_i_57" offset="0x1E4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_58" acronym="UHH_SAR_CNTX_i_58" offset="0x1E8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_59" acronym="UHH_SAR_CNTX_i_59" offset="0x1EC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_60" acronym="UHH_SAR_CNTX_i_60" offset="0x1F0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_61" acronym="UHH_SAR_CNTX_i_61" offset="0x1F4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_62" acronym="UHH_SAR_CNTX_i_62" offset="0x1F8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_63" acronym="UHH_SAR_CNTX_i_63" offset="0x1FC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_64" acronym="UHH_SAR_CNTX_i_64" offset="0x200" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_65" acronym="UHH_SAR_CNTX_i_65" offset="0x204" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_66" acronym="UHH_SAR_CNTX_i_66" offset="0x208" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_67" acronym="UHH_SAR_CNTX_i_67" offset="0x20C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_68" acronym="UHH_SAR_CNTX_i_68" offset="0x210" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_69" acronym="UHH_SAR_CNTX_i_69" offset="0x214" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_70" acronym="UHH_SAR_CNTX_i_70" offset="0x218" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_71" acronym="UHH_SAR_CNTX_i_71" offset="0x21C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_72" acronym="UHH_SAR_CNTX_i_72" offset="0x220" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_73" acronym="UHH_SAR_CNTX_i_73" offset="0x224" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_74" acronym="UHH_SAR_CNTX_i_74" offset="0x228" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_75" acronym="UHH_SAR_CNTX_i_75" offset="0x22C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_76" acronym="UHH_SAR_CNTX_i_76" offset="0x230" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_77" acronym="UHH_SAR_CNTX_i_77" offset="0x234" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_78" acronym="UHH_SAR_CNTX_i_78" offset="0x238" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_79" acronym="UHH_SAR_CNTX_i_79" offset="0x23C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_80" acronym="UHH_SAR_CNTX_i_80" offset="0x240" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_81" acronym="UHH_SAR_CNTX_i_81" offset="0x244" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_82" acronym="UHH_SAR_CNTX_i_82" offset="0x248" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_83" acronym="UHH_SAR_CNTX_i_83" offset="0x24C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_84" acronym="UHH_SAR_CNTX_i_84" offset="0x250" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_85" acronym="UHH_SAR_CNTX_i_85" offset="0x254" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_86" acronym="UHH_SAR_CNTX_i_86" offset="0x258" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_87" acronym="UHH_SAR_CNTX_i_87" offset="0x25C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_88" acronym="UHH_SAR_CNTX_i_88" offset="0x260" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_89" acronym="UHH_SAR_CNTX_i_89" offset="0x264" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_90" acronym="UHH_SAR_CNTX_i_90" offset="0x268" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_91" acronym="UHH_SAR_CNTX_i_91" offset="0x26C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_92" acronym="UHH_SAR_CNTX_i_92" offset="0x270" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_93" acronym="UHH_SAR_CNTX_i_93" offset="0x274" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_94" acronym="UHH_SAR_CNTX_i_94" offset="0x278" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_95" acronym="UHH_SAR_CNTX_i_95" offset="0x27C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_96" acronym="UHH_SAR_CNTX_i_96" offset="0x280" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_97" acronym="UHH_SAR_CNTX_i_97" offset="0x284" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_98" acronym="UHH_SAR_CNTX_i_98" offset="0x288" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_99" acronym="UHH_SAR_CNTX_i_99" offset="0x28C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_100" acronym="UHH_SAR_CNTX_i_100" offset="0x290" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_101" acronym="UHH_SAR_CNTX_i_101" offset="0x294" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_102" acronym="UHH_SAR_CNTX_i_102" offset="0x298" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_103" acronym="UHH_SAR_CNTX_i_103" offset="0x29C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_104" acronym="UHH_SAR_CNTX_i_104" offset="0x2A0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_105" acronym="UHH_SAR_CNTX_i_105" offset="0x2A4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_106" acronym="UHH_SAR_CNTX_i_106" offset="0x2A8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_107" acronym="UHH_SAR_CNTX_i_107" offset="0x2AC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_108" acronym="UHH_SAR_CNTX_i_108" offset="0x2B0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_109" acronym="UHH_SAR_CNTX_i_109" offset="0x2B4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_110" acronym="UHH_SAR_CNTX_i_110" offset="0x2B8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_111" acronym="UHH_SAR_CNTX_i_111" offset="0x2BC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_112" acronym="UHH_SAR_CNTX_i_112" offset="0x2C0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_113" acronym="UHH_SAR_CNTX_i_113" offset="0x2C4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_114" acronym="UHH_SAR_CNTX_i_114" offset="0x2C8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_115" acronym="UHH_SAR_CNTX_i_115" offset="0x2CC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_116" acronym="UHH_SAR_CNTX_i_116" offset="0x2D0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_117" acronym="UHH_SAR_CNTX_i_117" offset="0x2D4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_118" acronym="UHH_SAR_CNTX_i_118" offset="0x2D8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_119" acronym="UHH_SAR_CNTX_i_119" offset="0x2DC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_120" acronym="UHH_SAR_CNTX_i_120" offset="0x2E0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_121" acronym="UHH_SAR_CNTX_i_121" offset="0x2E4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_122" acronym="UHH_SAR_CNTX_i_122" offset="0x2E8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_123" acronym="UHH_SAR_CNTX_i_123" offset="0x2EC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_124" acronym="UHH_SAR_CNTX_i_124" offset="0x2F0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_125" acronym="UHH_SAR_CNTX_i_125" offset="0x2F4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_126" acronym="UHH_SAR_CNTX_i_126" offset="0x2F8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_127" acronym="UHH_SAR_CNTX_i_127" offset="0x2FC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_128" acronym="UHH_SAR_CNTX_i_128" offset="0x300" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_129" acronym="UHH_SAR_CNTX_i_129" offset="0x304" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_130" acronym="UHH_SAR_CNTX_i_130" offset="0x308" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_131" acronym="UHH_SAR_CNTX_i_131" offset="0x30C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_132" acronym="UHH_SAR_CNTX_i_132" offset="0x310" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_133" acronym="UHH_SAR_CNTX_i_133" offset="0x314" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_134" acronym="UHH_SAR_CNTX_i_134" offset="0x318" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_135" acronym="UHH_SAR_CNTX_i_135" offset="0x31C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_136" acronym="UHH_SAR_CNTX_i_136" offset="0x320" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_137" acronym="UHH_SAR_CNTX_i_137" offset="0x324" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_138" acronym="UHH_SAR_CNTX_i_138" offset="0x328" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_139" acronym="UHH_SAR_CNTX_i_139" offset="0x32C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_140" acronym="UHH_SAR_CNTX_i_140" offset="0x330" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_141" acronym="UHH_SAR_CNTX_i_141" offset="0x334" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_142" acronym="UHH_SAR_CNTX_i_142" offset="0x338" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_143" acronym="UHH_SAR_CNTX_i_143" offset="0x33C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_144" acronym="UHH_SAR_CNTX_i_144" offset="0x340" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_145" acronym="UHH_SAR_CNTX_i_145" offset="0x344" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_146" acronym="UHH_SAR_CNTX_i_146" offset="0x348" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_147" acronym="UHH_SAR_CNTX_i_147" offset="0x34C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_148" acronym="UHH_SAR_CNTX_i_148" offset="0x350" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_149" acronym="UHH_SAR_CNTX_i_149" offset="0x354" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_150" acronym="UHH_SAR_CNTX_i_150" offset="0x358" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_151" acronym="UHH_SAR_CNTX_i_151" offset="0x35C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_152" acronym="UHH_SAR_CNTX_i_152" offset="0x360" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_153" acronym="UHH_SAR_CNTX_i_153" offset="0x364" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_154" acronym="UHH_SAR_CNTX_i_154" offset="0x368" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_155" acronym="UHH_SAR_CNTX_i_155" offset="0x36C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_156" acronym="UHH_SAR_CNTX_i_156" offset="0x370" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_157" acronym="UHH_SAR_CNTX_i_157" offset="0x374" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_158" acronym="UHH_SAR_CNTX_i_158" offset="0x378" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_159" acronym="UHH_SAR_CNTX_i_159" offset="0x37C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_160" acronym="UHH_SAR_CNTX_i_160" offset="0x380" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_161" acronym="UHH_SAR_CNTX_i_161" offset="0x384" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_162" acronym="UHH_SAR_CNTX_i_162" offset="0x388" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_163" acronym="UHH_SAR_CNTX_i_163" offset="0x38C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_164" acronym="UHH_SAR_CNTX_i_164" offset="0x390" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_165" acronym="UHH_SAR_CNTX_i_165" offset="0x394" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_166" acronym="UHH_SAR_CNTX_i_166" offset="0x398" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_167" acronym="UHH_SAR_CNTX_i_167" offset="0x39C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_168" acronym="UHH_SAR_CNTX_i_168" offset="0x3A0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_169" acronym="UHH_SAR_CNTX_i_169" offset="0x3A4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_170" acronym="UHH_SAR_CNTX_i_170" offset="0x3A8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_171" acronym="UHH_SAR_CNTX_i_171" offset="0x3AC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_172" acronym="UHH_SAR_CNTX_i_172" offset="0x3B0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_173" acronym="UHH_SAR_CNTX_i_173" offset="0x3B4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_174" acronym="UHH_SAR_CNTX_i_174" offset="0x3B8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_175" acronym="UHH_SAR_CNTX_i_175" offset="0x3BC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_176" acronym="UHH_SAR_CNTX_i_176" offset="0x3C0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_177" acronym="UHH_SAR_CNTX_i_177" offset="0x3C4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_178" acronym="UHH_SAR_CNTX_i_178" offset="0x3C8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_179" acronym="UHH_SAR_CNTX_i_179" offset="0x3CC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_180" acronym="UHH_SAR_CNTX_i_180" offset="0x3D0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_181" acronym="UHH_SAR_CNTX_i_181" offset="0x3D4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_182" acronym="UHH_SAR_CNTX_i_182" offset="0x3D8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_183" acronym="UHH_SAR_CNTX_i_183" offset="0x3DC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_184" acronym="UHH_SAR_CNTX_i_184" offset="0x3E0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_185" acronym="UHH_SAR_CNTX_i_185" offset="0x3E4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_186" acronym="UHH_SAR_CNTX_i_186" offset="0x3E8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_187" acronym="UHH_SAR_CNTX_i_187" offset="0x3EC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_188" acronym="UHH_SAR_CNTX_i_188" offset="0x3F0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_189" acronym="UHH_SAR_CNTX_i_189" offset="0x3F4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_190" acronym="UHH_SAR_CNTX_i_190" offset="0x3F8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_191" acronym="UHH_SAR_CNTX_i_191" offset="0x3FC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_192" acronym="UHH_SAR_CNTX_i_192" offset="0x400" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_193" acronym="UHH_SAR_CNTX_i_193" offset="0x404" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_194" acronym="UHH_SAR_CNTX_i_194" offset="0x408" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_195" acronym="UHH_SAR_CNTX_i_195" offset="0x40C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_196" acronym="UHH_SAR_CNTX_i_196" offset="0x410" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_197" acronym="UHH_SAR_CNTX_i_197" offset="0x414" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_198" acronym="UHH_SAR_CNTX_i_198" offset="0x418" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_199" acronym="UHH_SAR_CNTX_i_199" offset="0x41C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_200" acronym="UHH_SAR_CNTX_i_200" offset="0x420" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_201" acronym="UHH_SAR_CNTX_i_201" offset="0x424" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_202" acronym="UHH_SAR_CNTX_i_202" offset="0x428" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_203" acronym="UHH_SAR_CNTX_i_203" offset="0x42C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_204" acronym="UHH_SAR_CNTX_i_204" offset="0x430" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_205" acronym="UHH_SAR_CNTX_i_205" offset="0x434" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_206" acronym="UHH_SAR_CNTX_i_206" offset="0x438" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_207" acronym="UHH_SAR_CNTX_i_207" offset="0x43C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_208" acronym="UHH_SAR_CNTX_i_208" offset="0x440" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_209" acronym="UHH_SAR_CNTX_i_209" offset="0x444" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_210" acronym="UHH_SAR_CNTX_i_210" offset="0x448" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_211" acronym="UHH_SAR_CNTX_i_211" offset="0x44C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_212" acronym="UHH_SAR_CNTX_i_212" offset="0x450" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_213" acronym="UHH_SAR_CNTX_i_213" offset="0x454" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_214" acronym="UHH_SAR_CNTX_i_214" offset="0x458" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_215" acronym="UHH_SAR_CNTX_i_215" offset="0x45C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_216" acronym="UHH_SAR_CNTX_i_216" offset="0x460" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_217" acronym="UHH_SAR_CNTX_i_217" offset="0x464" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_218" acronym="UHH_SAR_CNTX_i_218" offset="0x468" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_219" acronym="UHH_SAR_CNTX_i_219" offset="0x46C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_220" acronym="UHH_SAR_CNTX_i_220" offset="0x470" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_221" acronym="UHH_SAR_CNTX_i_221" offset="0x474" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_222" acronym="UHH_SAR_CNTX_i_222" offset="0x478" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_223" acronym="UHH_SAR_CNTX_i_223" offset="0x47C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_224" acronym="UHH_SAR_CNTX_i_224" offset="0x480" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_225" acronym="UHH_SAR_CNTX_i_225" offset="0x484" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_226" acronym="UHH_SAR_CNTX_i_226" offset="0x488" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_227" acronym="UHH_SAR_CNTX_i_227" offset="0x48C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_228" acronym="UHH_SAR_CNTX_i_228" offset="0x490" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_229" acronym="UHH_SAR_CNTX_i_229" offset="0x494" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_230" acronym="UHH_SAR_CNTX_i_230" offset="0x498" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_231" acronym="UHH_SAR_CNTX_i_231" offset="0x49C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_232" acronym="UHH_SAR_CNTX_i_232" offset="0x4A0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_233" acronym="UHH_SAR_CNTX_i_233" offset="0x4A4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_234" acronym="UHH_SAR_CNTX_i_234" offset="0x4A8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_235" acronym="UHH_SAR_CNTX_i_235" offset="0x4AC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_236" acronym="UHH_SAR_CNTX_i_236" offset="0x4B0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_237" acronym="UHH_SAR_CNTX_i_237" offset="0x4B4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_238" acronym="UHH_SAR_CNTX_i_238" offset="0x4B8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_239" acronym="UHH_SAR_CNTX_i_239" offset="0x4BC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_240" acronym="UHH_SAR_CNTX_i_240" offset="0x4C0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_241" acronym="UHH_SAR_CNTX_i_241" offset="0x4C4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_242" acronym="UHH_SAR_CNTX_i_242" offset="0x4C8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_243" acronym="UHH_SAR_CNTX_i_243" offset="0x4CC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_244" acronym="UHH_SAR_CNTX_i_244" offset="0x4D0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_245" acronym="UHH_SAR_CNTX_i_245" offset="0x4D4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_246" acronym="UHH_SAR_CNTX_i_246" offset="0x4D8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_247" acronym="UHH_SAR_CNTX_i_247" offset="0x4DC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_248" acronym="UHH_SAR_CNTX_i_248" offset="0x4E0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_249" acronym="UHH_SAR_CNTX_i_249" offset="0x4E4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_250" acronym="UHH_SAR_CNTX_i_250" offset="0x4E8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_251" acronym="UHH_SAR_CNTX_i_251" offset="0x4EC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_252" acronym="UHH_SAR_CNTX_i_252" offset="0x4F0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_253" acronym="UHH_SAR_CNTX_i_253" offset="0x4F4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_254" acronym="UHH_SAR_CNTX_i_254" offset="0x4F8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_255" acronym="UHH_SAR_CNTX_i_255" offset="0x4FC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_256" acronym="UHH_SAR_CNTX_i_256" offset="0x500" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_257" acronym="UHH_SAR_CNTX_i_257" offset="0x504" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_258" acronym="UHH_SAR_CNTX_i_258" offset="0x508" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_259" acronym="UHH_SAR_CNTX_i_259" offset="0x50C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_260" acronym="UHH_SAR_CNTX_i_260" offset="0x510" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_261" acronym="UHH_SAR_CNTX_i_261" offset="0x514" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_262" acronym="UHH_SAR_CNTX_i_262" offset="0x518" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_263" acronym="UHH_SAR_CNTX_i_263" offset="0x51C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_264" acronym="UHH_SAR_CNTX_i_264" offset="0x520" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_265" acronym="UHH_SAR_CNTX_i_265" offset="0x524" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_266" acronym="UHH_SAR_CNTX_i_266" offset="0x528" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_267" acronym="UHH_SAR_CNTX_i_267" offset="0x52C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_268" acronym="UHH_SAR_CNTX_i_268" offset="0x530" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_269" acronym="UHH_SAR_CNTX_i_269" offset="0x534" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_270" acronym="UHH_SAR_CNTX_i_270" offset="0x538" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_271" acronym="UHH_SAR_CNTX_i_271" offset="0x53C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_272" acronym="UHH_SAR_CNTX_i_272" offset="0x540" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_273" acronym="UHH_SAR_CNTX_i_273" offset="0x544" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_274" acronym="UHH_SAR_CNTX_i_274" offset="0x548" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_275" acronym="UHH_SAR_CNTX_i_275" offset="0x54C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_276" acronym="UHH_SAR_CNTX_i_276" offset="0x550" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_277" acronym="UHH_SAR_CNTX_i_277" offset="0x554" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_278" acronym="UHH_SAR_CNTX_i_278" offset="0x558" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_279" acronym="UHH_SAR_CNTX_i_279" offset="0x55C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_280" acronym="UHH_SAR_CNTX_i_280" offset="0x560" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_281" acronym="UHH_SAR_CNTX_i_281" offset="0x564" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_282" acronym="UHH_SAR_CNTX_i_282" offset="0x568" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_283" acronym="UHH_SAR_CNTX_i_283" offset="0x56C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_284" acronym="UHH_SAR_CNTX_i_284" offset="0x570" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_285" acronym="UHH_SAR_CNTX_i_285" offset="0x574" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_286" acronym="UHH_SAR_CNTX_i_286" offset="0x578" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_287" acronym="UHH_SAR_CNTX_i_287" offset="0x57C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_288" acronym="UHH_SAR_CNTX_i_288" offset="0x580" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_289" acronym="UHH_SAR_CNTX_i_289" offset="0x584" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_290" acronym="UHH_SAR_CNTX_i_290" offset="0x588" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_291" acronym="UHH_SAR_CNTX_i_291" offset="0x58C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_292" acronym="UHH_SAR_CNTX_i_292" offset="0x590" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_293" acronym="UHH_SAR_CNTX_i_293" offset="0x594" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_294" acronym="UHH_SAR_CNTX_i_294" offset="0x598" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_295" acronym="UHH_SAR_CNTX_i_295" offset="0x59C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_296" acronym="UHH_SAR_CNTX_i_296" offset="0x5A0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_297" acronym="UHH_SAR_CNTX_i_297" offset="0x5A4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_298" acronym="UHH_SAR_CNTX_i_298" offset="0x5A8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_299" acronym="UHH_SAR_CNTX_i_299" offset="0x5AC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_300" acronym="UHH_SAR_CNTX_i_300" offset="0x5B0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_301" acronym="UHH_SAR_CNTX_i_301" offset="0x5B4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_302" acronym="UHH_SAR_CNTX_i_302" offset="0x5B8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_303" acronym="UHH_SAR_CNTX_i_303" offset="0x5BC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_304" acronym="UHH_SAR_CNTX_i_304" offset="0x5C0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_305" acronym="UHH_SAR_CNTX_i_305" offset="0x5C4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_306" acronym="UHH_SAR_CNTX_i_306" offset="0x5C8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_307" acronym="UHH_SAR_CNTX_i_307" offset="0x5CC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_308" acronym="UHH_SAR_CNTX_i_308" offset="0x5D0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_309" acronym="UHH_SAR_CNTX_i_309" offset="0x5D4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_310" acronym="UHH_SAR_CNTX_i_310" offset="0x5D8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_311" acronym="UHH_SAR_CNTX_i_311" offset="0x5DC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_312" acronym="UHH_SAR_CNTX_i_312" offset="0x5E0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_313" acronym="UHH_SAR_CNTX_i_313" offset="0x5E4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_314" acronym="UHH_SAR_CNTX_i_314" offset="0x5E8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_315" acronym="UHH_SAR_CNTX_i_315" offset="0x5EC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_316" acronym="UHH_SAR_CNTX_i_316" offset="0x5F0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_317" acronym="UHH_SAR_CNTX_i_317" offset="0x5F4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_318" acronym="UHH_SAR_CNTX_i_318" offset="0x5F8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_319" acronym="UHH_SAR_CNTX_i_319" offset="0x5FC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_320" acronym="UHH_SAR_CNTX_i_320" offset="0x600" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_321" acronym="UHH_SAR_CNTX_i_321" offset="0x604" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_322" acronym="UHH_SAR_CNTX_i_322" offset="0x608" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_323" acronym="UHH_SAR_CNTX_i_323" offset="0x60C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_324" acronym="UHH_SAR_CNTX_i_324" offset="0x610" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_325" acronym="UHH_SAR_CNTX_i_325" offset="0x614" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_326" acronym="UHH_SAR_CNTX_i_326" offset="0x618" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_327" acronym="UHH_SAR_CNTX_i_327" offset="0x61C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_328" acronym="UHH_SAR_CNTX_i_328" offset="0x620" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_329" acronym="UHH_SAR_CNTX_i_329" offset="0x624" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_330" acronym="UHH_SAR_CNTX_i_330" offset="0x628" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_331" acronym="UHH_SAR_CNTX_i_331" offset="0x62C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_332" acronym="UHH_SAR_CNTX_i_332" offset="0x630" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_333" acronym="UHH_SAR_CNTX_i_333" offset="0x634" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_334" acronym="UHH_SAR_CNTX_i_334" offset="0x638" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_335" acronym="UHH_SAR_CNTX_i_335" offset="0x63C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_336" acronym="UHH_SAR_CNTX_i_336" offset="0x640" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_337" acronym="UHH_SAR_CNTX_i_337" offset="0x644" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_338" acronym="UHH_SAR_CNTX_i_338" offset="0x648" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_339" acronym="UHH_SAR_CNTX_i_339" offset="0x64C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_340" acronym="UHH_SAR_CNTX_i_340" offset="0x650" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_341" acronym="UHH_SAR_CNTX_i_341" offset="0x654" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_342" acronym="UHH_SAR_CNTX_i_342" offset="0x658" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_343" acronym="UHH_SAR_CNTX_i_343" offset="0x65C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_344" acronym="UHH_SAR_CNTX_i_344" offset="0x660" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_345" acronym="UHH_SAR_CNTX_i_345" offset="0x664" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_346" acronym="UHH_SAR_CNTX_i_346" offset="0x668" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_347" acronym="UHH_SAR_CNTX_i_347" offset="0x66C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_348" acronym="UHH_SAR_CNTX_i_348" offset="0x670" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_349" acronym="UHH_SAR_CNTX_i_349" offset="0x674" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_350" acronym="UHH_SAR_CNTX_i_350" offset="0x678" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_351" acronym="UHH_SAR_CNTX_i_351" offset="0x67C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_352" acronym="UHH_SAR_CNTX_i_352" offset="0x680" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_353" acronym="UHH_SAR_CNTX_i_353" offset="0x684" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_354" acronym="UHH_SAR_CNTX_i_354" offset="0x688" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_355" acronym="UHH_SAR_CNTX_i_355" offset="0x68C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_356" acronym="UHH_SAR_CNTX_i_356" offset="0x690" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_357" acronym="UHH_SAR_CNTX_i_357" offset="0x694" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_358" acronym="UHH_SAR_CNTX_i_358" offset="0x698" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_359" acronym="UHH_SAR_CNTX_i_359" offset="0x69C" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_360" acronym="UHH_SAR_CNTX_i_360" offset="0x6A0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_361" acronym="UHH_SAR_CNTX_i_361" offset="0x6A4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_362" acronym="UHH_SAR_CNTX_i_362" offset="0x6A8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_363" acronym="UHH_SAR_CNTX_i_363" offset="0x6AC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_364" acronym="UHH_SAR_CNTX_i_364" offset="0x6B0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_365" acronym="UHH_SAR_CNTX_i_365" offset="0x6B4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_366" acronym="UHH_SAR_CNTX_i_366" offset="0x6B8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_367" acronym="UHH_SAR_CNTX_i_367" offset="0x6BC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_368" acronym="UHH_SAR_CNTX_i_368" offset="0x6C0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_369" acronym="UHH_SAR_CNTX_i_369" offset="0x6C4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_370" acronym="UHH_SAR_CNTX_i_370" offset="0x6C8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_371" acronym="UHH_SAR_CNTX_i_371" offset="0x6CC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_372" acronym="UHH_SAR_CNTX_i_372" offset="0x6D0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_373" acronym="UHH_SAR_CNTX_i_373" offset="0x6D4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_374" acronym="UHH_SAR_CNTX_i_374" offset="0x6D8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_375" acronym="UHH_SAR_CNTX_i_375" offset="0x6DC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_376" acronym="UHH_SAR_CNTX_i_376" offset="0x6E0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_377" acronym="UHH_SAR_CNTX_i_377" offset="0x6E4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_378" acronym="UHH_SAR_CNTX_i_378" offset="0x6E8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_379" acronym="UHH_SAR_CNTX_i_379" offset="0x6EC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_380" acronym="UHH_SAR_CNTX_i_380" offset="0x6F0" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_381" acronym="UHH_SAR_CNTX_i_381" offset="0x6F4" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_382" acronym="UHH_SAR_CNTX_i_382" offset="0x6F8" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+  <register id="UHH_SAR_CNTX_i_383" acronym="UHH_SAR_CNTX_i_383" offset="0x6FC" width="32" description="Save and restore context array. Array size is indicated in. When in SAR mode, read out to save and write to restore. Do not access when not in SAR mode.">
+    <bitfield id="CNTX" width="32" begin="31" end="0" resetval="0x0000 0000" description="Context bits" range="" rwaccess="RW"/>
+  </register>
+</module>

@@ -1,0 +1,349 @@
+/*******************************************************************/ 
+/* This GEL file is loaded on the command line of Code Composer    */
+/* The StartUp() function is called every time you start           */
+/* Code Composer.  You can customize this function to              */
+/* initialize wait states or to perform other initialization.      */
+/*                                                                 */
+/* AM572x Ivahd cross triggering                                   */
+/*                                                                 */
+/* This gel file is to be used to configure the cross              */
+/* triggering on a ICECrusher based device.                        */
+/*                                                                 */
+/*******************************************************************/
+
+/*--------------------------------------------------------------*/
+/* FUNCTION SUMMARY                                             */
+/*                                                              */
+/* EnableEPM            -- Enable EPM for Trigger               */
+/* EnableCrossTrigger   -- Enable Cross Trigger                 */
+/* DisableCrossTrigger  -- Disable Cross Trigger                */
+/* EnableEMU0Output     -- Enable output on EMU0                */
+/* EnableEMU0Input      -- Enable input on EMU0                 */
+/* EnableEMU1Output     -- Enable output on EMU1                */
+/* EnableEMU1Input      -- Enable input on EMU1                 */
+/*                                                              */
+/*--------------------------------------------------------------*/ 
+
+#define DEBUG_PRINT     0
+
+menuitem "Cross Triggering"; 
+//-----------------------------------------------------------------------------
+// claim control & status register (CCSR) bits - note: the "claim control &
+// status register" is the upper 4-bits (31-28) of each resources control register 
+
+#define CRUSH_CCSR_MASK    (0xF << 28)    
+// extracts all 4 of the CCSR bits
+
+#define CRUSH_CMD_CLAIM    (0x1 << 30)    // command bits to claim resource
+#define CRUSH_CMD_ENABLE   (0x1 << 31)    // command bits to enable claimed resource 
+
+// masks and values for the trigger control register
+#define CRUSH_TRIG_TRIG0MASK     (unsigned int)(0xF <<  0)
+#define CRUSH_TRIG_NEMU0I        (unsigned int)(0x1 <<  5)
+#define CRUSH_TRIG_NEMU0OE       (unsigned int)(0x1 <<  6)
+#define CRUSH_TRIG_NEMU0O        (unsigned int)(0x1 <<  7) 
+#define CRUSH_TRIG_TRIG1MASK     (unsigned int)(0xF << 12)
+#define CRUSH_TRIG_NEMU1I        (unsigned int)(0x1 << 17)
+#define CRUSH_TRIG_NEMU1OE       (unsigned int)(0x1 << 18)
+#define CRUSH_TRIG_NEMU1O        (unsigned int)(0x1 << 19)  // trigger 0/1 control modes (bits 0-3 & bits 12-15)
+#define CRUSH_TRIGX_OFF          0x0
+#define CRUSH_TRIGX_CROSSHALT    0x1
+#define CRUSH_TRIGX_CROSSOUT     0x2
+#define CRUSH_TRIGX_CROSSTRIG    0x3
+#define CRUSH_TRIGX_INTERCONN    0x4
+#define CRUSH_TRIGX_CROSSINT     0x5
+#define CRUSH_TRIGX_LOCNTOVER    0x6
+#define CRUSH_TRIGX_HICNTOVER    0x7
+#define CRUSH_TRIGX_ARMWPMATCH   0x8
+#define CRUSH_TRIGX_LOHWBPMATCH  0xA
+#define CRUSH_TRIGX_HIHWBPMATCH  0xB
+#define CRUSH_TRIGX_ETMTRIG      0xC
+#define CRUSH_TRIGX_EXTERN       0xD
+#define CRUSH_TRIGX_THREADID     0xE
+#define CRUSH_TRIGX_BITIO        0xF
+
+#define CRUSH_TRIGX_MAXMODE      0xF
+#define CRUSH_TRIG0_DISABLE      (0x0 <<  0)
+#define CRUSH_TRIG1_DISABLE      (0x0 << 12) // masks and values for the DCON register
+#define CRUSH_DCON_CRS_SET       (0x1 << 20)
+#define CRUSH_DCON_CLK_EN        (0x3 << 18)
+
+#define DAPCTL_BASE              0x54016000
+#define EPM_CNTL0                *(unsigned int)(DAPCTL_BASE + 0x50)   // EPM CONTROL REGISTER 0
+#define EPM_CNTL1                *(unsigned int)(DAPCTL_BASE + 0x54)   // EPM CONTROL REGISTER 1
+#define EPM_CNTL2                *(unsigned int)(DAPCTL_BASE + 0x58)   // EPM CONTROL REGISTER 2  
+
+// EPM control mode
+#define EPM_MODE_BOOT            0x0
+#define EPM_MODE_TRIG            0x1
+#define EPM_MODE_RTDX            0x2
+#define EPM_MODE_ETM             0x4
+#define EPM_MODE_ADTF            0x5
+#define EPM_MODE_CTOOLS          0x6
+
+#define EPM_EMU0_MASK            (unsigned int)(0xF << 0)
+#define EPM_EMU1_MASK            (unsigned int)(0xF << 4)
+
+EnableCrossTrigger()
+{
+    if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON1 %x\n",,,,, ICEC_DCON);
+  }
+  
+  ICEC_DCON |= CRUSH_DCON_CRS_SET;            /* Clear ContextRestoreStatus bit*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON2 %x\n",,,,, ICEC_DCON);
+  }
+  ICEC_DCON |= CRUSH_DCON_CLK_EN ;            /* Set Clock Enable bit*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON3 %x\n",,,,, ICEC_DCON);
+  GEL_TextOut("ICEC_TRIGGER_CONTROL1 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_CCSR_MASK;   /* Release*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL2 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_CLAIM;     /* Claim*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL3 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_ENABLE;    /* Enable*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL4 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_TRIG_TRIG0MASK;           /* Clear EMU0 */
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL5 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_TRIG_TRIG1MASK;           /* Clear EMU1 */
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL6 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL |= (CRUSH_TRIGX_CROSSTRIG <<  0);   /* Enable EMU0 CrossTrig*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL7 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL |= (CRUSH_TRIGX_CROSSTRIG << 12);   /* Enable EMU1 CrossTrig*/   
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL8 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  GEL_TextOut("Cross triggering is enabled\n","result");
+  
+  
+} 
+
+EnableEmu0Output() 
+{
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_CCSR_MASK;   /* Release*/
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_CLAIM;     /* Claim*/
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_ENABLE;    /* Enable*/
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_TRIG_TRIG0MASK;           /* Clear EMU0 */
+  ICEC_TRIGGER_CONTROL |= (CRUSH_TRIGX_CROSSOUT <<  0);   /* Enable EMU0 output*/   
+  GEL_TextOut("EMU0 Output is Enabled.\n","result");
+} 
+
+EnableEmu0Input() 
+{
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_CCSR_MASK;   /* Release*/
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_CLAIM;     /* Claim*/
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_ENABLE;    /* Enable*/
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_TRIG_TRIG0MASK;           /* Clear EMU0 */
+  ICEC_TRIGGER_CONTROL |= (CRUSH_TRIGX_CROSSHALT <<  0);   /* Enable EMU0 input*/   
+  GEL_TextOut("EMU0 Input is Enabled.\n","result");
+}
+
+EnableEmu1Output() 
+{
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_CCSR_MASK;   /* Release*/
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_CLAIM;     /* Claim*/
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_ENABLE;    /* Enable*/
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_TRIG_TRIG1MASK;           /* Clear EMU1 */
+  ICEC_TRIGGER_CONTROL |= (CRUSH_TRIGX_CROSSOUT << 12);   /* Enable EMU0 output*/   
+  GEL_TextOut("EMU1 Output is Enabled.\n","result");
+} 
+
+EnableEmu1Input() 
+{
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_CCSR_MASK;   /* Release*/
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_CLAIM;     /* Claim*/
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_ENABLE;    /* Enable*/
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_TRIG_TRIG1MASK;           /* Clear EMU0 */
+  ICEC_TRIGGER_CONTROL |= (CRUSH_TRIGX_CROSSHALT <<  12);   /* Enable EMU0 input*/   
+  GEL_TextOut("EMU1 Input is enabled.\n","result");
+} 
+
+hotmenu SetTriggerControlRegisterCrossTrigger0HaltIcont1()
+{
+    GEL_TextOut("--->>> enter SetTriggerControlRegisterCrossTrigger0HaltIcont1 <<<---\n");
+    
+    if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON1 %x\n",,,,, ICEC_DCON);
+  }
+  
+  ICEC_DCON |= CRUSH_DCON_CRS_SET;            /* Clear ContextRestoreStatus bit*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON2 %x\n",,,,, ICEC_DCON);
+  }
+  ICEC_DCON |= CRUSH_DCON_CLK_EN ;            /* Set Clock Enable bit*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON3 %x\n",,,,, ICEC_DCON);
+  GEL_TextOut("ICEC_TRIGGER_CONTROL1 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_CCSR_MASK;   /* Release*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL2 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_CLAIM;     /* Claim*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL3 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_ENABLE;    /* Enable*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL4 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_TRIG_TRIG0MASK;           /* Clear EMU0 */
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL5 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL |= (CRUSH_TRIGX_CROSSHALT <<  0);   /* Enable EMU0 CrossHalt*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL7 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+ 
+      
+    GEL_TextOut("--->>> exit SetTriggerControlRegisterCrossTrigger0HaltIcont1 <<<---\n");
+}
+
+hotmenu SetTriggerControlRegisterCrossTrigger1HaltIcont1()
+{
+    GEL_TextOut("--->>> enter SetTriggerControlRegisterCrossTrigger1HaltIcont1 <<<---\n");
+    
+    if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON1 %x\n",,,,, ICEC_DCON);
+  }
+  
+  ICEC_DCON |= CRUSH_DCON_CRS_SET;            /* Clear ContextRestoreStatus bit*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON2 %x\n",,,,, ICEC_DCON);
+  }
+  ICEC_DCON |= CRUSH_DCON_CLK_EN ;            /* Set Clock Enable bit*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON3 %x\n",,,,, ICEC_DCON);
+  GEL_TextOut("ICEC_TRIGGER_CONTROL1 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_CCSR_MASK;   /* Release*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL2 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_CLAIM;     /* Claim*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL3 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_ENABLE;    /* Enable*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL4 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+ 
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_TRIG_TRIG1MASK;           /* Clear EMU1 */
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL6 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  
+  ICEC_TRIGGER_CONTROL |= (CRUSH_TRIGX_CROSSHALT << 12);   /* Enable EMU1 CrossHalt*/   
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL8 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+      
+    GEL_TextOut("--->>> exit SetTriggerControlRegisterCrossTrigger1HaltIcont1 <<<---\n");
+}
+
+hotmenu SetTriggerControlRegisterCrossTrigger0HaltIcont2()
+{
+    GEL_TextOut("--->>> enter SetTriggerControlRegisterCrossTrigger0HaltIcont2 <<<---\n");
+    
+    if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON1 %x\n",,,,, ICEC_DCON);
+  }
+  
+  ICEC_DCON |= CRUSH_DCON_CRS_SET;            /* Clear ContextRestoreStatus bit*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON2 %x\n",,,,, ICEC_DCON);
+  }
+  ICEC_DCON |= CRUSH_DCON_CLK_EN ;            /* Set Clock Enable bit*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON3 %x\n",,,,, ICEC_DCON);
+  GEL_TextOut("ICEC_TRIGGER_CONTROL1 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_CCSR_MASK;   /* Release*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL2 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_CLAIM;     /* Claim*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL3 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_ENABLE;    /* Enable*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL4 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_TRIG_TRIG0MASK;           /* Clear EMU0 */
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL5 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  
+  ICEC_TRIGGER_CONTROL |= (CRUSH_TRIGX_CROSSHALT <<  0);   /* Enable EMU0 CrossHalt*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL7 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  
+      
+    GEL_TextOut("--->>> exit SetTriggerControlRegisterCrossTrigger0HaltIcont2 <<<---\n");
+}
+
+hotmenu SetTriggerControlRegisterCrossTrigger1HaltIcont2()
+{
+    GEL_TextOut("--->>> enter SetTriggerControlRegisterCrossTrigger1HaltIcont2 <<<---\n");
+    
+    if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON1 %x\n",,,,, ICEC_DCON);
+  }
+  
+  ICEC_DCON |= CRUSH_DCON_CRS_SET;            /* Clear ContextRestoreStatus bit*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON2 %x\n",,,,, ICEC_DCON);
+  }
+  ICEC_DCON |= CRUSH_DCON_CLK_EN ;            /* Set Clock Enable bit*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_DCON3 %x\n",,,,, ICEC_DCON);
+  GEL_TextOut("ICEC_TRIGGER_CONTROL1 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_CCSR_MASK;   /* Release*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL2 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_CLAIM;     /* Claim*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL3 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL = CRUSH_CMD_ENABLE;    /* Enable*/
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL4 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_TRIG_TRIG1MASK;           /* Clear EMU1 */
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL6 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+  ICEC_TRIGGER_CONTROL |= (CRUSH_TRIGX_CROSSHALT << 12);   /* Enable EMU1 CrossHalt*/   
+  if (DEBUG_PRINT) {
+  GEL_TextOut("ICEC_TRIGGER_CONTROL8 %x\n",,,,, ICEC_TRIGGER_CONTROL);
+  }
+      
+    GEL_TextOut("--->>> exit SetTriggerControlRegisterCrossTrigger1HaltIcont2 <<<---\n");
+}
+
+hotmenu DisableCrossTrigger()
+{
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_TRIG_TRIG0MASK;   /* Disable EMU0 CrossTrig*/
+  ICEC_TRIGGER_CONTROL &= ~CRUSH_TRIG_TRIG1MASK;   /* Disable EMU1 CrossTrig*/   
+  GEL_TextOut("Cross-triggering is disabled\n","result");
+} 

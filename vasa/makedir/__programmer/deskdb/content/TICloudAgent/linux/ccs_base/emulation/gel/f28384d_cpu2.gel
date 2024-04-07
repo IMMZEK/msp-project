@@ -1,0 +1,367 @@
+/********************************************************************/
+/* f28384d_cpu2.gel                                                       */
+/* Version 1.00.0                                                   */
+/*                                                                  */
+/* This GEL file is to be used with the TMS320F28384d DSP.           */
+/* Changes may be required to support specific hardware designs.    */
+/*                                                                  */
+/* Code Composer Studio supports six reserved GEL functions that    */
+/* automatically get executed if they are defined. They are:        */
+/*                                                                  */
+/* StartUp()              - Executed whenever CCS is invoked        */
+/* OnReset()              - Executed after Debug->Reset CPU         */
+/* OnRestart()            - Executed after Debug->Restart           */
+/* OnPreFileLoaded()      - Executed before File->Load Program      */
+/* OnFileLoaded()         - Executed after File->Load Program       */
+/* OnTargetConnect()      - Executed after Debug->Connect           */
+/*                                                                  */
+/********************************************************************/
+
+StartUp()
+{
+
+}
+
+OnReset(int nErrorCode)
+{
+
+    *(int *)0x5FB00 = 0; 		/* Disable Flash ECC */
+    *(int *)0x7029 = 0x68; 		/* Disable WD */
+    
+    CLA_Clock_Enable();
+    
+    ERAD_Clock_Enable();
+    
+    if (GEL_IsInRealtimeMode())     /* If in real-time-mode */
+	{
+	}
+	else                            /* Put device into C28x Mode */
+	{
+	  C28x_Mode();   
+	}
+
+}
+
+OnRestart(int nErrorCode)
+{
+/* CCS will call OnRestart() when you do a Debug->Restart and   */
+/* after you load a new file.  Between running interrupt based  */
+/* programs, this function will clear interrupts and help keep  */
+/* the processor from going off into invalid memory.            */
+    if (GEL_IsInRealtimeMode())     /* If in real-time-mode */
+	{
+	}
+	else                            /* Put device into C28x Mode */
+	{
+	  C28x_Mode();   
+	}
+     IER = 0;
+     IFR = 0;
+}
+
+OnPreFileLoaded()
+{
+	GEL_Reset();
+}
+
+OnFileLoaded(int nErrorCode, int bSymbolsOnly)
+{
+
+}
+
+OnTargetConnect()
+{
+
+    *(int *)0x5F412 =0x000F;      /* RAM INIT FOR M0/M1/D0/D1 Memory  */
+    *(int *)0x5F432 =0x00FF;      /* RAM INIT FOR LS0..LS7  Memory    */
+
+    if (GEL_IsInRealtimeMode())     /* If in real-time-mode */
+    {
+    }
+    else                            /* Put device into C28x Mode */
+    {
+        C28x_Mode();   
+    }
+
+    F28384d_Memory_Map();        /* Initialize the CCS memory map */      
+
+/* Check to see if CCS has been started-up with the DSP already */
+/* running in real-time mode.  The user can add whatever        */
+/* custom initialization stuff they want to each case.          */
+
+    if (GEL_IsInRealtimeMode())     /* Do real-time mode target initialization */
+    {
+
+    }
+    else                            /* Do stop-mode target initialization */
+    {
+        GEL_Reset();                /* Reset DSP */
+    }
+}
+
+
+/********************************************************************/
+/* These functions are useful to engage/disengage realtime          */
+/* emulation mode during debug.  They save the user from having to  */
+/* manually perform these steps in CCS.                             */
+/********************************************************************/
+menuitem "Realtime Emulation Control";
+
+hotmenu Run_Realtime_with_Reset()
+{
+    GEL_Reset();                /* Reset the DSP */
+    ST1 = ST1 & 0xFFFD;         /* clear DBGM bit in ST1 */
+    GEL_EnableRealtime();       /* Enable Realtime mode */
+    GEL_Run();                  /* Run the DSP */
+}
+hotmenu Run_Realtime_with_Restart()
+{
+    GEL_Restart();              /* Reset the DSP */
+    ST1 = ST1 & 0xFFFD;         /* clear DBGM bit in ST1 */
+    GEL_EnableRealtime();       /* Enable Realtime mode */
+    GEL_Run();                  /* Run the DSP */
+}
+hotmenu Full_Halt()
+{
+    GEL_DisableRealtime();      /* Disable Realtime mode */
+    GEL_Halt();                 /* Halt the DSP */
+}
+hotmenu Full_Halt_with_Reset()
+{
+    GEL_DisableRealtime();      /* Disable Realtime mode */
+    GEL_Halt();                 /* Halt the DSP */
+    GEL_Reset();                /* Reset the DSP */
+}
+
+/*********************************************************************/
+/*                         F28384d Memory Map                         */
+/*                                                                   */
+/*********************************************************************/
+menuitem "Initialize Memory Map";
+
+hotmenu F28384d_Memory_Map()
+{
+    /* GEL_MapReset(); */
+    GEL_MapOn();
+
+
+    /* Program memory maps */
+    GEL_MapAddStr(0x00000000,0, 0x400, "R|W|AS2",0);                     /*   M0 RAM (with ECC) (2 KByte)                             */
+    GEL_MapAddStr(0x00000400,0, 0x400, "R|W|AS2",0);                     /*   M1 RAM (with ECC) (2 KByte)                             */
+    GEL_MapAddStr(0x00000D00,0, 0x100, "R|W|AS2",0);                     /*   PIE Vector Table                                        */        
+    GEL_MapAddStr(0x00008000,0, 0x800, "R|W|AS2",0);                     /*   LS0 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x00008800,0, 0x800, "R|W|AS2",0);                     /*   LS1 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x00009000,0, 0x800, "R|W|AS2",0);                     /*   LS2 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x00009800,0, 0x800, "R|W|AS2",0);                     /*   LS3 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000A000,0, 0x800, "R|W|AS2",0);                     /*   LS4 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000A800,0, 0x800, "R|W|AS2",0);                     /*   LS5 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000B000,0, 0x800, "R|W|AS2",0);                     /*   LS6 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000B800,0, 0x800, "R|W|AS2",0);                     /*   LS7 RAM (with PARITY) (4KBytes)                         */
+    GEL_MapAddStr(0x0000C000,0, 0x800, "R|W|AS2",0);                     /*   D0 RAM (with ECC or PARITY) (4KBytes)                   */
+    GEL_MapAddStr(0x0000C800,0, 0x800, "R|W|AS2",0);                     /*   D1 RAM (with ECC or PARITY) (4KBytes)                   */
+    GEL_MapAddStr(0x0000D000,0, 0x1000, "R|W|AS2",0);                    /*   GS0 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x0000E000,0, 0x1000, "R|W|AS2",0);                    /*   GS1 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x0000F000,0, 0x1000, "R|W|AS2",0);                    /*   GS2 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00010000,0, 0x1000, "R|W|AS2",0);                    /*   GS3 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00011000,0, 0x1000, "R|W|AS2",0);                    /*   GS4 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00012000,0, 0x1000, "R|W|AS2",0);                    /*   GS5 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00013000,0, 0x1000, "R|W|AS2",0);                    /*   GS6 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00014000,0, 0x1000, "R|W|AS2",0);                    /*   GS7 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00015000,0, 0x1000, "R|W|AS2",0);                    /*   GS8 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00016000,0, 0x1000, "R|W|AS2",0);                    /*   GS9 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00017000,0, 0x1000, "R|W|AS2",0);                    /*   GS10 RAM (with PARITY) (8KBytes)                        */
+    GEL_MapAddStr(0x00018000,0, 0x1000, "R|W|AS2",0);                    /*   GS11 RAM (with PARITY) (8KBytes)                        */
+    GEL_MapAddStr(0x00019000,0, 0x1000, "R|W|AS2",0);                    /*   GS12 RAM (with PARITY) (8KBytes)                        */
+    GEL_MapAddStr(0x0001A000,0, 0x1000, "R|W|AS2",0);                    /*   GS13 RAM (with PARITY) (8KBytes)                        */
+    GEL_MapAddStr(0x0001B000,0, 0x1000, "R|W|AS2",0);                    /*   GS14 RAM (with PARITY) (8KBytes)                        */
+    GEL_MapAddStr(0x0001C000,0, 0x1000, "R|W|AS2",0);                    /*   GS15 RAM (with PARITY) (8KBytes)                        */
+    GEL_MapAddStr(0x00070000,0, 0x400, "R|AS2",0);                     /*   TIOTP CPU2BANK0 (2 KBytes)                                 */
+    GEL_MapAddStr(0x00078000,0, 0x400, "R|AS2",0);                     /*   USER OTP CPU2BANK0 (2 KBytes)                                 */
+    GEL_MapAddStr(0x00080000,0, 0x40000, "R|AS2",0);                   /*   FLASH CPU2BANK0 (512 KBytes)                                */
+    GEL_MapAddStr(0x00100000,0, 0x100000, "R|W|AS2",0);                  /*   EMIF-1 (Prog + Data) (2 MBytes) CS2n - ASYNC Access     */
+    GEL_MapAddStr(0x00200000,0, 0x100000, "R|W|AS2",0);                  /*   EMIF-1 (Prog + Data) (2 MBytes) CS2n - ASYNC Access OR SDRAM(2MB)     */
+    GEL_MapAddStr(0x00300000,0, 0x80000, "R|W|AS2",0);                  /*   EMIF-1 (Prog + Data) (1 MBytes) CS3n - ASYNC Access     */
+    GEL_MapAddStr(0x00380000,0, 0x60000, "R|W|AS2",0);                   /*   EMIF-1 (Prog + Data) (0.75 MBytes) CS4n - ASYNC Access     */
+    GEL_MapAddStr(0x003E0000,0, 0x8000, "R|AS2",0);                    /*   Secure ROM (with PARITY) (64 KBytes)                                  */
+    GEL_MapAddStr(0x003E8000,0, 0x8000, "R|AS2",0);                    /*   Boot ROM (master) (64 KBytes)                           */
+    GEL_MapAddStr(0x003F0000,0, 0x8000, "R|AS2",0);                    /*   Boot ROM (master) (64 KBytes)                           */
+    GEL_MapAddStr(0x003F8000,0, 0x8000, "R|AS2",0);                    /*   Boot ROM (master) (64 KBytes)                           */
+    
+    /* Data memory maps */
+    GEL_MapAddStr(0x00000000,1, 0x400, "R|W|AS2",0);                     /*   M0 RAM (with ECC) (2 KByte)                             */
+    GEL_MapAddStr(0x00000400,1, 0x400, "R|W|AS2",0);                     /*   M1 RAM (with ECC) (2 KByte)                             */
+    GEL_MapAddStr(0x00000800,1, 0x200, "R|W|AS2",0);                     /*   C28 Emulation & Test Regs                                        */
+    GEL_MapAddStr(0x00000B00,1, 0x80, "R|W|AS2",0);                      /*   ADC Result Regs                                        */       
+    GEL_MapAddStr(0x00000C00,1, 0x18, "R|W|AS2",0);                      /*   CPU Timer Regs                                        */           
+    GEL_MapAddStr(0x00000CE0,1, 0x20, "R|W|AS2",0);                      /*   PIE Regs                                        */
+    GEL_MapAddStr(0x00000D00,1, 0x100, "R|W|AS2",0);                     /*   PIE Vector Table                                        */    
+    GEL_MapAddStr(0x00000F00,1, 0x100, "R|W|AS2",0);                     /*   FPU Regs                                   */       
+    GEL_MapAddStr(0x00001000,1, 0x200, "R|W|AS2",0);                     /*   DMA Regs                                   */        
+    GEL_MapAddStr(0x00001200,1, 0x100, "R|W|AS2",0);                     /*   VCU Regs                                   */            
+    GEL_MapAddStr(0x00001400,1, 0x80, "R|W|AS2",0);                      /*   CPU2 CLA1 Regs        */    
+    GEL_MapAddStr(0x00001480,1, 0x80, "R|W|AS2",0);                      /*   CPU2.CLA1toCPU2 MSG RAM (with PARITY) (256 bytes)            */
+    GEL_MapAddStr(0x00001500,1, 0x80, "R|W|AS2",0);                      /*   CPU2toCPU2.CLA1 MSG RAM (with PARITY) (256 bytes)            */
+    GEL_MapAddStr(0x00001680,1, 0x80, "R|W|AS2",0);                      /*   CLA1TODMA MSG RAM (with PARITY) (256 bytes)                         */
+    GEL_MapAddStr(0x00001700,1, 0x80, "R|W|AS2",0);                      /*   DMATOCLA1 MSG RAM (with PARITY) (256 bytes)                         */
+    /*GEL_MapAddStr(0x00002000,1, 0x1000, "R|W|AS2",0);*/                    /*   EMIF-2 (8 Kbytes) CS2n - ASYNC Access                   */
+    GEL_MapAddStr(0x00004000,1, 0x2000, "R|W|AS2",0);                    /*   Control Peripheral Registers (16 Kbytes)                                       */
+    GEL_MapAddStr(0x00006000,1, 0x1000, "R|W|AS2",0);                    /*   High Speed Serial Port Registers (8 KBytes)             */
+    GEL_MapAddStr(0x00007000,1, 0xA40, "R|W|AS2",0);                     /*   System Configuration Registers                          */
+    GEL_MapAddStr(0x00007A80,1, 0x580, "R|W|AS2",0);                     /*   System Configuration Registers                          */
+    GEL_MapAddStr(0x00008000,1, 0x800, "R|W|AS2",0);                     /*   LS0 RAM (ECC) (4KBytes)                         */
+    GEL_MapAddStr(0x00008800,1, 0x800, "R|W|AS2",0);                     /*   LS1 RAM (ECC) (4KBytes)                         */
+    GEL_MapAddStr(0x00009000,1, 0x800, "R|W|AS2",0);                     /*   LS2 RAM (ECC) (4KBytes)                         */
+    GEL_MapAddStr(0x00009800,1, 0x800, "R|W|AS2",0);                     /*   LS3 RAM (ECC) (4KBytes)                         */
+    GEL_MapAddStr(0x0000A000,1, 0x800, "R|W|AS2",0);                     /*   LS4 RAM (ECC) (4KBytes)                         */
+    GEL_MapAddStr(0x0000A800,1, 0x800, "R|W|AS2",0);                     /*   LS5 RAM (ECC) (4KBytes)                         */
+    GEL_MapAddStr(0x0000B000,1, 0x800, "R|W|AS2",0);                     /*   LS6 RAM (ECC) (4KBytes)                         */
+    GEL_MapAddStr(0x0000B800,1, 0x800, "R|W|AS2",0);                     /*   LS7 RAM (ECC) (4KBytes)                         */
+    GEL_MapAddStr(0x0000C000,1, 0x800, "R|W|AS2",0);                     /*   D0 RAM (with ECC) (4KBytes)                   */
+    GEL_MapAddStr(0x0000C800,1, 0x800, "R|W|AS2",0);                     /*   D1 RAM (with ECC) (4KBytes)                   */
+    GEL_MapAddStr(0x0000D000,1, 0x1000, "R|W|AS2",0);                    /*   GS0 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x0000E000,1, 0x1000, "R|W|AS2",0);                    /*   GS1 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x0000F000,1, 0x1000, "R|W|AS2",0);                    /*   GS2 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00010000,1, 0x1000, "R|W|AS2",0);                    /*   GS3 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00011000,1, 0x1000, "R|W|AS2",0);                    /*   GS4 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00012000,1, 0x1000, "R|W|AS2",0);                    /*   GS5 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00013000,1, 0x1000, "R|W|AS2",0);                    /*   GS6 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00014000,1, 0x1000, "R|W|AS2",0);                    /*   GS7 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00015000,1, 0x1000, "R|W|AS2",0);                    /*   GS8 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00016000,1, 0x1000, "R|W|AS2",0);                    /*   GS9 RAM (with PARITY) (8KBytes)                         */
+    GEL_MapAddStr(0x00017000,1, 0x1000, "R|W|AS2",0);                    /*   GS10 RAM (with PARITY) (8KBytes)                        */
+    GEL_MapAddStr(0x00018000,1, 0x1000, "R|W|AS2",0);                    /*   GS11 RAM (with PARITY) (8KBytes)                        */
+    GEL_MapAddStr(0x00019000,1, 0x1000, "R|W|AS2",0);                    /*   GS12 RAM (with PARITY) (8KBytes)                        */
+    GEL_MapAddStr(0x0001A000,1, 0x1000, "R|W|AS2",0);                    /*   GS13 RAM (with PARITY) (8KBytes)                        */
+    GEL_MapAddStr(0x0001B000,1, 0x1000, "R|W|AS2",0);                    /*   GS14 RAM (with PARITY) (8KBytes)                        */
+    GEL_MapAddStr(0x0001C000,1, 0x1000, "R|W|AS2",0);                    /*   GS15 RAM (with PARITY) (8KBytes)                        */
+    GEL_MapAddStr(0x00038000,1, 0x400, "R|W|AS2",0);                     /*   CMTOCPU2MSGRAM0 Message RAM (with PARITY) (2 KBytes)       */
+    GEL_MapAddStr(0x00038400,1, 0x400, "R|W|AS2",0);                     /*   CMTOCPU2MSGRAM1 Message RAM (with PARITY) (2 KBytes)	      */
+    GEL_MapAddStr(0x00039000,1, 0x400, "R|W|AS2",0);                     /*   CPU2TOCMSGRAM0 Message RAM (with PARITY) (2 KBytes)       */
+    GEL_MapAddStr(0x00039400,1, 0x400, "R|W|AS2",0);                     /*   CPU2TOCMSGRAM1 Message RAM (with PARITY) (2 KBytes)	      */
+    GEL_MapAddStr(0x0003A000,1, 0x400, "R|W|AS2",0);                     /*   CPU1TOCPU2MSGRAM0 Message RAM (with PARITY) (2 KBytes)       */
+    GEL_MapAddStr(0x0003A400,1, 0x400, "R|W|AS2",0);                     /*   CPU1TOCPU2MSGRAM1 Message RAM (with PARITY) (2 KBytes)       */
+    GEL_MapAddStr(0x0003B000,1, 0x400, "R|W|AS2",0);                     /*   CPU2TOCPU1MSGRAM0 Message RAM (with PARITY) (2 KBytes)       */
+    GEL_MapAddStr(0x0003B400,1, 0x400, "R|W|AS2",0);                     /*   CPU2TOCPU1MSGRAM1 Message RAM (with PARITY) (2 KBytes)       */
+    GEL_MapAddStr(0x00040000,1, 0x8000, "R|W|AS4",0);                    /*   Peripheral Space                                        */       
+    GEL_MapAddStr(0x00048800,1, 0x1800, "R|W|AS4",0);                    /*   Peripheral Space                                        */  
+    GEL_MapAddStr(0x0004A800,1, 0x5800, "R|W|AS4",0);                    /*   Peripheral Space                                        */
+    GEL_MapAddStr(0x00058000,1, 0x6700, "R|W|AS4",0);                    /*   Peripheral Space                                        */
+    GEL_MapAddStr(0x0005E7C0,1, 0x1840, "R|W|AS4",0);                    /*   Peripheral Space                                        */
+    GEL_MapAddStr(0x00070000,1, 0x400, "R|AS2",0);                     /*   TIOTP CPU2BANK0 (2 KBytes)                                 */
+    GEL_MapAddStr(0x00078000,1, 0x400, "R|AS2",0);                     /*   USEROTP CPU2BANK0 (2 KBytes)                                 */
+    GEL_MapAddStr(0x00080000,1, 0x40000, "R|AS2",0);                   /*   FLASH CPU2BANK0 (512 KBytes)                                */
+    GEL_MapAddStr(0x01070000,1, 0x80, "R|AS2",0);                     /*   TIOTP ECC CPU2BANK0 (256 Bytes)                             */
+    GEL_MapAddStr(0x01071000,1, 0x80, "R|AS2",0);                     /*   USER OTP ECC CPU2BANK0 (256 Bytes)                           */
+    GEL_MapAddStr(0x01080000,1, 0x8000, "R|AS2",0);                   /*   FLASH ECC CPU2BANK0 (64 KBytes)                            */
+    GEL_MapAddStr(0x00100000,1, 0x100000, "R|W|AS2",0);                  /*   EMIF-1 (Prog + Data) (2 MBytes) CS2n - ASYNC Access     */
+    GEL_MapAddStr(0x00200000,1, 0x100000, "R|W|AS2",0);                  /*   EMIF-1 (Prog + Data) (2 MBytes) CS2n - ASYNC Access or SDRAM(2MB) CS0n     */
+    GEL_MapAddStr(0x00300000,1, 0x80000, "R|W|AS2",0);                   /*   EMIF-1 (Prog + Data) (1 MBytes) CS3n - ASYNC Access     */
+    GEL_MapAddStr(0x00380000,1, 0x60000, "R|W|AS2",0);                   /*   EMIF-1 (Prog + Data) (1 MBytes) CS4n - ASYNC Access     */
+    GEL_MapAddStr(0x003E0000,1, 0x8000, "R|AS2",0);                    /*   Secure ROM (with PARITY) (64 KBytes)                                  */
+    GEL_MapAddStr(0x003E8000,1, 0x8000, "R|AS2",0);                    /*   Boot ROM (master) (64 KBytes)                           */
+    GEL_MapAddStr(0x003F0000,1, 0x8000, "R|AS2",0);                    /*   Boot ROM (master) (64 KBytes)                           */
+    GEL_MapAddStr(0x003F8000,1, 0x8000, "R|AS2",0);                    /*   Boot ROM (master) (64 KBytes)                           */
+    GEL_MapAddStr(0x80000000,1, 0x10000000, "R|W|AS2",0);                /*   EMIF-1 (Data Only) (0.5 GBytes) CS0n - SDRAM Access                */
+
+    GEL_MapAddStr(0x01000D00,1, 0x200, "R|W|AS2",0);                     /* Redundant PIE Vector Table                                */
+    
+    /* Peripheral memory maps */
+    GEL_MapAddStr(0x00048000,3, 0x800, "R|W|AS4",0);                     /*   CANA Registers  (4KBytes)                                        */   
+    GEL_MapAddStr(0x0004A000,3, 0x800, "R|W|AS4",0);                     /*   CANB Registers  (4KBytes)                                       */
+    
+    GEL_TextOut("\nMemory Map Initialization Complete\n"); 
+
+}
+
+/********************************************************************/
+/* The ESTOP0 fill functions are useful for debug.  They fill the   */
+/* RAM with software breakpoints that will trap runaway code.       */
+/********************************************************************/
+hotmenu Fill_F28384d_RAM_with_ESTOP0()
+{
+    GEL_MemoryFill(0x000000,1,0x000800,0x7625);      /* Fill M0/M1  */
+    GEL_MemoryFill(0x008000,1,0x000800,0x7625);      /* Fill L0     */
+    GEL_MemoryFill(0x008800,1,0x001000,0x7625);      /* Fill L1/L2  */
+    GEL_MemoryFill(0x009800,1,0x001000,0x7625);      /* Fill L3/L4  */
+    GEL_MemoryFill(0x00A800,1,0x001000,0x7625);      /* Fill L5/L6  */
+    GEL_MemoryFill(0x00B800,1,0x000800,0x7625);	     /* Fill L7     */
+    
+    GEL_MemoryFill(0x00B000,1,0x001000,0x7625);	     /* Fill D0/D1  */
+
+    GEL_MemoryFill(0x00D000,1,0x010000,0x7625);	     /* Fill G0-G15 */
+
+}
+
+/********************************************************************/
+/*              TI OTP and USER OTP Memory Dump                     */
+/********************************************************************/
+menuitem "OTP Dump";
+hotmenu OTP_Dump()
+{
+                GEL_MemorySave(0x00070000,1, 0x400, "TI_OTP_CPU2Bank0.dat");
+                
+                GEL_MemorySave(0x00078000,1, 0x400, "USER_OTP_CPU2Bank0.dat");
+                
+                GEL_TextOut("\n********************************************************************** 
+                             \nTI OTP and USER OTP Memory Dump Complete!  
+                             \nFile Output Directory: <CCS Install Directory>\\ccs<version>\\eclipse 
+                             \n                       (e.g. C:\\ti\\ccsv6\\eclipse)
+                             \n**********************************************************************\n"); 
+}
+
+/********************************************************************/
+menuitem "Watchdog";
+hotmenu Disable_WD()
+{
+    *0x7029 = *0x7029 | 0x0068;                /* Set the WDDIS bit */
+    *0x7025 = 0x0055;                          /* Service the WD    */
+    *0x7025 = 0x00AA;                          /*  once to be safe. */
+    GEL_TextOut("\nWatchdog Timer Disabled");
+}
+
+
+
+/********************************************************************/
+menuitem "Addressing Modes";
+
+hotmenu C28x_Mode()
+{
+    ST1 = ST1 & (~0x0100);      /*   AMODE = 0  */
+    ST1 = ST1 | 0x0200;         /* OBJMODE = 1  */
+}
+
+hotmenu C24x_Mode()
+{
+    ST1 = ST1 | 0x0100;         /*   AMODE = 1  */
+    ST1 = ST1 | 0x0200;         /* OBJMODE = 1  */
+}
+
+hotmenu C27x_Mode()
+{
+    ST1 = ST1 & (~0x0100);      /*   AMODE = 0  */
+    ST1 = ST1 & (~0x0200);      /* OBJMODE = 0  */
+}
+
+
+
+/********************************************************************/
+/* CLA Clock Enable                                                 */
+/* Allows debugger to enable CLA breakpoints (esp. after Reset)     */
+/********************************************************************/
+menuitem "CLA Clock Enable"
+hotmenu CLA_Clock_Enable()
+{
+ *0x5D322|= 0x1;   /* Set PCLKCR0 bit 0 */
+}
+
+/********************************************************************/
+/* ERAD Clock Enable                                                 */
+/* Allows debugger to enable HW breakpoints                          */
+/********************************************************************/
+menuitem "ERAD Clock Enable"
+hotmenu ERAD_Clock_Enable()
+{
+ *0x5D323|= 0x0100;   /* Set PCLKCR0 bit 24 */
+}
+
+/*** End of file ***/

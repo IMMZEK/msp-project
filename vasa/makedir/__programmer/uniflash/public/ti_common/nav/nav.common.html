@@ -1,0 +1,70 @@
+<header id="tctHeader" ng-controller="NavCtrl">
+	<tic-app-name></tic-app-name>
+
+	<div ng-repeat="menuItem in menuContribSrv.getList()" id="{{menuItem.id}}" class="menuItem2 clickable redHover" ng-class="menuItem.subMenu.length > 0?'menuItemWithTextAndIcon':'menuItemWithText'" ng-mouseover="menuItem.show=true" ng-mouseleave="menuItem.show=false" ng-click="execute(menuItem.funcStr)">
+		<span class="alignCenter">{{menuItem.name}}</span>
+		<i ng-show="menuItem.subMenu.length > 0" class="material-icons iconWithTextRight">arrow_drop_down</i>
+		<ul id="nav{{menuItem.name}}MenuDD" class="hoverMenu shadow2 hoverMenuList" ng-show="menuItem.show && (menuItem.subMenu.length > 0)">
+			<li ng-repeat="subMenuItem in menuItem.subMenu" ng-class="{'disabled':subMenuItem.disabled}" ng-click="execute(subMenuItem.funcStr);menuItem.show=false;">{{subMenuItem.name}}</li>
+		</ul>
+	</div>
+	
+	<div ng-show="navSrv.showModule('about')" id="navAboutMenu" class="menuItem2 clickable redHover menuItemWithText" ng-mouseover="showAboutMenu=true" ng-mouseleave="showAboutMenu=false">
+		<span class="alignCenter"  style="padding-bottom:9px;">About</span>
+		<div id="navAboutMenuDD" class="hoverMenu shadow2" ng-show="showAboutMenu" style="color:#444;padding:10px 15px;">
+			<div style="font-size:22px;font-weight:600;padding-bottom:6px;text-align:center;"><img ng-src="{{navSrv.appLogoPath}}" style="width:36px;position:relative;top:-3px;right:8px;"><span style="color:#cc0000">TI</span> {{navSrv.appName}}</div>
+			<div style="font-size:14px;padding:10px 3px;border-top:1px solid #ddd;border-bottom:1px solid #ddd;font-size:13px;text-align:center;">
+				Version: <span style="color:#222;">{{version}}</span> {{navSrv.releaseType}}
+				<tic-component-version-info></tic-component-version-info>	
+			</div>
+			<div style="font-size:10px;padding-top:5px;text-align:center;">© Copyright Texas Instruments {{getYear()}}. <br/>All rights reserved.</div>
+		</div>
+	</div>
+	
+    <tic-user></tic-user>
+	
+	<div ng-show="navSrv.showModule('tour')" id="navTourMenu" class="menuItem2 alignRight clickable redHover menuItemWithText">
+		<i class="material-icons iconWithText">directions</i>
+		<span class="alignCenter">Tour</span>
+	</div>
+	
+	<div ng-show="navSrv.showModule('settings')" id="navSettingsMenu" class="menuItem2 alignRight clickable redHover menuItemWithText" ng-click="navSrv.openSettingsModal();">
+		<i class="material-icons iconWithText">settings</i>
+		<span class="alignCenter">Settings</span>
+	</div>
+
+	<div ng-show="navSrv.showModule('help')" id="navHelpMenu" class="menuItem2 alignRight clickable redHover menuItemWithText" ng-click="navSrv.openHelp();">
+		<i class="material-icons iconWithText">help</i>
+		<span class="alignCenter">Help</span>
+	</div>
+	
+	<div ng-show="navSrv.showModule('search')" id="navSearchBoxContainer" class="alignRight" tic-click-elsewhere="hideSearchResults=true">
+		<div id="navSearchBox">
+			<i class="material-icons">search</i>
+			<span id="searchInputContainer">
+				<input type="text" placeholder="Search UniFlash" ng-model="ufSearch.searchStr" ng-click="hideSearchResults=false" ng-change="ufSearch.updateSearchResults(ufSearch.searchStr)" />
+			</span>
+		</div>
+		<ul id="searchResultList" class="hoverMenu shadow3 hoverMenuList" ng-show="ufSearch.getResultList().length > 0 && !hideSearchResults">
+			<li ng-repeat="searchEntry in ufSearch.getResultList().slice(0, 5)" ng-click="execute(searchEntry.action)">
+				<span class="searchEntryType" ng-show="searchEntry.type">{{searchEntry.type}}: </span>
+				<span class="searchEntryContent">{{searchEntry.content}}<span>
+			</li>
+			<li id="searchListShowMore" ng-show="ufSearch.getResultList().length > 5">Show More Results...</li>
+		</ul>
+	</div>
+	
+	<div id="navRightMenu" class="menuItem1 clickable redHover alignRight" ng-click="showMobileMenu=!showMobileMenu" tic-click-elsewhere="showMobileMenu=false" style="">
+		<i class="material-icons">menu</i>
+		<ul ng-show="showMobileMenu" id="mobileMenuDD">
+			<li ng-repeat="menuItem in menuContribSrv.getList()" ng-click="execute(menuItem.funcStr)" style="padding-bottom:0;">
+				<ul ng-show="!menuItem.subMenu">
+					<li class="mobileMenuItem" ng-click="execute(menuItem.funcStr)" style="border-bottom:1px solid #eee">{{menuItem.name}}</li>
+				</ul>
+				<ul ng-show="menuItem.subMenu.length > 0">
+					<li class="mobileMenuItem" ng-repeat="subMenuItem in menuItem.subMenu" ng-click="execute(subMenuItem.funcStr)" ng-style="(($index!==(menuItem.subMenu.length-1)) || ($parent.$index!==(menuContribSrv.getList().length-1))) && {'border-bottom':'1px solid #eee'}">{{subMenuItem.name}}</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+</header>

@@ -1,0 +1,481 @@
+/// Maximum size of the CCFG flash sector across all devices, in number of bytes
+#define SACI_FLASH_CCFG_MAX_SECTOR_SIZE     2048
+/// Maximum size of one MAIN flash sector across all devices, in number of bytes
+#define SACI_FLASH_MAIN_MAX_SECTOR_SIZE     2048
+
+
+
+#define SC_MISC_NO_OPERATION            0x01    ///< Miscellaneous: No operation
+#define SC_MISC_GET_TEST_ID             0x02    ///< Miscellaneous: Get test ID
+#define SC_MISC_GET_DIE_ID              0x03    ///< Miscellaneous: Get die ID
+#define SC_MISC_GET_CCFG_USER_REC       0x04    ///< Miscellaneous: Get non-read protected part of user record in CCFG
+#define SC_DEBUG_REQ_PWD_ID             0x05    ///< Debug: Request password ID for debug authentication
+#define SC_DEBUG_SUBMIT_AUTH            0x06    ///< Debug: Submit debug authentication (password)
+#define SC_DEBUG_EXIT_SACI_HALT         0x07    ///< Debug: Exit SACI, and halt at bootloader/application entry
+#define SC_DEBUG_EXIT_SACI_SHUTDOWN     0x08    ///< Debug: Exit SACI, and enter shutdown mode
+#define SC_FLASH_ERASE_CHIP             0x09    ///< Flash programming: Erase CCFG and all MAIN sectors (key)
+#define SC_FLASH_PROG_CCFG_SECTOR       0x0C    ///< Flash programming: Program CCFG sector (option to skip user record) (key)
+#define SC_FLASH_PROG_CCFG_USER_REC     0x0D    ///< Flash programming: Program user record in CCFG sector (key)
+#define SC_FLASH_PROG_MAIN_SECTOR       0x0E    ///< Flash programming: Program all or a part of one MAIN sector (key)
+#define SC_FLASH_PROG_MAIN_PIPELINED    0x0F    ///< Flash programming: Program one or more whole MAIN sectors (key)
+#define SC_FLASH_VERIFY_MAIN_SECTORS    0x10    ///< Flash programming: Verify a range of MAIN sectors
+#define SC_FLASH_VERIFY_CCFG_SECTOR     0x11    ///< Flash programming: Verify CCFG sector
+#define SC_LIFECYCLE_INCR_STATE         0x12    ///< Device lifecycle: Increment state (including RTF) (password)
+#define SC_LIFECYCLE_REQ_FIRST_BDAY     0x13    ///< Device lifecycle: Request first birthday lifecycle (password)
+#define SC_BLDR_APP_RESET_DEVICE        0x14    ///< Bootloader/application: Reset the device
+#define SC_BLDR_APP_EXIT_SACI_RUN       0x15    ///< Bootloader/application: Exit SACI, and run bootloader/application
+#define SC_MODE_REQ_FLASHLESS_TEST      0x16    ///< Device mode: Request flashless test mode (password)
+#define SC_MODE_REQ_TOOLS_CLIENT        0x17    ///< Device mode: Request flashless tools client mode
+#define SC_FLASH_PROG_SCFG_SECTOR       0x1A    ///< Flash programming: Program SCFG sector of applicable devices
+#define SC_FLASH_VERIFY_SCFG_SECTOR     0x1B    ///< Flash programming: Verify SCFG sector
+
+// SACI Command results
+#define SCR_SUCCESS                     0x00    ///< Command executed successfully
+#define SCR_INVALID_CMD_ID              0x80    ///< Invalid command ID
+#define SCR_INVALID_ADDRESS_PARAM       0x81    ///< Invalid address parameter
+#define SCR_INVALID_SIZE_PARAM          0x82    ///< Invalid size parameter
+#define SCR_INVALID_KEY_PARAM           0x83    ///< Invalid key parameter
+#define SCR_FLASH_FSM_ERROR             0x84    ///< Flash hardware FSM error
+#define SCR_PARAM_BUFFER_OVERFLOW       0x85    ///< Parameter data buffer overflow (host must slow down)
+#define SCR_NOT_ALLOWED                 0x86    ///< Command is not allowed due to restrictions
+#define SCR_CRC32_MISMATCH              0x87    ///< Calculated CRC32 does not match expected CRC32
+#define SCR_INVALID_PWD_PARAM           0x88    ///< Invalid password parameter
+#define SCR_BLANK_CHECK_FAILED          0x89    ///< Blank check detected one or more flash bits that were zero
+#define SCR_CMD_FAILED                  0xFF    ///< Unspecified command failure
+
+// Debug sub-system mailbox: SACI TX flags (host -> device)
+
+/// SACI MBOX TX flag: TXD full (set on host write, cleared on device read)
+#define BV_SACI_MBOX_TXFLAG_TXD_FULL        0x1
+/// SACI MBOX TX flag:
+#define BV_SACI_MBOX_TXFLAG_CMD_START       0x2
+
+
+// Debug sub-system mailbox: SACI RX flags (device -> host)
+
+/// SACI MBOX RX flag: RXD full (set on device write, cleared on host read)
+#define BV_SACI_MBOX_RXFLAG_RXD_FULL        0x1
+/// SACI MBOX RX flag: Last SACI command was aborted (incomplete parameters or ignored response)
+#define BV_SACI_MBOX_RXFLAG_CMD_ABORTED     0x2
+/// SACI MBOX RX flag: SACI is working on the last received command
+#define BV_SACI_MBOX_RXFLAG_CMD_WORKING     0x4
+/// SACI MBOX RX flag: Current/last SACI command error
+#define BV_SACI_MBOX_RXFLAG_CMD_ERROR       0x8
+
+
+/****************************************
+********* Global GEL variables **********
+*****************************************/
+// Next sequence number
+unsigned char nextRespSeqNumber = 0x00;
+
+// Password Id request response data
+unsigned int passwordIdWordCount = 0;
+unsigned int passwordIdWord0 = 0;
+unsigned int passwordIdWord1 = 0;
+
+// Password data
+unsigned int passwordLen    = 3;
+unsigned int passwordWord0  = 0;
+unsigned int passwordWord1  = 0;
+unsigned int passwordWord2  = 0;
+unsigned int passwordWord3  = 0;
+unsigned int passwordWord4  = 0;
+unsigned int passwordWord5  = 0;
+unsigned int passwordWord6  = 0;
+unsigned int passwordWord7  = 0;
+unsigned int passwordWord8  = 0;
+unsigned int passwordWord9  = 0;
+unsigned int passwordWord10 = 0;
+unsigned int passwordWord11 = 0;
+unsigned int passwordWord12 = 0;
+unsigned int passwordWord13 = 0;
+unsigned int passwordWord14 = 0;
+unsigned int passwordWord15 = 0;
+
+
+/**
+ * \brief   This functions writes flags to the SEC-AP Transmit control register
+ * \param   txFlags The value to write to the transmit control register
+ */
+SaciWriteTxFlags(txFlags)
+{
+    'REG'::SECAP_TXCTL = txFlags;
+}
+
+/**
+ * \brief   This functions reads flags from the SEC-AP Transmit control register
+ * \return  The value of the Transmit control register
+ */
+SaciReadTxFlags()
+{
+    unsigned int flags = 'REG'::SECAP_TXCTL;
+    return flags;
+}
+
+/**
+ * \brief   This functions reads flags from the SEC-AP Receive control register
+ * \return  The value of the Receive control register
+ */
+SaciReadRxFlags()
+{
+    unsigned int flags = 'REG'::SECAP_RXCTL;
+    return flags;
+}
+
+/**
+ * \brief   This functions waits until the TXD_FULL flag is cleared.
+ */
+SaciWaitForTxDataEmpty()
+{
+
+    // Wait until TXD full flag is cleared ...
+    unsigned int txFlags;
+    txFlags = SaciReadTxFlags();
+    while(txFlags & BV_SACI_MBOX_TXFLAG_TXD_FULL)
+    {
+        txFlags = SaciReadTxFlags();
+    }
+}
+
+/**
+ * \brief   This functions waits until the RXD_FULL flag is set.
+ */
+SaciWaitForRxDataReady()
+{
+
+    // Wait until RXD full flag is set ...
+    unsigned int rxFlags;
+    rxFlags = SaciReadRxFlags();
+    while ((rxFlags & BV_SACI_MBOX_RXFLAG_RXD_FULL) != BV_SACI_MBOX_RXFLAG_RXD_FULL)
+    {
+        rxFlags = SaciReadRxFlags();
+    }
+}
+
+
+/**
+ * \brief   This function sets the necessary CMD_START flag in SEC-AP Transmit control register,
+ *          and writes a word to the SEC-AP Transmit Data Register
+ * \param   value       The word to write
+ * \param   isFirstWord If not 0, the CMD_START flag is set in the transmit control register and if it is 0 the flag is cleared.
+ */
+SaciWriteTxWord(value, isFirstWord)
+{
+
+    // Update command start flag if needed
+    if (isFirstWord)
+    {
+        SaciWriteTxFlags(BV_SACI_MBOX_TXFLAG_CMD_START);
+    }
+    else
+    {
+        SaciWriteTxFlags(0);
+    }
+
+    // Write TX data
+    'REG'::SECAP_TXD = value;
+}
+
+/**
+ * \brief   This functions the value of the SEC-AP Receive Data Register
+ * \return  The value of the Receive Data Register
+ */
+SaciReadRxWord()
+{
+    unsigned int value =  'REG'::SECAP_RXD;
+    return value;
+}
+
+
+/**
+ * \brief   This function constructs the first word of a SACI command
+ * \param   cmdId           SACI Command ID
+ * \param   respSeqNumber   Optional sequence number, included in the response header
+ * \param   cmdSpecific     Command specific
+ */
+SaciMakeFirstParamWord(cmdId, respSeqNumber, cmdSpecific)
+{
+    return (cmdSpecific << 16) | (respSeqNumber << 8) | cmdId;
+}
+
+
+/**
+ * \brief   This function generates a sequence number.
+ * \return  The sequence number to use.
+ */
+SaciGenRespSeqNumber()
+{
+    unsigned char respSeqNumber = 'GEL'::nextRespSeqNumber;
+    nextRespSeqNumber = (nextRespSeqNumber + 1) & 0xFF;
+    return respSeqNumber;
+}
+
+
+/**
+ * \brief   This function reads the response of a SACI command and returns the header of the response.
+ * \return  The header of the SACI command response.
+ */
+SaciReadCmdRespHeader()
+{
+    unsigned int respHeader;
+    unsigned int respDataWordCount;
+
+    // Read response header
+    SaciWaitForRxDataReady();
+    respHeader = SaciReadRxWord();
+
+    // Ignore additional response, if any
+    respDataWordCount = (respHeader >> 24) & 0xFF;
+    while (respDataWordCount)
+    {
+        SaciWaitForRxDataReady();
+        SaciReadRxWord();
+        respDataWordCount -= 1;
+    }
+
+    return respHeader;
+}
+
+
+/**
+ * \brief   This sends a command to SACI and reads the response header. Only commands consisting of one word is supported by this function.
+ * \param   cmdId           SACI Command ID
+ * \param   cmdSpecific     Command specific
+ * \return  The header of the response for the command.
+ */
+SaciOneWordCommand(cmdId, cmdSpecific)
+{
+    unsigned int cmdResp;
+    // Generate response sequence number
+    unsigned char respSeqNumber = SaciGenRespSeqNumber();
+
+    // Set command start flag for the first word
+    SaciWaitForTxDataEmpty();
+    SaciWriteTxWord(SaciMakeFirstParamWord(cmdId, respSeqNumber, cmdSpecific), 1);
+
+    // Wait until the first command word has been read, to ensure that there is no leftover response
+    // from the previous command, if any
+    SaciWaitForTxDataEmpty();
+
+    // Read response and check header contents
+    cmdResp = SaciReadCmdRespHeader();
+    return cmdResp;
+}
+
+
+
+
+/**
+ * \brief   Reads and returns the result code from a response header
+ * \param   responseHeader  The response header word
+ * \return  The result code of the response header.
+ */
+SaciGetResultCodeFromResultHeader(responseHeader)
+{
+    return (responseHeader >> 16) & 0xFF;
+}
+
+
+
+
+/**
+ * \brief   This functions sends the SC_MISC_NO_OPERATION to SACI.
+ * \return  The result code of the response of the command.
+ */
+SaciNop()
+{
+    return SaciGetResultCodeFromResultHeader(SaciOneWordCommand(SC_MISC_NO_OPERATION, 0));
+}
+
+
+
+
+/**
+ * \brief   This functions sends the SC_BLDR_APP_EXIT_SACI_RUN to SACI.
+ * \return  The result code of the response of the command.
+ */
+SaciExitSaciRun()
+{
+    return SaciGetResultCodeFromResultHeader(SaciOneWordCommand(SC_BLDR_APP_EXIT_SACI_RUN, 0));
+}
+
+
+
+
+/**
+ * \brief   This functions sends the SC_DEBUG_EXIT_SACI_HALT to SACI.
+ * \return  The result code of the response of the command.
+ */
+SaciExitSaciHalt()
+{
+    return SaciGetResultCodeFromResultHeader(SaciOneWordCommand(SC_DEBUG_EXIT_SACI_HALT, 0));
+}
+
+/**
+ * \brief   This function sends the SC_BLDR_APP_RESET_DEVICE to SACI.
+ * \param   waitForSwdDisconnect  Specify whether to wait for SWD disconnection before the device reset occurs:
+ *                                  - 0 to reset and re-enter SACI
+ *                                  - 1 to wait for SWD disconnection sequence, and then reset without re-entering SACI
+ * \return  The result code of the response of the command.
+ */
+SaciAppResetDevice(waitForSwdDisconnect)
+{
+    if (waitForSwdDisconnect)
+    {
+        return SaciGetResultCodeFromResultHeader(SaciOneWordCommand(SC_BLDR_APP_RESET_DEVICE, 0x0001));
+    }
+    else
+    {
+        return SaciGetResultCodeFromResultHeader(SaciOneWordCommand(SC_BLDR_APP_RESET_DEVICE, 0x0000));
+    }
+}
+
+
+
+/**
+ * \brief   This functions sends the SC_DEBUG_REQ_PWD_ID command to SACI.
+ *          The response data will be written to following global variables:
+ *            - 'GEL'::passwordIdWordCount
+ *            - 'GEL'::passwordIdWord0
+ *            - 'GEL'::passwordIdWord1
+ *
+ * \return  The result code of the response of the command or SCR_CMD_FAILED if incorrect number of response words was received.
+ */
+SaciReqPasswordId()
+{
+    unsigned int cmdResp;
+    unsigned int respHeader;
+    unsigned int resultCode;
+    // Generate response sequence number
+    unsigned char respSeqNumber = SaciGenRespSeqNumber();
+
+    // Set command start flag for the first word
+    SaciWaitForTxDataEmpty();
+    SaciWriteTxWord(SaciMakeFirstParamWord(SC_DEBUG_REQ_PWD_ID, respSeqNumber, 0x0000), 1);
+
+    // Wait until the first command word has been read, to ensure that there is no leftover response
+    // from the previous command, if any
+    SaciWaitForTxDataEmpty();
+
+    // Read response header
+    SaciWaitForRxDataReady();
+    respHeader = SaciReadRxWord();
+
+    resultCode = SaciGetResultCodeFromResultHeader(respHeader);
+    if(resultCode != SCR_SUCCESS)
+    {
+        return resultCode;
+    }
+
+    // Ignore additional response, if any
+    'GEL'::passwordIdWordCount = (respHeader >> 24) & 0xFF;
+    if('GEL'::passwordIdWordCount == 0)
+    {
+        return resultCode;
+    }
+    else if('GEL'::passwordIdWordCount == 2)
+    {
+        SaciWaitForRxDataReady();
+        'GEL'::passwordIdWord0 = SaciReadRxWord();
+        SaciWaitForRxDataReady();
+        'GEL'::passwordIdWord1 = SaciReadRxWord();
+        return resultCode;
+    }
+    else
+    {
+        return SCR_CMD_FAILED;
+    }
+}
+
+
+
+
+/**
+ * \brief   This functions sends the SC_DEBUG_SUBMIT_AUTH command to SACI
+ *          with the data provided in the following global variables:
+ *            - 'GEL'::passwordLen
+ *            - 'GEL'::passwordWord0
+ *            - 'GEL'::passwordWord1
+ *            - 'GEL'::passwordWord2
+ *            - 'GEL'::passwordWord3
+ *            - 'GEL'::passwordWord4
+ *            - 'GEL'::passwordWord5
+ *            - 'GEL'::passwordWord6
+ *            - 'GEL'::passwordWord7
+ *            - 'GEL'::passwordWord8
+ *            - 'GEL'::passwordWord9
+ *            - 'GEL'::passwordWord10
+ *            - 'GEL'::passwordWord11
+ *            - 'GEL'::passwordWord12
+ *            - 'GEL'::passwordWord13
+ *            - 'GEL'::passwordWord14
+ *            - 'GEL'::passwordWord15
+ *
+ * \return  The result code of the response of the command.
+ */
+SaciSubmitAuth()
+{
+    unsigned int respHeader;
+    unsigned int resultCode;
+    unsigned char respSeqNumber = SaciGenRespSeqNumber();
+
+    SaciWaitForTxDataEmpty();
+    SaciWriteTxWord(SaciMakeFirstParamWord(SC_DEBUG_SUBMIT_AUTH, respSeqNumber, 'GEL'::passwordLen), 1);
+
+
+    SaciWaitForTxDataEmpty();
+    if('GEL'::passwordLen > 0)
+    {
+        SaciWriteTxWord('GEL'::passwordWord0 , 0);
+        SaciWaitForTxDataEmpty();
+    }
+    if('GEL'::passwordLen > 1)
+    SaciWriteTxWord('GEL'::passwordWord1 , 0);
+
+    if('GEL'::passwordLen > 2)
+    SaciWriteTxWord('GEL'::passwordWord2 , 0);
+
+    if('GEL'::passwordLen > 3)
+    SaciWriteTxWord('GEL'::passwordWord3 , 0);
+
+    if('GEL'::passwordLen > 4)
+    SaciWriteTxWord('GEL'::passwordWord4 , 0);
+
+    if('GEL'::passwordLen > 5)
+    SaciWriteTxWord('GEL'::passwordWord5 , 0);
+
+    if('GEL'::passwordLen > 6)
+    SaciWriteTxWord('GEL'::passwordWord6 , 0);
+
+    if('GEL'::passwordLen > 7)
+    SaciWriteTxWord('GEL'::passwordWord7 , 0);
+
+    if('GEL'::passwordLen > 8)
+    SaciWriteTxWord('GEL'::passwordWord8 , 0);
+
+    if('GEL'::passwordLen > 9)
+    SaciWriteTxWord('GEL'::passwordWord9 , 0);
+
+    if('GEL'::passwordLen > 10)
+    SaciWriteTxWord('GEL'::passwordWord10, 0);
+
+    if('GEL'::passwordLen > 11)
+    SaciWriteTxWord('GEL'::passwordWord11, 0);
+
+    if('GEL'::passwordLen > 12)
+    SaciWriteTxWord('GEL'::passwordWord12, 0);
+
+    if('GEL'::passwordLen > 13)
+    SaciWriteTxWord('GEL'::passwordWord13, 0);
+
+    if('GEL'::passwordLen > 14)
+    SaciWriteTxWord('GEL'::passwordWord14, 0);
+
+    if('GEL'::passwordLen > 15)
+    SaciWriteTxWord('GEL'::passwordWord15, 0);
+
+    respHeader = SaciReadCmdRespHeader();
+
+    return SaciGetResultCodeFromResultHeader(respHeader);  // Return result code
+}

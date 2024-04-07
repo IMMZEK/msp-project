@@ -1,0 +1,333 @@
+<module name="PRU_ICSS_0_IEP" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="PRUSS_IEP_GLOBAL_CFG" acronym="PRUSS_IEP_GLOBAL_CFG" offset="0x0" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="12" begin="31" end="20" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="CMP_INC" width="12" begin="19" end="8" resetval="0x5" description="Defines the increment value when compensation is active" range="" rwaccess="RW"/>
+    <bitfield id="DEFAULT_INC" width="4" begin="7" end="4" resetval="0x5" description="Defines the default increment value" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="3" end="1" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="CNT_ENABLE" width="1" begin="0" end="0" resetval="0x0" description="Counter enable. 0h: Disables the counter. The counter maintains the current count. 1h: Enables the counter." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_STATUS" acronym="PRUSS_IEP_STATUS" offset="0x4" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="CNT_OVF" width="1" begin="0" end="0" resetval="0x0" description="Counter overflow status. 0h: No overflow" range="" rwaccess="RWr1Clr"/>
+  </register>
+  <register id="PRUSS_IEP_COMPENSATION" acronym="PRUSS_IEP_COMPENSATION" offset="0x8" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="COMPEN_CNT" width="24" begin="23" end="0" resetval="0x0" description="Compensation counter. Read returns the current COMPEN_CNT value. 0h: Compensation is disabled and counter will increment by DEFAULT_INC. Nh: Compensation is enabled until COMPEN_CNT decrements to 0. The COMPEN_CNT value decrements on every IEP_CLK cycle. When COMPEN_CNT is greater than 0, then count value increments by CMP_INC. NOTE: SLOW_COMPEN_CNT MUST be set to zero IF COMPEN_CNT is not zero." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_SLOW_COMPENSATION" acronym="PRUSS_IEP_SLOW_COMPENSATION" offset="0xC" page="2" width="32" description="">
+    <bitfield id="SLOW_COMPEN_CNT" width="32" begin="31" end="0" resetval="0x0" description="Slow compensation counter. Write 0h: Slow compensation is disabled and counter will increment by DEFAULT_INC. Write Nh: Compensation is enabled for 1 count for every SLOW_COMPEN_CNT cycle, this is free running and continuous until software clears the MMR. For example, SLOW_COMPEN_CNT = 16, every 16 clock cycles the compensation value is used for 1 count. Note: COMPEN_CNT MUST be set to zero IF SLOW_COMPEN_CNT is not zero. Software can read the number of cycles left until the compensation event. For example, software writes SLOW_COMPEN_CNT = 100h and reads SLOW_COMPEN_CNT = 7h. This means in 6 more IEP_CLK cycles before the counter reaches 1h for the compensation event. If software writes SLOW_COMPEN_CNT = 8000h before compensation event, then the counter will reset to 8000h." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_LOW_COUNTER" acronym="PRUSS_IEP_LOW_COUNTER" offset="0x10" page="2" width="32" description="">
+    <bitfield id="COUNT" width="32" begin="31" end="0" resetval="0x0" description="64 bit count value (lower 32-bits). Increments by (DEFAULT_INC or CMP_INC) on every positive edge of ICSS_IEP_CLK (200MHz) or ICSS_VCLK_CLK." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_HIGH_COUNTER" acronym="PRUSS_IEP_HIGH_COUNTER" offset="0x14" page="2" width="32" description="">
+    <bitfield id="COUNT" width="32" begin="31" end="0" resetval="0x0" description="64 bit count value (upper 32-bits). Increments by (DEFAULT_INC or CMP_INC) on every positive edge of ICSS_IEP_CLK (200MHz) or ICSS_VCLK_CLK." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_CFG" acronym="PRUSS_IEP_CAPTURE_CFG" offset="0x18" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="14" begin="31" end="18" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="CAP_ASYNC_EN" width="8" begin="17" end="10" resetval="0x7F" description="Synchronization of the capture inputs to the ICSS_IEP_CLK/ ICSS_VCLK_CLK enable. Note if input capture signal is asynchronous to ICSS_IEP_CLK, enabling synchronization will cause the capture contents to be invalid. CAP_ASYNC_EN[n] maps to CAPR[n]. 0h: Disable synchronization 1h: Enable synchronization" range="" rwaccess="RW"/>
+    <bitfield id="CAP7F_1ST_EVENT_EN" width="1" begin="9" end="9" resetval="0x0" description="Capture 1st Event Enable for CAP7F. 0h: Continues mode. The capture status is not set when events occur. 1h: First Event mode. The capture status is set when the first event occurs and must be cleared before new data will fill buffer. Time value is captured when first event occurs and held until time is read." range="" rwaccess="RW"/>
+    <bitfield id="CAP7R_1ST_EVENT_EN" width="1" begin="8" end="8" resetval="0x0" description="Capture 1st Event Enable for CAP7R. 0h: Continues mode. The capture status is not set when events occur. 1h: First Event mode. The capture status is set when the first event occurs and must be cleared before new data will fill buffer. Time value is captured when first event occurs and held until time is read." range="" rwaccess="RW"/>
+    <bitfield id="CAP6F_1ST_EVENT_EN" width="1" begin="7" end="7" resetval="0x0" description="Capture 1st Event Enable for CAP6F. 0h: Continues mode. The capture status is not set when events occur. 1h: First Event mode. The capture status is set when the first event occurs and must be cleared before new data will fill buffer. Time value is captured when first event occurs and held until time is read." range="" rwaccess="RW"/>
+    <bitfield id="CAP6R_1ST_EVENT_EN" width="1" begin="6" end="6" resetval="0x0" description="Capture 1st Event Enable for CAP6R. 0h: Continues mode. The capture status is not set when events occur. 1h: First Event mode. The capture status is set when the first event occurs and must be cleared before new data will fill buffer. Time value is captured when first event occurs and held until time is read." range="" rwaccess="RW"/>
+    <bitfield id="CAP_1ST_EVENT_EN" width="6" begin="5" end="0" resetval="0x0" description="Capture 1st Event Enable for registers. CAP_1ST_EVENT_EN[n] maps to CAPR[n]. 0h: Continues mode. The capture status is not set when events occur. 1h: First Event mode. The capture status is set when the first event occurs and must be cleared before new data will fill buffer. Time value is captured when first event occurs and held until time is read." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_STATUS" acronym="PRUSS_IEP_CAPTURE_STATUS" offset="0x1C" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="CAP_RAW" width="8" begin="23" end="16" resetval="0x0" description="Raw/Current status bit for each of the capture registers, where CAP_RAW[n] maps to CAPR[n]. 0h: Current state is low. 1h: Current state is high." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="CAP_VALID" width="1" begin="10" end="10" resetval="0x0" description="Valid status for capture function. Reflects the ORed result from CAP_STATUS[9:0]. 0h: No Hit for any capture event, i.e., there are all 0 in CAP_STATUS[9:0]. 1h: Hit for 1 or more captures events is pending, i.e., there has at least one value equal to 1 in CAP_STATUS[9:0]." range="" rwaccess="R"/>
+    <bitfield id="CAPF7_VALID" width="1" begin="9" end="9" resetval="0x0" description="Valid status for CAPF7 (fall). 0h: No Hit, no capture event occurred 1h: Hit, capture event occurred" range="" rwaccess="R"/>
+    <bitfield id="CAPR7_VALID" width="1" begin="8" end="8" resetval="0x0" description="Valid status for CAPR7 (rise). 0h: No Hit, no capture event occurred 1h: Hit, capture event occurred" range="" rwaccess="R"/>
+    <bitfield id="CAPF6_VALID" width="1" begin="7" end="7" resetval="0x0" description="Valid status for CAPF6 (fall). 0h: No Hit, no capture event occurred 1h: Hit, capture event occurred" range="" rwaccess="R"/>
+    <bitfield id="CAPR6_VALID" width="1" begin="6" end="6" resetval="0x0" description="Valid status for CAPR6 (rise). 0h: No Hit, no capture event occurred 1h: Hit, capture event occurred" range="" rwaccess="R"/>
+    <bitfield id="CAPR_VALID" width="6" begin="5" end="0" resetval="0x0" description="Valid status bit for each compare register, where CAPR_VALID[n] maps to CAPR[n] (rise). 0h: No Hit, no capture event occurred 1h: Hit, capture event occurred" range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE00" acronym="PRUSS_IEP_CAPTURE_RISE00" offset="0x20" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR&amp;amp;lt;i&amp;amp;gt; (fall) event, where i = 0 to 5. Lower 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE10" acronym="PRUSS_IEP_CAPTURE_RISE10" offset="0x24" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR&amp;amp;lt;i&amp;amp;gt; (rise) event, where i = 0 to 5. Upper 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE01" acronym="PRUSS_IEP_CAPTURE_RISE01" offset="0x28" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR&amp;amp;lt;i&amp;amp;gt; (fall) event, where i = 0 to 5. Lower 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE11" acronym="PRUSS_IEP_CAPTURE_RISE11" offset="0x2C" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR&amp;amp;lt;i&amp;amp;gt; (rise) event, where i = 0 to 5. Upper 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE02" acronym="PRUSS_IEP_CAPTURE_RISE02" offset="0x30" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR&amp;amp;lt;i&amp;amp;gt; (fall) event, where i = 0 to 5. Lower 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE12" acronym="PRUSS_IEP_CAPTURE_RISE12" offset="0x34" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR&amp;amp;lt;i&amp;amp;gt; (rise) event, where i = 0 to 5. Upper 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE03" acronym="PRUSS_IEP_CAPTURE_RISE03" offset="0x38" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR&amp;amp;lt;i&amp;amp;gt; (fall) event, where i = 0 to 5. Lower 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE13" acronym="PRUSS_IEP_CAPTURE_RISE13" offset="0x3C" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR&amp;amp;lt;i&amp;amp;gt; (rise) event, where i = 0 to 5. Upper 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE04" acronym="PRUSS_IEP_CAPTURE_RISE04" offset="0x40" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR&amp;amp;lt;i&amp;amp;gt; (fall) event, where i = 0 to 5. Lower 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE14" acronym="PRUSS_IEP_CAPTURE_RISE14" offset="0x44" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR&amp;amp;lt;i&amp;amp;gt; (rise) event, where i = 0 to 5. Upper 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE05" acronym="PRUSS_IEP_CAPTURE_RISE05" offset="0x48" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR&amp;amp;lt;i&amp;amp;gt; (fall) event, where i = 0 to 5. Lower 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE15" acronym="PRUSS_IEP_CAPTURE_RISE15" offset="0x4C" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR&amp;amp;lt;i&amp;amp;gt; (rise) event, where i = 0 to 5. Upper 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE06" acronym="PRUSS_IEP_CAPTURE_RISE06" offset="0x50" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR6 event. Lower 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE16" acronym="PRUSS_IEP_CAPTURE_RISE16" offset="0x54" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR6 event. Upper 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_FALL06" acronym="PRUSS_IEP_CAPTURE_FALL06" offset="0x58" page="2" width="32" description="">
+    <bitfield id="CAPF" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPF6 (fall) event. Lower 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_FALL16" acronym="PRUSS_IEP_CAPTURE_FALL16" offset="0x5C" page="2" width="32" description="">
+    <bitfield id="CAPF" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPF6 (fall) event. Lower 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE07" acronym="PRUSS_IEP_CAPTURE_RISE07" offset="0x60" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR7 (rise) event. Lower 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_RISE17" acronym="PRUSS_IEP_CAPTURE_RISE17" offset="0x64" page="2" width="32" description="">
+    <bitfield id="CAPR" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPR7 (rise) event. Upper 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_FALL07" acronym="PRUSS_IEP_CAPTURE_FALL07" offset="0x68" page="2" width="32" description="">
+    <bitfield id="CAPF" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPF7 (fall) event. Lower 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_CAPTURE_FALL17" acronym="PRUSS_IEP_CAPTURE_FALL17" offset="0x6C" page="2" width="32" description="">
+    <bitfield id="CAPF" width="32" begin="31" end="0" resetval="0x0" description="Value captured for CAPF7 (fall) event. Upper 32-bits." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE_CFG" acronym="PRUSS_IEP_COMPARE_CFG" offset="0x70" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="15" begin="31" end="17" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="CMP_EN" width="16" begin="16" end="1" resetval="0x0" description="Enable bits for each of the compare registers" range="" rwaccess="RW"/>
+    <bitfield id="CMP0_RST_CNT_EN" width="1" begin="0" end="0" resetval="0x0" description="Enable the reset of the counter" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE_STATUS" acronym="PRUSS_IEP_COMPARE_STATUS" offset="0x74" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="CMP_HIT" width="16" begin="15" end="0" resetval="0x0" description="Status bit for each of the compare registers. 'Match' indicates the current counter is greater than or equal to the compare value. Note it is the firmware's responsibility to handle the IEP overflow." range="" rwaccess="RWr1Clr"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE00" acronym="PRUSS_IEP_COMPARE00" offset="0x78" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 0 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE10" acronym="PRUSS_IEP_COMPARE10" offset="0x7C" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 0 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE01" acronym="PRUSS_IEP_COMPARE01" offset="0x80" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 1 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE11" acronym="PRUSS_IEP_COMPARE11" offset="0x84" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 1 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE02" acronym="PRUSS_IEP_COMPARE02" offset="0x88" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 2 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE12" acronym="PRUSS_IEP_COMPARE12" offset="0x8C" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 2 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE03" acronym="PRUSS_IEP_COMPARE03" offset="0x90" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 3 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE13" acronym="PRUSS_IEP_COMPARE13" offset="0x94" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 3 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE04" acronym="PRUSS_IEP_COMPARE04" offset="0x98" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 4 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE14" acronym="PRUSS_IEP_COMPARE14" offset="0x9C" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 4 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE05" acronym="PRUSS_IEP_COMPARE05" offset="0xA0" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 5 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE15" acronym="PRUSS_IEP_COMPARE15" offset="0xA4" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 5 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE06" acronym="PRUSS_IEP_COMPARE06" offset="0xA8" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 6 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE16" acronym="PRUSS_IEP_COMPARE16" offset="0xAC" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 6 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE07" acronym="PRUSS_IEP_COMPARE07" offset="0xB0" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 7 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE17" acronym="PRUSS_IEP_COMPARE17" offset="0xB4" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 7 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_RXIPG0" acronym="PRUSS_IEP_RXIPG0" offset="0xB8" page="2" width="32" description="">
+    <bitfield id="RX_MIN_IPG" width="16" begin="31" end="16" resetval="0xFFFF" description="Defines the minimum number of ICSS_IEP_CLK/ICCS_VCLK_CLK cycles that is RX_DV is sampled low. It stores the smallest RX_IPG duration. It can be read at any time and gets updated after RX_IPG is updated, if RX_MIN_IPG is greater than RX_IPG." range="" rwaccess="RW"/>
+    <bitfield id="RX_IPG" width="16" begin="15" end="0" resetval="0x0" description="Records the current number of ICSS_IEP_CLK/ICSS_VCLK_CLK cycles RX_DV is sampled low. Value is updated after RX_DV transitions from low to high. It will saturate at FFFFh." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_RXIPG1" acronym="PRUSS_IEP_RXIPG1" offset="0xBC" page="2" width="32" description="">
+    <bitfield id="RX_MIN_IPG" width="16" begin="31" end="16" resetval="0xFFFF" description="Defines the minimum number of ICSS_IEP_CLK/ICSS_VCLK_CLK cycles that is RX_DV is sampled low. It stores the smallest RX_IPG duration. It can be read at any time and gets updated after RX_IPG is updated, if RX_MIN_IPG is greater than RX_IPG." range="" rwaccess="RW"/>
+    <bitfield id="RX_IPG" width="16" begin="15" end="0" resetval="0x0" description="Records the current number of ICSS_IEP_CLK/ICSS_VCLK_CLK cycles RX_DV is sampled low. Value is updated after RX_DV transitions from low to high. It will saturate at FFFFh." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE08" acronym="PRUSS_IEP_COMPARE08" offset="0xC0" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 8 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE18" acronym="PRUSS_IEP_COMPARE18" offset="0xC4" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Reset value (upper 32-bits). This register enables SW to define the reset state of the Master Counter, which can be reset by the following events (if enabled): CMP0 event; eHRPWM0_SYNCO event; eHRPWM3_SYNCO event. The RESET_VAL should be in increments of the DEFAULT_INC (default state is 5). For example, 0000_000Ah." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE09" acronym="PRUSS_IEP_COMPARE09" offset="0xC8" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 9 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE19" acronym="PRUSS_IEP_COMPARE19" offset="0xCC" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 9 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE010" acronym="PRUSS_IEP_COMPARE010" offset="0xD0" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 10 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE110" acronym="PRUSS_IEP_COMPARE110" offset="0xD4" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 10 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE011" acronym="PRUSS_IEP_COMPARE011" offset="0xD8" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 11 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE111" acronym="PRUSS_IEP_COMPARE111" offset="0xDC" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 11 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE012" acronym="PRUSS_IEP_COMPARE012" offset="0xE0" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 12 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE112" acronym="PRUSS_IEP_COMPARE112" offset="0xE4" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 12 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE013" acronym="PRUSS_IEP_COMPARE013" offset="0xE8" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 13 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE113" acronym="PRUSS_IEP_COMPARE113" offset="0xEC" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 13 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE014" acronym="PRUSS_IEP_COMPARE014" offset="0xF0" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 14 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE114" acronym="PRUSS_IEP_COMPARE114" offset="0xF4" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 14 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE015" acronym="PRUSS_IEP_COMPARE015" offset="0xF8" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 15 low value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_COMPARE115" acronym="PRUSS_IEP_COMPARE115" offset="0xFC" page="2" width="32" description="">
+    <bitfield id="CMP" width="32" begin="31" end="0" resetval="0x0" description="Compare 15 high value" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_LOW_COUNTER_RESET_VALUE" acronym="PRUSS_IEP_LOW_COUNTER_RESET_VALUE" offset="0x100" page="2" width="32" description="">
+    <bitfield id="RESET_VAL" width="32" begin="31" end="0" resetval="0x0" description="Reset value (lower 32-bits). This register enables SW to define the reset state of the Master Counter, which can be reset by the following events (if enabled): CMP0 event; eHRPWM0_SYNCO event; eHRPWM3_SYNCO event. The RESET_VAL should be in increments of the DEFAULT_INC (default state is 5). For example, 0000_000Ah." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_HIGH_COUNTER_RESET_VALUE" acronym="PRUSS_IEP_HIGH_COUNTER_RESET_VALUE" offset="0x104" page="2" width="32" description="">
+    <bitfield id="RESET_VAL" width="32" begin="31" end="0" resetval="0x0" description="This enables SW to define the reset state of the Master counter when it gets reset do to the following 3 possible events if enabled: CMP0 event; eHRPWM0_SYNCO event; eHRPWM3_SYNCO event. It should be in increments of the DEFAULT_INC, default state is 5 For example, 0000_000Ah" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_PWM" acronym="PRUSS_IEP_PWM" offset="0x108" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PWM3_HIT" width="1" begin="3" end="3" resetval="0x0" description="The raw status bit of eHRPWM3_SYNCO event. 0h: No eHRPWM3_SYNCO event 1h: eHRPWM3_SYNCO event occurred Write 1h to Clear." range="" rwaccess="RW1Clr"/>
+    <bitfield id="PWM3_RST_CNT_EN" width="1" begin="2" end="2" resetval="0x0" description="Enable the reset of the counter by a eHRPWM3_SYNCO event. 0h: Disable 1h: Enable the reset of the counter if a eHRPWM3_SYNCO event occurs" range="" rwaccess="RW"/>
+    <bitfield id="PWM0_HIT" width="1" begin="1" end="1" resetval="0x0" description="The raw status bit of eHRPWM0_SYNCO event. 0h: No eHRPWM0_SYNCO event 1h: eHRPWM0_SYNCO event occurred Write 1 to Clear." range="" rwaccess="RW1Clr"/>
+    <bitfield id="PWM0_RST_CNT_EN" width="1" begin="0" end="0" resetval="0x0" description="Enable the reset of the counter by a eHRPWM0_SYNCO event. 0h: Disable 1h: Enable the reset of the counter if a eHRPWM0_SYNCO event occurs" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_SYNC_CTRL" acronym="PRUSS_IEP_SYNC_CTRL" offset="0x180" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SYNC1_IND_EN" width="1" begin="8" end="8" resetval="0x0" description="SYNC1 independent mode enable. Independent mode means the SYNC1 signal can be different from SYNC0. 0h: Dependent mode" range="" rwaccess="RW"/>
+    <bitfield id="SYNC1_CYCLIC_EN" width="1" begin="7" end="7" resetval="0x0" description="SYNC1 single shot or cyclic/auto generation mode enable 0h: Disable, single shot mode" range="" rwaccess="RW"/>
+    <bitfield id="SYNC1_ACK_EN" width="1" begin="6" end="6" resetval="0x0" description="SYNC1 acknowledgement mode enable 0h: Disable, SYNC1 will go low after pulse width is met." range="" rwaccess="RW"/>
+    <bitfield id="SYNC0_CYCLIC_EN" width="1" begin="5" end="5" resetval="0x0" description="SYNC0 single shot or cyclic/auto generation mode enable 0h: Disable, single shot mode" range="" rwaccess="RW"/>
+    <bitfield id="SYNC0_ACK_EN" width="1" begin="4" end="4" resetval="0x0" description="SYNC0 acknowledgement mode enable 0h: Disable, SYNC0 will go low after pulse width is met." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SYNC1_EN" width="1" begin="2" end="2" resetval="0x0" description="SYNC1 generation enable 0h: Disable SYNC1 generation. If SYNC1 is low, it will stop immediately. If SYNC1 is high, it will stop after SYNC1 goes low" range="" rwaccess="RW"/>
+    <bitfield id="SYNC0_EN" width="1" begin="1" end="1" resetval="0x0" description="SYNC0 generation enable 0h: Disable SYNC0 generation. If SYNC0 is low, it will stop immediately If SYNC0 is high, it will stop after SYNC0 goes low" range="" rwaccess="RW"/>
+    <bitfield id="SYNC_EN" width="1" begin="0" end="0" resetval="0x0" description="SYNC generation enable 0h: Disable the generation and clocking of SYNC0 and SYNC1 logic. If SYNC0 AND SYNC1 is low, it will stop immediately. If SYNC0 OR SYNC1 is high, it will stop after SYCN0 AND SYNC1 goes low. Note that you might get 1 extra high pulse if this is disabled during a high pulse of one and the 2nd pulse goes high before the last pulse low if you do not de-assert sync0_en and sync1_en at the same time. SW should always de-assert both sync1_en and sync0_en at the same time as sync_en is de-asserted" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_SYNC_FIRST_STAT" acronym="PRUSS_IEP_SYNC_FIRST_STAT" offset="0x184" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FIRST_SYNC1" width="1" begin="1" end="1" resetval="0x0" description="SYNC1 First Event status" range="" rwaccess="R"/>
+    <bitfield id="FIRST_SYNC0" width="1" begin="0" end="0" resetval="0x0" description="SYNC0 First Event status" range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_SYNC0_STAT" acronym="PRUSS_IEP_SYNC0_STAT" offset="0x188" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SYNC0_PEND" width="1" begin="0" end="0" resetval="0x0" description="SYNC0 pending state" range="" rwaccess="RWr1Clr"/>
+  </register>
+  <register id="PRUSS_IEP_SYNC1_STAT" acronym="PRUSS_IEP_SYNC1_STAT" offset="0x18C" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SYNC1_PEND" width="1" begin="0" end="0" resetval="0x0" description="SYNC1 pending state" range="" rwaccess="RWr1Clr"/>
+  </register>
+  <register id="PRUSS_IEP_SYNC_PWIDTH" acronym="PRUSS_IEP_SYNC_PWIDTH" offset="0x190" page="2" width="32" description="">
+    <bitfield id="SYNC_HPW" width="32" begin="31" end="0" resetval="0x0" description="Defines the number of clock cycles SYNC0/1 will be high." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_SYNC0_PERIOD" acronym="PRUSS_IEP_SYNC0_PERIOD" offset="0x194" page="2" width="32" description="">
+    <bitfield id="SYNC0_PERIOD" width="32" begin="31" end="0" resetval="0x1" description="Defines the period between the rising edges of SYNC0." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_SYNC1_DELAY" acronym="PRUSS_IEP_SYNC1_DELAY" offset="0x198" page="2" width="32" description="">
+    <bitfield id="SYNC1_DELAY" width="32" begin="31" end="0" resetval="0x0" description="When SYNC1_IND_EN = 0, defines number of clock cycles from the start of SYNC0 to the start of SYNC1." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_SYNC_START" acronym="PRUSS_IEP_SYNC_START" offset="0x19C" page="2" width="32" description="">
+    <bitfield id="SYNC_START" width="32" begin="31" end="0" resetval="0x0" description="Defines the start time after the activation event." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_WD_PREDIV" acronym="PRUSS_IEP_WD_PREDIV" offset="0x200" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PRE_DIV" width="16" begin="15" end="0" resetval="0x4E20" description="Defines the number of ICSS_IEP_CLK cycles per WD clock event. Note that the WD clock is a free-running clock. The value 0x4e20 (or 20000) generates a rate of 100 us if ICSS_IEP_CLK is 200 MHz." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_PDI_WD_TIM" acronym="PRUSS_IEP_PDI_WD_TIM" offset="0x204" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PDI_WD_TIME" width="16" begin="15" end="0" resetval="0x3E8" description="Defines the number of WD ticks (or increments) for PDI WD, that is, the number of WD increments. If" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_PD_WD_TIM" acronym="PRUSS_IEP_PD_WD_TIM" offset="0x208" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PD_WD_TIME" width="16" begin="15" end="0" resetval="0x3E8" description="Defines the number of WD ticks (or increments) for PD WD, that is, the number of WD increments." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_WD_STATUS" acronym="PRUSS_IEP_WD_STATUS" offset="0x20C" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="15" begin="31" end="17" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PDI_WD_STAT" width="1" begin="16" end="16" resetval="0x1" description="WD PDI status." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="15" begin="15" end="1" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PD_WD_STAT" width="1" begin="0" end="0" resetval="0x1" description="WD PD status (triggered by Sync Mangers status)." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_WD_EXP_CNT" acronym="PRUSS_IEP_WD_EXP_CNT" offset="0x210" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PD_EXP_CNT" width="8" begin="15" end="8" resetval="0x0" description="WD PD expiration counter. Counter increments on every PD time out and stops at FFh." range="" rwaccess="RWrClr"/>
+    <bitfield id="PDI_EXP_CNT" width="8" begin="7" end="0" resetval="0x0" description="WD PDI expiration counter. Counter increments on every PDI time out and stops at FFh." range="" rwaccess="RWrClr"/>
+  </register>
+  <register id="PRUSS_IEP_WD_CTRL" acronym="PRUSS_IEP_WD_CTRL" offset="0x214" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="15" begin="31" end="17" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PDI_WD_EN" width="1" begin="16" end="16" resetval="0x0" description="Watchdog PDI" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="15" begin="15" end="1" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PD_WD_EN" width="1" begin="0" end="0" resetval="0x0" description="Watchdog PD" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_DIGIO_CTRL" acronym="PRUSS_IEP_DIGIO_CTRL" offset="0x300" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="OUT_MODE" width="2" begin="7" end="6" resetval="0x0" description="Defines events that triggers data out to be updated. Note if OUTVALID_MODE is set, then data out is forced to zero if a WD PD expiration occurs (PD_WD_EXP) from the WD block and pr&amp;amp;lt;k&amp;amp;gt;_edio_oe_ext = 1." range="" rwaccess="RW"/>
+    <bitfield id="IN_MODE" width="2" begin="5" end="4" resetval="0x0" description="Defines event that triggers data in to be sampled" range="" rwaccess="RW"/>
+    <bitfield id="WD_MODE" width="1" begin="3" end="3" resetval="0x0" description="Defines Watchdog behavior" range="" rwaccess="RW"/>
+    <bitfield id="BIDI_MODE" width="1" begin="2" end="2" resetval="0x1" description="Defines the digital input/output direction. NOTE THAT DUE TO INTEGRATION, ACTUAL MODE IS UNIDIRECTIONAL IN THIS DEVICE." range="" rwaccess="R"/>
+    <bitfield id="OUTVALID_MODE" width="1" begin="1" end="1" resetval="0x0" description="Defines the outvalid mode behavior." range="" rwaccess="RW"/>
+    <bitfield id="OUTVALID_POL" width="1" begin="0" end="0" resetval="0x0" description="Defines OUTVALID polarity" range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_DIGIO_STATUS" acronym="PRUSS_IEP_DIGIO_STATUS" offset="0x304" page="2" width="32" description="">
+    <bitfield id="DIGIO_STAT" width="32" begin="31" end="0" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_DIGIO_DATA_IN" acronym="PRUSS_IEP_DIGIO_DATA_IN" offset="0x308" page="2" width="32" description="">
+    <bitfield id="DATA_IN" width="32" begin="31" end="0" resetval="0x-" description="Data input. Digital inputs can be configured to be sampled in four ways." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_DIGIO_DATA_IN_RAW" acronym="PRUSS_IEP_DIGIO_DATA_IN_RAW" offset="0x30C" page="2" width="32" description="">
+    <bitfield id="DATA_IN_RAW" width="32" begin="31" end="0" resetval="0x-" description="Data input which direct sample of PR&amp;amp;lt;k&amp;amp;gt;_EDIO_DATA[0:31]. Only PR&amp;amp;lt;k&amp;amp;gt;_EDIO_DATA[0:3] are exported to device pins in this device." range="" rwaccess="R"/>
+  </register>
+  <register id="PRUSS_IEP_DIGIO_DATA_OUT" acronym="PRUSS_IEP_DIGIO_DATA_OUT" offset="0x310" page="2" width="32" description="">
+    <bitfield id="DATA_OUT" width="32" begin="31" end="0" resetval="0x0" description="Data output. Digital outputs can be configured to be updated in four ways. 1h: Digital outputs are updated at the end of each frame (EOF mode). 2h: Digital outputs are updated with SYNC0 events 3h: Digital outputs are updated SYNC1 events. 4h: Digital outputs are updated at the end of a frame which triggered the Process Data Watchdog. Digital Outputs are only updated if the frame was correct (WD_TRIG mode). These can be configured by [7-6] OUT_MODE bit field in the PRUSS_IEP_DIGIO_CTRL." range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_DIGIO_DATA_OUT_EN" acronym="PRUSS_IEP_DIGIO_DATA_OUT_EN" offset="0x314" page="2" width="32" description="">
+    <bitfield id="DATA_OUT_EN" width="32" begin="31" end="0" resetval="0x0" description="Data input which controls tri-state of PR&amp;amp;lt;k&amp;amp;gt;_EDIO_DATA[0:3]" range="" rwaccess="RW"/>
+  </register>
+  <register id="PRUSS_IEP_DIGIO_EXP" acronym="PRUSS_IEP_DIGIO_EXP" offset="0x318" page="2" width="32" description="">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="EOF_SEL" width="1" begin="13" end="13" resetval="0x0" description="Defines which RX_EOF is used for PR&amp;amp;lt;k&amp;amp;gt;_EDIO_DATA_IN[0:3] capture" range="" rwaccess="RW"/>
+    <bitfield id="SOF_SEL" width="1" begin="12" end="12" resetval="0x0" description="Defines which RX_SOF is used for PR&amp;amp;lt;k&amp;amp;gt;_EDIO_DATA_IN[0:3] capture" range="" rwaccess="RW"/>
+    <bitfield id="SOF_DLY" width="4" begin="11" end="8" resetval="0x0" description="Define the number of iep_clk (ICSS_IEP_CLK) cycle delay of SOF PR&amp;amp;lt;k&amp;amp;gt;_EDIO_DATA_IN[0:3] capture" range="" rwaccess="RW"/>
+    <bitfield id="OUTVALID_DLY" width="4" begin="7" end="4" resetval="0x2" description="Define the number of iep_clk (ICSS_IEP_CLK) cycle delay on assertion of PR&amp;amp;lt;k&amp;amp;gt;_EDIO_OUTVALID. Min is 2 clock cycles. Max is 16 clock cycles" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SW_OUTVALID" width="1" begin="2" end="2" resetval="0x0" description="PR&amp;amp;lt;k&amp;amp;gt;_EDIO_OUTVALID = SW_OUTVALID, only if OUTVALID_OVR_EN is set." range="" rwaccess="RW"/>
+    <bitfield id="OUTVALID_OVR_EN" width="1" begin="1" end="1" resetval="0x0" description="Software override enable" range="" rwaccess="RW"/>
+    <bitfield id="SW_DATA_OUT_UPDATE" width="1" begin="0" end="0" resetval="0x0" description="Defines the value of pr&amp;amp;lt;k&amp;amp;gt;_edio_data_out when OUTVALID_OVR_EN = 1." range="" rwaccess="RW"/>
+  </register>
+</module>

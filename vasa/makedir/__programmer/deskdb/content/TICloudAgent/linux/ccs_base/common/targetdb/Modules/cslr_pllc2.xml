@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module id="PLLC" HW_revision="" XML_version="1" description="This module propagates clocks to the device.">
+	<register id="PLLDIV1" acronym="PLLDIV1" offset="0x118" width="32" description="Divider 1 control--divider for SYSCLK1. Only document if this sysclk exists">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R"/>
+		<bitfield id="D1EN" width="1" begin="15" end="15" resetval="0" description="Divider Enable. Actual default determined by module tieoff. May lock default and make bit R only" range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R"/>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="Divider ratio. Actual default determined by module tieoff. May lock default and make bit R only" range="0 - 31" rwaccess="RW">
+			<bitenum id="DIVIDE_BY_2" value="1" token="DIVIDE_BY_2" description=""/>
+			<bitenum id="DIVIDE_BY_5" value="4" token="DIVIDE_BY_5" description=""/>
+		</bitfield>		
+	</register>
+	<register id="PLLCMD" acronym="PLLCMD" offset="0x138" width="32" description="Contains the command bit for the GO operation.">
+		<bitfield id="_RESV_1" width="30" begin="31" end="2" resetval="0" description="Reserved. The reserved bit location is always read as 0.  A value written to this field has no effect." range="" rwaccess="R"/>
+		<bitfield id="_RESV_2" width="1" begin="1" end="1" resetval="0" description="Reserved. The reserved bit location is always read as 0.  A value written to this field has no effect." range="" rwaccess="R"/>
+		<bitfield id="GOSET" width="1" begin="0" end="0" resetval="0" description="GO operation command for SYSCLK rate change and phase alignment.  Before setting this bit to 1 to initiate a GO operation, check the GOSTAT bit in the PLLSTAT register to ensure all previous GO operations have completed." range="" rwaccess="RW">
+			<bitenum id="CLRBIT" value="0" token="CLRBIT" description="No effect. Write of 0 clears bit to 0."/>
+			<bitenum id="SET" value="1" token="SET" description="Initiates GO operation. Write of 1 initiates GO operation. Once set, GOSET remains set but further writes of 1 can initiate the GO operation."/>
+		</bitfield>
+	</register>
+	<register id="PLLSTAT" acronym="PLLSTAT" offset="0x13C" width="32" description="Shows the PLL controller status.">
+		<bitfield id="_RESV_1" width="31" begin="31" end="1" resetval="0" description="Reserved. The reserved bit location is always read as 0.  A value written to this field has no effect." range="" rwaccess="R"/>
+		<bitfield id="GOSTAT" width="1" begin="0" end="0" resetval="0" description="GO operation status." range="" rwaccess="R">
+			<bitenum id="NONE" value="0" token="NONE" description="Go operation is not in progress. SYSCLK divide ratios are not being changed."/>
+			<bitenum id="INPROG" value="1" token="INPROG" description="GO operation is in progress. SYSCLK divide ratios are being changed."/>
+		</bitfield>
+	</register>
+	<register id="ALNCTL" acronym="ALNCTL" offset="0x140" width="32" description="Indicates if clock should be aligned during GO operation.  This register should not be modified.">
+		<bitfield id="_RESV_1" width="31" begin="31" end="1" resetval="0" description="Reserved. The reserved bit location is always read as 0.  A value written to this field has no effect." range="" rwaccess="R"/>
+		<bitfield id="ALN1" width="1" begin="0" end="0" resetval="1" description="SYSCLK1 alignment. Do not change the default values of these fields." range="" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description="Do not align SYSCLK1 to other SYSCLKs during GO operation. If SYS1 in DCHANGE is set to 1, SYSCLK1 switches to the new ratio immediately after the GOSET bit in PLLCMD is set."/>
+			<bitenum id="YES" value="1" token="YES" description="Align SYSCLK1 when the GOSET bit in PLLCMD is set.  The SYSCLK1 ratio is set to the ratio programmed in the RATIO bit in PLLDIV1."/>
+		</bitfield>
+	</register>
+	<register id="DCHANGE" acronym="DCHANGE" offset="0x144" width="32" description="Indicates if SYSCLK divide ratio has been modified.">
+		<bitfield id="_RESV_1" width="31" begin="31" end="1" resetval="0" description="Reserved. The reserved bit location is always read as 0.  A value written to this field has no effect." range="" rwaccess="R"/>
+		<bitfield id="SYS1" width="1" begin="0" end="0" resetval="0" description="Identifies when the SYSCLK1 divide ratio has been modified." range="" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description="SYSCLK1 ratio has not been modified. When GOSET is set, SYSCLK1 will not be affected."/>
+			<bitenum id="YES" value="1" token="YES" description="SYSCLK1 ratio has been modified. When GOSET is set, SYSCLK1 will change to the new ratio."/>
+		</bitfield>
+	</register>
+	<register id="SYSTAT" acronym="SYSTAT" offset="0x150" width="32" description="Indicates SYSCLK on/off status.">
+		<bitfield id="_RESV_1" width="31" begin="31" end="1" resetval="0" description="Reserved. The reserved bit location is always read as 0.  A value written to this field has no effect." range="" rwaccess="R"/>
+		<bitfield id="SYS1ON" width="1" begin="1" end="1" resetval="1" description="SYSCLK1 on status." range="" rwaccess="R">
+			<bitenum id="OFF" value="0" token="OFF" description="SYSCLK1 is gated."/>
+			<bitenum id="ON" value="1" token="ON" description="SYSCLK1 is on."/>
+		</bitfield>
+	</register>
+</module>

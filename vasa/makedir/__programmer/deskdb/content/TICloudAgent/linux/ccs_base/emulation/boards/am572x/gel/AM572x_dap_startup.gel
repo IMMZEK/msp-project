@@ -1,0 +1,464 @@
+/*******************************************************************/
+/* This GEL file is loaded on the command line of Code Composer    */
+/* The StartUp() function is called every time you start           */
+/* Code Composer.  You can customize this function to              */
+/* initialize wait states or to perform other initialization.      */
+/*                                                                 */
+/* AM572x dap startup                                              */
+/*                                                                 */
+/*     Revision 0.1                                                */
+/*     -    Initial revision based on the OMAP5                    */
+/*                                                                 */
+/*******************************************************************/
+#define GEL_VERSION         0.1
+
+// Timeout definitions
+int _GEL_Global_Timeout1 = 0;
+
+#define DEBUG_PRINT 0
+
+#define TIMEOUT_ID 10
+// Global timeout value
+#define GTIMEOUT 2000
+
+#define WR_MEM_32(addr, data)   *(unsigned int*)(addr) =(unsigned int)(data)
+#define RD_MEM_32(addr)         *(unsigned int*)(addr)
+#define uint32_t                unsigned int
+
+#define CONTROL_L3_HW_FW_EXPORTED_VALUES_CONF_DBG       0x4A002114
+#define CONTROL_L3_HW_FW_EXPORTED_VALUES_CONF_LOCK      0x4A002118
+
+#define fw_lli_ocp_regupdate                            0x4A202040
+#define fw_modem_regupdate_control                      0x4A204040
+#define fw_modem_ocp_regupdate_control                  0x4A206040
+#define fw_lli_regupdate                                0x4A208040
+#define fw_mpuma_regupdate_control                      0x4A20A040
+#define fw_emif_regupdate_control                       0x4A20C040
+#define fw_gpmc_regupdate_control                       0x4A210040
+#define fw_sgx_regupdate_control                        0x4A214040
+#define fw_iss_regupdate_control                        0x4A216040
+#define fw_ipu_regupdate_control                        0x4A218040
+#define fw_dss_regupdate_control                        0x4A21C040
+#define fw_sl2_regupdate_control                        0x4A21E040
+#define fw_ivahd_regupdate_control                      0x4A220040
+
+#define fw_cal_regupdate_control                        0x4A222040
+#define fw_ct_tbr_regupdate_control                     0x4A224040
+
+#define fw_l3_inst_regupdate_control                    0x4A226040
+
+#define fw_abe_regupdate_control                        0x4A228040
+#define fw_crypto_regupdate_control                     0x4A22A040
+#define fw_debug_regupdate_control                      0x4A226088
+
+#define fw_l3ram_regupdate_control                      0x4A212040
+#define fw_l3ram_start_region_1_val                     0x40300000
+#define fw_l3ram_end_region_1_val                       0x4030BFFF
+
+#define FW_L3RAM_START_REGION_1_VALUE                   fw_l3ram_regupdate_control+0x50
+#define FW_L3RAM_END_REGION_1_VALUE                     fw_l3ram_regupdate_control+0x54
+
+#define CONTROL_L4_HW_FW_EXPORTED_VALUES_CONF           0x4A00211C
+#define CONTROL_SEC_LOAD_FW_EXPORTED_VALUES             0x4A002120
+
+#define control_l4_hw_fw_exported_values_conf           0x4A00211C
+#define control_sec_load_fw_exported_values             0x4A002120
+
+#define CM_L3INSTR_L3_3_CLKCTRL                         0x4A008E20
+#define CM_L3INSTR_L3_INSTR_CLKCTRL                     0x4A008E28
+
+#define DEBUGSS_CFGBUS_PLLCTRL                          0x80031800
+#define DEBUGSS_CFGBUS_PLLCTRL_PLL_STATUS          *(unsigned int *) 0x80031804
+#define DEBUGSS_CFGBUS_PLLCTRL_PLL_GO              *(unsigned int *) 0x80031808
+#define DEBUGSS_CFGBUS_PLLCTRL_PLL_CONFIGURATION1  *(unsigned int *) 0x8003180C
+#define DEBUGSS_CFGBUS_PLLCTRL_PLL_CONFIGURATION2  *(unsigned int *) 0x80031810
+#define DEBUGSS_CFGBUS_PLLCTRL_PLL_CONFIGURATION3  *(unsigned int *) 0x80031814
+
+#define DRM_SUSPEND_CTRL                         0x54160200
+#define DRM_SUSPEND_CTRL_TIMER1                  (DRM_SUSPEND_CTRL + 0x00000040)
+#define DRM_SUSPEND_CTRL_TIMER2                  (DRM_SUSPEND_CTRL + 0x00000044)
+#define DRM_SUSPEND_CTRL_TIMER3                  (DRM_SUSPEND_CTRL + 0x00000048)
+#define DRM_SUSPEND_CTRL_TIMER4                  (DRM_SUSPEND_CTRL + 0x0000004C)
+#define DRM_SUSPEND_CTRL_TIMER5                  (DRM_SUSPEND_CTRL + 0x00000014)
+#define DRM_SUSPEND_CTRL_TIMER6                  (DRM_SUSPEND_CTRL + 0x00000018)
+#define DRM_SUSPEND_CTRL_TIMER7                  (DRM_SUSPEND_CTRL + 0x0000001C)
+#define DRM_SUSPEND_CTRL_TIMER8                  (DRM_SUSPEND_CTRL + 0x00000020)
+#define DRM_SUSPEND_CTRL_TIMER9                  (DRM_SUSPEND_CTRL + 0x00000050)
+#define DRM_SUSPEND_CTRL_TIMER10                 (DRM_SUSPEND_CTRL + 0x00000054)
+#define DRM_SUSPEND_CTRL_TIMER11                 (DRM_SUSPEND_CTRL + 0x00000058)
+#define DRM_SUSPEND_CTRL_TIMER12                 (DRM_SUSPEND_CTRL + 0x0000005C)
+#define DRM_SUSPEND_CTRL_TIMER13                 (DRM_SUSPEND_CTRL + 0x00000028)
+#define DRM_SUSPEND_CTRL_TIMER14                 (DRM_SUSPEND_CTRL + 0x00000030)
+#define DRM_SUSPEND_CTRL_TIMER15                 (DRM_SUSPEND_CTRL + 0x00000060)
+#define DRM_SUSPEND_CTRL_TIMER16                 (DRM_SUSPEND_CTRL + 0x00000074)
+
+#define DRM_SUSPEND_SRC_DSP1    (0x0)
+#define DRM_SUSPEND_SRC_IVA1    (0x1)
+#define DRM_SUSPEND_SRC_IVA2    (0x2)
+#define DRM_SUSPEND_SRC_IPU1_C0 (0x3)
+#define DRM_SUSPEND_SRC_IPU1_C1 (0x4)
+#define DRM_SUSPEND_SRC_MPU_C0  (0x5)
+#define DRM_SUSPEND_SRC_MPU_C1  (0x6)
+#define DRM_SUSPEND_SRC_DSP2    (0x7)
+
+StartUp()
+{
+    /*------------------ Load Common Gel Files -------------------*/
+    // STM traces
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_stm.gel");
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_tpiu.gel");
+
+    /*------------------ Memory Map Config -------------------*/
+    GEL_MapOff();
+    GEL_MapReset();
+    memorymap_init();
+    GEL_MapOn();
+}
+
+memorymap_init()
+{
+    GEL_MapAddStr(0x00000000, 0, 0x20000000, "R|W|AS4", 0);     /* GPMC */
+    GEL_MapAddStr(0x20000000, 0, 0x10000000, "R|W|AS4", 0);     /* PCIe */
+
+    GEL_MapAddStr(0x40038000, 0, 0x0000C000, "R|AS4", 0);       /* Public ROM - 48KBytes */
+
+    GEL_MapAddStr(0x402F0000, 0, 0x00010000, "R|W|AS4", 0);     /* MPU RAM - 48KBytes */
+    GEL_MapAddStr(0x40300000, 0, 0x00080000, "R|W|AS4", 0);     /* OCMRAM1 -  */
+    GEL_MapAddStr(0x40400000, 0, 0x00200000, "R|W|AS4", 0);     /* OCMRAM 2+3  */
+
+    // DSP1/2
+    GEL_MapAddStr(0x40800000, 0, 0x00808000, "R|W|AS4", 0);     /* FULL DSP1  */
+    GEL_MapAddStr(0x41000000, 0, 0x00808000, "R|W|AS4", 0);     /* FULL DSP2  */
+
+    // OCMRAM CBUF
+    GEL_MapAddStr(0x41800000, 0, 0x02000000, "R|W|AS4", 0);     /* CBUF  */
+
+    // edma, tpcc, ...
+    GEL_MapAddStr(0x43300000, 0, 0x00300000, "R|W|AS4", 0);     /* EDMA */
+    GEL_MapAddStr(0x43a00000, 0, 0x00040000, "R|W|AS4", 0);     /* OCMCROM */
+
+    // L3MAIN, L4s
+    GEL_MapAddStr(0x44000000, 0, 0x01800000, "R|W|AS4", 0);     /* L3 main1 */
+    GEL_MapAddStr(0x45800000, 0, 0x00040000, "R|W|AS4", 0);     /* MCASP1 */
+    GEL_MapAddStr(0x47000000, 0, 0x01000000, "R|AS4", 0);       /* STM - 16MBytes */
+
+    GEL_MapAddStr(0x48000000, 0, 0x00200000, "R|W|AS4", 0);     /* L4PER1 */
+    GEL_MapAddStr(0x48210000, 0, 0x00040000, "R|W|AS4", 0);     /* MPU  */
+    GEL_MapAddStr(0x48250000, 0, 0x000A0000, "R|W|AS4", 0);     /* MPU  */
+    GEL_MapAddStr(0x48970000, 0, 0x00040000, "R|W|AS4", 0);     /* MPU  */
+    GEL_MapAddStr(0x48400000, 0, 0x00C00000, "R|W|AS4", 0);     /* L4PER2+3 */
+    GEL_MapAddStr(0x49000000, 0, 0x01000000, "R|W|AS4", 0);     /* OCMCRAM CBUF 2 + 3 */
+    GEL_MapAddStr(0x4A000000, 0, 0x00E00000, "R|W|AS4", 0);     /* L4CFG */
+    GEL_MapAddStr(0x4AE00000, 0, 0x00200000, "R|W|AS4", 0);     /* L4WKUP */
+
+    GEL_MapAddStr(0x4B200000, 0, 0x00080000, "R|W|AS4", 0);     /* PRUSS1 */
+    GEL_MapAddStr(0x4B280000, 0, 0x00080000, "R|W|AS4", 0);     /* PRUSS2 */
+    GEL_MapAddStr(0x4B300000, 0, 0x00100000, "R|W|AS4", 0);     /* QSPI */
+
+    //emif/DMM, ...
+    GEL_MapAddStr(0x4C000000, 0, 0x03000000, "R|W|AS4", 0);     /* EMIF1/2, DMM */
+    GEL_MapAddStr(0x50000000, 0, 0x01000000, "R|W|AS4", 0);     /* GPMC */
+    GEL_MapAddStr(0x51000000, 0, 0x00800000, "R|W|AS4", 0);     /* PCIESS1 */
+    GEL_MapAddStr(0x54000000, 0, 0x00800000, "R|W|AS4", 0);     /* L3INSTR */
+    GEL_MapAddStr(0x54800000, 0, 0x00800000, "R|W|AS4", 0);     /* DEBUGSS */
+    GEL_MapAddStr(0x54140000, 0, 0x00800000, "R|W|AS4", 0);     /* DEBUGSS CONFIG*/
+    GEL_MapAddStr(0x56000000, 0, 0x02000000, "R|W|AS4", 0);     /* GPU */
+    GEL_MapAddStr(0x55000000, 0, 0x00800000, "R|W|AS4", 0);     /* IPU2 */
+    GEL_MapAddStr(0x58000000, 0, 0x00800000, "R|W|AS4", 0);     /* DSS */
+    GEL_MapAddStr(0x58800000, 0, 0x00800000, "R|W|AS4", 0);     /* IPU1 */
+    GEL_MapAddStr(0x5a000000, 0, 0x01400000, "R|W|AS4", 0);     /* IVA Global */
+
+    // Space addressing - big memories here
+    GEL_MapAddStr(0x5c000000, 0, 0x04000000, "R|W|AS4", 0);     /* QSPI */
+    GEL_MapAddStr(0x60000000, 0, 0x20000000, "R|W|AS4", 0);     /* DMM, tiled area */
+    GEL_MapAddStr(0x80000000, 0, 0x40000000, "R|W|AS4", 0);     /* DDR Area */
+    // APB view
+    GEL_MapAddStr(0x80000000, 1, 0x80000000, "R|W|AS4", 0);     /* DDR Area */
+
+}
+
+OnTargetConnect()
+{
+    int device_type;
+
+    GEL_TextOut("--->>> CONFIGURE DEBUG DPLL settings to 1.9 GHZs  <<<---\n");
+    dpll_dbgss_config_board();
+
+    GEL_TextOut("--->>> TURNING ON L3_INSTR and L3_3 clocks required for debug instrumention <<<<<<----\n");
+    configure_CM2_provide_instrumentation_clocks();
+
+    device_type = (RD_MEM_32(0x4A002134) & 0x1C0) >> 6;
+
+    GEL_TextOut("--->>> Mapping TIMER supsend sources to default cores <<<<<<----\n");
+    
+    /*   --------------------------------------------
+     *  | Target       | Default availMask           |
+     *   --------------------------------------------
+     *  | A15          | 0x0202 (GPTimer 2 & 10)     |
+     *  | DSP          | 0x0030 (GPTimer 5 & 6)      |
+     *  | IPU(Dual-M4) | 0x050C (GPTimer 3,4,9 & 11) |
+     *   --------------------------------------------
+     */
+    WR_MEM_32(DRM_SUSPEND_CTRL_TIMER2,  (DRM_SUSPEND_SRC_MPU_C0 << 4)  | 0x1);
+    WR_MEM_32(DRM_SUSPEND_CTRL_TIMER10, (DRM_SUSPEND_SRC_MPU_C1 << 4)  | 0x1);
+    WR_MEM_32(DRM_SUSPEND_CTRL_TIMER5,  (DRM_SUSPEND_SRC_DSP1 << 4)    | 0x1);
+    WR_MEM_32(DRM_SUSPEND_CTRL_TIMER6,  (DRM_SUSPEND_SRC_DSP2 << 4)    | 0x1);
+    WR_MEM_32(DRM_SUSPEND_CTRL_TIMER3,  (DRM_SUSPEND_SRC_IPU1_C0 << 4) | 0x1);
+    WR_MEM_32(DRM_SUSPEND_CTRL_TIMER4,  (DRM_SUSPEND_SRC_IPU1_C1 << 4) | 0x1);
+    
+    // Applying Firewall Settings
+    // Nothing to do for GP devices
+    if (device_type != 0x3)
+    {
+        GEL_TextOut("--->>> Applying Firewall Settings... <<<---\n");
+        if (device_type == 0x2)
+        {
+            // HS device
+            GEL_TextOut("\t--->>> HS device, no FW settings needed  <<<---\n");
+        }
+        else if (device_type == 0x1)
+        {
+            // EMU device
+            GEL_TextOut("\t--->>> EMU device, FW settings needed -> allow all access <<<---\n");
+            set_firewalls_to_public();
+        }
+        else if (device_type == 0x0)
+        {
+            // TEST device
+            GEL_TextOut("\t--->>> TEST device, FW settings needed -> allow all access <<<---\n");
+            set_firewalls_to_public();
+        }
+        else
+        {
+            GEL_TextOut("\t--->>> UNKOWN device maybe NON FUSED , FW settings needed -> allow all access <<<---\n");
+            set_firewalls_to_public();
+        }
+        GEL_TextOut("--->>> Firewall Settings DONE! <<<---\n");
+    }
+}
+
+dpll_dbgss_config_board()
+{
+    unsigned int temp;
+    unsigned int count = 0;
+    if (DEBUGSS_CFGBUS_PLLCTRL_PLL_STATUS@data & 0x2)
+    {
+        GEL_TextOut("DEBUGSS DPLL is already locked, nothing done  \n");
+      }
+    else
+    {
+        GEL_TextOut("> Setup DebugSS 1.9GHz in progress...\n");
+        // PLL CONFIGURATION1
+        // M5 [30:26] = 0x9; M4 [25:21] = 0x4;
+        // M  [20:9] = 0x1DB (475); N  [8:1] = 0x9
+        DEBUGSS_CFGBUS_PLLCTRL_PLL_CONFIGURATION1@data = 0x2483B612 ; 
+        // PLL CONFIGURATION2
+        DEBUGSS_CFGBUS_PLLCTRL_PLL_CONFIGURATION2@data = 0xE52008;
+        // PLL CONFIGURATION3 - M6 [4:0] = 0x9 - 97 MHz
+        tpiu_config_board_slow();
+        // REQUEST DPLL
+        DEBUGSS_CFGBUS_PLLCTRL_PLL_GO@data = 0x1;
+        // Reading 1 : DPLL is locked.
+        while ( ((DEBUGSS_CFGBUS_PLLCTRL_PLL_STATUS@data & 0x2)!= 0x2) && (count < GTIMEOUT) )
+        {
+            count++;
+            if (count = GTIMEOUT) {
+                GEL_TextOut("DEBUGSS DPLL is not locked, time out occured  \n");
+            }
+        }
+        GEL_TextOut("< Done with Setup DebugSS PLL Clocking 1.9GHz \n");
+        GEL_TextOut("< Done with Setup DebugSS ATB Clocking 380MHz \n");
+        GEL_TextOut("< Done with Setup DebugSS Trace export clock (TPIU) to 97MHz \n");
+    }
+}
+
+configure_CM2_provide_instrumentation_clocks()
+{
+    *(int*)CM_L3INSTR_L3_3_CLKCTRL = 0x1; /* Provide L3_3 clock */
+
+    *(int*)CM_L3INSTR_L3_INSTR_CLKCTRL = 0x1; /* Provide L3 instr clock */
+
+    GEL_TextOut("---<<< L3 instrumentation clocks are enabled >>>> ---\n");
+}
+
+hotmenu set_firewalls_to_public()
+{
+    int control_l3_hw_fw_exported_values_conf_dbg_register_value;
+
+    int control_l3_hw_fw_exported_values_conf_lock_register_value;
+
+    int control_l3ram_regupdate_control_dbg_register_value;
+
+    int control_l3ram_regupdate_control_lock_register_value;
+
+    int control_l4_hw_fw_exported_values_conf_register_value;
+
+    if (DEBUG_PRINT)
+    {
+        GEL_TextOut("--->>> set_firewalls_to_public <<<---\n");
+    }
+
+    /* Set Public rights for some L3 firewalls */
+    control_l3_hw_fw_exported_values_conf_dbg_register_value = *(int*)CONTROL_L3_HW_FW_EXPORTED_VALUES_CONF_DBG;
+
+    control_l3_hw_fw_exported_values_conf_lock_register_value = *(int*)CONTROL_L3_HW_FW_EXPORTED_VALUES_CONF_LOCK;
+
+    if (DEBUG_PRINT)
+    {
+        GEL_TextOut("L3_DBG_FW1 %x\n",,,,, control_l3_hw_fw_exported_values_conf_dbg_register_value);
+    }
+
+    control_l3_hw_fw_exported_values_conf_dbg_register_value = 0xFFFFFFFF;
+    *(int*)CONTROL_L3_HW_FW_EXPORTED_VALUES_CONF_DBG = control_l3_hw_fw_exported_values_conf_dbg_register_value;
+
+    if (DEBUG_PRINT)
+    {
+        GEL_TextOut("L3_DBG_FW2 %x\n",,,,, control_l3_hw_fw_exported_values_conf_dbg_register_value);
+    }
+
+    if (DEBUG_PRINT)
+    {
+        GEL_TextOut("L3_LOCK_FW1 %x\n",,,,, control_l3_hw_fw_exported_values_conf_lock_register_value);
+    }
+
+    control_l3_hw_fw_exported_values_conf_lock_register_value &= 0xFFFF720A;
+    *(int*)CONTROL_L3_HW_FW_EXPORTED_VALUES_CONF_LOCK = control_l3_hw_fw_exported_values_conf_lock_register_value;
+
+    if (DEBUG_PRINT)
+    {
+        GEL_TextOut("L3_DBG_FW2 %x\n",,,,, control_l3_hw_fw_exported_values_conf_lock_register_value);
+    }
+
+    /* Request L3 firewalls to load exported values: */
+    /*  - Set BUSY_REQ bit (avoid requests to go through FW while updating registers) */
+    /*  - Request load of exported values (Write '1' to FW_LOAD_REQ bit) */
+    /*  - Clear BUSY_REQ bit */
+
+    /* Set BUSY_REQ Bit */
+    *(int*)fw_lli_ocp_regupdate = 0x1;
+    *(int*)fw_modem_regupdate_control = 0x1;
+    *(int*)fw_modem_ocp_regupdate_control = 0x1;
+    *(int*)fw_lli_regupdate = 0x1;
+    *(int*)fw_mpuma_regupdate_control = 0x1;
+    *(int*)fw_emif_regupdate_control = 0x1;
+    *(int*)fw_sgx_regupdate_control = 0x1;
+    *(int*)fw_iss_regupdate_control = 0x1;
+    *(int*)fw_ipu_regupdate_control = 0x1;
+    *(int*)fw_dss_regupdate_control = 0x1;
+    *(int*)fw_sl2_regupdate_control = 0x1;
+    *(int*)fw_ivahd_regupdate_control = 0x1;
+    *(int*)fw_abe_regupdate_control = 0x1;
+    *(int*)fw_cal_regupdate_control = 0x1;
+    *(int*)fw_ct_tbr_regupdate_control = 0x1;
+    *(int*)fw_crypto_regupdate_control = 0x1;
+    *(int*)fw_debug_regupdate_control = 0x1;
+    *(int*)fw_l3_inst_regupdate_control = 0x1;
+
+    if (DEBUG_PRINT)
+    {
+        GEL_TextOut("--->>> set_firewalls_to_public 1<<<---\n");
+    }
+
+    /* Request load of exported value */
+    *(int*)fw_lli_ocp_regupdate = 0x3;
+    *(int*)fw_modem_regupdate_control = 0x3;
+    *(int*)fw_modem_ocp_regupdate_control = 0x3;
+    *(int*)fw_lli_regupdate = 0x3;
+    *(int*)fw_mpuma_regupdate_control = 0x3;
+    *(int*)fw_emif_regupdate_control = 0x3;
+    *(int*)fw_sgx_regupdate_control = 0x3;
+    *(int*)fw_iss_regupdate_control = 0x3;
+    *(int*)fw_ipu_regupdate_control = 0x3;
+    *(int*)fw_dss_regupdate_control = 0x3;
+    *(int*)fw_sl2_regupdate_control = 0x3;
+    *(int*)fw_ivahd_regupdate_control = 0x3;
+    *(int*)fw_abe_regupdate_control = 0x3;
+    *(int*)fw_cal_regupdate_control = 0x3;
+    *(int*)fw_ct_tbr_regupdate_control = 0x3;
+    *(int*)fw_crypto_regupdate_control = 0x3;
+    *(int*)fw_debug_regupdate_control = 0x3;
+    *(int*)fw_l3_inst_regupdate_control = 0x3;
+
+    if (DEBUG_PRINT)
+    {
+        GEL_TextOut("--->>> set_firewalls_to_public 2<<<---\n");
+    }
+
+    /* Clear BUSY_REQ Bit */
+    *(int*)fw_lli_ocp_regupdate = 0x3;
+    *(int*)fw_modem_regupdate_control = 0x0;
+    *(int*)fw_modem_ocp_regupdate_control = 0x0;
+    *(int*)fw_lli_regupdate = 0x0;
+    *(int*)fw_mpuma_regupdate_control = 0x0;
+    *(int*)fw_emif_regupdate_control = 0x0;
+    *(int*)fw_sgx_regupdate_control = 0x0;
+    *(int*)fw_iss_regupdate_control = 0x0;
+    *(int*)fw_ipu_regupdate_control = 0x0;
+    *(int*)fw_dss_regupdate_control = 0x0;
+    *(int*)fw_sl2_regupdate_control = 0x0;
+    *(int*)fw_ivahd_regupdate_control = 0x0;
+    *(int*)fw_abe_regupdate_control = 0x0;
+    *(int*)fw_cal_regupdate_control = 0x0;
+    *(int*)fw_ct_tbr_regupdate_control = 0x0;
+    *(int*)fw_crypto_regupdate_control = 0x0;
+    *(int*)fw_debug_regupdate_control = 0x0;
+    *(int*)fw_l3_inst_regupdate_control = 0x0;
+
+    if (DEBUG_PRINT)
+    {
+        GEL_TextOut("--->>> set_firewalls_to_public 3<<<---\n");
+    }
+
+    /*  GPMC firewall configuration load request is done there to take care of extermal booting */
+    /* in GPMC case. Indeed setting the BUSY_REQ bit locks access to GPMC in which code is located */
+    /* when booting in GPMC. Thus in order to avoid deadlock (can not fetch code because of BUSY_REQ */
+    /* assertion) the six following instructions are aligned on 8 words boundary. So they are all */
+    /* loaded in one time in the prefetch buffer, avoiding the deadlock case to happen. */
+
+    /* Set GPMC BUSY_REQ */
+    *(int*)fw_gpmc_regupdate_control = 0x1;
+
+    /* Request load of exported value */
+    *(int*)fw_gpmc_regupdate_control = 0x3;
+
+    /* Clear BUSY_REQ Bit */
+    *(int*)fw_gpmc_regupdate_control = 0x0;
+
+    if (DEBUG_PRINT)
+    {
+        GEL_TextOut("--->>> set_firewalls_to_public 4<<<---\n");
+    }
+
+    /* Configure partially OCMCRAM in public with region1 */
+    /* control_l3ram_regupdate_control_register_value = *(int*)fw_l3ram_regupdate_control; */
+     *(int*)fw_l3ram_regupdate_control = 0x1;
+    //*(int*)FW_L3RAM_START_REGION_1_VALUE = fw_l3ram_start_region_1_val;
+    *(int*)0x4A212090 = 0x0;
+    //*(int*)FW_L3RAM_END_REGION_1_VALUE =  fw_l3ram_end_region_1_val;
+    *(int*)0x4A212094 = 0xb001;
+    *(int*)fw_l3ram_regupdate_control = 0x0;
+
+    if (DEBUG_PRINT)
+    {
+        GEL_TextOut("--->>> set_firewalls_to_public 5<<<---\n");
+    }
+
+    /* Set public rights for some L4 firewalls */
+    control_l4_hw_fw_exported_values_conf_register_value = *(int*)control_l4_hw_fw_exported_values_conf;
+    /* Clear L4CONFIG_USIM_seclock bit */
+    control_l4_hw_fw_exported_values_conf_register_value &= ~(1 << 6);
+
+    *(int*)CONTROL_L4_HW_FW_EXPORTED_VALUES_CONF = control_l4_hw_fw_exported_values_conf_register_value;
+
+    /* Request L4CONFIG firewalls to load exported values */
+    *(int*)CONTROL_SEC_LOAD_FW_EXPORTED_VALUES=0x4;
+
+    /* Set debug firewall to public */
+    *(int*)fw_debug_regupdate_control = 0xFFFFFFFF;
+    if (DEBUG_PRINT)
+    {
+        GEL_TextOut("--->>> set_firewalls_to_public <<<---\n");
+    }
+}
+
+

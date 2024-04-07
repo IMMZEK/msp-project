@@ -1,0 +1,96 @@
+/*--------------------------------------------------------------------*/
+/*                                                                    */
+/* This gel file allows the Cortex-A15 CPU1 to come out of reset      */
+/* so that Cortex-A15 CPU0 can be halted in WIR mode on a GP device   */
+/* in non-secure mode, this is                                        */
+/* because the secure ROM code running on CPU0 checks that CPU1 is    */
+/* out of reset on CPU0 before exiting secure mode to go into         */
+/* non-secure mode                                                    */
+/*                                                                    */
+/*                                                                    */
+/*--------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------*/
+/* FUNCTION SUMMARY                                                   */
+/*                                                                    */
+/* ReleaseWIR_CortexA15_CPU1()                                        */
+/*                                                                    */
+/*--------------------------------------------------------------------*/
+
+
+#define WR_MEM_32(addr, data)   *(unsigned int*)(addr) =(unsigned int)(data)
+#define RD_MEM_32(addr)         *(unsigned int*)(addr)
+#define uint32_t                unsigned int
+
+
+//----------------------------------------------------------------------
+#define SDTR_CORTEX_A15_1         IP_TAP_CNTL_1
+
+// masks and values for the SDTR register
+#define RESETOCCURRED            (unsigned int)(0x1 << 22)
+#define POWERLOSSDETECTED        (unsigned int)(0x1 << 21)
+#define RELEASEFROMWIR           (unsigned int)(0x1 << 17)
+#define RESETCONTROL_MASK        (unsigned int)(0x3 << 14)
+#define EXECUTEACTION            (unsigned int)(0x1 << 10)
+
+#define RESETCNTL_NORMAL         (unsigned int)(0x0 << 14)
+#define RESETCNTL_WIR            (unsigned int)(0x1 << 14)
+#define RESETCNTL_BLOCK          (unsigned int)(0x2 << 14)
+#define RESETCNTL_ASSERT         (unsigned int)(0x3 << 14)
+
+OnTargetConnect()
+{
+    int device_type;
+  
+    /* Check device type, if GP release CPU1 from reset */    
+    device_type = (RD_MEM_32(0x4A002134) & 0x1C0) >> 6;
+    
+    if (device_type  == 0x3)
+    {          
+        ReleaseWIR_CortexA15_CPU1();
+    }
+    else
+    {
+        GEL_TextOut("--->>> Device type not GP <<<---\n");          
+    }
+}
+
+menuitem "CS_DAP_PC_Utility";
+
+hotmenu ReleaseWIR_CortexA15_CPU1()
+{
+    int SDTR_temp;
+    int writeBackValue;
+
+    SDTR_temp = SDTR_CORTEX_A15_1;  /* Read the SDTR value */
+   
+    if ((SDTR_temp & RESETCNTL_WIR) == RESETCNTL_WIR)
+    {
+        /* Do a read/modify write such that we write zero to following bits */
+        /* EXECUTEACTION bit */
+        /* RELEASEFROMWIR bit */
+        /* POWERLOSSDETECTED bit */
+        /* Reset Control bits */
+        /* Reset Occurred bit */
+
+        writeBackValue = 
+          SDTR_temp & (~( POWERLOSSDETECTED | 
+                          RELEASEFROMWIR    | 
+                          EXECUTEACTION     | 
+                          RESETCONTROL_MASK |  
+                          RESETOCCURRED) );
+
+        SDTR_CORTEX_A15_1 = writeBackValue;            
+
+        GEL_TextOut("Cortex-A15 1 has been released from Wait-In-Reset.\n");
+    }
+    else
+    {
+        GEL_TextOut("Cortex-A15 1 is not in WIR mode so nothing to do.\n");
+    }   
+} 
+
+          
+
+   
+

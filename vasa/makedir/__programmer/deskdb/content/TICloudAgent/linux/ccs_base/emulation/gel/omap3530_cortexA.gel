@@ -1,0 +1,477 @@
+/*******************************************************************/
+/* This GEL file is loaded on the command line of Code Composer    */
+/* The StartUp() function is called every time you start           */
+/* Code Composer.  You can customize this function to              */
+/* initialize wait states or to perform other initialization.      */
+/*                                                                 */
+/* OMAP3530/25 Master GEL file for Cortex-A8 processor             */
+/*                                                                 */
+/* - To enable C64+ please execute IVA22_GEM_startup()             */
+/*                                                                 */
+/* - If default memory type (DDR) is changed for EVM, adjust       */
+/*   OnTargetConnect() callback appropriately.                     */
+/*******************************************************************/
+StartUp()
+{
+    GEL_LoadGel("$(GEL_file_dir)/cortexA8_util.gel");
+    GEL_LoadGel("$(GEL_file_dir)/omap35xx_resets.gel");
+    GEL_LoadGel("$(GEL_file_dir)/omap3430_reconfigure_firewalls.gel");
+    GEL_LoadGel("$(GEL_file_dir)/omap3430_prcm_clock_configs.gel");
+    GEL_LoadGel("$(GEL_file_dir)/omap3430_sdrc_configs.gel");
+    GEL_LoadGel("$(GEL_file_dir)/CortexA8_CrossTrigger.gel");
+    GEL_LoadGel("$(GEL_file_dir)/etm_cortexA8_registers.gel");
+
+    GEL_MapOff();
+    GEL_MapReset();
+    memorymap_init();
+    GEL_MapOn();
+}
+
+
+memorymap_init()
+{
+    /* !! FOLLOWING MEM SPACE TO BE CONFIGURED PROPERLY !! */
+    GEL_MapAddStr(0x00000000, 0, 0x04000000, "R"    , 0);    /* GPMC CS0 ROM */
+    GEL_MapAddStr(0x04000000, 0, 0x00100000, "R|W|AS2", 0);  /* GPMC CS0 remapped */
+    GEL_MapAddStr(0x40000000, 0, 0x00200000, "R"    , 0);    /* OCMC-ROM */
+    GEL_MapAddStr(0x40200000, 0, 0x00100000, "R|W", 0);      /* OCMC-RAM */
+    GEL_MapAddStr(0x40300000, 0, 0x07B00000, "R|W", 0);      /* TO BE CONFIGURED*/    
+
+    /* L4-peripheral memory space mapping --------------------------------------*/
+    GEL_MapAddStr(0x48002000, 0, 0x00001000, "R|W|AS4", 0);  /* OMAP2430C system control - module */
+    GEL_MapAddStr(0x48003000, 0, 0x00001000, "R|W|AS4", 0);  /* OMAP2430C system control - L4 interconnect */
+    GEL_MapAddStr(0x48004000, 0, 0x00002000, "R|W|AS4", 0);  /* CM - module Region A */
+    GEL_MapAddStr(0x48006000, 0, 0x00000800, "R|W|AS4", 0);  /* CM - module Region B */
+    GEL_MapAddStr(0x48007000, 0, 0x00001000, "R|W|AS4", 0);  /* CM - L4 interconnect */    
+    GEL_MapAddStr(0x48200000, 0, 0x00001000, "R|W|AS4", 0);  /* MPU interrupt (mINT) */
+    GEL_MapAddStr(0x48050000, 0, 0x00000400, "R|W|AS4", 0);  /* DISPLAY subsystem - Display Subsystem Top */
+    GEL_MapAddStr(0x48050400, 0, 0x00000400, "R|W|AS4", 0);  /* DISPLAY subsystem - Display Controller (DISP) */
+    GEL_MapAddStr(0x48050800, 0, 0x00000400, "R|W|AS4", 0);  /* DISPLAY subsystem - Remote Frame Buffer Interface (RFBI)*/
+    GEL_MapAddStr(0x48050C00, 0, 0x00000400, "R|W|AS1", 0);  /* DISPLAY subsystem - Video encoder (VENC) */
+    GEL_MapAddStr(0x48051000, 0, 0x00001000, "R|W|AS4", 0);  /* DISPLAY subsystem - L4 interconnect */
+    GEL_MapAddStr(0x48056000, 0, 0x00001000, "R|W|AS4", 0);  /* SDMA - module (L3) */
+    GEL_MapAddStr(0x48057000, 0, 0x00001000, "R|W|AS4", 0);  /* SDMA - L4 interconnect */
+    GEL_MapAddStr(0x48058000, 0, 0x00001000, "R|W|AS4", 0);  /* SSI - SSI Top (ssi_func.doc)*/
+    GEL_MapAddStr(0x48059000, 0, 0x00001000, "R|W|AS4", 0);  /* SSI - SSI GDD (ssi_func.doc)*/
+    GEL_MapAddStr(0x4805A000, 0, 0x00001000, "R|W|AS4", 0);  /* SSI - SSI Port1 (ssi_func.doc)*/
+    GEL_MapAddStr(0x4805B000, 0, 0x00001000, "R|W|AS4", 0);  /* SSI - SSI Port2 (ssi_func.doc)*/
+    GEL_MapAddStr(0x4805C000, 0, 0x00001000, "R|W|AS4", 0);  /* SSI - L4 interconnect */
+    GEL_MapAddStr(0x4805E000, 0, 0x00001000, "R|W|AS4", 0);  /* FS USB - module (L3) (usb_otg_func.doc)*/
+    GEL_MapAddStr(0x4805F000, 0, 0x00001000, "R|W|AS4", 0);  /* FS USB - L4 interconnect */
+    GEL_MapAddStr(0x48060000, 0, 0x00001000, "R|W|AS2", 0);  /* I2C3 - module (msi2cocp_func.doc)*/
+    GEL_MapAddStr(0x48061000, 0, 0x00001000, "R|W|AS2", 0);  /* I2C3 - L4 interconnect */
+    GEL_MapAddStr(0x48068000, 0, 0x00001000, "R|W|AS4", 0);  /* XTI - module (xti_func.doc)*/
+    GEL_MapAddStr(0x48069000, 0, 0x00001000, "R|W|AS4", 0);  /* XTI - L4 interconnect */
+    GEL_MapAddStr(0x4806A000, 0, 0x00001000, "R|W|AS1", 0);  /* UART1 - module */
+    GEL_MapAddStr(0x4806B000, 0, 0x00001000, "R|W|AS2", 0);  /* UART1 - L4 interconnect */
+    GEL_MapAddStr(0x4806C000, 0, 0x00001000, "R|W|AS1", 0);  /* UART2 - module */
+    GEL_MapAddStr(0x4806D000, 0, 0x00001000, "R|W|AS2", 0);  /* UART2 - L4 interconnect */
+    GEL_MapAddStr(0x48070000, 0, 0x00001000, "R|W|AS2", 0);  /* I2C1 - module (msi2cocp_func.doc)*/
+    GEL_MapAddStr(0x48071000, 0, 0x00001000, "R|W|AS2", 0);  /* I2C1 - L4 interconnect */
+    GEL_MapAddStr(0x48072000, 0, 0x00001000, "R|W|AS2", 0);  /* I2C2 - module (msi2cocp_func.doc)*/
+    GEL_MapAddStr(0x48073000, 0, 0x00001000, "R|W|AS2", 0);  /* I2C2 - L4 interconnect */
+    GEL_MapAddStr(0x48074000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP1 - module */
+    GEL_MapAddStr(0x48075000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP1 - L4 interconnect */
+    GEL_MapAddStr(0x48086000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER10 - module */
+    GEL_MapAddStr(0x48087000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER10 - L4 interconnect */
+    GEL_MapAddStr(0x48088000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER11 - module */
+    GEL_MapAddStr(0x48089000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER11 - L4 interconnect */
+    GEL_MapAddStr(0x48092000, 0, 0x00001000, "R|W|AS2", 0);  /* FAC - module (fac_ocp_func.doc)*/
+    GEL_MapAddStr(0x48093000, 0, 0x00001000, "R|W|AS2", 0);  /* FAC - L4 interconnect */
+    GEL_MapAddStr(0x48094000, 0, 0x00001000, "R|W|AS4", 0);  /* MAILBOX - module (Mailboxes_func.doc)*/
+    GEL_MapAddStr(0x48095000, 0, 0x00001000, "R|W|AS4", 0);  /* MAILBOX - L4 interconnect */
+    GEL_MapAddStr(0x48096000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP5 (Digital for MIDI)- module */
+    GEL_MapAddStr(0x48097000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP5 (Digital for MIDI)- L4 interconnect */
+    GEL_MapAddStr(0x48098000, 0, 0x00001000, "R|W|AS4", 0);  /* SPI1 - module (mcspiocp_func.doc)*/
+    GEL_MapAddStr(0x48099000, 0, 0x00001000, "R|W|AS4", 0);  /* SPI1 - L4 interconnect */
+    GEL_MapAddStr(0x4809A000, 0, 0x00001000, "R|W|AS4", 0);  /* SPI2 - module (mcspiocp_func.doc)*/
+    GEL_MapAddStr(0x4809B000, 0, 0x00001000, "R|W|AS4", 0);  /* SPI2 - L4 interconnect */
+    GEL_MapAddStr(0x4809C000, 0, 0x00001000, "R|W|AS2", 0);  /* HS-MMC/SDIO1 - module (mmcsdioocp_func.doc)*/
+    GEL_MapAddStr(0x4809D000, 0, 0x00001000, "R|W|AS2", 0);  /* HS-MMC/SDIO1 - L4 interconnect */
+    GEL_MapAddStr(0x4809E000, 0, 0x00001000, "R|W|AS4", 0);  /* MS_PRO - module */
+    GEL_MapAddStr(0x4809F000, 0, 0x00001000, "R|W|AS4", 0);  /* MS_PRO - L4 interconnect */
+    GEL_MapAddStr(0x480A0000, 0, 0x00001000, "R|W|AS4", 0);  /* RNG - module (rng_func.doc)*/
+    GEL_MapAddStr(0x480A1000, 0, 0x00001000, "R|W|AS4", 0);  /* RNG - L4 interconnect */
+    GEL_MapAddStr(0x480A2000, 0, 0x00001000, "R|W|AS4", 0);  /* DES3DES1 - module (des_func.doc)*/
+    GEL_MapAddStr(0x480A3000, 0, 0x00001000, "R|W|AS4", 0);  /* DES3DES1 - L4 interconnect */
+    GEL_MapAddStr(0x480A4000, 0, 0x00001000, "R|W|AS4", 0);  /* SHA1MD5 1 - module */
+    GEL_MapAddStr(0x480A5000, 0, 0x00001000, "R|W|AS4", 0);  /* SHA1MD5 1 - L4 interconnect */
+    GEL_MapAddStr(0x480A6000, 0, 0x00001000, "R|W|AS4", 0);  /* AES1 - module (aes_func.doc)*/
+    GEL_MapAddStr(0x480A7000, 0, 0x00001000, "R|W|AS4", 0);  /* AES1 - L4 interconnect */
+    GEL_MapAddStr(0x480A8000, 0, 0x00002000, "R|W|AS4", 0);  /* PKA - module (pka_func.doc)*/
+    GEL_MapAddStr(0x480AA000, 0, 0x00001000, "R|W|AS4", 0);  /* PKA - L4 interconnect */
+    GEL_MapAddStr(0x480AB000, 0, 0x00001000, "R|W|AS4", 0);  /* USB 2.0 High speed - module*/
+    GEL_MapAddStr(0x480AC000, 0, 0x00001000, "R|W|AS4", 0);  /* USB 2.0 High speed - L4 Interconnect*/
+    GEL_MapAddStr(0x480B0000, 0, 0x00001000, "R|W|AS4", 0);  /* MG - module */
+    GEL_MapAddStr(0x480B1000, 0, 0x00001000, "R|W|AS4", 0);  /* MG - L4 interconnect */
+    GEL_MapAddStr(0x480B2000, 0, 0x00001000, "R|W|AS4", 0);  /* HDQ (1 wire) - module (hdq1wocp_func.doc)*/
+    GEL_MapAddStr(0x480B3000, 0, 0x00001000, "R|W|AS4", 0);  /* HDQ (1 wire) - L4 interconnect */
+    GEL_MapAddStr(0x480B4000, 0, 0x00001000, "R|W|AS2", 0);  /* HS-MMC/SDIO2 - module (mmcsdioocp_func.doc)*/
+    GEL_MapAddStr(0x480B5000, 0, 0x00001000, "R|W|AS2", 0);  /* HS-MMC/SDIO2 - L4 interconnect */
+    GEL_MapAddStr(0x480B8000, 0, 0x00001000, "R|W|AS4", 0);  /* SPI3 - module (mcspiocp_func.doc)*/
+    GEL_MapAddStr(0x480B9000, 0, 0x00001000, "R|W|AS4", 0);  /* SPI3 - L4 interconnect */
+    GEL_MapAddStr(0x480BA000, 0, 0x00001000, "R|W|AS4", 0);  /* SPI4 - module (mcspiocp_func.doc)*/
+    GEL_MapAddStr(0x480BB000, 0, 0x00001000, "R|W|AS4", 0);  /* SPI4 - L4 interconnect */
+    GEL_MapAddStr(0x480B6000, 0, 0x00001000, "R|W|AS4", 0);  /* ICR ARM11 Access- module */
+    GEL_MapAddStr(0x480B7000, 0, 0x00001000, "R|W|AS4", 0);  /* ICR ARM11 Access - L4 interconnect */
+    GEL_MapAddStr(0x480BC000, 0, 0x00004000, "R|W|AS4", 0);  /* CAMERA ISP - Camera Top (camera_func.doc)*/
+    GEL_MapAddStr(0x480C0000, 0, 0x00001000, "R|W|AS4", 0);  /* CAMERA ISP - L4 interconnect */
+    GEL_MapAddStr(0x480C1000, 0, 0x00001000, "R|W|AS4", 0);  /* DES3DES2 - module (des_func.doc)*/
+    GEL_MapAddStr(0x480C2000, 0, 0x00001000, "R|W|AS4", 0);  /* DES3DES2 - L4 interconnect */
+    GEL_MapAddStr(0x480C3000, 0, 0x00001000, "R|W|AS4", 0);  /* SHA1MD5 2 - module */
+    GEL_MapAddStr(0x480C4000, 0, 0x00001000, "R|W|AS4", 0);  /* SHA1MD5 2 - L4 interconnect */
+    GEL_MapAddStr(0x480C5000, 0, 0x00001000, "R|W|AS4", 0);  /* AES2 - module (aes_func.doc)*/
+    GEL_MapAddStr(0x480C6000, 0, 0x00001000, "R|W|AS4", 0);  /* AES2 - L4 interconnect */
+    GEL_MapAddStr(0x480C7000, 0, 0x00001000, "R|W|AS4", 0);  /* Modem INterrupt Handler - Module*/
+    GEL_MapAddStr(0x480C8000, 0, 0x00001000, "R|W|AS4", 0);  /* Modem INterrupt Handler - L4 Interconnect*/
+    GEL_MapAddStr(0x480C9000, 0, 0x00001000, "R|W|AS4", 0);  /* Smart Reflex1  - Module*/
+    GEL_MapAddStr(0x480CA000, 0, 0x00001000, "R|W|AS4", 0);  /* Smart Reflex1  - L4 Interconnect*/
+    GEL_MapAddStr(0x480CB000, 0, 0x00001000, "R|W|AS4", 0);  /* Smart Reflex2  - Module*/
+    GEL_MapAddStr(0x480CC000, 0, 0x00001000, "R|W|AS4", 0);  /* Smart Reflex2  - L4 Interconnect*/
+    GEL_MapAddStr(0x480CD000, 0, 0x00001000, "R|W|AS4", 0);  /* ICR ARM9 Access - module */
+    GEL_MapAddStr(0x480CE000, 0, 0x00001000, "R|W|AS4", 0);  /* ICR ARM9 Access - L4 interconnect */
+    GEL_MapAddStr(0x48304000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER12 - module */
+    GEL_MapAddStr(0x48305000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER12 - L4 interconnect */
+    GEL_MapAddStr(0x48306000, 0, 0x00002000, "R|W|AS4", 0);  /* PRCM - module Region A */
+    GEL_MapAddStr(0x48308000, 0, 0x00000800, "R|W|AS4", 0);  /* PRCM - module Region B */
+    GEL_MapAddStr(0x48309000, 0, 0x00001000, "R|W|AS4", 0);  /* PRCM - L4 interconnect */
+    GEL_MapAddStr(0x4830C000, 0, 0x00001000, "R|W|AS4", 0);  /* WDTIMER1 module _Secure_ */
+    GEL_MapAddStr(0x4830D000, 0, 0x00001000, "R|W|AS2", 0);  /* WDTIMER1 L4 interconnect */
+    GEL_MapAddStr(0x48310000, 0, 0x00001000, "R|W|AS4", 0);  /* GPIO1 module (quadgpio.doc)*/
+    GEL_MapAddStr(0x48311000, 0, 0x00001000, "R|W|AS4", 0);  /* Quad GPIO top (OCP splitter) (quadgpio.doc)*/
+    GEL_MapAddStr(0x48314000, 0, 0x00001000, "R|W|AS4", 0);  /* WDTIMER 2 module _OMAP_ */
+    GEL_MapAddStr(0x48315000, 0, 0x00001000, "R|W|AS4", 0);  /* WDTIMER 2 L4 interconnect */
+    GEL_MapAddStr(0x48318000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER1 - module */
+    GEL_MapAddStr(0x48319000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER1 - L4 interconnect */
+    GEL_MapAddStr(0x48320000, 0, 0x00001000, "R|W|AS4", 0);  /* 32K TIMER - module */
+    GEL_MapAddStr(0x48321000, 0, 0x00001000, "R|W|AS4", 0);  /* 32K TIMER - L4 interconnect */
+    GEL_MapAddStr(0x49000000, 0, 0x00000800, "R|W|AS4", 0);  /* L4_Wakeup Configuration OMAP35xx Address/Protection */
+    GEL_MapAddStr(0x49000800, 0, 0x00000800, "R|W|AS1", 0);  /* L4_Wakeup Configuration OMAP35xx Initiator port */
+    GEL_MapAddStr(0x49001000, 0, 0x00001000, "R|W|AS4", 0);  /* L4_Wakeup Configuration OMAP35xx Link Agent */
+    GEL_MapAddStr(0x49020000, 0, 0x00001000, "R|W|AS1", 0);  /* UART3 - module (uartirdacirocp.doc)*/
+    GEL_MapAddStr(0x49021000, 0, 0x00001000, "R|W|AS2", 0);  /* UART3 - L4 interconnect */
+    GEL_MapAddStr(0x49022000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP2 - module */
+    GEL_MapAddStr(0x49023000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP2 - L4 interconnect */
+    GEL_MapAddStr(0x49024000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP3 (voice BT)- module */
+    GEL_MapAddStr(0x49025000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP3 (voice BT)- L4 interconnect */
+    GEL_MapAddStr(0x49026000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP4 (Digital for Modem)- module */
+    GEL_MapAddStr(0x49027000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP4 (Digital for Modem)- L4 interconnect */
+    GEL_MapAddStr(0x49028000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP2 - (sidetone) module */
+    GEL_MapAddStr(0x49029000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP2 - (sidetone) L4 interconnect */
+    GEL_MapAddStr(0x4902A000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP3 (sidetone)- module */
+    GEL_MapAddStr(0x4902B000, 0, 0x00001000, "R|W|AS2", 0);  /* McBSP3 (sidetone)- L4 interconnect */
+    GEL_MapAddStr(0x49032000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER2 - module */
+    GEL_MapAddStr(0x49033000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER2 - L4 interconnect */
+    GEL_MapAddStr(0x49034000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER3 - module */
+    GEL_MapAddStr(0x49035000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER3 - L4 interconnect */
+    GEL_MapAddStr(0x49036000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER4 - module */
+    GEL_MapAddStr(0x49037000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER4 - L4 interconnect */
+    GEL_MapAddStr(0x49038000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER5 - module */
+    GEL_MapAddStr(0x49039000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER5 - L4 interconnect */
+    GEL_MapAddStr(0x4903A000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER6 - module */
+    GEL_MapAddStr(0x4903B000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER6 - L4 interconnect */
+    GEL_MapAddStr(0x4903C000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER7 - module */
+    GEL_MapAddStr(0x4903D000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER7 - L4 interconnect */
+    GEL_MapAddStr(0x4903E000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER8 - module */
+    GEL_MapAddStr(0x4903F000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER8 - L4 interconnect */
+    GEL_MapAddStr(0x49040000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER9 - module */
+    GEL_MapAddStr(0x49041000, 0, 0x00001000, "R|W|AS4", 0);  /* GPTIMER9 - L4 interconnect */
+    GEL_MapAddStr(0x49050000, 0, 0x00001000, "R|W|AS4", 0);  /* GPIO2 module (quadgpio.doc)*/
+    GEL_MapAddStr(0x49051000, 0, 0x00001000, "R|W|AS4", 0);  /* GPIO2 L4 interconnect */
+    GEL_MapAddStr(0x49052000, 0, 0x00001000, "R|W|AS4", 0);  /* GPIO3 module (quadgpio.doc)*/
+    GEL_MapAddStr(0x49053000, 0, 0x00001000, "R|W|AS4", 0);  /* GPIO3 L4 interconnect */
+    GEL_MapAddStr(0x49054000, 0, 0x00001000, "R|W|AS4", 0);  /* GPIO4 module (quadgpio.doc)*/
+    GEL_MapAddStr(0x49055000, 0, 0x00001000, "R|W|AS4", 0);  /* GPIO4 L4 interconnect */
+    GEL_MapAddStr(0x49056000, 0, 0x00001000, "R|W|AS4", 0);  /* GPIO5 - module (quadgpio.doc)*/
+    GEL_MapAddStr(0x49057000, 0, 0x00001000, "R|W|AS4", 0);  /* GPIO5 - L4 interconnect (quadgpio.doc)*/
+    GEL_MapAddStr(0x49058000, 0, 0x00001000, "R|W|AS4", 0);  /* GPIO6 - module (quadgpio.doc)*/
+    GEL_MapAddStr(0x49059000, 0, 0x00001000, "R|W|AS4", 0);  /* GPIO6 - L4 interconnect (quadgpio.doc)*/
+    GEL_MapAddStr(0x50000000, 0, 0x00010000, "R|W|AS4", 0);  /* GFX */
+    GEL_MapAddStr(0x54000000, 0, 0x00800000, "R|W|AS4", 0);  /* L4-EMU */
+
+    /* -- IVA2 Memory Space ----------------------------------------------------- */
+    GEL_MapAddStr(0x5C7E0000, 0, 0x00004000, "R"      , 0);  /* L2 ROM  -UMAP1    */
+    GEL_MapAddStr(0x5C7F8000, 0, 0x00008000, "R|W  "  , 0);  /* L2RAM -UMAP1      */
+    GEL_MapAddStr(0x5C800000, 0, 0x00010000, "R|W  "  , 0);  /* L2RAM -UMAP0      */
+    GEL_MapAddStr(0x5CE00000, 0, 0x00008000, "R|W"    , 0);  /* L1PRAM            */
+    GEL_MapAddStr(0x5CF04000, 0, 0x0000C000, "R|W  "  , 0);  /* L1DRAM            */
+    GEL_MapAddStr(0x5CF10000, 0, 0x00008000, "R|W"    , 0);  /* L1DRAM$           */
+    GEL_MapAddStr(0x5D000000, 0, 0x00001000, "R|W  "  , 0);  /*iMMU config        */
+    GEL_MapAddStr(0x5E000000, 0, 0x00100000, "R|W  "  , 0);  /*LEON               */  
+    /* -- END OF IVA MEM SPACE -------------------------------------------------- */
+
+    /* !! FOLLOWING MEM SPACE TO BE CONFIGURED PROPERLY !!*/
+    GEL_MapAddStr(0x68000000, 0, 0x98000000, "R|W|AS4"    , 0);  /* TO BE CONFIGURED */
+}
+
+
+OnTargetConnect()
+{
+    if ((REG_TZ_SECURE) && (CP15_CONTROL_REGISTER & 0x1))
+    {   /* Target in SECURE mode and Secure MMU on */
+        /* Do not do any configuration stuff */
+        GEL_TextOut("No configuration being done because Secure MMU on \n");
+        GEL_TextOut("If Configuration required please add it here \n");
+    }
+    else
+    {
+        Watchdog_disable();
+        SelectSysClock_19_2MHz();
+        Setup_ClockConfig_IIA(); /* SDRC-DDR cannot be accessed <75MHz L3 clock */
+        mDDR_Samsung_K4X51323PC(); /* VALID FOR TEB/SDP (default only) */
+
+        /* IVA DPLL does not produce a valid clock status when ForceActive (IVA) is applied */
+        /* Enable DSP-ss functional clock (set bit 0) CM_FCLKEN_IVA2 */
+        (*(int*)0x48004000) |= 0x1;              
+
+        /* Enable IVA2 DPLL (low power mode bybass -> 5) CM_CLKEN_PLL_IVA2 */
+        (*(int*)0x48004004) = (1<<4) |  (5<<0);
+
+        GEL_TextOut("19.2MHz clock configuration IIa \n");
+    }
+    EnableDebugDuringWFI();
+    ETM_Enable_Access();
+} 
+
+/*                                OFFSET  WriteDDRClkx2 ENADLL    LOCKDLL    DLL_PHASE */
+#define SDRC_DLL_CTRL_DDR_VALUE  (0 << 24) | (0 << 7) | (1 << 3) | (0 << 2) | (1 << 1)
+
+OnReset()
+{
+    Watchdog_disable();
+    SelectSysClock_19_2MHz();
+    Setup_ClockConfig_IIA(); /* SDRC-DDR cannot be accessed <75MHz L3 clock */
+
+    EnableDebugDuringWFI();
+
+    /* IVA DPLL does not produce a valid clock status when ForceActive (IVA) is applied */
+    /* Enable DSP-ss functional clock (set bit 0) CM_FCLKEN_IVA2 */
+    (*(int*)0x48004000) |= 0x1;
+
+    /* Enable IVA2 DPLL (low power mode bybass -> 5) CM_CLKEN_PLL_IVA2 */
+    (*(int*)0x48004004) = (1<<4) |  (5<<0);
+
+    /* CAN BE ADDED IF REQUIRED */
+    /* IVA22_GEM_startup( ); */
+
+    /* Relock the SDRC DLL's because access is not permitted below 75MHz */
+    /* and DLL's unlock by global reset. */
+    *((int*)0x6D000060) = SDRC_DLL_CTRL_DDR_VALUE;  
+
+    GEL_TextOut( "CPU Reset callback function has fired \n" ); 
+}
+
+OnResetDetected()
+{
+    Watchdog_disable();  
+    SelectSysClock_19_2MHz();
+    Setup_ClockConfig_IIA();  /* SDRC-DDR cannot be accessed <75MHz L3 clock */
+
+    EnableDebugDuringWFI();
+
+    /* CAN BE ADDED IF REQUIRED */
+    /* IVA22_GEM_startup( ); */
+
+    /* IVA DPLL does not produce a valid clock status when ForceActive (IVA) is applied */
+    /* Enable DSP-ss functional clock (set bit 0) CM_FCLKEN_IVA2 */
+    (*(int*)0x48004000) |= 0x1;
+
+    /* Enable IVA2 DPLL (low power mode bybass -> 5) CM_CLKEN_PLL_IVA2 */
+    (*(int*)0x48004004) = (1<<4) |  (5<<0);
+
+    /* CAN BE ADDED IF REQUIRED */
+    /* IVA22_GEM_startup( ); */
+
+    /* Relock the SDRC DLL's because access is not permitted below 75MHz */
+    /* and DLL's unlock by global reset. */
+    *((int*)0x6D000060)= 0;
+    *((int*)0x6D000060)= SDRC_DLL_CTRL_DDR_VALUE;
+
+    GEL_TextOut( "System Reset has occured.\n\n" );
+}
+
+
+menuitem "IVA2200_Startup"
+
+hotmenu IVA22_GEM_startup()
+{
+    /* Enable DSP-ss functional clock (set bit 0) CM_FCLKEN_IVA2 */
+    (*(int*)0x48004000) |= 0x1;
+
+    /* IVA clk is bypassed CORE clock/2 CM_CLKSEL1_PLL_IVA2 */
+    (*(int*)0x48004040) = (2<<19);
+
+    /* Enable IVA2 DPLL (low power mode bybass -> 5) CM_CLKEN_PLL_IVA2 */
+    (*(int*)0x48004004) = (1<<4) |  (5<<0);
+
+    /* Release DSPMMU reset (clear bit 1) -> RM_RSTCTRL_IVA2 */
+    (*(int*)0x48306050) &= ~(1 << 1);
+
+    /* Set DSP boot mode to WaitInDeadLoop -> CONTROL_IVA2_BOOTMODE */
+    (*(int*)0x48002404) = 2;
+
+    /* Release DSP from reset (clear bit 0) -> RM_RSTCTRL_IVA2 */
+    (*(int*)0x48306050) &= ~(1 << 0);
+
+    GEL_TextOut("C64x+ release from reset\n","result");
+}
+
+menuitem "IVA2200_MMU"
+
+hotmenu ResetMMU()
+{
+    *(int *)0x5D000010 |= 0x2;
+}
+
+hotmenu Enable()
+{
+    *(int *)0x5D000044 |= 0x2;
+}
+
+hotmenu Disable()
+{
+    *(int *)0x5D000044 &= ~0x2;
+}
+
+hotmenu ProgramMMU()
+{
+    /* MMU configuration Port */
+    *(int*)0x5D000050 = 0x00000000;
+    *(int*)0x5D000058 = 0x5D00000C;
+    *(int*)0x5D00005C = 0x5D000140;
+    *(int*)0x5D000054 = 0x00000001;
+
+    /* SDRC - 0x80000000 */
+    *(int*)0x5D000050 = 0x00000010;
+    *(int*)0x5D000058 = 0x8000000C;
+    *(int*)0x5D00005C = 0x80000140;
+    *(int*)0x5D000054 = 0x00000001;
+
+    /* SDRC - 0x80100000  */
+    *(int*)0x5D000050 = 0x00000020;
+    *(int*)0x5D000058 = 0x8010000C;
+    *(int*)0x5D00005C = 0x80100140;
+    *(int*)0x5D000054 = 0x00000001;
+
+    /* L4 - 0x48000000 */
+    *(int*)0x5D000050 = 0x00000030;
+    *(int*)0x5D000058 = 0x4800000C;
+    *(int*)0x5D00005C = 0x48000140;
+    *(int*)0x5D000054 = 0x00000001;
+
+    /* L4 Wakeup - 0x49000000 */
+    *(int*)0x5D000050 = 0x00000040;
+    *(int*)0x5D000058 = 0x4900000C;
+    *(int*)0x5D00005C = 0x49000140;
+    *(int*)0x5D000054 = 0x00000001;
+}
+ 
+menuitem "IVA2200_PD"
+hotmenu iva2200_power_domain_off()
+{
+    int domainState, counter;
+
+    /* Enable DSP-ss functional clock (set bit 0) CM_FCLKEN_IVA2 */
+    (*(int*)0x48004000) |= 0x1;              
+
+    /* Enable IVA2 DPLL (low power mode bybass -> 5) CM_CLKEN_PLL_IVA2 */
+    (*(int*)0x48004004) = (1<<4) |  (5<<0);
+
+    /* Clear bits 0:1 to turn IVA OFF */
+    *(int*)0x483060e0 &= ~0x3;
+
+    /* Turn off wakeup dependencies */
+    *(int*)0x483060c8 = 0x0;
+
+    /* Turn on auto-idle enable for IVA DPLL (low power stop mode) */
+    *(int*)0x48004034 = 0x1;
+
+    /* Release MMU reset */
+    *(int*)0x48306050 = 0x5;
+
+    /* Assert it back */
+    *(int*)0x48306050 = 0x7;
+
+    /* Start the auto-transition */
+    *(int*)0x48004048 = 0x3;   
+
+    /* Wait loop */
+    for (counter = 0;
+        counter < 5000;
+        counter++)
+    ;
+
+    domainState = (*(int*)0x483060e4) & 0x3;
+
+    if (domainState == 0x0)
+    {
+        GEL_TextOut("IVA domain is OFF \n");
+    }
+    else
+    {
+        GEL_TextOut("**** IVA domain is NOT OFF **** \n");
+    }
+}
+
+menuitem "WatchDogs"
+
+hotmenu Watchdog_disable()
+{
+    /* enable Interface clock */
+    *(int*)0x48004C10 = 0x20;
+
+    /* enable functional clock */
+    *(int*)0x48004C00 = 0x20;
+
+    /* Check that module is Idle */
+    while ( ((*(int *)0x48004C20) & 0x20));
+
+    /* Disabler watchdog 2 */
+    /* Wait until reset complete */
+    while (!((*(int*)0x48314014) & 0x01));
+
+    /* Disable 32Khz watchdog timer */
+    *(int*)0x48314048 = 0x0000AAAA;
+
+    while ( ((*(int *)0x48314034) & 0x10));
+
+    /* Disable 32Khz watchdog timer */
+    *(int*)0x48314048 = 0x00005555;
+
+    while ( ((*(int *)0x48314034) & 0x10));
+
+    GEL_TextOut("OMAP 32K Watchdog Timer is disable\n");
+}
+
+
+menuitem "Debug During WFI"
+
+/* Bug in OMAP35xx ES2.0 due to incorrect tieoff of DBGNOCLKSTOP */
+
+hotmenu EnableDebugDuringWFI()
+{
+    int ProcessorState, auxControlReg;
+
+    ProcessorState = REG_TZ_SECURE;
+
+    // switch to secure mode first if in non-secure if spiden is high
+    if ( ((ICECS_DCCR & 0x3000)>>12) == 0x3)
+    {
+        if ((ProcessorState & 1) == 0x0)
+        {
+            REG_TZ_SECURE = 1;
+        }
+
+        auxControlReg = CP15_AUXILIARY_CONTROL;
+        auxControlReg |= (1 << 15); /* Force ETM clock */
+
+        CP15_AUXILIARY_CONTROL = auxControlReg;   
+
+        if ((ProcessorState & 1)==0x0)
+        {
+            REG_TZ_SECURE = 0;
+        }
+    }
+}
+
+/* EOF */

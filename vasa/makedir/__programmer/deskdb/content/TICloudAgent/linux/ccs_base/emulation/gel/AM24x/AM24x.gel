@@ -1,0 +1,223 @@
+/**
+ * \file  AM24x.gel
+ *
+ * \brief GEL File to control and manage other GEL functions for AM24x
+ */
+
+/* Copyright (c) 2021, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+/*
+ *        Platform: Keystone 3 SoCs
+ *                     - AM24
+ *        Usage: This GEL will be run from CCS upon connection to the Cortex-M3
+ *               CPU.
+ */
+
+#define CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE (0x45a00000ul)
+#define CSL_WKUP_DMSC0_RAT_BASE     (0x44200000)
+#define CSL_WKUP_CTRL_MMR0_CFG0_BASE   (0x43000000)
+#define CSL_MCU_CTRL_MMR0_CFG0_BASE    (0x4500000UL)
+#define M4_IRAM_BASE_ADDRESS        (0x05000000)
+
+StartUp(){
+	//Load the common GEL
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_common/AM24_common.gel");
+
+    //Load the Power Sleep Controller GEL.
+	GEL_LoadGel( "$(GEL_file_dir)/AM24_PSC/AM24_PSC.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PSC/AM24_PSC_UC_1_1_1.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PSC/AM24_PSC_UC_1_2.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PSC/AM24_PSC_UC_1_3.gel");
+
+    //Load the PLL GELS
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_MMR.gel");
+    //25MHz HFOSC
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/25MHz_HFOSC/AM24_PLL_PARAMS_OFC1.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/25MHz_HFOSC/AM24_PLL_PARAMS_UC_1_1_1.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/25MHz_HFOSC/AM24_PLL_PARAMS_UC_1_2.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/25MHz_HFOSC/AM24_PLL_PARAMS_UC_1_3.gel");
+  
+
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_OFC1.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_UC_1_1_1.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_UC_1_2.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_UC_1_3.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_non_UC_configurations.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_bypass.gel");
+
+    // Load CPSW stats print regs
+    GEL_LoadGel( "$(GEL_file_dir)/AM243_CPSW/AM243_cpsw_stats_print_regs.gel");
+}
+
+OnTargetConnect(){
+	Configure_RAT();
+    Configure_ATCM();
+    Configure_R5F_Halt_Upon_PowerUp();
+    Configure_R5F_Bootvectors();
+	Set_All_PLL_OFC1();
+	Set_PSC_All_On();
+	GEL_TextOut("\n");
+	//GEL_TextOut("*****DDR is configured using R5 GELs\n");
+}
+
+menuitem "Initial Device Configuration";
+
+hotmenu Configure_RAT(){
+   //Configure RAT
+    GEL_TextOut( "This GEL is currently only supported for use from the Cortex-M3 inside the DMSC.\n");
+    GEL_TextOut( "Do not run this GEL from any other CPU on the SoC.\n");
+    GEL_TextOut( "This script sets the first address translation region to [0x8000_0000, 0x0000_0000].\n");
+    GEL_TextOut( "It also sets the second address translation region to    [0x6000_0000, 0x4000_0000].\n");
+    GEL_TextOut( "This is consistent with the SoC DV assumptions.\n");
+    
+    // Available M3 space to remap =2GB, 0x6000_0000 - 0xDFFF_FFFF
+    // Configure the RAT for view into the SoC
+    // enable and set region size for first two regions 
+
+    // region 0 0x60000000 - 0x80000000 -> 0x40000000 - 0x60000000
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x24) = 0x60000000;     //If the M3 reads from here -------> IN ADDRESS
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x2C) = 0x00000000;     //retrieve data from here   -------> OUT ADDRESS[47:32] in RAT register[15:0]
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x28) = 0x40000000;     //                          -------> OUT ADDRESS[31:0] 
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x20) = 0x8000001D;     //Size = 512MB and enable region
+    
+    // region 1 0x80000000 - 0xA0000000 -> 0X0 - 0x20000000
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x34) = 0x80000000;     //If the M3 reads from here -------> IN ADDRESS
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x3C) = 0x00000000;     //retrieve data from here   -------> OUT ADDRESS[47:32] in RAT register[15:0] 
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x38) = 0x00000000;     //                          -------> OUT ADDRESS[31:0] 
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x30) = 0x8000001D;     //Size = 512MB and enable region      
+
+    //Disable region 2-15
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x40)  = 0x00000000;    //Region 2 Disable
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x50)  = 0x00000000;    //Region 3
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x60)  = 0x00000000;    //Region 4
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x70)  = 0x00000000;    //...
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x80)  = 0x00000000;
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x90)  = 0x00000000;
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0xA0)  = 0x00000000;
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0xB0)  = 0x00000000;
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0xC0)  = 0x00000000;
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0xD0)  = 0x00000000;
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0xE0)  = 0x00000000;
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0xF0)  = 0x00000000;    //...
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x100) = 0x00000000;    //Region 14
+    *(unsigned int *)(CSL_WKUP_DMSC0_RAT_BASE + 0x110) = 0x00000000;    //Region 15
+    
+}
+
+hotmenu Configure_ATCM(){
+    //Enable ATCM
+    GEL_TextOut("Configuring ATCM for the R5Fs\n");
+    *((unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE+0x100)) = 0x888;
+    *((unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE+0x180)) = 0x888;
+    *((unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE+0x1100)) = 0x888;
+    *((unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE+0x1180)) = 0x888;
+    GEL_TextOut("ATCM Configured.\n");
+}
+
+hotmenu Configure_R5F_Bootvectors(){
+    //Set bootvector (default 0x822000)
+    GEL_TextOut("Configuring bootvectors\n");
+    *((unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE+0x110)) = 0;
+    *((unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE+0x114)) = 0;
+    *((unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE+0x190)) = 0;
+    *((unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE+0x194)) = 0;
+    *((unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE+0x1110)) = 0;
+    *((unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE+0x1114)) = 0;
+    *((unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE+0x1190)) = 0;
+    *((unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE+0x1194)) = 0;
+    GEL_TextOut("Bootvectors configured.\n");
+}
+
+hotmenu Configure_R5F_Halt_Upon_PowerUp(){
+    //Put all R5Fs in HALT mode upon PORz by writing to the MMRs.
+    *(unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE + 0x120) = 0x1;  //Cluster 0 Core 0
+    *(unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE + 0x1A0) = 0x1;  //Cluster 0 Core 1
+    *(unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE + 0x1120) = 0x1; //Cluster 1 Core 0
+    *(unsigned int *)(CSL_MAIN_SEC_MMR0_CFG0_CTRL_BASE + 0x11A0) = 0x1; //Cluster 1 Core 1
+    GEL_TextOut("R5F Halt bits set.\n");
+}
+Load_M4_WFI_Vector(){
+    //Goal is to load in a valid stack pointer and reset vector so the M4 does not enter a hard fault when turned on
+    unsigned int address_offset = 0; 
+    address_offset = 0x80000000;  
+
+    //Set the stack pointer to 0x1000 for M4 
+    *((unsigned int *)(M4_IRAM_BASE_ADDRESS+address_offset+0x0)) = 0x00001000;
+
+    //Set the reset vector, nmi, and hard fault vector for M4 to be a location with no code so it spins, but have bit[0] of the vectors =1 so it does not hard fault
+    *((unsigned int *)(M4_IRAM_BASE_ADDRESS+address_offset+0x4)) = 0x00000400 + 0x1; //Reset Vector
+
+    //Zero out the location specified so it does not do anything
+    *((unsigned int *)(M4_IRAM_BASE_ADDRESS+address_offset+0x400)) = 0xBF30BF30;
+
+    GEL_TextOut("M4F WFI Vector set into IRAM.\n");
+} 
+hotmenu Init_M4() {
+    Assert_M4_LRST();
+    Load_M4_WFI_Vector();
+    Release_M4_LRST();
+}
+Assert_M4_LRST() {
+    change_M4_LRST(1);
+}
+  
+Release_M4_LRST() {
+    change_M4_LRST(0);
+}
+
+HFOSC_25MHz_PLL_gels()
+{
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/25MHz_HFOSC/AM24_PLL_PARAMS_OFC1.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/25MHz_HFOSC/AM24_PLL_PARAMS_UC_1_1_1.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/25MHz_HFOSC/AM24_PLL_PARAMS_UC_1_2.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/25MHz_HFOSC/AM24_PLL_PARAMS_UC_1_3.gel");
+    HFOSC    = MHZ25;
+}
+
+load_PSC_gels()
+{
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PSC/AM24_PSC.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PSC/AM24_PSC_UC_1_1_1.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PSC/AM24_PSC_UC_1_2.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PSC/AM24_PSC_UC_1_3.gel");
+}
+
+load_commmon_PLL_gels()
+{
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_OFC1.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_UC_1_1_1.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_UC_1_2.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_UC_1_3.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_non_UC_configurations.gel");
+    GEL_LoadGel( "$(GEL_file_dir)/AM24_PLL/AM24_PLL_bypass.gel");
+}

@@ -1,0 +1,2583 @@
+//##################################################################################
+// TPR12 EVM GEL File                                                             
+// ==================    
+//
+// 1.4
+// -----                                                                           
+// Updated to the sequence used in EVM bringup
+//
+// 1.3                                                                            
+// -----                                                                          
+// Added OnTargetConnect() callback by CCS to initialize the EVM
+//
+// 1.2                                                                            
+// -----                                                                          
+// Added CSI to MSS_TOPRCM, HWA to DSS_RCM
+//
+// 1.1                                                                            
+// -----                                                                          
+// Updated HSDIVIDER_CLKOUTn output within max allowed ranges
+// Updated MSS_RCM clock divider address offsets
+// Updated MSS_RCM:
+// . Updated MCANA, MCANB, RTIA, RTIB, RTIC and WDT clock select and dividers
+// . Added CPTS and CPSW
+// Updated DSS_RCM:
+// . Changed the hotmenu name to dsp_wakeup_pll_switch()
+// . Added RTIA, RTIB, WDT and SCIA
+// Updated RCSS_RCM:
+// . Created a hotmenu rcss_pll_switch()
+// . Added peripherals
+// Reshuffled registers to address order
+//
+// 1.0                                                                           
+// -----                                                                               
+// Initial Release              
+//
+//##################################################################################
+
+
+#define GEL_VERSION                    1.4
+#define CLKINP                         40  //40MHz input clock for EVM
+
+menuitem "TPR12 gel"
+
+#define WR_MEM_32(addr, data)          *(unsigned int*)(addr) = (unsigned int)(data)
+#define RD_MEM_32(addr)                *(unsigned int*)(addr)
+#define ARM_WR32(addr, data)           *(unsigned int*)(addr) = (unsigned int)(data)
+
+#define 	PLL_CORE_PWRCTRL           0x400
+#define 	PLL_CORE_CLKCTRL           0x404
+#define 	PLL_CORE_TENABLE           0x408
+#define 	PLL_CORE_TENABLEDIV        0x40C
+#define 	PLL_CORE_M2NDIV            0x410
+#define 	PLL_CORE_MN2DIV            0x414
+#define 	PLL_CORE_FRACDIV           0x418
+#define 	PLL_CORE_BWCTRL            0x41C
+#define 	PLL_CORE_FRACCTRL          0x420
+#define 	PLL_CORE_STATUS            0x424
+#define 	PLL_CORE_HSDIVIDER         0x428
+#define 	PLL_CORE_HSDIVIDER_CLKOUT0 0x42C
+#define 	PLL_CORE_HSDIVIDER_CLKOUT1 0x430
+#define 	PLL_CORE_HSDIVIDER_CLKOUT2 0x434
+#define 	PLL_CORE_HSDIVIDER_CLKOUT3 0x438
+#define 	PLL_DSP_PWRCTRL            0x800
+#define 	PLL_DSP_CLKCTRL            0x804
+#define 	PLL_DSP_TENABLE            0x808
+#define 	PLL_DSP_TENABLEDIV         0x80C
+#define 	PLL_DSP_M2NDIV             0x810
+#define 	PLL_DSP_MN2DIV             0x814
+#define 	PLL_DSP_FRACDIV            0x818
+#define 	PLL_DSP_BWCTRL             0x81C
+#define 	PLL_DSP_FRACCTRL           0x820
+#define 	PLL_DSP_STATUS             0x824
+#define 	PLL_DSP_HSDIVIDER          0x828
+#define 	PLL_DSP_HSDIVIDER_CLKOUT0  0x82C
+#define 	PLL_DSP_HSDIVIDER_CLKOUT1  0x830
+#define 	PLL_DSP_HSDIVIDER_CLKOUT2  0x834
+#define 	PLL_DSP_HSDIVIDER_CLKOUT3  0x838
+#define 	PLL_PER_PWRCTRL            0x83C
+#define 	PLL_PER_CLKCTRL            0x840
+#define 	PLL_PER_TENABLE            0x844
+#define 	PLL_PER_TENABLEDIV         0x848
+#define 	PLL_PER_M2NDIV             0x84C
+#define 	PLL_PER_MN2DIV             0x850
+#define 	PLL_PER_FRACDIV            0x854
+#define 	PLL_PER_BWCTRL             0x858
+#define 	PLL_PER_FRACCTRL           0x85C
+#define 	PLL_PER_STATUS             0x860
+#define 	PLL_PER_HSDIVIDER          0x864
+#define 	PLL_PER_HSDIVIDER_CLKOUT0  0x868
+#define 	PLL_PER_HSDIVIDER_CLKOUT1  0x86C
+#define 	PLL_PER_HSDIVIDER_CLKOUT2  0x870
+#define 	PLL_PER_HSDIVIDER_CLKOUT3  0x874
+
+#define     MSS_TOPRCM_U_BASE     0x02140000
+#define     MSS_RCM_U_BASE        0x02100000
+#define     MSS_CTRL_U_BASE       0x02120000
+#define     HSM_CTRL_U_BASE       0x47000000
+#define     DSS_CM4_CTRL_U_BASE   0x48020000
+#define     RST2ASSERTDLY               0x14
+#define     RST_WFICHECK                0x18
+#define     MSS_STC_CONTROL            0x628
+#define     R5_CONTROL                 0x800
+#define     R5_ROM_ECLIPSE             0x804
+#define     R5_COREA_HALT              0x808
+#define     R5_COREB_HALT              0x80C
+
+/* MSS_TOPRCM */
+#define HSI_CLK_SRC_SEL                 0x14
+#define CSIRX_CLK_SRC_SEL               0x18
+#define TRCCLKOUT_CLK_SRC_SEL           0x28
+#define HSI_DIV_VAL                     0x40
+#define CSIRX_DIV_VAL                   0x44
+#define TRCCLKOUT_DIV_VAL               0x54
+#define HSI_CLK_GATE                    0x80
+
+#define MSS_CR5_CLK_SRC_SEL_CLKSRCSEL  0x43C	
+#define MSS_CR5_DIV_VAL_CLKDIV         0x440
+#define SYS_CLK_DIV_VAL_CLKDIV         0x444	
+
+/* MSS_RCM */	
+#define MSS_MCANA_CLK_SRC_SEL           0x1C
+#define MSS_MCANB_CLK_SRC_SEL           0x20
+#define MSS_QSPI_CLK_SRC_SEL            0x24
+#define MSS_RTIA_CLK_SRC_SEL            0x28
+#define MSS_RTIB_CLK_SRC_SEL            0x2C
+#define MSS_RTIC_CLK_SRC_SEL            0x30
+#define MSS_WDT_CLK_SRC_SEL             0x34
+#define MSS_SPIA_CLK_SRC_SEL            0x38
+#define MSS_SPIB_CLK_SRC_SEL            0x3C
+#define MSS_I2C_CLK_SRC_SEL             0x40
+#define MSS_SCIA_CLK_SRC_SEL            0x44
+#define MSS_SCIB_CLK_SRC_SEL            0x48
+#define MSS_CPTS_CLK_SRC_SEL            0x4C
+#define MSS_CPSW_CLK_SRC_SEL            0x50
+#define MSS_MCANA_CLK_DIV_VAL           0x54
+#define MSS_MCANB_CLK_DIV_VAL           0x58
+#define MSS_QSPI_CLK_DIV_VAL            0x5C
+#define MSS_RTIA_CLK_DIV_VAL            0x60
+#define MSS_RTIB_CLK_DIV_VAL            0x64
+#define MSS_RTIC_CLK_DIV_VAL            0x68
+#define MSS_WDT_CLK_DIV_VAL             0x6C
+#define MSS_SPIA_CLK_DIV_VAL            0x70 
+#define MSS_SPIB_CLK_DIV_VAL            0x74 
+#define MSS_I2C_CLK_DIV_VAL             0x78
+#define MSS_SCIA_CLK_DIV_VAL            0x7C
+#define MSS_SCIB_CLK_DIV_VAL            0x80 
+#define MSS_CPTS_CLK_DIV_VAL            0x84 
+#define MSS_CPSW_CLK_DIV_VAL            0x88
+#define MSS_RGMII_CLK_DIV_VAL           0x8C
+#define MSS_MII100_CLK_DIV_VAL          0x90
+#define MSS_MII10_CLK_DIV_VAL           0x94
+
+#define DSS_RCM_U_BASE            0x06000000
+#define DSS_CTRL_U_BASE           0x06020000
+
+/* DSS_RCM */
+#define DSP_PD_CTRL                     0x14
+#define DSP_PD_TRIGGER_WAKUP            0x18
+#define DSP_PD_STATUS                   0x20
+#define DSP_PD_WAKEUP_MASK0             0x30
+#define DSS_DSP_CLK_SRC_SEL             0x8C
+#define DSS_HWA_CLK_SRC_SEL             0x90
+#define DSS_RTIA_CLK_SRC_SEL            0x94
+#define DSS_RTIB_CLK_SRC_SEL            0x98
+#define DSS_WDT_CLK_SRC_SEL             0x9C
+#define DSS_SCIA_CLK_SRC_SEL            0xA0
+#define DSS_DSP_CLK_DIV_VAL             0xA4
+#define DSS_RTIA_CLK_DIV_VAL            0xA8
+#define DSS_RTIB_CLK_DIV_VAL            0xAC
+#define DSS_WDT_CLK_DIV_VAL             0xB0
+#define DSS_SCIA_CLK_DIV_VAL            0xB4
+#define DSS_DSP_CLK_GATE                0xB8
+#define DSS_DSP_BOOTCFG                 0xD8
+#define DSS_DSP_RST_CTRL                0xEC
+#define LOCK0_KICK0                   0x1008
+#define LOCK0_KICK1                   0x100C
+   
+
+#define RCSS_RCM_U_BASE           0x05000000
+
+/* RCSS_RCM */
+#define RCSS_I2CA_CLK_SRC_SEL	        0x14
+#define RCSS_I2CB_CLK_SRC_SEL	        0x18
+#define RCSS_SCIA_CLK_SRC_SEL	        0x1C
+#define RCSS_SPIA_CLK_SRC_SEL	        0x20
+#define RCSS_SPIB_CLK_SRC_SEL	        0x24
+#define RCSS_ATL_CLK_SRC_SEL	        0x28
+#define RCSS_MCASPA_REF0_CLK_SRC_SEL    0x2C
+#define RCSS_MCASPA_REF1_CLK_SRC_SEL    0x30
+#define RCSS_MCASPA_AUX_CLK_SRC_SEL     0x34
+#define RCSS_MCASPB_REF0_CLK_SRC_SEL    0x38
+#define RCSS_MCASPB_REF1_CLK_SRC_SEL    0x3C
+#define RCSS_MCASPB_AUX_CLK_SRC_SEL     0x40
+#define RCSS_MCASPC_REF0_CLK_SRC_SEL    0x44
+#define RCSS_MCASPC_REF1_CLK_SRC_SEL    0x48
+#define RCSS_MCASPC_AUX_CLK_SRC_SEL     0x4C
+#define RCSS_I2CA_CLK_DIV_VAL	        0x50
+#define RCSS_I2CB_CLK_DIV_VAL	        0x54
+#define RCSS_SCIA_CLK_DIV_VAL	        0x58
+#define RCSS_SPIA_CLK_DIV_VAL	        0x5C
+#define RCSS_SPIB_CLK_DIV_VAL	        0x60
+#define RCSS_ATL_CLK_DIV_VAL	        0x64
+#define RCSS_MCASPA_REF0_CLK_DIV_VAL    0x68
+#define RCSS_MCASPA_REF1_CLK_DIV_VAL    0x6C
+#define RCSS_MCASPA_AUX_CLK_DIV_VAL     0x70
+#define RCSS_MCASPB_REF0_CLK_DIV_VAL    0x74
+#define RCSS_MCASPB_REF1_CLK_DIV_VAL    0x78
+#define RCSS_MCASPB_AUX_CLK_DIV_VAL     0x7C
+#define RCSS_MCASPC_REF0_CLK_DIV_VAL    0x80
+#define RCSS_MCASPC_REF1_CLK_DIV_VAL    0x84
+#define RCSS_MCASPC_AUX_CLK_DIV_VAL     0x88
+
+#define HSM_RTIA_CLK_SRC_SEL           0x400
+#define HSM_WDT_CLK_SRC_SEL            0x404
+#define HSM_RTC_CLK_SRC_SEL            0x408
+#define HSM_DMTA_CLK_SRC_SEL           0x40C
+#define HSM_DMTB_CLK_SRC_SEL           0x410
+#define HSM_RTIA_CLK_DIV_VAL           0x414
+#define HSM_WDT_CLK_DIV_VAL            0x418
+#define HSM_RTC_CLK_DIV_VAL            0x41C
+#define HSM_DMTA_CLK_DIV_VAL           0x420
+#define HSM_DMTB_CLK_DIV_VAL           0x424
+
+/**************************************************************************************** 
+
+=====================TOP RCM PLL Configuration===========================
+-----------------------------------------------------------------------------------------
+| PLL                        |   MODE 1    |   MODE 2     |   MODE 3     |    MODE 4    |
+|                            | TPR12 mmWave| TPR12 Audio  | TPR12 mmWave |    AM601     |
+|                            |             |              | Lower ADPLL  |              |
+|                            |             |              | Lock Freq    |              |
+-----------------------------------------------------------------------------------------
+|pll_core_clk                |   800       |   2000       |    800       |    800       |
+|dpll_core_hsdiv0_clkout0    |   Unused    |   Unused     |    400       |    Unused    |
+|dpll_core_hsdiv0_clkout1    |   200       |   500        |    Unused    |    Unused    |
+|dpll_core_hsdiv0_clkout2    |   400       |   400        |    400       |    400       |
+|dpll_core_hsdiv0_clkout3    |   Unused    |   Unused     |    Unused    |    Unused    |
+|                            |             |              |              |              |
+|pll_dsp_clk                 |   900       |   1728       | 900/960/1000 |     450      |
+|dpll_dsp_hsdiv0_clkout0     |   Unused    |   Unused     | 450/480/500  |     Unused   |
+|dpll_dsp_hsdiv0_clkout1     |   450       |   576        | 450/480/500  |     225      |
+|dpll_dsp_hsdiv0_clkout2     |   Unused    |   192        | 150/160/200  |     150      |
+|dpll_dsp_hsdiv0_clkout3     |   Unused    |   Unused     | Unused       |     Unused   |
+|                            |             |              |              |              |
+|pll_per_clk                 |   1728      |   1966.08    |   1152       |    960       |
+|dpll_per_hsdiv0_clkout0     |   Unused    |   Unused     |   576        |    Unused    |
+|dpll_per_hsdiv0_clkout1     |   192       |   Unused     |   192        |    192       |
+|dpll_per_hsdiv0_clkout2     |   96        |   Unused     |   96         |    Unused    |
+|dpll_per_hsdiv0_clkout3     |   Unused    |491.52/393.216|   Unused     |   Unused     |
+----------------------------------------------------------------------------------------
+=====================TOP RCM Clock Selection=============================
+mss_cr5f_clk[0]  = wucpuclk;      
+mss_cr5f_clk[1]  = rcclk10m;
+mss_cr5f_clk[2]  = dpll_core_hsdiv0_clkout2;
+mss_cr5f_clk[3]  = rcclk10m;
+mss_cr5f_clk[4]  = rcclk10m;
+mss_cr5f_clk[5]  = rcclk10m;
+mss_cr5f_clk[6]  = xtalclk;
+mss_cr5f_clk[7]  = rcclk10m;
+
+sys_clk[0]  = wucpuclk;      
+sys_clk[1]  = rcclk10m;
+sys_clk[2]  = dpll_core_hsdiv0_clkout2;
+sys_clk[3]  = rcclk10m;
+sys_clk[4]  = rcclk10m;
+sys_clk[5]  = rcclk10m;
+sys_clk[6]  = xtalclk;
+sys_clk[7]  = rcclk10m;
+
+hsi_clk[0]  = pll_core_clk;      
+hsi_clk[1]  = pll_core_clk;
+hsi_clk[2]  = pll_dsp_clk;
+hsi_clk[3]  = pll_per_clk;
+hsi_clk[4]  = dpll_core_hsdiv0_clkout0;
+hsi_clk[5]  = rcclk10m;
+hsi_clk[6]  = dpll_dsp_hsdiv0_clkout0;
+hsi_clk[7]  = dpll_per_hsdiv0_clkout0;
+
+csirx_clk[0]  = wucpuclk;      
+csirx_clk[1]  = rcclk10m;
+csirx_clk[2]  = dpll_core_hsdiv0_clkout2;
+csirx_clk[3]  = rcclk10m;
+csirx_clk[4]  = rcclk10m;
+csirx_clk[5]  = rcclk10m;
+csirx_clk[6]  = xtalclk;
+csirx_clk[7]  = rcclk10m;
+
+trc_clkout[0]  = wucpuclk;      
+trc_clkout[1]  = dpll_core_hsdiv0_clkout1;
+trc_clkout[2]  = dpll_core_hsdiv0_clkout2;
+trc_clkout[3]  = dpll_dsp_hsdiv0_clkout2;
+trc_clkout[4]  = dpll_per_hsdiv0_clkout3;
+trc_clkout[5]  = rcclk10m;
+trc_clkout[6]  = xtalclk;
+trc_clkout[7]  = rcclk10m;
+
+mcu_clkout[0]  = wucpuclk;      
+mcu_clkout[1]  = rcclk10m;
+mcu_clkout[2]  = dpll_core_hsdiv0_clkout2;
+mcu_clkout[3]  = rcclk10m;
+mcu_clkout[4]  = rcclk10m;
+mcu_clkout[5]  = rcclk10m;
+mcu_clkout[6]  = xtalclk;
+mcu_clkout[7]  = rcclk10m;
+
+pmic_clkout[0]  = wucpuclk;      
+pmic_clkout[1]  = rcclk10m;
+pmic_clkout[2]  = dpll_core_hsdiv0_clkout2;
+pmic_clkout[3]  = rcclk10m;
+pmic_clkout[4]  = rcclk10m;
+pmic_clkout[5]  = rcclk10m;
+pmic_clkout[6]  = xtalclk;
+pmic_clkout[7]  = rcclk10m;
+
+obs_clkout[0]  = wucpuclk;      
+obs_clkout[1]  = dpll_core_hsdiv0_clkout2;
+obs_clkout[2]  = dpll_dsp_hsdiv0_clkout1;
+obs_clkout[3]  = dpll_per_hsdiv0_clkout1;
+obs_clkout[4]  = rcclk10m;
+obs_clkout[5]  = rcclk10m;
+obs_clkout[6]  = xtalclk;
+obs_clkout[7]  = rcclk10m;
+
+=====================MSS RCM Clock Selection=============================
+mss_rtia_clk_src_bus[0]  = wucpuclk;
+mss_rtia_clk_src_bus[1]  = fe1_refclk;
+mss_rtia_clk_src_bus[2]  = sys_vclk;
+mss_rtia_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+mss_rtia_clk_src_bus[4]  = rcclk10m;
+mss_rtia_clk_src_bus[5]  = rcclk10m;
+mss_rtia_clk_src_bus[6]  = wdt_dcc_clk;
+mss_rtia_clk_src_bus[7]  = rcclk32k;
+
+mss_rtib_clk_src_bus[0]  = wucpuclk;
+mss_rtib_clk_src_bus[1]  = fe2_refclk;
+mss_rtib_clk_src_bus[2]  = sys_vclk;
+mss_rtib_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+mss_rtib_clk_src_bus[4]  = rcclk10m;
+mss_rtib_clk_src_bus[5]  = rcclk10m;
+mss_rtib_clk_src_bus[6]  = wdt_dcc_clk;
+mss_rtib_clk_src_bus[7]  = rcclk32k;
+
+mss_rtic_clk_src_bus[0]  = wucpuclk;
+mss_rtic_clk_src_bus[1]  = fe1_refclk;
+mss_rtic_clk_src_bus[2]  = sys_vclk;
+mss_rtic_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+mss_rtic_clk_src_bus[4]  = rcclk10m;
+mss_rtic_clk_src_bus[5]  = rcclk10m;
+mss_rtic_clk_src_bus[6]  = wdt_dcc_clk;
+mss_rtic_clk_src_bus[7]  = rcclk32k;
+
+mss_wdt_clk_src_bus[0]  = wucpuclk;
+mss_wdt_clk_src_bus[1]  = fe1_refclk;
+mss_wdt_clk_src_bus[2]  = sys_vclk;
+mss_wdt_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+mss_wdt_clk_src_bus[4]  = rcclk10m;
+mss_wdt_clk_src_bus[5]  = rcclk10m;
+mss_wdt_clk_src_bus[6]  = wdt_dcc_clk;
+mss_wdt_clk_src_bus[7]  = rcclk32k;
+
+qspi_clk_src_bus[0]  = wucpuclk;
+qspi_clk_src_bus[1]  = plldss_hsdiv0_clkout2;
+qspi_clk_src_bus[2]  = sys_vclk;
+qspi_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+qspi_clk_src_bus[4]  = pllcore_hsdiv0_clkout2;
+qspi_clk_src_bus[5]  = rcclk10m;
+qspi_clk_src_bus[6]  = wdt_dcc_clk;
+qspi_clk_src_bus[7]  = rcclk10m;
+
+mss_spia_clk_src_bus[0]  = wucpuclk;
+mss_spia_clk_src_bus[1]  = xtalclk;
+mss_spia_clk_src_bus[2]  = sys_vclk;
+mss_spia_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+mss_spia_clk_src_bus[4]  = pllcore_hsdiv0_clkout2;
+mss_spia_clk_src_bus[5]  = rcclk10m;
+mss_spia_clk_src_bus[6]  = wdt_dcc_clk;
+mss_spia_clk_src_bus[7]  = rcclk10m;
+
+mss_spib_clk_src_bus[0]  = wucpuclk;
+mss_spib_clk_src_bus[1]  = xtalclk;
+mss_spib_clk_src_bus[2]  = sys_vclk;
+mss_spib_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+mss_spib_clk_src_bus[4]  = pllcore_hsdiv0_clkout2;
+mss_spib_clk_src_bus[5]  = rcclk10m;
+mss_spib_clk_src_bus[6]  = wdt_dcc_clk;
+mss_spib_clk_src_bus[7]  = rcclk10m;
+
+mss_i2c_clk_src_bus[0]  = wucpuclk;
+mss_i2c_clk_src_bus[1]  = xtalclk;
+mss_i2c_clk_src_bus[2]  = sys_vclk;
+mss_i2c_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+mss_i2c_clk_src_bus[4]  = pllcore_hsdiv0_clkout2;
+mss_i2c_clk_src_bus[5]  = rcclk10m;
+mss_i2c_clk_src_bus[6]  = wdt_dcc_clk;
+mss_i2c_clk_src_bus[7]  = rcclk10m;
+
+mss_uarta_clk_src_bus[0]  = wucpuclk;
+mss_uarta_clk_src_bus[1]  = xtalclk;
+mss_uarta_clk_src_bus[2]  = sys_vclk;
+mss_uarta_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+mss_uarta_clk_src_bus[4]  = pllcore_hsdiv0_clkout2;
+mss_uarta_clk_src_bus[5]  = rcclk10m;
+mss_uarta_clk_src_bus[6]  = wdt_dcc_clk;
+mss_uarta_clk_src_bus[7]  = rcclk10m;
+
+mss_uartb_clk_src_bus[0]  = wucpuclk;
+mss_uartb_clk_src_bus[1]  = xtalclk;
+mss_uartb_clk_src_bus[2]  = sys_vclk;
+mss_uartb_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+mss_uartb_clk_src_bus[4]  = pllcore_hsdiv0_clkout2;
+mss_uartb_clk_src_bus[5]  = rcclk10m;
+mss_uartb_clk_src_bus[6]  = wdt_dcc_clk;
+mss_uartb_clk_src_bus[7]  = rcclk10m;
+
+mcana_clk_src_bus[0]  = wucpuclk;
+mcana_clk_src_bus[1]  = plldss_hsdiv0_clkout2;
+mcana_clk_src_bus[2]  = sys_vclk;
+mcana_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+mcana_clk_src_bus[4]  = pllcore_hsdiv0_clkout2;
+mcana_clk_src_bus[5]  = rcclk10m;
+mcana_clk_src_bus[6]  = wdt_dcc_clk;
+mcana_clk_src_bus[7]  = canfd_extclk_in;
+
+mcanb_clk_src_bus[0]  = wucpuclk;
+mcanb_clk_src_bus[1]  = plldss_hsdiv0_clkout2;
+mcanb_clk_src_bus[2]  = sys_vclk;
+mcanb_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+mcanb_clk_src_bus[4]  = pllcore_hsdiv0_clkout2;
+mcanb_clk_src_bus[5]  = rcclk10m;
+mcanb_clk_src_bus[6]  = wdt_dcc_clk;
+mcanb_clk_src_bus[7]  = canfd_extclk_in;
+
+cpts_clk_src_bus[0]  = wucpuclk;
+cpts_clk_src_bus[1]  = xtalclk;
+cpts_clk_src_bus[2]  = sys_vclk;
+cpts_clk_src_bus[3]  = pllcore_hsdiv0_clkout1;
+cpts_clk_src_bus[4]  = pllcore_hsdiv0_clkout2;
+cpts_clk_src_bus[5]  = rcclk10m;
+cpts_clk_src_bus[6]  = rcclk10m;
+cpts_clk_src_bus[7]  = rcclk10m;
+
+cpsw_clk_src_bus[0]  = wucpuclk;
+cpsw_clk_src_bus[1]  = xtalclk;
+cpsw_clk_src_bus[2]  = sys_vclk;
+cpsw_clk_src_bus[3]  = rcclk10m;
+cpsw_clk_src_bus[4]  = pllcore_hsdiv0_clkout2;
+cpsw_clk_src_bus[5]  = rcclk10m;
+cpsw_clk_src_bus[6]  = rcclk10m;
+cpsw_clk_src_bus[7]  = rcclk10m;
+
+hsm_rti_clk_src_bus[0] = wucpuclk;
+hsm_rti_clk_src_bus[1] = xtalclk;
+hsm_rti_clk_src_bus[2] = sys_vclk;
+hsm_rti_clk_src_bus[3] = pllper_hsdiv0_clkout1;
+hsm_rti_clk_src_bus[4] = rcclk10m;
+hsm_rti_clk_src_bus[5] = rcclk10m;
+hsm_rti_clk_src_bus[6] = wdt_dcc_clk;
+hsm_rti_clk_src_bus[7] = rcclk32k;
+
+hsm_wdt_clk_src_bus[0] = wucpuclk;
+hsm_wdt_clk_src_bus[1] = xtalclk;
+hsm_wdt_clk_src_bus[2] = sys_vclk;
+hsm_wdt_clk_src_bus[3] = pllper_hsdiv0_clkout1;
+hsm_wdt_clk_src_bus[4] = rcclk10m;
+hsm_wdt_clk_src_bus[5] = rcclk10m;
+hsm_wdt_clk_src_bus[6] = wdt_dcc_clk;
+hsm_wdt_clk_src_bus[7] = rcclk32k;
+
+hsm_rtc_clk_src_bus[0] = wucpuclk;
+hsm_rtc_clk_src_bus[1] = xtalclk;
+hsm_rtc_clk_src_bus[2] = sys_vclk;
+hsm_rtc_clk_src_bus[3] = pllper_hsdiv0_clkout1;
+hsm_rtc_clk_src_bus[4] = rcclk10m;
+hsm_rtc_clk_src_bus[5] = rcclk10m;
+hsm_rtc_clk_src_bus[6] = wdt_dcc_clk;
+hsm_rtc_clk_src_bus[7] = rcclk32k;
+
+hsm_dmta_clk_src_bus[0] = wucpuclk;
+hsm_dmta_clk_src_bus[1] = xtalclk;
+hsm_dmta_clk_src_bus[2] = sys_vclk;
+hsm_dmta_clk_src_bus[3] = pllper_hsdiv0_clkout1;
+hsm_dmta_clk_src_bus[4] = rcclk10m;
+hsm_dmta_clk_src_bus[5] = rcclk10m;
+hsm_dmta_clk_src_bus[6] = wdt_dcc_clk;
+hsm_dmta_clk_src_bus[7] = rcclk32k;
+
+hsm_dmtb_clk_src_bus[0] = wucpuclk;
+hsm_dmtb_clk_src_bus[1] = xtalclk;
+hsm_dmtb_clk_src_bus[2] = sys_vclk;
+hsm_dmtb_clk_src_bus[3] = pllper_hsdiv0_clkout1;
+hsm_dmtb_clk_src_bus[4] = rcclk10m;
+hsm_dmtb_clk_src_bus[5] = rcclk10m;
+hsm_dmtb_clk_src_bus[6] = wdt_dcc_clk;
+hsm_dmtb_clk_src_bus[7] = rcclk32k;
+
+=========================DSS RCM Clock Connection===============================
+dsp_clk_src_bus[0]  = wucpuclk;
+dsp_clk_src_bus[1]  = xtalclk;
+dsp_clk_src_bus[2]  = plldsp_hsdiv0_clkout1;
+dsp_clk_src_bus[3]  = plldsp_hsdiv0_clkout1_dithered_dftmux; 
+dsp_clk_src_bus[4]  = pllcore_hsdiv0_clkout1;
+dsp_clk_src_bus[5]  = rcclk;
+dsp_clk_src_bus[6]  = rcclk;
+dsp_clk_src_bus[7]  = rcclk;
+
+dss_rtia_clk_src_bus[0]  = wucpuclk;
+dss_rtia_clk_src_bus[1]  = xtalclk;
+dss_rtia_clk_src_bus[2]  = sys_clk;
+dss_rtia_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+dss_rtia_clk_src_bus[4]  = rcclk;
+dss_rtia_clk_src_bus[5]  = rcclk;
+dss_rtia_clk_src_bus[6]  = xref0_clk;
+dss_rtia_clk_src_bus[7]  = rcclk32k;
+
+dss_rtib_clk_src_bus[0]  = wucpuclk;
+dss_rtib_clk_src_bus[1]  = xtalclk;
+dss_rtib_clk_src_bus[2]  = sys_clk;
+dss_rtib_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+dss_rtib_clk_src_bus[4]  = rcclk;
+dss_rtib_clk_src_bus[5]  = rcclk;
+dss_rtib_clk_src_bus[6]  = xref0_clk;
+dss_rtib_clk_src_bus[7]  = rcclk32k;
+
+dss_wdt_clk_src_bus[0]  = wucpuclk;
+dss_wdt_clk_src_bus[1]  = xtalclk;
+dss_wdt_clk_src_bus[2]  = sys_clk;
+dss_wdt_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+dss_wdt_clk_src_bus[4]  = rcclk;
+dss_wdt_clk_src_bus[5]  = rcclk;
+dss_wdt_clk_src_bus[6]  = xref0_clk;
+dss_wdt_clk_src_bus[7]  = rcclk32k;
+
+dss_scia_clk_src_bus[0]  = wucpuclk;
+dss_scia_clk_src_bus[1]  = xtalclk;
+dss_scia_clk_src_bus[2]  = sys_clk;
+dss_scia_clk_src_bus[3]  = rcclk32k;
+dss_scia_clk_src_bus[4]  = rcclk;
+dss_scia_clk_src_bus[5]  = rcclk;
+dss_scia_clk_src_bus[6]  = pllper_hsdiv0_clkout1;
+dss_scia_clk_src_bus[7]  = rcclk;
+
+=======RCSS RCM Clock Connection================
+atl_clk_src_bus[0]  = wucpuclk;
+atl_clk_src_bus[1]  = xtalclk;
+atl_clk_src_bus[2]  = sys_clk;
+atl_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+atl_clk_src_bus[4]  = pllper_hsdiv0_clkout2;
+atl_clk_src_bus[5]  = rcclk;
+atl_clk_src_bus[6]  = pllper_hsdiv0_clkout3;
+atl_clk_src_bus[7]  = rcclk;
+
+mcaspa_ref0_clk_src_bus[0]  = wucpuclk;
+mcaspa_ref0_clk_src_bus[1]  = rcss_atl_clk_dftmuxed[0];
+mcaspa_ref0_clk_src_bus[2]  = rcss_atl_clk_dftmuxed[1];
+mcaspa_ref0_clk_src_bus[3]  = rcss_atl_clk_dftmuxed[2];
+mcaspa_ref0_clk_src_bus[4]  = rcss_atl_clk_dftmuxed[3];
+mcaspa_ref0_clk_src_bus[5]  = rcclk;
+mcaspa_ref0_clk_src_bus[6]  = xref_clk0;
+mcaspa_ref0_clk_src_bus[7]  = xref_clk1;
+
+mcaspa_ref1_clk_src_bus[0]  = wucpuclk;
+mcaspa_ref1_clk_src_bus[1]  = rcss_atl_clk_dftmuxed[0];
+mcaspa_ref1_clk_src_bus[2]  = rcss_atl_clk_dftmuxed[1];
+mcaspa_ref1_clk_src_bus[3]  = rcss_atl_clk_dftmuxed[2];
+mcaspa_ref1_clk_src_bus[4]  = rcss_atl_clk_dftmuxed[3];
+mcaspa_ref1_clk_src_bus[5]  = rcclk; 
+mcaspa_ref1_clk_src_bus[6]  = xref_clk0;
+mcaspa_ref1_clk_src_bus[7]  = xref_clk1;
+
+mcaspa_aux_clk_src_bus[0]  = wucpuclk;
+mcaspa_aux_clk_src_bus[1]  = wucpuclk;
+mcaspa_aux_clk_src_bus[2]  = pllper_hsdiv0_clkout1;
+mcaspa_aux_clk_src_bus[3]  = pllper_hsdiv0_clkout2;
+mcaspa_aux_clk_src_bus[4]  = pllper_hsdiv0_clkout3;
+mcaspa_aux_clk_src_bus[5]  = rcclk;
+mcaspa_aux_clk_src_bus[6]  = xref_clk0;
+mcaspa_aux_clk_src_bus[7]  = xref_clk1;
+
+mcaspb_ref0_clk_src_bus[0]  = wucpuclk;
+mcaspb_ref0_clk_src_bus[1]  = rcss_atl_clk_dftmuxed[0];
+mcaspb_ref0_clk_src_bus[2]  = rcss_atl_clk_dftmuxed[1];
+mcaspb_ref0_clk_src_bus[3]  = rcss_atl_clk_dftmuxed[2];
+mcaspb_ref0_clk_src_bus[4]  = rcss_atl_clk_dftmuxed[3];
+mcaspb_ref0_clk_src_bus[5]  = rcclk; 
+mcaspb_ref0_clk_src_bus[6]  = xref_clk0;
+mcaspb_ref0_clk_src_bus[7]  = xref_clk1;
+
+mcaspb_ref1_clk_src_bus[0]  = wucpuclk;
+mcaspb_ref1_clk_src_bus[1]  = rcss_atl_clk_dftmuxed[0];
+mcaspb_ref1_clk_src_bus[2]  = rcss_atl_clk_dftmuxed[1];
+mcaspb_ref1_clk_src_bus[3]  = rcss_atl_clk_dftmuxed[2];
+mcaspb_ref1_clk_src_bus[4]  = rcss_atl_clk_dftmuxed[3];
+mcaspb_ref1_clk_src_bus[5]  = rcclk; 
+mcaspb_ref1_clk_src_bus[6]  = xref_clk0;
+mcaspb_ref1_clk_src_bus[7]  = xref_clk1;
+
+mcaspb_aux_clk_src_bus[0]  = wucpuclk;
+mcaspb_aux_clk_src_bus[1]  = wucpuclk;
+mcaspb_aux_clk_src_bus[2]  = pllper_hsdiv0_clkout1;
+mcaspb_aux_clk_src_bus[3]  = pllper_hsdiv0_clkout2;
+mcaspb_aux_clk_src_bus[4]  = pllper_hsdiv0_clkout3;
+mcaspb_aux_clk_src_bus[5]  = rcclk;
+mcaspb_aux_clk_src_bus[6]  = xref_clk0;
+mcaspb_aux_clk_src_bus[7]  = xref_clk1;
+
+mcaspc_ref0_clk_src_bus[0]  = wucpuclk;
+mcaspc_ref0_clk_src_bus[1]  = rcss_atl_clk_dftmuxed[0];
+mcaspc_ref0_clk_src_bus[2]  = rcss_atl_clk_dftmuxed[1];
+mcaspc_ref0_clk_src_bus[3]  = rcss_atl_clk_dftmuxed[2];
+mcaspc_ref0_clk_src_bus[4]  = rcss_atl_clk_dftmuxed[3];
+mcaspc_ref0_clk_src_bus[5]  = rcclk; 
+mcaspc_ref0_clk_src_bus[6]  = xref_clk0;
+mcaspc_ref0_clk_src_bus[7]  = xref_clk1;
+
+mcaspc_ref1_clk_src_bus[0]  = wucpuclk;
+mcaspc_ref1_clk_src_bus[1]  = rcss_atl_clk_dftmuxed[0];
+mcaspc_ref1_clk_src_bus[2]  = rcss_atl_clk_dftmuxed[1];
+mcaspc_ref1_clk_src_bus[3]  = rcss_atl_clk_dftmuxed[2];
+mcaspc_ref1_clk_src_bus[4]  = rcss_atl_clk_dftmuxed[3];
+mcaspc_ref1_clk_src_bus[5]  = rcclk; 
+mcaspc_ref1_clk_src_bus[6]  = xref_clk0;
+mcaspc_ref1_clk_src_bus[7]  = xref_clk1;
+
+mcaspc_aux_clk_src_bus[0]  = wucpuclk;
+mcaspc_aux_clk_src_bus[1]  = wucpuclk;
+mcaspc_aux_clk_src_bus[2]  = pllper_hsdiv0_clkout1;
+mcaspc_aux_clk_src_bus[3]  = pllper_hsdiv0_clkout2;
+mcaspc_aux_clk_src_bus[4]  = pllper_hsdiv0_clkout3;
+mcaspc_aux_clk_src_bus[5]  = rcclk;
+mcaspc_aux_clk_src_bus[6]  = xref_clk0;
+mcaspc_aux_clk_src_bus[7]  = xref_clk1;
+
+rcss_spia_clk_src_bus[0]  = wucpuclk;
+rcss_spia_clk_src_bus[1]  = xtalclk;
+rcss_spia_clk_src_bus[2]  = sys_clk;
+rcss_spia_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+rcss_spia_clk_src_bus[4]  = rcclk;
+rcss_spia_clk_src_bus[5]  = rcclk;
+rcss_spia_clk_src_bus[6]  = rcclk;
+rcss_spia_clk_src_bus[7]  = rcclk;
+
+rcss_spib_clk_src_bus[0]  = wucpuclk;
+rcss_spib_clk_src_bus[1]  = xtalclk;
+rcss_spib_clk_src_bus[2]  = sys_clk;
+rcss_spib_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+rcss_spib_clk_src_bus[4]  = rcclk;
+rcss_spib_clk_src_bus[5]  = rcclk;
+rcss_spib_clk_src_bus[6]  = rcclk;
+rcss_spib_clk_src_bus[7]  = rcclk;
+
+rcss_scia_clk_src_bus[0]  = wucpuclk;
+rcss_scia_clk_src_bus[1]  = xtalclk;
+rcss_scia_clk_src_bus[2]  = sys_clk;
+rcss_scia_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+rcss_scia_clk_src_bus[4]  = rcclk;
+rcss_scia_clk_src_bus[5]  = rcclk;
+rcss_scia_clk_src_bus[6]  = rcclk;
+rcss_scia_clk_src_bus[7]  = rcclk;
+
+rcss_i2ca_clk_src_bus[0]  = wucpuclk;
+rcss_i2ca_clk_src_bus[1]  = xtalclk;
+rcss_i2ca_clk_src_bus[2]  = sys_clk;
+rcss_i2ca_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+rcss_i2ca_clk_src_bus[4]  = rcclk;
+rcss_i2ca_clk_src_bus[5]  = rcclk;
+rcss_i2ca_clk_src_bus[6]  = rcclk;
+rcss_i2ca_clk_src_bus[7]  = rcclk;
+
+rcss_i2cb_clk_src_bus[0]  = wucpuclk;
+rcss_i2cb_clk_src_bus[1]  = xtalclk;
+rcss_i2cb_clk_src_bus[2]  = sys_clk;
+rcss_i2cb_clk_src_bus[3]  = pllper_hsdiv0_clkout1;
+rcss_i2cb_clk_src_bus[4]  = rcclk;
+rcss_i2cb_clk_src_bus[5]  = rcclk;
+rcss_i2cb_clk_src_bus[6]  = rcclk;
+rcss_i2cb_clk_src_bus[7]  = rcclk;
+
+****************************************************************************************/
+
+/****************************************************************************
+ *
+ * NAME
+ *      OnTargetConnect
+ *
+ * PURPOSE:
+ *      Setup almost everything ready for a new debug session.
+ *
+ * USAGE
+ *      This routine is a callback routine and called by CCS only.
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+OnTargetConnect()
+{
+    GEL_TextOut("Connecting Target...\n");
+    doAll();
+    GEL_TextOut("Target setup is done\n");
+}
+
+hotmenu apll_en_mode1()
+{ 
+    unsigned int lock_sts;
+   
+    //UNLOCK TOPRCM
+    WR_MEM_32(MSS_TOPRCM_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(MSS_TOPRCM_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+   
+    //UNLOCK MSS_RCM
+    WR_MEM_32(MSS_RCM_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(MSS_RCM_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+   
+    //UNLOCK RCSS_RCM
+    WR_MEM_32(RCSS_RCM_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(RCSS_RCM_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+   
+    //UNLOCK DSS_RCM
+    WR_MEM_32(DSS_RCM_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(DSS_RCM_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+
+    // APPLJ-1 Setting
+    // CLOCKOUT = M/(N+1) * CLKINP * (1/M2)  =  0x3e8/(19+1) * 40 * (1/1) = 2G
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_M2NDIV     , 0x10013);      //M2NDIV_M2[22:16] = 1 , M2NDIV_N[7:0] = 0x13
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_MN2DIV     , 0x103e8);      //MN2DIV_N2[19:16] = 1 , MN2DIV_M[11:0] = 0x3e8  
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_CLKCTRL    , 0x29131000);   //CLKDCOLDOEN[29] = 1,NWELLTRIM[28:24] = 9 IDLE[23] = 0 CLKDCOLDOPWDNZ[17] = 1 SELFREQDCO[12:10] = 4
+
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_TENABLE    , 0x1);          // TENABLE    = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_CLKCTRL    , 0x29131001);   //+TINTZ[0]   = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_TENABLE    , 0x0);          // TENABLE    = 0
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_TENABLEDIV , 0x1);          // TENABLEDIV = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_TENABLEDIV , 0x0);          // TENABLEDIV = 0
+
+    // APPLJ-2 Setting
+    // CLOCKOUT = M/(N+1) * CLKINP * (1/M2)  =  0x384/(19+1) * 40 * (1/1) = 1.8G
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_M2NDIV     , 0x10013);      //M2NDIV_M2[22:16] = 1 , M2NDIV_N[7:0] = 0x13
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_MN2DIV     , 0x10384);      //MN2DIV_N2[19:16] = 1 , MN2DIV_M[11:0] = 0x384  
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_CLKCTRL    , 0x29131000);   //CLKDCOLDOEN[29] = 1,NWELLTRIM[28:24] = 9 IDLE[23] = 0 CLKDCOLDOPWDNZ[17] = 1 SELFREQDCO[12:10] = 4
+
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_TENABLE    , 0x1);          // TENABLE    = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_CLKCTRL    , 0x29131001);   //+TINTZ[0]   = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_TENABLE    , 0x0);          // TENABLE    = 0
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_TENABLEDIV , 0x1);          // TENABLEDIV = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_TENABLEDIV , 0x0);          // TENABLEDIV = 0
+
+    // APPLJ-3 Setting
+    // CLOCKOUT = M/(N+1) * CLKINP * (1/M2)  =  0x360/(17+1) * 40 * (1/1) = 1.92G
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_M2NDIV     , 0x10011);      //M2NDIV_M2[22:16] = 1 , M2NDIV_N[7:0] = 0x11
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_MN2DIV     , 0x10360);      //MN2DIV_N2[19:16] = 1 , MN2DIV_M[11:0] = 0x360  
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_CLKCTRL    , 0x29131000);   //CLKDCOLDOEN[29] = 1,NWELLTRIM[28:24] = 9 IDLE[23] = 0 CLKDCOLDOPWDNZ[17] = 1 SELFREQDCO[12:10] = 4
+
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_TENABLE    , 0x1);          // TENABLE    = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_CLKCTRL    , 0x29131001);   //+TINTZ[0]   = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_TENABLE    , 0x0);          // TENABLE    = 0
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_TENABLEDIV , 0x1);          // TENABLEDIV = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_TENABLEDIV , 0x0);          // TENABLEDIV = 0
+
+    /*
+    // APPLJ-1  :  loop check to PLLLOCK DONE
+    lock_sts = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_CORE_STATUS); //PHASELOCK[10]
+    while(0x400 != (lock_sts & 0x400)) { 
+       lock_sts = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_CORE_STATUS); //PHASELOCK[10]
+    }
+    */
+	
+    // HSDIV-1 Settings
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT0, 0x3);    // CLKOUT0_DIV[4:0] = 3  -- 2G/(3+1) = 500MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT1, 0x3);    // CLKOUT1_DIV[4:0] = 3  -- 2G/(3+1) = 500MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT2, 0x4);    // CLKOUT2_DIV[4:0] = 4  -- 2G/(4+1) = 400MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER        , 0x4);    // HSDIVIDER[2]     = 1 
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER        , 0x0);    // HSDIVIDER[2]     = 0
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT0, 0x103);  //+CLKOUT0_GATE[8]  = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT1, 0x103);  //+CLKOUT1_GATE[8]  = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT2, 0x104);  //+CLKOUT2_GATE[8]  = 1
+
+    /*
+    // APPLJ-2 : loop check to PLLLOCK DONE
+    lock_sts = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_DSP_STATUS); //PHASELOCK[10]
+    while(0x400 != (lock_sts & 0x400)) { 
+       lock_sts = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_DSP_STATUS); //PHASELOCK[10]
+    }
+    */
+	
+    // HSDIV-2 Settings
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT0, 0x3);    // CLKOUT0_DIV[4:0] = 3  -- 1.8G/(3+1) = 450MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT1, 0x3);    // CLKOUT1_DIV[4:0] = 3  -- 1.8G/(3+1) = 450MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT2, 0x4);    // CLKOUT2_DIV[4:0] = 4  -- 1.8G/(4+1) = 360MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER        , 0x4);    // HSDIVIDER[2]     = 1 
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER        , 0x0);    // HSDIVIDER[2]     = 0
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT0, 0x103);  //+CLKOUT0_GATE[8]  = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT1, 0x103);  //+CLKOUT1_GATE[8]  = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT2, 0x104);  //+CLKOUT2_GATE[8]  = 1
+
+    /*
+    // APPLJ-3 : loop check to PLLLOCK DONE
+    lock_sts = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_PER_STATUS); //PHASELOCK[10]
+    while(0x400 != (lock_sts & 0x400)) { 
+       lock_sts = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_PER_STATUS); //PHASELOCK[10]
+    }
+    */
+		
+    // HSDIV-2 Settings
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT0, 0x3);    // CLKOUT0_DIV[4:0] = 3  -- 1.92G/(3+1) = 480 MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT1, 0x9);    // CLKOUT1_DIV[4:0] = 9  -- 1.92G/(9+1) = 192 MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT2, 0x13);   // CLKOUT2_DIV[4:0] = 19 -- 1.92G/(19+1) = 96 MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT3, 0x7);    // CLKOUT3_DIV[4:0] = 7  -- 1.92G/(7+1) = 240 MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER        , 0x4);    // HSDIVIDER[2]     = 1 
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER        , 0x0);    // HSDIVIDER[2]     = 0
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT0, 0x103);  //+CLKOUT0_GATE[8]  = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT1, 0x109);  //+CLKOUT1_GATE[8]  = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT2, 0x113);  //+CLKOUT2_GATE[8]  = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT3, 0x107);  //+CLKOUT3_GATE[8]  = 1
+	
+    WR_MEM_32(MSS_TOPRCM_U_BASE+MSS_CR5_DIV_VAL_CLKDIV, 0x000);         //MSS_CR5_DIV_VAL_CLKDIV = 0x000;  400MHz/1
+    WR_MEM_32(MSS_TOPRCM_U_BASE+MSS_CR5_CLK_SRC_SEL_CLKSRCSEL, 0x222);  //MSS_CR5_CLK_SRC_SEL_CLKSRCSEL = 0x222
+    
+    WR_MEM_32(MSS_TOPRCM_U_BASE+SYS_CLK_DIV_VAL_CLKDIV, 0x111);         //400MHz/2
+	
+    WR_MEM_32(MSS_TOPRCM_U_BASE+HSI_DIV_VAL, 0x111);                    //500MHz/2 
+    WR_MEM_32(MSS_TOPRCM_U_BASE+HSI_CLK_SRC_SEL, 0x444);                //HSI_CLK_SRC_SEL = 0x444  
+    WR_MEM_32(MSS_TOPRCM_U_BASE+HSI_CLK_GATE , 0x0);
+	 
+    WR_MEM_32(MSS_TOPRCM_U_BASE+TRCCLKOUT_DIV_VAL, 0x333);              //500MHz/4 
+    WR_MEM_32(MSS_TOPRCM_U_BASE+TRCCLKOUT_CLK_SRC_SEL, 0x111);          //TRCCLKOUT_CLK_SRC_SEL = 0x111
+
+    WR_MEM_32(MSS_TOPRCM_U_BASE+CSIRX_DIV_VAL, 0x000);                  //CSIRX_DIV_VAL = 0x000;  96MHz/1
+    WR_MEM_32(MSS_TOPRCM_U_BASE+CSIRX_CLK_SRC_SEL, 0x222);              //CSIRX_CLK_SRC_SEL = 0x222
+	 	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_MCANA_CLK_DIV_VAL, 0x444);  //MSS_MCANA_CLK_DIV_VAL_CLKDIVR   = 0x444; 400MHz/5
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_MCANA_CLK_SRC_SEL, 0x444);  //MSS_MCANA_CLK_SRC_SEL_CLKSRCSEL = 0x444;  
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_MCANB_CLK_DIV_VAL, 0x444);  //MSS_MCANB_CLK_DIV_VAL_CLKDIVR   = 0x444; 400MHz/5
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_MCANB_CLK_SRC_SEL, 0x444);  //MSS_MCANB_CLK_SRC_SEL_CLKSRCSEL = 0x444; 
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RTIA_CLK_DIV_VAL, 0x000);  //MSS_RTIA_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RTIA_CLK_SRC_SEL, 0x222);  //MSS_RTIA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RTIB_CLK_DIV_VAL, 0x000);  //MSS_RTIB_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RTIB_CLK_SRC_SEL, 0x222);  //MSS_RTIB_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RTIC_CLK_DIV_VAL, 0x000);  //MSS_RTIC_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RTIC_CLK_SRC_SEL, 0x222);  //MSS_RTIC_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_WDT_CLK_DIV_VAL, 0x000);   //MSS_WDT_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_WDT_CLK_SRC_SEL, 0x222);   //MSS_WDT_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+    
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_QSPI_CLK_DIV_VAL, 0x444);  //MSS_QSPI_CLK_DIV_VAL_CLKDIVR   = 0x444; 400MHz/5
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_QSPI_CLK_SRC_SEL, 0x444);  //MSS_QSPI_CLK_SRC_SEL_CLKSRCSEL = 0x444;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SPIA_CLK_DIV_VAL, 0x000);  //MSS_SPIA_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SPIA_CLK_SRC_SEL, 0x222);  //MSS_SPIA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SPIB_CLK_DIV_VAL, 0x000);  //MSS_SPIB_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SPIB_CLK_SRC_SEL, 0x222);  //MSS_SPIB_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_I2C_CLK_DIV_VAL, 0x000);   //MSS_I2C_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_I2C_CLK_SRC_SEL, 0x222);   //MSS_I2C_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SCIA_CLK_DIV_VAL, 0x000);  //MSS_SCIA_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SCIA_CLK_SRC_SEL, 0x222);  //MSS_SCIA_CLK_SRC_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SCIB_CLK_DIV_VAL, 0x000);  //MSS_SCIB_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SCIB_CLK_SRC_SEL, 0x222);  //MSS_SCIB_CLK_SRC_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_CPTS_CLK_DIV_VAL, 0x111);  //MSS_CPTS_CLK_DIV_VAL_CLKDIVR = 0x111; 500MHz/2
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_CPTS_CLK_SRC_SEL, 0x333);  //MSS_CPTS_CLK_SRC_CLKSRCSEL = 0x333;
+   
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_MII100_CLK_DIV_VAL, 0x999);  //500MHz/10
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_MII10_CLK_DIV_VAL, 0x636363); //500MHz/100
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RGMII_CLK_DIV_VAL, 0x333);   //500MHz/4
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_CPSW_CLK_DIV_VAL, 0x111);    //MSS_CPSW_CLK_DIV_VAL_CLKDIVR   = 0x111; 400MHz/2
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_CPSW_CLK_SRC_SEL, 0x444);    //MSS_CPSW_CLK_SRC_SEL_CLKSRCSEL = 0x444;    
+
+    WR_MEM_32(MSS_RCM_U_BASE+HSM_RTIA_CLK_SRC_SEL, 0x222);    //200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+HSM_WDT_CLK_SRC_SEL, 0x222);     //200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+HSM_RTC_CLK_SRC_SEL, 0x777);     //0.032MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+HSM_DMTA_CLK_SRC_SEL, 0x222);    //200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+HSM_DMTB_CLK_SRC_SEL, 0x222);    //200MHz/1
+    
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_I2CA_CLK_DIV_VAL, 0x000);  //RCSS_I2CA_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_I2CA_CLK_SRC_SEL, 0x222);  //RCSS_I2CA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_I2CB_CLK_DIV_VAL, 0x000);  //RCSS_I2CB_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_I2CB_CLK_SRC_SEL, 0x222);  //RCSS_I2CB_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_SCIA_CLK_DIV_VAL, 0x000);  //RCSS_SCIA_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_SCIA_CLK_SRC_SEL, 0x222);  //RCSS_SCIA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_SPIA_CLK_DIV_VAL, 0x000);  //RCSS_SPIA_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_SPIA_CLK_SRC_SEL, 0x222);  //RCSS_SPIA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_SPIB_CLK_DIV_VAL, 0x000);  //RCSS_SPIB_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_SPIB_CLK_SRC_SEL, 0x222);  //RCSS_SPIB_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPA_REF0_CLK_DIV_VAL, 0x111);  //RCSS_MCASPA_REF0_CLK_DIV_VAL_CLKDIVR = 0x111; 200MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPA_REF0_CLK_SRC_SEL, 0x111);  //RCSS_MCASPA_REF0_CLK_SRC_SEL_CLKSRCSEL = 0x111;
+	
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPA_REF1_CLK_DIV_VAL, 0x111);  //RCSS_MCASPA_REF1_CLK_DIV_VAL_CLKDIVR = 0x111; 200MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPA_REF1_CLK_SRC_SEL, 0x111);  //RCSS_MCASPA_REF1_CLK_SRC_SEL_CLKSRCSEL = 0x111;
+	
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPA_AUX_CLK_DIV_VAL,  0x111);  //RCSS_MCASPA_AUX_CLK_DIV_VAL_CLKDIVR = 0x111; 192MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPA_AUX_CLK_SRC_SEL,  0x222);  //RCSS_MCASPA_AUX_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPB_REF0_CLK_DIV_VAL, 0x111);  //RCSS_MCASPB_REF0_CLK_DIV_VAL_CLKDIVR = 0x111; 200MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPB_REF0_CLK_SRC_SEL, 0x111);  //RCSS_MCASPB_REF0_CLK_SRC_SEL_CLKSRCSEL = 0x111;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPB_REF1_CLK_DIV_VAL, 0x111);  //RCSS_MCASPB_REF1_CLK_DIV_VAL_CLKDIVR = 0x111; 200MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPB_REF1_CLK_SRC_SEL, 0x111);  //RCSS_MCASPB_REF1_CLK_SRC_SEL_CLKSRCSEL = 0x111;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPB_AUX_CLK_DIV_VAL,  0x111);  //RCSS_MCASPB_AUX_CLK_DIV_VAL_CLKDIVR = 0x111; 192MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPB_AUX_CLK_SRC_SEL,  0x222);  //RCSS_MCASPB_AUX_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPC_REF0_CLK_DIV_VAL, 0x111);  //RCSS_MCASPC_REF0_CLK_DIV_VAL_CLKDIVR = 0x111; 200MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPC_REF0_CLK_SRC_SEL, 0x111);  //RCSS_MCASPC_REF0_CLK_SRC_SEL_CLKSRCSEL = 0x111;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPC_REF1_CLK_DIV_VAL, 0x111);  //RCSS_MCASPC_REF1_CLK_DIV_VAL_CLKDIVR = 0x111; 200MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPC_REF1_CLK_SRC_SEL, 0x111);  //RCSS_MCASPC_REF1_CLK_SRC_SEL_CLKSRCSEL = 0x111;
+	
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPC_AUX_CLK_DIV_VAL,  0x111);  //RCSS_MCASPC_AUX_CLK_DIV_VAL_CLKDIVR = 0x111; 192MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPC_AUX_CLK_SRC_SEL,  0x222);  //RCSS_MCASPC_AUX_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_DSP_CLK_DIV_VAL, 0x000);  //DSS_DSP_CLK_DIV_VAL 450MHz/1 
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_DSP_CLK_SRC_SEL, 0x222);  //DSS_DSP_CLK_SRC_SEL = 0x222; 
+	
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_HWA_CLK_SRC_SEL, 0x000);  //DSS_HWA_CLK_SRC_SEL;  400MHz from R5
+	 
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_RTIA_CLK_DIV_VAL, 0x000); //DSS_RTIA_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_RTIA_CLK_SRC_SEL, 0x222); //DSS_RTIA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_RTIB_CLK_DIV_VAL, 0x000); //DSS_RTIB_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_RTIB_CLK_SRC_SEL, 0x222); //DSS_RTIB_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_WDT_CLK_DIV_VAL, 0x000);  //DSS_WDT_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_WDT_CLK_SRC_SEL, 0x222);  //DSS_WDT_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_SCIA_CLK_DIV_VAL, 0x000); //DSS_SCIA_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_SCIA_CLK_SRC_SEL, 0x222); //DSS_SCIA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    GEL_TextOut("\n APLL CONFIGURED IN MODE1\n");
+}
+
+hotmenu apll_en_mode1_default()
+{ 
+    unsigned int lock_sts;
+   
+    //UNLOCK TOPRCM
+    WR_MEM_32(MSS_TOPRCM_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(MSS_TOPRCM_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+   
+    //UNLOCK MSS_RCM
+    WR_MEM_32(MSS_RCM_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(MSS_RCM_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+   
+    //UNLOCK RCSS_RCM
+    WR_MEM_32(RCSS_RCM_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(RCSS_RCM_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+   
+    //UNLOCK DSS_RCM
+    WR_MEM_32(DSS_RCM_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(DSS_RCM_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+
+    // APPLJ-1 Setting
+    // CLOCKOUT = M/(N+1) * CLKINP * (1/M2)  =  0x320/(39+1) * 40 * (1/1) = 800MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_M2NDIV     , 0x10027);      //M2NDIV_M2[22:16] = 1 , M2NDIV_N[7:0] = 0x27
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_MN2DIV     , 0x10320);      //MN2DIV_N2[19:16] = 1 , MN2DIV_M[11:0] = 0x320 
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_CLKCTRL    , 0x29131000);   //CLKDCOLDOEN[29] = 1,NWELLTRIM[28:24] = 9 IDLE[23] = 0 CLKDCOLDOPWDNZ[17] = 1 SELFREQDCO[12:10] = 4
+
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_TENABLE    , 0x1);          // TENABLE    = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_CLKCTRL    , 0x29131001);   //+TINTZ[0]   = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_TENABLE    , 0x0);          // TENABLE    = 0
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_TENABLEDIV , 0x1);          // TENABLEDIV = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_TENABLEDIV , 0x0);          // TENABLEDIV = 0
+
+    // APPLJ-2 Setting
+    // CLOCKOUT = M/(N+1) * CLKINP * (1/M2)  =  0x384/(39+1) * 40 * (1/1) = 900MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_M2NDIV     , 0x10027);      //M2NDIV_M2[22:16] = 1 , M2NDIV_N[7:0] = 0x27
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_MN2DIV     , 0x10384);      //MN2DIV_N2[19:16] = 1 , MN2DIV_M[11:0] = 0x384     
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_CLKCTRL    , 0x29131000);   //CLKDCOLDOEN[29] = 1,NWELLTRIM[28:24] = 9 IDLE[23] = 0 CLKDCOLDOPWDNZ[17] = 1 SELFREQDCO[12:10] = 4
+
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_TENABLE    , 0x1);          // TENABLE    = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_CLKCTRL    , 0x29131001);   //+TINTZ[0]   = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_TENABLE    , 0x0);          // TENABLE    = 0
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_TENABLEDIV , 0x1);          // TENABLEDIV = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_TENABLEDIV , 0x0);          // TENABLEDIV = 0
+
+    // APPLJ-3 Setting
+    // CLOCKOUT = M/(N+1) * CLKINP * (1/M2)  =  0x6C0/(39+1) * 40 * (1/1) = 1.728G
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_M2NDIV     , 0x10027);      //M2NDIV_M2[22:16] = 1 , M2NDIV_N[7:0] = 0x27
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_MN2DIV     , 0x106C0);      //MN2DIV_N2[19:16] = 1 , MN2DIV_M[11:0] = 0x6C0  
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_CLKCTRL    , 0x29131000);   //CLKDCOLDOEN[29] = 1,NWELLTRIM[28:24] = 9 IDLE[23] = 0 CLKDCOLDOPWDNZ[17] = 1 SELFREQDCO[12:10] = 4
+
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_TENABLE    , 0x1);          // TENABLE    = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_CLKCTRL    , 0x29131001);   //+TINTZ[0]   = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_TENABLE    , 0x0);          // TENABLE    = 0
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_TENABLEDIV , 0x1);          // TENABLEDIV = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_TENABLEDIV , 0x0);          // TENABLEDIV = 0
+
+    /*
+    // APPLJ-1  :  loop check to PLLLOCK DONE
+    lock_sts = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_CORE_STATUS); //PHASELOCK[10]
+    while(0x400 != (lock_sts & 0x400)) { 
+       lock_sts = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_CORE_STATUS); //PHASELOCK[10]
+    }
+    */
+	
+    // HSDIV-1 Settings
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT1, 0x3);    // CLKOUT1_DIV[4:0] = 3  -- 800/(3+1) = 200MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT2, 0x1);    // CLKOUT2_DIV[4:0] = 1  -- 800/(1+1) = 400MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER        , 0x4);    // HSDIVIDER[2]     = 1 
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER        , 0x0);    // HSDIVIDER[2]     = 0
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT1, 0x103);  //+CLKOUT1_GATE[8]  = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT2, 0x101);  //+CLKOUT2_GATE[8]  = 1
+
+    /*
+    // APPLJ-2 : loop check to PLLLOCK DONE
+    lock_sts = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_DSP_STATUS); //PHASELOCK[10]
+    while(0x400 != (lock_sts & 0x400)) { 
+       lock_sts = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_DSP_STATUS); //PHASELOCK[10]
+    }
+    */
+	
+    // HSDIV-2 Settings
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT1, 0x1);    // CLKOUT1_DIV[4:0] = 1  -- 900/(1+1) = 450MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER        , 0x4);    // HSDIVIDER[2]     = 1 
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER        , 0x0);    // HSDIVIDER[2]     = 0
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT1, 0x101);  //+CLKOUT1_GATE[8]  = 1
+
+    /*
+    // APPLJ-3 : loop check to PLLLOCK DONE
+    lock_sts = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_PER_STATUS); //PHASELOCK[10]
+    while(0x400 != (lock_sts & 0x400)) { 
+       lock_sts = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_PER_STATUS); //PHASELOCK[10]
+    }
+    */
+		
+    // HSDIV-2 Settings
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT1, 0x8);    // CLKOUT1_DIV[4:0] = 8  -- 1.728G/(8+1) = 192 MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT2, 0x11);   // CLKOUT2_DIV[4:0] = 17  -- 1.728G/(17+1) = 96 MHz
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER        , 0x4);    // HSDIVIDER[2]     = 1 
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER        , 0x0);    // HSDIVIDER[2]     = 0
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT1, 0x108);  //+CLKOUT1_GATE[8]  = 1
+    ARM_WR32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT2, 0x111);  //+CLKOUT2_GATE[8]  = 1
+	
+    WR_MEM_32(MSS_TOPRCM_U_BASE+MSS_CR5_DIV_VAL_CLKDIV, 0x000);         //MSS_CR5_DIV_VAL_CLKDIV = 0x000;  400MHz/1
+    WR_MEM_32(MSS_TOPRCM_U_BASE+MSS_CR5_CLK_SRC_SEL_CLKSRCSEL, 0x222);  //MSS_CR5_CLK_SRC_SEL_CLKSRCSEL = 0x222
+    
+    WR_MEM_32(MSS_TOPRCM_U_BASE+SYS_CLK_DIV_VAL_CLKDIV, 0x111);         //400MHz/2
+	
+    WR_MEM_32(MSS_TOPRCM_U_BASE+HSI_DIV_VAL, 0x333);                    //800MHz/4 
+    WR_MEM_32(MSS_TOPRCM_U_BASE+HSI_CLK_SRC_SEL, 0x000);                //HSI_CLK_SRC_SEL = 0x000  
+    WR_MEM_32(MSS_TOPRCM_U_BASE+HSI_CLK_GATE , 0x0);
+	 
+    WR_MEM_32(MSS_TOPRCM_U_BASE+TRCCLKOUT_DIV_VAL, 0x111);              //200MHz/2 
+    WR_MEM_32(MSS_TOPRCM_U_BASE+TRCCLKOUT_CLK_SRC_SEL, 0x111);          //TRCCLKOUT_CLK_SRC_SEL = 0x111
+
+    WR_MEM_32(MSS_TOPRCM_U_BASE+CSIRX_DIV_VAL, 0x000);                  //CSIRX_DIV_VAL = 0x000;  96MHz/1
+    WR_MEM_32(MSS_TOPRCM_U_BASE+CSIRX_CLK_SRC_SEL, 0x222);              //CSIRX_CLK_SRC_SEL = 0x222
+	 	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_MCANA_CLK_DIV_VAL, 0x444);  //MSS_MCANA_CLK_DIV_VAL_CLKDIVR   = 0x444; 400MHz/5
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_MCANA_CLK_SRC_SEL, 0x444);  //MSS_MCANA_CLK_SRC_SEL_CLKSRCSEL = 0x444;  
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_MCANB_CLK_DIV_VAL, 0x444);  //MSS_MCANB_CLK_DIV_VAL_CLKDIVR   = 0x444; 400MHz/5
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_MCANB_CLK_SRC_SEL, 0x444);  //MSS_MCANB_CLK_SRC_SEL_CLKSRCSEL = 0x444; 
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RTIA_CLK_DIV_VAL, 0x000);  //MSS_RTIA_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RTIA_CLK_SRC_SEL, 0x222);  //MSS_RTIA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RTIB_CLK_DIV_VAL, 0x000);  //MSS_RTIB_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RTIB_CLK_SRC_SEL, 0x222);  //MSS_RTIB_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RTIC_CLK_DIV_VAL, 0x000);  //MSS_RTIC_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_RTIC_CLK_SRC_SEL, 0x222);  //MSS_RTIC_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_WDT_CLK_DIV_VAL, 0x000);   //MSS_WDT_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_WDT_CLK_SRC_SEL, 0x222);   //MSS_WDT_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+    
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_QSPI_CLK_DIV_VAL, 0x444);  //MSS_QSPI_CLK_DIV_VAL_CLKDIVR   = 0x444; 400MHz/5
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_QSPI_CLK_SRC_SEL, 0x444);  //MSS_QSPI_CLK_SRC_SEL_CLKSRCSEL = 0x444;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SPIA_CLK_DIV_VAL, 0x000);  //MSS_SPIA_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SPIA_CLK_SRC_SEL, 0x222);  //MSS_SPIA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SPIB_CLK_DIV_VAL, 0x000);  //MSS_SPIB_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SPIB_CLK_SRC_SEL, 0x222);  //MSS_SPIB_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_I2C_CLK_DIV_VAL, 0x000);   //MSS_I2C_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_I2C_CLK_SRC_SEL, 0x222);   //MSS_I2C_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SCIA_CLK_DIV_VAL, 0x000);  //MSS_SCIA_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SCIA_CLK_SRC_SEL, 0x222);  //MSS_SCIA_CLK_SRC_CLKSRCSEL = 0x222;
+	 
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SCIB_CLK_DIV_VAL, 0x000);  //MSS_SCIB_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_SCIB_CLK_SRC_SEL, 0x222);  //MSS_SCIB_CLK_SRC_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_CPTS_CLK_DIV_VAL, 0x000);  //MSS_CPTS_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_CPTS_CLK_SRC_SEL, 0x333);  //MSS_CPTS_CLK_SRC_CLKSRCSEL = 0x333;
+   
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_MII100_CLK_DIV_VAL, 0x333);  //200MHz/4
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_MII10_CLK_DIV_VAL, 0x272727); //200MHz/40
+    //WR_MEM_32(MSS_RCM_U_BASE+MSS_RGMII_CLK_DIV_VAL, 0x333);   //Can't make 125MHz
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_CPSW_CLK_DIV_VAL, 0x111);    //MSS_CPSW_CLK_DIV_VAL_CLKDIVR   = 0x111; 400MHz/2
+    WR_MEM_32(MSS_RCM_U_BASE+MSS_CPSW_CLK_SRC_SEL, 0x444);    //MSS_CPSW_CLK_SRC_SEL_CLKSRCSEL = 0x444;    
+
+    WR_MEM_32(MSS_RCM_U_BASE+HSM_RTIA_CLK_SRC_SEL, 0x222);    //200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+HSM_WDT_CLK_SRC_SEL, 0x222);     //200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+HSM_RTC_CLK_SRC_SEL, 0x777);     //0.032MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+HSM_DMTA_CLK_SRC_SEL, 0x222);    //200MHz/1
+    WR_MEM_32(MSS_RCM_U_BASE+HSM_DMTB_CLK_SRC_SEL, 0x222);    //200MHz/1
+    
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_I2CA_CLK_DIV_VAL, 0x000);  //RCSS_I2CA_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_I2CA_CLK_SRC_SEL, 0x222);  //RCSS_I2CA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_I2CB_CLK_DIV_VAL, 0x000);  //RCSS_I2CB_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_I2CB_CLK_SRC_SEL, 0x222);  //RCSS_I2CB_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_SCIA_CLK_DIV_VAL, 0x000);  //RCSS_SCIA_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_SCIA_CLK_SRC_SEL, 0x222);  //RCSS_SCIA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_SPIA_CLK_DIV_VAL, 0x000);  //RCSS_SPIA_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_SPIA_CLK_SRC_SEL, 0x222);  //RCSS_SPIA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_SPIB_CLK_DIV_VAL, 0x000);  //RCSS_SPIB_CLK_DIV_VAL_CLKDIVR = 0x000; 200MHz/1
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_SPIB_CLK_SRC_SEL, 0x222);  //RCSS_SPIB_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPA_REF0_CLK_DIV_VAL, 0x111);  //RCSS_MCASPA_REF0_CLK_DIV_VAL_CLKDIVR = 0x111; 200MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPA_REF0_CLK_SRC_SEL, 0x111);  //RCSS_MCASPA_REF0_CLK_SRC_SEL_CLKSRCSEL = 0x111;
+	
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPA_REF1_CLK_DIV_VAL, 0x111);  //RCSS_MCASPA_REF1_CLK_DIV_VAL_CLKDIVR = 0x111; 200MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPA_REF1_CLK_SRC_SEL, 0x111);  //RCSS_MCASPA_REF1_CLK_SRC_SEL_CLKSRCSEL = 0x111;
+	
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPA_AUX_CLK_DIV_VAL,  0x111);  //RCSS_MCASPA_AUX_CLK_DIV_VAL_CLKDIVR = 0x111; 192MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPA_AUX_CLK_SRC_SEL,  0x222);  //RCSS_MCASPA_AUX_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPB_REF0_CLK_DIV_VAL, 0x111);  //RCSS_MCASPB_REF0_CLK_DIV_VAL_CLKDIVR = 0x111; 200MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPB_REF0_CLK_SRC_SEL, 0x111);  //RCSS_MCASPB_REF0_CLK_SRC_SEL_CLKSRCSEL = 0x111;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPB_REF1_CLK_DIV_VAL, 0x111);  //RCSS_MCASPB_REF1_CLK_DIV_VAL_CLKDIVR = 0x111; 200MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPB_REF1_CLK_SRC_SEL, 0x111);  //RCSS_MCASPB_REF1_CLK_SRC_SEL_CLKSRCSEL = 0x111;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPB_AUX_CLK_DIV_VAL,  0x111);  //RCSS_MCASPB_AUX_CLK_DIV_VAL_CLKDIVR = 0x111; 192MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPB_AUX_CLK_SRC_SEL,  0x222);  //RCSS_MCASPB_AUX_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPC_REF0_CLK_DIV_VAL, 0x111);  //RCSS_MCASPC_REF0_CLK_DIV_VAL_CLKDIVR = 0x111; 200MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPC_REF0_CLK_SRC_SEL, 0x111);  //RCSS_MCASPC_REF0_CLK_SRC_SEL_CLKSRCSEL = 0x111;
+
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPC_REF1_CLK_DIV_VAL, 0x111);  //RCSS_MCASPC_REF1_CLK_DIV_VAL_CLKDIVR = 0x111; 200MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPC_REF1_CLK_SRC_SEL, 0x111);  //RCSS_MCASPC_REF1_CLK_SRC_SEL_CLKSRCSEL = 0x111;
+	
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPC_AUX_CLK_DIV_VAL,  0x111);  //RCSS_MCASPC_AUX_CLK_DIV_VAL_CLKDIVR = 0x111; 192MHz/2
+    WR_MEM_32(RCSS_RCM_U_BASE+RCSS_MCASPC_AUX_CLK_SRC_SEL,  0x222);  //RCSS_MCASPC_AUX_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+	
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_DSP_CLK_DIV_VAL, 0x000);  //DSS_DSP_CLK_DIV_VAL 450MHz/1 
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_DSP_CLK_SRC_SEL, 0x222);  //DSS_DSP_CLK_SRC_SEL = 0x222; 
+	
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_HWA_CLK_SRC_SEL, 0x000);  //DSS_HWA_CLK_SRC_SEL;  400MHz from R5
+	 
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_RTIA_CLK_DIV_VAL, 0x000); //DSS_RTIA_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_RTIA_CLK_SRC_SEL, 0x222); //DSS_RTIA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_RTIB_CLK_DIV_VAL, 0x000); //DSS_RTIB_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_RTIB_CLK_SRC_SEL, 0x222); //DSS_RTIB_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_WDT_CLK_DIV_VAL, 0x000);  //DSS_WDT_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_WDT_CLK_SRC_SEL, 0x222);  //DSS_WDT_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_SCIA_CLK_DIV_VAL, 0x000); //DSS_SCIA_CLK_DIV_VAL_CLKDIVR   = 0x000; 200MHz/1
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_SCIA_CLK_SRC_SEL, 0x222); //DSS_SCIA_CLK_SRC_SEL_CLKSRCSEL = 0x222;
+
+    GEL_TextOut("\n APLL CONFIGURED IN MODE1 WITH DEFAULT SETTING\n");
+}
+
+hotmenu pll_clock_detection()
+{  
+   unsigned int m2n=0, mn2=0, rd1=0, rd2=0, freq=0;
+   unsigned int hsdiv_clk0=0, hsdiv_clk1=0, hsdiv_clk2=0, hsdiv_clk3=0;
+   rd1 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_CORE_M2NDIV);
+   rd2 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_CORE_MN2DIV);
+   m2n = ( rd1 & 0xFF);
+   mn2 = ( rd2 & 0xFFF);
+   freq = (mn2 * 40/(m2n+1));
+   GEL_TextOut("PLL_CORE_CLK Programmed Frequency = %d    \n",,,,, freq);
+   hsdiv_clk0 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT0);    
+   hsdiv_clk1 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT1);    
+   hsdiv_clk2 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_CORE_HSDIVIDER_CLKOUT2);   
+   GEL_TextOut("PLL_CORE_HSDIVIDER_CLKOUT0 Programmed Frequency = %d    \n",,,,, (freq/((hsdiv_clk0 & 0x1F)+1)));
+   GEL_TextOut("PLL_CORE_HSDIVIDER_CLKOUT1 Programmed Frequency = %d    \n",,,,, (freq/((hsdiv_clk1 & 0x1F)+1)));
+   GEL_TextOut("PLL_CORE_HSDIVIDER_CLKOUT2 Programmed Frequency = %d    \n",,,,, (freq/((hsdiv_clk2 & 0x1F)+1)));
+   rd1=0; rd2=0; m2n=0; m2n=0; freq=0; hsdiv_clk0; hsdiv_clk1=0; hsdiv_clk2=0;
+   
+   rd1 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_DSP_M2NDIV);
+   rd2 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_DSP_MN2DIV);
+   m2n = ( rd1 & 0xFF);
+   mn2 = ( rd2 & 0xFFF);
+   freq = (mn2 * 40 /(m2n+1));
+   GEL_TextOut("PLL_DSP_CLK Programmed Frequency = %d    \n",,,,, freq);
+   hsdiv_clk0 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT0);    
+   hsdiv_clk1 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT1);    
+   hsdiv_clk2 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_DSP_HSDIVIDER_CLKOUT2);   
+   GEL_TextOut("PLL_DSP_HSDIVIDER_CLKOUT0 Programmed Frequency = %d    \n",,,,, (freq/((hsdiv_clk0 & 0x1F)+1)));
+   GEL_TextOut("PLL_DSP_HSDIVIDER_CLKOUT1 Programmed Frequency = %d    \n",,,,, (freq/((hsdiv_clk1 & 0x1F)+1)));
+   GEL_TextOut("PLL_DSP_HSDIVIDER_CLKOUT2 Programmed Frequency = %d    \n",,,,, (freq/((hsdiv_clk2 & 0x1F)+1)));
+   rd1=0; rd2=0; m2n=0; m2n=0; freq=0; hsdiv_clk0; hsdiv_clk1=0; hsdiv_clk2=0;
+   
+   rd1 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_PER_M2NDIV);
+   rd2 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_PER_MN2DIV);
+   m2n = ( rd1 & 0xFF);
+   mn2 = ( rd2 & 0xFFF);
+   freq = (mn2 * 40/(m2n+1));
+   GEL_TextOut("PLL_PER_CLK Programmed Frequency = %d    \n",,,,, freq);
+   hsdiv_clk0 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT0);    
+   hsdiv_clk1 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT1);    
+   hsdiv_clk2 = RD_MEM_32(MSS_TOPRCM_U_BASE+PLL_PER_HSDIVIDER_CLKOUT2);   
+   GEL_TextOut("PLL_PER_HSDIVIDER_CLKOUT0 Programmed Frequency = %d    \n",,,,, (freq/((hsdiv_clk0 & 0x1F)+1)));
+   GEL_TextOut("PLL_PER_HSDIVIDER_CLKOUT1 Programmed Frequency = %d    \n",,,,, (freq/((hsdiv_clk1 & 0x1F)+1)));
+   GEL_TextOut("PLL_PER_HSDIVIDER_CLKOUT2 Programmed Frequency = %d    \n",,,,, (freq/((hsdiv_clk2 & 0x1F)+1)));
+   rd1=0; rd2=0; m2n=0; m2n=0; freq=0; hsdiv_clk0; hsdiv_clk1=0; hsdiv_clk2=0;
+}
+
+hotmenu internal_clock_detection()
+{  
+   unsigned int m2n=0, mn2=0, rd1=0, rd2=0, freq=0;
+   unsigned int clk_sel=0, div_val=0, hsdiv_clk2=0, hsdiv_clk3=0;
+   
+   rd1=RD_MEM_32(MSS_TOPRCM_U_BASE+MSS_CR5_DIV_VAL_CLKDIV);  
+   rd2=RD_MEM_32(MSS_TOPRCM_U_BASE+MSS_CR5_CLK_SRC_SEL_CLKSRCSEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MSS_CR5 Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MSS_CR5 Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MSS_CR5 Clock Source is dpll_core_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MSS_CR5 Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MSS_CR5 Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MSS_CR5 Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MSS_CR5 Clock Source is xtalclk \n");
+   }     
+   else 
+    {GEL_TextOut("MSS_CR5 Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("MSS_CR5 Clock Div_Value = %d    \n",,,,, div_val);
+   
+   rd1=RD_MEM_32(MSS_TOPRCM_U_BASE+SYS_CLK_DIV_VAL_CLKDIV);  
+   div_val = (rd1 & 0xF);
+   GEL_TextOut("SYS_Clock Div Value = %d    \n",,,,, div_val);
+   
+   
+   //HSI_CLK
+   rd1=RD_MEM_32(MSS_TOPRCM_U_BASE+HSI_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_TOPRCM_U_BASE+HSI_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("HSI Clock Source is pll_core_clk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("HSI Clock Source is pll_core_clk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("HSI Clock Source is pll_dsp_clk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("HSI Clock Source is pll_per_clk \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("HSI Clock Source is dpll_core_hsdiv0_clkout0 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("HSI Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("HSI Clock Source is dpll_dsp_hsdiv0_clkout0 \n");
+   }     
+   else 
+    {GEL_TextOut("HSI Clock Source is dpll_per_hsdiv0_clkout0 \n");
+   }     
+   GEL_TextOut("HSI Clock Div_Value = %d    \n",,,,, div_val);
+   
+   //CSI_RX Clock
+   rd1=RD_MEM_32(MSS_TOPRCM_U_BASE+CSIRX_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_TOPRCM_U_BASE+CSIRX_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("CSIRX Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("CSIRX Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("CSIRX Clock Source is dpll_core_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("CSIRX Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("CSIRX Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("CSIRX Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("CSIRX Clock Source is xtalclk \n");
+   }     
+   else 
+    {GEL_TextOut("CSIRX Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("CSIRX Clock Div_Value = %d    \n",,,,, div_val);
+   
+   //Trace Clock
+   rd1=RD_MEM_32(MSS_TOPRCM_U_BASE+TRCCLKOUT_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_TOPRCM_U_BASE+TRCCLKOUT_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("Trace Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("Trace Clock Source is dpll_core_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("Trace Clock Source is dpll_core_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("Trace Clock Source is dpll_dsp_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("Trace Clock Source is dpll_per_hsdiv0_clkout3 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("Trace Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("Trace Clock Source is xtalclk \n");
+   }     
+   else 
+    {GEL_TextOut("Trace Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("Trace Clock Div_Value = %d    \n",,,,, div_val);   
+   
+   //MCANA Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_MCANA_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_MCANA_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MCANA Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MCANA Clock Source is plldss_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MCANA Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MCANA Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MCANA Clock Source is pllcore_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MCANA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MCANA Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("MCANA Clock Source is canfd_extclk_in \n");
+   }     
+   GEL_TextOut("MCANA Clock Div_Value = %d    \n",,,,, div_val);   
+   
+   //MCANB Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_MCANB_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_MCANB_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MCANB Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MCANB Clock Source is plldss_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MCANB Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MCANB Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MCANB Clock Source is pllcore_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MCANB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MCANB Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("MCANB Clock Source is canfd_extclk_in \n");
+   }     
+   GEL_TextOut("MCANB Clock Div_Value = %d    \n",,,,, div_val);   
+   
+   //MSS RTIA Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_RTIA_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_RTIA_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MSS_RTIA Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MSS_RTIA Clock Source is fe1_refclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MSS_RTIA Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MSS_RTIA Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MSS_RTIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MSS_RTIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MSS_RTIA Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("MSS_RTIA Clock Source is rcclk32k \n");
+   }     
+   GEL_TextOut("MSS_RTIA Clock Div_Value = %d    \n",,,,, div_val);   
+   
+   //MSS RTIB Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_RTIB_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_RTIB_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MSS_RTIB Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MSS_RTIB Clock Source is fe2_refclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MSS_RTIB Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MSS_RTIB Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MSS_RTIB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MSS_RTIB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MSS_RTIB Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("MSS_RTIB Clock Source is rcclk32k \n");
+   }     
+   GEL_TextOut("MSS_RTIB Clock Div_Value = %d    \n",,,,, div_val);   
+   
+   //MSS RTIC Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_RTIC_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_RTIC_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MSS_RTIC Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MSS_RTIC Clock Source is fe2_refclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MSS_RTIC Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MSS_RTIC Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MSS_RTIC Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MSS_RTIC Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MSS_RTIC Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("MSS_RTIC Clock Source is rcclk32k \n");
+   }     
+   GEL_TextOut("MSS_RTIC Clock Div_Value = %d    \n",,,,, div_val);     
+   
+   //MSS WDT Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_WDT_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_WDT_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MSS_WDT Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MSS_WDT Clock Source is fe2_refclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MSS_WDT Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MSS_WDT Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MSS_WDT Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MSS_WDT Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MSS_WDT Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("MSS_WDT Clock Source is rcclk32k \n");
+   }     
+   GEL_TextOut("MSS_WDT Clock Div_Value = %d    \n",,,,, div_val); 
+   
+   //QSPI Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_QSPI_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_QSPI_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("QSPI Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("QSPI Clock Source is plldss_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("QSPI Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("QSPI Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("QSPI Clock Source is pllcore_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("QSPI Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("QSPI Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("QSPI Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("QSPI Clock Div_Value = %d    \n",,,,, div_val); 
+   
+   //MSS SPIA Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_SPIA_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_SPIA_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MSS_SPIA Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MSS_SPIA Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MSS_SPIA Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MSS_SPIA Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MSS_SPIA Clock Source is pllcore_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MSS_SPIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MSS_SPIA Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("MSS_SPIA Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("MSS_SPIA Clock Div_Value = %d    \n",,,,, div_val); 
+    
+   //MSS SPIB Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_SPIB_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_SPIB_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MSS_SPIB Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MSS_SPIB Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MSS_SPIB Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MSS_SPIB Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MSS_SPIB Clock Source is pllcore_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MSS_SPIB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MSS_SPIB Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("MSS_SPIB Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("MSS_SPIB Clock Div Value = %d    \n",,,,, div_val); 
+   
+   //MSS I2C Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_I2C_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_I2C_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MSS_I2C Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MSS_I2C Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MSS_I2C Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MSS_I2C Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MSS_I2C Clock Source is pllcore_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MSS_I2C Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MSS_I2C Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("MSS_I2C Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("MSS_I2C Clock Div_Value = %d    \n",,,,, div_val); 
+   
+   //MSS SCIA Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_SCIA_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_SCIA_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MSS_SCIA Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MSS_SCIA Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MSS_SCIA Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MSS_SCIA Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MSS_SCIA Clock Source is pllcore_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MSS_SCIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MSS_SCIA Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("MSS_SCIA Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("MSS_SCIA Clock Div_Value = %d    \n",,,,, div_val); 
+   
+   //MSS SCIB Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_SCIB_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_SCIB_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MSS_SCIB Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MSS_SCIB Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MSS_SCIB Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MSS_SCIB Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MSS_SCIB Clock Source is pllcore_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MSS_SCIB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MSS_SCIB Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("MSS_SCIB Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("MSS_SCIB Clock Div_Value = %d    \n",,,,, div_val); 
+   
+   //CPTS Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_CPTS_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_CPTS_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MSS_CPTS Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MSS_CPTS Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MSS_CPTS Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MSS_CPTS Clock Source is pllcore_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MSS_CPTS Clock Source is pllcore_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MSS_CPTS Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MSS_CPTS Clock Source is rcclk10m \n");
+   }     
+   else 
+    {GEL_TextOut("MSS_CPTS Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("MSS_CPTS Clock Div_Value = %d    \n",,,,, div_val);    
+   
+   //CPSW Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_CPSW_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+MSS_CPSW_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("MSS_CPSW Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("MSS_CPSW Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("MSS_CPSW Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("MSS_CPSW Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("MSS_CPSW Clock Source is pllcore_hsdiv0_clkout2 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("MSS_CPSW Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("MSS_CPSW Clock Source is rcclk10m \n");
+   }     
+   else 
+    {GEL_TextOut("MSS_CPSW Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("MSS_CPSW Clock Div_Value = %d    \n",,,,, div_val); 
+   
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_MII10_CLK_DIV_VAL);  
+   div_val = (rd1 & 0xFF);
+   GEL_TextOut("MSS_MII10 Clock Div_Value = %d    \n",,,,, div_val); 
+   
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_MII100_CLK_DIV_VAL);  
+   div_val = (rd1 & 0xF);
+   GEL_TextOut("MSS_MII10 Clock Div_Value = %d    \n",,,,, div_val); 
+   
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+MSS_RGMII_CLK_DIV_VAL);  
+   div_val = (rd1 & 0xF);
+   GEL_TextOut("MSS_MII10 Clock Div_Value = %d    \n",,,,, div_val); 
+
+   //HSM RTIA Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+HSM_RTIA_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+HSM_RTIA_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("HSM_RTIA Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("HSM_RTIA Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("HSM_RTIA Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("HSM_RTIA Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("HSM_RTIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("HSM_RTIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("HSM_RTIA Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("HSM_RTIA Clock Source is rcclk32k \n");
+   }     
+   GEL_TextOut("HSM_RTIA Clock Div_Value = %d    \n",,,,, div_val);    
+   
+   //HSM WDT Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+HSM_WDT_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+HSM_WDT_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("HSM_WDT Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("HSM_WDT Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("HSM_WDT Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("HSM_WDT Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("HSM_WDT Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("HSM_WDT Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("HSM_WDT Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("HSM_WDT Clock Source is rcclk32k \n");
+   }     
+   GEL_TextOut("HSM_WDT Clock Div_Value = %d    \n",,,,, div_val);    
+   
+   //HSM RTC Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+HSM_RTC_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+HSM_RTC_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("HSM_RTC Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("HSM_RTC Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("HSM_RTC Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("HSM_RTC Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("HSM_RTC Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("HSM_RTC Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("HSM_RTC Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("HSM_RTC Clock Source is rcclk32k \n");
+   }     
+   GEL_TextOut("HSM_RTC Clock Div_Value = %d    \n",,,,, div_val);    
+   
+   //HSM DMTA Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+HSM_DMTA_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+HSM_DMTA_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("HSM_DMTA Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("HSM_DMTA Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("HSM_DMTA Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("HSM_DMTA Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("HSM_DMTA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("HSM_DMTA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("HSM_DMTA Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("HSM_DMTA Clock Source is rcclk32k \n");
+   }     
+   GEL_TextOut("HSM_DMTA Clock Div_Value = %d    \n",,,,, div_val);    
+   
+   //HSM DMTB Clock
+   rd1=RD_MEM_32(MSS_RCM_U_BASE+HSM_DMTB_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(MSS_RCM_U_BASE+HSM_DMTB_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("HSM_DMTB Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("HSM_DMTB Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("HSM_DMTB Clock Source is sys_vclk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("HSM_DMTB Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("HSM_DMTB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("HSM_DMTB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("HSM_DMTB Clock Source is wdt_dcc_clk \n");
+   }     
+   else 
+    {GEL_TextOut("HSM_DMTB Clock Source is rcclk32k \n");
+   }     
+   GEL_TextOut("HSM_DMTB Clock Div_Value = %d    \n",,,,, div_val); 
+    
+   //DSP Clock
+   rd1=RD_MEM_32(DSS_RCM_U_BASE+DSS_DSP_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(DSS_RCM_U_BASE+DSS_DSP_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("DSP Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("DSP Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("DSP Clock Source is plldsp_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("DSP Clock Source is plldsp_hsdiv0_clkout1_dithered_dftmux \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("DSP Clock Source is pllcore_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("DSP Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("DSP Clock Source is rcclk10m \n");
+   }     
+   else 
+    {GEL_TextOut("DSP Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("DSP Clock Div_Value = %d    \n",,,,, div_val); 
+
+   //HWA Clock
+   rd2=RD_MEM_32(DSS_RCM_U_BASE+DSS_HWA_CLK_SRC_SEL);  
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("HWA Clock Source is cr5_clk \n");
+   }   
+   else 
+   {GEL_TextOut("HWA Clock Source is sys_clk \n");
+   }
+   
+   //DSS RTIA Clock
+   rd1=RD_MEM_32(DSS_RCM_U_BASE+DSS_RTIA_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(DSS_RCM_U_BASE+DSS_RTIA_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("DSS_RTIA Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("DSS_RTIA Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("DSS_RTIA Clock Source is sys_clk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("DSS_RTIA Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("DSS_RTIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("DSS_RTIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("DSS_RTIA Clock Source is xref0_clk \n");
+   }     
+   else 
+    {GEL_TextOut("DSS_RTIA Clock Source is rcclk32k \n");
+   }     
+   GEL_TextOut("DSS_RTIA Clock Div_Value = %d    \n",,,,, div_val); 
+   
+   //DSS RTIB Clock
+   rd1=RD_MEM_32(DSS_RCM_U_BASE+DSS_RTIB_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(DSS_RCM_U_BASE+DSS_RTIB_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("DSS_RTIB Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("DSS_RTIB Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("DSS_RTIB Clock Source is sys_clk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("DSS_RTIB Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("DSS_RTIB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("DSS_RTIB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("DSS_RTIB Clock Source is xref0_clk \n");
+   }     
+   else 
+    {GEL_TextOut("DSS_RTIB Clock Source is rcclk32k \n");
+   }     
+   GEL_TextOut("DSS_RTIB Clock Div_Value = %d    \n",,,,, div_val);
+   
+   //DSS WDT Clock
+   rd1=RD_MEM_32(DSS_RCM_U_BASE+DSS_WDT_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(DSS_RCM_U_BASE+DSS_WDT_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("DSS_WDT Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("DSS_WDT Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("DSS_WDT Clock Source is sys_clk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("DSS_WDT Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("DSS_WDT Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("DSS_WDT Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("DSS_WDT Clock Source is xref0_clk \n");
+   }     
+   else 
+    {GEL_TextOut("DSS_WDT Clock Source is rcclk32k \n");
+   }     
+   GEL_TextOut("DSS_WDT Clock Div_Value = %d    \n",,,,, div_val);
+   
+   //DSS SCIA Clock
+   rd1=RD_MEM_32(DSS_RCM_U_BASE+DSS_SCIA_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(DSS_RCM_U_BASE+DSS_SCIA_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("DSS_SCIA Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("DSS_SCIA Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("DSS_SCIA Clock Source is sys_clk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("DSS_SCIA Clock Source is rcclk32k \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("DSS_SCIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("DSS_SCIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("DSS_SCIA Clock Source is pllper_hsdiv0_clkout1 \n");
+   }     
+   else 
+    {GEL_TextOut("DSS_SCIA Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("DSS_SCIA Clock Div_Value = %d    \n",,,,, div_val);
+   
+   //RCSS SPIA Clock
+   rd1=RD_MEM_32(RCSS_RCM_U_BASE+RCSS_SPIA_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(RCSS_RCM_U_BASE+RCSS_SPIA_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("RCSS_SPIA Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("RCSS_SPIA Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("RCSS_SPIA Clock Source is sys_clk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("RCSS_SPIA Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("RCSS_SPIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("RCSS_SPIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("RCSS_SPIA Clock Source is rcclk10m \n");
+   }     
+   else 
+    {GEL_TextOut("RCSS_SPIA Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("RCSS_SPIA Clock DivValue = %d    \n",,,,, div_val); 
+
+   //RCSS SPIB Clock
+   rd1=RD_MEM_32(RCSS_RCM_U_BASE+RCSS_SPIB_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(RCSS_RCM_U_BASE+RCSS_SPIB_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("RCSS_SPIB Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("RCSS_SPIB Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("RCSS_SPIB Clock Source is sys_clk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("RCSS_SPIB Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("RCSS_SPIB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("RCSS_SPIB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("RCSS_SPIB Clock Source is rcclk10m \n");
+   }     
+   else 
+    {GEL_TextOut("RCSS_SPIB Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("RCSS_SPIB Clock Div_Value = %d    \n",,,,, div_val);    
+   
+   //RCSS SCIA Clock
+   rd1=RD_MEM_32(RCSS_RCM_U_BASE+RCSS_SCIA_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(RCSS_RCM_U_BASE+RCSS_SCIA_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("RCSS_SCIA Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("RCSS_SCIA Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("RCSS_SCIA Clock Source is sys_clk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("RCSS_SCIA Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("RCSS_SCIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("RCSS_SCIA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("RCSS_SCIA Clock Source is rcclk10m \n");
+   }     
+   else 
+    {GEL_TextOut("RCSS_SCIA Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("RCSS_SCIA Clock Div_Value = %d    \n",,,,, div_val);    
+   
+   //RCSS I2CA Clock
+   rd1=RD_MEM_32(RCSS_RCM_U_BASE+RCSS_I2CA_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(RCSS_RCM_U_BASE+RCSS_I2CA_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("RCSS_I2CA Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("RCSS_I2CA Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("RCSS_I2CA Clock Source is sys_clk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("RCSS_I2CA Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("RCSS_I2CA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("RCSS_I2CA Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("RCSS_I2CA Clock Source is rcclk10m \n");
+   }     
+   else 
+    {GEL_TextOut("RCSS_I2CA Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("RCSS_I2CA Clock Div_Value = %d    \n",,,,, div_val);    
+   
+   //RCSS I2CB Clock
+   rd1=RD_MEM_32(RCSS_RCM_U_BASE+RCSS_I2CB_CLK_DIV_VAL);  
+   rd2=RD_MEM_32(RCSS_RCM_U_BASE+RCSS_I2CB_CLK_SRC_SEL);  
+   div_val = (rd1 & 0xF);
+   clk_sel = (rd2 & 0xF);
+	 
+   if(clk_sel == 0)
+   {GEL_TextOut("RCSS_I2CB Clock Source is wucpuclk \n");
+   }   
+   else if (clk_sel == 1)
+   {GEL_TextOut("RCSS_I2CB Clock Source is xtalclk \n");
+   }  
+   else if (clk_sel == 2)
+   {GEL_TextOut("RCSS_I2CB Clock Source is sys_clk \n");
+   }  
+   else if (clk_sel == 3)
+   {GEL_TextOut("RCSS_I2CB Clock Source is pllper_hsdiv0_clkout1 \n");
+   }  
+   else if (clk_sel == 4)
+   {GEL_TextOut("RCSS_I2CB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 5)
+   {GEL_TextOut("RCSS_I2CB Clock Source is rcclk10m \n");
+   }  
+   else if (clk_sel == 6)
+   {GEL_TextOut("RCSS_I2CB Clock Source is rcclk10m \n");
+   }     
+   else 
+    {GEL_TextOut("RCSS_I2CB Clock Source is rcclk10m \n");
+   }     
+   GEL_TextOut("RCSS_I2CB Clock Div_Value = %d    \n",,,,, div_val);    
+}
+
+hotmenu sop_dev_type_check()
+{
+    unsigned int ana_3, ana_4;
+
+    ana_3 = RD_MEM_32(0x470001CC);
+    ana_4 = RD_MEM_32(0x470001D0);
+
+    GEL_TextOut("\n DIAGNOSTICS \n");  
+    GEL_TextOut("--------------------------------------------------------------\n");
+    GEL_TextOut("0x470001CC SOP_MODE   0x0       = %x   \n" ,,,,, ana_3);
+    GEL_TextOut("[31:0]    SOP_MODE_TYPE   0x0  = %x   \n" ,,,,, ((ana_3& 0xFFFFFFFF)));
+
+    if (((ana_3 & 0x1C)>>2) == 0x1)
+    {
+        GEL_TextOut("FUNCTIONAL MODE SOP 4 001 \n");
+    }
+    else if (((ana_3 & 0x1C)>>2) == 0x3)
+    {
+        GEL_TextOut("DEVELOPMENT MODE SOP 2 011 \n");
+    }
+    else if (((ana_3 & 0x1C)>>2) == 0x5)
+    {
+        GEL_TextOut("FLASH MODE SOP 5 101 \n");
+    }
+    else if (((ana_3 & 0x1C)>>2) == 0x2)
+    {
+        GEL_TextOut("TEST_ATPG MODE SOP 1 010 \n");
+    }
+    else if (((ana_3 & 0x1C)>>2) == 0x0)
+    {
+        GEL_TextOut("THB MODE SOP 3 000 \n");
+    }
+    else
+    {
+    GEL_TextOut("WARNING! INVALID SOP PLEASE CHECK \n");
+    }
+
+    if (((ana_3 >> 4) & 0x3) == 0x0)
+    {
+        GEL_TextOut("XTAL CLK = 40 MHz \n");
+    }
+    else if(((ana_3 >> 4) & 0x3) == 0x1)
+    {
+        GEL_TextOut("XTAL CLK = 45.1584 MHz \n");
+    }
+    else if(((ana_3 >> 4) & 0x3) == 0x2)
+    {
+        GEL_TextOut("XTAL CLK = 49.152 MHz \n");
+    }
+    else
+    {
+        GEL_TextOut("XTAL CLK = 50 MHz \n");
+    }
+
+    GEL_TextOut("--------------------------------------------------------------\n");
+    GEL_TextOut("0x470001D0 DEVICE_TYPE   0x0       = %x   \n" ,,,,, ana_4);
+    GEL_TextOut("[15:0]    DEVICE_TYPE_DTYPE_RAW   0x0  = %x   \n" ,,,,, ((ana_4& 0x0000FFFF)>>0));
+
+    if ((ana_4 & 0xFF) == 0x0)
+    {
+        GEL_TextOut("DEVICE TYPE = TEST 0x00 \n");
+    }
+    else if((ana_4 & 0xFF) == 0xF0)
+    {
+        GEL_TextOut("DEVICE TYPE = GP 0xF0  \n");
+    }
+    else if((ana_4 & 0xFF) == 0xC3)
+    {
+        GEL_TextOut("DEVICE TYPE = EMU 0xC3  \n");
+    }
+    else if((ana_4 & 0xFF) == 0xCC)
+    {
+        GEL_TextOut("DEVICE TYPE = HS 0xCC  \n");
+    }
+    else
+    {
+        GEL_TextOut("WARNING! INVALID DEVICE TYPE ! \n");
+    }
+}
+
+hotmenu diagnostics_log()
+{
+    sop_dev_type_check();
+    pll_clock_detection();
+    internal_clock_detection();
+}
+
+#define CSL_MSS_CTRL_MSS_L2_MEM_INIT                                           (0x00000034)
+#define CSL_MSS_CTRL_MSS_L2_MEM_INIT_DONE                                      (0x00000038)
+#define CSL_MSS_CTRL_MSS_L2_MEM_INIT_STATUS                                    (0x0000003C)
+
+hotmenu mss_l2_meminit()
+{
+    unsigned int status=0;
+
+    WR_MEM_32((MSS_CTRL_U_BASE + CSL_MSS_CTRL_MSS_L2_MEM_INIT), 0x3);
+
+    status = RD_MEM_32(MSS_CTRL_U_BASE + CSL_MSS_CTRL_MSS_L2_MEM_INIT_DONE); 
+    /* wait for the L2 memory init to complete */
+    while((status & 0x3U) != 0x3U)
+    {
+        status = RD_MEM_32(MSS_CTRL_U_BASE + CSL_MSS_CTRL_MSS_L2_MEM_INIT_DONE); 
+    }
+
+    /* clear the status */
+    WR_MEM_32((MSS_CTRL_U_BASE + CSL_MSS_CTRL_MSS_L2_MEM_INIT_DONE) , 0x3);
+    GEL_TextOut("\n MSS L2 Init done \n");
+}
+
+hotmenu cr5_2core_ram_boot()
+{
+    //UNLOCK MSS_RCM
+    WR_MEM_32(MSS_RCM_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(MSS_RCM_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+   
+    //UNLOCK MSS_CTRL
+    WR_MEM_32(MSS_CTRL_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(MSS_CTRL_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+   
+    WR_MEM_32(MSS_RCM_U_BASE+RST2ASSERTDLY, 0x0);  
+    WR_MEM_32(MSS_RCM_U_BASE+RST_WFICHECK, 0x00000707);  
+    WR_MEM_32(MSS_CTRL_U_BASE+R5_CONTROL, 0x707);
+    WR_MEM_32(MSS_CTRL_U_BASE+R5_CONTROL, 0x700);
+    WR_MEM_32(MSS_CTRL_U_BASE+R5_CONTROL, 0x70700);
+    WR_MEM_32(MSS_CTRL_U_BASE+MSS_STC_CONTROL, 0x7); 
+  
+    WR_MEM_32(MSS_CTRL_U_BASE+R5_ROM_ECLIPSE, 0x7);
+  
+    WR_MEM_32(MSS_CTRL_U_BASE+R5_COREA_HALT, 0x0); //core_A_unhalt
+    WR_MEM_32(MSS_CTRL_U_BASE+R5_COREB_HALT, 0x0); //core_B_unhalt
+    GEL_TextOut("\n CR5 DUAL CORE BOOTED\n");
+}
+
+hotmenu cr5_core_lock_step_ram_boot()
+{
+    //UNLOCK MSS_RCM
+    WR_MEM_32(MSS_RCM_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(MSS_RCM_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+   
+    //UNLOCK MSS_CTRL
+    WR_MEM_32(MSS_CTRL_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(MSS_CTRL_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+
+    WR_MEM_32(MSS_RCM_U_BASE+RST2ASSERTDLY, 0x0);  //RST2ASSERTDLY
+    WR_MEM_32(MSS_RCM_U_BASE+RST_WFICHECK, 0x00000707);  //RSTWFI CHECK
+    WR_MEM_32(MSS_CTRL_U_BASE+MSS_STC_CONTROL, 0x7); //MSS_STC_CTRL //WFI OVERRIDE
+  
+    WR_MEM_32(MSS_CTRL_U_BASE+R5_ROM_ECLIPSE, 0x7);
+  
+    WR_MEM_32(MSS_CTRL_U_BASE+R5_COREA_HALT, 0x0); //core_A_unhalt
+    WR_MEM_32(MSS_CTRL_U_BASE+R5_COREB_HALT, 0x0); //core_B_unhalt
+    GEL_TextOut("\n CR5 LOCK STEP BOOTED\n");
+}
+
+hotmenu dsp_pll_switch()
+{    
+    unsigned status=0;
+    WR_MEM_32(DSS_RCM_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(DSS_RCM_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+	 
+    WR_MEM_32(DSS_CTRL_U_BASE+LOCK0_KICK0, 0x01234567);
+    WR_MEM_32(DSS_CTRL_U_BASE+LOCK0_KICK1, 0xFEDCBA8);
+	 
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_DSP_RST_CTRL, 0x0); 
+    WR_MEM_32(DSS_RCM_U_BASE+DSS_DSP_CLK_GATE, 0x0);   
+    WR_MEM_32(DSS_RCM_U_BASE+DSP_PD_WAKEUP_MASK0, 0xFFFEFFFF); 
+    WR_MEM_32(DSS_RCM_U_BASE+DSP_PD_TRIGGER_WAKUP, 0x1); 
+
+    status = RD_MEM_32(DSS_RCM_U_BASE+DSP_PD_STATUS);
+	
+    while((status & 0x1) != 0x1) { 
+        status = RD_MEM_32(DSS_RCM_U_BASE+DSP_PD_STATUS);
+    }	 
+
+    GEL_TextOut("\n DSP WAKEUP COMPLETED\n");
+}
+
+hotmenu dsp_wakeup()
+{
+    WR_MEM_32(DSS_RCM_U_BASE+DSP_PD_CTRL, 0x1);  //Unhalt DSP
+    WR_MEM_32(DSS_RCM_U_BASE+DSP_PD_CTRL, 0x0);  //Unmask Interrupts
+}
+
+#define MSS_IOMUX_U_BASE    0x020C0000
+#define IOMUX_PADAL         0x2C
+#define IOMUX_PADAM         0x30
+#define IOMUX_PADAN         0x34
+#define IOMUX_PADAO         0x38
+#define IOMUX_PADAP         0x3C
+#define IOMUX_PADAQ         0x40
+#define IOMUX_KICK0         0x01F8
+#define IOMUX_KICK1         0x01FC
+
+hotmenu qspi_pinconfig()
+{
+    WR_MEM_32(MSS_IOMUX_U_BASE+IOMUX_KICK0, 0x83E70B13);
+    WR_MEM_32(MSS_IOMUX_U_BASE+IOMUX_KICK1, 0x95A4F1E0); 
+
+    WR_MEM_32(MSS_IOMUX_U_BASE+IOMUX_PADAL, 0x201);  //QSPI_DATA0
+    WR_MEM_32(MSS_IOMUX_U_BASE+IOMUX_PADAM, 0x201);  //QSPI_DATA1
+    WR_MEM_32(MSS_IOMUX_U_BASE+IOMUX_PADAN, 0x201);  //QSPI_DATA2
+    WR_MEM_32(MSS_IOMUX_U_BASE+IOMUX_PADAO, 0x201);  //QSPI_DATA3
+    WR_MEM_32(MSS_IOMUX_U_BASE+IOMUX_PADAP, 0x001);  //QSPI_CLK
+    WR_MEM_32(MSS_IOMUX_U_BASE+IOMUX_PADAQ, 0x201);  //QSPI_CS
+    GEL_TextOut("\n QSPI Pinmux done \n");
+}
+
+#define CSL_DSS_CTRL_U_BASE                      (0x06020000)
+#define CSL_DSS_CTRL_LOCK0_KICK0                 (0x00001008)
+#define CSL_DSS_CTRL_LOCK0_KICK1                 (0x0000100C)
+#define CSL_DSS_CTRL_DSS_DSP_L2RAM_MEMINIT_START (0x00000080)
+#define CSL_DSS_CTRL_DSS_DSP_L2RAM_MEMINIT_DONE  (0x00000088)
+#define CSL_DSS_CTRL_DSS_L3RAM_MEMINIT_START     (0x00000098)
+#define CSL_DSS_CTRL_DSS_L3RAM_MEMINIT_DONE      (0x000000A0)
+
+
+CSL_DSS_CTRL_enableAccess()
+{
+    WR_MEM_32((CSL_DSS_CTRL_U_BASE + CSL_DSS_CTRL_LOCK0_KICK0) , 0x01234567);
+    WR_MEM_32((CSL_DSS_CTRL_U_BASE + CSL_DSS_CTRL_LOCK0_KICK1) , 0xFEDCBA8);
+}
+
+hotmenu meminitDSSL2()
+{
+    unsigned int dssCtrl = CSL_DSS_CTRL_U_BASE;
+    unsigned int status=0;
+
+    CSL_DSS_CTRL_enableAccess();
+
+    WR_MEM_32((dssCtrl + CSL_DSS_CTRL_DSS_DSP_L2RAM_MEMINIT_START), 0xFF);
+    status = RD_MEM_32(dssCtrl  + CSL_DSS_CTRL_DSS_DSP_L2RAM_MEMINIT_DONE); 
+
+    while (status != 0xFF)
+    {
+        status = RD_MEM_32(dssCtrl  + CSL_DSS_CTRL_DSS_DSP_L2RAM_MEMINIT_DONE); 
+    }
+
+    WR_MEM_32((dssCtrl + CSL_DSS_CTRL_DSS_DSP_L2RAM_MEMINIT_DONE), 0xFF);
+    GEL_TextOut("\n DSS L2 init done \n");
+}
+
+hotmenu memInitDSSL3()
+{
+    unsigned int dssCtrl = CSL_DSS_CTRL_U_BASE;
+    unsigned int status=0;
+
+    CSL_DSS_CTRL_enableAccess();
+	
+    WR_MEM_32((dssCtrl + CSL_DSS_CTRL_DSS_L3RAM_MEMINIT_START), 0xF);
+    status = RD_MEM_32(dssCtrl  + CSL_DSS_CTRL_DSS_L3RAM_MEMINIT_DONE); 
+	
+    while (status != 0xF)
+    {
+        status = RD_MEM_32(dssCtrl  + CSL_DSS_CTRL_DSS_L3RAM_MEMINIT_DONE); 
+    }
+    WR_MEM_32((dssCtrl + CSL_DSS_CTRL_DSS_L3RAM_MEMINIT_DONE), 0xF);
+    GEL_TextOut("\n DSS L3 init done \n");
+}
+
+hotmenu doAll()
+{
+    pll_clock_detection();
+    apll_en_mode1_default();   /* Suggested default setting, sanity tested */
+    //apll_en_mode1();         /* Setting used in EVM wakeup test */	
+    diagnostics_log();
+    mss_l2_meminit();
+    cr5_core_lock_step_ram_boot();
+    qspi_pinconfig();
+    dsp_pll_switch();
+    meminitDSSL2();
+    memInitDSSL3();
+    dsp_wakeup();
+    GEL_TextOut("\n Do All done \n");
+}

@@ -1,0 +1,170 @@
+/* ucd3138064A.gel
+ * adapted from tms470mf03107.gel
+ *
+ */
+
+/* --------------------------------------*/
+/*  Definitions - Memory Map Specifiers  */
+
+#define FLASH	0
+#define ROM	1
+
+/*----------------------------------------*/
+/*      Definitions - Memory Switch       */
+
+#define STARTED 		0
+#define COMPLETE		1
+
+/*----------------------------------------*/
+/*      Default values                    */
+
+#define DEFAULT_MEMORY_MAP            FLASH
+#define DEFAULT_MEMORY_SWITCH_STATE   COMPLETE
+
+int MemoryMap = DEFAULT_MEMORY_MAP;
+int MemSwitchState = DEFAULT_MEMORY_SWITCH_STATE;
+/*----------------------------------------*/
+/* Menu Item - "UCD3138064A Memory Map Setup  */
+/*
+*/
+menuitem "UCD3138064A Memory Map Setup";
+
+hotmenu MemMap_FLASH_at_0x0()
+{
+	memmap(FLASH);
+	GEL_TextOut("/tMemory Map Setup for Flash at Address 0x0");
+}
+
+hotmenu MemMap_ROM_at_0x0()
+{
+	memmap(ROM);
+     GEL_TextOut("/tMemory Map Setup for ROM at Address 0x0.");
+     GEL_TextOut("/tFor Debugging Only!");
+}
+
+StartUp()
+{
+}
+
+OnResetDetected()
+{
+
+	if(MemSwitchState == COMPLETE)
+	{
+		memmap(FLASH);
+		MemoryMap = FLASH;
+		GEL_TextOut("/tMemory Map Setup For Flash at Address 0x0 due to System Reset/n");
+	}
+
+	if(MemSwitchState == STARTED)
+	{
+		MemSwitchState == COMPLETE;
+	}
+}
+
+OnTargetConnect()
+{
+	
+	if(MemoryMap == FLASH)
+	{
+		memmap(FLASH);
+		GEL_TextOut("/tMemory Map Setup for Flash at Address 0x0");
+	}
+	if(MemoryMap == ROM)
+	{
+		memmap(ROM);
+		GEL_TextOut("/tMemory Map Setup for ROM at Address 0x0.");
+        GEL_TextOut("/tFor Debugging Only!");
+	}
+}
+
+memmap(int memSel)
+{
+	GEL_MapOff();
+	GEL_MapReset();
+
+	if(memSel == FLASH)
+	{
+		memorymap_init_flash();
+	}
+	if(memSel == ROM)
+	{
+		memorymap_init_ROM();
+	}
+	memorymap_init();
+	
+	GEL_MapOn();
+}
+
+memorymap_init_flash()
+{
+    GEL_MapAddStr(0x00000000, 0, 0x00008000, "R", 0);  /* Program Flash 1 (or 2) */
+    GEL_MapAddStr(0x00008000, 0, 0x00008000, "R", 0);  /* Program Flas 2 (or 1) */
+    GEL_MapAddStr(0x00020000, 0, 0x00002000, "R", 0);  /* ROM */
+    GEL_MapAddStr(0x00068800, 0, 0x00001800, "R|W", 0);  /* RAM and Data Flash */
+}						/* Seperate? */
+
+memorymap_init_ROM()
+{
+    GEL_MapAddStr(0x00000000, 0, 0x00040000, "R", 0);  /* ROM */
+    GEL_MapAddStr(0x00040000, 0, 0x00008000, "R", 0);  /* Program Flash 1 */
+    GEL_MapAddStr(0x00048000, 0, 0x00008000, "R", 0);  /* Program Flash 2 */
+    GEL_MapAddStr(0x00068800, 0, 0x00001800, "R|W", 0);  /* RAM and Data Flash */
+} 						/* Seperate? */
+
+
+memorymap_init()
+{
+    /*
+     * Syntax for GEL_MapAddStr.
+     * GEL_MapAddStr(address, page, length, "attribute", waitstate);
+
+    Basic Attribute Types           Derived Attribute Types
+    String      Description         String      Description
+    R           Read                NONE        No memory/protected
+    W           Write               RAM         Read and write
+    P           Port                ROM         Read only
+    EX          External            WOM         Write only
+    EM          Emulator            INPORT      Port read only
+    PR          Programmable        OUTPORT     Port write only
+    ER          Erasable            IOPORT      Port read and write
+    DA          Dual access         SARAM       Single access RAM
+    ASn         Access size         DARAM       Dual access RAM
+    SHnC        Shared              FLASH       Flash ROM
+    CACHE       Cache               EXRAM       External RAM
+    TX          Text                EXROM       External ROM
+    MN          Monitor             EPROM       Erasable write-able EPROM
+    SA          Single access       MONITOR     Monitor ROM
+    FL          Flash               PRAM        Program RAM
+    MR          Memory mapped       PROM        Program ROM
+    NULL        NULL                NULL        NULL
+
+    */
+
+    GEL_MapAddStr(0x00120000, 0, 0x00000100, "R|W", 0);  /* Loop Mux */
+    GEL_MapAddStr(0x00130000, 0, 0x00000100, "R|W", 0);  /* Fault Mux */
+    GEL_MapAddStr(0x00140000, 0, 0x00000100, "R|W", 0);  /* ADC */
+    GEL_MapAddStr(0x00150000, 0, 0x00000100, "R|W", 0);  /* DPWM 3 */
+    GEL_MapAddStr(0x00160000, 0, 0x00000100, "R|W", 0);  /* Filter 2 */
+    GEL_MapAddStr(0x00170000, 0, 0x00000100, "R|W", 0);  /* DPWM 2 */
+    GEL_MapAddStr(0x00180000, 0, 0x00000100, "R|W", 0);  /* Front End/Ramp I/F 2 */
+    GEL_MapAddStr(0x00190000, 0, 0x00000100, "R|W", 0);  /* Filter 1 */
+    GEL_MapAddStr(0x001a0000, 0, 0x00000100, "R|W", 0);  /* DPWM 1 */
+    GEL_MapAddStr(0x001b0000, 0, 0x00000100, "R|W", 0);  /* Front End/Ramp I/F 1 */
+    GEL_MapAddStr(0x001c0000, 0, 0x00000100, "R|W", 0);  /* Filter 0 */
+    GEL_MapAddStr(0x001d0000, 0, 0x00000100, "R|W", 0);  /* DPWM 0 */
+    GEL_MapAddStr(0x001e0000, 0, 0x00000100, "R|W", 0);  /* Front End/Ramp I/F 0 */
+    GEL_MapAddStr(0xfff7ec00, 0, 0x00000100, "R|W", 0);  /* UART 0 */
+    GEL_MapAddStr(0xfff7ed00, 0, 0x00000100, "R|W", 0);  /* UART 1 */
+    GEL_MapAddStr(0xfff7f000, 0, 0x00000100, "R|W", 0);  /* MISC ANALOG CONTROL */
+    GEL_MapAddStr(0xfff7f600, 0, 0x00000100, "R|W", 0);  /* PMBus Interface */
+    GEL_MapAddStr(0xfff7fa00, 0, 0x00000100, "R|W", 0);  /* GIO */
+    GEL_MapAddStr(0xfff7fd00, 0, 0x00000100, "R|W", 0);  /* TIMER */
+    GEL_MapAddStr(0xfffffd00, 0, 0x00000100, "R|W", 0);  /* MMC */
+    GEL_MapAddStr(0xfffffe00, 0, 0x00000100, "R|W", 0);  /* DEC */
+    GEL_MapAddStr(0xffffff20, 0, 0x00000018, "R|W", 0);  /* CIM */
+    GEL_MapAddStr(0xffffff40, 0, 0x00000011, "R|W", 0);  /* PSA */
+    GEL_MapAddStr(0xffffffd0, 0, 0x0000001d, "R|W", 0);  /* SYS */
+    GEL_TextOut("/nMemory Map Initialization Complete/n");
+
+}

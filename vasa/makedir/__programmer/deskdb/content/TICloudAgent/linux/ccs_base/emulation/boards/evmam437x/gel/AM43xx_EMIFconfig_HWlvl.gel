@@ -1,0 +1,944 @@
+//********************************************************************************
+//				DDR Initialization
+//08/25/14:  Updated for DDR3 H/W leveling
+//********************************************************************************
+
+//********************************************************************************
+//********************************************************************************
+//				GP EVM DDR3 Initialization
+//********************************************************************************
+//******************************************************************************** 
+
+#define  DDR3_ADDRCTRL_WD0_IOCTRL_VALUE 	0x00000000 	//no pullup/down on addr/ctrl
+#define  DDR3_ADDRCTRL_WD1_IOCTRL_VALUE 	0x00000000 	//no pullup/down on addr/ctrl
+#define  DDR3_ADDRCTRL_IOCTRL_VALUE     	0x84       	//Slew rate:  fastest, Impedance:  44ohms, no pullup/down
+#define  DDR3_DATA0_IOCTRL_VALUE   			0x84 		//Slew rate:  fastest, Impedance:  44ohms, no pullup/down
+#define  DDR3_DATA1_IOCTRL_VALUE   			0x84 		//Slew rate:  fastest, Impedance:  44ohms, no pullup/down
+#define  DDR3_DATA2_IOCTRL_VALUE   			0x84 		//Slew rate:  fastest, Impedance:  44ohms, no pullup/down 
+#define  DDR3_DATA3_IOCTRL_VALUE   			0x84 		//Slew rate:  fastest, Impedance:  44ohms, no pullup/down
+
+//400MHz DDR3
+#define DDR3_PHY_CTRL    		0x00048008	//enable h/w training
+											//invert_clkout=1
+											//disable half delay mode
+											//phy_dis_calib_rst set to 0  
+											//read latency of 8
+//AC timing for GP EVM board
+#define GP_EVM_DDR3_SDRAM_TIMING1           0xEAAAE51B    
+#define GP_EVM_DDR3_SDRAM_TIMING2           0x266B7FDA    
+#define GP_EVM_DDR3_SDRAM_TIMING3           0x5F7F8679 
+						
+//AC timing for SK and IDK boards						
+#define SK_IDK_EVM_DDR3_SDRAM_TIMING1   	0xEAAAE523    
+#define SK_IDK_EVM_DDR3_SDRAM_TIMING2   	0x266B7FDA    
+#define SK_IDK_EVM_DDR3_SDRAM_TIMING3   	0x5F7F867F
+
+#define DDR3_REF_CTRL       			 	0x00000C30  //400 * 7.8us = 0xc30
+
+#define GP_EVM_DDR3_SDRAM_CONFIG     		0x61A013B2  
+											//32-bit DDR3 
+											//differential DQS
+											//ODT set to RZQ/4; Dynamic ODT set to RZQ/4
+											//drive strength = RZQ/6
+											//CWL = 5  400MHz
+											//CL = 6   400MHz
+											//7 = 16 row bits
+											//2 = 10 column bits
+											//1 chip select
+											
+#define SK_IDK_EVM_DDR3_SDRAM_CONFIG        0x61A01332  //32-bit DDR3 
+											//differential DQS
+											//ODT set to RZQ/4; Dynamic ODT set to RZQ/4
+											//drive strength = RZQ/6
+											//CWL = 5  400MHz
+											//CL = 6   400MHz
+											//6 = 15 row bits
+											//2 = 10 column bits
+											//1 chip select
+											
+#define DDR3_ZQ_CONFIG       0x50077D33		
+
+//##############################################################################
+//##############################################################################
+//                       DDR3 Hardware Leveling
+//##############################################################################
+//##############################################################################
+menuitem "DDR Configurations"
+
+hotmenu AM43xx_DDR3_config(int EVM)
+{
+	int i, read_reg;
+	
+	GEL_TextOut("Starting DDR3 configuration...\n");
+    
+    EMIF_PRCM_CLK_ENABLE();
+	GEL_TextOut("EMIF CLK enabled... \n");	
+    
+	VTP_Enable();
+	GEL_TextOut("VTP controller enabled\n");
+    
+	GEL_TextOut("Checking if DLL is ready...\n");
+    WR_MEM_32(CM_DLL_CTRL, RD_MEM_32(CM_DLL_CTRL) & ~0x00000001 );
+	//wait for DLL ready
+	while((RD_MEM_32(CM_DLL_CTRL) & 0x4) == 0);
+	GEL_TextOut("DLL is ready\n");
+	
+	GEL_TextOut("Configuring DDR IOs and Control Module registers...\n");
+
+    WR_MEM_32(DDR_ADDRCTRL_IOCTRL,DDR3_ADDRCTRL_IOCTRL_VALUE);
+	WR_MEM_32(DDR_ADDRCTRL_WD0_IOCTRL,DDR3_ADDRCTRL_WD0_IOCTRL_VALUE);
+	WR_MEM_32(DDR_ADDRCTRL_WD1_IOCTRL,DDR3_ADDRCTRL_WD1_IOCTRL_VALUE);
+    WR_MEM_32(DDR_DATA0_IOCTRL,DDR3_DATA0_IOCTRL_VALUE);
+    WR_MEM_32(DDR_DATA1_IOCTRL,DDR3_DATA1_IOCTRL_VALUE);
+    WR_MEM_32(DDR_DATA2_IOCTRL,DDR3_DATA2_IOCTRL_VALUE);
+    WR_MEM_32(DDR_DATA3_IOCTRL,DDR3_DATA3_IOCTRL_VALUE);
+    
+    WR_MEM_32(DDR_IO_CTRL,0x0);		//DDR3 RESET controlled by EMIF/DDR PHY
+	
+	WR_MEM_32(DDR_CKE_CTRL,0x3);  	//DDR3 CKE controlled by EMIF/DDR PHY
+									
+    WR_MEM_32(EMIF_SDRAM_CONFIG_EXT,0x0C163);   //for 32-bit 
+    											//enable CMD PHY0 and PHY1
+    											//half thevenin load
+    											//# of samples for read data eye training 3/leveling algorithm #0
+												
+	//hwlvmod reset applied after DDR PHY & IO control settings.
+    WR_MEM_32(EMIF_IODFT_TLGC         	,0x00002011);
+    WR_MEM_32(EMIF_IODFT_TLGC         	,0x00002411);
+	WR_MEM_32(EMIF_IODFT_TLGC         	,0x00002011);
+	 
+    GEL_TextOut("Configuration of Control Module registers complete\n");
+	
+	//hwlvmod SDRAM Refresh modified to match SW leveling algorithm
+	//disable initialzation and refreshes for now until we finish programming EMIF regs
+    //also set for long refresh
+	WR_MEM_32(EMIF_SDRAM_REF_CTRL,0x80003000);
+    
+	
+	GEL_TextOut("Setting up DDR3 H/W leveling configuration...\n");
+	WR_MEM_32(EMIF_DDR_PHY_CTRL_1     	,DDR3_PHY_CTRL);
+	WR_MEM_32(EMIF_DDR_PHY_CTRL_1_SHDW 	,DDR3_PHY_CTRL);
+		
+	//phy_reg_ctrl_slave_ratio
+	//10bits wide each slice, 3 slices concatenated (only slice 0 and 1 are used)
+	#define PHY_CTRL_SLAVE_RATIO 0x100 // invert_clkout = 1
+	
+	WR_MEM_32(EXT_PHY_CTRL_1	 	,(PHY_CTRL_SLAVE_RATIO<<10)|(PHY_CTRL_SLAVE_RATIO<<0)); 
+	WR_MEM_32(EXT_PHY_CTRL_1_SHDW	,(PHY_CTRL_SLAVE_RATIO<<10)|(PHY_CTRL_SLAVE_RATIO<<0));
+
+//reg_phy_gatelvl_init_ratio
+#define PHY_GATELVL_INIT_RATIO 0x20
+	WR_MEM_32(EXT_PHY_CTRL_26	 	,(PHY_GATELVL_INIT_RATIO<<16)|(PHY_GATELVL_INIT_RATIO<<0)); //ratio1:ratio0 
+	WR_MEM_32(EXT_PHY_CTRL_26_SHDW	,(PHY_GATELVL_INIT_RATIO<<16)|(PHY_GATELVL_INIT_RATIO<<0)); //ratio1:ratio0
+	WR_MEM_32(EXT_PHY_CTRL_27	 	,(PHY_GATELVL_INIT_RATIO<<16)|(PHY_GATELVL_INIT_RATIO<<0)); //ratio3:ratio2 
+	WR_MEM_32(EXT_PHY_CTRL_27_SHDW	,(PHY_GATELVL_INIT_RATIO<<16)|(PHY_GATELVL_INIT_RATIO<<0)); //ratio3:ratio2
+	WR_MEM_32(EXT_PHY_CTRL_28	 	,(PHY_GATELVL_INIT_RATIO<<16)|(PHY_GATELVL_INIT_RATIO<<0)); //ratio5:ratio4 
+	WR_MEM_32(EXT_PHY_CTRL_28_SHDW	,(PHY_GATELVL_INIT_RATIO<<16)|(PHY_GATELVL_INIT_RATIO<<0)); //ratio5:ratio4
+	WR_MEM_32(EXT_PHY_CTRL_29	 	,(PHY_GATELVL_INIT_RATIO<<16)|(PHY_GATELVL_INIT_RATIO<<0)); //ratio7:ratio6 
+	WR_MEM_32(EXT_PHY_CTRL_29_SHDW	,(PHY_GATELVL_INIT_RATIO<<16)|(PHY_GATELVL_INIT_RATIO<<0)); //ratio7:ratio6
+	WR_MEM_32(EXT_PHY_CTRL_30	 	,(PHY_GATELVL_INIT_RATIO<<16)|(PHY_GATELVL_INIT_RATIO<<0)); //ratio9:ratio8 
+	WR_MEM_32(EXT_PHY_CTRL_30_SHDW	,(PHY_GATELVL_INIT_RATIO<<16)|(PHY_GATELVL_INIT_RATIO<<0)); //ratio9:ratio8
+	
+//reg_phy_wrlvl_init_ratio
+#define PHY_WRLVL_INIT_RATIO 0x00
+	WR_MEM_32(EXT_PHY_CTRL_31	 	,(PHY_WRLVL_INIT_RATIO<<16)|(PHY_WRLVL_INIT_RATIO<<0)); //ratio1:ratio0 
+	WR_MEM_32(EXT_PHY_CTRL_31_SHDW	,(PHY_WRLVL_INIT_RATIO<<16)|(PHY_WRLVL_INIT_RATIO<<0)); //ratio1:ratio0
+	WR_MEM_32(EXT_PHY_CTRL_32	 	,(PHY_WRLVL_INIT_RATIO<<16)|(PHY_WRLVL_INIT_RATIO<<0)); //ratio3:ratio2 
+	WR_MEM_32(EXT_PHY_CTRL_32_SHDW	,(PHY_WRLVL_INIT_RATIO<<16)|(PHY_WRLVL_INIT_RATIO<<0)); //ratio3:ratio2
+	WR_MEM_32(EXT_PHY_CTRL_33	 	,(PHY_WRLVL_INIT_RATIO<<16)|(PHY_WRLVL_INIT_RATIO<<0)); //ratio5:ratio4 
+	WR_MEM_32(EXT_PHY_CTRL_33_SHDW	,(PHY_WRLVL_INIT_RATIO<<16)|(PHY_WRLVL_INIT_RATIO<<0)); //ratio5:ratio4
+	WR_MEM_32(EXT_PHY_CTRL_34	 	,(PHY_WRLVL_INIT_RATIO<<16)|(PHY_WRLVL_INIT_RATIO<<0)); //ratio7:ratio6 
+	WR_MEM_32(EXT_PHY_CTRL_34_SHDW	,(PHY_WRLVL_INIT_RATIO<<16)|(PHY_WRLVL_INIT_RATIO<<0)); //ratio7:ratio6
+	WR_MEM_32(EXT_PHY_CTRL_35	 	,(PHY_WRLVL_INIT_RATIO<<16)|(PHY_WRLVL_INIT_RATIO<<0)); //ratio9:ratio8 
+	WR_MEM_32(EXT_PHY_CTRL_35_SHDW	,(PHY_WRLVL_INIT_RATIO<<16)|(PHY_WRLVL_INIT_RATIO<<0)); //ratio9:ratio8
+
+//phy_fifo_we_in_delay    phy_ctrl_slave_delay
+#define PHY_FIFO_WE_IN_DELAY	0x0
+#define PHY_CTRL_SLAVE_DELAY	0x0
+	WR_MEM_32(EXT_PHY_CTRL_22	 	,(PHY_FIFO_WE_IN_DELAY<<16)|(PHY_CTRL_SLAVE_DELAY<<0));  
+	WR_MEM_32(EXT_PHY_CTRL_22_SHDW	,(PHY_FIFO_WE_IN_DELAY<<16)|(PHY_CTRL_SLAVE_DELAY<<0)); 
+
+//phy_wr_dqs_slave_delay    phy_rd_dqs_slave_delay
+#define PHY_WR_DQS_SLAVE_DELAY	0x60
+#define PHY_RD_DQS_SLAVE_DELAY	0x20
+	WR_MEM_32(EXT_PHY_CTRL_23	 	,(PHY_WR_DQS_SLAVE_DELAY<<16)|(PHY_RD_DQS_SLAVE_DELAY<<0));  
+	WR_MEM_32(EXT_PHY_CTRL_23_SHDW	,(PHY_WR_DQS_SLAVE_DELAY<<16)|(PHY_RD_DQS_SLAVE_DELAY<<0)); 
+
+//reg_phy_dq_offset_hi    reg_phy_gatelvl_init_mode    reg_phy_use_rank0_delays    reg_phy_wr_data_slave_delay
+#define PHY_DQ_OFFSET 			0x40
+#define PHY_GATELVL_INIT_MODE	0x01
+#define PHY_USE_RANK0_DELAYS	0x00
+#define PHY_WR_DATA_SLAVE_DELAY	0x80
+	WR_MEM_32(EXT_PHY_CTRL_24	 	,(PHY_DQ_OFFSET<<24)|(PHY_GATELVL_INIT_MODE<<16)|(PHY_USE_RANK0_DELAYS<<12)|(PHY_WR_DATA_SLAVE_DELAY<<0));  
+	WR_MEM_32(EXT_PHY_CTRL_24_SHDW	,(PHY_DQ_OFFSET<<24)|(PHY_GATELVL_INIT_MODE<<16)|(PHY_USE_RANK0_DELAYS<<12)|(PHY_WR_DATA_SLAVE_DELAY<<0)); 
+
+//reg_phy_dq_offset 
+//7bits each, 4 values concatenated (5th in EXT_PHY_CTRL_24)
+	WR_MEM_32(EXT_PHY_CTRL_25	 	,(PHY_DQ_OFFSET<<21)|(PHY_DQ_OFFSET<<14)|(PHY_DQ_OFFSET<<7)|(PHY_DQ_OFFSET<<0));  
+	WR_MEM_32(EXT_PHY_CTRL_25_SHDW	,(PHY_DQ_OFFSET<<21)|(PHY_DQ_OFFSET<<14)|(PHY_DQ_OFFSET<<7)|(PHY_DQ_OFFSET<<0));
+	 
+//reg_phy_wrlvl_num_of_dq0    reg_phy_gatelvl_num_of_dq0 misalign clean dll lock clear etc
+#define PHY_GATELVL_NUM_DQ0		0xF  //hwlvmod 0x7 increased to 0xF
+#define PHY_WRLVL_NUM_DQ0 		0xF  //hwlvmod 0x7 increased to 0xF 
+	WR_MEM_32(EXT_PHY_CTRL_36	 	,(PHY_WRLVL_NUM_DQ0)<<4|(PHY_GATELVL_NUM_DQ0<<0));
+	WR_MEM_32(EXT_PHY_CTRL_36_SHDW	,(PHY_WRLVL_NUM_DQ0)<<4|(PHY_GATELVL_NUM_DQ0<<0)); 
+
+// reset the PHY to latch the PHY registers
+    WR_MEM_32(EMIF_IODFT_TLGC         	,0x00002011);  
+    WR_MEM_32(EMIF_IODFT_TLGC         	,0x00002411);
+	WR_MEM_32(EMIF_IODFT_TLGC         	,0x00002011);
+
+	GEL_TextOut("Starting EMIF controller configuration...\n");
+	   
+    WR_MEM_32(EMIF_ZQ_CONFIG           	,DDR3_ZQ_CONFIG);
+
+	WR_MEM_32(EMIF_PWR_MGMT_CTRL      	,0x000000A0);
+	WR_MEM_32(EMIF_PWR_MGMT_CTRL_SHDW 	,0x000000A0);
+	
+	//hwlvmod enable the SDRAM refresh.
+	WR_MEM_32(EMIF_SDRAM_REF_CTRL,0x3000);
+    	
+	//this final write initiates an EMIF initialization and also latches values to PHY	
+	if(EVM==0)
+	{
+		WR_MEM_32(EMIF_SDRAM_TIM_1,GP_EVM_DDR3_SDRAM_TIMING1);
+		WR_MEM_32(EMIF_SDRAM_TIM_1_SHDW,GP_EVM_DDR3_SDRAM_TIMING1);
+		WR_MEM_32(EMIF_SDRAM_TIM_2,GP_EVM_DDR3_SDRAM_TIMING2);
+		WR_MEM_32(EMIF_SDRAM_TIM_2_SHDW,GP_EVM_DDR3_SDRAM_TIMING2);
+		WR_MEM_32(EMIF_SDRAM_TIM_3,GP_EVM_DDR3_SDRAM_TIMING3);
+		WR_MEM_32(EMIF_SDRAM_TIM_3_SHDW,GP_EVM_DDR3_SDRAM_TIMING3);
+		WR_MEM_32(EMIF_SDRAM_CONFIG,GP_EVM_DDR3_SDRAM_CONFIG);
+	}
+	else if ((EVM==2) || (EVM==3))
+	{
+		WR_MEM_32(EMIF_SDRAM_TIM_1,SK_IDK_EVM_DDR3_SDRAM_TIMING1);
+		WR_MEM_32(EMIF_SDRAM_TIM_1_SHDW,SK_IDK_EVM_DDR3_SDRAM_TIMING1);
+		WR_MEM_32(EMIF_SDRAM_TIM_2,SK_IDK_EVM_DDR3_SDRAM_TIMING2);
+		WR_MEM_32(EMIF_SDRAM_TIM_2_SHDW,SK_IDK_EVM_DDR3_SDRAM_TIMING2);
+		WR_MEM_32(EMIF_SDRAM_TIM_3,SK_IDK_EVM_DDR3_SDRAM_TIMING3);
+		WR_MEM_32(EMIF_SDRAM_TIM_3_SHDW,SK_IDK_EVM_DDR3_SDRAM_TIMING3);
+	    WR_MEM_32(EMIF_SDRAM_CONFIG,SK_IDK_EVM_DDR3_SDRAM_CONFIG);
+	}
+
+	WR_MEM_32(EMIF_SDRAM_REF_CTRL,DDR3_REF_CTRL);
+	WR_MEM_32(EMIF_SDRAM_REF_CTRL_SHDW,DDR3_REF_CTRL);
+		
+	//disable SRAM refresh before leveling
+	//WR_MEM_32(EMIF_SDRAM_REF_CTRL,(DDR3_REF_CTRL|0x80000000)); //hwlvmod kept SDRAM REF enabled
+	for (i=0; i<1000; i++) ; // wait for some clock cycles refresh to complete
+	
+	//clear the error status bits
+	WR_MEM_32(EXT_PHY_CTRL_36,(RD_MEM_32(EXT_PHY_CTRL_36)|0x00000700));
+	WR_MEM_32(EXT_PHY_CTRL_36_SHDW,(RD_MEM_32(EXT_PHY_CTRL_36_SHDW)|0x00000700));
+	while(RD_MEM_32(PHY_STATUS_27) != 0);  //wait till error status bits clear
+    
+	while(RD_MEM_32(PHY_STATUS_28) != 0);  //wait till error status bits clear
+    
+	WR_MEM_32(EXT_PHY_CTRL_36,(RD_MEM_32(EXT_PHY_CTRL_36)& 0xFFFFF8FF));
+    WR_MEM_32(EXT_PHY_CTRL_36_SHDW,(RD_MEM_32(EXT_PHY_CTRL_36_SHDW)& 0xFFFFF8FF));
+
+	
+	WR_MEM_32(EMIF_RDWR_LVL_RMP_CTRL    ,0x80000000); // Enable Read leveling
+	WR_MEM_32(EMIF_RDWR_LVL_CTRL     	,0x80000000); // Enabling Full Read & Write leveling
+	
+	//hwlvmod wait for read and write leveling bit to clear RDWRLVLFULL_START bit 31
+	while((RD_MEM_32(EMIF_RDWR_LVL_CTRL) & 0x80000000) != 0x0);
+	//for (i=0; i<1000; i++) ; // wait for the leveling procedure to complete
+	
+	//enable SRAM refresh after leveling is complete
+	// WR_MEM_32(EMIF_SDRAM_REF_CTRL,(DDR3_REF_CTRL&0x7fffffff)); //hwlvmod kept SDRAM REF enabled
+	
+		//check the error bits in across several regs
+	if ( ((RD_MEM_32(EMIF_STATUS) & 0x70) !=0x0 ) 
+	  || ((RD_MEM_32(PHY_STATUS_27) & 0x31F00000) != 0) 
+	  || ((RD_MEM_32(PHY_STATUS_28) & 0x1F1F1F00) != 0) )
+	{
+		GEL_TextOut("\n\nDDR3 Hardware leveling incomplete with errors !!!\n\n",,,,,i);
+	} else {		
+		GEL_TextOut("\n\nDDR3 Hardware leveling complete... Outputing all the leveling results !!!\n\n",,,,,i);
+		GEL_TextOut("PHY_STATUS_12=%x\n",,,,,RD_MEM_32(PHY_STATUS_12));
+		GEL_TextOut("PHY_STATUS_13=%x\n",,,,,RD_MEM_32(PHY_STATUS_13));
+		GEL_TextOut("PHY_STATUS_14=%x\n",,,,,RD_MEM_32(PHY_STATUS_14));
+		GEL_TextOut("PHY_STATUS_15=%x\n",,,,,RD_MEM_32(PHY_STATUS_15));
+		GEL_TextOut("PHY_STATUS_16=%x\n",,,,,RD_MEM_32(PHY_STATUS_16));
+		GEL_TextOut("PHY_STATUS_7 =%x\n",,,,,RD_MEM_32(PHY_STATUS_7));
+		GEL_TextOut("PHY_STATUS_8 =%x\n",,,,,RD_MEM_32(PHY_STATUS_8));
+		GEL_TextOut("PHY_STATUS_9 =%x\n",,,,,RD_MEM_32(PHY_STATUS_9));
+		GEL_TextOut("PHY_STATUS_10=%x\n",,,,,RD_MEM_32(PHY_STATUS_10));
+		GEL_TextOut("PHY_STATUS_11=%x\n",,,,,RD_MEM_32(PHY_STATUS_11));
+		GEL_TextOut("PHY_STATUS_17=%x\n",,,,,RD_MEM_32(PHY_STATUS_17));
+		GEL_TextOut("PHY_STATUS_18=%x\n",,,,,RD_MEM_32(PHY_STATUS_18));
+		GEL_TextOut("PHY_STATUS_19=%x\n",,,,,RD_MEM_32(PHY_STATUS_19));
+		GEL_TextOut("PHY_STATUS_20=%x\n",,,,,RD_MEM_32(PHY_STATUS_20));
+		GEL_TextOut("PHY_STATUS_21=%x\n",,,,,RD_MEM_32(PHY_STATUS_21));
+		GEL_TextOut("PHY_STATUS_22=%x\n",,,,,RD_MEM_32(PHY_STATUS_22));
+		GEL_TextOut("PHY_STATUS_23=%x\n",,,,,RD_MEM_32(PHY_STATUS_23));
+		GEL_TextOut("PHY_STATUS_24=%x\n",,,,,RD_MEM_32(PHY_STATUS_24));
+		GEL_TextOut("PHY_STATUS_25=%x\n",,,,,RD_MEM_32(PHY_STATUS_25));
+		GEL_TextOut("PHY_STATUS_26=%x\n",,,,,RD_MEM_32(PHY_STATUS_26));		
+	}
+	
+	WR_MEM_32(0x80000000,0xa5a5a5a5);
+	if (RD_MEM_32(0x80000000) == 0xa5a5a5a5) {
+		GEL_TextOut("\n\nDDR3 configuration is complete!!!\n\n",,,,,i);
+	}else {
+		GEL_TextOut("\n\nDDR3 CONFIGURATION FAILED!!!  Could not read/write first DDR location.\n");
+		GEL_TextOut("Expected 0xA5A5A5A5, Read: %x\n\n",,,,,RD_MEM_32(0x80000000));
+	}
+
+}
+
+
+//********************************************************************************
+//********************************************************************************
+//				LPDDR2 Initialization
+//********************************************************************************
+//******************************************************************************** 
+#define  LPDDR2_ADDRCTRL_WD0_IOCTRL_VALUE 	0x00000000 	//no pullup/down on addr/ctrl
+#define  LPDDR2_ADDRCTRL_WD1_IOCTRL_VALUE 	0x00000000 	//no pullup/down on addr/ctrl
+#define  LPDDR2_ADDRCTRL_IOCTRL_VALUE     	0x00000294  //Slew rate:  fast, Impedance: 44ohms, no pullup/down
+#define  LPDDR2_DATA0_IOCTRL_VALUE   		0x20000294 	//Slew rate:  fast, Impedance: 44ohms, pullup on DQSn, pulldown on DQS
+#define  LPDDR2_DATA1_IOCTRL_VALUE   		0x20000294 	//Slew rate:  fast, Impedance: 44ohms, pullup on DQSn, pulldown on DQS
+#define  LPDDR2_DATA2_IOCTRL_VALUE   		0x20000294 	//Slew rate:  fast, Impedance: 44ohms, pullup on DQSn, pulldown on DQS
+#define  LPDDR2_DATA3_IOCTRL_VALUE   		0x20000294 	//Slew rate:  fast, Impedance: 44ohms, pullup on DQSn, pulldown on DQS
+
+//timings for 266MHz LPDDR2 (4Gb) (2 die total is 8Gb)
+//#define LPDDR2_PHY_CTRL			0x0E088005 	//for 133MHz LPDDR2 (disable half delay mode)
+#define LPDDR2_PHY_CTRL			0x0E288005     	//for 266MHz LPDDR2
+												//mask out h/w training
+												//invert_clkout = 0
+												//disable phy calibration reset
+												//enable half delay mode (266MHz LPDDR2)
+												//RD_Latency = RL(from memory) + 1 = 5
+
+#define LPDDR2_SDRAM_TIMING1   0xEA86B41B   
+#define LPDDR2_SDRAM_TIMING2   0x2025095A   
+#define LPDDR2_SDRAM_TIMING3   0x5F6BA22F
+//#define LPDDR2_SDRAM_CONFIG    0x808052BA  //16-bit LPDDR2
+#define LPDDR2_SDRAM_CONFIG    0x808012BA  	//32-bit LPDDR2
+											//differential DQS
+											//normal drive strength
+											//CL = 4
+											//5 = 14 row bits
+											//2 = 10 column bits
+											//2 chip selects
+											
+#define LPDDR2_REF_CTRL        0x0000040D  //266 * 3.9us = 0x40d
+#define LPDDR2_ZQ_CONFIG       0xD007FA67		
+
+
+//##############################################################################
+//##############################################################################
+//                      LPDDR2 Configuration
+//##############################################################################
+//##############################################################################
+
+hotmenu AM43xx_LPDDR2_config()
+{
+	
+	unsigned int i, read_reg;
+	
+    GEL_TextOut("Starting LPDDR2 configuration\n");
+         
+    EMIF_PRCM_CLK_ENABLE();
+	GEL_TextOut("EMIF CLK enabled\n");
+
+	VTP_Enable();
+	GEL_TextOut("VTP controller enabled\n");
+    
+	GEL_TextOut("Checking if DLL is ready...\n");
+    WR_MEM_32(CM_DLL_CTRL, RD_MEM_32(CM_DLL_CTRL) & ~0x00000001 );
+	//wait for DLL ready
+	while((RD_MEM_32(CM_DLL_CTRL) & 0x4) == 0);
+	GEL_TextOut("DLL is ready\n");
+         
+    GEL_TextOut("Configuring DDR IOs and Control Module registers...\n");
+
+          WR_MEM_32(DDR_ADDRCTRL_IOCTRL,LPDDR2_ADDRCTRL_IOCTRL_VALUE);
+          WR_MEM_32(DDR_ADDRCTRL_WD0_IOCTRL,LPDDR2_ADDRCTRL_WD0_IOCTRL_VALUE);
+          WR_MEM_32(DDR_ADDRCTRL_WD1_IOCTRL,LPDDR2_ADDRCTRL_WD1_IOCTRL_VALUE);
+          WR_MEM_32(DDR_DATA0_IOCTRL,LPDDR2_DATA0_IOCTRL_VALUE);
+          WR_MEM_32(DDR_DATA1_IOCTRL,LPDDR2_DATA1_IOCTRL_VALUE);
+          WR_MEM_32(DDR_DATA2_IOCTRL,LPDDR2_DATA2_IOCTRL_VALUE);
+          WR_MEM_32(DDR_DATA3_IOCTRL,LPDDR2_DATA3_IOCTRL_VALUE);
+
+    // SDRAM_CONFIG_EXT is used coming out of low power modes
+	//WR_MEM_32(EMIF_SDRAM_CONFIG_EXT,0x00020101); //for 16-bit mode LPDDR2
+	WR_MEM_32(EMIF_SDRAM_CONFIG_EXT,0x00000101); 	//for 32-bit
+													//only cmd0 slice is used for LPDDR2
+
+    WR_MEM_32(DDR_CKE_CTRL,0x3);  	//LPDDR2 CKE0/1 controlled by EMIF/DDR PHY
+     
+    GEL_TextOut("Configuration of Control Module registers complete\n");
+     
+    //disable initialzation and refreshes for now until we finish programming EMIF regs
+    //also set for long refresh
+    WR_MEM_32(EMIF_SDRAM_REF_CTRL,0x80003000);
+       
+ // EMIF controller configuration
+    
+	GEL_TextOut("Starting EMIF controller configuration...\n");
+
+    WR_MEM_32(EMIF_SDRAM_TIM_1,LPDDR2_SDRAM_TIMING1);
+    WR_MEM_32(EMIF_SDRAM_TIM_1_SHDW,LPDDR2_SDRAM_TIMING1);
+
+    WR_MEM_32(EMIF_SDRAM_TIM_2,LPDDR2_SDRAM_TIMING2);
+    WR_MEM_32(EMIF_SDRAM_TIM_2_SHDW,LPDDR2_SDRAM_TIMING2);
+
+    WR_MEM_32(EMIF_SDRAM_TIM_3,LPDDR2_SDRAM_TIMING3);
+    WR_MEM_32(EMIF_SDRAM_TIM_3_SHDW,LPDDR2_SDRAM_TIMING3);
+		
+	WR_MEM_32(EMIF_SDRAM_CONFIG_2		,0x00000000); //ebank_pos=0
+	WR_MEM_32(EMIF_PWR_MGMT_CTRL      	,0x000000A0);
+	WR_MEM_32(EMIF_PWR_MGMT_CTRL_SHDW 	,0x000000A0);
+	WR_MEM_32(EMIF_IODFT_TLGC         	,0x00000001);  
+	WR_MEM_32(EMIF_ZQ_CONFIG           	,LPDDR2_ZQ_CONFIG);
+	WR_MEM_32(EMIF_RDWR_LVL_RMP_WIN     ,0x00000000);	
+	WR_MEM_32(EMIF_RDWR_LVL_RMP_CTRL    ,0x00000000);
+	WR_MEM_32(EMIF_RDWR_LVL_CTRL     	,0x00000000);
+	
+	WR_MEM_32(EMIF_DDR_PHY_CTRL_1     	,LPDDR2_PHY_CTRL);
+	WR_MEM_32(EMIF_DDR_PHY_CTRL_1_SHDW 	,LPDDR2_PHY_CTRL);
+		
+//phy_reg_ctrl_slave_ratio
+//10bits wide each slice, 3 slices concatenated (only slice0 used)
+#define PHY_CTRL_SLAVE_RATIO 0x40	
+
+	
+	WR_MEM_32(EXT_PHY_CTRL_1	 	,PHY_CTRL_SLAVE_RATIO<<0); 
+	WR_MEM_32(EXT_PHY_CTRL_1_SHDW	,PHY_CTRL_SLAVE_RATIO<<0);
+
+//phy_reg_fifo_we_slave_ratio     RD Gate  Need to change as per the board delay
+//16bits wide each, 10 ratios
+#define LPDDR2_PHY_FIFO_WE_SLAVE_RATIO 0x50
+
+	WR_MEM_32(EXT_PHY_CTRL_2	 	,(LPDDR2_PHY_FIFO_WE_SLAVE_RATIO<<0)); //ratio1:ratio0 
+	WR_MEM_32(EXT_PHY_CTRL_2_SHDW	,(LPDDR2_PHY_FIFO_WE_SLAVE_RATIO<<0)); //ratio1:ratio0
+	WR_MEM_32(EXT_PHY_CTRL_3	 	,(LPDDR2_PHY_FIFO_WE_SLAVE_RATIO<<0)); //ratio3:ratio2 
+	WR_MEM_32(EXT_PHY_CTRL_3_SHDW	,(LPDDR2_PHY_FIFO_WE_SLAVE_RATIO<<0)); //ratio3:ratio2
+	WR_MEM_32(EXT_PHY_CTRL_4	 	,(LPDDR2_PHY_FIFO_WE_SLAVE_RATIO<<0)); //ratio5:ratio4 
+	WR_MEM_32(EXT_PHY_CTRL_4_SHDW	,(LPDDR2_PHY_FIFO_WE_SLAVE_RATIO<<0)); //ratio5:ratio4
+	WR_MEM_32(EXT_PHY_CTRL_5	 	,(LPDDR2_PHY_FIFO_WE_SLAVE_RATIO<<0)); //ratio7:ratio6 
+	WR_MEM_32(EXT_PHY_CTRL_5_SHDW	,(LPDDR2_PHY_FIFO_WE_SLAVE_RATIO<<0)); //ratio7:ratio6
+	WR_MEM_32(EXT_PHY_CTRL_6	 	,(LPDDR2_PHY_FIFO_WE_SLAVE_RATIO<<0)); //ratio9:ratio8 
+	WR_MEM_32(EXT_PHY_CTRL_6_SHDW	,(LPDDR2_PHY_FIFO_WE_SLAVE_RATIO<<0)); //ratio9:ratio8
+
+
+//phy_rd_dqs_slave_ratio
+//16bits wide each, 10 ratios
+#define LPDDR2_PHY_RD_DQS_SLAVE_RATIO 0x20  
+
+	WR_MEM_32(EXT_PHY_CTRL_7	 	,(LPDDR2_PHY_RD_DQS_SLAVE_RATIO<<0)); //ratio1:ratio0 
+	WR_MEM_32(EXT_PHY_CTRL_7_SHDW	,(LPDDR2_PHY_RD_DQS_SLAVE_RATIO<<0)); //ratio1:ratio0
+	WR_MEM_32(EXT_PHY_CTRL_8	 	,(LPDDR2_PHY_RD_DQS_SLAVE_RATIO<<0)); //ratio3:ratio2 
+	WR_MEM_32(EXT_PHY_CTRL_8_SHDW	,(LPDDR2_PHY_RD_DQS_SLAVE_RATIO<<0)); //ratio3:ratio2
+	WR_MEM_32(EXT_PHY_CTRL_9	 	,(LPDDR2_PHY_RD_DQS_SLAVE_RATIO<<0)); //ratio5:ratio4 
+	WR_MEM_32(EXT_PHY_CTRL_9_SHDW	,(LPDDR2_PHY_RD_DQS_SLAVE_RATIO<<0)); //ratio5:ratio4
+	WR_MEM_32(EXT_PHY_CTRL_10	 	,(LPDDR2_PHY_RD_DQS_SLAVE_RATIO<<0)); //ratio7:ratio6 
+	WR_MEM_32(EXT_PHY_CTRL_10_SHDW	,(LPDDR2_PHY_RD_DQS_SLAVE_RATIO<<0)); //ratio7:ratio6
+	WR_MEM_32(EXT_PHY_CTRL_11	 	,(LPDDR2_PHY_RD_DQS_SLAVE_RATIO<<0)); //ratio9:ratio8 
+	WR_MEM_32(EXT_PHY_CTRL_11_SHDW	,(LPDDR2_PHY_RD_DQS_SLAVE_RATIO<<0)); //ratio9:ratio8
+
+//phy_wr_data_slave_ratio
+//16bits wide each, 10 ratios
+#define LPDDR2_PHY_WR_DATA_SLAVE_RATIO 0x20
+
+	WR_MEM_32(EXT_PHY_CTRL_12	 	,(LPDDR2_PHY_WR_DATA_SLAVE_RATIO<<0)); //ratio1:ratio0 
+	WR_MEM_32(EXT_PHY_CTRL_12_SHDW	,(LPDDR2_PHY_WR_DATA_SLAVE_RATIO<<0)); //ratio1:ratio0
+	WR_MEM_32(EXT_PHY_CTRL_13	 	,(LPDDR2_PHY_WR_DATA_SLAVE_RATIO<<0)); //ratio3:ratio2 
+	WR_MEM_32(EXT_PHY_CTRL_13_SHDW	,(LPDDR2_PHY_WR_DATA_SLAVE_RATIO<<0)); //ratio3:ratio2
+	WR_MEM_32(EXT_PHY_CTRL_14	 	,(LPDDR2_PHY_WR_DATA_SLAVE_RATIO<<0)); //ratio5:ratio4 
+	WR_MEM_32(EXT_PHY_CTRL_14_SHDW	,(LPDDR2_PHY_WR_DATA_SLAVE_RATIO<<0)); //ratio5:ratio4
+	WR_MEM_32(EXT_PHY_CTRL_15	 	,(LPDDR2_PHY_WR_DATA_SLAVE_RATIO<<0)); //ratio7:ratio6 
+	WR_MEM_32(EXT_PHY_CTRL_15_SHDW	,(LPDDR2_PHY_WR_DATA_SLAVE_RATIO<<0)); //ratio7:ratio6
+	WR_MEM_32(EXT_PHY_CTRL_16	 	,(LPDDR2_PHY_WR_DATA_SLAVE_RATIO<<0)); //ratio9:ratio8 
+	WR_MEM_32(EXT_PHY_CTRL_16_SHDW	,(LPDDR2_PHY_WR_DATA_SLAVE_RATIO<<0)); //ratio9:ratio8
+
+//phy_wr_dqs_slave_ratio
+//16bits wide each, 10 ratios
+#define LPDDR2_PHY_WR_DQS_SLAVE_RATIO 0x00
+
+	WR_MEM_32(EXT_PHY_CTRL_17	 	,(LPDDR2_PHY_WR_DQS_SLAVE_RATIO<<0)); //ratio1:ratio0 
+	WR_MEM_32(EXT_PHY_CTRL_17_SHDW	,(LPDDR2_PHY_WR_DQS_SLAVE_RATIO<<0)); //ratio1:ratio0
+	WR_MEM_32(EXT_PHY_CTRL_18	 	,(LPDDR2_PHY_WR_DQS_SLAVE_RATIO<<0)); //ratio3:ratio2 
+	WR_MEM_32(EXT_PHY_CTRL_18_SHDW	,(LPDDR2_PHY_WR_DQS_SLAVE_RATIO<<0)); //ratio3:ratio2
+	WR_MEM_32(EXT_PHY_CTRL_19	 	,(LPDDR2_PHY_WR_DQS_SLAVE_RATIO<<0)); //ratio5:ratio4 
+	WR_MEM_32(EXT_PHY_CTRL_19_SHDW	,(LPDDR2_PHY_WR_DQS_SLAVE_RATIO<<0)); //ratio5:ratio4
+	WR_MEM_32(EXT_PHY_CTRL_20	 	,(LPDDR2_PHY_WR_DQS_SLAVE_RATIO<<0)); //ratio7:ratio6 
+	WR_MEM_32(EXT_PHY_CTRL_20_SHDW	,(LPDDR2_PHY_WR_DQS_SLAVE_RATIO<<0)); //ratio7:ratio6
+	WR_MEM_32(EXT_PHY_CTRL_21	 	,(LPDDR2_PHY_WR_DQS_SLAVE_RATIO<<0)); //ratio9:ratio8 
+	WR_MEM_32(EXT_PHY_CTRL_21_SHDW	,(LPDDR2_PHY_WR_DQS_SLAVE_RATIO<<0)); //ratio9:ratio8
+
+//phy_fifo_we_in_delay    phy_ctrl_slave_delay
+//#define LPDDR2_PHY_FIFO_WE_IN_DELAY	0x0
+//#define LPDDR2_PHY_CTRL_SLAVE_DELAY	0x0
+
+	//WR_MEM_32(EXT_PHY_CTRL_22	 		,(LPDDR2_PHY_FIFO_WE_IN_DELAY<<16)|(LPDDR2_PHY_CTRL_SLAVE_DELAY<<0));  
+	//WR_MEM_32(EXT_PHY_CTRL_22_SHDW	,(LPDDR2_PHY_FIFO_WE_IN_DELAY<<16)|(LPDDR2_PHY_CTRL_SLAVE_DELAY<<0)); 
+
+//phy_wr_dqs_slave_delay    phy_rd_dqs_slave_delay
+
+//#define LPDDR2_PHY_WR_DQS_SLAVE_DELAY	0x0
+//#define LPDDR2_PHY_RD_DQS_SLAVE_DELAY	0x0
+
+	//WR_MEM_32(EXT_PHY_CTRL_23	 	,(LPDDR2_PHY_WR_DQS_SLAVE_DELAY<<16)|(LPDDR2_PHY_RD_DQS_SLAVE_DELAY<<0));  
+	//WR_MEM_32(EXT_PHY_CTRL_23_SHDW	,(LPDDR2_PHY_WR_DQS_SLAVE_DELAY<<16)|(LPDDR2_PHY_RD_DQS_SLAVE_DELAY<<0)); 
+
+//reg_phy_dq_offset_hi    reg_phy_gatelvl_init_mode    reg_phy_use_rank0_delays    reg_phy_wr_data_slave_delay
+#define LPDDR2_PHY_DQ_OFFSET 			0x40
+#define LPDDR2_PHY_GATELVL_INIT_MODE	0x00
+#define LPDDR2_PHY_USE_RANK0_DELAYS		0x1  //must enable use rank0 delays to avoid 32K boundary errors
+#define LPDDR2_PHY_WR_DATA_SLAVE_DELAY	0x00
+
+	WR_MEM_32(EXT_PHY_CTRL_24	 	,(LPDDR2_PHY_DQ_OFFSET<<24)|(LPDDR2_PHY_GATELVL_INIT_MODE<<16)|(LPDDR2_PHY_USE_RANK0_DELAYS<<12)|(LPDDR2_PHY_WR_DATA_SLAVE_DELAY<<0));  
+	WR_MEM_32(EXT_PHY_CTRL_24_SHDW	,(LPDDR2_PHY_DQ_OFFSET<<24)|(LPDDR2_PHY_GATELVL_INIT_MODE<<16)|(LPDDR2_PHY_USE_RANK0_DELAYS<<12)|(LPDDR2_PHY_WR_DATA_SLAVE_DELAY<<0)); 
+
+//reg_phy_dq_offset 
+//7bits each, 4 values concatenated (5th in EXT_PHY_CTRL_24)
+
+	WR_MEM_32(EXT_PHY_CTRL_25	 	,(LPDDR2_PHY_DQ_OFFSET<<21)|(LPDDR2_PHY_DQ_OFFSET<<14)|(LPDDR2_PHY_DQ_OFFSET<<7)|(LPDDR2_PHY_DQ_OFFSET<<0));  
+	WR_MEM_32(EXT_PHY_CTRL_25_SHDW	,(LPDDR2_PHY_DQ_OFFSET<<21)|(LPDDR2_PHY_DQ_OFFSET<<14)|(LPDDR2_PHY_DQ_OFFSET<<7)|(LPDDR2_PHY_DQ_OFFSET<<0)); 
+
+//reg_phy_gatelvl_init_ratio
+#define LPDDR2_PHY_GATELVL_INIT_RATIO 0x00
+	WR_MEM_32(EXT_PHY_CTRL_26	 	,(LPDDR2_PHY_GATELVL_INIT_RATIO<<0)); //ratio1:ratio0 
+	WR_MEM_32(EXT_PHY_CTRL_26_SHDW	,(LPDDR2_PHY_GATELVL_INIT_RATIO<<0)); //ratio1:ratio0
+	WR_MEM_32(EXT_PHY_CTRL_27	 	,(LPDDR2_PHY_GATELVL_INIT_RATIO<<0)); //ratio3:ratio2 
+	WR_MEM_32(EXT_PHY_CTRL_27_SHDW	,(LPDDR2_PHY_GATELVL_INIT_RATIO<<0)); //ratio3:ratio2
+	WR_MEM_32(EXT_PHY_CTRL_28	 	,(LPDDR2_PHY_GATELVL_INIT_RATIO<<0)); //ratio5:ratio4 
+	WR_MEM_32(EXT_PHY_CTRL_28_SHDW	,(LPDDR2_PHY_GATELVL_INIT_RATIO<<0)); //ratio5:ratio4
+	WR_MEM_32(EXT_PHY_CTRL_29	 	,(LPDDR2_PHY_GATELVL_INIT_RATIO<<0)); //ratio7:ratio6 
+	WR_MEM_32(EXT_PHY_CTRL_29_SHDW	,(LPDDR2_PHY_GATELVL_INIT_RATIO<<0)); //ratio7:ratio6
+	WR_MEM_32(EXT_PHY_CTRL_30	 	,(LPDDR2_PHY_GATELVL_INIT_RATIO<<0)); //ratio9:ratio8 
+	WR_MEM_32(EXT_PHY_CTRL_30_SHDW	,(LPDDR2_PHY_GATELVL_INIT_RATIO<<0)); //ratio9:ratio8
+	
+//reg_phy_wrlvl_init_ratio
+#define LPDDR2_PHY_WRLVL_INIT_RATIO 0x00
+	WR_MEM_32(EXT_PHY_CTRL_31	 	,(LPDDR2_PHY_WRLVL_INIT_RATIO<<0)); //ratio1:ratio0 
+	WR_MEM_32(EXT_PHY_CTRL_31_SHDW	,(LPDDR2_PHY_WRLVL_INIT_RATIO<<0)); //ratio1:ratio0
+	WR_MEM_32(EXT_PHY_CTRL_32	 	,(LPDDR2_PHY_WRLVL_INIT_RATIO<<0)); //ratio3:ratio2 
+	WR_MEM_32(EXT_PHY_CTRL_32_SHDW	,(LPDDR2_PHY_WRLVL_INIT_RATIO<<0)); //ratio3:ratio2
+	WR_MEM_32(EXT_PHY_CTRL_33	 	,(LPDDR2_PHY_WRLVL_INIT_RATIO<<0)); //ratio5:ratio4 
+	WR_MEM_32(EXT_PHY_CTRL_33_SHDW	,(LPDDR2_PHY_WRLVL_INIT_RATIO<<0)); //ratio5:ratio4
+	WR_MEM_32(EXT_PHY_CTRL_34	 	,(LPDDR2_PHY_WRLVL_INIT_RATIO<<0)); //ratio7:ratio6 
+	WR_MEM_32(EXT_PHY_CTRL_34_SHDW	,(LPDDR2_PHY_WRLVL_INIT_RATIO<<0)); //ratio7:ratio6
+	WR_MEM_32(EXT_PHY_CTRL_35	 	,(LPDDR2_PHY_WRLVL_INIT_RATIO<<0)); //ratio9:ratio8 
+	WR_MEM_32(EXT_PHY_CTRL_35_SHDW	,(LPDDR2_PHY_WRLVL_INIT_RATIO<<0)); //ratio9:ratio8
+
+//reg_phy_wrlvl_num_of_dq0    reg_phy_gatelvl_num_of_dq0 misalign clean dll lock clear etc
+	WR_MEM_32(EXT_PHY_CTRL_36	 	,0x0);  
+	WR_MEM_32(EXT_PHY_CTRL_36_SHDW	,0x0); 
+		
+
+	//finished with EMIF config
+	//set init bit back to enable
+	WR_MEM_32(EMIF_SDRAM_REF_CTRL,0x3000);
+
+	//this write initiates and EMIF initialization and also latches values to PHY
+	WR_MEM_32(EMIF_SDRAM_CONFIG,LPDDR2_SDRAM_CONFIG);
+
+	WR_MEM_32(EMIF_SDRAM_REF_CTRL,LPDDR2_REF_CTRL);
+	WR_MEM_32(EMIF_SDRAM_REF_CTRL_SHDW,LPDDR2_REF_CTRL);
+
+	GEL_TextOut("\n\nEMIF configuration is complete\n");
+	
+	
+//at this point, we can check the MR0 register of the LPDDR2 memory to ensure auto-initialization in memory is complete
+//when complete, DAI should be 0x0, RZQI should be 0x3
+//check memory datasheet for definition of these bits
+	
+	GEL_TextOut("Waiting for LPDDR2 autoinitialization to be ready...\n");
+	GEL_TextOut("\n");
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG,0x00000000);
+	while((RD_MEM_32(EMIF_LPDDR2_MODE_REG_DATA) & 0xFF) != 0x18);
+	GEL_TextOut("LPDDR2 autoinitialization complete!\n");
+
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG,0x00000005);
+	GEL_TextOut("Manufacturer ID: %x\n",,,,,(RD_MEM_32(EMIF_LPDDR2_MODE_REG_DATA) & 0xFF));
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG,0x00000006);
+	GEL_TextOut("Revision ID1: %x\n",,,,,(RD_MEM_32(EMIF_LPDDR2_MODE_REG_DATA) & 0xFF));
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG,0x00000007);
+	GEL_TextOut("Revision ID2: %x\n",,,,,(RD_MEM_32(EMIF_LPDDR2_MODE_REG_DATA) & 0xFF));
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG,0x00000008);
+	GEL_TextOut("Basic config: %x\n",,,,,(RD_MEM_32(EMIF_LPDDR2_MODE_REG_DATA) & 0xFF));
+
+	//write mode registers in LPDDR2
+	GEL_TextOut("Writing LPDDR2 mode registers...\n");
+	
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG ,0x0000000A); //MR10 CS0
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_DATA,0x56);
+
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG ,0x8000000A); //MR10 CS1
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_DATA,0x56);
+
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG ,0x00000001); //MR1 CS0
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_DATA,0x43); //burst length = 8
+
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG ,0x80000001); //MR1 CS1
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_DATA,0x43); //burst length = 8
+
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG ,0x00000002); //MR2 CS0
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_DATA,0x2); //RL4/WL2  for 266MHz
+	
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG ,0x80000002); //MR2 CS1
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_DATA,0x2); //RL4/WL2 for 266MHz
+	
+	//set the refresh bit to write regs to memory
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG ,0x40000002); //MR2 CS0
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_DATA,0x2); //RL4/WL2  for 266MHz
+	
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_CFG ,0xC0000002); //MR2 CS1
+	WR_MEM_32(EMIF_LPDDR2_MODE_REG_DATA,0x2); //RL4/WL2 for 266MHz
+	
+
+	GEL_TextOut("Done writing LPDDR2 mode registers!\n");
+	GEL_TextOut("\n\nLPDDR2 configuration is complete!!!\n\n");
+		
+
+}
+
+menuitem "DDR operations"
+
+hotmenu Enable_VTT_Regulator()
+{
+  UWORD32 temp;
+  
+  	GEL_TextOut("Enabling VTT Regulator... \n");
+
+    /*GPIO_VTTEN - GPIO5_7 PINMUX Setup*/ 
+    WR_MEM_32(CONTROL_CONF_SPI4_CS0, 0x20007);
+
+    WR_MEM_32(CM_PER_GPIO5_CLKCTRL,0x2);
+    /* Poll if module is functional */
+    while(RD_MEM_32(CM_PER_GPIO5_CLKCTRL) & 0x30000 != 0x0);
+
+    //enable module
+    WR_MEM_32(GPIO5_CTRL,0x0); 
+        
+    /*enable output for GPIO5_7*/
+     WR_MEM_32((GPIO5_SETDATAOUT),(1<<7));
+     temp = RD_MEM_32(GPIO5_OE);
+     temp = temp & ~(1 << 7);
+     WR_MEM_32(GPIO5_OE,temp);
+
+     GEL_TextOut("VTT Regulator Enabled \n");
+
+}
+
+hotmenu Disable_VTT_Regulator()
+{
+  UWORD32 temp;
+  
+    /*GPIO_VTTEN - GPIO5_7 PINMUX Setup*/ 
+    WR_MEM_32(CONTROL_CONF_SPI4_CS0, 0x20007);
+
+    WR_MEM_32(CM_PER_GPIO5_CLKCTRL,0x2);
+    /* Poll if module is functional */
+    while(RD_MEM_32(CM_PER_GPIO5_CLKCTRL) & 0x30000 != 0x0);
+       
+    //enable module
+    WR_MEM_32(GPIO5_CTRL,0x0); 
+    
+    /*enable output for GPIO5_7*/
+     WR_MEM_32((GPIO5_CLEARDATAOUT),(1<<7));
+     temp = RD_MEM_32(GPIO5_OE);
+     temp = temp & ~(1 << 7);
+     WR_MEM_32(GPIO5_OE,temp);
+}
+//************************************************************************
+//VTP_Enable() routine                                                   *
+//************************************************************************
+
+hotmenu VTP_Enable()
+{
+   //Write 1 to enable VTP
+   WR_MEM_32(VTP_CTRL_REG ,(RD_MEM_32(VTP_CTRL_REG) | 0x00000040));
+   //Write 0 to CLRZ bit
+   WR_MEM_32(VTP_CTRL_REG ,(RD_MEM_32(VTP_CTRL_REG) & 0xFFFFFFFE));
+   //Write 1 to CLRZ bit
+   WR_MEM_32(VTP_CTRL_REG ,(RD_MEM_32(VTP_CTRL_REG) | 0x00000001));
+   //Check for VTP ready bit
+   GEL_TextOut("Waiting for VTP Ready ....... \n");
+   while((RD_MEM_32(VTP_CTRL_REG) & 0x00000020) != 0x00000020);    
+   GEL_TextOut("VTP is Ready! \n");
+}
+
+hotmenu VTP_Disable()
+{
+   //Write 1 to enable VTP
+   WR_MEM_32(VTP_CTRL_REG ,0x10107);
+   GEL_TextOut("VTP is Disabled! \n");
+}
+
+hotmenu EMIF_PRCM_CLK_ENABLE()
+{
+	   GEL_TextOut("\EMIF PRCM is in progress ....... \n","Output",1,1,1);
+   	   /* Enable EMIF4DC Firewall clocks*/
+   	   WR_MEM_32(CM_PER_EMIF_FW_CLKCTRL,0x02);
+   	   /* Enable EMIF4DC clocks*/
+           WR_MEM_32(CM_PER_EMIF_CLKCTRL,0x02);
+   	   /* Poll for module is functional */
+   	   while(RD_MEM_32(CM_PER_EMIF_CLKCTRL)!= 0x02);
+	   GEL_TextOut("\EMIF PRCM Done \n","Output",1,1,1);
+}
+
+hotmenu EMIF_PRCM_CLK_DISABLE()
+{
+    GEL_TextOut("EMIF PRCM DISABLE is in progress ....... \n","Output",1,1,1);
+    /* Disable EMIF4 clocks*/
+    WR_MEM_32(CM_PER_EMIF_CLKCTRL,0x0);
+    /* Poll if module is disabled */
+    while(RD_MEM_32(CM_PER_EMIF_CLKCTRL)!= 0x30000);
+    GEL_TextOut("EMIF PRCM is Disabled \n","Output",1,1,1);
+}
+hotmenu DLL_AGING_CLK_ENABLE()
+{
+	   GEL_TextOut("\DLL aging PRCM is in progress ....... \n","Output",1,1,1);
+   	   /* Enable DLL aegings clocks*/
+           WR_MEM_32(CM_PER_DLL_AGING_CLKCTRL,0x02);
+   	   /* Poll for module is functional */
+   	   while(RD_MEM_32(CM_PER_DLL_AGING_CLKCTRL)!= 0x02);
+	   GEL_TextOut("\DLL aegis PRCM Done \n","Output",1,1,1);
+}
+
+//#########################################################################
+//simple DDR test
+//#########################################################################
+
+#define NO_LOOP_CNT       250
+#define DDR_START_ADDR    0x80000000
+
+menuitem "AM43xx DDR Tests"
+
+hotmenu DDR_DataTransferCheck()
+{
+    unsigned int temp_reg_rd = 0;
+        unsigned int temp_reg_wr = 0xA5A5A5A5;
+        unsigned int i=0;
+        unsigned int error=0;
+      GEL_TextOut("Try Accessing DDR memory....Write data\n");
+        for (i=0;i<NO_LOOP_CNT; i++)
+        {
+         *((UWORD32 *)DDR_START_ADDR + (i)) = temp_reg_wr;
+         //GEL_TextOut("Data Written is :: %x \n",,,,,(unsigned int *)i);
+         GEL_TextOut("Data written at :: %x \n",,,,,(unsigned int *)DDR_START_ADDR + (i));
+
+        
+        }
+      for (i=0;i<NO_LOOP_CNT; i++)
+        {
+
+        temp_reg_rd =  *((UWORD32 *)DDR_START_ADDR + (i));
+        // GEL_TextOut("Data Read is :: %x \n",,,,,(unsigned int *)temp_reg_rd);
+        if(temp_reg_rd != 0xA5A5A5A5)
+           {
+            //GEL_TextOut("Data check failed at :: %x \n",,,,,(unsigned int *)DDR_START_ADDR + (i));
+
+            error++;    
+           }
+        else
+        {
+        //GEL_TextOut("Data check passed  at :: %x \n",,,,,(unsigned int *)DDR_START_ADDR + (i));
+
+         } 
+        GEL_TextOut("No of Failed locations  are :: %x,  Addr:%x, Expected: 0xA5A5A5A5, Read: %x\n",,,,,(unsigned int *)error,DDR_START_ADDR + (i),*((UWORD32 *)DDR_START_ADDR + (i)));
+
+        }
+
+        if(error != 0)
+        {
+        GEL_TextOut("Data Integrity check Failed ");
+        }
+        else {
+        GEL_TextOut("Data Integrity check Passed\n");
+        }   
+}
+
+//#########################################################################
+//EDMA tests for DDR
+//#########################################################################
+
+#define TPCC_BASE_ADDR          0x49000000
+#define INT_SRAM_BASE_ADDR      0x00300000
+#define DDR_BASE_ADDR           0x80000000
+#define DMA_SIZE                512 /*Words*/
+#define L3_OFFSET_ADDR          0x40000000  
+#define CPU_OFFSET_ADDR         0x40000000
+
+hotmenu EDMA() 
+{
+unsigned int pattern=0;
+unsigned int queuqePri=0;
+unsigned int TPTC0_MMU_MAP=0;
+   
+    GEL_TextOut("\n\nThis EDMA test consists of 8 tests.\n");
+    EdmaPrcm();
+    memWrite(DDR_BASE_ADDR, 0x100, 0);
+    memWrite(0x40300000,    0x100, 0);
+    /*DDR ->Internal SRAM EDMA data Transfer */
+    GEL_TextOut("\nTest 1\n");
+    pattern=0xAAAAAAAA;
+    queuqePri=0;
+    memWrite(DDR_BASE_ADDR, DMA_SIZE, pattern);
+    edmaConfigure(DDR_BASE_ADDR, (INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR), DMA_SIZE, queuqePri);
+    compare((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+    /*Internal SRAM->DDR EDMA data Transfer */
+    memWrite(((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR)+4*DMA_SIZE), DMA_SIZE, pattern);
+    edmaConfigure(((INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR)+4*DMA_SIZE), (DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, queuqePri);
+    compare((DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+
+    /*DDR ->Internal SRAM EDMA data Transfer */
+    GEL_TextOut("\nTest 2\n");
+    pattern=0x55555555;
+    queuqePri=1;
+    memWrite(DDR_BASE_ADDR, DMA_SIZE, pattern);
+    edmaConfigure(DDR_BASE_ADDR, (INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR), DMA_SIZE, queuqePri);
+    compare((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+    /*Internal SRAM->DDR EDMA data Transfer */
+    memWrite(((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR)+4*DMA_SIZE), DMA_SIZE, pattern);
+    edmaConfigure(((INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR)+4*DMA_SIZE), (DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, queuqePri);
+    compare((DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+
+    /*DDR ->Internal SRAM EDMA data Transfer */
+    GEL_TextOut("\nTest 3\n");
+    pattern=0x00FF00FF;
+    queuqePri=2;
+    memWrite(DDR_BASE_ADDR, DMA_SIZE, pattern);
+    edmaConfigure(DDR_BASE_ADDR, (INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR), DMA_SIZE, queuqePri);
+    compare((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+    /*Internal SRAM->DDR EDMA data Transfer */
+    memWrite(((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR)+4*DMA_SIZE), DMA_SIZE, pattern);
+    edmaConfigure(((INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR)+4*DMA_SIZE), (DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, queuqePri);
+    compare((DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+
+    /*DDR ->Internal SRAM EDMA data Transfer */
+    GEL_TextOut("\nTest 4\n");
+    pattern=0x80808080;
+    queuqePri=3;
+    memWrite(DDR_BASE_ADDR, DMA_SIZE, pattern);
+    edmaConfigure(DDR_BASE_ADDR, (INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR), DMA_SIZE, queuqePri);
+    compare((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+    /*Internal SRAM->DDR EDMA data Transfer */
+    memWrite(((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR)+4*DMA_SIZE), DMA_SIZE, pattern);
+    edmaConfigure(((INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR)+4*DMA_SIZE), (DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, queuqePri);
+    compare((DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+
+    /*DDR ->Internal SRAM EDMA data Transfer */
+    GEL_TextOut("\nTest 5\n");
+    pattern=0xCCCCCCCC;
+    queuqePri=4;
+    memWrite(DDR_BASE_ADDR, DMA_SIZE, pattern);
+    edmaConfigure(DDR_BASE_ADDR, (INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR), DMA_SIZE, queuqePri);
+    compare((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+    /*Internal SRAM->DDR EDMA data Transfer */
+    memWrite(((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR)+4*DMA_SIZE), DMA_SIZE, pattern);
+    edmaConfigure(((INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR)+4*DMA_SIZE), (DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, queuqePri);
+    compare((DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+
+    /*DDR ->Internal SRAM EDMA data Transfer */
+    GEL_TextOut("\nTest 6\n");
+    pattern=0xA0A0A0A0;
+    queuqePri=5;
+    memWrite(DDR_BASE_ADDR, DMA_SIZE, pattern);
+    edmaConfigure(DDR_BASE_ADDR, (INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR), DMA_SIZE, queuqePri);
+    compare((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+    /*Internal SRAM->DDR EDMA data Transfer */
+    memWrite(((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR)+4*DMA_SIZE), DMA_SIZE, pattern);
+    edmaConfigure(((INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR)+4*DMA_SIZE), (DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, queuqePri);
+    compare((DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+
+    /*DDR ->Internal SRAM EDMA data Transfer */
+    GEL_TextOut("\nTest 7\n");
+    pattern=0x12345678;
+    queuqePri=6;
+    memWrite(DDR_BASE_ADDR, DMA_SIZE, pattern);
+    edmaConfigure(DDR_BASE_ADDR, (INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR), DMA_SIZE, queuqePri);
+    compare((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+    /*Internal SRAM->DDR EDMA data Transfer */
+    memWrite(((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR)+4*DMA_SIZE), DMA_SIZE, pattern);
+    edmaConfigure(((INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR)+4*DMA_SIZE), (DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, queuqePri);
+    compare((DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+
+    /*DDR ->Internal SRAM EDMA data Transfer */
+    GEL_TextOut("\nTest 8\n");
+    pattern=0xAA55AA55;
+    queuqePri=7;
+    memWrite(DDR_BASE_ADDR, DMA_SIZE, pattern);
+    edmaConfigure(DDR_BASE_ADDR, (INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR), DMA_SIZE, queuqePri);
+    compare((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+    /*Internal SRAM->DDR EDMA data Transfer */
+    memWrite(((INT_SRAM_BASE_ADDR+CPU_OFFSET_ADDR)+4*DMA_SIZE), DMA_SIZE, pattern);
+    edmaConfigure(((INT_SRAM_BASE_ADDR+L3_OFFSET_ADDR)+4*DMA_SIZE), (DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, queuqePri);
+    compare((DDR_BASE_ADDR+4*DMA_SIZE), DMA_SIZE, pattern);
+    GEL_TextOut("\n");
+    GEL_TextOut("Test is complete\n");
+}
+
+edmaConfigure(unsigned int srcAddr, unsigned DstAddr, unsigned short dmaSize, unsigned int QUEPRI)
+{
+  GEL_TextOut("\EDMA Transfer Start for QUEPRI %x\n",,,,,QUEPRI); 
+  WR_MEM_32(TPCC_BASE_ADDR +0x0284, (QUEPRI&0x7));
+  WR_MEM_32(TPCC_BASE_ADDR +0x0340, 0x00000001);
+  WR_MEM_32(TPCC_BASE_ADDR +0x0240, 0x00000000);
+  WR_MEM_32(TPCC_BASE_ADDR +0x0100, 0x00000000);
+  WR_MEM_32(TPCC_BASE_ADDR +0x4000, 0x00100200);
+  WR_MEM_32(TPCC_BASE_ADDR +0x4004, srcAddr);
+  WR_MEM_32(TPCC_BASE_ADDR +0x400C, DstAddr);
+  WR_MEM_32(TPCC_BASE_ADDR +0x4008, 0x00010000 | (dmaSize * 4)); /* byte len */
+  WR_MEM_32(TPCC_BASE_ADDR +0x401C, 0x00000001);
+  WR_MEM_32(TPCC_BASE_ADDR +0x4010, 0x00000000);
+  WR_MEM_32(TPCC_BASE_ADDR +0x4018, 0x00000000);
+  WR_MEM_32(TPCC_BASE_ADDR +0x4014, 0x0000ffff);
+  WR_MEM_32(TPCC_BASE_ADDR +0x1060, 0x00000001);
+  WR_MEM_32(TPCC_BASE_ADDR +0x1010, 0x00000001);
+
+  while( (RD_MEM_32(TPCC_BASE_ADDR+0x1068)&0x1) !=1 ) {}
+  WR_MEM_32(TPCC_BASE_ADDR+0x1070, 0x1); 
+  GEL_TextOut("\EDMA Transfer Complete for QUEPRI %x\n",,,,,QUEPRI);    
+}
+
+memWrite(unsigned int Addr, unsigned int size, unsigned int initData)
+{
+unsigned int len=0;
+  for(len=0; len<size; len++) {
+    WR_MEM_32(Addr+4*len, (initData+len));
+  }
+  GEL_TextOut("Write is completed Starting @%x\n",,,,,Addr);    
+}
+
+compare(unsigned int Addr, unsigned int size, unsigned int initData)
+{
+  unsigned int len=0, fail=0;
+  for(len=0; len<size; len++) {
+     if( RD_MEM_32(Addr+4*len) != (initData+len) ) {
+       GEL_TextOut("\nFailed@%x\tExpected=%x \tRead=%x\n",,,,,(Addr+4*len),(initData+len),RD_MEM_32(Addr+4*len) );
+       fail++;
+       } 
+     }
+  if(fail==0) {
+    GEL_TextOut("Test Case Passed for Destination Addr=%x\n",,,,,Addr); 
+    }
+}
+
+EdmaPrcm() {
+   WR_MEM_32(CM_PER_TPCC_CLKCTRL, 2); // it was L3
+   WR_MEM_32(CM_PER_TPTC0_CLKCTRL ,   2); 
+   WR_MEM_32(CM_PER_TPTC1_CLKCTRL ,   2);
+   WR_MEM_32(CM_PER_TPTC2_CLKCTRL ,   2);
+}
+

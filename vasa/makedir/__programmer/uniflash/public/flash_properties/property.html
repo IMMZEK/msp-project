@@ -1,0 +1,59 @@
+<div class="uf-property" id="property-{{vm.curProperty._id}}" value="{{vm.valueObj.value}}" ng-if="vm.curProperty && (vm.curProperty.name.indexOf('Toggle') === -1) && !vm.valueObj.disabled" ng-hide="(vm.curProperty.valueType==='Text')&&(vm.curProperty.name==='')" ng-style="vm.curProperty.valueType==='Button'&&{'display':'inline'}">
+
+	<!-- Text Property -->
+	<div class="uf-property-text" ng-if="vm.curProperty.valueType==='Text'" style="font-size:13px;">
+		<div class="uf-property-text-main">
+			<span class="uf-property-text-sub" ng-show="vm.curProperty.name.toLowerCase().substring(0,5) !== 'note:'">Note:</span> 
+			<span ng-bind-html="vm.ticHighlightSrv.highlight(vm.curProperty.name, vm.getFilter(),1)"></span>
+		</div>
+	</div>
+	
+	<!-- Boolean Property -->
+	<div id="property-boolean-{{vm.curProperty._id}}" ng-if="vm.curProperty.valueType==='Boolean'" ng-click="vm.valueChanged()" ng-class="{'disabled':vm.valueObj.disabled}">
+		<tic-checkbox type="checkbox" ng-model="vm.valueObj.value">
+			<span ng-bind-html="vm.ticHighlightSrv.highlight(vm.curProperty.name, vm.getFilter(), 1)"></span>
+		</tic-checkbox>
+	</div>
+	
+	<!-- String/Numeric Property -->
+	<span ng-if="vm.curProperty.valueType!=='Boolean' && vm.curProperty.valueType!=='Button' && vm.curProperty.valueType !== 'Text' && vm.curProperty.name!==''">
+		<span ng-bind-html="vm.ticHighlightSrv.highlight(vm.curProperty.name, vm.getFilter(),1)"></span><span ng-hide="(vm.curProperty.name.slice(-1)===':')||(vm.curProperty.name.slice(-2)==='0x')">:</span>
+	</span>
+	<span ng-if="!vm.curProperty.readOnly" ng-class="{'disabled':vm.valueObj.disabled}">
+		<input id="property-string-input-{{vm.curProperty._id}}" ng-if="(vm.curProperty.valueType === 'String')" type="text" ng-model="vm.valueObj.value" ng-change="vm.valueChanged()" ng-style="{'width':vm.getInputWidth(vm.valueObj.value)}" />
+		<input id="property-numeric-input-{{vm.curProperty._id}}" ng-if="(vm.curProperty.valueType === 'Numeric')" type="number" ng-model="vm.valueObj.value" ng-change="vm.valueChanged()" ng-blur="vm.checkValue()" ng-style="{'width':vm.getInputWidth(vm.valueObj.value)}"/>
+		<span style="color:#888;font-size:12px;" ng-show="vm.curProperty.lower&&vm.curProperty.upper">[{{vm.curProperty.lower}}-{{vm.curProperty.upper}}]</span>
+	</span>
+
+	<!-- Read-Only Property -->
+	<span ng-if="((vm.curProperty.valueType === 'Numeric') || (vm.curProperty.valueType === 'String') || (vm.curProperty.valueType === 'StringList') || (vm.curProperty.valueType === 'ChoiceList')) && vm.curProperty.readOnly">
+		<span style="color:#555;font-weight:500;font-size:13px;display:inline-block;">{{vm.valueObj.value}}</span>
+		<span style="color:#999;font-size:12px;" ng-show="!vm.valueObj.value">--</span>
+	</span>
+	
+	<!-- StringList Property -->
+	<select ng-if="vm.curProperty.valueType === 'StringList' && !vm.curProperty.readOnly" ng-model="vm.valueObj.value" ng-change="vm.valueChanged()" ng-class="{'disabled':vm.valueObj.disabled}">
+		<option ng-repeat="value in vm.curProperty.values.value">{{value}}</option>
+	</select>
+
+	<!-- Button Property -->
+	<button ng-if="vm.curProperty.valueType==='Button'" type="button" class="btn btn-primary btn-sm" ng-click="vm.propertiesActionSrv.addAction(vm.curProperty.action)" style="margin:4px 0;" ng-class="{'disabled':vm.valueObj.disabled}"><span ng-bind-html="vm.ticHighlightSrv.highlight(vm.curProperty.name, vm.getFilter(),2)">{{vm.curProperty.name}}</span></button>
+	
+	<!-- show ID if matched to ID only -->
+	<span ng-show="vm.curProperty.matchedId && (vm.curProperty._id !== 'FlashVerboseMode') && vm.searchable" class="highlightedTag" ng-style="(vm.curProperty.valueType !== 'ChoiceList')&&{'margin-left':'20px'}">ID: {{vm.curProperty._id}}</span>
+	
+	<!-- ChoiceList Property -->
+	<div ng-if="vm.curProperty.valueType === 'ChoiceList' && !vm.curProperty.readOnly" style="border:1px solid #ddd;padding:5px 12px;margin:5px 0;border-radius:4px;display:table-cell;" ng-click="vm.valueChanged()" ng-class="{'disabled':vm.valueObj.disabled||vm.curProperty.readOnly}">
+		<div ng-repeat="value in vm.curProperty.values.value">
+			<tic-radio-button ng-model="vm.valueObj.value" value="{{value}}">
+				<span ng-style="vm.valueObj.value===value&&{'color':'#115566','font-weight':'500'}" ng-bind-html="vm.ticHighlightSrv.highlight(value, vm.getFilter(),1)"></span>
+			</tic-radio-button>
+		</div>
+	</div>
+	
+	<!-- More Info -->
+	<ul ng-show="vm.ufSettingsDisplayControlSrv.showDescription&&!vm.minimal&&(vm.curProperty.valueType !== 'Text')" style="margin:0;">
+		<li ng-show="vm.curProperty.description"><span style="font-weight:500;">Description</span>: {{vm.curProperty.description}}</li>
+		<li><span style="font-weight:500;">ID</span>: {{vm.curProperty._id}}</li>
+	</ul>
+</div>

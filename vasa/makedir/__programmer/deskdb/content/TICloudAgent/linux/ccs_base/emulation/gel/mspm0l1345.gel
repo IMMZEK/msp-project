@@ -1,0 +1,309 @@
+/*****************************************************************************
+
+  Copyright (C) 2023 Texas Instruments Incorporated - http://www.ti.com/ 
+
+  Redistribution and use in source and binary forms, with or without 
+  modification, are permitted provided that the following conditions 
+  are met:
+
+   Redistributions of source code must retain the above copyright 
+   notice, this list of conditions and the following disclaimer.
+
+   Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the 
+   documentation and/or other materials provided with the   
+   distribution.
+
+   Neither the name of Texas Instruments Incorporated nor the names of
+   its contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*****************************************************************************/
+
+/* StartUp()              - Executed whenever CCS is invoked         */
+/* OnReset()              - Executed after Debug->Reset CPU          */
+/* OnRestart()            - Executed after Debug->Restart            */
+/* OnPreFileLoaded()      - Executed before File->Load Program       */
+/* OnFileLoaded()         - Executed after File->Load Program        */
+/* OnTargetConnect()      - Executed after Debug->Connect            */
+
+menuitem "MSPM0L1345_Commands"
+
+/* initialize CCS debugger memory map                                */
+memorymap_init()
+{
+    /*
+     * Syntax for GEL_MapAddStr.
+     * GEL_MapAddStr(address, page, length, "attribute", waitstate);
+
+    Basic Attribute Types           Derived Attribute Types
+    String      Description         String      Description
+    R           Read                NONE        No memory/protected
+    W           Write               RAM         Read and write
+    P           Port                ROM         Read only
+    EX          External            WOM         Write only
+    EM          Emulator            INPORT      Port read only
+    PR          Programmable        OUTPORT     Port write only
+    ER          Erasable            IOPORT      Port read and write
+    DA          Dual access         SARAM       Single access RAM
+    ASn         Access size         DARAM       Dual access RAM
+    SHnC        Shared              FLASH       Flash ROM
+    CACHE       Cache               EXRAM       External RAM
+    TX          Text                EXROM       External ROM
+    MN          Monitor             EPROM       Erasable write-able EPROM
+    SA          Single access       MONITOR     Monitor ROM
+    FL          Flash               PRAM        Program RAM
+    MR          Memory mapped       PROM        Program ROM
+    NULL        NULL                NULL        NULL
+    */
+
+    GEL_MapAddStr(0x00000000, 0, 0x00007FF8, "R|AS4", 0);   /* FLASH_Main_ECC_Corrected */
+    GEL_MapAddStr(0x20000000, 0, 0x00001000, "R|W|AS4", 0); /* SRAM */
+    GEL_MapAddStr(0x20100000, 0, 0x00001000, "R|W|AS4", 0); /* SRAM_Parity */
+    GEL_MapAddStr(0x20200000, 0, 0x00001000, "R|W|AS4", 0); /* SRAM_No_Parity */
+    GEL_MapAddStr(0x20300000, 0, 0x00001000, "R|W|AS4", 0); /* SRAM_Parity_Code */
+    GEL_MapAddStr(0x40004000, 0, 0x00002000, "R|W|AS4", 0); /* ADC0 */
+    GEL_MapAddStr(0x40008000, 0, 0x00001F00, "R|W|AS4", 0); /* COMP0 */
+    GEL_MapAddStr(0x40020000, 0, 0x00001F00, "R|W|AS4", 0); /* OPA0 */
+    GEL_MapAddStr(0x40022000, 0, 0x00001F00, "R|W|AS4", 0); /* OPA1 */
+    GEL_MapAddStr(0x40030000, 0, 0x00001F00, "R|W|AS4", 0); /* VREF */
+    GEL_MapAddStr(0x40080000, 0, 0x00001500, "R|W|AS4", 0); /* WWDT0 */
+    GEL_MapAddStr(0x40084000, 0, 0x00001F00, "R|W|AS4", 0); /* TIMG0 */
+    GEL_MapAddStr(0x40086000, 0, 0x00001F00, "R|W|AS4", 0); /* TIMG1 */
+    GEL_MapAddStr(0x40088000, 0, 0x00001F00, "R|W|AS4", 0); /* TIMG2 */
+    GEL_MapAddStr(0x4008C000, 0, 0x00001F00, "R|W|AS4", 0); /* TIMG4 */
+    GEL_MapAddStr(0x400A0000, 0, 0x00001F00, "R|W|AS4", 0); /* GPIOA */
+    GEL_MapAddStr(0x400AF000, 0, 0x00002C64, "R|W|AS4", 0); /* SYSCTL */
+    GEL_MapAddStr(0x400C7000, 0, 0x00001F00, "R|W|AS4", 0); /* DEBUGSS */
+    GEL_MapAddStr(0x400CD000, 0, 0x00002000, "R|W|AS4", 0); /* FLASHCTL */
+    GEL_MapAddStr(0x400F0000, 0, 0x00001F00, "R|W|AS4", 0); /* I2C0 */
+    GEL_MapAddStr(0x400F2000, 0, 0x00001F00, "R|W|AS4", 0); /* I2C1 */
+    GEL_MapAddStr(0x40100000, 0, 0x00001F00, "R|W|AS4", 0); /* UART1 */
+    GEL_MapAddStr(0x40108000, 0, 0x00001F00, "R|W|AS4", 0); /* UART0 */
+    GEL_MapAddStr(0x40400000, 0, 0x00001F00, "R|W|AS4", 0); /* CPUSS */
+    GEL_MapAddStr(0x40424000, 0, 0x00000500, "R|W|AS4", 0); /* WUC */
+    GEL_MapAddStr(0x40428000, 0, 0x00002000, "R|W|AS4", 0); /* IOMUX */
+    GEL_MapAddStr(0x4042A000, 0, 0x00001F00, "R|W|AS4", 0); /* DMA */
+    GEL_MapAddStr(0x40440000, 0, 0x00002000, "R|W|AS4", 0); /* CRC */
+    GEL_MapAddStr(0x40468000, 0, 0x00001F00, "R|W|AS4", 0); /* SPI0 */
+    GEL_MapAddStr(0x4055A000, 0, 0x00001000, "R|W|AS4", 0); /* adc0_PERIPHERALREGIONSVT */
+    GEL_MapAddStr(0x41C00000, 0, 0x00000200, "R|AS4", 0);   /* NonMain_ECC_Corrected */
+    GEL_MapAddStr(0x41C40000, 0, 0x00000080, "R|AS4", 0);   /* Factory_ECC_Corrected */
+
+    /* ARM standard IPs */
+    GEL_MapAddStr(0xE0000000, 0, 0x00001000, "R|W|AS4", 0);       /* itm */
+    GEL_MapAddStr(0xE0001000, 0, 0x00001000, "R|W|AS4", 0);       /* dwt */
+    GEL_MapAddStr(0xE0002000, 0, 0x00001000, "R|W|AS4", 0);       /* fpb */
+    GEL_MapAddStr(0xE000EDF0, 0, 0x00000018, "R|W|AS4", 0);       /* dcb */
+    GEL_MapAddStr(0xE0040000, 0, 0x00001000, "R|W|AS4", 0);       /* tpiu */
+    GEL_MapAddStr(0xE0041004, 0, 0x00001000, "R|W|AS4", 0);       /* etm */
+    GEL_MapAddStr(0xE0042000, 0, 0x00001000, "R|W|AS4", 0);       /* cti */
+    GEL_MapAddStr(0xE0043000, 0, 0x00001000, "R|W|AS4", 0);       /* mtb */
+    GEL_MapAddStr(0xE000E004, 0, 0x00000008, "R|W|AS4", 0);       /* icb */
+    GEL_MapAddStr(0xE000E010, 0, 0x0000000C, "R|W|AS4", 0);       /* systick */
+    GEL_MapAddStr(0xE000E100, 0, 0x00000444, "R|W|AS4", 0);       /* nvic */
+    GEL_MapAddStr(0xE000ED00, 0, 0x00000014, "R|W|AS4", 0);       /* cpuidbr, icsr, vtor, aircr, scr */
+    GEL_MapAddStr(0xE000ED90, 0, 0x00000034, "R|W|AS4", 0);       /* mpu */
+    GEL_MapAddStr(0xE000EDD0, 0, 0x00000018, "R|W|AS4", 0);       /* sau */
+    GEL_MapAddStr(0xE000EF00, 0, 0x00000004, "R|W|AS4", 0);       /* sig */
+    GEL_MapAddStr(0xE000EF34, 0, 0x00000018, "R|W|AS4", 0);       /* fpu */
+
+    GEL_TextOut("Memory Map Initialization Complete\n");
+}
+
+// Global variables to store device id and HW revision
+unsigned int gGEL_DeviceID = 0;
+
+int gGEL_Reset_Done;
+int gGEL_ResetCalled = 0;
+int gGEL_RemoteCmd_Done;
+
+/*
+ * Called during startup of device
+ *  Sets a handler to force external reset if an error is detected
+ */
+StartUp(major, minor, revision, build)
+{
+    GEL_HandleTargetError( ".*-613.*", "\nDevice Connection Error.
+This could be caused by the device having gone to low power mode.
+Try forcing an external reset pressing the 'Force Reset' button.
+If the error persists, try:
+    1) Invoking BSL,
+    2) Calling a DSSM Mass erase, or,
+    3) Calling a DSSM Factory Reset.
+Check device FAQs for more information.",
+1, "Force Reset", "GEL_MSPM0_Board_Reset()" );
+    GEL_HandleTargetError( ".*-2062.*", "\nDevice Connection Error.
+This could be caused by the device having gone to low power mode.
+Try forcing an external reset pressing the 'Force Reset' button.
+If the error persists, try:
+    1) Invoking BSL,
+    2) Calling a DSSM Mass erase, or,
+    3) Calling a DSSM Factory Reset.
+Check device FAQs for more information.",
+1, "Force Reset", "GEL_MSPM0_Board_Reset()" );
+}
+
+/*
+ * Starts a board reset from the device
+ *  It will call a function from CS_DAP to trigger the reset.
+ *  Function won't return until reset is done.
+ */
+GEL_MSPM0_Board_Reset()
+{
+    if ('GEL'::gGEL_ResetCalled == 0)
+    {
+        'GEL'::gGEL_ResetCalled = 1;
+        'GEL'::gGEL_Reset_Done = 0;
+        GEL_EvalOnTarget( "CS_DAP_0", "GEL_DAPInit_remotePORReset()", 0 );
+        while(!'GEL'::gGEL_Reset_Done)
+            ;
+        'GEL'::gGEL_ResetCalled = 0;
+    }
+}
+
+/*
+ * Returns true, if the device id reflects a MSPM0L11XX_L13XX variant
+ */
+GEL_isMSPM0L11XX_L13XX()
+{
+  int result = 0;
+  if (
+      ((gGEL_DeviceID&0xFFFFFFE) == 0x0BB8202E)
+     )
+  {
+    result = 1;
+  }
+  return result;
+}
+
+/*
+ * Returns true, if the device version is preliminary silicon
+ */
+GEL_isMSPM0Rev0()
+{
+    int result = 0;
+    if ( (gGEL_DeviceID&0xF0000000) == 0x00000000 )
+    {
+        result = 1;
+    }
+    return result;
+}
+
+/*
+ * Called after the parent router is connected, but before the target is connected.
+ */
+OnPreTargetConnect()
+{
+}
+
+OnFileLoaded()
+{
+
+}
+
+/*
+ * Called every time a target is connected.
+ *  Validates the device ID and initializes the memory map.
+ */
+OnTargetConnect()
+{
+    GEL_MapReset();
+    memorymap_init();
+    GEL_MapOn();
+
+    gGEL_DeviceID   = *(unsigned int *)(0x41C40004);
+
+    if (!GEL_isMSPM0L11XX_L13XX())
+    {
+        if (GEL_Dialog("The connected device is not MSPM0L11xx/L13xx.\nContinue?" , "QUESTION" , 0, "OK", "Cancel") != 0)
+        {
+            GEL_Disconnect();
+            return;
+        }
+    }
+    if (GEL_isMSPM0Rev0())
+    {
+        if (GEL_Dialog("This support package doesn't support MSPM0 early samples.\nTI recommends moving to production-quality MSPM0L silicon by ordering samples at www.ti.com/mspm0.\nContinue?" , "QUESTION" , 0, "OK", "Cancel") != 0)
+        {
+            GEL_Disconnect();
+            return;
+        }
+    }
+}
+
+/*
+ * GEL callback function called when the program is restarted.
+ */
+OnRestart()
+{
+    GEL_AdvancedReset("System Reset", 1);
+}
+
+hotmenu MSPM0_MailboxMassErase_Manual()
+{
+    'GEL'::gGEL_RemoteCmd_Done = 0;
+    GEL_EvalOnTarget( "CS_DAP_0", "GEL_DAPInit_remoteMassErase(0)", 0 );
+    while(!'GEL'::gGEL_RemoteCmd_Done)
+        ;
+    GEL_TextOut("Mass Erase executed. Please terminate debug session, power-cycle and restart debug session.\n");
+}
+
+hotmenu MSPM0_MailboxMassErase_Auto()
+{
+    if(GEL_IsConnected() == 1)
+    {
+        GEL_Disconnect();
+    }
+
+    'GEL'::gGEL_RemoteCmd_Done = 0;
+    GEL_EvalOnTarget( "CS_DAP_0", "GEL_DAPInit_remoteMassErase(1)", 0 );
+    while(!'GEL'::gGEL_RemoteCmd_Done)
+        ;
+    GEL_TextOut("Mass Erase executed. Please terminate debug session, power-cycle and restart debug session.\n");
+}
+
+hotmenu MSPM0_Mailbox_FactoryReset_Manual()
+{
+    'GEL'::gGEL_RemoteCmd_Done = 0;
+    GEL_EvalOnTarget( "CS_DAP_0", "GEL_DAPInit_remoteFactoryReset(0)", 0 );
+    while(!'GEL'::gGEL_RemoteCmd_Done)
+        ;
+    GEL_TextOut("Factory Reset executed. Please terminate debug session, power-cycle and restart debug session.\n");
+}
+
+hotmenu MSPM0_Mailbox_FactoryReset_Auto()
+{
+    if(GEL_IsConnected() == 1)
+    {
+        GEL_Disconnect();
+    }
+ 
+    'GEL'::gGEL_RemoteCmd_Done = 0;
+    GEL_EvalOnTarget( "CS_DAP_0", "GEL_DAPInit_remoteFactoryReset(1)", 0 );
+    while(!'GEL'::gGEL_RemoteCmd_Done)
+        ;
+    GEL_TextOut("Factory Reset executed. Please terminate debug session, power-cycle and restart debug session.\n");
+}
+
+hotmenu MSPM0_Mailbox_PasswordAuthentication_Auto()
+{
+    'GEL'::gGEL_RemoteCmd_Done = 0;
+    GEL_EvalOnTarget( "CS_DAP_0", "GEL_DAPInit_remotePasswordAuth(1)", 0 );
+    while(!'GEL'::gGEL_RemoteCmd_Done)
+        ;
+    GEL_TextOut(" Password Authentication executed.\n");
+    GEL_Connect();
+}

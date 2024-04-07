@@ -1,0 +1,82 @@
+<html>
+    <!doctype html>
+    <html>
+        <head>
+            <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+            <style>
+            </style>
+            <script src="/ticloudagent/q.js"></script>
+            <script src="/ticloudagent/agent.js"></script>
+            <script type="module">
+             import { init } from '/ccs-webview/ccs-plugin-api.js';
+             init('file', 'debug', 'project').then(async (ccs) => {
+                 const theme = await ccs.ide.getCurrentThemeId();
+                 
+                 const params = Object.fromEntries(new URLSearchParams(location.search));
+                 const {view, ...rest} = params;
+                 const server = 'https://dev.ti.com/tirex4-desktop';
+                 const toTirex = {...rest, theiaPort: location.port, theiaTheme: theme};
+                 const canConnect = await canConnectToServer(server);
+
+                 if (view && canConnect) {
+                     document.location.replace(`${server}/${view}?${new URLSearchParams(toTirex).toString()}`);
+                 } else if (!canConnect) {
+                     // NOTE: Can be 'wizard' or 'wizard/select' from portal (on devices, but not boards?).
+                     // The 'select' is due to how the wizard worked before, with multiple steps.
+                     if (view && view.startsWith('wizard')) {
+                         document.location = `./theia-index-offline.html?${new URLSearchParams(toTirex).toString()}`;
+                     } else {
+                         document.location = './serverdidnotstart.html';
+                     }
+                 } else {
+                     alert(`View not specified, received ${JSON.stringify(params)}`);
+                 }
+             });
+
+             async function canConnectToServer(server) {
+                 let canConnect = true;
+                 try {
+                     await ajaxHead(`${server}/api/serverState`);
+                 } catch(err) {
+                     canConnect = false;
+                     console.error(err);
+                 }
+                 return canConnect;
+             }
+
+             // helpers taken from ajax.ts
+
+             function ajaxHead(url) {
+                 return doRequest(url, 'HEAD');
+             }
+
+             function doRequest(url, method) {
+                 const XMLClass = getXMLHttpRequest();
+                 const req = new XMLClass();
+                 return new Promise((resolve, reject) => {
+                     req.onreadystatechange = () => {
+                         if (req.readyState === XMLHttpRequest.DONE) {
+                             if (req.status !== 200) {
+                                 return reject(new Error(req.responseText, req.status.toString()));
+                             }
+                             const contentType = req.getResponseHeader('Content-Type');
+                             if (contentType && contentType.includes('application/json')) {
+                                 resolve(JSON.parse(req.responseText));
+                             } else {
+                                 resolve(req.responseText);
+                             }
+                         }
+                     };
+                     req.open(method, url);
+                     req.send();
+                 });
+             }
+
+             function getXMLHttpRequest() {
+                 return XMLHttpRequest;
+             }
+            </script>
+        </head>
+        <body>
+        </body>
+    </html>

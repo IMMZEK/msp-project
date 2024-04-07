@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module id="TRNG" HW_revision="1.0">
+    <group id="TRNG_GPRCM" name="TRNG_GPRCM" instances="1" offset="0x800" instaddr="0x100" description="">
+        <register id="TRNG_PWREN" width="32" offset="0x0" description="Power enable">
+            <bitfield id="ENABLE" description="Enable the power" begin="0" end="0" width="1" rwaccess="R/W">
+                <bitenum id="DISABLE" value="0x0" description="Disable Power"/>
+                <bitenum id="ENABLE" value="0x1" description="Enable Power"/>
+            </bitfield>
+        </register>
+        <register id="TRNG_RSTCTL" width="32" offset="0x4" description="Reset Control">
+            <bitfield id="RESETSTKYCLR" description="Clear the RESETSTKY bit in the STAT register" begin="1" end="1" width="1" rwaccess="R/W">
+                <bitenum id="NOP" value="0x0" description="Writing 0 has no effect"/>
+                <bitenum id="CLR" value="0x1" description="Clear reset sticky bit"/>
+            </bitfield>
+            <bitfield id="RESETASSERT" description="Assert reset to the peripheral" begin="0" end="0" width="1" rwaccess="R/W">
+                <bitenum id="NOP" value="0x0" description="Writing 0 has no effect"/>
+                <bitenum id="ASSERT" value="0x1" description="Assert reset"/>
+            </bitfield>
+        </register>
+        <register id="TRNG_GPRCM_STAT" width="32" offset="0x14" description="Status Register">
+            <bitfield id="RESETSTKY" description="This bit indicates, if the peripheral was reset, since this bit was cleared by RESETSTKYCLR in the RSTCTL register" begin="16" end="16" width="1" rwaccess="R">
+                <bitenum id="NORES" value="0x0" description="The peripheral has not been reset since this bit was last cleared by RESETSTKYCLR in the RSTCTL register"/>
+                <bitenum id="RESET" value="0x1" description="The peripheral was reset since the last bit clear"/>
+            </bitfield>
+        </register>
+    </group>
+    <register id="TRNG_IIDX" width="32" offset="0x1020" description="Interrupt index">
+        <bitfield id="STAT" description="Interrupt index status" begin="7" end="0" width="8" rwaccess="R">
+            <bitenum id="NO_INTR" value="0x0" description="No bit is set means there is no pending interrupt request"/>
+            <bitenum id="IRQ_HEALTH_FAIL" value="0x1" description="Indicates that a health test has failed. The TRNG is in an error state until the interrupt is cleared."/>
+            <bitenum id="IRQ_CMD_FAIL" value="0x2" description="Indicates that the just issued command was rejected and is not being performed."/>
+            <bitenum id="IRQ_CMD_DONE" value="0x3" description="Indicates that the current command/mode is done. This may have different meanings based on the mode: OFF --&gt; Power has been turned off PWRUP_DIG --&gt; Digital powerup tests are done PWRUP_ANA --&gt; Analog powerup tests are done NORM_FUNC --&gt; No IRQ, since mode runs indefinitely until a new command is issued"/>
+            <bitenum id="IRQ_CAPTURED_RDY" value="0x4" description="Indicates that the captured word buffer is ready to be copied to memory"/>
+        </bitfield>
+    </register>
+    <register id="TRNG_IMASK" width="32" offset="0x1028" description="Interrupt mask">
+        <bitfield id="IRQ_HEALTH_FAIL" description="Mask for IRQ_HEALTH_FAIL. Indicates that a health test has failed." begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="DISABLED" value="0x0" description="Interrupt is masked out"/>
+            <bitenum id="ENABLED" value="0x1" description="Interrupt will request an interrupt service routine and corresponding bit in MIS will be set"/>
+        </bitfield>
+        <bitfield id="IRQ_CAPTURED_RDY" description="Mask for IRQ_CAPTURED_RDY. Indicates to the CPU that the Captured Word is ready to be read." begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="DISABLED" value="0x0" description="Interrupt is masked out"/>
+            <bitenum id="ENABLED" value="0x1" description="Interrupt will request an interrupt service routine and corresponding bit in MIS will be set"/>
+        </bitfield>
+        <bitfield id="IRQ_CMD_DONE" description="Mask for IRQ_CMD_DONE. Indicates that a command has finished" begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="DISABLED" value="0x0" description="Interrupt is masked out"/>
+            <bitenum id="ENABLED" value="0x1" description="Interrupt will request an interrupt service routine and corresponding bit in MIS will be set"/>
+        </bitfield>
+        <bitfield id="IRQ_CMD_FAIL" description="Masked interrupt source for IRQ_CMD_FAIL. Indicates that the just issued command/mode has been rejected." begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="DISABLED" value="0x0" description="Interrupt is masked out"/>
+            <bitenum id="ENABLED" value="0x1" description="Interrupt will request an interrupt service routine and corresponding bit in MIS will be set"/>
+        </bitfield>
+    </register>
+    <register id="TRNG_RIS" width="32" offset="0x1030" description="Raw interrupt status">
+        <bitfield id="IRQ_CAPTURED_RDY" description="Indicates to the CPU that the Captured Word is ready to be read. Reading the IIDX will clear this interrupt." begin="3" end="3" width="1" rwaccess="R">
+            <bitenum id="CLR" value="0x0" description="IRQ_CAPTURED_READY did not occur"/>
+            <bitenum id="SET" value="0x1" description="IRQ_CAPTURED_READY occurred"/>
+        </bitfield>
+        <bitfield id="IRQ_HEALTH_FAIL" description="Indicates to the CPU that any of the health tests have failed. Reading the IIDX  will clear this interrupt." begin="0" end="0" width="1" rwaccess="R">
+            <bitenum id="CLR" value="0x0" description="IRQ_CAPTURED_READY did not occur"/>
+            <bitenum id="SET" value="0x1" description="IRQ_CAPTURED_READY occurred"/>
+        </bitfield>
+        <bitfield id="IRQ_CMD_DONE" description="Raw interrupt source for IRQ_CMD_DONE. Indicates that the issued command/mode has completed." begin="2" end="2" width="1" rwaccess="R">
+            <bitenum id="CLR" value="0x0" description="IRQ_CMD_DONE did not occur"/>
+            <bitenum id="SET" value="0x1" description="IRQ_CMD_DONE occurred"/>
+        </bitfield>
+        <bitfield id="IRQ_CMD_FAIL" description="Masked interrupt source for IRQ_CMD_FAIL. Indicates that the just issued command/mode has been rejected." begin="1" end="1" width="1" rwaccess="R">
+            <bitenum id="CLR" value="0x0" description="IRQ_CMD_FAIL did not occur"/>
+            <bitenum id="SET" value="0x1" description="IRQ_CMD_FAIL occurred"/>
+        </bitfield>
+    </register>
+    <register id="TRNG_MIS" width="32" offset="0x1038" description="Masked interrupt status">
+        <bitfield id="IRQ_CAPTURED_RDY" description="Masked interrupt result for CAPTURED_READY. Indicates to the CPU that the Captured Word is ready to be read. Reading the IIDX  will clear this interrupt." begin="3" end="3" width="1" rwaccess="R">
+            <bitenum id="CLR" value="0x0" description="IRQ_CAPTURED_READY did not request an interrupt service routine"/>
+            <bitenum id="SET" value="0x1" description="IRQ_CAPTURED_READY requests an interrupt service routine"/>
+        </bitfield>
+        <bitfield id="IRQ_HEALTH_FAIL" description="Masked interrupt result for HEALTH_FAIL. Indicates to the CPU that any of the health tests have failed for the latest 1024-bit window." begin="0" end="0" width="1" rwaccess="R">
+            <bitenum id="CLR" value="0x0" description="IRQ_CAPTURED_READY did not request an interrupt service routine"/>
+            <bitenum id="SET" value="0x1" description="IRQ_CAPTURED_READY requests an interrupt service routine"/>
+        </bitfield>
+        <bitfield id="IRQ_CMD_DONE" description="Masked interrupt source for IRQ_CMD_DONE. Indicates that the issued command/mode has completed." begin="2" end="2" width="1" rwaccess="R">
+            <bitenum id="CLR" value="0x0" description="IRQ_CAPTURED_READY did not request an interrupt service routine"/>
+            <bitenum id="SET" value="0x1" description="IRQ_CMD_DONE requests an interrupt service routine"/>
+        </bitfield>
+        <bitfield id="IRQ_CMD_FAIL" description="Masked interrupt source for IRQ_CMD_FAIL. Indicates that the just issued command/mode has been rejected." begin="1" end="1" width="1" rwaccess="R">
+            <bitenum id="CLR" value="0x0" description="IRQ_CMD_FAIL did not request an interrupt service routine"/>
+            <bitenum id="SET" value="0x1" description="IRQ_CMD_FAIL requests an interrupt service routine"/>
+        </bitfield>
+    </register>
+    <register id="TRNG_ISET" width="32" offset="0x1040" description="Interrupt set">
+        <bitfield id="IRQ_CAPTURED_RDY" description="Indicates to the CPU that the Captured Word is ready to be read. Reading the IIDX or DATA_CAPTURE registers will clear this interrupt." begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="NO_EFFECT" value="0x0" description="Writing a 0 has no effect"/>
+            <bitenum id="SET" value="0x1" description="RIS bit corresponding to CAPTURED_READY is set"/>
+        </bitfield>
+        <bitfield id="IRQ_HEALTH_FAIL" description="Indicates to the CPU that any of the health tests have failed. Reading the IIDX or DATA_CAPTURE registers will clear this interrupt." begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="NO_EFFECT" value="0x0" description="Writing a 0 has no effect"/>
+            <bitenum id="SET" value="0x1" description="RIS bit corresponding to HEALTH_FAIL is set"/>
+        </bitfield>
+        <bitfield id="IRQ_CMD_DONE" description="Write to turn on CMD_DONE IRQ. Indicates that the last issued TRNG command has finished." begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="NO_EFFECT" value="0x0" description="Writing a 0 has no effect."/>
+            <bitenum id="SET" value="0x1" description="RIS bit corresponding to CMD_DONE is set"/>
+        </bitfield>
+        <bitfield id="IRQ_CMD_FAIL" description="Masked interrupt source for IRQ_CMD_FAIL. Indicates that the just issued command/mode has been rejected." begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="NO_EFFECT" value="0x0" description="Writing a 0 has no effect."/>
+            <bitenum id="SET" value="0x1" description="RIS bit corresponding to CMD_FAIL is set"/>
+        </bitfield>
+    </register>
+    <register id="TRNG_ICLR" width="32" offset="0x1048" description="Interrupt clear">
+        <bitfield id="IRQ_CAPTURED_RDY" description="Indicates to the CPU that the Captured Word is ready to be read. Reading the IIDX or DATA_CAPTURE registers will clear this interrupt." begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="NO_EFFECT" value="0x0" description="Writing a 0 has no effect"/>
+            <bitenum id="CLR" value="0x1" description="RIS bit corresponding to CAPTURED_READY is cleared"/>
+        </bitfield>
+        <bitfield id="IRQ_HEALTH_FAIL" description="Indicates to the CPU that any of the health tests have failed. Reading the IIDX or DATA_CAPTURE registers will clear this interrupt." begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="NO_EFFECT" value="0x0" description="Writing a 0 has no effect"/>
+            <bitenum id="CLR" value="0x1" description="RIS bit corresponding to CAPTURED_READY is cleared"/>
+        </bitfield>
+        <bitfield id="IRQ_CMD_DONE" description="Write to turn off CMD_DONE IRQ. Indicates that the last issued TRNG command has finished." begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="NO_EFFECT" value="0x0" description="Writing a 0 has no effect."/>
+            <bitenum id="CLR" value="0x1" description="RIS bit corresponding to CMD_DONE is cleared"/>
+        </bitfield>
+        <bitfield id="IRQ_CMD_FAIL" description="Masked interrupt source for IRQ_CMD_FAIL. Indicates that the just issued command/mode has been rejected." begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="NO_EFFECT" value="0x0" description="Writing a 0 has no effect."/>
+            <bitenum id="CLR" value="0x1" description="RIS bit corresponding to CMD_FAIL is cleared"/>
+        </bitfield>
+    </register>
+    <register id="TRNG_DESC" width="32" offset="0x10FC" description="Module descriptions">
+        <bitfield id="MINREV" description="Minor rev of the IP" begin="3" end="0" width="4" rwaccess="R/W">
+        </bitfield>
+        <bitfield id="MAJREV" description="Major rev of the IP" begin="7" end="4" width="4" rwaccess="R/W">
+        </bitfield>
+        <bitfield id="INSTNUM" description="Instance Number within the device. This will be a parameter to the RTL for modules that can have multiple instances" begin="11" end="8" width="4" rwaccess="R/W">
+        </bitfield>
+        <bitfield id="FEATUREVER" description="Feature Set for the module *instance*" begin="15" end="12" width="4" rwaccess="R/W">
+        </bitfield>
+        <bitfield id="MODULEID" description="Module Identifier - An internal TI page has been created to request unique module IDs" begin="31" end="16" width="16" rwaccess="R/W">
+        </bitfield>
+    </register>
+    <register id="TRNG_CTL" width="32" offset="0x1100" description="Controls the command and decimation rate">
+        <bitfield id="DECIM_RATE" description="Set decimation rate. Decimate by n
+0x0 = Decimation by 1 (no decimation)
+0x1 = Decimation by 2 (Skip every other sample)
+
+0x7 = Decimation by 8 (Take every 8th sample)" begin="10" end="8" width="3" rwaccess="R/W">
+        </bitfield>
+        <bitfield id="PWRUP_CLKDIV" description="When '1', the powerup sequence will take twice as long (i.e., clock frequency halved)" begin="16" end="16" width="1" rwaccess="R/W">
+        </bitfield>
+        <bitfield id="PWRUP_PCHRG_CFG" description="Configure PCHARGE sequence length
+
+b00 = Disabled
+b01 = 20 us PCHARGE
+b10 = 30 us PCHARGE (default)
+b11 = 40 us PCHARGE" begin="18" end="17" width="2" rwaccess="R/W">
+        </bitfield>
+        <bitfield id="PWRUP_PSTART_CFG" description="Configure pusle startup sequence length
+
+b00 = Disabled
+b01 = rise at 10us, fall at 50us
+b10 = rise at 10us, fall at 70us (default)
+b11 = rise at 10us, fall at 90us" begin="20" end="19" width="2" rwaccess="R/W">
+        </bitfield>
+        <bitfield id="CMD" description="Sets the TRNG mode through a command. The mode will not be updated until the previous command is done, as indicated by IRQ_CMD_DONE.
+00 --&gt; OFF
+01 --&gt; PWRUP_DIG
+10 --&gt; PWRUP_ANA
+11 --&gt; NORM_FUNC" begin="1" end="0" width="2" rwaccess="R/W">
+            <bitenum id="PWR_OFF" value="0x0" description="Turns the power off of the analog source and clocks the digital interface"/>
+            <bitenum id="PWRUP_DIG" value="0x1" description="Initiates the powerup test sequence for the digital components. This verifies that the digital components are properly working. IRQ_CMD_DONE indicates that the test is done. The results of this test are in bits 0:6 in TEST_RESULTS register"/>
+            <bitenum id="PWRUP_ANA" value="0x2" description="Initiates the powerup test sequence for the analog TRNG. This verifies that the analog component is generating sequences with enough entropy. IRQ_CMD_DONE indicates that the test is done. The results of this test are in bit 7 in TEST_RESULTS register"/>
+            <bitenum id="NORM_FUNC" value="0x3" description="Normal operating mode for TRNG. All components are turned on."/>
+        </bitfield>
+    </register>
+    <register id="TRNG_STAT" width="32" offset="0x1104" description="Status register that informs health test results and last issued command">
+        <bitfield id="ADAP_FAIL" description="Indicates that the Adaptive Proportion Test (1,2,3, or 4-bit counters) failed by having too many or too few counted samples in the last 1024 bit window." begin="0" end="0" width="1" rwaccess="R/W">
+        </bitfield>
+        <bitfield id="ISSUED_CMD" description="Indicates the last accepted command that is issued to the TRNG interface.
+Upon writing a valid command, this register will update and the command will be in progress until CMD_DONE_IRQ is set.
+CMD_DONE_IRQ indicates that the state is in PWROFF, NORM_FUNC, or ERROR. These states will accept new commands.
+00 --&gt; OFF
+01 --&gt; PWRUP_DIG
+10 --&gt; PWRUP_ANA
+11 --&gt; NORM_FUNC" begin="9" end="8" width="2" rwaccess="R">
+        </bitfield>
+        <bitfield id="FSM_STATE" description="Current state of the front end FSM (behind a clock domain crossing).
+2 reads are REQUIRED as there is a chance of metastability when reading this
+States:
+0000: OFF
+0001: PWRUP_ES
+0011: NORM_FUNC
+0111: TEST_DIG
+1011: TEST_ANA
+1010: ERROR
+0010: PWRDOWN_ES" begin="19" end="16" width="4" rwaccess="R">
+        </bitfield>
+        <bitfield id="REP_FAIL" description="Indicates that the repetition counter test caused the most recent failure. Thus, the health count numbers are most likely not for a complete 1024-bit window." begin="1" end="1" width="1" rwaccess="R">
+        </bitfield>
+    </register>
+    <register id="TRNG_DATA_CAPTURE" width="32" offset="0x1108" description="Captured word buffer of RNG data">
+    </register>
+    <register id="TRNG_TEST_RESULTS" width="32" offset="0x110C" description="Test results from TEST_ANA and TEST_DIG">
+        <bitfield id="DIG_TEST" description="Bit 0 indicates if the first decimation rate test and health test(verifies conditioning, decimation, and captured buffer) fails and Bit 1 indicates if the second decimation test and health test fails
+Bit 0 - decim_test0 (decim = 0x0)
+Bit 1 - decim_test1 (decim = 0x1) ..." begin="7" end="0" width="8" rwaccess="R/W">
+        </bitfield>
+        <bitfield id="ANA_TEST" description="Runs through 4096 samples from an enabled entropy source and verifies that none of the health tests failed, indicating sufficient entropy was produced by the analog components" begin="8" end="8" width="1" rwaccess="R/W">
+        </bitfield>
+    </register>
+    <register id="TRNG_CLKDIVIDE" width="32" offset="0x1110" description="Clock Divider">
+        <bitfield id="RATIO" description="Selects divide ratio of module clock" begin="2" end="0" width="3" rwaccess="R/W">
+            <bitenum id="DIV_BY_1" value="0x0" description="Do not divide clock source"/>
+            <bitenum id="DIV_BY_2" value="0x1" description="Divide clock source by 2"/>
+            <bitenum id="DIV_BY_4" value="0x3" description="Divide clock source by 4"/>
+            <bitenum id="DIV_BY_6" value="0x5" description="Divide clock source by 6"/>
+            <bitenum id="DIV_BY_8" value="0x7" description="Divide clock source by 8"/>
+        </bitfield>
+    </register>
+</module>

@@ -1,0 +1,281 @@
+<module name="ISP_RESIZER" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="RSZ_PID" acronym="RSZ_PID" offset="0x0" width="32" description="PERIPHERAL ID REGISTER">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="R"/>
+    <bitfield id="TID" width="8" begin="23" end="16" resetval="0x10" description="Peripheral identification: RESIZER module." range="" rwaccess="R"/>
+    <bitfield id="CID" width="8" begin="15" end="8" resetval="0xFE" description="Class identification:Camera ISP." range="" rwaccess="R"/>
+    <bitfield id="PREV" width="8" begin="7" end="0" resetval="TI internal data" description="Peripheral revision number." range="" rwaccess="R"/>
+  </register>
+  <register id="RSZ_PCR" acronym="RSZ_PCR" offset="0x4" width="32" description="PERIPHERAL CONTROL REGISTER">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x00000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ONESHOT" width="1" begin="2" end="2" resetval="0x1" description="One-shot or continuous mode selection.This bit only applies when the image source is CCDC or PREVIEW (RSZ_CNT INPSRC =0)" range="" rwaccess="RW">
+      <bitenum value="0" token="ONESHOT_0" description="Continuous mode. The module must be disabled by software. The disable module is latched at the end of the frame it was written in."/>
+      <bitenum value="1" token="ONESHOT_1" description="One shot mode. Enable bit is reset to 0 once the busy bit turns to 1."/>
+    </bitfield>
+    <bitfield id="BUSY" width="1" begin="1" end="1" resetval="0x0" description="RESIZER module busy." range="" rwaccess="R">
+      <bitenum value="0" token="BUSY_0" description="RESIZER module not busy."/>
+      <bitenum value="1" token="BUSY_1" description="RESIZER module busy."/>
+    </bitfield>
+    <bitfield id="ENABLE" width="1" begin="0" end="0" resetval="0x0" description="RESIZER module enable. Memory to memory operation: Resizer always operates in one-shot mode in memory to memory operation. Enable bit is reset to 0 once the busy bit turns to 1. CCDC/PREVIEW to memory operation: The resizer operates either in one-shot or continuous mode. The behavior is defined by the The enable bit MUST be the last field written to resize a frame." range="" rwaccess="RW">
+      <bitenum value="0" token="ENABLE_0" description="Disable RESIZER module."/>
+      <bitenum value="1" token="ENABLE_1" description="Enable RESIZER module."/>
+    </bitfield>
+  </register>
+  <register id="RSZ_CNT" acronym="RSZ_CNT" offset="0x8" width="32" description="RESIZER CONTROL REGISTER">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="CBILIN" width="1" begin="29" end="29" resetval="0x0" description="Chrominance horizontal algorithm select.Filtering that is same as luminance processing is intended only for downsampling, and bilinear interpolation is intended only for upsampling." range="" rwaccess="RW">
+      <bitenum value="0" token="CBILIN_0" description="The chrominance uses the same processing as the luminance."/>
+      <bitenum value="1" token="CBILIN_1" description="The chrominance uses bilinear interpolation processing."/>
+    </bitfield>
+    <bitfield id="INPSRC" width="1" begin="28" end="28" resetval="0x0" description="Input source select.NOTE: If this field is set to zero, the resizer input is fed from either the preview engine or the CCDC, but not both. The CCDC and preview engine modules have individual control to feed their output to the resizer input. If both the CCDC and preview engine modules are set to drive the resizer input, the CCDC output takes precedence." range="" rwaccess="RW">
+      <bitenum value="0" token="INPSRC_0" description="PREVIEW or CCDC module."/>
+      <bitenum value="1" token="INPSRC_1" description="Memory."/>
+    </bitfield>
+    <bitfield id="INPTYP" width="1" begin="27" end="27" resetval="0x0" description="Input type select." range="" rwaccess="RW">
+      <bitenum value="0" token="INPTYP_0" description="YUV422 color is interleaved"/>
+      <bitenum value="1" token="INPTYP_1" description="Color separate data on 8 bits."/>
+    </bitfield>
+    <bitfield id="YCPOS" width="1" begin="26" end="26" resetval="0x0" description="Luminance and chrominance position in 16-bit word" range="" rwaccess="RW">
+      <bitenum value="0" token="YCPOS_0" description="YC"/>
+      <bitenum value="1" token="YCPOS_1" description="CY"/>
+    </bitfield>
+    <bitfield id="VSTPH" width="3" begin="25" end="23" resetval="0x0" description="Vertical starting phase. The phase range is 0 to 7." range="" rwaccess="RW"/>
+    <bitfield id="HSTPH" width="3" begin="22" end="20" resetval="0x0" description="Horizontal starting phase. The phase range is 0 to 7." range="" rwaccess="RW"/>
+    <bitfield id="VRSZ" width="10" begin="19" end="10" resetval="0x0FF" description="Vertical resizing value. (range from 64 - 1024) plus 1Vertical resizing ratio is 256/(VRSZ+1)For have the correct functionality, must enter the desired value minus 1. For example for a ratio of 1, must enter 255" range="" rwaccess="RW"/>
+    <bitfield id="HRSZ" width="10" begin="9" end="0" resetval="0x0FF" description="Horizontal resizing value. (range from 64 - 1024) plus 1Horizontal resizing ratio is 256/(HRSZ+1) For have the correct functionality, must enter the desired value minus 1. For example for a ratio of 1, must enter 255" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_OUT_SIZE" acronym="RSZ_OUT_SIZE" offset="0xC" width="32" description="OUTPUT SIZE REGISTER">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VERT" width="12" begin="27" end="16" resetval="0x000" description="Output height." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="HORZ" width="12" begin="11" end="0" resetval="0x000" description="Output (width in the horizontal direction)The maximum output width cannot be greater than 3312 pixels wide (1650 if downsampling greater than 2 is used with 7 filter taps) This value must be EVEN and the number of bytes written to SDRAM must be a multiple of 16-bytes if the vertical resizing factor is greater than 1x (upsizing)" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_IN_START" acronym="RSZ_IN_START" offset="0x10" width="32" description="INPUT CONFIGURATION REGISTER This register must be used when the input pixel data comes from the PREVIEW module. must be set to 0 is the input pixel data comes from memory.">
+    <bitfield id="RESERVED" width="3" begin="31" end="29" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VERT_ST" width="13" begin="28" end="16" resetval="0x0000" description="Vertical start line.This field makes sense when the resizer obtains its input from the preview engine/CCDC When the resizer gets its input from SDRAM, this field must be set to 0" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="15" end="13" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="HORZ_ST" width="13" begin="12" end="0" resetval="0x0000" description="Horizontal start pixel. Pixels are coded on 16 bits for YUV and 8 bits for color separate data. When the resizer gets its input from SDRAM, this field must be set to = 15 for YUV 16-bit data and = 31 for 8-bit color separate data Horizontal starting pixel value is in number of pixels if input is from SDRAM. If the input to the resizer is from CCDC/preview engine, this field must be programmed as follows:(1) Program this field using number of bytes (twice number of pixels).(2) Change the lowest bit to reflect start position in pixels (effectively change from a value 0 to a value 1 if required)" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_IN_SIZE" acronym="RSZ_IN_SIZE" offset="0x14" width="32" description="INPUT SIZE REGISTER">
+    <bitfield id="RESERVED" width="3" begin="31" end="29" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VERT" width="13" begin="28" end="16" resetval="0x0000" description="Input height. The range is 0 to 4095 lines." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="15" end="13" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="HORZ" width="13" begin="12" end="0" resetval="0x0000" description="Input width. The range is 0 to 4095 pixels." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_SDR_INADD" acronym="RSZ_SDR_INADD" offset="0x18" width="32" description="INPUT ADDRESS REGISTER This register must be set only if the input pixel data comes from memory.">
+    <bitfield id="ADDR" width="32" begin="31" end="0" resetval="0x00000000" description="32-bit input memory address. The 5 LSBs are forced to be zeros by the hardware to align on a 32-byte boundary; the 5 LSBs are read-only. This field must be programmed to be 0x0 if the resizer input is from preview engine/CCDC. * This field can be altered even when the resizer is busy. The change takes place only for the next frame. However, note that reading this register always gives the latest value." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_SDR_INOFF" acronym="RSZ_SDR_INOFF" offset="0x1C" width="32" description="INPUT OFFSET REGISTER This register must be set only if the input pixel data comes from memory.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="OFFSET" width="16" begin="15" end="0" resetval="0x0000" description="Memory offset for the input lines. The 5 LSBs are forced to be zeros by the hardware to align on a 32-byte boundary; the 5 LSBs are read-only. This field must be programmed to be 0x0 if the resizer input is from preview engine/CCDC. * This field can be altered even when the resizer is busy. The change takes place only for the next frame. However, note that reading this register always gives the latest value." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_SDR_OUTADD" acronym="RSZ_SDR_OUTADD" offset="0x20" width="32" description="OUTPUT ADDRESS REGISTER">
+    <bitfield id="ADDR" width="32" begin="31" end="0" resetval="0x00000000" description="32-bit output memory address. The 5 LSBs are forced to be zeros by the hardware to align on a 32-byte boundary; the 5 LSBs are read-only. For optimal use of SDRAM bandwidth, the SDRAM address must be set on a 256-byte boundary * This field can be altered even when the resizer is busy. The change takes place only for the next frame. However, note that reading this register always gives the latest value." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_SDR_OUTOFF" acronym="RSZ_SDR_OUTOFF" offset="0x24" width="32" description="OUTPUT OFFSET REGISTER">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="OFFSET" width="16" begin="15" end="0" resetval="0x0000" description="Memory offset for the output lines. The 5 LSBs are forced to be zeros by the hardware to align on a 32-byte boundary; the 5 LSBs are read-only. For optimal use of SDRAM bandwidth, the SDRAM line offset must be set on a 256-byte boundary. * This field can be altered even when the resizer is busy. The change takes place only for the next frame. However, note that reading this register always gives the latest value." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT10" acronym="RSZ_HFILT10" offset="0x28" width="32" description="HORIZONTAL FILTER COEFFICIENTS 0 AND 1 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF1" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0, tap 1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF0" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0, tap 0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT32" acronym="RSZ_HFILT32" offset="0x2C" width="32" description="HORIZONTAL FILTER COEFFICIENTS 2 AND 3 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF3" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0, tap 3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF2" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0, tap 2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT54" acronym="RSZ_HFILT54" offset="0x30" width="32" description="HORIZONTAL FILTER COEFFICIENTS 4 AND 5 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF5" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0/1, tap 5/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF4" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0/1, tap 4/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT76" acronym="RSZ_HFILT76" offset="0x34" width="32" description="HORIZONTAL FILTER COEFFICIENTS 6 AND 37REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF7" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0/1, tap 7/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF6" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0/1, tap 6/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT98" acronym="RSZ_HFILT98" offset="0x38" width="32" description="HORIZONTAL FILTER COEFFICIENTS 8 AND 9 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF9" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/2, tap 1/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF8" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/2, tap 0/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT1110" acronym="RSZ_HFILT1110" offset="0x3C" width="32" description="HORIZONTAL FILTER COEFFICIENTS 10 AND 11 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF11" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/2, tap 3/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF10" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/2, tap 2/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT1312" acronym="RSZ_HFILT1312" offset="0x40" width="32" description="HORIZONTAL FILTER COEFFICIENTS 12 AND 13 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF13" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/3, tap 5/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF12" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/3, tap 4/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT1514" acronym="RSZ_HFILT1514" offset="0x44" width="32" description="HORIZONTAL FILTER COEFFICIENTS 14 AND 15 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF15" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/3, tap 7/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF14" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/3, tap 6/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT1716" acronym="RSZ_HFILT1716" offset="0x48" width="32" description="HORIZONTAL FILTER COEFFICIENTS 17 AND 16 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF17" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/4, tap 1/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF16" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/4, tap 0/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT1918" acronym="RSZ_HFILT1918" offset="0x4C" width="32" description="HORIZONTAL FILTER COEFFICIENTS 18 AND 19 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF19" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/4, tap 3/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF18" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/4, tap 2/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT2120" acronym="RSZ_HFILT2120" offset="0x50" width="32" description="HORIZONTAL FILTER COEFFICIENTS 20 AND 21 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF21" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/5, tap 5/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF20" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/5, tap 4/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT2322" acronym="RSZ_HFILT2322" offset="0x54" width="32" description="HORIZONTAL FILTER COEFFICIENTS 22 AND 23 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF23" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/5, tap 7/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF22" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/5, tap 6/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT2524" acronym="RSZ_HFILT2524" offset="0x58" width="32" description="HORIZONTAL FILTER COEFFICIENTS 24 AND 25 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF25" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/6, tap 1/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF24" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/6, tap 0/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT2726" acronym="RSZ_HFILT2726" offset="0x5C" width="32" description="HORIZONTAL FILTER COEFFICIENTS 26 AND 27 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF27" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/6, tap 3/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF26" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/6, tap 2/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT2928" acronym="RSZ_HFILT2928" offset="0x60" width="32" description="HORIZONTAL FILTER COEFFICIENTS 28 AND 29 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF29" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/7, tap 5/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF28" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/7, tap 4/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_HFILT3130" acronym="RSZ_HFILT3130" offset="0x64" width="32" description="HORIZONTAL FILTER COEFFICIENTS 30 AND 31 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF31" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/7, tap 7/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF30" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/7, tap 6/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT10" acronym="RSZ_VFILT10" offset="0x68" width="32" description="VERTICAL FILTER COEFFICIENTS 0 AND 1 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF1" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0, tap 1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF0" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0, tap 0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT32" acronym="RSZ_VFILT32" offset="0x6C" width="32" description="VERTICAL FILTER COEFFICIENTS 2 AND 3 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF3" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0, tap 3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF2" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0, tap 2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT54" acronym="RSZ_VFILT54" offset="0x70" width="32" description="VERTICAL FILTER COEFFICIENTS 4 AND 5 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF5" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0/1, tap 5/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF4" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0/1, tap 4/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT76" acronym="RSZ_VFILT76" offset="0x74" width="32" description="VERTICAL FILTER COEFFICIENTS 6 AND 7 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF7" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0/1, tap 7/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF6" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 0/1, tap 6/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT98" acronym="RSZ_VFILT98" offset="0x78" width="32" description="VERTICAL FILTER COEFFICIENTS 8 AND 9 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF9" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/2, tap 1/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF8" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/2, tap 0/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT1110" acronym="RSZ_VFILT1110" offset="0x7C" width="32" description="VERTICAL FILTER COEFFICIENTS 10 AND 11 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF11" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/2, tap 3/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF10" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/2, tap 2/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT1312" acronym="RSZ_VFILT1312" offset="0x80" width="32" description="VERTICAL FILTER COEFFICIENTS 12 AND 13 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF13" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/3, tap 5/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF12" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/3, tap 4/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT1514" acronym="RSZ_VFILT1514" offset="0x84" width="32" description="VERTICAL FILTER COEFFICIENTS 14 AND 15 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF15" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/3, tap 7/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF14" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 1/3, tap 6/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT1716" acronym="RSZ_VFILT1716" offset="0x88" width="32" description="VERTICAL FILTER COEFFICIENTS 16 AND 17 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF17" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/4, tap 1/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF16" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/4, tap 0/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT1918" acronym="RSZ_VFILT1918" offset="0x8C" width="32" description="VERTICAL FILTER COEFFICIENTS 18 AND 19 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF19" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/4, tap 3/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF18" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/4, tap 2/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT2120" acronym="RSZ_VFILT2120" offset="0x90" width="32" description="VERTICAL FILTER COEFFICIENTS 20 AND 21 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF21" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/5, tap 5/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF20" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/5, tap 4/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT2322" acronym="RSZ_VFILT2322" offset="0x94" width="32" description="VERTICAL FILTER COEFFICIENTS 22 AND 23 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF23" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/5, tap 7/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF22" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 2/5, tap 6/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT2524" acronym="RSZ_VFILT2524" offset="0x98" width="32" description="VERTICAL FILTER COEFFICIENTS 24 AND 25 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF25" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/6, tap 1/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF24" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/6, tap 0/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT2726" acronym="RSZ_VFILT2726" offset="0x9C" width="32" description="VERTICAL FILTER COEFFICIENTS 26 AND 27 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF27" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/6, tap 3/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF26" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/6, tap 2/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT2928" acronym="RSZ_VFILT2928" offset="0xA0" width="32" description="VERTICAL FILTER COEFFICIENTS 28 AND 29 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF29" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/7, tap 5/1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF28" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/7, tap 4/0" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_VFILT3130" acronym="RSZ_VFILT3130" offset="0xA4" width="32" description="VERTICAL FILTER COEFFICIENTS 30 AND 31 REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF31" width="10" begin="25" end="16" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/7, tap 7/3" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COEF30" width="10" begin="9" end="0" resetval="0x000" description="10-bit coefficient (S10Q8 format - range of -2 to 1.255/256, 1 is 0x100) - Phase 3/7, tap 6/2" range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_YENH" acronym="RSZ_YENH" offset="0xA8" width="32" description="LUMINANCE ENHANCER REGISTER The new luminance value is computed as: Y += HPF(Y) x max(GAIN, (|HPF(Y) - CORE) x SLOP + 8) 4.">
+    <bitfield id="RESERVED" width="14" begin="31" end="18" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ALGO" width="2" begin="17" end="16" resetval="0x0" description="Algorithm select." range="" rwaccess="RW">
+      <bitenum value="0" token="ALGO_0" description="Disable."/>
+      <bitenum value="1" token="ALGO_1" description="[-1 2 -1]/2 high-pass filter."/>
+      <bitenum value="2" token="ALGO_2" description="[-1 -2 6 -2 -1]/4 high-pass filter."/>
+    </bitfield>
+    <bitfield id="GAIN" width="4" begin="15" end="12" resetval="0x0" description="Maximum gain. The data is coded in U4Q4 representation." range="" rwaccess="RW"/>
+    <bitfield id="SLOP" width="4" begin="11" end="8" resetval="0x0" description="Slope. The data is coded in U4Q4 representation." range="" rwaccess="RW"/>
+    <bitfield id="CORE" width="8" begin="7" end="0" resetval="0x00" description="Coring offset. The data is coded in U8Q0 representation." range="" rwaccess="RW"/>
+  </register>
+</module>

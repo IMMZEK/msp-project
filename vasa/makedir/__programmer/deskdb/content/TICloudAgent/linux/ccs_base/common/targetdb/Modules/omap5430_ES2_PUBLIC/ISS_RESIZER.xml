@@ -1,0 +1,565 @@
+<module name="ISS_RESIZER" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="RSZ_REVISION" acronym="RSZ_REVISION" offset="0x0" width="32" description="IP Revision Identifier (X.Y.R) Used by software to track features, bugs, and compatibility">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="See" description="IP Revision" range="" rwaccess="R"/>
+  </register>
+  <register id="RSZ_SYSCONFIG" acronym="RSZ_SYSCONFIG" offset="0x4" width="32" description="SYSTEM CONFIGURATION REGISTER This register is not shadowed. There is no standalone software reset for the resizer module.">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="RSZB_CLK_EN" width="1" begin="9" end="9" resetval="0" description="Resizer B clock enable This bit enable to enable / disable the RESIZER B clock. Note that it is a second level clock enable. This bit has effect only if RSZ_GCK_SDR is set to 1." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="RSZB_CLK_EN_0" description="off"/>
+      <bitenum value="1" id="newEnum2" token="RSZB_CLK_EN_1" description="on"/>
+    </bitfield>
+    <bitfield id="RSZA_CLK_EN" width="1" begin="8" end="8" resetval="0" description="Resizer A clock enable This bit enable to enable / disable the RESIZER A clock. Note that it is a second level clock enable. This bit has effect only if RSZ_GCK_SDR is set to 1." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="RSZA_CLK_EN_0" description="off"/>
+      <bitenum value="1" id="newEnum2" token="RSZA_CLK_EN_1" description="on"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="AUTOGATING" width="1" begin="0" end="0" resetval="1" description="Internal Clock Gating Strategy Enables or disables auto clock gating." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="AUTOGATING_0" description="Clocks are free running"/>
+      <bitenum value="1" id="newEnum2" token="AUTOGATING_1" description="Automatic clock gating strategy."/>
+    </bitfield>
+  </register>
+  <register id="RSZ_IN_FIFO_CTRL" acronym="RSZ_IN_FIFO_CTRL" offset="0xC" width="32" description="INPUT DATA BUFFER CONTROL REGISTER This register is not shadowed">
+    <bitfield id="RESERVED" width="3" begin="31" end="29" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="THRLD_LOW" width="13" begin="28" end="16" resetval="0x0000" description="WhenRSZ_IN_FIFO_CTRL.THRLD_HIGH = RSZ_IN_FIFO_CTRL.THRLD_LOW, the rsz_stall_input is not asserted. The only purpose of the RSZ_IN_FIFO_CTRL.THRLD_LOW register is to prevent rsz_stall_input signal assertion." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="15" end="13" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="THRLD_HIGH" width="13" begin="12" end="0" resetval="0x0000" description="High threshold value. The rsz_stall_input signal is asserted if 2 lines of circular buffer are full and the third line has more pixels than RSZ_IN_FIFO_CTRL.THRLD_HIGH. The rsz_stall_input signal stays high as long as one full line is not free for receiving further data. THRLD_HIGH is in terms of line size and can at max be programmed equal to the input line size (RSZ_SRC_HSZ)." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_GNC" acronym="RSZ_GNC" offset="0x10" width="32" description="GENERIC PARAMETER REGISTER">
+    <bitfield id="RESERVED" width="3" begin="31" end="29" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RSZB_MEM_LINE_SIZE" width="13" begin="28" end="16" resetval="0x0920" description="Resizer #B memory line size (pixels). The output image cannot exceed this size." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="3" begin="15" end="13" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RSZA_MEM_LINE_SIZE" width="13" begin="12" end="0" resetval="0x1500" description="Resizer #A memory line size (pixels). The output image cannot exceed this size." range="" rwaccess="R"/>
+  </register>
+  <register id="RSZ_FRACDIV" acronym="RSZ_FRACDIV" offset="0x14" width="32" description="Fractional clock divider settings">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="RSZ_FRACDIV" width="16" begin="15" end="0" resetval="0xFFFF" description="Fractional clock divider value. The fractional clock divider gates the read requests made to the input data buffer such that the input data buffer is read at an average frequency equal to FFCLK instead of FCLK. The value of FFCLK depends upon the upscaling ratios as well as the input pixel clock: We have FFCLK = FCLK / FRACDIV MHz and RSZ_FRACDIV = 65536 / FRACDIV. When RSZ_ FRACDIV = 65536, we have: FFCLK = FCLK." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_SRC_EN" acronym="RSZ_SRC_EN" offset="0x20" width="32" description="RESIZER ENABLE REGISTER This register is not shadowed">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="EN" width="1" begin="0" end="0" resetval="0" description="Resizer module enable The start flag of the RESIZER module. When EN is set to 1, the RESIZER module starts the processing from the next rising edge of the VD pulse. If the processing mode of the RESIZER module is set to 'one shot', the EN bit is cleared to 0 after the end of the processing. One has to pay attention that when this bit is enabled and" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="EN_0" description="Disable"/>
+      <bitenum value="1" id="newEnum2" token="EN_1" description="Enable"/>
+    </bitfield>
+  </register>
+  <register id="RSZ_SRC_MODE" acronym="RSZ_SRC_MODE" offset="0x24" width="32" description="This register is not shadowed">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="WRT" width="1" begin="1" end="1" resetval="0" description="Video port WEN signal selection This bit selects whether the WEN signal which is present on the IPIPE and IPIPEIF video port is used or not to select the input data. If WRT is 0, the RESIZER module ignores the WEN signal and processes all image frame while RESIZER is enabled. If WRT is 1, the RESIZER module only processes the lines that arrived while the WEN is high. HD is used to sample the WEN signal." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="WRT_0" description="Disable"/>
+      <bitenum value="1" id="newEnum2" token="WRT_1" description="Enable"/>
+    </bitfield>
+    <bitfield id="OST" width="1" begin="0" end="0" resetval="0" description="The processing mode selection of the RESIZER module. Value 0 indicates the mode of free run, value 1 indicates the mode of one shot." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="OST_0" description="Free running"/>
+      <bitenum value="1" id="newEnum2" token="OST_1" description="One shot"/>
+    </bitfield>
+  </register>
+  <register id="RSZ_SRC_FMT0" acronym="RSZ_SRC_FMT0" offset="0x28" width="32" description="This register is not shadowed">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="BYPASS" width="1" begin="1" end="1" resetval="0" description="Pass Through This bit enables or disables the RESIZER module pass through mode. The pass through mode can transfer images which are 8K pixel wide. When it is enabled, the input data buffer and the resizer engines are bypassed." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="BYPASS_0" description="Pass through off = normal output mode, the input data buffer is used."/>
+      <bitenum value="1" id="newEnum2" token="BYPASS_1" description="Pass through on = normal output mode, the input data buffer is bypassed."/>
+    </bitfield>
+    <bitfield id="SEL" width="1" begin="0" end="0" resetval="0" description="Input selection This bit selects which of the two video port is selected to push data through the RESIZER module." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="SEL_0" description="IPIPE"/>
+      <bitenum value="1" id="SRC" token="SEL_1" description="IPIPEIF"/>
+    </bitfield>
+  </register>
+  <register id="RSZ_SRC_FMT1" acronym="RSZ_SRC_FMT1" offset="0x2C" width="32" description="">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="CHR" width="1" begin="3" end="3" resetval="0" description="Cb/Cr order This bit indicates if Cb/Cr is flipped. This bit is referred by RGB output function. 0: Normal. Cb/Cr is in normal order. 1: Flipped. Cb/Cr is flipped. RGB output modules flips back Cb/Cr before applying YUV to RGB matrix." range="" rwaccess="RW"/>
+    <bitfield id="COL" width="1" begin="2" end="2" resetval="0" description="Y/C selection This bit is valid only if the input data is YUV4:2:0 (IN420 = 1). It enables to specify where the data which is input to the RESIZER module is Luma or Chroma data." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="COL_0" description="Y data is input"/>
+      <bitenum value="1" id="newEnum2" token="COL_1" description="Chroma data is input"/>
+    </bitfield>
+    <bitfield id="IN420" width="1" begin="1" end="1" resetval="0" description="Chroma Format Selection This bit sets the chroma undersampling when YUV data is input to the RESIZER module." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="IN420_0" description="YUV4:2:2 is input"/>
+      <bitenum value="1" id="newEnum2" token="IN420_1" description="YUV4:2:0 is input"/>
+    </bitfield>
+    <bitfield id="RAW" width="1" begin="0" end="0" resetval="0" description="Pass-through mode input data format selection This bit affects the horizontal reversal (flipping) process." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="RAW_0" description="Flipping preserves YCbCr format"/>
+      <bitenum value="1" id="newEnum2" token="RAW_1" description="Flipping preserves RAW format"/>
+    </bitfield>
+  </register>
+  <register id="RSZ_SRC_VPS" acronym="RSZ_SRC_VPS" offset="0x30" width="32" description="VERTICAL POSITION REGISTER This register is not shadowed">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="VPS" width="16" begin="15" end="0" resetval="0x0000" description="Vertical Start Position Sets the vertical position of the global frame from the rising edge of the VD. The RSZ module will start the image processing from the VPS'th line. This value can be odd or even whatever the input data format." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_SRC_VSZ" acronym="RSZ_SRC_VSZ" offset="0x34" width="32" description="VERTICAL SIZER REGISTER">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="VSZ" width="13" begin="12" end="0" resetval="0x0000" description="Vertical Processing Size Sets the vertical size of the processing area. The RSZ module will process (VSZ+1) lines. This value can be odd or even whatever the input data format." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_SRC_HPS" acronym="RSZ_SRC_HPS" offset="0x38" width="32" description="HORIZONTAL POSITION REGISTER This register is not shadowed">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="HPS" width="16" begin="15" end="0" resetval="0x0000" description="Horizontal Start Position The RSZ_SRC_HPS register has two functions: The first function is to compensate for possible delay between the HD pulse and the first valid data. It is possible for this delay to be different than 0 when the RESIZER module gets its input data from the VP connected to the IPIPEIF module (the offset value can be odd or even). When data are coming from the IPIPE module, it is not required to resynchronize HD and the first valid data. The second function is to crop the data in the horizontal direction. When used for cropping, only RSZ_SRC_HPS must be even or null." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_SRC_HSZ" acronym="RSZ_SRC_HSZ" offset="0x3C" width="32" description="HORIZONTAL SIZE REGISTER The HSZ value is given by HSZ concatenated with HSZ_LSB">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="HSZ" width="13" begin="12" end="0" resetval="0x0000" description="Horizontal size Sets the horizontal size of the processing area. The RSZ module processes (HSZ+1) pixels. (HSZ+1) must be even for YUV4:2:2 and RAW data. The valid available values for HSZ are 1~xxxx." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_DMA_RZA" acronym="RSZ_DMA_RZA" offset="0x40" width="32" description="RESIZER A - MEMORY REQUEST MINIMUM INTERVAL REGISTER">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="RZA" width="16" begin="15" end="0" resetval="0x0000" description="Sets the minimum interval btw two consecutive memory request for resizer #A. Specified in number of interface clock cycles. Values of 0, 1, and 2 are used as a condition to keep the bandwidth limiter off. When this function is enabled, this value must be greater than 10 cycles." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_DMA_RZB" acronym="RSZ_DMA_RZB" offset="0x44" width="32" description="RESIZER B - MEMORY REQUEST MINIMUM INTERVAL REGISTER">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="RZB" width="16" begin="15" end="0" resetval="0x0000" description="Sets the minimum interval btw two consecutive memory request for resizer #B. Specified in number of interface clock cycles. Values of 0, 1, and 2 are used as a condition to keep the bandwidth limiter off. When this function is enabled, this value must be greater than 10 cycles." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_DMA_STA" acronym="RSZ_DMA_STA" offset="0x48" width="32" description="RESIZER STATUS REGISTER">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="STATUS" width="1" begin="0" end="0" resetval="0" description="Resizer process status This bit is set in the time window from rsz_int_reg to rsz_int_dma." range="" rwaccess="R">
+      <bitenum value="1" id="newEnum2" token="STATUS_1_r" description="Active"/>
+      <bitenum value="0" id="newEnum1" token="STATUS_0_r" description="Not active"/>
+    </bitfield>
+  </register>
+  <register id="RSZ_GCK_MMR" acronym="RSZ_GCK_MMR" offset="0x4C" width="32" description="MMR CLOCK CONTROL REGISTER This register is not shadowed">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="MMR" width="1" begin="0" end="0" resetval="0" description="The on/off selection of the MMR interface clock which is used for MMR register access." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="MMR_0" description="Off"/>
+      <bitenum value="1" id="newEnum2" token="MMR_1" description="On"/>
+    </bitfield>
+  </register>
+  <register id="RSZ_GCK_SDR" acronym="RSZ_GCK_SDR" offset="0x54" width="32" description="CORE CLOCK CONTROL REGISTER This register is not shadowed">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="CORE" width="1" begin="0" end="0" resetval="0" description="RSZ Core Clock Enable. This bit enables or disables the resizer core functional clock. When this bit is off, the resizer core (interpolator) is automatically bypassed (resizer-bypass mode of pass-through mode is selected depending on RSZ_SRC_FMT0 value). In resizer-bypass mode or pass-through mode, no up-scaling or downscaling process is operated." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="CORE_0" description="Resizer core clock disabled. Resizer in bypass mode if .BYPASS = 0 Resizer in pass-through if .BYPASS = 1"/>
+      <bitenum value="1" id="newEnum2" token="CORE_1" description="Resizer core clock enabled. Resizer in rescaling mode if .BYPASS = 0 Resizer in pass-through if .BYPASS = 1"/>
+    </bitfield>
+  </register>
+  <register id="RSZ_IRQ_RZA" acronym="RSZ_IRQ_RZA" offset="0x58" width="32" description="RESIZER A - CIRCULAR BUFFER INTERRUPT INTERVAL REGISTER">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="RZA" width="13" begin="12" end="0" resetval="0x0000" description="Resizer A circular buffer interval Sets the circular buffer interval for Resizer A. The interrupt is triggered every time (RZA+1) lines are written to the circular buffer (Y buffer). The range goes from 1 to 8192 lines. Usually, the circular buffer vertical size should be a multiple of RZA." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_IRQ_RZB" acronym="RSZ_IRQ_RZB" offset="0x5C" width="32" description="RESIZER B - CIRCULAR BUFFER INTERRUPT INTERVAL REGISTER">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="RZB" width="13" begin="12" end="0" resetval="0x0000" description="Resizer B circular buffer interval Sets the circular buffer interval for Resizer B. The interrupt is triggered every time (RZB+1) lines are written to the circular buffer (Y buffer). The range goes from 1 to 8192 lines. Usually, the circular buffer vertical size should be a multiple of RZB." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_YUV_Y_MIN" acronym="RSZ_YUV_Y_MIN" offset="0x60" width="32" description="LUMINANCE SATURATION REGISTER">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="MIN" width="8" begin="7" end="0" resetval="0x00" description="The minimum value of Luminance (8bits unsigned). If the value of the Luminance is smaller than VAL, it will be clipped to VAL. This bit field must be set to its default values when the resizer is set in pass-though mode." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_YUV_Y_MAX" acronym="RSZ_YUV_Y_MAX" offset="0x64" width="32" description="LUMINANCE SATURATION REGISTER">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="MAX" width="8" begin="7" end="0" resetval="0xFF" description="The maximum value of Luminance (8bits unsigned). If the value of the Luminance is larger than VAL, it will be clipped to VAL. This bit field must be set to its default values when the resizer is set in pass-through mode." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_YUV_C_MIN" acronym="RSZ_YUV_C_MIN" offset="0x68" width="32" description="CHROMINANCE SATURATION REGISTER">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="MIN" width="8" begin="7" end="0" resetval="0x00" description="The minimum value of Chrominance (8bits unsigned). If the value of the Chrominance is smaller than VAL, it will be clipped to VAL. This bit field must be set to its default values when the resizer is set in pass-though mode." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_YUV_C_MAX" acronym="RSZ_YUV_C_MAX" offset="0x6C" width="32" description="CHROMINANCE SATURATION REGISTER">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="MAX" width="8" begin="7" end="0" resetval="0xFF" description="The maximum value of Chrominance (8bits unsigned). If the value of the Chrominance is larger than VAL, it will be clipped to VAL. This bit field must be set to its default values when the resizer is set in pass-through mode." range="" rwaccess="RW"/>
+  </register>
+  <register id="RSZ_YUV_PHS" acronym="RSZ_YUV_PHS" offset="0x70" width="32" description="The phase position of the output of the Chrominance">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="POS" width="1" begin="0" end="0" resetval="0" description="The phase position of the output of the chrominance. The RESIZER module does not change the relative position of the chroma samples vs. the luma samples between the input and output and the chroma position at the output of the IPIPE module and at the output of the RESIZER module must be identical. In other words, we must have RSZ_YUV_PHS.POS = IPIPE_YUV_PHS.POS." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="POS_0" description="Same position with Luminance: cosited"/>
+      <bitenum value="1" id="newEnum2" token="POS_1" description="The middle of the luminance: centered"/>
+    </bitfield>
+  </register>
+  <register id="RSZ_SEQ" acronym="RSZ_SEQ" offset="0x74" width="32" description="">
+    <bitfield id="RESERVED" width="27" begin="31" end="5" resetval="0x0000000" description="" range="" rwaccess="R"/>
+    <bitfield id="CRV" width="1" begin="4" end="4" resetval="0" description="Chroma sampling point change" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="CRV_0" description="Chroma sampling point is not changed"/>
+      <bitenum value="1" id="newEnum2" token="CRV_1" description="Chroma sampling point is changed from odd-numbered pixels to even-number pixels. The pixel at the left end is removed and the pixel at the right end is duplicated."/>
+    </bitfield>
+    <bitfield id="VRVB" width="1" begin="3" end="3" resetval="0" description="Resizer B - Vertical reversal of output image" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="VRVB_0" description="Processed pixels are output in the order of input (normal operation) in vertical direction."/>
+      <bitenum value="1" id="newEnum2" token="VRVB_1" description="The order of output data is flipped top to bottom."/>
+    </bitfield>
+    <bitfield id="HRVB" width="1" begin="2" end="2" resetval="0" description="Resizer B -Horizontal reversal of output image" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="HRVB_0" description="Processed pixels are output in the order of input (normal operation) in horizontal direction."/>
+      <bitenum value="1" id="newEnum2" token="HRVB_1" description="The order of output data is flipped left to right."/>
+    </bitfield>
+    <bitfield id="VRVA" width="1" begin="1" end="1" resetval="0" description="Resizer A - Vertical reversal of output image" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="VRVA_0" description="Processed pixels are output in the order of input (normal operation) in vertical direction."/>
+      <bitenum value="1" id="newEnum2" token="VRVA_1" description="The order of output data is flipped top to bottom."/>
+    </bitfield>
+    <bitfield id="HRVA" width="1" begin="0" end="0" resetval="0" description="Resizer A - Horizontal reversal of output image" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="HRVA_0" description="Processed pixels are output in the order of input (normal operation) in horizontal direction."/>
+      <bitenum value="1" id="newEnum2" token="HRVA_1" description="The order of output data is flipped left to right."/>
+    </bitfield>
+  </register>
+  <register id="RZA_EN" acronym="RZA_EN" offset="0x78" width="32" description="RESIZER A - ENABLE REGISTER">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="EN" width="1" begin="0" end="0" resetval="0" description="Enable resizer #A This bit is latched on video port VD input. The reason is that the resizer must only starts the processing on a clean frame boundary. In one-shot mode, this bit is negated on VD." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="EN_0" description="Disable"/>
+      <bitenum value="1" id="newEnum2" token="EN_1" description="Enable"/>
+    </bitfield>
+  </register>
+  <register id="RZA_MODE" acronym="RZA_MODE" offset="0x7C" width="32" description="RESIZER #A MODE REGISTER">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="MODE" width="1" begin="0" end="0" resetval="0" description="Select 'Free Run mode' or 'One Shot Mode'" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="MODE_0" description="Free run"/>
+      <bitenum value="1" id="newEnum2" token="MODE_1" description="One shot"/>
+    </bitfield>
+  </register>
+  <register id="RZA_420" acronym="RZA_420" offset="0x80" width="32" description="YEN/CEN: 0/0: in = YUV4:2:2 input, out = YUV4:2:2 output 0/1: in = YUV4:2:2 input, out = Chrominance of YUV4:2:0 output 1/0: in = YUV4:2:2 input, out = Luminance of YUV4:2:0 output 1/1: in = YUV4:2:2 input, out = YUV4:2:0 output">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="CEN" width="1" begin="1" end="1" resetval="0" description="Output Enable for Chrominance This bit is valid in 422 input mode. When CEN=0 and YEN=0, output is 422" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="CEN_0" description="C output disable"/>
+      <bitenum value="1" id="newEnum2" token="CEN_1" description="C output enable and 422to420 conversion enabled"/>
+    </bitfield>
+    <bitfield id="YEN" width="1" begin="0" end="0" resetval="0" description="Output Enable for Luminance. This bit is valid in 422 input mode. When CEN=0 and YEN=0, output is 422" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="YEN_0" description="Y output disable"/>
+      <bitenum value="1" id="newEnum2" token="YEN_1" description="Y output enable and 422to420 conversion enabled"/>
+    </bitfield>
+  </register>
+  <register id="RZA_I_VPS" acronym="RZA_I_VPS" offset="0x84" width="32" description="RESIZER A - INPUT VERTICAL START REGISTER The height of the image after the second level crop must be 2 or larger.">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="VPS" width="13" begin="12" end="0" resetval="0x0000" description="Input Vertical Position Sets the vertical start position of the input image within the global frame. It enables to crop data into the global frame. After SRC_VPS, the Vps'th line is processed as the first line in each image. After the second level crop, the height of the image area must be two lines or larger; that is, a one-line image is not allowed. (RSZ_SRC_VSZ &#8211; RZA_I_VPS &amp;amp;gt; 0)." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_I_HPS" acronym="RZA_I_HPS" offset="0x88" width="32" description="RESIZER A - INPUT HORIZONTAL START REGISTER">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="HPS" width="13" begin="12" end="0" resetval="0x0000" description="Input Horizontal Position Sets the horizontal position of the first pixel for each line within the global frame. After SRC_HPS, the pixel at the VAL'th position is processed as the first pixel. This value must be even." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_O_VSZ" acronym="RZA_O_VSZ" offset="0x8C" width="32" description="RESIZER A - OUTPUT VERTICAL SIZER REGISTER">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="VSZ" width="13" begin="12" end="0" resetval="0x0000" description="The target output size of the resized image. The number of output lines is (VSZ+1). Set 479, when 480 lines of output is required." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_O_HSZ" acronym="RZA_O_HSZ" offset="0x90" width="32" description="RESIZER A - OUTPUT HORIZONTAL SIZE REGISTER">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="HSZ" width="12" begin="12" end="1" resetval="0x000" description="The horizontal size of output image. The number of pixel in each line is (HSZ+1). Set 479, when 480 pixels are required. This value must be lower than the max memory line size supported by the resizer engine, except in RAW pass through mode. Note that the LSB of the 13-bit HSZ value is fixed to 1 such that the horizontal size is always even." range="" rwaccess="RW"/>
+    <bitfield id="HSZ_LSB" width="1" begin="0" end="0" resetval="1" description="The least significant bit of HSZ is forced to 1." range="" rwaccess="R"/>
+  </register>
+  <register id="RZA_V_PHS_Y" acronym="RZA_V_PHS_Y" offset="0x94" width="32" description="RESIZER A - INITIAL LUMINANCE PHASE OF VERTICAL RESIZING PROCESS When YUV4:2:2 data are output, the phase values for luma and chroma should typically be equal, that is, RZX_V_PHS_Y= RZX_V_PHS_C. The following constraints apply when setting the initial vertical phases ABS(RZX_V_PHS_Y - RZX_V_PHS_C) RZX_V_DIF. This constraint means that at most the distance between the initial phases for luminance and chrominance is not expected to exceed the distance between two luma pixels. Note that the absolute value is used, hence, the initial luma phase can be greater than the initial chroma phase or the other way around. As a reminder, the distance between two output pixels for luma is given by RZX_V_DIF.">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y" width="14" begin="13" end="0" resetval="0x0000" description="The initial value for the luma phase in vertical resizing process. This value is in U14Q8 fractional format." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_V_PHS_C" acronym="RZA_V_PHS_C" offset="0x98" width="32" description="RESIZER A - INITIAL CHROMINANCE PHASE OF VERTICAL RESIZING PROCESS When YUV4:2:2 data are output, the phase values for luma and chroma should typically be equal, that is, RZX_V_PHS_Y= RZX_V_PHS_C. The following constraints apply when setting the initial vertical phases ABS(RZX_V_PHS_Y - RZX_V_PHS_C) RZX_V_DIF. This constraint means that at most the distance between the initial phases for luminance and chrominance is not expected to exceed the distance between two luma pixels. Note that the absolute value is used, hence, the initial luma phase can be greater than the initial chroma phase or the other way around. As a reminder, the distance between two output pixels for luma is given by RZX_V_DIF.">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="C" width="14" begin="13" end="0" resetval="0x0000" description="The initial value for the chroma phase in vertical resizing process. This value is in U14Q8 fractional format." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_V_DIF" acronym="RZA_V_DIF" offset="0x9C" width="32" description="RESIZER A - VERTICAL RESIZER REGISTER">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="V" width="14" begin="13" end="0" resetval="0x0000" description="The parameter for vertical resize. The actual resizing ratio is 256/RZA_V_DIF. In normal mode: 16 &amp;amp;lt;= RZA_V_DIF &amp;amp;lt;= 4096. In down-scale mode: 256 &amp;amp;lt;= RZA_V_DIF &amp;amp;lt;= 4096." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_V_TYP" acronym="RZA_V_TYP" offset="0xA0" width="32" description="RESIZER A - INTERPOLATION METHOD FOR VERTICAL RESIZING">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C" width="1" begin="1" end="1" resetval="0" description="Selection of resizing method for chrominance: vertical" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="C_0" description="4-tap cubic convolution (default)"/>
+      <bitenum value="1" id="newEnum2" token="C_1" description="2-tap linear interpolation"/>
+    </bitfield>
+    <bitfield id="Y" width="1" begin="0" end="0" resetval="0" description="Selection of resizing method for luminance: vertical" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="Y_0" description="4-tap cubic convolution (default)"/>
+      <bitenum value="1" id="newEnum2" token="Y_1" description="2-tap linear interpolation"/>
+    </bitfield>
+  </register>
+  <register id="RZA_V_LPF" acronym="RZA_V_LPF" offset="0xA4" width="32" description="RESIZER A - VERTICAL LPF INTENSITY REGISTER">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="C" width="6" begin="11" end="6" resetval="0x00" description="The intensity parameter for chroma vertical low pass filtering." range="" rwaccess="RW"/>
+    <bitfield id="Y" width="6" begin="5" end="0" resetval="0x00" description="The intensity parameter for luma vertical low pass filtering." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_H_PHS" acronym="RZA_H_PHS" offset="0xA8" width="32" description="RESIZER A - INITIAL PHASE OF HORIZONTAL RESIZING PROCESS">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="PHS" width="14" begin="13" end="0" resetval="0x0000" description="Initial value for the phase in horizontal resizing process, that is, the sampling position is shifted. This value is in U14Q8 fractional format. Example: If RZX_H_PHS = 128, the first output pixel is sampled at the center of the first two valid input pixels. If RZX_I_HPS=100 and RZX_H_PHS=128, the first output pixel is resampled at the center of the 100-th and the 101-st input pixels." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_H_PHS_ADJ" acronym="RZA_H_PHS_ADJ" offset="0xAC" width="32" description="RESIZER A - LUMINANCE HORIZONTAL PHASE ADJUSTMENT The register enables to adjust the horizontal phase for the luma component when averaging is enabled (the horizontal averaging disrupts the relative sampling point between luminance and chrominance when YUV4:2:2 cosited data is input), that is, the relative phase between luma and chroma is different before and after the horizontal averager.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="ADJ" width="9" begin="8" end="0" resetval="0x000" description="Horizontal phase adjustment value. This value is in U9Q8 fractional format. This value is expected to be equal to zero if the averager is disabled or if input chroma is centered." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_H_DIF" acronym="RZA_H_DIF" offset="0xB0" width="32" description="RESIZER A - HORIZONTAL RESIZER REGISTER">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="H" width="14" begin="13" end="0" resetval="0x0000" description="The parameter for horizontal resizing process. The actual resizing ratio is 256/VAL. In normal mode 16&amp;amp;lt;= RSZ_RZA_H_DIF&amp;amp;lt;=4096 In down-scale mode 256&amp;amp;lt;=RSZ_RZA_H_DIF&amp;amp;lt;=4096" range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_H_TYP" acronym="RZA_H_TYP" offset="0xB4" width="32" description="Resize-A">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C" width="1" begin="1" end="1" resetval="0" description="Selection of resizing method for chrominance: horizontal" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="C_0" description="4-tap cubic convolution (default)"/>
+      <bitenum value="1" id="newEnum2" token="C_1" description="2-tap linear interpolation"/>
+    </bitfield>
+    <bitfield id="Y" width="1" begin="0" end="0" resetval="0" description="Selection of resizing method for luminance: horizontal" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="Y_0" description="4-tap cubic convolution (default)"/>
+      <bitenum value="1" id="newEnum2" token="Y_1" description="2-tap linear interpolation"/>
+    </bitfield>
+  </register>
+  <register id="RZA_H_LPF" acronym="RZA_H_LPF" offset="0xB8" width="32" description="RESIZER A - HORIZONTAL LPF INTENSITY REGISTER">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="C" width="6" begin="11" end="6" resetval="0x00" description="Horizontal LPF Intensity for Chrominance" range="" rwaccess="RW"/>
+    <bitfield id="Y" width="6" begin="5" end="0" resetval="0x00" description="Selection of resizing method for Luminance in horizontal direction" range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_DWN_EN" acronym="RZA_DWN_EN" offset="0xBC" width="32" description="RESIZER #A - DOWNSCALE ENABLE REGISTER">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="DWN_EN" width="1" begin="0" end="0" resetval="0" description="Resizer downscale enable" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="DWN_EN_0" description="Off. Normal operation: upscale and downscale are allowed."/>
+      <bitenum value="1" id="newEnum2" token="DWN_EN_1" description="On. Downscale mode."/>
+    </bitfield>
+  </register>
+  <register id="RZA_DWN_AV" acronym="RZA_DWN_AV" offset="0xC0" width="32" description="Resize-A">
+    <bitfield id="RESERVED" width="26" begin="31" end="6" resetval="0x0000000" description="" range="" rwaccess="R"/>
+    <bitfield id="V" width="3" begin="5" end="3" resetval="0x0" description="Vertical averaging size : 1/2 The range goes from 1/2 to 1/256 in power of two. 0:_DIV2 1/2 down scale 1:_DIV4 1/4 down scale 2:_DIV8 1/8 down scale 3:_DIV16 1/16 down scale 4:_DIV32 1/32 down scale 5:_DIV64 1/64 down scale 6:_DIV128 1/128 down scale 7:_DIV256 1/256 down scale" range="" rwaccess="RW"/>
+    <bitfield id="H" width="3" begin="2" end="0" resetval="0x0" description="Horizontal averaging size : 1/2 The range goes from 1/2 to 1/256 in power of two. 0:_DIV2 1/2 down scale 1:_DIV4 1/4 down scale 2:_DIV8 1/8 down scale 3:_DIV16 1/16 down scale 4:_DIV32 1/32 down scale 5:_DIV64 1/64 down scale 6:_DIV128 1/128 down scale 7:_DIV256 1/256 down scale" range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_RGB_EN" acronym="RZA_RGB_EN" offset="0xC4" width="32" description="RESIZER #A - RGB OUTPUT ENABLE">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="RGB_EN" width="1" begin="0" end="0" resetval="0" description="Enable of RGB output In pass through mode, this register must be 0. This bit can only be set to 1 when YUV4:2:2 data are output. YUV4:2:2 data output is selected when SRC_FMT1.IN420 = 0 and RZA_420.YEN = RZA_420.CEN = 0" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="RGB_EN_0" description="Off (YCbCr output)"/>
+      <bitenum value="1" id="newEnum2" token="RGB_EN_1" description="On (RGB output)"/>
+    </bitfield>
+  </register>
+  <register id="RZA_RGB_TYP" acronym="RZA_RGB_TYP" offset="0xC8" width="32" description="RESIZER A - RGB OUTPUT CONTROL REGISTER">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="MSK1" width="1" begin="2" end="2" resetval="0" description="Enables masking of the last 2 pixels This bit is used to mask the 2 last pixels at the image boundary which are affected by the YUV4:2:2 to YUV4:4:4 conversion." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="MSK1_0" description="output the last 2 pixels"/>
+      <bitenum value="1" id="newEnum2" token="MSK1_1" description="mask the last 2 pixels (Resizer do not output them.)"/>
+    </bitfield>
+    <bitfield id="MSK0" width="1" begin="1" end="1" resetval="0" description="Enables masking of the first 2 pixels This bit is used to mask the 2 first pixels at the image boundary which are affected by the YUV4:2:2 to YUV4:4:4 conversion." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="MSK0_0" description="output the first 2 pixels"/>
+      <bitenum value="1" id="newEnum2" token="MSK0_1" description="mask the first 2 pixels (Resizer do not output them.)"/>
+    </bitfield>
+    <bitfield id="TYP" width="1" begin="0" end="0" resetval="0" description="16bit/32bit output selection" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="TYP_0" description="32-bit output: alpha + R + G + B (8 bit each) This mode comes with performance degradation. The maximum input frequency in this mode is 160 MHz. This due to the fact that the output is 4 bytes / pixel."/>
+      <bitenum value="1" id="newEnum2" token="TYP_1" description="16-bit output: R(5 bit) + G (6 bit) + B (5 bit)"/>
+    </bitfield>
+  </register>
+  <register id="RZA_RGB_BLD" acronym="RZA_RGB_BLD" offset="0xCC" width="32" description="RESIZER A - RGB BLEND REGISTER">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="BLD" width="8" begin="7" end="0" resetval="0x00" description="The alpha value used in 32-bit RGBA output mode" range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_Y_BAD_H" acronym="RZA_SDR_Y_BAD_H" offset="0xD0" width="32" description="RESIZER A - OUTPUT MEMORY BASE ADDRESS REGISTER (HIGH) This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0, RGB5:6:5, RGBA. RAW: RAW data is written to this address YUV4:2:2: YUV data is written to this address YUV4:2:0: Y data is written to this address RGB5:6:5: 16-bit RGB data is written to this address RGBA: 32-bit RGBA data is written to this address">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_BAD_H" width="16" begin="15" end="0" resetval="0x0000" description="Memory Base Address Sets the 16 upper bits of the 32-bit base address of the circular buffer in memory." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_Y_BAD_L" acronym="RZA_SDR_Y_BAD_L" offset="0xD4" width="32" description="RESIZER A - OUTPUT MEMORY BASE ADDRESS REGISTER (LOW) This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0, RGB5:6:5, RGBA. RAW: RAW data is written to this address YUV4:2:2: YUV data is written to this address YUV4:2:0: Y data is written to this address RGB5:6:5: 16-bit RGB data is written to this address RGBA: 32-bit RGBA data is written to this address">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_BAD_L" width="16" begin="15" end="0" resetval="0x0000" description="Memory Base Address Sets the 16 lower bits of the 32-bit base address of the circular buffer in memory. It is a byte address. YUV4:2:0 format (output data on 8 bits): The two least significant bits must be set to 00 when horizontal reversal mode is off. The two least significant bits must be set to 11 when horizontal reversal mode is on. RAW, RGB5:6:5 and YUV4:2:2 formats (output data on 16 bits): The two least significant bits must be set to 00 when horizontal reversal mode is off. The two least significant bits must be set to 11 when horizontal reversal mode is on. RGBA format (output data on 32 bits): The three least significant bits must be set to '000' when horizontal reversal mode is off. The three least significant bits must be set to '111' when horizontal reversal mode is on." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_Y_SAD_H" acronym="RZA_SDR_Y_SAD_H" offset="0xD8" width="32" description="RESIZER A - OUTPUT MEMORY START ADDRESS REGISTER (HIGH) This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0, RGB5:6:5, RGBA. RAW: RAW data is written to this address YUV4:2:2: YUV data is written to this address YUV4:2:0: Y data is written to this address RGB5:6:5: 16-bit RGB data is written to this address RGBA: 32-bit RGBA data is written to this address">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_SAD_H" width="16" begin="15" end="0" resetval="0x0000" description="Memory Start Address Sets the 16 upper bits of the 32-bit start address in memory." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_Y_SAD_L" acronym="RZA_SDR_Y_SAD_L" offset="0xDC" width="32" description="RESIZER A - OUTPUT MEMORY START ADDRESS REGISTER (LOW) This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0, RGB5:6:5, RGBA. RAW: RAW data is written to this address YUV4:2:2: YUV data is written to this address YUV4:2:0: Y data is written to this address RGB5:6:5: 16-bit RGB data is written to this address RGBA: 32-bit RGBA data is written to this address">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_SAD_L" width="16" begin="15" end="0" resetval="0x0000" description="Memory Start Address Sets 16 lower bits of the 32-bit start address in memory. It is a byte address. For every frame, the first line of data will be written to this address. We have: SAD = BAD + (PTR_S x OFT) and PTR_S &amp;amp;lt; PTR_E If the first line must be written at the beginning of the circular buffer memory then SAD = BAD and PTR_S = 0. YUV4:2:0 format (output data on 8 bits): The two least significant bits must be set to 00 when horizontal reversal mode is off. The two least significant bits must be set to 11 when horizontal reversal mode is on. RAW, RGB5:6:5 and YUV4:2:2 formats (output data on 16 bits): The two least significant bits must be set to 00 when horizontal reversal mode is off. The two least significant bits must be set to 11 when horizontal reversal mode is on. RGBA format (output data on 32 bits): The three least significant bits must be set to '000' when horizontal reversal mode is off. The three least significant bits must be set to '111' when horizontal reversal mode is on." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_Y_OFT" acronym="RZA_SDR_Y_OFT" offset="0xE0" width="32" description="RESIZER A - OUTPUT MEMORY OFFSET REGISTER This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0 or RGBA.">
+    <bitfield id="RESERVED" width="15" begin="31" end="17" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_OFT" width="17" begin="16" end="0" resetval="0x00000" description="Memory Line Offset Sets the size of each line in the circular buffer. It is expressed in bytes and unsigned. Note that OFT does not necessary corresponds to the size of a line in a frame, it can be much bigger. The line offset must be a multiple of 128 bytes (bits [6:0] of RZX_SDR_Y_OFT and RZX_SDR_C_OFT must be set to 0). Example: line 0 address = SAD line 1 address = SAD + 1 x OFT line 2 address = SAD + 2 x OFT" range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_Y_PTR_S" acronym="RZA_SDR_Y_PTR_S" offset="0xE4" width="32" description="RESIZER A - OUTPUT MEMORY START ADDRESS REGISTER This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0 or RGBA.">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_PTR_S" width="13" begin="12" end="0" resetval="0x0000" description="Start Line of Memory Pointer Sets the vertical position of the first output line in the output memory space. This value is expressed in number of lines. The hardware uses it to set up the initial value of the circular buffer. It must be set up such as PTR_S = (SAD - BAD) / OFT. This value must be set to 0 when RSZ_RZA_SDR_Y_BAD = RSZ_RZA_SDR_Y_SAD." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_Y_PTR_E" acronym="RZA_SDR_Y_PTR_E" offset="0xE8" width="32" description="RESIZER A - OUTPUT MEMORY END ADDRESS REGISTER This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0 or RGBA.">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_PTR_E" width="13" begin="12" end="0" resetval="0x0000" description="End Line of Memory Pointer Sets the maximum number of lines to be stored in the output memory space. This value is expressed in number of lines. When the number of output lines exceeds this value, the address restarts from the first address in the output memory space (BAD)." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_C_BAD_H" acronym="RZA_SDR_C_BAD_H" offset="0xEC" width="32" description="RESIZER A - OUTPUT MEMORY BASE ADDRESS REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0. U and V data are written into this buffer.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_BAD_H" width="16" begin="15" end="0" resetval="0x0000" description="Memory Base Address Sets the 16 higher bits of the 32-bit base address of the circular buffer in memory." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_C_BAD_L" acronym="RZA_SDR_C_BAD_L" offset="0xF0" width="32" description="RESIZER A - OUTPUT MEMORY BASE ADDRESS REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0. U and V data are written into this buffer.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_BAD_L" width="16" begin="15" end="0" resetval="0x0000" description="Memory Base Address Sets the 16 lower bits of the 32-bit base address of the circular buffer in memory. It is a byte address. YUV4:2:0 format (output data on 8 bits): The two least significant bits must be set to 00 when horizontal reversal mode is off. The two least significant bits must be set to 11 when horizontal reversal mode is on." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_C_SAD_H" acronym="RZA_SDR_C_SAD_H" offset="0xF4" width="32" description="RESIZER A - OUTPUT MEMORY START ADDRESS REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0. U and V data are written into this buffer.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_SAD_H" width="16" begin="15" end="0" resetval="0x0000" description="Memory Base Address Sets the 16 higher bits of the 32-bit start address in memory." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_C_SAD_L" acronym="RZA_SDR_C_SAD_L" offset="0xF8" width="32" description="RESIZER A - OUTPUT MEMORY START ADDRESS REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0. U and V data are written into this buffer.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_SAD_L" width="16" begin="15" end="0" resetval="0x0000" description="Memory Base Address Sets the 16 lower bits of the 32-bit start address in memory. It is a byte address. For every frame, the first line of data will be written to this address. We have: SAD = BAD + (PTR_S x OFT) and PTR_S PTR_E If the first line must be written at the beginning of the circular buffer memory then SAD = BAD and PTR_S = 0. YUV4:2:0 format (output data on 8 bits): The two least significant bits must be set to 00 when horizontal reversal mode is off. The two least significant bits must be set to 11 when horizontal reversal mode is on." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_C_OFT" acronym="RZA_SDR_C_OFT" offset="0xFC" width="32" description="RESIZER A - OUTPUT MEMORY OFFSET REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0">
+    <bitfield id="RESERVED" width="15" begin="31" end="17" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_OFT" width="17" begin="16" end="0" resetval="0x00000" description="Memory Line Offset Sets the size of each line in the circular buffer. It is expressed in bytes and unsigned. Note that OFT does not necessary corresponds to the size of a line in a frame, it can be much bigger. The line offset must be a multiple of 128 bytes (bits [6:0] of RZX_SDR_Y_OFT and RZX_SDR_C_OFT must be set to 0). Example: line 0 address = SAD line 1 address = SAD + 1 x OFT line 2 address = SAD + 2 x OFT" range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_C_PTR_S" acronym="RZA_SDR_C_PTR_S" offset="0x100" width="32" description="RESIZER A - OUTPUT MEMORY START ADDRESS REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_PTR_S" width="13" begin="12" end="0" resetval="0x0000" description="Start Line of Memory Pointer Sets the vertical position of the first output line in the output memory space. This value is expressed in number of lines. The hardware uses it to set up the initial value of the circular buffer. It must be set up such as PTR_S = (SAD - BAD) / OFT. This value must be set to 0 when RSZ_RZA_SDR_C_BAD = RSZ_RZA_SDR_C_SAD." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZA_SDR_C_PTR_E" acronym="RZA_SDR_C_PTR_E" offset="0x104" width="32" description="RESIZER A - OUTPUT MEMORY END ADDRESS REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_PTR_E" width="13" begin="12" end="0" resetval="0x0000" description="End Line of Memory Pointer Sets the maximum number of lines to be stored in the output memory space. This value is expressed in number of lines. When the number of output lines exceeds this value, the address restarts from the first address in the output memory space (BAD)." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_EN" acronym="RZB_EN" offset="0x108" width="32" description="RESIZER B - ENABLE REGISTER">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="EN" width="1" begin="0" end="0" resetval="0" description="Enable resizer #A This bit is latched on the video port VD input signal. The reason is that the resizer must only starts the processing on a clean frame boundary. In one-shot mode, this bit is negated on VD." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="EN_0" description="Disable"/>
+      <bitenum value="1" id="newEnum2" token="EN_1" description="Enable"/>
+    </bitfield>
+  </register>
+  <register id="RZB_MODE" acronym="RZB_MODE" offset="0x10C" width="32" description="RESIZER B MODE REGISTER">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="MODE" width="1" begin="0" end="0" resetval="0" description="Select 'Free Run mode' or 'One Shot Mode'" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="MODE_0" description="Free run"/>
+      <bitenum value="1" id="newEnum2" token="MODE_1" description="One shot"/>
+    </bitfield>
+  </register>
+  <register id="RZB_420" acronym="RZB_420" offset="0x110" width="32" description="YEN/CEN: 0/0: in = YUV4:2:2 input, out = YUV4:2:2 output 0/1: in = YUV4:2:2 input, out = Chrominance of YUV4:2:0 output 1/0: in = YUV4:2:2 input, out = Luminance of YUV4:2:0 output 1/1: in = YUV4:2:2 input, out = YUV4:2:0 output">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="CEN" width="1" begin="1" end="1" resetval="0" description="Output Enable for Chrominance This bit is valid in 422 input mode. When CEN=0 and YEN=0, output is 422" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="CEN_0" description="C output disable"/>
+      <bitenum value="1" id="newEnum2" token="CEN_1" description="C output enable and 422to420 conversion enabled"/>
+    </bitfield>
+    <bitfield id="YEN" width="1" begin="0" end="0" resetval="0" description="Output Enable for Luminance. This bit is valid in 422 input mode. When CEN=0 and YEN=0, output is 422" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="YEN_0" description="Y output disable"/>
+      <bitenum value="1" id="newEnum2" token="YEN_1" description="Y output enable and 422to420 conversion enabled"/>
+    </bitfield>
+  </register>
+  <register id="RZB_I_VPS" acronym="RZB_I_VPS" offset="0x114" width="32" description="RESIZER B - INPUT VERTICAL START REGISTER The height of the image after the second level crop must be 2 or larger.">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="VPS" width="13" begin="12" end="0" resetval="0x0000" description="Input Vertical Position Sets the vertical start position of the input image within the global frame. It enables to crop data into the global frame. After SRC_VPS, the Vps'th line is processed as the first line in each image. After the second level crop, the height of the image area must be two lines or larger; that is, a one-line image is not allowed. (RSZ_SRC_VSZ &#8211; RZB_I_VPS &amp;amp;gt; 0)." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_I_HPS" acronym="RZB_I_HPS" offset="0x118" width="32" description="RESIZER B - INPUT HORIZONTAL START REGISTER">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="HPS" width="13" begin="12" end="0" resetval="0x0000" description="Input Horizontal Position Sets the horizontal position of the first pixel for each line within the global frame. After SRC_HPS, the pixel at the VAL'th position is processed as the first pixel. This value must be even." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_O_VSZ" acronym="RZB_O_VSZ" offset="0x11C" width="32" description="RESIZER B - OUTPUT VERTICAL SIZER REGISTER">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="VSZ" width="13" begin="12" end="0" resetval="0x0000" description="The target output size of the resized image. The number of output lines is (VSZ+1). Set 479, when 480 lines of output is required." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_O_HSZ" acronym="RZB_O_HSZ" offset="0x120" width="32" description="RESIZER B - OUTPUT HORIZONTAL SIZE REGISTER">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="HSZ" width="12" begin="12" end="1" resetval="0x000" description="The horizontal size of output image. The number of pixel in each line is (HSZ+1). Set 479, when 480 pixels are required. This value must be lower than the max memory line size supported by the resizer engine, except in RAW pass through mode. Note that the LSB of the 13-bit HSZ value is fixed to 1 such that the horizontal size is always even." range="" rwaccess="RW"/>
+    <bitfield id="HSZ_LSB" width="1" begin="0" end="0" resetval="1" description="The least significant bit of HSZ is forced to 1." range="" rwaccess="R"/>
+  </register>
+  <register id="RZB_V_PHS_Y" acronym="RZB_V_PHS_Y" offset="0x124" width="32" description="RESIZER B - INITIAL LUMINANCE PHASE OF VERTICAL RESIZING PROCESS When YUV4:2:2 data are output, the phase values for luma and chroma should typically be equal, that is, RZX_V_PHS_Y= RZX_V_PHS_C. The following constraints apply when setting the initial vertical phases ABS(RZX_V_PHS_Y - RZX_V_PHS_C) RZX_V_DIF. This constraint means that at most the distance between the initial phases for luminance and chrominance is not expected to exceed the distance between two luma pixels. Note that the absolute value is used, hence, the initial luma phase can be greater than the initial chroma phase or the other way around. As a reminder, the distance between two output pixels for luma is given by RZX_V_DIF.">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y" width="14" begin="13" end="0" resetval="0x0000" description="The initial value for the luma phase in vertical resizing process. This value is in U14Q8 fractional format." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_V_PHS_C" acronym="RZB_V_PHS_C" offset="0x128" width="32" description="RESIZER B - INITIAL CHROMINANCE PHASE OF VERTICAL RESIZING PROCESS When YUV4:2:2 data are output, the phase values for luma and chroma should typically be equal, that is, RZX_V_PHS_Y= RZX_V_PHS_C. The following constraints apply when setting the initial vertical phases ABS(RZX_V_PHS_Y - RZX_V_PHS_C) RZX_V_DIF. This constraint means that at most the distance between the initial phases for luminance and chrominance is not expected to exceed the distance between two luma pixels. Note that the absolute value is used, hence, the initial luma phase can be greater than the initial chroma phase or the other way around. As a reminder, the distance between two output pixels for luma is given by RZX_V_DIF.">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="C" width="14" begin="13" end="0" resetval="0x0000" description="The initial value for the chroma phase in vertical resizing process. This value is in U14Q8 fractional format." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_V_DIF" acronym="RZB_V_DIF" offset="0x12C" width="32" description="RESIZER B - VERTICAL RESIZER REGISTERR">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="V" width="14" begin="13" end="0" resetval="0x0000" description="The parameter for vertical resize. The actual resizing ratio is 256/RZB_V_DIF. In normal mode: 16 &amp;amp;lt;= RZB_V_DIF &amp;amp;lt;= 4096. In down-scale mode: 256 &amp;amp;lt;= RZB_V_DIF &amp;amp;lt;= 4096." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_V_TYP" acronym="RZB_V_TYP" offset="0x130" width="32" description="RESIZER B - INTERPOLATION METHOD FOR VERTICAL RESIZING">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C" width="1" begin="1" end="1" resetval="0" description="Selection of resizing method for chrominance: vertical" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="C_0" description="4-tap cubic convolution (default)"/>
+      <bitenum value="1" id="newEnum2" token="C_1" description="2-tap linear interpolation"/>
+    </bitfield>
+    <bitfield id="Y" width="1" begin="0" end="0" resetval="0" description="Selection of resizing method for luminance: vertical" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="Y_0" description="4-tap cubic convolution (default)"/>
+      <bitenum value="1" id="newEnum2" token="Y_1" description="2-tap linear interpolation"/>
+    </bitfield>
+  </register>
+  <register id="RZB_V_LPF" acronym="RZB_V_LPF" offset="0x134" width="32" description="RESIZER B - VERTICAL LPF INTENSITY REGISTER">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="C" width="6" begin="11" end="6" resetval="0x00" description="The intensity parameter for chroma vertical low pass filtering." range="" rwaccess="RW"/>
+    <bitfield id="Y" width="6" begin="5" end="0" resetval="0x00" description="The intensity parameter for luma vertical low pass filtering." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_H_PHS" acronym="RZB_H_PHS" offset="0x138" width="32" description="RESIZER B - INITIAL PHASE OF HORIZONTAL RESIZING PROCESS">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="PHS" width="14" begin="13" end="0" resetval="0x0000" description="Initial value for the phase in horizontal resizing process, that is, the sampling position is shifted. This value is in U14Q8 fractional format. Example: If RZX_H_PHS = 128, the first output pixel is sampled at the center of the first two valid input pixels. If RZX_I_HPS=100 and RZX_H_PHS=128, the first output pixel is resampled at the center of the 100-th and the 101-st input pixels." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_H_PHS_ADJ" acronym="RZB_H_PHS_ADJ" offset="0x13C" width="32" description="RESIZER B - LUMINANCE HORIZONTAL PHASE ADJUSTMENT The register enables to adjust the horizontal phase for the luma component when averaging is enabled (the horizontal averaging disrupts the relative sampling point between luminance and chrominance when YUV4:2:2 cosited data is input), that is, the relative phase between luma and chroma is different before and after the horizontal averager.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="ADJ" width="9" begin="8" end="0" resetval="0x000" description="Horizontal phase adjustment value. This value is in U9Q8 fractional format. This value is expected to be equal to zero if the averager is disabled or if input chroma is centered." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_H_DIF" acronym="RZB_H_DIF" offset="0x140" width="32" description="RESIZER B - HORIZONTAL RESIZER REGISTER">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="H" width="14" begin="13" end="0" resetval="0x0000" description="The parameter for horizontal resizing process. The actual resizing ratio is 256/VAL. In normal mode 16 &amp;amp;lt;= RSZ_RZA_H_DIF&amp;amp;lt;=4096 In down-scale mode 256&amp;amp;lt;=RSZ_RZA_H_DIF&amp;amp;lt;=4096" range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_H_TYP" acronym="RZB_H_TYP" offset="0x144" width="32" description="RESIZER B">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C" width="1" begin="1" end="1" resetval="0" description="Selection of resizing method for chrominance: horizontal" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="C_0" description="4-tap cubic convolution (default)"/>
+      <bitenum value="1" id="newEnum2" token="C_1" description="2-tap linear interpolation"/>
+    </bitfield>
+    <bitfield id="Y" width="1" begin="0" end="0" resetval="0" description="Selection of resizing method for luminance: horizontal" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="Y_0" description="4-tap cubic convolution (default)"/>
+      <bitenum value="1" id="newEnum2" token="Y_1" description="2-tap linear interpolation"/>
+    </bitfield>
+  </register>
+  <register id="RZB_H_LPF" acronym="RZB_H_LPF" offset="0x148" width="32" description="RESIZER B - HORIZONTAL LPF INTENSITY REGISTER">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="C" width="6" begin="11" end="6" resetval="0x00" description="Horizontal LPF Intensity for Chrominance" range="" rwaccess="RW"/>
+    <bitfield id="Y" width="6" begin="5" end="0" resetval="0x00" description="Selection of resizing method for Luminance in horizontal direction" range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_DWN_EN" acronym="RZB_DWN_EN" offset="0x14C" width="32" description="RESIZER B - DOWNSCALE ENABLE REGISTER">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="DWN_EN" width="1" begin="0" end="0" resetval="0" description="Resizer downscale enable" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="DWN_EN_0" description="Off. Normal operation: upscale and downscale are allowed."/>
+      <bitenum value="1" id="newEnum2" token="DWN_EN_1" description="On. Downscale mode."/>
+    </bitfield>
+  </register>
+  <register id="RZB_DWN_AV" acronym="RZB_DWN_AV" offset="0x150" width="32" description="RESIZER B">
+    <bitfield id="RESERVED" width="26" begin="31" end="6" resetval="0x0000000" description="" range="" rwaccess="R"/>
+    <bitfield id="V" width="3" begin="5" end="3" resetval="0x0" description="Vertical averaging size : 1/2 The range goes from 1/2 to 1/256 in power of two. 0:_DIV2 1/2 down scale 1:_DIV4 1/4 down scale 2:_DIV8 1/8 down scale 3:_DIV16 1/16 down scale 4:_DIV32 1/32 down scale 5:_DIV64 1/64 down scale 6:_DIV128 1/128 down scale 7:_DIV256 1/256 down scale" range="" rwaccess="RW"/>
+    <bitfield id="H" width="3" begin="2" end="0" resetval="0x0" description="Horizontal averaging size : 1/2 The range goes from 1/2 to 1/256 in power of two. 0:_DIV2 1/2 down scale 1:_DIV4 1/4 down scale 2:_DIV8 1/8 down scale 3:_DIV16 1/16 down scale 4:_DIV32 1/32 down scale 5:_DIV64 1/64 down scale 6:_DIV128 1/128 down scale 7:_DIV256 1/256 down scale" range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_RGB_EN" acronym="RZB_RGB_EN" offset="0x154" width="32" description="RESIZER B - RGB OUTPUT ENABLE">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="RGB_EN" width="1" begin="0" end="0" resetval="0" description="Enable of RGB output In pass through mode, this register must be 0. This bit can only be set to 1 when YUV4:2:2 data are output. YUV4:2:2 data output is selected when SRC_FMT1.IN420 = 0 and RZB_420.YEN = RZB_420.CEN = 0" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="RGB_EN_0" description="Off (YCbCr output)"/>
+      <bitenum value="1" id="newEnum2" token="RGB_EN_1" description="On (RGB output)"/>
+    </bitfield>
+  </register>
+  <register id="RZB_RGB_TYP" acronym="RZB_RGB_TYP" offset="0x158" width="32" description="RESIZER B - RGB OUTPUT CONTROL REGISTER">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="MSK1" width="1" begin="2" end="2" resetval="0" description="Enables masking of the last 2 pixels This bit is used to mask the 2 last pixels at the image boundary which are affected by the YUV4:2:2 to YUV4:4:4 conversion." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="MSK1_0" description="output the last 2 pixels"/>
+      <bitenum value="1" id="newEnum2" token="MSK1_1" description="mask the last 2 pixels (Resizer do not output them.)"/>
+    </bitfield>
+    <bitfield id="MSK0" width="1" begin="1" end="1" resetval="0" description="Enables masking of the first 2 pixels This bit is used to mask the 2 first pixels at the image boundary which are affected by the YUV4:2:2 to YUV4:4:4 conversion." range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="MSK0_0" description="output the first 2 pixels"/>
+      <bitenum value="1" id="newEnum2" token="MSK0_1" description="mask the first 2 pixels (Resizer do not output them.)"/>
+    </bitfield>
+    <bitfield id="TYP" width="1" begin="0" end="0" resetval="0" description="16bit/32bit output selection" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="TYP_0" description="32-bit output: alpha + R + G + B (8 bit each) This mode comes with performance degradation. The maximum input frequency in this mode is 160 MHz. This due to the fact that the output is 4 bytes / pixel."/>
+      <bitenum value="1" id="newEnum2" token="TYP_1" description="16-bit output: R(5 bit) + G (6 bit) + B (5 bit)"/>
+    </bitfield>
+  </register>
+  <register id="RZB_RGB_BLD" acronym="RZB_RGB_BLD" offset="0x15C" width="32" description="RESIZER B - RGB BLEND REGISTER">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="BLD" width="8" begin="7" end="0" resetval="0x00" description="The alpha value used in 32-bit RGBA output mode" range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_Y_BAD_H" acronym="RZB_SDR_Y_BAD_H" offset="0x160" width="32" description="RESIZER B - OUTPUT MEMORY BASE ADDRESS REGISTER This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0, RGB5:6:5, RGBA. RAW: RAW data is written to this address YUV4:2:2: YUV data is written to this address YUV4:2:0: Y data is written to this address RGB5:6:5: 16-bit RGB data is written to this address RGBA: 32-bit RGBA data is written to this address">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_BAD_H" width="16" begin="15" end="0" resetval="0x0000" description="Memory Base Address Sets 16 upper bits of the 32-bit base address of the circular buffer in memory." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_Y_BAD_L" acronym="RZB_SDR_Y_BAD_L" offset="0x164" width="32" description="RESIZER B - OUTPUT MEMORY BASE ADDRESS REGISTER This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0, RGB5:6:5, RGBA. RAW: RAW data is written to this address YUV4:2:2: YUV data is written to this address YUV4:2:0: Y data is written to this address RGB5:6:5: 16-bit RGB data is written to this address RGBA: 32-bit RGBA data is written to this address">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_BAD_L" width="16" begin="15" end="0" resetval="0x0000" description="Memory Base Address Sets the 16 lower bits of the 32-bit base address of the circular buffer in memory. It is a byte address. YUV4:2:0 format (output data on 8 bits): The two least significant bits must be set to 00 when horizontal reversal mode is off. The two least significant bits must be set to 11 when horizontal reversal mode is on. RAW, RGB5:6:5 and YUV4:2:2 formats (output data on 16 bits): The two least significant bits must be set to 00 when horizontal reversal mode is off. The two least significant bits must be set to 11 when horizontal reversal mode is on. RGBA format (output data on 32 bits): The three least significant bits must be set to '000' when horizontal reversal mode is off. The three least significant bits must be set to '111' when horizontal reversal mode is on." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_Y_SAD_H" acronym="RZB_SDR_Y_SAD_H" offset="0x168" width="32" description="RESIZER B - OUTPUT MEMORY START ADDRESS REGISTER This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0, RGB5:6:5, RGBA. RAW: RAW data is written to this address YUV4:2:2: YUV data is written to this address YUV4:2:0: Y data is written to this address RGB5:6:5: 16-bit RGB data is written to this address RGBA: 32-bit RGBA data is written to this address">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_SAD_H" width="16" begin="15" end="0" resetval="0x0000" description="Memory Start Address Sets 16 upper bits of the 32-bit start address in memory." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_Y_SAD_L" acronym="RZB_SDR_Y_SAD_L" offset="0x16C" width="32" description="RESIZER B - OUTPUT MEMORY START ADDRESS REGISTER This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0, RGB5:6:5, RGBA. RAW: RAW data is written to this address YUV4:2:2: YUV data is written to this address YUV4:2:0: Y data is written to this address RGB5:6:5: 16-bit RGB data is written to this address RGBA: 32-bit RGBA data is written to this address">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_SAD_L" width="16" begin="15" end="0" resetval="0x0000" description="Memory Start Address Sets the 16 lower bits of the 32-bit start address in memory. It is a byte address. For every frame, the first line of data will be written to this address. We have: SAD = BAD + (PTR_S x OFT) and PTR_S &amp;amp;lt; PTR_E If the first line must be written at the beginning of the circular buffer memory then SAD = BAD and PTR_S = 0. YUV4:2:0 format (output data on 8 bits): The two least significant bits must be set to 00 when horizontal reversal mode is off. The two least significant bits must be set to 11 when horizontal reversal mode is on. RAW, RGB5:6:5 and YUV4:2:2 formats (output data on 16 bits): The two least significant bits must be set to 00 when horizontal reversal mode is off. The two least significant bits must be set to 11 when horizontal reversal mode is on. RGBA format (output data on 32 bits): The three least significant bits must be set to '000' when horizontal reversal mode is off. The three least significant bits must be set to '111' when horizontal reversal mode is on." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_Y_OFT" acronym="RZB_SDR_Y_OFT" offset="0x170" width="32" description="RESIZER B - OUTPUT MEMORY OFFSET REGISTER This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0 or RGBA.">
+    <bitfield id="RESERVED" width="15" begin="31" end="17" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_OFT" width="17" begin="16" end="0" resetval="0x00000" description="Memory Line Offset Sets the size of each line in the circular buffer. It is expressed in bytes and unsigned. Note that OFT does not necessary corresponds to the size of a line in a frame, it can be much bigger. The line offset must be a multiple of 128 bytes (bits [6:0] of RZX_SDR_Y_OFT and RZX_SDR_C_OFT must be set to 0). Example: line 0 address = SAD line 1 address = SAD + 1 x OFT line 2 address = SAD + 2 x OFT" range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_Y_PTR_S" acronym="RZB_SDR_Y_PTR_S" offset="0x174" width="32" description="RESIZER B - OUTPUT MEMORY START ADDRESS REGISTER This register is used if the output data format is one of the following: RAW, YUV4;2:2, YUV4:2:0 or RGBA.">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_PTR_S" width="13" begin="12" end="0" resetval="0x0000" description="Start Line of Memory Pointer Sets the vertical position of the first output line in the output memory space. This value is expressed in number of lines. The hardware uses it to set up the initial value of the circular buffer. It must be set up such as PTR_S = (SAD - BAD) / OFT. This value must be set to 0 when RSZ_RZA_SDR_Y_BAD = RSZ_RZA_SDR_Y_SAD." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_Y_PTR_E" acronym="RZB_SDR_Y_PTR_E" offset="0x178" width="32" description="RESIZER B - OUTPUT MEMORY END ADDRESS REGISTER This register is used if the output data format is one of the following: RAW, YUV4:2:2, YUV4:2:0 or RGBA.">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="Y_PTR_E" width="13" begin="12" end="0" resetval="0x0000" description="End Line of Memory Pointer Sets the maximum number of lines to be stored in the output memory space. This value is expressed in number of lines. When the number of output lines exceeds this value, the address restarts from the first address in the output memory space (BAD)." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_C_BAD_H" acronym="RZB_SDR_C_BAD_H" offset="0x17C" width="32" description="RESIZER B - OUTPUT MEMORY BASE ADDRESS REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0. U and V data are written into this buffer.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_BAD_H" width="16" begin="15" end="0" resetval="0x0000" description="Memory Base Address Sets the 16 upper bits of the 32-bit base address of the circular buffer in memory." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_C_BAD_L" acronym="RZB_SDR_C_BAD_L" offset="0x180" width="32" description="RESIZER B - OUTPUT MEMORY BASE ADDRESS REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0. U and V data are written into this buffer.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_BAD_L" width="16" begin="15" end="0" resetval="0x0000" description="Memory Base Address Sets the 16 lower bits of the 32-bit base address of the circular buffer in memory. It is a byte address. YUV4:2:0 format (output data on 8 bits): The two least significant bits must be set to 00 when horizontal reversal mode is off. The two least significant bits must be set to 11 when horizontal reversal mode is on." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_C_SAD_H" acronym="RZB_SDR_C_SAD_H" offset="0x184" width="32" description="RESIZER B - OUTPUT MEMORY START ADDRESS REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0. U and V data are written into this buffer.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_SAD_H" width="16" begin="15" end="0" resetval="0x0000" description="Memory Base Address Sets the 16 upper bits of the 32-bit start address in memory." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_C_SAD_L" acronym="RZB_SDR_C_SAD_L" offset="0x188" width="32" description="RESIZER B - OUTPUT MEMORY START ADDRESS REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0. U and V data are written into this buffer.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_SAD_L" width="16" begin="15" end="0" resetval="0x0000" description="Memory Base Address Sets the 16 lower bits of the 32-bit start address in memory. It is a byte address. For every frame, the first line of data will be written to this address (C_SAD_H/C_SAD_L). We have: SAD = BAD + (PTR_S x OFT) and PTR_S &amp;amp;lt; PTR_E If the first line must be written at the beginning of the circular buffer memory then SAD = BAD and PTR_S = 0. YUV4:2:0 format (output data on 8 bits): The two least significant bits must be set to 00 when horizontal reversal mode is off. The two least significant bits must be set to 11 when horizontal reversal mode is on." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_C_OFT" acronym="RZB_SDR_C_OFT" offset="0x18C" width="32" description="RESIZER B - OUTPUT MEMORY OFFSET REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0">
+    <bitfield id="RESERVED" width="15" begin="31" end="17" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_OFT" width="17" begin="16" end="0" resetval="0x00000" description="Memory Line Offset Sets the size of each line in the circular buffer. It is expressed in bytes and unsigned. Note that OFT does not necessary corresponds to the size of a line in a frame, it can be much bigger. The line offset must be a multiple of 128 bytes (bits [6:0] of RZX_SDR_Y_OFT and RZX_SDR_C_OFT must be set to 0). Example: line 0 address = SAD line 1 address = SAD + 1 x OFT line 2 address = SAD + 2 x OFT" range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_C_PTR_S" acronym="RZB_SDR_C_PTR_S" offset="0x190" width="32" description="RESIZER B - OUTPUT MEMORY START ADDRESS REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_PTR_S" width="13" begin="12" end="0" resetval="0x0000" description="Start Line of Memory Pointer Sets the vertical position of the first output line in the output memory space. This value is expressed in number of lines. The hardware uses it to set up the initial value of the circular buffer. It must be set up such as PTR_S = (SAD - BAD) / OFT. This value must be set to 0 when RSZ_RZA_SDR_C_BAD = RSZ_RZA_SDR_C_SAD." range="" rwaccess="RW"/>
+  </register>
+  <register id="RZB_SDR_C_PTR_E" acronym="RZB_SDR_C_PTR_E" offset="0x194" width="32" description="RESIZER B - OUTPUT MEMORY END ADDRESS REGISTER FOR CHROMA DATA (YUV4:2:0) This register is used if the output data format is YUV4:2:0">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="C_PTR_E" width="13" begin="12" end="0" resetval="0x0000" description="End Line of Memory Pointer Sets the maximum number of lines to be stored in the output memory space. This value is expressed in number of lines. When the number of output lines exceeds this value, the address restarts from the first address in the output memory space (BAD)." range="" rwaccess="RW"/>
+  </register>
+</module>

@@ -1,0 +1,695 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+
+<module description="APP_LIN" id="APP_LIN">
+  
+  
+  <register acronym="SCIGCR0" description="The SCIGCR0 register defines the module reset." id="SCIGCR0" offset="0x0" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="1" id="Reserved" rwaccess="R" width="15"></bitfield>
+    
+  <bitfield begin="0" description="This bit resets the SCI/LIN module.  This bit is effective in LIN or SCI-compatible mode.. This bit affects the reset state of the SCI/LIN module.  Writable Only in privilege mode" end="0" id="RESET" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIGCR1" description="The SCIGCR1 register defines the frame format, protocol, and communication mode used by the SCI." id="SCIGCR1" offset="0x4" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="26" id="Reserved2" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="Transmit enable. This bit is effective in LIN and SCI modes. Data is transferred from SCITD or the TDy (with y=0, 1,...7) buffers in LIN mode to the SCITXSHF shift out register only when the TXENA bit is set.  Note: Data written to SCITD or the transmit multi-buffer before TXENA is set is not transmitted. If TXENA is cleared while transmission is ongoing, the data previously written to SCITD is sent (including the checksum byte in LIN mode)." end="25" id="TXENA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="24" description="Receive enable. This bit is effective in LIN or SCI-compatible mode. RXENA allows or prevents the transfer of data from SCIRXSHF to SCIRD or the receive multibuffers.  Note: Clearing RXENA stops received characters from being transferred into the receive buffer or multi-buffers, prevents the RX status flags (see Table 7) from being updated by receive data, and inhibits both receive and error interrupts. However, the shift register continues to assemble data regardless of the state of RXENA.  Note: If RXENA is cleared before the time the reception of a frame is complete, the data from the frame is not transferred into the receive buffer.  Note: If RXENA is set before the time the reception of a frame is complete, the data from the frame is transferred into the receive buffer. If RXENA is set while SCIRXSHF is in the process of assembling a frame, the status flags are not guaranteed to be accurate for that frame. To ensure that the status flags correctly reflect what was detected on the bus during a particular frame, RXENA should be set before the detection of that frame" end="24" id="RXENA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="Reserved" end="18" id="Reserved1" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="17" description="Continue on suspend. This bit has an effect only when a program is being debugged with an emulator, and it determines how the SCI/LIN operates when the program is suspended. This bit affects the LIN counters. When this bit is set, the counters are not stopped during debug. When this bit is cleared, the counters are stopped during debug." end="17" id="CONT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="16" description="Loopback bit. This bit is effective in LIN or SCI-compatible mode. The self-checking option for the SCI/LIN can be selected with this bit. If the LINTX and LINRX pins are configured with SCI/LIN functionality, then the LINTX pin is internally connected to the LINRX pin. Externally, during loop back operation, the LINTX pin outputs a high value and the LINRX pin is in a high-impedance state. If this bit value is changed while the SCI/LIN is transmitting or receiving data, errors may result." end="16" id="LOOPBACK" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="14" id="Reserved" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="13" description="Stop extended frame communication. This bit is effective in LIN mode only. This bit can be written only during extended frame communication. When the extended frame communication is stopped, this bit is cleared automatically." end="13" id="STOPEXTFRAME" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="12" description="HGEN control bit. This bit is effective in LIN mode only. This bit controls the type of mask filtering comparison." end="12" id="HGENCTRL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="11" description="Checksum type. This bit is effective in LIN mode only. This bit controls the type of checksum to be used: classic or enhanced." end="11" id="CTYPE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="10" description="Multibuffer mode. This bit is effective in LIN or SCI-compatible mode. This bit controls receive/transmit buffer usage, that is, whether the RX/TX multibuffers are used or a single register, RD0/TD0, is used." end="10" id="MBUFMODE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="9" description="Adapt mode enable. This mode is effective in LIN mode only. This bit has an effect during the detection of the Sync Field. There are two LIN protocol bit rate modes that could be enabled with this bit according to the Node capability file definition: automatic or select. Software and network configuration will decide which of the previous two modes. When this bit is cleared, the LIN 2.0 protocol fixed bit rate should be used. If the ADAPT bit is set, a LIN slave node detecting the baudrate will compare it to the prescalers in BRSR register and update it if they are different. The BRSR register will be updated  with the new value. If this bit is not set there will be no adjustment to the BRSR register.  This field is writable in LIN mode only." end="9" id="ADAPT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="SCI sleep. SCI compatibility mode only. In a multiprocessor configuration, this bit controls the receive sleep function. Clearing this bit brings the SCI out of sleep mode.  The receiver still operates when the SLEEP bit is set; however, RXRDY is updated and SCIRD is loaded with new data only when an address frame is detected. The remaining receiver status flags are updated and an error interrupt is requested if the corresponding interrupt enable bit is set, regardless of the value of the SLEEP bit. In this way, if an error is detected on the receive data line while the SCI is asleep, software can promptly deal with the error condition. The SLEEP bit is not automatically cleared when an address byte is detected.  This field is writable in SCI mode only." end="8" id="SLEEP" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Software reset (active low). This bit is effective in LIN or SCI-compatible mode. The SCI/LIN should only be configured while SWnRST = 0.  Only the following configuration bits can be changed in runtime (i.e., while SWnRESET = 1): - STOP EXT Frame (SCIGCR1[13]) - CC bit (SCIGCR2[17]) - SC bit (SCIGCR2[16])" end="7" id="SWnRST" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="LIN mode This bit controls the mode of operation of the module.  Writable Only in privilege mode" end="6" id="LINMODE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="SCI internal clock enable or LIN Master/Slave configuration. In the SCI mode, this bit enables the clock to the SCI module. In LIN mode, this bit determines whether a LIN node is a slave or master." end="5" id="CLK_MASTER" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="SCI number of stop bits. This bit is effective in SCI-compatible mode only.  Note: The receiver checks for only one stop bit. However in idle-line mode, the receiver waits until the end of the second stop bit (if STOP = 1) to begin checking for an idle period.  This field is writable in SCI mode only." end="4" id="STOP" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="SCI parity odd/even selection. This bit is effective in SCI-compatible mode only. If the PARITY ENA bit (SCIGCR1.2) is set, PARITY designates odd or even parity. The parity bit is calculated based on the data bits in each frame and the address bit (in address-bit mode). The start and stop fields in the frame are not included in the parity calculation.  This field is writable in SCI mode only." end="3" id="PARITY" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Parity enable. Enables or disables the parity function." end="2" id="PARITYENA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="SCI timing mode bit. This bit is effective in SCI-compatible mode only. It must be set to 1 when the SCI mode is used. This bit configures the SCI for asynchronous operation." end="1" id="TIMINGMODE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="SCI/LIN communication mode bit. In compatibility mode, it selects the SCI communication mode. In LIN mode it selects length control option for ID-field bits ID4 and ID5." end="0" id="COMMMODE" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIGCR2" description="The SCIGCR2 register is used to send or compare a checksum byte during extended frames, to generate a wakeup and for low-power mode control of the LIN module." id="SCIGCR2" offset="0x8" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="18" id="Reserved2" rwaccess="R" width="14"></bitfield>
+    
+  <bitfield begin="17" description="Compare Checksum. This mode is effective in LIN mode only. This bit is used by the receiver for extended frames to trigger a checksum compare. The user will initiate this transaction by writing a one to this bit. In non multibuffer mode, once the CC bit is set, the checksum will be compared on the byte that is currently being received, expected to be the checkbyte. During Multi-buffer mode, following are the scenarios associated with the CC bit : -  If CC bit is set during the reception of the data, then the byte that is received after the reception of the programmed no. of data bytes indicated by SCIFORMAT[18:16], is treated as a checksum byte. - If CC bit is set during the IDLE period (i.e. during inter-frame space), then the next immediate byte will be treated as a checksum byte.  A CE will immediatly be flagged if there is a checksum error. This bit is automatically cleared once the checksum is successfully compared." end="17" id="CC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="16" description="Send Checksum This mode is effective in LIN mode only. This bit is used by the transmitter with extended frames to send a checkbyte. In non multibuffer mode the checkbyte will be sent after the current byte transmission. In multibuffer mode the checkbyte will be sent after the last byte count, indicated by the SCIFORMAT[18:16]).    This field is writable in LIN mode only." end="16" id="SC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="9" id="Reserved1" rwaccess="R" width="7"></bitfield>
+    
+  <bitfield begin="8" description="Generate wakeup signal. This bit controls the generation of a wakeup signal, by transmitting the TDO buffer value. This bit is cleared on reception of a valid sync break." end="8" id="GENWU" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Reserved" end="1" id="Reserved" rwaccess="R" width="7"></bitfield>
+    
+  <bitfield begin="0" description="Power down. This bit is effective in LIN or SCI-compatible mode. When the powerdown bit is set, the SCI/LIN module attempts to enter local low-power mode. If the POWERDOWN bit is set while the receiver is actively receiving data and the wakeup interrupt is disabled, then the SCI/LIN will delay low-power mode from being entered until completion of reception. In LIN mode the user may set the POWERDOWN bit on Sleep Command reception or on idle bus detection (more than 4 seconds, i.e. 80,000 cycles at 20kHz)" end="0" id="POWERDOWN" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCISETINT" description="The SCISETINT register is used to enable the various interrupts available in the LIN module." id="SCISETINT" offset="0xC" width="32">
+    
+  <bitfield begin="31" description="Set bit error interrupt. This bit is effective in LIN mode only. Setting this bit enables the SCI/LIN module to generate an interrupt when there is a bit error.  This field is writable in LIN mode only." end="31" id="SETBEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="30" description="Set physical bus error interrupt. This bit is effective in LIN mode only. Setting this bit enables the SCI/LIN module to generate an interrupt when a physical bus error occurs.  This field is writable in LIN mode only." end="30" id="SETPBEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="29" description="Set checksum-error Interrupt. This bit is effective in LIN mode only. Setting this bit enables the SCI/LIN module to generate an interrupt when there is a checksum error.  This field is writable in LIN mode only." end="29" id="SETCEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="28" description="Set inconsistent-sync-field-error interrupt. This bit is effective in LIN mode only. Setting this bit enables the SCI/LIN module to generate an interrupt when there is an inconsistent sync field error.  This field is writable in LIN mode only." end="28" id="SETISFEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="27" description="Set no-response-error interrupt. This bit is effective in LIN mode only. Setting this bit enables the SCI/LIN module to generate an interrupt when a no-response error occurs.  This field is writable in LIN mode only." end="27" id="SETNREINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="26" description="Set framing-error interrupt. This bit is effective in LIN or SCI-compatible mode. Setting this bit enables the SCI/LIN module to generate an interrupt when a framing error occurs." end="26" id="SETFEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="25" description="Set overrun-error interrupt. This bit is effective in LIN or SCI-compatible mode. Setting this bit enables the SCI/LIN module to generate an interrupt when an overrun error occurs." end="25" id="SETOEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="24" description="Set parity interrupt. This bit is effective in LIN or SCI-compatible mode. Setting this bit enables the SCI/LIN module to generate an interrupt when a parity error occurs." end="24" id="SETPEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="Reserved" end="19" id="Reserved4" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="18" description="Set receiver DMA for Address &amp; Data frames. This bit is effective in LIN or SCI-compatible mode. To enable RX DMA request for address and data frames this bit must be set. If it is cleared, RX interrupt request is generated for address frames and DMA requests are generated for data frames. " end="18" id="SET_RX_DMA_ALL" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Set receiver DMA. This bit is effective in LIN or SCI-compatible mode. To enable DMA requests for the receiver this bit must be set. If it is cleared, interrupt requests are generated depending on SETRXINT." end="17" id="SET_RX_DMA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="16" description="Set transmit DMA. This bit is effective in LIN or SCI-compatible mode. To enable DMA requests for the transmitter, this bit must be set. If it is cleared, interrupt requests are generated depending on SETTXINT." end="16" id="SET_TX_DMA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="14" id="Reserved3" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="13" description="Set Identification interrupt. This bit is effective in LIN mode only. This bit is set to enable interrupt once a valid matching identifier is received." end="13" id="SETIDINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="12" description="Reserved" end="10" id="Reserved2" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="9" description="Set Receiver interrupt. Setting this bit enables the SCI/LIN to generate a receive interrupt after a frame has been completely received and the data is being transferred from SCIRXSHF to SCIRD." end="9" id="SETRXINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Set Transmitter interrupt. Setting this bit enables the SCI/LIN to generate a transmit interrupt as data is being transferred from SCITD to SCITXSHF and the TXRDY bit is being set." end="8" id="SETTXINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Set Timeout After 3 Wakeup Signals interrupt. This bit is effective in LIN mode only. Setting this bit enables the SCI/LIN to generate an interrupt when there is a timeout after 3 wakeup signals have been sent.  This field is writable in LIN mode only." end="7" id="SETTOA3WUSINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Set Timeout After Wakeup Signal interrupt. This bit is effective in LIN mode only. Setting this bit enables the SCI/LIN to generate an interrupt when there is a timeout after one wakeup signal has been sent.  This field is writable in LIN mode only." end="6" id="SETTOAWUSINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved" end="5" id="Reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Set timeout interrupt. This bit is effective in LIN mode only. Setting this bit enables the SCI/LIN to generate an interrupt when no LIN bus activity (bus idle) occurs for at least 4 seconds.  This field is writable in LIN mode only." end="4" id="SETTIMEOUTINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved" end="2" id="Reserved" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="1" description="Set wake-up interrupt. This bit is effective in LIN or SCI-compatible mode. Setting this bit enables the SCI/LIN to generate a wake-up interrupt and thereby exit low-power mode. The wake-up interrupt is asserted on falling edge of the wake-up pulse. If enabled, the wake-up interrupt is asserted when local low-power mode is requested while the receiver is busy or if a low level is detected on the SCIRX pin during low-power mode. Wake-up interrupt is not asserted upon a wakeup pulse if the module is not in power down mode." end="1" id="SETWAKEUPINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Set break-detect interrupt. This bit is effective in SCI-compatible mode only. Setting this bit enables the SCI/LIN to generate an interrupt if a break condition is detected on the LINRX pin.  This field is writable in SCI mode only." end="0" id="SETBRKDTINT" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCICLEARINT" description="The SCICLEARINT register is used to disable the enabled interrupts without accessing the SCISETINT register." id="SCICLEARINT" offset="0x10" width="32">
+    
+  <bitfield begin="31" description="Clear Bit Error Interrupt. This bit is effective in LIN mode only. Setting this bit disables the bit error interrupt.  This field is writable in LIN mode only." end="31" id="CLRBEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="30" description="Clear Physical Bus Error Interrupt. This bit is effective in LIN mode only. Setting this bit disables the physical-bus error interrupt.  This field is writable in LIN mode only." end="30" id="CLRPBEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="29" description="Clear checksum-error Interrupt. This bit is effective in LIN mode only. Setting this bit disables the checksum-error interrupt.  This field is writable in LIN mode only." end="29" id="CLRCEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="28" description="Clear Inconsistent-Sync-Field-Error Interrupt. This bit is effective in LIN mode only. Setting this bit disables the ISFE interrupt.  This field is writable in LIN mode only." end="28" id="CLRISFEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="27" description="Clear No-Reponse-Error Interrupt. This bit is effective in LIN mode only. Setting this bit disables the no-response error interrupt.  This field is writable in LIN mode only." end="27" id="CLRNREINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="26" description="Clear Framing-Error Interrupt. This bit is effective in LIN or SCI-compatible mode. Setting this bit disables framing-error interrupt." end="26" id="CLRFEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="25" description="Clear Overrun-Error Interrupt. This bit is effective in LIN or SCI-compatible mode. Setting this bit disables the overrun interrupt." end="25" id="CLROEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="24" description="Clear Parity Interrupt. This bit is effective in LIN or SCI-compatible mode. Setting this bit disables the parity error interrupt." end="24" id="CLRPEINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="Reserved" end="19" id="Reserved5" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="18" description="Reserved" end="18" id="Reserved4" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Clear receiver DMA. This bit is effective in LIN or SCI-compatible mode. Setting this bit disables the receive DMA request." end="17" id="CLRRXDMA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="16" description="Clear transmit DMA. This bit is effective in LIN or SCI-compatible mode. Setting this bit disables the transmit DMA request." end="16" id="CLRTXDMA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="14" id="Reserved3" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="13" description="Clear Identifier interrupt. This bit is effective in LIN mode only. Setting this bit disables the ID interrupt." end="13" id="CLRIDINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="12" description="Reserved" end="10" id="Reserved2" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="9" description="Clear Receiver interrupt. This bit is effective in LIN or SCI-compatible mode. Setting this bit disables the receiver interrupt." end="9" id="CLRRXINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Clear Transmitter interrupt. This bit is effective in LIN or SCI-compatible mode. Setting this bit disables the transmitter interrupt." end="8" id="CLRTXINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Clear Timeout After 3 Wakeup Signals interrupt. This bit is effective in LIN mode only. Setting this bit disables the timeout after 3 wakeup signals interrupt.  This field is writable in LIN mode only." end="7" id="CLRTOA3WUSINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Clear Timeout After Wakeup Signal interrupt. This bit is effective in LIN mode only. Setting this bit disables the timeout after one wakeup signal interrupt.  This field is writable in LIN mode only." end="6" id="CLRTOAWUSINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved" end="5" id="Reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Clear Timeout interrupt. This bit is effective in LIN mode only. Setting this bit disables the timeout (LIN bus idle) interrupt.  This field is writable in LIN mode only." end="4" id="CLRTIMEOUTINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved" end="2" id="Reserved" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="1" description="Clear Wake-up interrupt. This bit is effective in LIN or SCI-compatible mode. Setting this bit disables the wake-up interrupt." end="1" id="CLRWAKEUPINT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Clear Break-detect interrupt. This bit is effective in SCI-compatible mode only. Setting this bit disables the Break-detect interrupt.  This field is writable in SCI mode only." end="0" id="CLRBRKDTINT" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCISETINTLVL" description="The SCISETINTLVL register is used to map individual interrupt sources to the INT1 interrupt line." id="SCISETINTLVL" offset="0x14" width="32">
+    
+  <bitfield begin="31" description="Set Bit Error interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the Bit Error interrupt level to the INT1 line.  This field is writable in LIN mode only." end="31" id="SETBEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="30" description="Set Physical Bus Error interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the Physical Bus Error interrupt level to the INT1 line.  This field is writable in LIN mode only." end="30" id="SETPBEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="29" description="Set Checksum-error interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the Checksum-error interrupt level to the INT1 line.  This field is writable in LIN mode only." end="29" id="SETCEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="28" description="Set Inconsistent-Sync-Field-Error interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the Inconsistent-Sync-Field-Error interrupt level to the INT1 line.  This field is writable in LIN mode only." end="28" id="SETISFEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="27" description="Set No-Reponse-Error interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the No-Response-Error interrupt level to the INT1 line.  This field is writable in LIN mode only." end="27" id="SETNREINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="26" description="Set Framing-Error interrupt level. This bit is effective in LIN or SCI-compatible mode. Writing to this bit maps the Framing-Error interrupt level to the INT1 line." end="26" id="SETFEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="25" description="Set Overrun-Error Interrupt Level. This bit is effective in LIN or SCI-compatible mode. Writing to this bit maps the Overrun-Error interrupt level to the INT1 line." end="25" id="SETOEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="24" description="Set Parity Error interrupt level. This bit is effective in LIN or SCI-compatible mode. Writing to this bit maps the Parity error interrupt level to the INT1 line." end="24" id="SETPEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="Reserved" end="19" id="Reserved6" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="18" description="Reserved" end="18" id="Reserved5" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Reserved" end="16" id="Reserved4" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="14" id="Reserved3" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="13" description="Set ID interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the ID interrupt level to the INT1 line.  This field is writable in LIN mode only." end="13" id="SETIDINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="12" description="Reserved" end="10" id="Reserved2" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="9" description="Set Receiver interrupt level. This bit is effective in LIN or SCI-compatible mode. Writing to this bit maps the receiver interrupt level to the INT1 line." end="9" id="SETRXINTOVO" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Set Transmitter interrupt level. This bit is effective in LIN or SCI-compatible mode. Writing to this bit maps the transmitter interrupt level to the INT1 line." end="8" id="SETTXINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Set Timeout After 3 Wakeup Signals interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the timeout after 3 wakeup signals interrupt level to the INT1 line.  This field is writable in LIN mode only." end="7" id="SETTOA3WUSINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Set Timeout After Wakeup Signal interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the the timeout after wakeup interrupt level to the INT1 line.  This field is writable in LIN mode only." end="6" id="SETTOAWUSINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved" end="5" id="Reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Set Timeout interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the timeout interrupt level to the INT1 line.  This field is writable in LIN mode only." end="4" id="SETTIMEOUTINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved" end="2" id="Reserved" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="1" description="Set Wake-up interrupt level. This bit is effective in LIN or SCI-compatible mode. Writing to this bit maps the Wake-up interrupt level to the INT1 line." end="1" id="SETWAKEUPINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Set Break-detect interrupt level. This bit is effective in SCI-compatible mode only. Writing to this bit maps the Break-detect interrupt level to the INT1 line.  This field is writable in SCI mode only." end="0" id="SETBRKDTINTLVL" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCICLEARINTLVL" description="The SCICLEARINTLVL register is used to map individual interrupt sources to the INT0 line." id="SCICLEARINTLVL" offset="0x18" width="32">
+    
+  <bitfield begin="31" description="Clear Bit Error interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the Bit Error interrupt level to the INT0 line.  This field is writable in LIN mode only." end="31" id="CLRBEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="30" description="Clear Physical Bus Error interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the Physical Bus Error interrupt level to the INT0 line.  This field is writable in LIN mode only." end="30" id="CLRPBEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="29" description="Clear Checksum-error interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the Checksum-error interrupt level to the INT0 line.  This field is writable in LIN mode only." end="29" id="CLRCEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="28" description="Clear Inconsistent-Sync-Field-Error interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the Inconsistent-Sync-Field-Error interrupt level to the INT0 line.  This field is writable in LIN mode only." end="28" id="CLRISFEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="27" description="Clear No-Reponse-Error interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the No-Response-Error interrupt level to the INT0 line.  This field is writable in LIN mode only." end="27" id="CLRNREINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="26" description="Clear Framing-Error interrupt level. This bit is effective in LIN or SCI-compatible mode. Writing to this bit maps the Framing-Error interrupt level to the INT0 line." end="26" id="CLRFEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="25" description="Clear Overrun-Error Interrupt Level. This bit is effective in LIN or SCI-compatible mode. Writing to this bit maps the Overrun-Error interrupt level to the INT0 line." end="25" id="CLROEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="24" description="Clear Parity Error interrupt level. This bit is effective in LIN or SCI-compatible mode. Writing to this bit maps the Parity Error interrupt level to the INT0 line." end="24" id="CLRPEINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="Reserved" end="19" id="Reserved6" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="18" description="Reserved" end="18" id="Reserved5" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Reserved" end="16" id="Reserved4" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="14" id="Reserved3" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="13" description="Clear ID interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the ID interrupt level to the INT0 line.  This field is writable in LIN mode only." end="13" id="CLRIDINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="12" description="Reserved" end="10" id="Reserved2" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="9" description="Clear Receiver interrupt level. This bit is effective in LIN or SCI-compatible mode. Writing to this bit maps the receiver interrupt level to the INT0 line." end="9" id="CLRRXINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Clear Transmitter interrupt level. This bit is effective in LIN or SCI-compatible mode. Writing to this bit maps the transmitter interrupt level to the INT0 line." end="8" id="CLRTXINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Clear Timeout After 3 Wakeup Signals interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the timeout after 3 wakeup signals interrupt level to the INT0 line.  This field is writable in LIN mode only." end="7" id="CLRTOA3WUSINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Clear Timeout After Wakeup Signal interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the the timeout after wakeup interrupt level to the INT0 line.  This field is writable in LIN mode only." end="6" id="CLRTOAWUSINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved" end="5" id="Reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Clear Timeout interrupt level. This bit is effective in LIN mode only. Writing to this bit maps the timeout interrupt level to the INT0 line.  This field is writable in LIN mode only." end="4" id="CLRTIMEOUTINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved" end="2" id="Reserved" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="1" description="Clear Wake-up interrupt level. This bit is effective in LIN or SCI-compatible mode. Writing to this bit maps the Wake-up interrupt level to the INT0 line." end="1" id="CLRWAKEUPINTLVL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Clear Break-detect interrupt level. This bit is effective in SCI-compatible mode only. Writing to this bit maps the Break-detect interrupt level to the INT0 line.  This field is writable in SCI mode only." end="0" id="CLRBRKDTINTLVL" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIFLR" description="The SCIFLR register indicates the current status of the various interrupt sources of the LIN module." id="SCIFLR" offset="0x1C" width="32">
+    
+  <bitfield begin="31" description="Bit Error Flag. This bit is effective in LIN mode only. This bit is set when there has been a bit error. This is detected by the bit monitor in the internal bit monitor. This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Writing a 1 to this bit - Reception of a new sync break  This field is writable in LIN mode only." end="31" id="BE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="30" description="Physical Bus Error Flag. This bit is effective in LIN mode only. This bit is set when there has been a physical bus error. This is detected by the bit monitor in TED. This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Writing a 1 to this bit - Reception of a new sync break  Note: thie PBE will ony be flagged if no sync break can be generated. (because of a bus shortage to VBAT) or if no sync break delimeter can be generated (because of a bus shortage to GND).  This field is writable in LIN mode only." end="30" id="PBE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="29" description="Checksum Error Flag.  This bit is effective in LIN mode only. This bit is set when there is checksum error detected by a receiving node. The type of checksum to be used depends on the SCIGCR1.CTYPE bit. This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Writing a 1 to this bit - Reception of a new sync break  This field is writable in LIN mode only." end="29" id="CE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="28" description="Inconsistent Sync Field Error Flag. This bit is effective in LIN mode only. This bit is set when there has been an inconsistent Sync Field error detected by the synchronizer during header reception. See the &quot;Header Reception and Adaptive Baudrate&quot; section for more information.  This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Writing a 1 to this bit - Reception of a new sync break  This field is writable in LIN mode only." end="28" id="ISFE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="27" description="No-Response Error Flag. This bit is effective in LIN mode only. This bit is set when there is no response to a master’s header completed within TFRAME_MAX. This timeout period is applied for message frames of unknown length (identifiers 0 to 61). This error is detected by the synchronizer of the module. This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Writing a 1 to this bit - Reception of a new sync break  This field is writable in LIN mode only." end="27" id="NRE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="26" description="Framing error flag. This bit is effective in LIN or SCI-compatible mode. This bit is set when an expected stop bit is not found. In SCI compatible mode, only the first stop bit is checked. The missing stop bit indicates that synchronization with the start bit has been lost and that the character is incorrectly framed. Detection of a framing error causes the SCI to generate an error interrupt if the RXERR INT ENA bit is set. This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Writing a 1 to this bit - Reception of a new character (SCI-compatible mode), or frame (LIN mode) In multibuffer mode the frame is defined in the SCIFORMAT register." end="26" id="FE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="25" description="Overrun error flag. This bit is effective in LIN or SCI-compatible mode. This bit is set when the transfer of data from SCIRXSHF to SCIRD overwrites unread data already in SCIRD or the RDy buffers. Detection of an overrun error causes the LIN to generate an error interrupt if the SET OE INT bit is one. This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Writing a 1 to this bit" end="25" id="OE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="24" description="Parity error flag. This bit is effective in LIN or SCI-compatible mode. This bit is set when a parity error is detected in the received data. In SCI address-bit mode, the parity is calculated on the data and address bit fields of the received frame. In idle-line mode, only the data is used to calculate parity. An error is generated when a character is received with a mismatch between the number of 1s and its parity bit. For more information on parity checking, see the &quot;SCI Global Control Register (SCIGCR1)&quot; description. If the parity function is disabled (that is, SCIGCR1.2 = 0), the PE flag is disabled and read as 0. Detection of a parity error causes the LIN to generate an error interrupt if the SET PE INT bit = 1.  This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Reception of a new charcter (SCI-compatible mode) or frame (LIN mode) - Writing a 1 to this bit" end="24" id="PE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="reserved" end="16" id="Reserved2" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="15" description="reserved" end="15" id="Reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="14" description="Identifier On Receive Flag. This bit is effective in LIN mode only. This flag is set once an identifier is received with an RX match and no ID-parity error. See the &quot;Message Filtering and Validation&quot; section for more details. When this flag is set it indicates that a new valid identifier has been received on an RX match. This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Reading the LINID register - Writing a 1 to this bit  This field is writable in LIN mode only." end="14" id="IDRXFLAG" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="13" description="Identifier On Transmit Flag. This bit is effective in LIN mode only. This flag is set once an identifier is received with a TX match and no ID-parity error. See the &quot;Message Filtering and Validation&quot; section for more details. When this flag is set it indicates that a new valid identifier has been received on a TX match. This bit is cleared by:  - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - RESET bit (SCIGCR0.0) - Setting SWnRESET - System reset - Reading the LINID register - Writing a 1 to this bit   This field is writable in LIN mode only." end="13" id="IDTXFLAG" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="12" description="Receiver wakeup detect flag. This bit is effective in SCI-compatible mode only. The SCI sets this bit to indicate that the data currently in SCIRD is an address. This bit is cleared by: - RESET bit - Setting the SWnRESET bit (SCIGCR1.7) - System reset - Receipt of a data frame  This bit is writable in SCI mode only." end="12" id="RXWAKE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="11" description="Transmitter Empty flag. The value of this flag indicates the contents of the transmitter’s buffer register(s) (SCITD/TDy) and shift register (SCITXSHF). In multibuffer mode, this flag indicates the value of the TDx registers and shift register (SCITXSHF). In non multibuffer mode, this flag indicates the value of LINTD0 (byte) and shift register (SCITXSHF). This bit is set by:  - RESET bit (SCIGCR0.0) - Setting the SWnRESET bit (SCIGCR1.7) - System reset.   Note: This bit does not cause an interrupt request." end="11" id="TXEMPTY" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="10" description="SCI transmitter wakeup method select. This bit is effective in SCI-compatible mode only. The TXWAKE bit controls whether the data in SCITD should be sent as an address or data frame using multiprocessor communication format. This bit is set to 1 or 0 by software before a byte is written to SCITD and is cleared by the SCI when data is transferred from SCITD to SCITXSHF or by a system reset. TXWAKE is not cleared by the SWnRESET bit (SCIGCR1.7)." end="10" id="TXWAKE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="9" description="Receiver ready flag.  In SCI compatibility mode, the receiver sets this bit to indicate that the SCIRD contains new data and is ready to be read by the CPU. In LIN mode, RXRDY is set once a valid frame is received in multibuffer mode, a valid frame being a message frame received with no errors. In non multibuffer mode RXRDY is set for each received byte and will be set for the last byte of the frame if there are no errors. The SCI/LIN generates a receive interrupt when RXRDY flag bit is set if the interrupt-enable bit is set (SCISETINT.9). RXRDY is cleared by: - RESET bit (SCIGCR0.0) - Setting the SWnRESET - System reset - Writing a 1 to this bit - Reading SCIRD in while in SCI compatibility mode - Reading last data byte RDy of the response in LIN mode   Note: The RXRDY flag cannot be cleared by reading the corresponding interrupt offset in the SCIINTVECT0/1 register." end="9" id="RXRDY" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Transmitter buffer register ready flag. When set, this bit indicates that the transmit buffer(s) register (SCITD in compatibility mode and LINTD0, LINTD1 in MBUF mode) is/are ready to get another character from a CPU write.  In SCI compatibility mode, writing data to SCITD automatically clears this bit. In LIN mode, this bit is cleared once byte 0 (TD0) is written to LINTD0. This bit is set after the data of the TX buffer are shifted into the SCITXSHF register. This event can trigger a transmit DMA event if the DMA enable bit is set. This bit is set to 1 by: - RESET bit (SCIGCR0.0) - Setting the SWnRESET (SCIGCR1.7) - System reset  Note: The TXRDY flag cannot be cleared by reading the corresponding interrupt offset in the SCIINTVECT0/1 register.  Note: The transmit interrupt request can be eliminated until the next series of data is written into the transmit buffers LINTD0 and LINTD1, by disaLINg the corresponding interrupt via the SCICLEARINT register or by disaLINg the transmitter via the TXENA bit (SCIGCR1.25=0)." end="8" id="TXRDY" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Timeout After 3 Wakeup Signals flag. This bit is effective in LIN mode only. This flag is set if there is no Sync Break received after 3 wakeup signals and a period of 1.5 seconds have passed. Such expiration time is used before issuing another round of wakeup signals. This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Writing a 1 to this bit  This field is writable in LIN mode only." end="7" id="TOA3WUS" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Timeout After Wakeup Signal flag. This bit is effective in LIN mode only. This bit is set if there is no Sync Break received after a wakeup signal has been sent. A minimum of 150 ms expiration time is used before issuing another wakeup signal.  This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Writing a 1 to this bit  This field is writable in LIN mode only." end="6" id="TOAWUS" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="reserved" end="5" id="Reserved" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="LIN Bus IDLE timeout flag. This bit is effective in LIN mode only. This bit is set if there is no LIN bus activity for at least 4 seconds. LIN bus activity being a transition from recessive to dominant. This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Writing a 1 to this bit  This field is writable in LIN mode only." end="4" id="TIMEOUT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Bus BUSY flag. This bit is effective in LIN mode and SCI-compatible mode. This bit indicates whether the receiver is in the process of receiving a frame. As soon as the receiver detects the beginning of a start bit, the BUSY bit is set to 1. When the reception of a frame is complete, the BUSY bit is cleared. If SET WAKEUP INT is set and power down is requested while this bit is set, the SCI/LIN automatically prevents low-power mode from being entered and generates wakeup interrupt. The BUSY bit is controlled directly by the SCI receiver but can be cleared by: - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset." end="3" id="BUSY" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="SCI receiver in idle state. This bit is effective in SCI-compatible mode only. While this bit is set, the SCI looks for an idle period to resynchronize itself with the bit stream. The receiver does not receive any data while the bit is set. The bus must be idle for 11 bit periods to clear this bit. The SCI enters this state: - After a system reset - Setting the SWnRESET bit (SCIGCR1.7) - After coming out of power down  This bit is writable in SCI mode only." end="2" id="IDLE" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Wake-up flag. This bit is effective in LIN mode only. This bit is set by the SCI/LIN when receiver or transmitter activity has taken the module out of power-down mode. An interrupt is generated if the SET WAKEUP INT bit (SCISETINT.1) is set. This bit is cleared by: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register. - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - Writing a 1 to this bit.  This field is writable in LIN mode only." end="1" id="WAKEUP" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="SCI break-detect flag. This bit is effective in SCI-compatible mode only. This bit is set when the SCI detects a break condition on the LINRX pin. A break condition occurs when the LINRX pin remains continuously low for at least 10 bits after a missing first stop bit, that is, after a framing error. Detection of a break condition causes the SCI to generate an error interrupt if the BRKDT INT ENA bit is set. The BRKDT bit is cleared by the following: - Reading the corresponding interrupt offset in the SCIINTVECT0/1 register. - Setting the SWnRESET bit (SCIGCR1.7) - RESET bit (SCIGCR0.0) - System reset - By writing a 1 to this bit.  This bit is writable in SCI mode only." end="0" id="BRKDT" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIINTVECT0" description="The SCIINTVECT0 register indicates the offset for the INT0 interrupt line." id="SCIINTVECT0" offset="0x20" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="5" id="Reserved" rwaccess="R" width="11"></bitfield>
+    
+  <bitfield begin="4" description="Interrupt vector offset for INT0. This register indicates the offset for interrupt line INT0. A read to this register updates its value to the next highest priority pending interrupt in SCIFLR and clears the flag corresponding to the offset that was read.  Note: The flags for the receive (SCIFLR.9) and the transmit (SCIFLR.8) interrupts cannot be cleared by reading the corresponding offset vector in this register (see detailed description in SCIFLR register)." end="0" id="INTVECT0" rwaccess="R" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIINTVECT1" description="The SCIINTVECT1 register indicates the offset for the INT1 interrupt line." id="SCIINTVECT1" offset="0x24" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="5" id="Reserved" rwaccess="R" width="11"></bitfield>
+    
+  <bitfield begin="4" description="Interrupt vector offset for INT1. This register indicates the offset for interrupt line INT1. A read to this register updates its value to the next highest priority pending interrupt in SCIFLR and clears the flag corresponding to the offset that was read.  Note: The flags for the receive (SCIFLR.9) and the transmit (SCIFLR.8) interrupts cannot be cleared by reading the corresponding offset vector in this register (see detailed description in SCIFLR register)." end="0" id="INTVECT1" rwaccess="R" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIFORMAT" description="The SCIFORMAT register is used to set up the character and frame lengths." id="SCIFORMAT" offset="0x28" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="19" id="Reserved1" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="18" description="Frame length control bits. In LIN mode, these bits indicate the number of bytes in the response field from 1 to 8 bytes. In buffered SCI mode, these bits indicate the number of characters. When these bits are used to indicate LIN response length (SCIGCR1[0] = 1), then when there is an ID RX match, this value should be updated with the expected length of the response. In buffered SCI mode, these bits indicate the number of characters with SCIFORMAT[2:0] bits per character. i.e. these bits indicate the transmitter/receiver format for the number of characters: 1 to 8. There can be up to eight characters with eight bits each." end="16" id="LENGTH" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="3" id="Reserved" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="2" description="Character length control bits. These bits are effective in SCI compatible mode only. These bits set the SCI character length from 1 to 8 bits.  Note: In compatibility mode or buffered SCI mode, when data of fewer than eight bits in length is received, it is left justified in SCIRD/RDy and padded with trailing zeros. Data read from the SCIRD should be shifted by software to make the received data right justified.  Note: Data written to the SCITD should be right justified but does not need to be padded with leading zeros.  These bits are witable in SCI mode only." end="0" id="CHAR" rwaccess="RW" width="3"></bitfield>
+  </register>
+  
+  
+  <register acronym="BRSR" description="The BRSR register is used to configure the baud rate of the LIN module." id="BRSR" offset="0x2C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="31" id="Reserved" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="30" description="Superfractional Divider Selection. (U) These bits are an additional fractional part for the baudrate specification. These bits allow a super fine tuning of the fractional baudrate with 7 more intermediate values for each of the M fractional divider values. See the Superfractional Divider section for more details." end="28" id="U" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="27" description="SCI/LIN 4-bit Fractional Divider Selection. (M) These bits are effective in LIN or SCI asynchronous mode. These bits are used to select a baud rate for the SCI/LIN module, and they are a fractional part for the baud rate specification. The M divider allows fine-tuning of the baud rate over the P prescaler with 15 additional intermediate values for each of the P integer values." end="24" id="M" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="23" description="PRESCALER P (High Bits). SCI/LIN 24-bit Integer Prescaler Selection. These bits are used to select a baudrate for the SCI/LIN module. These bits are effective in LIN mode and SCI compatible mode. The SCI/LIN has an internally generated serial clock determined by the LIN module input clock and the prescalers P and M in this register. The SCI/LIN uses the 24-bit integer prescaler P value to select 1 of over 16,700,000 available baud rates. The additional 4-bit fractional prescaler M refines the baudate selection." end="16" id="SCI_LIN_PSH" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="15" description="PRESCALER P (Low Bits). SCI/LIN 24-bit Integer Prescaler Selection. These bits are used to select a baudrate for the SCI/LIN module. These bits are effective in LIN mode and SCI compatible mode. The SCI/LIN has an internally generated serial clock determined by the LIN module input clock and the prescalers P and M in this register. The SCI/LIN uses the 24-bit integer prescaler P value to select 1 of over 16,700,000 available baud rates. The additional 4-bit fractional prescaler M refines the baudate selection." end="0" id="SCI_LIN_PSL" rwaccess="RW" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIED" description="The SCIED register is a duplicate copy of SCIRD register that has no affect on the RXRDY flag for use with an emulator." id="SCIED" offset="0x30" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="8" id="Reserved" rwaccess="R" width="24"></bitfield>
+    
+  <bitfield begin="7" description="Receiver Emulation Data. This bit is effective in SCI-compatible mode only. Reading SCIED(7–0) does not clear the RXRDY flag. This register should be used only by an emulator that must continually read the data buffer without affecting the RXRDY flag." end="0" id="ED" rwaccess="R" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIRD" description="The SCIRD register is where received data is stored and can be read from." id="SCIRD" offset="0x34" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="8" id="Reserved" rwaccess="R" width="24"></bitfield>
+    
+  <bitfield begin="7" description="Received Data. This bit is effective in SCI-compatible mode only. When a frame has been completely received, the data in the frame is transferred from the receiver shift register SCIRXSHF to this register. As this transfer occurs, the RXRDY flag is set and a receive interrupt is generated if RX INT ENA (SCISETINT0.9) is set. When the data is read from SCIRD, the RXRDY flag is automatically cleared.  When the SCI receives data that is fewer than eight bits in length, it loads the data into this register in a left justified format padded with trailing zeros. Therefore, your software should perform a logical shift on the data by the correct number of positions to make it right justified." end="0" id="RD" rwaccess="R" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCITD" description="The SCITD register is where data to be transmitted is written to by application software." id="SCITD" offset="0x38" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="8" id="Reserved" rwaccess="R" width="24"></bitfield>
+    
+  <bitfield begin="7" description="Transmit data This bit is effective in SCI-compatible mode only. Data to be transmitted is written to this register. The transfer of data from this register to the transmit shift register SCITXSHF sets the TXRDY flag (SCIFLR.23), which indicates that SCITD is ready to be loaded with another byte of data. Note: If TX INT ENA (SCISETINT.8) is set, this data transfer also causes an interrupt.  Note: Data written to the SCIRD register that is fewer than eight bits long must be right justified, but it does not need to be padded with leading zeros. " end="0" id="TD" rwaccess="R" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIPIO0" description="The SCIPIO0 register is used to enable the LINTX and LINRX pins." id="SCIPIO0" offset="0x3C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="3" id="Reserved" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="2" description="Transmit pin function. This bit is effective in LIN or SCI mode. This bit defines the function of LINTX pin." end="2" id="TXFUNC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Receive pin function. This bit is effective in LIN or SCI mode. This bit defines the function of the LINRX pin." end="1" id="RXFUNC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved" end="0" id="CLKFUNC" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIPIO1" id="SCIPIO1" offset="0x40" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="3" id="Reserved" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="2" description="Transmit pin direction. This bit is effective in LIN or SCI mode. This bit determines the data direction on the LINTX pin if it is configured with general-purpose I/O functionality (TX FUNC = 0). 0: general purpose input pin. 1: general-purpose output pin" end="2" id="TXDIR" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Receive pin direction. This bit is effective in LIN or SCI mode. This bit determines the data direction on the LINRX pin if it is configured with general-purpose I/O functionality (RX FUNC = 0). 0: general purpose input pin. 1: general-purpose output pin" end="1" id="RXDIR" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved" end="0" id="CLKDIR" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIPIO2" description="The SCIPIO2 register indicates the current status of the LINTX and LINRX pins." id="SCIPIO2" offset="0x44" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="3" id="Reserved" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="2" description="Transmit data in. This bit is effective in LIN or SCI-compatible mode. This bit contains the current value on the LINTX pin." end="2" id="TXIN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Receive data in. This bit is effective in LIN or SCI-compatible mode. This bit contains the current value on the LINRX pin." end="1" id="RXIN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved" end="0" id="CLKIN" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIPIO3" id="SCIPIO3" offset="0x48" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="3" id="Reserved" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="2" description="Transmit pin out. This bit is effective in LIN or SCI mode. This pin specifies the logic to be output on pin LINTX." end="2" id="TXOUT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Receive pin out. This bit is effective in LIN or SCI mode. This pin specifies the logic to be output on pin LINRX." end="1" id="RXOUT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved" end="0" id="CLKOUT" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIPIO4" id="SCIPIO4" offset="0x4C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="3" id="Reserved" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="2" description="Transmit pin set. This bit is effective in LIN or SCI mode. This bit sets the logic to be output on pin LINTX." end="2" id="TXSET" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Receive pin set. This bit is effective in LIN or SCI mode. This bit sets the logic to be output on pin LINRX." end="1" id="RXSET" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved" end="0" id="CLKSET" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIPIO5" id="SCIPIO5" offset="0x50" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="3" id="Reserved" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="2" description="Transmit pin clear. This bit is effective in LIN or SCI mode. This bit clears the logic to be output on pin LINTX." end="2" id="TXCLR" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Receive pin clear. This bit is effective in LIN or SCI mode. This bit clears the logic to be output on pin LINRX." end="1" id="RXCLR" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved" end="0" id="CLKCLR" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIPIO6" id="SCIPIO6" offset="0x54" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="3" id="Reserved" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="2" description="Transmit pin open drain enable. This bit is effective in LIN or SCI mode. This bit enables open-drain capability in the output pin LINTX." end="2" id="TXPDR" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Receive pin open drain enable. This bit is effective in LIN or SCI mode. This bit enables open-drain capability in the output pin LINRX." end="1" id="RXPDR" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved" end="0" id="CLKDR" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIPIO7" id="SCIPIO7" offset="0x58" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="3" id="Reserved" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="2" description="Transmit pin pull control disable. This bit is effective in LIN or SCI mode. This bit disables pull control capability on the input pin LINTX." end="2" id="TXPD" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Receive pin pull control disable. This bit is effective in LIN or SCI mode. This bit disables pull control capability on the input pin LINRX." end="1" id="RXPD" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved" end="0" id="CLKPD" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIPIO8" id="SCIPIO8" offset="0x5C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="3" id="Reserved" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="2" description="TX pin pull select. This bit is effective in LIN or SCI mode. This bit selects pull type in the input pin LINTX." end="2" id="TXPSL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="RX pin pull select. This bit is effective in LIN or SCI mode. This bit selects pull type in the input pin LINRX." end="1" id="RXPSL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved" end="0" id="CLKPSL" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="LINCOMP" description="The LINCOMPARE register is used to configure the sync delimeter and sync break extension." id="LINCOMP" offset="0x60" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved2" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="10" id="Reserved1" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="9" description="2-bit Sync Delimiter compare. These bits are effective in LIN mode only. These bits are used to configure the number of Tbit for the sync delimiter in the sync field. The time delay calculation for the synchronization delimiter is: TSDEL = (SDEL + 1)Tbit  These bits are writable in LIN mode only." end="8" id="SDEL" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="7" description="Reserved" end="3" id="Reserved" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="2" description="3-bit Sync Break extend. LIN mode only. These bits are used to configure the number of Tbits for the sync break to extend the minimum 13 Tbit in the Sync Field to a maximum of 20 Tbit. The time delay calculation for the sync break is: TSYNBRK = 13Tbit + SBREAK x Tbit  These bits are writable in LIN mode only." end="0" id="SBREAK" rwaccess="RW" width="3"></bitfield>
+  </register>
+  
+  
+  <register acronym="LINRD0" description="The LINRD0 register contains the lower 4 bytes of the received LIN frame data." id="LINRD0" offset="0x64" width="32">
+    
+  <bitfield begin="31" description="8-bit Receive Buffer 0 Each response data-byte that is received in the SCIRXSHFT register is transferred to the corresponding RDy register according to the number of bytes received. A read of this byte clears the RXDY byte. Note: RD&lt;x-1> is equivalent to Data byte &lt;x> of the LIN frame." end="24" id="RD0" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="8-bit Receive Buffer 1. Each response data-byte that is received in the SCIRXSHFT register is transferred to the corresponding RDy register according to the number of bytes received." end="16" id="RD1" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="15" description="8-bit Receive Buffer 2. Each response data-byte that is received in the SCIRXSHFT register is transferred to the corresponding RDy register according to the number of bytes received." end="8" id="RD2" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="7" description="8-bit Receive Buffer 3. Each response data-byte that is received in the SCIRXSHFT register is transferred to the corresponding RDy register according to the number of bytes received." end="0" id="RD3" rwaccess="R" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="LINRD1" description="The LINRD1 regsiter contains the upper 4 bytes of the received LIN frame data." id="LINRD1" offset="0x68" width="32">
+    
+  <bitfield begin="31" description="8-bit Receive Buffer 4  Each response data-byte that is received in the SCIRXSHFT register is transferred to the corresponding RDy register according to the number of bytes received." end="24" id="RD4" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="8-bit Receive Buffer 5. Each response data-byte that is received in the SCIRXSHFT register is transferred to the corresponding RDy register according to the number of bytes received." end="16" id="RD5" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="15" description="8-bit Receive Buffer 6. Each response data-byte that is received in the SCIRXSHFT register is transferred to the corresponding RDy register according to the number of bytes received." end="8" id="RD6" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="7" description="8-bit Receive Buffer 7. Each response data-byte that is received in the SCIRXSHFT register is transferred to the corresponding RDy register according to the number of bytes received." end="0" id="RD7" rwaccess="R" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="LINMASK" description="The LINMASK register is used to configure the masks used for filtering incoming ID messages for receive and transmit frames." id="LINMASK" offset="0x6C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="24" id="Reserved1" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Receive ID mask. This field is effective in LIN mode only.This 8-bit mask is used for filtering an incoming ID message and compare it to the ID-byte. A compare match of the received ID witht the RX ID mask will set the ID RX flag and trigger and ID interrupt if enabled. A 0 bit in the mask indicates that bit is compared to the ID-byte. A 1 bit in the mask indicates that that bit is filtered and therefore not used in the compare.  When HGENCTRL is set to 1, this field must be set to 0xFF." end="16" id="RXIDMASK" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="8" id="Reserved" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="7" description="Transmit ID mask. This field is effective in LIN mode only. This 8-bit mask is used for filtering an incoming ID message and compare it to the ID-byte. A compare match of the received ID with the TX ID Mask will set the ID TX flag and trigger an ID interrupt if enabled. A 0 bit in the mask indicates that bit is compared to the ID-byte. A 1 bit in the mask indicates that bit is filtered and therefore not used for the compare.  When HGENCTRL is set to 1, this field must be set to 0xFF." end="0" id="TXIDMASK" rwaccess="RW" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="LINID" description="The LINID register contains the identification fields for LIN communication. NOTE: For software compatibility with future LIN modules, the HGEN CTRL bit must be set to 1, the RX ID MASK field must be set to FFh, and the TX ID MASK field must be set to FFh." id="LINID" offset="0x70" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="24" id="Reserved" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Received ID. This bit is effective in LIN mode only. This byte contains the current message identifier. During header reception the received ID is copied from the SCIRXSHF register to this byte if there is no ID-parity error and there has been an RX/TX match. Note: If a framing error (FE) is detected during ID reception, the received ID will also not be copied to the LINID register." end="16" id="RECEIVEDID" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="15" description="ID Slave Task byte. This field is effective in LIN mode only. This byte contains the identifier to which the received ID of an incoming header will be compared in order to decide whether a RX response, a TX response, or no action needs to be done by the LIN node.   These bits are writable in LIN mode only." end="8" id="IDSLAVETASKBYTE" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="7" description="ID byte. This field is effective in LIN mode only. This byte is the LIN mode message ID. On a master node, a write to this register by the CPU initiates a header transmission. For a slave task, this byte is used for message filtering when HGENCTRL (SCIGCR1.12) is '0'.  These bits are writable in LIN mode only." end="0" id="IDBYTE" rwaccess="RW" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="LINTD0" description="The LINTD0 register contains the lower 4 bytes of the data to be transmitted. NOTE: TD&lt;x-1> is equivalent to Data byte &lt;x> of the LIN frame." id="LINTD0" offset="0x74" width="32">
+    
+  <bitfield begin="31" description="8-bit Transmit Buffer 0. Byte 0 to be transmitted is written into this register and then copied to SCITXSHF for transmission. Once byte 0 is written in TDO buffer, transmission will be initiated." end="24" id="TD0" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="23" description="8-bit Transmit Buffer 3. Byte 1 to be transmitted is written into this register and then copied to SCITXSHF for transmission." end="16" id="TD1" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="15" description="8-bit Transmit Buffer 2. Byte 2 to be transmitted is written into this register and then copied to SCITXSHF for transmission." end="8" id="TD2" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="7" description="8-bit Transmit Buffer 3. Byte 3 to be transmitted is written into this register and then copied to SCITXSHF for transmission." end="0" id="TD3" rwaccess="RW" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="LINTD1" description="The LINTD1 register contains the upper 4 bytes of the data to be transmitted. NOTE: TD&lt;x-1> is equivalent to Data byte &lt;x> of the LIN frame." id="LINTD1" offset="0x78" width="32">
+    
+  <bitfield begin="31" description="8-bit Transmit Buffer 4. Byte4 to be transmitted is written into this register and then copied to SCITXSHF for transmission." end="24" id="TD4" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="23" description="8-bit Transmit Buffer 5. Byte 5 to be transmitted is written into this register and then copied to SCITXSHF for transmission. " end="16" id="TD5" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="15" description="8-bit Transmit Buffer 6. Byte 6 to be transmitted is written into this register and then copied to SCITXSHF for transmission." end="8" id="TD6" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="7" description="8-bit Transmit Buffer 7. Byte 7 to be transmitted is written into this register and then copied to SCITXSHF for transmission." end="0" id="TD7" rwaccess="RW" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="MBRSR" description="The MBRSR register is used to configure the expected maximum baud rate of the LIN network." id="MBRSR" offset="0x7C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="13" id="Reserved" rwaccess="R" width="19"></bitfield>
+    
+  <bitfield begin="12" description="Maximum Baud Rate Prescaler. This field is effective in LIN mode only. This 13-bit prescaler is used during the synchronization phase (see the &quot;Header Reception and Adaptive Baudrate&quot; section) of a slave module if the ADAPT bit is set. In this way, a SCI/LIN slave using an automatic or select bit rate modes detects any LIN bus legal rate automatically.  The MBR value should be programmed to allow a maximum baud rate that is not more than 10% above the expected operating baud rate in the LIN network. Otherwise a s 0x00 data byte could mistakenly be detected as sync break. The default value is for a 70MHz LINCLK (0xDAC). This MBR prescaler is used by the wake-up and idle time counters for a constant expiration time relative to a 20kHz rate." end="0" id="MBR" rwaccess="RW" width="13"></bitfield>
+  </register>
+  
+  
+  <register acronym="SCIPIO9" description="Couldn't find this register in spec. But it's mentioned in RTL." id="SCIPIO9" offset="0x80" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="16" id="Reserved1" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="3" id="Reserved" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="2" description="SCITX PIN value" end="2" id="TXSL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="SCIRX PIN value" end="1" id="RXSL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved" end="0" id="CLKSL" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Reserved" id="Reserved" offset="0x84" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="0" id="Reserved" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Reserved1" id="Reserved1" offset="0x88" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="0" id="Reserved" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Reserved2" id="Reserved2" offset="0x8C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="0" id="Reserved" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="IODFTCTRL" description="The IODFTCTRL register is used to emulate various error and test conditions." id="IODFTCTRL" offset="0x90" width="32">
+    
+  <bitfield begin="31" description="Bit Errror Enable bit. This bit is effective in LIN mode only. This bit is used to create a Bit error. When this bit is set, the bit received is ORed with 1 and passed to the Bit monitor circuitry." end="31" id="BERRENA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="30" description="Physical Bus Error Enable bit. This bit is effective in LIN mode only. This bit is used to create a Physical Bus Error. When this bit is set, the bit received during Sync Break field transmission is ORed with 1 and passed to the Bit monitor circuitry" end="30" id="PBERRENA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="29" description="Checksum Error Enable bit. This bit is effective in LIN mode only. This bit is used to create a checksum error. When this bit is set, the polarity of the CTYPE (checksum type) in the receive checksum calculator is changed so that a checksum error is generated." end="29" id="CERRENA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="28" description="Inconsistent Sync Field Error Enable bit. This bit is effective in LIN mode only. This bit is used to create an ISF error. When this bit is set, the bit widths in the sync field are varied so that the ISF check fails and the error flag is set." end="28" id="ISFERRENA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="27" description="Reserved" end="27" id="Reserved3" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="26" description="This bit is used to create a Frame Error. This bit is effective in SCI-compatible mode only. When this bit is set, the stop bit received is ANDed with ’0’ and passed to the stop bit check circuitry." end="26" id="FERRENA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="25" description="Compatible Mode only This bit is effective in SCI-compatible mode only. This bit is used to create a Parity Error. When this bit is set, in compatible mode, the parity bit received is toggled so that a parity error occurs." end="25" id="PERRENA" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="24" description="Compatible Mode only This bit is effective in SCI-compatible mode only. This bit is used to create BRKDT error (SCI mode only). When this bit is set, the stop bit of the frame is ANDed with ’0’ and passed to the RSM so that a frame error occurs. Then the RX Pin is forced to continuous low for 10 Tbits so that a BRKDT error occurs. " end="24" id="BRKDTERRENA" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="23" description="Reserved" end="21" id="Reserved2" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="20" description="Pin sample mask. These bits define the sample number at which the TX Pin value that is being transmitted will be inverted to verify the receive pin samples correctly with the majority detection circuitry. Note: During IODFT mode testing for the pin sample mask, the prescalar P must be programmed to be greater than 2." end="19" id="PINSAMPLEMASK" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="18" description="Transmit shift. These bits define the delay by which the value on LINTX is delayed so that the value on LINRX is asynchronous. (Not applicable to Start Bit)" end="16" id="TXSHIFT" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="12" id="Reserved1" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="11" description="IO DFT Enable Key This field is used to enable the IODFT mode of the SCI/LIN module for testing.  Writable Only in privilege mode" end="8" id="IODFTENA" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="7" description="Reserved" end="2" id="Reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="1" description="Module loopback enable. In analog loopback mode the complete communication path through the I/Os can be tested, whereas in digital loopback mode the I/O buffers are excluded from this path. Writable Only in privilege mode" end="1" id="LPBENA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Module Analog loopback through receive pin enable. This bit defines whether the I/O buffers for the transmit or the receive pin are included in the communication path in analog loopback mode only. Writable Only in privilege mode" end="0" id="RXPENA" rwaccess="RW" width="1"></bitfield>
+  </register>
+</module>

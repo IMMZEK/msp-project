@@ -1,0 +1,39 @@
+<div class="files">
+    <div class="files-table-div" style="border-bottom:1px solid #eee;">
+        <div ng-show="vm.showUploadDialog" ng-style="(vm.files.length > 0)&&{'margin-bottom':'26px'}">
+            <span style="float:right;">
+                <span style="font-weight:500;color:#888;">Filter:</span> 
+                <select ng-model="vm.selectedFilter" ng-change="vm.showAllFiles()" style="padding:1px 15px 2px 3px;line-height:20px;outline:none;color:#888;">
+                    <option value="default">{{vm.filterType}} ({{vm.filter}})</option>
+                    <option value="all">All Files (.*)</option>
+                </select>
+            </span>
+            <div ng-show="(vm.files.length == 0)" style="text-align:center;padding-top:20px;clear:both;">
+                {{vm.noFilesMessage}}
+            </div>
+        </div>
+        <table class="table table-condensed table-striped">
+            <tbody>
+                <tr ng-repeat="file in vm.files | orderBy:'mtime':true" ng-click="vm.fileSelected(file)" id="{{file.name}}" title="Open {{file.name}}" class="highlight_hover" ng-hide="vm.showRecent&&!vm.showMore&&$index>2">
+                    <td style="width:98%;">
+                        <span ng-click="vm.deleteFile(file);$event.stopPropagation();" title="Delete {{file.name}}" class="glyphicon glyphicon-trash tic-icons-btn"></span>
+                        <span class="tic-file-display-name"> {{file.name}} <span>
+                    </td>
+                    <td style="white-space:nowrap">
+                        <span ng-if="file.isReady"> {{file.getDisplayTime()}} </span>
+                        <span ng-if="!file.isReady">
+                            <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                            <span>{{file.notReadyMessage}}</span>
+                        </span>
+                    </td>
+
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div ng-show="vm.showRecent&&!vm.showMore&&vm.files.length>3" style="padding:5px 0;cursor:pointer;text-align:center;font-size:14px;" class="highlight_hover_light" ng-click="vm.showMore=!vm.showMore">Show More</div>
+    <div ng-show="vm.showUploadDialog">
+        <tic-drag-drop-file-upload uploading="vm.uploading">
+        </tic-drag-drop-file-upload>
+    </div>
+</div>

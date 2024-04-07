@@ -1,0 +1,167 @@
+/* Copyright (c) 2022, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+menuitem "Initial Device Configuration";
+
+hotmenu Run_All()
+{
+ 	Configure_RAT();
+    Configure_ATCM();
+    Configure_R5F_Halt_Upon_PowerUp();
+    Configure_R5F_Bootvectors();
+	Set_All_PLL_OFC1();
+	Set_PSC_All_On();
+    GEL_TextOut("\n");
+	GEL_TextOut("*****Use R5 or A53 GELs to configure DDR\n");
+}
+
+hotmenu Configure_RAT(){
+   //Configure RAT
+    // Available SMS space to remap =2GB, 0x6000_0000 - 0xDFFF_FFFF
+    // Configure the RAT for view into the SoC
+    // enable and set region size for first two regions
+
+    // region 0 0x60000000 - 0x80000000 -> 0x40000000 - 0x60000000
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x24) = 0x60000000;     //If the SMS reads from here -------> IN ADDRESS
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x2C) = 0x00000000;     //retrieve data from here   -------> OUT ADDRESS[47:32] in RAT register[15:0]
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x28) = 0x40000000;     //                          -------> OUT ADDRESS[31:0]
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x20) = 0x8000001D;     //Size = 512MB and enable region
+
+    // region 1 0x80000000 - 0xA0000000 -> 0X0 - 0x20000000
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x34) = 0x80000000;     //If the SMS reads from here -------> IN ADDRESS
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x3C) = 0x00000000;     //retrieve data from here   -------> OUT ADDRESS[47:32] in RAT register[15:0]
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x38) = 0x00000000;     //                          -------> OUT ADDRESS[31:0]
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x30) = 0x8000001D;     //Size = 512MB and enable region
+
+    //Disable region 2-15
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x40)  = 0x00000000;    //Region 2 Disable
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x50)  = 0x00000000;    //Region 3
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x60)  = 0x00000000;    //Region 4
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x70)  = 0x00000000;    //...
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x80)  = 0x00000000;
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x90)  = 0x00000000;
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0xA0)  = 0x00000000;
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0xB0)  = 0x00000000;
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0xC0)  = 0x00000000;
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0xD0)  = 0x00000000;
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0xE0)  = 0x00000000;
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0xF0)  = 0x00000000;    //...
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x100) = 0x00000000;    //Region 14
+    *(unsigned int *)(CSL_SMS0_RAT_BASE + 0x110) = 0x00000000;    //Region 15
+    GEL_TextOut("RAT has been configured\n");
+}
+
+hotmenu Configure_ATCM(){
+    //Enable ATCM
+    GEL_TextOut("Configuring ATCM for the DM R5F\n");
+    *((unsigned int *)(CSL_WKUP_SEC_MMR0_CFG0_BASE + 0x1C100)) = 0x888;
+    GEL_TextOut("ATCM Configured.\n");
+}
+
+hotmenu Configure_R5F_Bootvectors(){
+    //Set bootvector (default 0x822000)
+    GEL_TextOut("Configuring DM R5F bootvector\n");
+    *((unsigned int *)(CSL_WKUP_SEC_MMR0_CFG0_BASE + 0x1C110)) = 0;
+    *((unsigned int *)(CSL_WKUP_SEC_MMR0_CFG0_BASE + 0x1C114)) = 0;
+    GEL_TextOut("DM R5F Bootvector configured.\n");
+}
+
+hotmenu Configure_R5F_Halt_Upon_PowerUp(){
+    //Put all R5Fs in HALT mode upon PORz by writing to the MMRs.
+    *(unsigned int *)(CSL_WKUP_SEC_MMR0_CFG0_BASE + 0x1C120) = 0x1;  //Cluster 0 Core 0
+    GEL_TextOut("DM R5F Halt bit set.\n");
+}
+Load_MCU_M4_WFI_Vector(){
+    //Goal is to load in a valid stack pointer and reset vector so the M4 does not enter a hard fault when turned on
+    unsigned int address_offset = 0;
+    address_offset = 0x80000000;
+
+    //Set the stack pointer to 0x1000 for M4
+    *((unsigned int *)(MCU_M4_IRAM_BASE_ADDRESS+address_offset+0x0)) = 0x00001000;
+
+    //Set the reset vector, nmi, and hard fault vector for M4 to be a location with no code so it spins, but have bit[0] of the vectors =1 so it does not hard fault
+    *((unsigned int *)(MCU_M4_IRAM_BASE_ADDRESS+address_offset+0x4)) = 0x00000400 + 0x1; //Reset Vector
+
+    //Zero out the location specified so it does not do anything
+    *((unsigned int *)(MCU_M4_IRAM_BASE_ADDRESS+address_offset+0x400)) = 0xBF30BF30;
+
+    GEL_TextOut("MCU_M4F WFI Vector set into IRAM.\n");
+}
+Load_HSM_M4_WFI_Vector(){
+    //Goal is to load in a valid stack pointer and reset vector so the M4 does not enter a hard fault when turned on
+    unsigned int address_offset = 0;
+    address_offset = 0x20000000;
+
+    //Set the stack pointer to 0x1000 for M4
+    *((unsigned int *)(HSM_M4_IRAM_BASE_ADDRESS+address_offset+0x0)) = 0x00001000;
+
+    //Set the reset vector, nmi, and hard fault vector for M4 to be a location with no code so it spins, but have bit[0] of the vectors =1 so it does not hard fault
+    *((unsigned int *)(HSM_M4_IRAM_BASE_ADDRESS+address_offset+0x4)) = 0x00000400 + 0x1; //Reset Vector
+
+    //Zero out the location specified so it does not do anything
+    *((unsigned int *)(HSM_M4_IRAM_BASE_ADDRESS+address_offset+0x400)) = 0xBF30BF30;
+
+    GEL_TextOut("HSM_M4F WFI Vector set into IRAM.\n");
+}
+hotmenu Init_MCU_M4() {
+
+    GEL_TextOut("Initializing MCU_M4F ...\n");
+    Assert_MCU_M4_LRST();
+    Load_MCU_M4_WFI_Vector();
+    Release_MCU_M4_LRST();
+    GEL_TextOut("MCU_M4F Initialized.\n");
+}
+Assert_MCU_M4_LRST() {
+    change_MCU_M4_LRST(1);
+}
+
+Release_MCU_M4_LRST() {
+    change_MCU_M4_LRST(0);
+}
+
+hotmenu Init_HSM_M4() {
+
+    GEL_TextOut("Initializing HSM_M4F ...\n");
+
+    //Unlock TIFS_SEC_MMR
+    *((unsigned int *)(TIFS_SEC_LOCK0_KICK0)) = HSM_KICK0_UNLOCK;
+    *((unsigned int *)(TIFS_SEC_LOCK0_KICK1)) = HSM_KICK1_UNLOCK;
+
+    //Release SEC_HSM_RESET
+    *((unsigned int *)(SEC_HSM_RESET)) = 0x1;
+
+    change_HSM_M4_LRST(1);
+    Load_HSM_M4_WFI_Vector();
+    change_HSM_M4_LRST(0);
+    GEL_TextOut("HSM_M4F Initialized.\n");
+}
+
+
+/* END OF FILE */

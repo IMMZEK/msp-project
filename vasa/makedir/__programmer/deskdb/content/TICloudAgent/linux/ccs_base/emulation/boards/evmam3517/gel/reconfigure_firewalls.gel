@@ -1,0 +1,106 @@
+/**********************************************************************/ 
+/*                                                                    */
+/* Created by Marcin Nowak (TI)                                       */
+/*                                                                    */
+/**********************************************************************/
+
+
+menuitem "FIREWALLS_RECONFIGURATION"
+
+
+
+/*------------------------------------------------------------------------*/
+#define  Q1_LVL1_UNIT_BASE       0x40000000
+#define  L3_CTRL_REG_BASE        0x28000000 + Q1_LVL1_UNIT_BASE
+
+#define  L3_PM_RT_BASE           0x10000 +  L3_CTRL_REG_BASE
+#define  L3_PM_SMS_BASE          0x12000 +  L3_CTRL_REG_BASE
+#define  L3_PM_GPMC_BASE         0x12400 +  L3_CTRL_REG_BASE
+#define  L3_PM_OCMC_RAM_BASE     0x12800 +  L3_CTRL_REG_BASE
+#define  L3_PM_OCMC_ROM_BASE     0x12C00 +  L3_CTRL_REG_BASE
+#define  L3_PM_HWA_Taget_BASE    0x14000 +  L3_CTRL_REG_BASE
+#define  SMS_RG_0_BASE           0x6C000000
+
+#define  PM_REQ_INFO_PERMISSION_0_OFFSET  (0x48u)
+
+#define  PUBLIC_SECURE_DEBUG     0xFFFFFFFF
+
+/*PM_registers*/
+   unsigned long*             GPMC_REQ_INFO_PERMISSION_0 = (L3_PM_GPMC_BASE + PM_REQ_INFO_PERMISSION_0_OFFSET);
+   unsigned long*             OCMRAM_REQ_INFO_PERMISSION_0 = (L3_PM_OCMC_RAM_BASE + PM_REQ_INFO_PERMISSION_0_OFFSET);
+   unsigned long*             IVA2_REQ_INFO_PERMISSION_0 = (L3_PM_HWA_Taget_BASE + PM_REQ_INFO_PERMISSION_0_OFFSET);
+
+/*SMS_RG_registers*/
+   unsigned long*             SMS_RG_0_REQ_INFO_PERMISSION = (SMS_RG_0_BASE + PM_REQ_INFO_PERMISSION_0_OFFSET);
+
+/*------------------------------------------------------------------------*/
+/*Global variables*/
+
+   
+/*------------------------------------------------------------------------*/
+hotmenu SetFirewallsToPublic()
+{
+   long long regVal;
+   
+   GEL_TextOut(" Reconfiguring firewalls to Public accessible \n");
+   
+  //----------------------- RAM ----------------------//
+  //--- After the following configuration, the RAM will be public and 
+  //--- accessible by any system modules (ARM, DMA, DSP, SSI, ...)
+
+  //--- Set the RAM public: all permission for region 0
+/************************* L3 FW Configuration for OCMC RAM  ***************************************/
+   /* First, read the L3 PM req info permission region 0 register*/
+   regVal = *OCMRAM_REQ_INFO_PERMISSION_0;
+
+   *OCMRAM_REQ_INFO_PERMISSION_0 = PUBLIC_SECURE_DEBUG;
+
+   /* again read back this value  */
+   regVal = *OCMRAM_REQ_INFO_PERMISSION_0;
+
+
+/************************* L3 FW Configuration for GPMC  ***************************************/
+   /* after the following configuration GPMC region 0 will be made public - it is secure by default */
+
+   /* read the L3 (GPMC target) FW register req_info_permission value */
+   regVal = *GPMC_REQ_INFO_PERMISSION_0;
+
+   /* set req_info_permission to 0xffff so that it is accessible by all the modules */
+   *GPMC_REQ_INFO_PERMISSION_0 = PUBLIC_SECURE_DEBUG;
+
+   /* again read back this value */
+   regVal = *GPMC_REQ_INFO_PERMISSION_0;
+
+
+/************************* L3 FW Configuration for IVA2 memory region  ***************************************/
+   /* after the following configuration IVA2 memory region 0 will be made public - it is secure by default */
+
+   /* read the L3 (IVA2 target) FW register req_info_permission value */
+   regVal = *IVA2_REQ_INFO_PERMISSION_0;
+   
+   /* set req_info_permission to 0xffff so that it is accessible by all the modules */
+   *IVA2_REQ_INFO_PERMISSION_0 = PUBLIC_SECURE_DEBUG;
+
+   /* again read back this value */
+   regVal = *IVA2_REQ_INFO_PERMISSION_0;
+
+
+/************************* L3 FW Configuration SDRC memory region  ***************************************/
+   /* after the following configuration SDRC region 0 will be made public - it is secure by default */
+
+   /* read the L3 (SMS) FW register req_info_permission value */
+   regVal = *SMS_RG_0_REQ_INFO_PERMISSION;
+   
+   /* set req_info_permission to 0xffff so that it is accessible by all the modules */
+   *SMS_RG_0_REQ_INFO_PERMISSION = PUBLIC_SECURE_DEBUG;
+
+   /* again read back this value */
+   regVal = *SMS_RG_0_REQ_INFO_PERMISSION;
+
+   
+   GEL_TextOut(" COM_RAM, GPMC, IVA2 and SMS firewalls has been reconfigured\n");
+   
+   return;
+}
+
+

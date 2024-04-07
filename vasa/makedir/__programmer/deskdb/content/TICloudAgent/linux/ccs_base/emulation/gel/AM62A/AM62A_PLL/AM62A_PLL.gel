@@ -1,0 +1,2075 @@
+/**
+ * \file  AM62A_PLL.gel
+ *
+ * \brief GEL File to configure the clocking infrastructure on AM62A
+ */
+
+/* Copyright (c) 2022, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+
+//Global definitions
+#define DEBUG 	  0 //turn on this for debugging messages
+#define GEL_TRACE 0 //turn this on for gel_trace debug messages
+
+#define MAIN_PSC_BASE 		(0x00400000)
+#define M3_MCU_OFFSET 		(0x80000000)
+#define M3_MAIN_OFFSET 		(0x80000000)
+
+//PLL Locations
+#define CSL_PLL0_CFG_BASE 										(0x680000ul)
+//Note: AM62A WKUP_PLL0 is named MCU_PLL0 here
+#define CSL_MCU_PLL0_CFG_BASE                                  (0x4040000ul)
+
+//PLL Controller Locations
+#define CSL_PLLCTRL0_BASE   									(0x410000ul)
+#define CSL_MCU_PLLCTRL0_BASE  								    (0x4020000ul)
+
+#define KICK0_UNLOCK 	0x68EF3490
+#define KICK1_UNLOCK 	0xD172BC5A
+#define KICK_LOCK		0x00000000
+
+#define MAIN_DOMAIN	0
+#define MCU_DOMAIN	1
+
+#define CENTER_SPREAD	0
+#define DOWN_SPREAD		1
+
+#define FRAC_PLL 		0
+#define FRAC_F_PLL		1
+#define DESKEW_PLL 		2
+
+//Needed for Address Offset if running from the SMS.
+unsigned int address_offset = 0;
+
+
+/**
+ * \brief   Program the PLL, any associated HSDIVs, PLL Controllers, and SSMODs.
+ *
+ * \param   Base_Address		The base address of the PLL registers. This
+ *                       		changes depending on which domain the PLL is in.
+ *
+ * \param   address_offset 		Address offset for SMS RAT compatibility.
+ * 
+ * \param   PLL_index    		The PLL's index, ranges from 0-25. These are
+ *                   			defined in AM62A_PLL_MMR.GEL.
+ * 
+ * \param   Clocking_Scheme     The operating frequency condition specified.
+ *                         		Changing this will change the OFC of the chip.
+ *
+ * \return  none
+ */
+Program_PLL(unsigned int Base_Address, unsigned int address_offset, unsigned int PLL_index, unsigned int Clocking_Scheme, unsigned int special_config){
+	//For debugging only
+	int debug_info = DEBUG;
+	//All other variables
+	unsigned int fout = 0;
+	unsigned int fref = 0;
+	unsigned int frefdiv = 0;
+	unsigned int fbdiv = 0;
+	signed int frac = 0;
+	unsigned int refdiv = 0;
+	unsigned int postdiv1 = 0;
+	unsigned int postdiv2 = 0;
+	signed int div_val_0 = 0;
+	signed int div_val_1 = 0;
+	signed int div_val_2 = 0;
+	signed int div_val_3 = 0;
+	signed int div_val_4 = 0;
+	signed int div_val_5 = 0;
+	signed int div_val_6 = 0;
+	signed int div_val_7 = 0;
+	signed int div_val_8 = 0;
+	signed int div_val_9 = 0;
+	unsigned int ssmod_spreadval = 0;
+	unsigned int ssmod_input_div = 0;
+	unsigned int ssmod_spreadtype = 0;
+	unsigned int PLL_config_info;
+	unsigned int HSDIV_Presence = 0;
+	unsigned int Num_HSDIV = 0;
+	unsigned int hsdiv_value = 0;
+	unsigned int SSM_Type = 0;
+	unsigned int SSM_Wavetable_Presence = 0; 
+	unsigned int PLL_Type = 0;
+	unsigned int Is_PLL_Locked;
+	unsigned int i = 0; //used for counting for any for loops.
+	unsigned int temp = 0; //used for mathematical calculations.
+
+	//Unlock the PLL
+	Unlock_PLL_MMR(Base_Address, address_offset, PLL_index);
+	
+	if(debug_info){
+		GEL_TextOut("Unlocked PLL MMRs.\n");
+	}
+
+	//Grab the PLL configuration from memory.
+	PLL_config_info = Read_MMR(Base_Address + address_offset + (PLL_index * 0x1000) + PLL_CONFIG);
+
+	if(debug_info){
+		GEL_TextOut("Read configuration MMRs.\n");
+	}
+
+	//Extract the PLL configuration from the register value.
+	HSDIV_Presence = (PLL_config_info & 0xFFFF0000) >> 16; 	//Mask & shift the HSDIV presence field.
+	SSM_Type = (PLL_config_info & 0x00001800) >> 11; 	//Mask & shift the ssm_type field.
+	SSM_Wavetable_Presence = (PLL_config_info & 0x00000100 >> 8); //Mask & shift the ssm_wvtbl field.
+	PLL_Type = (PLL_config_info & 0x00000003); 			//Extract the pll_type field.
+
+	//Need to reform Num_HSDIV. The index is programmed where each bit position represents the existence of a high speed divider.
+	temp = HSDIV_Presence; //use a temp variable to avoid having to re-read the MMR to restore the value.
+	if(debug_info){
+		GEL_TextOut("temp value (HSDIV_Presence) = %x\n",,,,, temp);
+		GEL_TextOut("HSDIV presence value = %x\n",,,,, HSDIV_Presence);
+	}
+
+	while(temp != 0){
+		temp = temp >> 1;	//shift right by 1.
+		Num_HSDIV++; //Count how many bit positions are set to "1".
+	}
+
+	if(debug_info){
+		GEL_TextOut("Number of hsidvs: %d\n",,,,, Num_HSDIV);
+		GEL_TextOut("Parsed PLL configuration information.\n");
+	}
+
+	//*************************************************************************
+	//Gather the PLL divider values for the speific PLL. Special programming modes will be provided later.
+	if(Clocking_Scheme == OFC1){
+		if(PLL_index == 0 && (Base_Address == CSL_PLL0_CFG_BASE)){
+			fbdiv = MAIN_PLL0_OFC1_FBDIV;
+			frac = MAIN_PLL0_OFC1_FRACDIV;
+			frefdiv = MAIN_PLL0_OFC1_PREDIV;
+			postdiv1 = MAIN_PLL0_OFC1_POSTDIV1;
+			postdiv2 = MAIN_PLL0_OFC1_POSTDIV2;
+			div_val_0 = MAIN_PLL0_OFC1_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL0_OFC1_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL0_OFC1_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL0_OFC1_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL0_OFC1_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL0_OFC1_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL0_OFC1_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL0_OFC1_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL0_OFC1_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL0_OFC1_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL0_OFC1_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL0_OFC1_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL0_OFC1_SSMOD_DOWNSPREAD;
+
+			if(special_config == MAIN_PLL0_HSDIV0_250MHz)
+            {
+                div_val_0 = 7;
+            }
+			if(special_config == MAIN_PLL0_HSDIV7_200MHz)
+            {
+			    div_val_7 = 4;
+            }
+			if(special_config == MAIN_PLL0_HSDIV3_80MHz)
+            {
+                div_val_3 = 24;
+			}
+		}else 	if(PLL_index == 1){
+			fbdiv = MAIN_PLL1_OFC1_FBDIV;
+			frac = MAIN_PLL1_OFC1_FRACDIV;
+			frefdiv = MAIN_PLL1_OFC1_PREDIV;
+			postdiv1 = MAIN_PLL1_OFC1_POSTDIV1;
+			postdiv2 = MAIN_PLL1_OFC1_POSTDIV2;
+			div_val_0 = MAIN_PLL1_OFC1_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL1_OFC1_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL1_OFC1_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL1_OFC1_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL1_OFC1_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL1_OFC1_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL1_OFC1_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL1_OFC1_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL1_OFC1_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL1_OFC1_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL1_OFC1_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL1_OFC1_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL1_OFC1_SSMOD_DOWNSPREAD;
+
+			if(special_config == MAIN_PLL1_HSDIV5_120MHz)
+            {
+			    div_val_5 = 7;
+            }
+		}else 	if(PLL_index == 2){
+			fbdiv = MAIN_PLL2_OFC1_FBDIV;
+			frac = MAIN_PLL2_OFC1_FRACDIV;
+			frefdiv = MAIN_PLL2_OFC1_PREDIV;
+			postdiv1 = MAIN_PLL2_OFC1_POSTDIV1;
+			postdiv2 = MAIN_PLL2_OFC1_POSTDIV2;
+			div_val_0 = MAIN_PLL2_OFC1_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL2_OFC1_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL2_OFC1_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL2_OFC1_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL2_OFC1_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL2_OFC1_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL2_OFC1_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL2_OFC1_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL2_OFC1_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL2_OFC1_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL2_OFC1_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL2_OFC1_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL2_OFC1_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 5){
+			fbdiv = MAIN_PLL5_OFC1_FBDIV;
+			frac = MAIN_PLL5_OFC1_FRACDIV;
+			frefdiv = MAIN_PLL5_OFC1_PREDIV;
+			postdiv1 = MAIN_PLL5_OFC1_POSTDIV1;
+			postdiv2 = MAIN_PLL5_OFC1_POSTDIV2;
+			div_val_0 = MAIN_PLL5_OFC1_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL5_OFC1_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL5_OFC1_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL5_OFC1_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL5_OFC1_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL5_OFC1_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL5_OFC1_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL5_OFC1_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL5_OFC1_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL5_OFC1_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL5_OFC1_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL5_OFC1_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL5_OFC1_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 7){
+			fbdiv = MAIN_PLL7_OFC1_FBDIV;
+			frac = MAIN_PLL7_OFC1_FRACDIV;
+			frefdiv = MAIN_PLL7_OFC1_PREDIV;
+			postdiv1 = MAIN_PLL7_OFC1_POSTDIV1;
+			postdiv2 = MAIN_PLL7_OFC1_POSTDIV2;
+			div_val_0 = MAIN_PLL7_OFC1_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL7_OFC1_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL7_OFC1_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL7_OFC1_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL7_OFC1_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL7_OFC1_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL7_OFC1_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL7_OFC1_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL7_OFC1_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL7_OFC1_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL7_OFC1_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL7_OFC1_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL7_OFC1_SSMOD_DOWNSPREAD;
+	        if(special_config == C7X_1000MHz)
+	            {
+	                fbdiv = 80;
+	                div_val_0 = 1;
+	            }
+		}else 	if(PLL_index == 8){
+			fbdiv = MAIN_PLL8_OFC1_FBDIV;
+			frac = MAIN_PLL8_OFC1_FRACDIV;
+			frefdiv = MAIN_PLL8_OFC1_PREDIV;
+			postdiv1 = MAIN_PLL8_OFC1_POSTDIV1;
+			postdiv2 = MAIN_PLL8_OFC1_POSTDIV2;
+			div_val_0 = MAIN_PLL8_OFC1_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL8_OFC1_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL8_OFC1_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL8_OFC1_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL8_OFC1_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL8_OFC1_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL8_OFC1_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL8_OFC1_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL8_OFC1_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL8_OFC1_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL8_OFC1_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL8_OFC1_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL8_OFC1_SSMOD_DOWNSPREAD;
+			
+			if(special_config == ARM0_100MHz)
+            {
+			    fbdiv = 100;
+			    div_val_0 = 24;
+            }
+			if(special_config == ARM0_200MHz)
+            {
+                fbdiv = 96;
+                div_val_0 = 11;
+            }
+			if(special_config == ARM0_300MHz)
+            {
+                fbdiv = 96;
+                div_val_0 = 7;
+            }
+			if(special_config == ARM0_400MHz)
+            {
+			    fbdiv = 96;
+                div_val_0 = 5;
+            }
+		    if(special_config == ARM0_500MHz)
+            {
+		        fbdiv = 100;
+		        div_val_0 = 4;
+            }
+			if(special_config == ARM0_600MHz)
+            {
+			    fbdiv = 96;
+                div_val_0 = 3;
+            }
+			if(special_config == ARM0_700MHz)
+            {
+                fbdiv = 112;
+                div_val_0 = 3;
+            }
+			if(special_config == ARM0_800MHz)
+            {
+			    fbdiv = 96;
+                div_val_0 = 2;
+            }
+			if(special_config == ARM0_900MHz)
+            {
+                fbdiv = 72;
+                div_val_0 = 1;
+            }
+			if(special_config == ARM0_1000MHz)
+            {
+                fbdiv = 80;
+                div_val_0 = 1;
+            }
+			if(special_config == ARM0_1100MHz)
+            {
+                fbdiv = 88;
+                div_val_0 = 1;
+            }
+			if(special_config == ARM0_1200MHz)
+            {
+                fbdiv = 96;
+                div_val_0 = 1;
+            }
+			if(special_config == ARM0_1300MHz)
+            {
+                fbdiv = 104;
+                div_val_0 = 1;
+            }
+			if(special_config == ARM0_1400MHz)
+            {
+                fbdiv = 112;
+                div_val_0 = 1;
+            }
+			if(special_config == ARM0_1250MHz)
+            {
+                fbdiv = 100;
+                div_val_0 = 1;
+            }
+			if(special_config == ARM0_625MHz)
+            {
+                fbdiv = 100;
+                div_val_0 = 3;
+            }
+		}else 	if(PLL_index == 12){
+			fbdiv = MAIN_PLL12_OFC1_FBDIV;
+			frac = MAIN_PLL12_OFC1_FRACDIV;
+			frefdiv = MAIN_PLL12_OFC1_PREDIV;
+			postdiv1 = MAIN_PLL12_OFC1_POSTDIV1;
+			postdiv2 = MAIN_PLL12_OFC1_POSTDIV2;		
+            div_val_0 = MAIN_PLL12_OFC1_HSDIV0_DIV_VAL;
+            div_val_1 = MAIN_PLL12_OFC1_HSDIV1_DIV_VAL;
+            div_val_2 = MAIN_PLL12_OFC1_HSDIV2_DIV_VAL;
+            div_val_3 = MAIN_PLL12_OFC1_HSDIV3_DIV_VAL;
+            div_val_4 = MAIN_PLL12_OFC1_HSDIV4_DIV_VAL;
+            div_val_5 = MAIN_PLL12_OFC1_HSDIV5_DIV_VAL;
+            div_val_6 = MAIN_PLL12_OFC1_HSDIV6_DIV_VAL;
+            div_val_7 = MAIN_PLL12_OFC1_HSDIV7_DIV_VAL;
+            div_val_8 = MAIN_PLL12_OFC1_HSDIV8_DIV_VAL;
+            div_val_9 = MAIN_PLL12_OFC1_HSDIV9_DIV_VAL;
+            ssmod_spreadval = MAIN_PLL12_OFC1_SSMOD_SPREAD;
+            ssmod_input_div = MAIN_PLL12_OFC1_SSMOD_MODDIV;
+            ssmod_spreadtype = MAIN_PLL12_OFC1_SSMOD_DOWNSPREAD;
+			            
+            if(special_config == DDR_200MHz){
+                fbdiv = 64;
+                div_val_0 = 7;
+            }
+            if(special_config == DDR_400MHz){
+                fbdiv = 64;
+                div_val_0 = 3;
+            }
+            if(special_config == DDR_267MHz){
+                fbdiv = 64;
+                div_val_0 = 5;
+            }
+            if(special_config == DDR_25MHz){
+                fbdiv = 64;
+                div_val_0 = 63;
+            }
+            if(special_config == DDR_333MHz){
+                fbdiv = 66;
+                frac = 0xAB851E;
+                div_val_0 = 4 ;
+            }
+			if(special_config == DDR_466_5MHz){
+                fbdiv = 74;
+                //frac = 0xA8F5C2;
+                div_val_0 = 3;
+            }
+			if(special_config == DDR_600MHz){
+			    fbdiv = 72;
+			    div_val_0 = 2;
+			}
+            if(special_config == DDR_800MHz){
+                fbdiv = 64;
+                div_val_0 = 1;
+            }
+            if(special_config == DDR_933_25MHz){
+                fbdiv = 74;
+                //frac = 0xA8F5C2;
+                div_val_0 = 1;
+            }
+            if(special_config == DDR_1000MHz){
+                fbdiv = 80;
+                div_val_0 = 1;
+            }
+            if(special_config == DDR_100MHz){
+                fbdiv = 64;
+                div_val_0 = 15;
+            }
+            if(special_config == DDR_50MHz){
+                fbdiv = 74;
+                frac = 0xA8F5C2;
+                div_val_0 = 31;
+            }
+		}else 	if(PLL_index == 15){
+			fbdiv = MAIN_PLL15_OFC1_FBDIV;
+			frac = MAIN_PLL15_OFC1_FRACDIV;
+			frefdiv = MAIN_PLL15_OFC1_PREDIV;
+			postdiv1 = MAIN_PLL15_OFC1_POSTDIV1;
+			postdiv2 = MAIN_PLL15_OFC1_POSTDIV2;
+			div_val_0 = MAIN_PLL15_OFC1_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL15_OFC1_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL15_OFC1_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL15_OFC1_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL15_OFC1_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL15_OFC1_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL15_OFC1_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL15_OFC1_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL15_OFC1_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL15_OFC1_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL15_OFC1_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL15_OFC1_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL15_OFC1_SSMOD_DOWNSPREAD;
+
+			if(special_config == MAIN_PLL15_HSDIV0_133MHz)
+            {
+			    div_val_0 = 17;
+            }
+
+			if(special_config == MAIN_PLL15_HSDIV1_133MHz)
+            {
+			    div_val_1 = 17;
+            }
+			if(special_config == MAIN_PLL15_HSDIV2_400MHz)
+            {
+			    div_val_2 = 5;
+            }
+		}else 	if(PLL_index == 17){
+			if(special_config == DSS_27)
+			{
+				fbdiv = 0x56;
+				frac = 0x666666;
+			}
+			else if(special_config == DSS_165)
+			{
+				fbdiv = 0x55;
+				frac = 0xCCCCCD;
+			}
+			else if(special_config == DSS_138_5)
+			{
+				fbdiv = 0x58;
+				frac = 0xA3D70A;
+			}
+			else if(special_config == DSS_64)
+			{
+				fbdiv = 0x51;
+				frac = 0xEB851F;
+			}
+			else if(special_config == DSS_92_25)
+			{
+				fbdiv = 0x58;
+				frac = 0x8F5C28;
+			}
+			else if(special_config == DSS_29_75)
+			{
+				fbdiv = 0x50;
+				frac = 0xEB851F;
+			}
+			else
+			{
+				fbdiv = MAIN_PLL17_OFC1_FBDIV;
+				frac = MAIN_PLL17_OFC1_FRACDIV;
+			}
+			frefdiv = MAIN_PLL17_OFC1_PREDIV;
+			postdiv1 = MAIN_PLL17_OFC1_POSTDIV1;
+			postdiv2 = MAIN_PLL17_OFC1_POSTDIV2;
+						if(special_config == DSS_27)
+			{
+				div_val_0 = 0x4F;
+			}
+			else if(special_config == DSS_165)
+			{
+				div_val_0 = 0xC;
+			}
+			else if(special_config == DSS_138_5)
+			{
+				div_val_0 = 0xF;
+			}
+			else if(special_config == DSS_64)
+			{
+				div_val_0 = 0x1F;
+			}
+			else if(special_config == DSS_92_25)
+			{
+				div_val_0 = 0x17;
+			}
+			else if(special_config == DSS_29_75)
+			{
+				div_val_0 = 0x43;
+			}
+			else
+			{
+				div_val_0 = MAIN_PLL17_OFC1_HSDIV0_DIV_VAL;
+			}
+			div_val_1 = MAIN_PLL17_OFC1_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL17_OFC1_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL17_OFC1_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL17_OFC1_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL17_OFC1_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL17_OFC1_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL17_OFC1_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL17_OFC1_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL17_OFC1_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL17_OFC1_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL17_OFC1_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL17_OFC1_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 0){
+			fbdiv = MCU_PLL0_OFC1_FBDIV;
+			frac = MCU_PLL0_OFC1_FRACDIV;
+			frefdiv = MCU_PLL0_OFC1_PREDIV;
+			postdiv1 = MCU_PLL0_OFC1_POSTDIV1;
+			postdiv2 = MCU_PLL0_OFC1_POSTDIV2;
+			div_val_0 = MCU_PLL0_OFC1_HSDIV0_DIV_VAL;
+			div_val_1 = MCU_PLL0_OFC1_HSDIV1_DIV_VAL;
+			div_val_2 = MCU_PLL0_OFC1_HSDIV2_DIV_VAL;
+			div_val_3 = MCU_PLL0_OFC1_HSDIV3_DIV_VAL;
+			div_val_4 = MCU_PLL0_OFC1_HSDIV4_DIV_VAL;
+			div_val_5 = MCU_PLL0_OFC1_HSDIV5_DIV_VAL;
+			div_val_6 = MCU_PLL0_OFC1_HSDIV6_DIV_VAL;
+			div_val_7 = MCU_PLL0_OFC1_HSDIV7_DIV_VAL;
+			div_val_8 = MCU_PLL0_OFC1_HSDIV8_DIV_VAL;
+			div_val_9 = MCU_PLL0_OFC1_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MCU_PLL0_OFC1_SSMOD_SPREAD;
+			ssmod_input_div = MCU_PLL0_OFC1_SSMOD_MODDIV;
+			ssmod_spreadtype = MCU_PLL0_OFC1_SSMOD_DOWNSPREAD;
+
+			if(special_config == MCU_PLL0_HSDIV0_200MHz)
+            {
+                div_val_0 = 11;
+            }
+			if(special_config == MCU_PLL0_HSDIV3_400MHz)
+            {
+                div_val_3 = 5;
+            }
+		}
+	}else 	if(Clocking_Scheme == UC1_4){
+		if(PLL_index == 0 && (Base_Address == CSL_PLL0_CFG_BASE)){
+			fbdiv = MAIN_PLL0_UC_1_4_FBDIV;
+			frac = MAIN_PLL0_UC_1_4_FRACDIV;
+			frefdiv = MAIN_PLL0_UC_1_4_PREDIV;
+			postdiv1 = MAIN_PLL0_UC_1_4_POSTDIV1;
+			postdiv2 = MAIN_PLL0_UC_1_4_POSTDIV2;
+			div_val_0 = MAIN_PLL0_UC_1_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL0_UC_1_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL0_UC_1_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL0_UC_1_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL0_UC_1_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL0_UC_1_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL0_UC_1_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL0_UC_1_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL0_UC_1_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL0_UC_1_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL0_UC_1_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL0_UC_1_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL0_UC_1_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 1){
+			fbdiv = MAIN_PLL1_UC_1_4_FBDIV;
+			frac = MAIN_PLL1_UC_1_4_FRACDIV;
+			frefdiv = MAIN_PLL1_UC_1_4_PREDIV;
+			postdiv1 = MAIN_PLL1_UC_1_4_POSTDIV1;
+			postdiv2 = MAIN_PLL1_UC_1_4_POSTDIV2;
+			div_val_0 = MAIN_PLL1_UC_1_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL1_UC_1_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL1_UC_1_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL1_UC_1_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL1_UC_1_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL1_UC_1_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL1_UC_1_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL1_UC_1_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL1_UC_1_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL1_UC_1_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL1_UC_1_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL1_UC_1_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL1_UC_1_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 2){
+			fbdiv = MAIN_PLL2_UC_1_4_FBDIV;
+			frac = MAIN_PLL2_UC_1_4_FRACDIV;
+			frefdiv = MAIN_PLL2_UC_1_4_PREDIV;
+			postdiv1 = MAIN_PLL2_UC_1_4_POSTDIV1;
+			postdiv2 = MAIN_PLL2_UC_1_4_POSTDIV2;
+			div_val_0 = MAIN_PLL2_UC_1_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL2_UC_1_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL2_UC_1_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL2_UC_1_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL2_UC_1_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL2_UC_1_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL2_UC_1_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL2_UC_1_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL2_UC_1_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL2_UC_1_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL2_UC_1_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL2_UC_1_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL2_UC_1_4_SSMOD_DOWNSPREAD;
+	}else   if(PLL_index == 5){
+          fbdiv = MAIN_PLL5_UC_1_4_FBDIV;
+          frac = MAIN_PLL5_UC_1_4_FRACDIV;
+          frefdiv = MAIN_PLL5_UC_1_4_PREDIV;
+          postdiv1 = MAIN_PLL5_UC_1_4_POSTDIV1;
+          postdiv2 = MAIN_PLL5_UC_1_4_POSTDIV2;
+          div_val_0 = MAIN_PLL5_UC_1_4_HSDIV0_DIV_VAL;
+          div_val_1 = MAIN_PLL5_UC_1_4_HSDIV1_DIV_VAL;
+          div_val_2 = MAIN_PLL5_UC_1_4_HSDIV2_DIV_VAL;
+          div_val_3 = MAIN_PLL5_UC_1_4_HSDIV3_DIV_VAL;
+          div_val_4 = MAIN_PLL5_UC_1_4_HSDIV4_DIV_VAL;
+          div_val_5 = MAIN_PLL5_UC_1_4_HSDIV5_DIV_VAL;
+          div_val_6 = MAIN_PLL5_UC_1_4_HSDIV6_DIV_VAL;
+          div_val_7 = MAIN_PLL5_UC_1_4_HSDIV7_DIV_VAL;
+          div_val_8 = MAIN_PLL5_UC_1_4_HSDIV8_DIV_VAL;
+          div_val_9 = MAIN_PLL5_UC_1_4_HSDIV9_DIV_VAL;
+          ssmod_spreadval = MAIN_PLL5_UC_1_4_SSMOD_SPREAD;
+          ssmod_input_div = MAIN_PLL5_UC_1_4_SSMOD_MODDIV;
+          ssmod_spreadtype = MAIN_PLL5_UC_1_4_SSMOD_DOWNSPREAD;
+	}else   if(PLL_index == 7){
+          fbdiv = MAIN_PLL7_UC_1_4_FBDIV;
+          frac = MAIN_PLL7_UC_1_4_FRACDIV;
+          frefdiv = MAIN_PLL7_UC_1_4_PREDIV;
+          postdiv1 = MAIN_PLL7_UC_1_4_POSTDIV1;
+          postdiv2 = MAIN_PLL7_UC_1_4_POSTDIV2;
+          div_val_0 = MAIN_PLL7_UC_1_4_HSDIV0_DIV_VAL;
+          div_val_1 = MAIN_PLL7_UC_1_4_HSDIV1_DIV_VAL;
+          div_val_2 = MAIN_PLL7_UC_1_4_HSDIV2_DIV_VAL;
+          div_val_3 = MAIN_PLL7_UC_1_4_HSDIV3_DIV_VAL;
+          div_val_4 = MAIN_PLL7_UC_1_4_HSDIV4_DIV_VAL;
+          div_val_5 = MAIN_PLL7_UC_1_4_HSDIV5_DIV_VAL;
+          div_val_6 = MAIN_PLL7_UC_1_4_HSDIV6_DIV_VAL;
+          div_val_7 = MAIN_PLL7_UC_1_4_HSDIV7_DIV_VAL;
+          div_val_8 = MAIN_PLL7_UC_1_4_HSDIV8_DIV_VAL;
+          div_val_9 = MAIN_PLL7_UC_1_4_HSDIV9_DIV_VAL;
+          ssmod_spreadval = MAIN_PLL7_UC_1_4_SSMOD_SPREAD;
+          ssmod_input_div = MAIN_PLL7_UC_1_4_SSMOD_MODDIV;
+          ssmod_spreadtype = MAIN_PLL7_UC_1_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 8){
+			fbdiv = MAIN_PLL8_UC_1_4_FBDIV;
+			frac = MAIN_PLL8_UC_1_4_FRACDIV;
+			frefdiv = MAIN_PLL8_UC_1_4_PREDIV;
+			postdiv1 = MAIN_PLL8_UC_1_4_POSTDIV1;
+			postdiv2 = MAIN_PLL8_UC_1_4_POSTDIV2;
+			div_val_0 = MAIN_PLL8_UC_1_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL8_UC_1_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL8_UC_1_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL8_UC_1_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL8_UC_1_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL8_UC_1_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL8_UC_1_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL8_UC_1_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL8_UC_1_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL8_UC_1_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL8_UC_1_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL8_UC_1_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL8_UC_1_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 12){
+			fbdiv = MAIN_PLL12_UC_1_4_FBDIV;
+			frac = MAIN_PLL12_UC_1_4_FRACDIV;
+			frefdiv = MAIN_PLL12_UC_1_4_PREDIV;
+			postdiv1 = MAIN_PLL12_UC_1_4_POSTDIV1;
+			postdiv2 = MAIN_PLL12_UC_1_4_POSTDIV2;
+			div_val_0 = MAIN_PLL12_UC_1_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL12_UC_1_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL12_UC_1_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL12_UC_1_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL12_UC_1_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL12_UC_1_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL12_UC_1_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL12_UC_1_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL12_UC_1_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL12_UC_1_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL12_UC_1_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL12_UC_1_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL12_UC_1_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 15){
+			fbdiv = MAIN_PLL15_UC_1_4_FBDIV;
+			frac = MAIN_PLL15_UC_1_4_FRACDIV;
+			frefdiv = MAIN_PLL15_UC_1_4_PREDIV;
+			postdiv1 = MAIN_PLL15_UC_1_4_POSTDIV1;
+			postdiv2 = MAIN_PLL15_UC_1_4_POSTDIV2;
+			div_val_0 = MAIN_PLL15_UC_1_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL15_UC_1_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL15_UC_1_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL15_UC_1_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL15_UC_1_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL15_UC_1_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL15_UC_1_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL15_UC_1_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL15_UC_1_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL15_UC_1_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL15_UC_1_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL15_UC_1_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL15_UC_1_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 17){
+			fbdiv = MAIN_PLL17_UC_1_4_FBDIV;
+			frac = MAIN_PLL17_UC_1_4_FRACDIV;
+			frefdiv = MAIN_PLL17_UC_1_4_PREDIV;
+			postdiv1 = MAIN_PLL17_UC_1_4_POSTDIV1;
+			postdiv2 = MAIN_PLL17_UC_1_4_POSTDIV2;
+			div_val_0 = MAIN_PLL17_UC_1_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL17_UC_1_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL17_UC_1_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL17_UC_1_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL17_UC_1_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL17_UC_1_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL17_UC_1_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL17_UC_1_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL17_UC_1_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL17_UC_1_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL17_UC_1_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL17_UC_1_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL17_UC_1_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 0){
+			fbdiv = MCU_PLL0_UC_1_4_FBDIV;
+			frac = MCU_PLL0_UC_1_4_FRACDIV;
+			frefdiv = MCU_PLL0_UC_1_4_PREDIV;
+			postdiv1 = MCU_PLL0_UC_1_4_POSTDIV1;
+			postdiv2 = MCU_PLL0_UC_1_4_POSTDIV2;
+			div_val_0 = MCU_PLL0_UC_1_4_HSDIV0_DIV_VAL;
+			div_val_1 = MCU_PLL0_UC_1_4_HSDIV1_DIV_VAL;
+			div_val_2 = MCU_PLL0_UC_1_4_HSDIV2_DIV_VAL;
+			div_val_3 = MCU_PLL0_UC_1_4_HSDIV3_DIV_VAL;
+			div_val_4 = MCU_PLL0_UC_1_4_HSDIV4_DIV_VAL;
+			div_val_5 = MCU_PLL0_UC_1_4_HSDIV5_DIV_VAL;
+			div_val_6 = MCU_PLL0_UC_1_4_HSDIV6_DIV_VAL;
+			div_val_7 = MCU_PLL0_UC_1_4_HSDIV7_DIV_VAL;
+			div_val_8 = MCU_PLL0_UC_1_4_HSDIV8_DIV_VAL;
+			div_val_9 = MCU_PLL0_UC_1_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MCU_PLL0_UC_1_4_SSMOD_SPREAD;
+			ssmod_input_div = MCU_PLL0_UC_1_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MCU_PLL0_UC_1_4_SSMOD_DOWNSPREAD;
+		}
+	}else 	if(Clocking_Scheme == UC4){
+		if(PLL_index == 0 && (Base_Address == CSL_PLL0_CFG_BASE)){
+			fbdiv = MAIN_PLL0_UC_4_FBDIV;
+			frac = MAIN_PLL0_UC_4_FRACDIV;
+			frefdiv = MAIN_PLL0_UC_4_PREDIV;
+			postdiv1 = MAIN_PLL0_UC_4_POSTDIV1;
+			postdiv2 = MAIN_PLL0_UC_4_POSTDIV2;
+			div_val_0 = MAIN_PLL0_UC_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL0_UC_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL0_UC_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL0_UC_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL0_UC_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL0_UC_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL0_UC_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL0_UC_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL0_UC_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL0_UC_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL0_UC_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL0_UC_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL0_UC_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 1){
+			fbdiv = MAIN_PLL1_UC_4_FBDIV;
+			frac = MAIN_PLL1_UC_4_FRACDIV;
+			frefdiv = MAIN_PLL1_UC_4_PREDIV;
+			postdiv1 = MAIN_PLL1_UC_4_POSTDIV1;
+			postdiv2 = MAIN_PLL1_UC_4_POSTDIV2;
+			div_val_0 = MAIN_PLL1_UC_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL1_UC_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL1_UC_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL1_UC_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL1_UC_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL1_UC_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL1_UC_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL1_UC_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL1_UC_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL1_UC_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL1_UC_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL1_UC_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL1_UC_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 2){
+			fbdiv = MAIN_PLL2_UC_4_FBDIV;
+			frac = MAIN_PLL2_UC_4_FRACDIV;
+			frefdiv = MAIN_PLL2_UC_4_PREDIV;
+			postdiv1 = MAIN_PLL2_UC_4_POSTDIV1;
+			postdiv2 = MAIN_PLL2_UC_4_POSTDIV2;
+			div_val_0 = MAIN_PLL2_UC_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL2_UC_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL2_UC_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL2_UC_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL2_UC_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL2_UC_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL2_UC_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL2_UC_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL2_UC_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL2_UC_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL2_UC_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL2_UC_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL2_UC_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 5){
+			fbdiv = MAIN_PLL5_UC_4_FBDIV;
+			frac = MAIN_PLL5_UC_4_FRACDIV;
+			frefdiv = MAIN_PLL5_UC_4_PREDIV;
+			postdiv1 = MAIN_PLL5_UC_4_POSTDIV1;
+			postdiv2 = MAIN_PLL5_UC_4_POSTDIV2;
+			div_val_0 = MAIN_PLL5_UC_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL5_UC_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL5_UC_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL5_UC_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL5_UC_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL5_UC_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL5_UC_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL5_UC_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL5_UC_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL5_UC_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL5_UC_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL5_UC_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL5_UC_4_SSMOD_DOWNSPREAD;
+	    }else   if(PLL_index == 7){
+          fbdiv = MAIN_PLL7_UC_4_FBDIV;
+          frac = MAIN_PLL7_UC_4_FRACDIV;
+          frefdiv = MAIN_PLL7_UC_4_PREDIV;
+          postdiv1 = MAIN_PLL7_UC_4_POSTDIV1;
+          postdiv2 = MAIN_PLL7_UC_4_POSTDIV2;
+          div_val_0 = MAIN_PLL7_UC_4_HSDIV0_DIV_VAL;
+          div_val_1 = MAIN_PLL7_UC_4_HSDIV1_DIV_VAL;
+          div_val_2 = MAIN_PLL7_UC_4_HSDIV2_DIV_VAL;
+          div_val_3 = MAIN_PLL7_UC_4_HSDIV3_DIV_VAL;
+          div_val_4 = MAIN_PLL7_UC_4_HSDIV4_DIV_VAL;
+          div_val_5 = MAIN_PLL7_UC_4_HSDIV5_DIV_VAL;
+          div_val_6 = MAIN_PLL7_UC_4_HSDIV6_DIV_VAL;
+          div_val_7 = MAIN_PLL7_UC_4_HSDIV7_DIV_VAL;
+          div_val_8 = MAIN_PLL7_UC_4_HSDIV8_DIV_VAL;
+          div_val_9 = MAIN_PLL7_UC_4_HSDIV9_DIV_VAL;
+          ssmod_spreadval = MAIN_PLL7_UC_4_SSMOD_SPREAD;
+          ssmod_input_div = MAIN_PLL7_UC_4_SSMOD_MODDIV;
+          ssmod_spreadtype = MAIN_PLL7_UC_4_SSMOD_DOWNSPREAD;
+	    }else   if(PLL_index == 8){
+          fbdiv = MAIN_PLL8_UC_4_FBDIV;
+          frac = MAIN_PLL8_UC_4_FRACDIV;
+          frefdiv = MAIN_PLL8_UC_4_PREDIV;
+          postdiv1 = MAIN_PLL8_UC_4_POSTDIV1;
+          postdiv2 = MAIN_PLL8_UC_4_POSTDIV2;
+          div_val_0 = MAIN_PLL8_UC_4_HSDIV0_DIV_VAL;
+          div_val_1 = MAIN_PLL8_UC_4_HSDIV1_DIV_VAL;
+          div_val_2 = MAIN_PLL8_UC_4_HSDIV2_DIV_VAL;
+          div_val_3 = MAIN_PLL8_UC_4_HSDIV3_DIV_VAL;
+          div_val_4 = MAIN_PLL8_UC_4_HSDIV4_DIV_VAL;
+          div_val_5 = MAIN_PLL8_UC_4_HSDIV5_DIV_VAL;
+          div_val_6 = MAIN_PLL8_UC_4_HSDIV6_DIV_VAL;
+          div_val_7 = MAIN_PLL8_UC_4_HSDIV7_DIV_VAL;
+          div_val_8 = MAIN_PLL8_UC_4_HSDIV8_DIV_VAL;
+          div_val_9 = MAIN_PLL8_UC_4_HSDIV9_DIV_VAL;
+          ssmod_spreadval = MAIN_PLL8_UC_4_SSMOD_SPREAD;
+          ssmod_input_div = MAIN_PLL8_UC_4_SSMOD_MODDIV;
+          ssmod_spreadtype = MAIN_PLL8_UC_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 12){
+			fbdiv = MAIN_PLL12_UC_4_FBDIV;
+			frac = MAIN_PLL12_UC_4_FRACDIV;
+			frefdiv = MAIN_PLL12_UC_4_PREDIV;
+			postdiv1 = MAIN_PLL12_UC_4_POSTDIV1;
+			postdiv2 = MAIN_PLL12_UC_4_POSTDIV2;
+			div_val_0 = MAIN_PLL12_UC_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL12_UC_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL12_UC_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL12_UC_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL12_UC_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL12_UC_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL12_UC_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL12_UC_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL12_UC_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL12_UC_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL12_UC_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL12_UC_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL12_UC_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 15){
+			fbdiv = MAIN_PLL15_UC_4_FBDIV;
+			frac = MAIN_PLL15_UC_4_FRACDIV;
+			frefdiv = MAIN_PLL15_UC_4_PREDIV;
+			postdiv1 = MAIN_PLL15_UC_4_POSTDIV1;
+			postdiv2 = MAIN_PLL15_UC_4_POSTDIV2;
+			div_val_0 = MAIN_PLL15_UC_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL15_UC_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL15_UC_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL15_UC_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL15_UC_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL15_UC_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL15_UC_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL15_UC_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL15_UC_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL15_UC_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL15_UC_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL15_UC_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL15_UC_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 17){
+			fbdiv = MAIN_PLL17_UC_4_FBDIV;
+			frac = MAIN_PLL17_UC_4_FRACDIV;
+			frefdiv = MAIN_PLL17_UC_4_PREDIV;
+			postdiv1 = MAIN_PLL17_UC_4_POSTDIV1;
+			postdiv2 = MAIN_PLL17_UC_4_POSTDIV2;
+			div_val_0 = MAIN_PLL17_UC_4_HSDIV0_DIV_VAL;
+			div_val_1 = MAIN_PLL17_UC_4_HSDIV1_DIV_VAL;
+			div_val_2 = MAIN_PLL17_UC_4_HSDIV2_DIV_VAL;
+			div_val_3 = MAIN_PLL17_UC_4_HSDIV3_DIV_VAL;
+			div_val_4 = MAIN_PLL17_UC_4_HSDIV4_DIV_VAL;
+			div_val_5 = MAIN_PLL17_UC_4_HSDIV5_DIV_VAL;
+			div_val_6 = MAIN_PLL17_UC_4_HSDIV6_DIV_VAL;
+			div_val_7 = MAIN_PLL17_UC_4_HSDIV7_DIV_VAL;
+			div_val_8 = MAIN_PLL17_UC_4_HSDIV8_DIV_VAL;
+			div_val_9 = MAIN_PLL17_UC_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MAIN_PLL17_UC_4_SSMOD_SPREAD;
+			ssmod_input_div = MAIN_PLL17_UC_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MAIN_PLL17_UC_4_SSMOD_DOWNSPREAD;
+		}else 	if(PLL_index == 0){
+			fbdiv = MCU_PLL0_UC_4_FBDIV;
+			frac = MCU_PLL0_UC_4_FRACDIV;
+			frefdiv = MCU_PLL0_UC_4_PREDIV;
+			postdiv1 = MCU_PLL0_UC_4_POSTDIV1;
+			postdiv2 = MCU_PLL0_UC_4_POSTDIV2;
+			div_val_0 = MCU_PLL0_UC_4_HSDIV0_DIV_VAL;
+			div_val_1 = MCU_PLL0_UC_4_HSDIV1_DIV_VAL;
+			div_val_2 = MCU_PLL0_UC_4_HSDIV2_DIV_VAL;
+			div_val_3 = MCU_PLL0_UC_4_HSDIV3_DIV_VAL;
+			div_val_4 = MCU_PLL0_UC_4_HSDIV4_DIV_VAL;
+			div_val_5 = MCU_PLL0_UC_4_HSDIV5_DIV_VAL;
+			div_val_6 = MCU_PLL0_UC_4_HSDIV6_DIV_VAL;
+			div_val_7 = MCU_PLL0_UC_4_HSDIV7_DIV_VAL;
+			div_val_8 = MCU_PLL0_UC_4_HSDIV8_DIV_VAL;
+			div_val_9 = MCU_PLL0_UC_4_HSDIV9_DIV_VAL;
+			ssmod_spreadval = MCU_PLL0_UC_4_SSMOD_SPREAD;
+			ssmod_input_div = MCU_PLL0_UC_4_SSMOD_MODDIV;
+			ssmod_spreadtype = MCU_PLL0_UC_4_SSMOD_DOWNSPREAD;
+		}
+	}else   if(Clocking_Scheme == OPP_LOW){
+        if(PLL_index == 0 && (Base_Address == CSL_PLL0_CFG_BASE)){
+            fbdiv = MAIN_PLL0_OPP_LOW_FBDIV;
+            frac = MAIN_PLL0_OPP_LOW_FRACDIV;
+            frefdiv = MAIN_PLL0_OPP_LOW_PREDIV;
+            postdiv1 = MAIN_PLL0_OPP_LOW_POSTDIV1;
+            postdiv2 = MAIN_PLL0_OPP_LOW_POSTDIV2;
+            div_val_0 = MAIN_PLL0_OPP_LOW_HSDIV0_DIV_VAL;
+            div_val_1 = MAIN_PLL0_OPP_LOW_HSDIV1_DIV_VAL;
+            div_val_2 = MAIN_PLL0_OPP_LOW_HSDIV2_DIV_VAL;
+            div_val_3 = MAIN_PLL0_OPP_LOW_HSDIV3_DIV_VAL;
+            div_val_4 = MAIN_PLL0_OPP_LOW_HSDIV4_DIV_VAL;
+            div_val_5 = MAIN_PLL0_OPP_LOW_HSDIV5_DIV_VAL;
+            div_val_6 = MAIN_PLL0_OPP_LOW_HSDIV6_DIV_VAL;
+            div_val_7 = MAIN_PLL0_OPP_LOW_HSDIV7_DIV_VAL;
+            div_val_8 = MAIN_PLL0_OPP_LOW_HSDIV8_DIV_VAL;
+            div_val_9 = MAIN_PLL0_OPP_LOW_HSDIV9_DIV_VAL;
+            ssmod_spreadval = MAIN_PLL0_OPP_LOW_SSMOD_SPREAD;
+            ssmod_input_div = MAIN_PLL0_OPP_LOW_SSMOD_MODDIV;
+            ssmod_spreadtype = MAIN_PLL0_OPP_LOW_SSMOD_DOWNSPREAD;
+        }else   if(PLL_index == 1){
+            fbdiv = MAIN_PLL1_OPP_LOW_FBDIV;
+            frac = MAIN_PLL1_OPP_LOW_FRACDIV;
+            frefdiv = MAIN_PLL1_OPP_LOW_PREDIV;
+            postdiv1 = MAIN_PLL1_OPP_LOW_POSTDIV1;
+            postdiv2 = MAIN_PLL1_OPP_LOW_POSTDIV2;
+            div_val_0 = MAIN_PLL1_OPP_LOW_HSDIV0_DIV_VAL;
+            div_val_1 = MAIN_PLL1_OPP_LOW_HSDIV1_DIV_VAL;
+            div_val_2 = MAIN_PLL1_OPP_LOW_HSDIV2_DIV_VAL;
+            div_val_3 = MAIN_PLL1_OPP_LOW_HSDIV3_DIV_VAL;
+            div_val_4 = MAIN_PLL1_OPP_LOW_HSDIV4_DIV_VAL;
+            div_val_5 = MAIN_PLL1_OPP_LOW_HSDIV5_DIV_VAL;
+            div_val_6 = MAIN_PLL1_OPP_LOW_HSDIV6_DIV_VAL;
+            div_val_7 = MAIN_PLL1_OPP_LOW_HSDIV7_DIV_VAL;
+            div_val_8 = MAIN_PLL1_OPP_LOW_HSDIV8_DIV_VAL;
+            div_val_9 = MAIN_PLL1_OPP_LOW_HSDIV9_DIV_VAL;
+            ssmod_spreadval = MAIN_PLL1_OPP_LOW_SSMOD_SPREAD;
+            ssmod_input_div = MAIN_PLL1_OPP_LOW_SSMOD_MODDIV;
+            ssmod_spreadtype = MAIN_PLL1_OPP_LOW_SSMOD_DOWNSPREAD;
+        }else   if(PLL_index == 2){
+            fbdiv = MAIN_PLL2_OPP_LOW_FBDIV;
+            frac = MAIN_PLL2_OPP_LOW_FRACDIV;
+            frefdiv = MAIN_PLL2_OPP_LOW_PREDIV;
+            postdiv1 = MAIN_PLL2_OPP_LOW_POSTDIV1;
+            postdiv2 = MAIN_PLL2_OPP_LOW_POSTDIV2;
+            div_val_0 = MAIN_PLL2_OPP_LOW_HSDIV0_DIV_VAL;
+            div_val_1 = MAIN_PLL2_OPP_LOW_HSDIV1_DIV_VAL;
+            div_val_2 = MAIN_PLL2_OPP_LOW_HSDIV2_DIV_VAL;
+            div_val_3 = MAIN_PLL2_OPP_LOW_HSDIV3_DIV_VAL;
+            div_val_4 = MAIN_PLL2_OPP_LOW_HSDIV4_DIV_VAL;
+            div_val_5 = MAIN_PLL2_OPP_LOW_HSDIV5_DIV_VAL;
+            div_val_6 = MAIN_PLL2_OPP_LOW_HSDIV6_DIV_VAL;
+            div_val_7 = MAIN_PLL2_OPP_LOW_HSDIV7_DIV_VAL;
+            div_val_8 = MAIN_PLL2_OPP_LOW_HSDIV8_DIV_VAL;
+            div_val_9 = MAIN_PLL2_OPP_LOW_HSDIV9_DIV_VAL;
+            ssmod_spreadval = MAIN_PLL2_OPP_LOW_SSMOD_SPREAD;
+            ssmod_input_div = MAIN_PLL2_OPP_LOW_SSMOD_MODDIV;
+            ssmod_spreadtype = MAIN_PLL2_OPP_LOW_SSMOD_DOWNSPREAD;
+        }else   if(PLL_index == 5){
+            fbdiv = MAIN_PLL5_OPP_LOW_FBDIV;
+            frac = MAIN_PLL5_OPP_LOW_FRACDIV;
+            frefdiv = MAIN_PLL5_OPP_LOW_PREDIV;
+            postdiv1 = MAIN_PLL5_OPP_LOW_POSTDIV1;
+            postdiv2 = MAIN_PLL5_OPP_LOW_POSTDIV2;
+            div_val_0 = MAIN_PLL5_OPP_LOW_HSDIV0_DIV_VAL;
+            div_val_1 = MAIN_PLL5_OPP_LOW_HSDIV1_DIV_VAL;
+            div_val_2 = MAIN_PLL5_OPP_LOW_HSDIV2_DIV_VAL;
+            div_val_3 = MAIN_PLL5_OPP_LOW_HSDIV3_DIV_VAL;
+            div_val_4 = MAIN_PLL5_OPP_LOW_HSDIV4_DIV_VAL;
+            div_val_5 = MAIN_PLL5_OPP_LOW_HSDIV5_DIV_VAL;
+            div_val_6 = MAIN_PLL5_OPP_LOW_HSDIV6_DIV_VAL;
+            div_val_7 = MAIN_PLL5_OPP_LOW_HSDIV7_DIV_VAL;
+            div_val_8 = MAIN_PLL5_OPP_LOW_HSDIV8_DIV_VAL;
+            div_val_9 = MAIN_PLL5_OPP_LOW_HSDIV9_DIV_VAL;
+            ssmod_spreadval = MAIN_PLL5_OPP_LOW_SSMOD_SPREAD;
+            ssmod_input_div = MAIN_PLL5_OPP_LOW_SSMOD_MODDIV;
+            ssmod_spreadtype = MAIN_PLL5_OPP_LOW_SSMOD_DOWNSPREAD;
+        }else   if(PLL_index == 7){
+          fbdiv = MAIN_PLL7_OPP_LOW_FBDIV;
+          frac = MAIN_PLL7_OPP_LOW_FRACDIV;
+          frefdiv = MAIN_PLL7_OPP_LOW_PREDIV;
+          postdiv1 = MAIN_PLL7_OPP_LOW_POSTDIV1;
+          postdiv2 = MAIN_PLL7_OPP_LOW_POSTDIV2;
+          div_val_0 = MAIN_PLL7_OPP_LOW_HSDIV0_DIV_VAL;
+          div_val_1 = MAIN_PLL7_OPP_LOW_HSDIV1_DIV_VAL;
+          div_val_2 = MAIN_PLL7_OPP_LOW_HSDIV2_DIV_VAL;
+          div_val_3 = MAIN_PLL7_OPP_LOW_HSDIV3_DIV_VAL;
+          div_val_4 = MAIN_PLL7_OPP_LOW_HSDIV4_DIV_VAL;
+          div_val_5 = MAIN_PLL7_OPP_LOW_HSDIV5_DIV_VAL;
+          div_val_6 = MAIN_PLL7_OPP_LOW_HSDIV6_DIV_VAL;
+          div_val_7 = MAIN_PLL7_OPP_LOW_HSDIV7_DIV_VAL;
+          div_val_8 = MAIN_PLL7_OPP_LOW_HSDIV8_DIV_VAL;
+          div_val_9 = MAIN_PLL7_OPP_LOW_HSDIV9_DIV_VAL;
+          ssmod_spreadval = MAIN_PLL7_OPP_LOW_SSMOD_SPREAD;
+          ssmod_input_div = MAIN_PLL7_OPP_LOW_SSMOD_MODDIV;
+          ssmod_spreadtype = MAIN_PLL7_OPP_LOW_SSMOD_DOWNSPREAD;
+        }else   if(PLL_index == 8){
+          fbdiv = MAIN_PLL8_OPP_LOW_FBDIV;
+          frac = MAIN_PLL8_OPP_LOW_FRACDIV;
+          frefdiv = MAIN_PLL8_OPP_LOW_PREDIV;
+          postdiv1 = MAIN_PLL8_OPP_LOW_POSTDIV1;
+          postdiv2 = MAIN_PLL8_OPP_LOW_POSTDIV2;
+          div_val_0 = MAIN_PLL8_OPP_LOW_HSDIV0_DIV_VAL;
+          div_val_1 = MAIN_PLL8_OPP_LOW_HSDIV1_DIV_VAL;
+          div_val_2 = MAIN_PLL8_OPP_LOW_HSDIV2_DIV_VAL;
+          div_val_3 = MAIN_PLL8_OPP_LOW_HSDIV3_DIV_VAL;
+          div_val_4 = MAIN_PLL8_OPP_LOW_HSDIV4_DIV_VAL;
+          div_val_5 = MAIN_PLL8_OPP_LOW_HSDIV5_DIV_VAL;
+          div_val_6 = MAIN_PLL8_OPP_LOW_HSDIV6_DIV_VAL;
+          div_val_7 = MAIN_PLL8_OPP_LOW_HSDIV7_DIV_VAL;
+          div_val_8 = MAIN_PLL8_OPP_LOW_HSDIV8_DIV_VAL;
+          div_val_9 = MAIN_PLL8_OPP_LOW_HSDIV9_DIV_VAL;
+          ssmod_spreadval = MAIN_PLL8_OPP_LOW_SSMOD_SPREAD;
+          ssmod_input_div = MAIN_PLL8_OPP_LOW_SSMOD_MODDIV;
+          ssmod_spreadtype = MAIN_PLL8_OPP_LOW_SSMOD_DOWNSPREAD;
+        }else   if(PLL_index == 12){
+            fbdiv = MAIN_PLL12_OPP_LOW_FBDIV;
+            frac = MAIN_PLL12_OPP_LOW_FRACDIV;
+            frefdiv = MAIN_PLL12_OPP_LOW_PREDIV;
+            postdiv1 = MAIN_PLL12_OPP_LOW_POSTDIV1;
+            postdiv2 = MAIN_PLL12_OPP_LOW_POSTDIV2;
+            div_val_0 = MAIN_PLL12_OPP_LOW_HSDIV0_DIV_VAL;
+            div_val_1 = MAIN_PLL12_OPP_LOW_HSDIV1_DIV_VAL;
+            div_val_2 = MAIN_PLL12_OPP_LOW_HSDIV2_DIV_VAL;
+            div_val_3 = MAIN_PLL12_OPP_LOW_HSDIV3_DIV_VAL;
+            div_val_4 = MAIN_PLL12_OPP_LOW_HSDIV4_DIV_VAL;
+            div_val_5 = MAIN_PLL12_OPP_LOW_HSDIV5_DIV_VAL;
+            div_val_6 = MAIN_PLL12_OPP_LOW_HSDIV6_DIV_VAL;
+            div_val_7 = MAIN_PLL12_OPP_LOW_HSDIV7_DIV_VAL;
+            div_val_8 = MAIN_PLL12_OPP_LOW_HSDIV8_DIV_VAL;
+            div_val_9 = MAIN_PLL12_OPP_LOW_HSDIV9_DIV_VAL;
+            ssmod_spreadval = MAIN_PLL12_OPP_LOW_SSMOD_SPREAD;
+            ssmod_input_div = MAIN_PLL12_OPP_LOW_SSMOD_MODDIV;
+            ssmod_spreadtype = MAIN_PLL12_OPP_LOW_SSMOD_DOWNSPREAD;
+        }else   if(PLL_index == 15){
+            fbdiv = MAIN_PLL15_OPP_LOW_FBDIV;
+            frac = MAIN_PLL15_OPP_LOW_FRACDIV;
+            frefdiv = MAIN_PLL15_OPP_LOW_PREDIV;
+            postdiv1 = MAIN_PLL15_OPP_LOW_POSTDIV1;
+            postdiv2 = MAIN_PLL15_OPP_LOW_POSTDIV2;
+            div_val_0 = MAIN_PLL15_OPP_LOW_HSDIV0_DIV_VAL;
+            div_val_1 = MAIN_PLL15_OPP_LOW_HSDIV1_DIV_VAL;
+            div_val_2 = MAIN_PLL15_OPP_LOW_HSDIV2_DIV_VAL;
+            div_val_3 = MAIN_PLL15_OPP_LOW_HSDIV3_DIV_VAL;
+            div_val_4 = MAIN_PLL15_OPP_LOW_HSDIV4_DIV_VAL;
+            div_val_5 = MAIN_PLL15_OPP_LOW_HSDIV5_DIV_VAL;
+            div_val_6 = MAIN_PLL15_OPP_LOW_HSDIV6_DIV_VAL;
+            div_val_7 = MAIN_PLL15_OPP_LOW_HSDIV7_DIV_VAL;
+            div_val_8 = MAIN_PLL15_OPP_LOW_HSDIV8_DIV_VAL;
+            div_val_9 = MAIN_PLL15_OPP_LOW_HSDIV9_DIV_VAL;
+            ssmod_spreadval = MAIN_PLL15_OPP_LOW_SSMOD_SPREAD;
+            ssmod_input_div = MAIN_PLL15_OPP_LOW_SSMOD_MODDIV;
+            ssmod_spreadtype = MAIN_PLL15_OPP_LOW_SSMOD_DOWNSPREAD;
+        }else   if(PLL_index == 17){
+            fbdiv = MAIN_PLL17_OPP_LOW_FBDIV;
+            frac = MAIN_PLL17_OPP_LOW_FRACDIV;
+            frefdiv = MAIN_PLL17_OPP_LOW_PREDIV;
+            postdiv1 = MAIN_PLL17_OPP_LOW_POSTDIV1;
+            postdiv2 = MAIN_PLL17_OPP_LOW_POSTDIV2;
+            div_val_0 = MAIN_PLL17_OPP_LOW_HSDIV0_DIV_VAL;
+            div_val_1 = MAIN_PLL17_OPP_LOW_HSDIV1_DIV_VAL;
+            div_val_2 = MAIN_PLL17_OPP_LOW_HSDIV2_DIV_VAL;
+            div_val_3 = MAIN_PLL17_OPP_LOW_HSDIV3_DIV_VAL;
+            div_val_4 = MAIN_PLL17_OPP_LOW_HSDIV4_DIV_VAL;
+            div_val_5 = MAIN_PLL17_OPP_LOW_HSDIV5_DIV_VAL;
+            div_val_6 = MAIN_PLL17_OPP_LOW_HSDIV6_DIV_VAL;
+            div_val_7 = MAIN_PLL17_OPP_LOW_HSDIV7_DIV_VAL;
+            div_val_8 = MAIN_PLL17_OPP_LOW_HSDIV8_DIV_VAL;
+            div_val_9 = MAIN_PLL17_OPP_LOW_HSDIV9_DIV_VAL;
+            ssmod_spreadval = MAIN_PLL17_OPP_LOW_SSMOD_SPREAD;
+            ssmod_input_div = MAIN_PLL17_OPP_LOW_SSMOD_MODDIV;
+            ssmod_spreadtype = MAIN_PLL17_OPP_LOW_SSMOD_DOWNSPREAD;
+        }else   if(PLL_index == 0){
+            fbdiv = MCU_PLL0_OPP_LOW_FBDIV;
+            frac = MCU_PLL0_OPP_LOW_FRACDIV;
+            frefdiv = MCU_PLL0_OPP_LOW_PREDIV;
+            postdiv1 = MCU_PLL0_OPP_LOW_POSTDIV1;
+            postdiv2 = MCU_PLL0_OPP_LOW_POSTDIV2;
+            div_val_0 = MCU_PLL0_OPP_LOW_HSDIV0_DIV_VAL;
+            div_val_1 = MCU_PLL0_OPP_LOW_HSDIV1_DIV_VAL;
+            div_val_2 = MCU_PLL0_OPP_LOW_HSDIV2_DIV_VAL;
+            div_val_3 = MCU_PLL0_OPP_LOW_HSDIV3_DIV_VAL;
+            div_val_4 = MCU_PLL0_OPP_LOW_HSDIV4_DIV_VAL;
+            div_val_5 = MCU_PLL0_OPP_LOW_HSDIV5_DIV_VAL;
+            div_val_6 = MCU_PLL0_OPP_LOW_HSDIV6_DIV_VAL;
+            div_val_7 = MCU_PLL0_OPP_LOW_HSDIV7_DIV_VAL;
+            div_val_8 = MCU_PLL0_OPP_LOW_HSDIV8_DIV_VAL;
+            div_val_9 = MCU_PLL0_OPP_LOW_HSDIV9_DIV_VAL;
+            ssmod_spreadval = MCU_PLL0_OPP_LOW_SSMOD_SPREAD;
+            ssmod_input_div = MCU_PLL0_OPP_LOW_SSMOD_MODDIV;
+            ssmod_spreadtype = MCU_PLL0_OPP_LOW_SSMOD_DOWNSPREAD;
+        }
+	}
+	if(debug_info){
+		GEL_TextOut("Note: deskew PLL programming isn't implemented yet\n");
+	}
+
+	if(PLL_Type == DESKEW_PLL){
+		//Program the Deskew PLL
+		if(debug_info){
+			GEL_TextOut("Put deskew PLL programming here\n");
+		}
+	}else{
+		//Program the fractional PLL. 
+		if(debug_info){
+			GEL_TextOut("This is a fractional PLL, continuing on with normal programming.\n");
+		}
+	}
+
+	//Debugging information for ensuring the GEL is writing to the right areas.
+	if(debug_info){
+		GEL_TextOut("For debugging: \n");
+		GEL_TextOut("Base address: %x\n",,,,, Base_Address);
+		GEL_TextOut("PLL index: %x\n",,,,, PLL_index);
+		GEL_TextOut("PLL index register base: %x\n",,,,, (PLL_index * 0x1000));
+		GEL_TextOut("Register: %x\n",,,,, CONTROL);
+		GEL_TextOut("Clocking scheme: %d\n",,,,, Clocking_Scheme);
+	}
+
+	//Put the PLL in external bypass first. Write "1" to bit #31 in the control register. 
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL), 1, 1, 31);
+	if(debug_info){
+		GEL_TextOut("Set PLL to external bypass via Control MMR.\n");
+	}
+	
+	//delay
+	//for(i = 0; i < 10000; i++);
+	
+	//Disable all HSDIVs
+/*	if(Num_HSDIV){
+		for(i = 0; i < Num_HSDIV; i++){
+			//Clear the enable bit.
+			Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + (i*0x4 + 0x80)), 0, 1, 15);
+			if(debug_info){
+				GEL_TextOut("Disabling HSDIV #%d\n",,,,, i);
+			}
+		}
+	}*/
+
+	//Disable PLL
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL), 0, 1, 15);
+	if(debug_info){
+		GEL_TextOut("Disabled PLL\n");
+	}
+	
+    //Disable calibration CAL_EN=0
+    Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 0, 1, 31);
+    if(debug_info){
+        GEL_TextOut("Disabled Calibration\n");
+    }
+
+	//delay
+	//for(i = 0; i < 10000; i++);
+	
+	//Wait for unlock by polling on the lock bit to be set to "0"
+	while((Read_MMR((unsigned int *)(Base_Address + address_offset + (PLL_index * 0x1000) + STATUS)) & 0x1) == 1);
+
+	if(frac == -1)
+	{	//Integer mode
+		//DACEN=0
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL), 0, 1, 0);
+		//DMEN=0
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL), 0, 1, 1);
+		//CAL_BYP=0
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 0, 1, 15);
+
+	}
+	else
+	{	//Fractional mode
+		//DACEN=1
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL), 1, 1, 0);
+		//DMEN=1
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL), 1, 1, 1);
+		//CAL_BYP=1
+	    Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 1, 1, 15);
+	}
+	
+	//FASTCAL=1
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 1, 1, 20);
+	//CALCNT[2:0]=2
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 2, 3, 16);
+	//CALIN[11:0]=0
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 0, 12, 0);
+
+	//Set the reference divider value
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + OUTPUT_DIV_CONTROL), frefdiv, 6, 0);
+	if(debug_info){
+		GEL_TextOut("Programmed Reference clock pre-divider in output clock divider register.\n");
+	}
+
+	//Set the Feedback divider value (12-bit)
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + FREQ_CONTROL_0), fbdiv, 12, 0);
+	if(debug_info){
+		GEL_TextOut("Programmed the integer feedback divider value in Freq Control 0 register.\n");
+	}
+
+	//Set the fractional multipler/divider value (24-bit)
+	if(frac >= 0){ //Sometimes, the fractional divider value will be set to a negative number.
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + FREQ_CONTROL_1), frac, 24, 0);
+	}else{
+		if(debug_info){
+			GEL_TextOut("Fractional Divider Value is -1, don't set the fractional divider.\n");
+		}
+	}
+	if(debug_info){
+		GEL_TextOut("Programmed the fractional feedback divider in Freq Control 0 register.\n");
+	}
+
+	//Disable the 4-phase clock generator
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL), 0, 1, 5);
+	if(debug_info){
+		GEL_TextOut("Disabled the 4-phase clock generator (clk_4ph_en) in the control register.\n");
+	}
+
+	//Set clk_postdiv_en (enables all the post-divider clocks, 4-phase, and synch. clocks)
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL), 1, 1, 4);
+	if(debug_info){
+		GEL_TextOut("Enabled the FOUT4PHASE clocks in the control register.\n");
+	}
+
+	//Set POSTDIV1
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + OUTPUT_DIV_CONTROL), postdiv1, 3, 16);
+	if(debug_info){
+		GEL_TextOut("Set the first post-divider value (POSTDIV1) in the output divider control register.\n");
+	}
+
+	//Set POSTDIV2
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + OUTPUT_DIV_CONTROL), postdiv2, 3, 24);
+	if(debug_info){
+		GEL_TextOut("Set the second post-divider value (POSTDIV2) in the output divider control register.\n");
+	}
+
+	//Program HSDIVs
+	//HSDIV clocking scheme will already be present.
+	if(Num_HSDIV){
+		for(i = 0; i < Num_HSDIV; i++){
+			//Program the HSDIVs.
+			if(debug_info){
+				GEL_TextOut("Programming HSDIV #%d\n",,,,, i);
+			}
+			if(i == 0){
+				hsdiv_value = div_val_0;
+			}else if(i == 1){
+				hsdiv_value = div_val_1;
+			}else if(i == 2){
+				hsdiv_value = div_val_2;
+			}else if(i == 3){
+				hsdiv_value = div_val_3;
+			}else if(i == 4){
+				hsdiv_value = div_val_4;
+			}else if(i == 5){
+				hsdiv_value = div_val_5;
+			}else if(i == 6){
+				hsdiv_value = div_val_6;
+			}else if(i == 7){
+				hsdiv_value = div_val_7;
+			}else if(i == 8){
+				hsdiv_value = div_val_8;
+			}else if(i == 9){
+				hsdiv_value = div_val_9;
+			}
+			if((signed int)hsdiv_value >= (signed int)0){ //If the HSDIV value is -1 then don't program the specific HSDIV.
+				Program_HSDIV(Base_Address, address_offset, PLL_index, i, hsdiv_value);
+			}else{
+				if(debug_info){
+					GEL_TextOut("i: %d, HSDIV value is -1, don't program this one\n",,,,, i);
+				}
+				//Set the enable bit.
+				Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + (i*0x4 + 0x80)), 0, 1, 15);
+				if(debug_info){
+					GEL_TextOut("HSDIV clock output disabled.\n");
+				}
+			}
+			if(debug_info){
+				GEL_TextOut("HSDIV #%d programmed.\n",,,,, i);
+			}
+		} //end of iterative loop over all existing HSDIVs
+	}
+
+	//Wait 1us
+	//for(i = 0; i < 10000; i++);
+
+	//If the PLL has a PLL controller connected to it, configure the PLL controller as well. 
+	if(PLL_index == 0){
+		if(debug_info){
+			if(Base_Address == CSL_PLL0_CFG_BASE){
+				GEL_TextOut("Selected Main Domain PLL Controller.\n");
+			}else if(Base_Address == CSL_MCU_PLL0_CFG_BASE){
+				GEL_TextOut("Selected WKUP Domain PLL Conntroller.\n");
+			}
+		}
+		if(Base_Address == CSL_PLL0_CFG_BASE){
+			Program_PLLCTRL(CSL_PLLCTRL0_BASE, address_offset);
+		}else if(Base_Address == CSL_MCU_PLL0_CFG_BASE){
+			Program_PLLCTRL(CSL_MCU_PLLCTRL0_BASE, address_offset);
+		}
+	}
+
+	//delay
+	//for(i = 0; i < 10000; i++);
+
+    if(frac == -1)
+    {   //Integer mode
+        //CAL_EN=1
+        Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 1, 1, 31);
+        GEL_TextOut("Setting PLL in integer mode\n");
+    }
+    else
+    {   //Fractional mode
+        //CAL_EN=0
+        Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 0, 1, 31);
+        GEL_TextOut("Setting PLL in fractional mode\n");
+    }
+
+    
+	//Set the PLL enable bit.
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL), 1, 1, 15);
+	if(debug_info){
+		GEL_TextOut("Set the enable bit in the control register.\n");
+	}
+
+    if(frac == -1)
+    {   //wait for cal_lock only in integer mode
+        //Wait for the cal_lock by polling on the lock bit to be set to "1"
+        GEL_TextOut("Waiting for Calibration Lock...\n");
+        while((Read_MMR((unsigned int *)(Base_Address + address_offset + (PLL_index * 0x1000) + CAL_STATUS)) & 0x80000000) == 0);
+        GEL_TextOut("Cal locked\n");
+    }
+    
+	//Wait for the PLL lock by polling on the lock bit to be set to "1"
+	GEL_TextOut("Waiting for PLL Lock...\n");
+	while((Read_MMR((unsigned int *)(Base_Address + address_offset + (PLL_index * 0x1000) + STATUS)) & 0x1) == 0);
+	GEL_TextOut("PLL is locked.\n");
+
+	//TODO: Need to add a timeout period if the PLL doesn't lock
+	//if(debug_info){
+	//	GEL_TextOut("PLL is locked.\n");
+	//}
+
+	//Re-enable all HSDIVs
+/*	if(Num_HSDIV){
+		for(i = 0; i < Num_HSDIV; i++){
+			//Set the enable bit.
+			Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + (i*0x4 + 0x80)), 1, 1, 15);
+			if(debug_info){
+				GEL_TextOut("Enabling HSDIV #%d\n",,,,, i);
+			}
+		}
+	}*/
+
+	//De-assert the PLL_EXTBYPASS bit to engage the PLL and HSDIV outputs with the rest of the SoC.
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL), 0, 1, 31);
+	if(debug_info){
+		GEL_TextOut("External bypass is disabled '0'. PLL and HSDIV clocks are engaging the rest of the SoC.\n");
+	}
+	
+	
+
+	//delay 1us
+	for(i = 0; i < 10000; i++);
+	
+	//DDR PLL Calibration starts here.
+	/*if(PLL_index == 12){
+		//Enable fast calibration
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 1, 1, 20);
+
+		//Set the calibration count to 3 (for slow calibration)
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 3, 3, 16);
+
+		//Set calibration input to 0
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 0, 12, 0);
+
+		//Set calibration bypass to 0
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 0, 1, 15);
+
+		//Enable calibration (set bit 31 to 1)
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 1, 1, 31);
+
+		//Poll on calibration lock
+		while(!Read_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_STATUS), 1, 31));
+
+		//Set calibration to the maximum value (CALCNT = 7)
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL), 7, 3, 16);
+
+		//For debugging
+		temp = 0;
+		temp = Read_MMR(Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL);
+		GEL_TextOut("DDR PLL Calibration Control MMR value: %x\n",,,,, temp);
+		temp = 0;
+		temp = Read_MMR(Base_Address + address_offset + (PLL_index * 0x1000) + CAL_STATUS);
+		GEL_TextOut("DDR PLL Calibration Control MMR value: %x\n",,,,, temp);
+
+	}*/
+}
+
+/**
+ * \brief   Program a high-speed divider.
+ *
+ * \param   Base_Address		The base address of the PLL MMR instance. This
+ *                      		will change depending on which PLL and HSDIV
+ *                      		the user wants to program.
+ *
+ * \param   address_offset 		Address offset for SMS RAT compatibility.
+ *
+ * \param   PLL_index    		The PLL's index, ranges from 0-25. These are
+ *                   			defined in AM62A_PLL_MMR.GEL.
+ *
+ * \param   HSDIV_index			The index of the high speed divider. This is
+ *                     			used to calculate the address of the HSDIV
+ *                     			registers for programming. This parameter will
+ *                     			range from 0-9.
+ *
+ * \param   hsdiv_value 		The value for the high speed divider. An
+ *                     			additional factor of +1 should be factored into
+ *                              the raw value here.
+ *
+ * \return  none
+ */
+Program_HSDIV(unsigned int Base_Address, unsigned int address_offset, unsigned int PLL_index, unsigned int HSDIV_index, unsigned int hsdiv_value){
+	//For debugging only
+	int debug_info = DEBUG;
+	//To calculate the correct register, grab the HSDIV index (from 0 to 9, there will only ever be a max of 10 HSDIVs), and then multiply the offset by 0x4 and add 0x80 to get the right HSDIV offset.
+
+	if(debug_info){
+		GEL_TextOut("hsdiv_value: %d\n",,,,, hsdiv_value);
+	}
+
+	//Set the reset value high.
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + (HSDIV_index*0x4 + 0x80)), 1, 1, 31);
+	if(debug_info){
+		GEL_TextOut("HSDIV reset asserted\n");
+	}
+
+	//Set the divider value to the desired value. it's the bottom 7 bits. 
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + (HSDIV_index*0x4 + 0x80)), hsdiv_value, 7, 0);
+
+	if(debug_info){
+		GEL_TextOut("HSDIV divider value programmed.\n");
+	}
+
+	//Check the enable bit HSDIV_CLKOUT_EN, bit 15 in the HSDIV control register. If it's set don't do anything. If it's cleared, set it.
+	if(!Read_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + (HSDIV_index*0x4 + 0x80)), 1, 15)){
+		//Set the enable bit.
+		Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + (HSDIV_index*0x4 + 0x80)), 1, 1, 15);
+		if(debug_info){
+			GEL_TextOut("HSDIV clock output enabled. Reset automatically de-asserted.\n");
+		}
+	}
+
+	//Explicitly clear the reset.
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + (HSDIV_index*0x4 + 0x80)), 0, 1, 31);
+	if(debug_info){
+		GEL_TextOut("HSDIV reset de-asserted\n");
+	}
+	//Reset will be released.
+}
+
+/**
+ * \brief   Program a Spread-Spectrum Modulator. This is done to reduce EMI.
+ *
+ * \param   Downspread_Value 		The type of spreading behavior that the 
+ *                                  SSMOD will use. Currently, only
+ *                                  center-spreading is supported.
+ *
+ * \param   Mod_In_Div              The divider for the input clock.
+ *
+ * \param   spread_depth			The amount that the frequency will vary
+ *                                  from the center frequency.
+ *
+ * \param   address_offset 			Address offset for SMS RAT compatibility.
+ *
+ * \return  none
+ */
+Program_SSMOD(unsigned int Downspread_Value, unsigned int Mod_In_Div, unsigned int spread_depth, unsigned int address_offset){
+	//For debugging only
+	int debug_info = DEBUG;
+	//All other variables
+	unsigned int Control_regVal; 
+	unsigned int Frequency_regVal;
+
+	Control_regVal = Read_MMR((Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_CONTROL));
+	Frequency_regVal = Read_MMR((Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_SPREAD));
+
+	//Assert SSMOD reset
+	Control_regVal |= (1 << 15); //write a "1" to bit 15, it's "0" at PORz
+	Write_MMR((Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_Control), Control_regVal);
+	Control_regVal = Read_MMR((Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_CONTROL));
+
+	if(debug_info){
+		GEL_TextOut("Asserted SSMOD reset.\n");
+	}
+
+	//Set Downspread
+	Control_regVal |= (Downspread_Value << 4);
+
+	if(debug_info){
+		GEL_TextOut("Set spread type.\n");
+	}
+
+	//set modulator divisor
+	if(Mod_In_Div >= 0){ //If this is -1 then don't set it.
+		Frequency_regVal |= (Mod_In_Div << 16);
+		
+		if(debug_info){
+			GEL_TextOut("Set input divider for SSMOD clock.\n");
+		}else{
+			GEL_TextOut("Not setting input divider for SSMOD clock, value is -1\n");
+		}
+	}
+
+	//Set SS spread value
+	Frequency_regVal |= (spread_depth);
+
+	if(debug_info){
+		GEL_TextOut("Set the spread width.\n");
+	}
+
+	//Write to the SSMOD control + frequency control MMRs
+	Write_MMR((Base_Address + address_offset + (PLL_index + 0x1000) + SSMOD_CONTROL), Control_regVal);
+	Write_MMR((Base_Address + address_offset + (PLL_index + 0x1000) + SSMOD_SPREAD), Frequency_regVal);
+
+	if(debug_info){
+		GEL_TextOut("Wrote control + frequency values to SSMOD control.\n");
+		GEL_TextOut("SSMOD will be enabled in the function Program_PLL().\n");
+	}
+
+}
+
+/**
+ * \brief   Program a PLL Controller associated with a PLL.
+ *
+ * \param   Base_Address 		The base address of the PLL Controller. This
+ *                              will be different than the base addresses of
+ *                              the PLL MMR instances used for programming the
+ *                              PLLs.
+ *
+ * \param   address_offset 		Address offset for SMS RAT compatibility.
+ *
+ * \return  none
+ */
+Program_PLLCTRL(unsigned int Base_Address, unsigned int address_offset){
+	//For debugging only
+	int debug_info = DEBUG;
+	//All other variables
+	//put a bunch of variables here for the PLL controller
+	unsigned int i = 0;
+	unsigned int obsclk_div1 = 0;
+	unsigned int bp_divider = 0;
+	unsigned int output_div1 = 0;
+	unsigned int output_div2 = 0;
+	unsigned int Control_regVal = 0;
+
+	//Grab PLL Controller values from AM62A PLL Paramter GEL file.
+	if(Base_Address == (CSL_PLLCTRL0_BASE)){
+			obsclk_div1 = MAIN_CTRL_OD1;
+			bp_divider = MAIN_CTRL_BPDIV;
+			output_div1 = MAIN_CTRL_DIV1;
+	}else if(Base_Address == (CSL_MCU_PLLCTRL0_BASE)){
+			obsclk_div1 = MCU_CTRL_OD1;
+			bp_divider = MCU_CTRL_BPDIV;
+			output_div1 = MCU_CTRL_DIV1;
+	}else{
+		GEL_TextOut("No PLL controller selected\n");
+	}
+
+	//Check against all boundaries.
+	if((obsclk_div1 < 0) || (obsclk_div1 > 255)){
+		GEL_TextOut("ERROR: INVALID OBSCLK DIVIDER VALUE\n");
+	}
+	if((bp_divider < 0) || (bp_divider > 255)){
+		GEL_TextOut("ERROR: INVALID BYPASS DIVIDER\n");
+	}
+	if((output_div1 < 0) || (output_div1 > 255)){
+		GEL_TextOut("ERROR: INVALID PLL CONTROLLER OUTPUT DIVIDER 1 VALUE\n");
+	}
+	if((output_div2 < 0) || (output_div2 > 255)){
+		GEL_TextOut("ERROR: INVALID PLL CONTROLLER OUTPUT DIVIDER 2 VALUE\n");
+	}
+
+    //Clear BIT 0 in PLL Controller control reigster.
+    Write_MMR_Field((Base_Address + address_offset + PLL_CTRL_PLLCTL_OFFSET), 0, 1, 0);
+    if(debug_info){
+        GEL_TextOut("Cleared bit 0 in the PLL controller control register.\n");
+    }
+
+    //Clear BIT 5 in PLL Controller control register.
+    Write_MMR_Field((Base_Address + address_offset + PLL_CTRL_PLLCTL_OFFSET), 0, 1, 5);
+    if(debug_info){
+        GEL_TextOut("Cleared bit 5 in the PLL Controller control register.\n");
+        GEL_TextOut("PLL controller is now in bypass mode.\n");
+    }
+
+	//Unlock the reset isolation register.
+	//Write_MMR((Base_Address + address_offset + 0xE8), 0x5A69); //Write the key into the Reset Control register to unlock the Reset Isolation Register.
+	//Write_MMR((Base_Address + address_offset + 0xF0), 0xFFFF); //Ensure all output clocks are warm reset-isolated. Only PORz resets should clear the clock settings.
+	if(debug_info){
+		GEL_TextOut("Set reset isolation to prevent a warm reset from killing the PLL controller.\n");
+	}
+
+	Control_regVal = Read_MMR((Base_Address + address_offset + 0x00)); //Read the control register.
+
+	//Set BPDIV (Divider 1, that feeds MAIN_SYSCLKOUT)
+	Write_MMR_Field((Base_Address + address_offset + PLL_CTRL_BPDIV_OFFSET), bp_divider, 8, 0);
+	if(debug_info){
+		GEL_TextOut("Set PLLDIV1 (output_div1).\n");
+	}
+
+	//Set obsdivider- enable the clock (bit 15) and divide by 25 (b11000)
+	Write_MMR((Base_Address + address_offset + PLL_CTRL_OSCDIV1_OFFSET), (obsclk_div1 | (1 << 15)));
+
+	//Clear GOSET bit, the programming bit in the PLL Controller Command Register
+	Write_MMR_Field((Base_Address + address_offset + PLL_CTRL_PLLCMD_OFFSET), 0, 1, 0);
+	if(debug_info){
+		GEL_TextOut("Clear GOSET.\n");
+	}
+
+	//Poll GOSTAT bit, the status bit in the PLL Controller Command Register
+	while((Read_MMR((Base_Address + address_offset + PLL_CTRL_PLLSTAT_OFFSET)) & 0x1));
+	if(debug_info){
+		GEL_TextOut("GOSTAT is clear.\n");
+	}
+
+	//Set PLLDIV1 (Divider 1, that feeds MAIN_SYSCLKOUT)
+	Write_MMR_Field((Base_Address + address_offset + PLL_CTRL_PLLDIV1_OFFSET), output_div1, 8, 0);
+	if(debug_info){
+		GEL_TextOut("Set PLLDIV1 (output_div1).\n");
+	}
+
+	//Clear ALN1 on ALNCTRL (Align Controller Register)
+	Write_MMR_Field((Base_Address + address_offset + PLL_CTRL_ALNCTL_OFFSET), 0, 1, 0);
+	if(debug_info){
+		GEL_TextOut("Set ALN1.\n");
+	}
+	
+	//Setup up OBSCLKs INSIDE the PLL Controller.
+	//Set OCSEL to 0x12 (0b10010, point C, sysrefclk_po, right before it hits DIV1 (set to 1))
+	Write_MMR((Base_Address + address_offset + 0x104), 0x12);
+	if(debug_info){
+		GEL_TextOut("Set OCSEL to 0x12, point C on the observation clock input tree inside the PLL Controller.\n");
+	}
+
+	//Set CLK control register for OBSCLK -- bit 0 (for AUXCLK) is cleared, bit 1 (for OBSCLK) is set
+	Write_MMR((Base_Address + address_offset + 0x148), 0x2);
+	if(debug_info){
+		GEL_TextOut("Set the clock control register to enable the OBSCLK output (bit 1).\n");
+	}
+
+	//Set GOSET to 1
+	Write_MMR_Field((Base_Address + address_offset + PLL_CTRL_PLLCMD_OFFSET), 1, 1, 0);
+	if(debug_info){
+		GEL_TextOut("Set GOSET to 1.\n");
+	}
+	
+	//Poll on GOSTAT to be 0
+	while((Read_MMR((Base_Address + address_offset + PLL_CTRL_PLLSTAT_OFFSET)) & 0x1));
+	if(debug_info){
+		GEL_TextOut("GOSTAT is clear.\n");
+	}
+
+	//Write to PLL control enable bit (bit 0) in PLLCTRL control register. "1" to select refclk mode
+	Write_MMR_Field((Base_Address + address_offset + PLL_CTRL_PLLCTL_OFFSET), 1, 1, 0);
+	if(debug_info){
+		GEL_TextOut("Enable PLL Controller (write to bit 0 in control register).\n");
+	}
+
+	//Clear GOSET
+	Write_MMR_Field((Base_Address + address_offset + PLL_CTRL_PLLCMD_OFFSET), 0, 1, 0);
+	if(debug_info){
+		GEL_TextOut("Set GOSET to 0.\n");
+	}
+
+	//Set PLLRST (bit 3) in PLLCTRL MMR to zero, turning off PLLCTRL reset
+	Write_MMR_Field((Base_Address + address_offset + PLL_CTRL_PLLCTL_OFFSET), 0, 1, 3);
+	if(debug_info){
+		GEL_TextOut("PLLCTRL reset is cleared. PLLCTRL is free.\n");
+	}
+	//PLL Controller is now free.
+}
+
+/**
+ * \brief   Sets up the PLLs. This will call Program_PLL().
+ *
+ * \param   Base_Address 		Base address for the PLL MMRs.
+ *
+ * \param   address_offset 		Address offset for the SMS RAT.
+ *
+ * \param 	PLL_index 			Index of the PLL to program.
+ *
+ * \param 	Clocking_Scheme 	The clocking scheme to program the chip for.
+ *
+ * \return  none
+ */
+Setup(unsigned int Base_Address, unsigned int address_offset, unsigned int PLL_index, unsigned int Clocking_Scheme, unsigned int special_config){
+	//Call the Program_PLL() function with the arguments passed in here.
+	//Will cover PLLs + HSDIVs + PLLCTRLs + SSMOD
+	Program_PLL(Base_Address, address_offset, PLL_index, Clocking_Scheme);
+}
+
+/**
+ * \brief   Read off all the configuration MMRs for a PLL.
+ *
+ * \param   Base_Address        Base address for the PLL MMRs.
+ *
+ * \param   address_offset      Address offset for the SMS RAT.
+ *
+ * \param 	PLL_index 			Index of the PLL to program.
+ *
+ * \return  none
+ */
+Get_PLL_Configuration(unsigned int Base_Address, unsigned int address_offset, unsigned int PLL_index){
+	//For debugging only
+	int debug_info = DEBUG;
+	//All other variables
+	unsigned int fout = 0;
+	unsigned int fref = 0;
+	unsigned int frefdiv = 0;
+	unsigned int fbdiv = 0;
+	signed int frac = 0;
+	unsigned int refdiv = 0;
+	unsigned int postdiv1 = 0;
+	unsigned int postdiv2 = 0;
+	signed int div_val_0 = 0;
+	signed int div_val_1 = 0;
+	signed int div_val_2 = 0;
+	signed int div_val_3 = 0;
+	signed int div_val_4 = 0;
+	signed int div_val_5 = 0;
+	signed int div_val_6 = 0;
+	signed int div_val_7 = 0;
+	signed int div_val_8 = 0;
+	signed int div_val_9 = 0;
+	unsigned int ssmod_spreadval = 0;
+	unsigned int ssmod_input_div = 0;
+	unsigned int ssmod_spreadtype = 0;
+	unsigned int PLL_config_info;
+	unsigned int HSDIV_Presence = 0;
+	unsigned int Num_HSDIV = 0;
+	unsigned int hsdiv_value = 0;
+	unsigned int SSM_Type = 0;
+	unsigned int SSM_Wavetable_Presence = 0;
+	unsigned int PLL_Type = 0;
+	unsigned int Is_PLL_Locked;
+	unsigned int i = 0; //used for counting for any for loops.
+	unsigned int temp = 0; //used for mathematical calculations.
+	unsigned int clkout_en = 0;
+
+	//GEL_TextOut("For debugging: \n");
+	GEL_TextOut("Base address: %x\n",,,,, Base_Address);
+	GEL_TextOut("PLL index: %x\n",,,,, PLL_index);
+	GEL_TextOut("PLL index register base: %x\n",,,,, (PLL_index * 0x1000));
+	GEL_TextOut("Register: %x\n",,,,, CONTROL);
+	//GEL_TextOut("Clocking scheme: %d\n",,,,, Clocking_Scheme);
+
+	//Grab the PLL configuration from memory.
+	PLL_config_info = Read_MMR(Base_Address + address_offset + (PLL_index * 0x1000) + PLL_CONFIG);
+
+	//Extract the PLL configuration from the register value.
+	HSDIV_Presence = (PLL_config_info & 0xFFFF0000) >> 16; 	//Mask & shift the HSDIV presence field.
+	SSM_Type = (PLL_config_info & 0x00001800) >> 11; 	//Mask & shift the ssm_type field.
+	SSM_Wavetable_Presence = (PLL_config_info & 0x00000100 >> 8); //Mask & shift the ssm_wvtbl field.
+	PLL_Type = (PLL_config_info & 0x00000003); 			//Extract the pll_type field.
+
+	//Grab all internal PLL multiplier/divider factors
+	frefdiv = Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + OUTPUT_DIV_CONTROL, 6, 0);
+	fbdiv = Read_MMR(Base_Address + address_offset + (PLL_index * 0x1000) + FREQ_CONTROL_0);
+	frac = Read_MMR(Base_Address + address_offset + (PLL_index * 0x1000) + FREQ_CONTROL_1);
+	postdiv1 = Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + OUTPUT_DIV_CONTROL, 3, 16);
+	postdiv2 = Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000 + OUTPUT_DIV_CONTROL), 3, 24);
+
+	GEL_TextOut("Reference Divider (REF_DIV) is:     %d\n",,,,, frefdiv);
+	GEL_TextOut("Feedback Divider (FB_DIV_INT) is:      %d\n",,,,, fbdiv);
+	GEL_TextOut("Fractional Multiplier (FB_DIV_FRAC) is: %d\n",,,,, frac);
+	GEL_TextOut("VCO Frequency: %dMHz\n",,,,,(int)((25/frefdiv)* (fbdiv + (float)frac/16777216)));
+	GEL_TextOut("Output Divider #1 (POST_DIV1) is:     %d\n",,,,, postdiv1);
+	GEL_TextOut("Output Divider #2 (POST_DIV2) is:     %d\n",,,,, postdiv2);
+    GEL_TextOut("PLL%d_CTRL.PLL_EN=%x\n",,,,, PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL, 1, 15));
+	GEL_TextOut("PLL%d_CTRL Address=%x\n",,,,,PLL_index,Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL);
+	GEL_TextOut("PLL%d_CTRL.DAC_EN=%x\n",,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL, 1, 0));
+	GEL_TextOut("PLL%d_CTRL.DSM_EN=%x\n",,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL, 1, 1));
+	GEL_TextOut("PLL%d_CAL_CTRL Address=%x\n",,,,,PLL_index,Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL);
+	GEL_TextOut("PLL%d_CAL_CTRL.CAL_IN=%x\n",,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL, 12, 0));
+	GEL_TextOut("PLL%d_CAL_CTRL.CAL_BYP=%x\n",,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL, 1, 15));
+	GEL_TextOut("PLL%d_CAL_CTRL.CAL_CNT=%x\n",,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL, 3, 16));
+	GEL_TextOut("PLL%d_CAL_CTRL.FAST_CAL=%x\n",,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL, 1, 20));
+	GEL_TextOut("PLL%d_CAL_CTRL.CAL_EN=%x\n",,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + CAL_CONTROL, 1, 31));
+
+	//if SSC modulator is enabled
+	if(Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_CONTROL, 1, 31) == 0)
+	{
+	    GEL_TextOut("PLL%d_SS_CTRL Address=%x\n"        ,,,,,PLL_index,Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_CONTROL);
+	    GEL_TextOut("PLL%d_SS_CTRL.WAVE_SEL=%x\n"       ,,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_CONTROL, 1, 0));
+	    GEL_TextOut("PLL%d_SS_CTRL.DOWNSPREAD_EN=%x\n"  ,,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_CONTROL, 1, 4));
+	    GEL_TextOut("PLL%d_SS_CTRL.RESET=%x\n"          ,,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_CONTROL, 1, 15));
+	    GEL_TextOut("PLL%d_SS_CTRL.WV_TBLE_MAXADDR=%x\n",,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_CONTROL, 8, 18));
+	    GEL_TextOut("PLL%d_SS_SPREAD Address=%x\n",,,,,PLL_index,Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_SPREAD);
+	    GEL_TextOut("PLL%d_SS_SPREAD.SPREAD=%x\n" ,,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_SPREAD, 5, 0));
+	    GEL_TextOut("PLL%d_SS_SPREAD.MOD_DIV=%x\n",,,,,PLL_index,Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + SSMOD_SPREAD, 4, 16));
+	}
+	else
+	    GEL_TextOut("Spread Spectrum is disabled in this PLL\n");
+	
+	
+	
+	//Need to reform Num_HSDIV. The index is programmed where each bit position represents the existence of a high speed divider.
+	temp = HSDIV_Presence; //use a temp variable to avoid having to re-read the MMR to restore the value.
+	//GEL_TextOut("temp value (HSDIV_Presence) = %x\n",,,,, temp);
+	//GEL_TextOut("HSDIV presence value = %x\n",,,,, HSDIV_Presence);
+
+	while(temp != 0){
+		temp = temp >> 1;	//shift right by 1.
+		Num_HSDIV++; //Count how many bit positions are set to "1".
+	}
+
+	//Print out number of HSDIVs
+	GEL_TextOut("Number of hsdivs: %d\n",,,,, Num_HSDIV);
+
+	//Print out each HSDIV's divider value
+	if(Num_HSDIV){
+		for(i = 0; i < Num_HSDIV; i++){
+			temp = Read_MMR(Base_Address + address_offset + (PLL_index * 0x1000) + (0x80 + 4*i));
+			temp = temp & 0x7F;
+			clkout_en = Read_MMR(Base_Address + address_offset + (PLL_index * 0x1000) + (0x80 + 4*i));
+			clkout_en = Read_MMR_Field(Base_Address + address_offset + (PLL_index * 0x1000) + (0x80 + 4*i), 1, 15);
+			GEL_TextOut("HSDIV #%d's divider value is: %d\n",,,,, i, (temp + 1));
+			GEL_TextOut("HSDIV #%d's clkout_en: %d\n",,,,, i, clkout_en);
+		}
+	}
+
+	GEL_TextOut("Parsed PLL configuration information.\n");
+	GEL_TextOut("\n");
+
+}
+
+/*****************************************************************************/
+/* PLL functions. */
+menuitem "PLL Configuration";
+
+menuitem "PLL Configuration/Version";
+
+/**
+ * \brief   Display revision history and contact information.
+ *
+ * \param   none
+ *
+ * \return  none
+ */
+
+menuitem "PLL Configuration/Get PLL Configurations";
+
+/**
+ * \brief   Print out PLL configurations- all multiplier and divider values.
+ *
+ * \param   none
+ *
+ * \return  none
+ */
+hotmenu Get_All_PLL_Configurations(){
+	unsigned int read_pid;
+	//Check for running from SMS
+	read_pid = *((unsigned int *)(WKUP_CTRL_MMR0_CFG0_BASE+CTRLMMR_PID_OFFSET)); 
+	if (read_pid != CTRLMMR_PID_VAL)
+	{
+		GEL_TextOut("Running from SMS\n",,,,,);
+		address_offset = 0x80000000;
+	}
+	else{
+		GEL_TextOut("Running from R5 or A53\n",,,,,);
+		address_offset = 0x00000000;
+	}
+
+	GEL_TextOut("Getting PLL Configuration...\n");
+	GEL_TextOut("Checking Main PLL\n");
+	Get_PLL_Configuration(CSL_PLL0_CFG_BASE, address_offset, MAIN_PLL_INDEX);
+	GEL_TextOut("Checking Peripheral 0 PLL\n");
+	Get_PLL_Configuration(CSL_PLL0_CFG_BASE, address_offset, PER0_PLL_INDEX);
+	GEL_TextOut("Checking Peripheral 1 PLL\n");
+	Get_PLL_Configuration(CSL_PLL0_CFG_BASE, address_offset, PER1_PLL_INDEX);
+	GEL_TextOut("Checking VIDEO PLL\n");	
+	Get_PLL_Configuration(CSL_PLL0_CFG_BASE, address_offset, VIDEO_PLL_INDEX);
+	GEL_TextOut("Checking C7X PLL\n");
+	Get_PLL_Configuration(CSL_PLL0_CFG_BASE, address_offset, C7X_PLL_INDEX);
+	GEL_TextOut("Checking ARM 0 PLL\n");
+	Get_PLL_Configuration(CSL_PLL0_CFG_BASE, address_offset, ARM0_PLL_INDEX);
+	GEL_TextOut("Checking DDR PLL\n");
+	Get_PLL_Configuration(CSL_PLL0_CFG_BASE, address_offset, DDR_PLL_INDEX);
+	GEL_TextOut("Checking SMS PLL\n");
+	Get_PLL_Configuration(CSL_PLL0_CFG_BASE, address_offset, SMS_PLL_INDEX);
+	GEL_TextOut("Checking DSS1 PLL\n");
+	Get_PLL_Configuration(CSL_PLL0_CFG_BASE, address_offset, DSS1_PLL_INDEX);
+	GEL_TextOut("Checking WKUP PLL 0\n");
+	Get_PLL_Configuration(CSL_MCU_PLL0_CFG_BASE, address_offset, MCU_PLL_INDEX);
+	GEL_TextOut("All PLL configurations printed.\n");
+}
+
+
+/*****************************************************************************/
+/* Global helper functions */
+/*****************************************************************************/
+
+/**
+ * \brief   Unlock the partition for a specific PLL.
+ *
+ * \param   Base_Address 		The base address of the PLL MMR instance.
+ *
+ * \param   PLL_index 			The index of the PLL (one PLL per partition).
+ *
+ * \return  none
+ */
+Unlock_PLL_MMR(unsigned int Base_Address, unsigned int address_offset, unsigned int PLL_index){
+	unsigned int first_mmr, second_mmr;
+	//Calculate the first lock register address based on the PLL index.
+	first_mmr = 0x10 + (PLL_index * 0x1000) + Base_Address + address_offset;
+	//Calculate tthe second lock register address based on the PLL index.
+	second_mmr = 0x14 + (PLL_index * 0x1000) + Base_Address + address_offset;
+	//Unlock the MMR region with those addresses.
+	MMR_Unlock_One((unsigned int *)(first_mmr),(unsigned int *)(second_mmr));
+}
+
+/**
+ * \brief   Lock the partition for a specific PLL.
+ *
+ * \param   Base_Address 		The base address of the PLL MMR instance.
+ *
+ * \param   PLL_index 			The index of the PLL (one PLL per partition).
+ *
+ * \return  none
+ */
+Lock_PLL_MMR(unsigned int Base_Address, unsigned int address_offset, unsigned int PLL_index){
+	unsigned int first_mmr, second_mmr;
+	//Calculate the first lock register address based on the PLL index.
+	first_mmr = 0x10 + (PLL_index * 0x1000) + Base_Address + address_offset;
+	//Calculate tthe second lock register address based on the PLL index.
+	second_mmr = 0x14 + (PLL_index * 0x1000) + Base_Address + address_offset;
+	MMR_Lock_One((unsigned int *)(first_mmr),(unsigned int *)(second_mmr));
+}
+
+/**
+ * \brief   Write the unlocking keys to the locking registers.
+ *
+ * \param   kick0 		 		The first lock register.
+ *
+ * \param   kick1 				The second lock register.
+ *
+ * \return  status 				This should return 0 on a successful unlock.
+ */
+MMR_Unlock_One(unsigned int * kick0, unsigned int * kick1)
+{
+    // initialize the status variable
+    unsigned int status = 1;
+
+    // if either of the kick lock registers are locked
+    if (!(*kick0 & 0x1) | !(*kick1 & 0x1)){
+        // unlock the partition by writing the unlock values to the kick lock registers
+        *kick0 = KICK0_UNLOCK;
+        *kick1 = KICK1_UNLOCK;
+    }
+
+    // check to see if either of the kick registers are unlocked.
+    if (!(*kick0 & 0x1)){
+        status = 0;
+    }
+
+    // return the status to the calling program
+    return status;
+
+}
+
+/**
+ * \brief   Write some lock keys to the locking registers.
+ *
+ * \param   kick0 		 		The first lock register.
+ *
+ * \param   kick1 				The second lock register.
+ *
+ * \return  status 				This should return 0 on a successful lock.
+ */
+MMR_Lock_One(unsigned int * kick0, unsigned int * kick1)
+{
+    // create status return variable
+    unsigned int status = 1;
+
+    // check to see if either of the kick registers are unlocked.
+    if ((*kick0 & 0x1)){
+        // write the kick lock value to the kick lock registers to lock the partition
+        *kick0 = KICK_LOCK;
+        *kick1 = KICK_LOCK;
+    }
+
+    // check to see if either of the kick registers are still unlocked.
+    if ((*kick0 & 0x1)){
+        status = 0;
+    }
+    // return success or failure
+    return status;
+}
+menuitem "Misc";

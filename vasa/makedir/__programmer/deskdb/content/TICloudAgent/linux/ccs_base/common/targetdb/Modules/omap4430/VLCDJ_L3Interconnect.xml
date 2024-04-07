@@ -1,0 +1,141 @@
+<module name="VLCDJ_L3Interconnect" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="VLCDJ_REVISION" acronym="VLCDJ_REVISION" offset="0x0" width="32" description="IP revision">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="TI internal data" description="IP Revision" range="" rwaccess="R"/>
+  </register>
+  <register id="VLCDJ_CTRL" acronym="VLCDJ_CTRL" offset="0x4" width="32" description="Controls common to encoding and decoding">
+    <bitfield id="RESERVED" width="15" begin="31" end="17" resetval="0x00" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="BUSY" width="1" begin="16" end="16" resetval="0" description="Idle/busy status 0: Idle 1: Busy" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="8" begin="15" end="8" resetval="0x00" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="CLRRB" width="1" begin="7" end="7" resetval="0" description="Write only; read returns 0." range="" rwaccess="W"/>
+    <bitfield id="RBEN" width="1" begin="6" end="6" resetval="0" description="Enable RB signaling." range="" rwaccess="RW"/>
+    <bitfield id="INTEN_ERR" width="1" begin="5" end="5" resetval="0" description="Interrupt enable for decode error 0: No interrupt generated on decode error 1: Interrupt generated on decode error" range="" rwaccess="RW"/>
+    <bitfield id="INTEN_DONE" width="1" begin="4" end="4" resetval="0" description="Interrupt enable for task completion. DONE_VLCD is not gated by this and is always asserted at task completion. 0: No interrupt generated on task completion 1: Interrupt generated on task completion" range="" rwaccess="RW"/>
+    <bitfield id="AUTOGATING" width="1" begin="3" end="3" resetval="1" description="Internal clock gating on OCP clock and functional clock 0: Clocks are free-running. 1: Clocks are gated off in sub-blocks that are not required for operation." range="" rwaccess="RW"/>
+    <bitfield id="TRIG_SRC" width="1" begin="2" end="2" resetval="0" description="Which mechanism starts VLCDJ operation 0: MMR write to VLCDJ_CTRL.EN 1: Hardware start signal" range="" rwaccess="RW"/>
+    <bitfield id="MODE" width="1" begin="1" end="1" resetval="0" description="0: Encode 1: Decode" range="" rwaccess="RW"/>
+    <bitfield id="EN" width="1" begin="0" end="0" resetval="0" description="Module enable by software (write-only, read returns 0). When TRIG_SRC = 0 and BUSY = 0, set this field to 1 to start VLCDJ. When TRIG_SRC = 1, writes to this field are ignored. Setting TRIG_SRC = 0 and EN = 1 on the same register write is recognized." range="" rwaccess="W"/>
+  </register>
+  <register id="VLCDJE_CFG" acronym="VLCDJE_CFG" offset="0x8" width="32" description="Encode configuration">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="NMCUS" width="6" begin="13" end="8" resetval="0x00" description="Number of MCUs (FMT = 0, 1) or blocks (FMT = 2) to encode 0: 1 MCU 1: 2 MCUs, etc." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="RLOCEN" width="1" begin="3" end="3" resetval="0" description="Restart marker location recording enable 0: Restart marker location recording disabled 1: Restart marker location recording enabled" range="" rwaccess="RW"/>
+    <bitfield id="RSTEN" width="1" begin="2" end="2" resetval="0" description="Restart marker insertion enable 0: Restart marker insertion disabled 1: Restart marker insertion enabled" range="" rwaccess="RW"/>
+    <bitfield id="FMT" width="2" begin="1" end="0" resetval="0x0" description="0: YUV4:2:0 1: YUV4:2:2 2 : Sequential blocks" range="" rwaccess="RW"/>
+  </register>
+  <register id="VLCDJE_DCPREDY" acronym="VLCDJE_DCPREDY" offset="0xC" width="32" description="Encode DC predictor for Y">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="PREDY" width="12" begin="11" end="0" resetval="0x000" description="DC predictor for Y" range="" rwaccess="RW"/>
+  </register>
+  <register id="VLCDJE_DCPREDUV" acronym="VLCDJE_DCPREDUV" offset="0x10" width="32" description="Encode DC predictor for U and V">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="PREDV" width="12" begin="27" end="16" resetval="0x000" description="DC predictor for V" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="PREDU" width="12" begin="11" end="0" resetval="0x000" description="DC predictor for U" range="" rwaccess="RW"/>
+  </register>
+  <register id="VLCDJE_BSPTR" acronym="VLCDJE_BSPTR" offset="0x14" width="32" description="Encode bitstream pointer">
+    <bitfield id="RESERVED" width="12" begin="31" end="20" resetval="0x000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="BITPTR" width="4" begin="19" end="16" resetval="0x8" description="Bit pointer, 1..8, indicates number of available bits" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="BYTEPTR" width="12" begin="11" end="0" resetval="0x000" description="Byte pointer (to BSMEM)" range="" rwaccess="RW"/>
+  </register>
+  <register id="VLCDJE_CBUF" acronym="VLCDJE_CBUF" offset="0x18" width="32" description="Encode bitstream circular buffer">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="END" width="2" begin="27" end="26" resetval="0x3" description="Ending quarter (1KB each unit) of bitstream buffer. Software can write a byte address into the upper 16 bits of the register." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="10" begin="25" end="16" resetval="0x3FF" description="Read returns 0x3FF." range="" rwaccess="R; returns 1s"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="START" width="2" begin="11" end="10" resetval="0x0" description="Starting quarter (1KB each unit) of bitstream buffer. Software can write a byte address to the lower 16 bits of the register." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="10" begin="9" end="0" resetval="0x000" description="Read returns 0." range="" rwaccess="R"/>
+  </register>
+  <register id="VLCDJE_RSTCFG" acronym="VLCDJE_RSTCFG" offset="0x1C" width="32" description="Encode restart marker configuration">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="INC" width="3" begin="30" end="28" resetval="0x1" description="Restart count increment value" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="27" end="27" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="INIT" width="3" begin="26" end="24" resetval="0x0" description="Restart marker initial count" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="23" end="22" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="PHASE" width="10" begin="21" end="12" resetval="0x000" description="MCU count within the interval" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="11" end="10" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="INTRVL" width="10" begin="9" end="0" resetval="0x000" description="Restart interval (in MCUs)" range="" rwaccess="RW"/>
+  </register>
+  <register id="VLCDJE_DCTQM" acronym="VLCDJE_DCTQM" offset="0x20" width="32" description="Encode DCT coefficient and quantizer matrix pointers">
+    <bitfield id="RESERVED" width="7" begin="31" end="25" resetval="0x00" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="QMR" width="2" begin="24" end="23" resetval="0x0" description="Quarter (128 bytes/unit) of quantization matrix reciprocal. Software can write a byte address to the upper 16 bits of the register." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="9" begin="22" end="14" resetval="0x000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DCT" width="10" begin="13" end="4" resetval="0x000" description="128-bit/word address of DCT coefficients. Software can write a byte address to the lower 16 bits of the register." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+  </register>
+  <register id="VLCDJE_VLCTBL" acronym="VLCDJE_VLCTBL" offset="0x24" width="32" description="Encode Huffman table pointer">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="ADDR" width="10" begin="11" end="2" resetval="0x000" description="Encode Huffman table pointer, 32-bit word address. Software can write a byte address into the entire register." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="1" end="0" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+  </register>
+  <register id="VLCDJE_RSTPTR" acronym="VLCDJE_RSTPTR" offset="0x28" width="32" description="Encode restart marker locations">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="ADDR" width="10" begin="13" end="4" resetval="0x000" description="Pointer to restart marker locations in image buffer, 128-bit/word address Software can write a byte address into the entire register." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+  </register>
+  <register id="VLCDJE_RSTOFST" acronym="VLCDJE_RSTOFST" offset="0x2C" width="32" description="SDRAM address to add to encode restart marker locations">
+    <bitfield id="OFFSET" width="32" begin="31" end="0" resetval="0x0000 0000" description="SDRAM address of bitstream buffer, to be added to the restart marker locations" range="" rwaccess="RW"/>
+  </register>
+  <register id="VLCDJD_CFG" acronym="VLCDJD_CFG" offset="0x40" width="32" description="Decode configuration">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="NMCUS" width="6" begin="13" end="8" resetval="0x00" description="Number of MCUs (FMT = 0, 1) or blocks (FMT = 2) to decode 0: 1 MCU 1: 2 MCUs, etc." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="7" end="3" resetval="0x00" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="RSTEN" width="1" begin="2" end="2" resetval="1" description="Restart marker detection/processing enable 0: Restart marker detection/processing disabled 1: Restart marker detection/processing enabled" range="" rwaccess="RW"/>
+    <bitfield id="FMT" width="2" begin="1" end="0" resetval="0x0" description="0: YUV4:2:0 1: YUV4:2:2 2: Sequential blocks" range="" rwaccess="RW"/>
+  </register>
+  <register id="VLCDJD_DCPREDY" acronym="VLCDJD_DCPREDY" offset="0x44" width="32" description="Decode DC predictor for Y">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="PREDY" width="12" begin="11" end="0" resetval="0x000" description="DC predictor for Y" range="" rwaccess="RW"/>
+  </register>
+  <register id="VLCDJD_DCPREDUV" acronym="VLCDJD_DCPREDUV" offset="0x48" width="32" description="Decode DC predictor for U and V">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="PREDV" width="12" begin="27" end="16" resetval="0x000" description="DC predictor for V" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="PREDU" width="12" begin="11" end="0" resetval="0x000" description="DC predictor for U" range="" rwaccess="RW"/>
+  </register>
+  <register id="VLCDJD_BSPTR" acronym="VLCDJD_BSPTR" offset="0x4C" width="32" description="Decode bitstream pointer">
+    <bitfield id="RESERVED" width="12" begin="31" end="20" resetval="0x000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="BITPTR" width="4" begin="19" end="16" resetval="0x8" description="Bit pointer, 1..8, indicates number of available bits" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="BYTEPTR" width="12" begin="11" end="0" resetval="0x000" description="Byte pointer (to BSMEM)" range="" rwaccess="RW"/>
+  </register>
+  <register id="VLCDJD_CBUF" acronym="VLCDJD_CBUF" offset="0x50" width="32" description="Decode bitstream circular buffer">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="END" width="2" begin="27" end="26" resetval="0x3" description="Ending quarter (1KB each unit) of bitstream buffer. Software can write a byte address into the upper 16 bits of the register." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="10" begin="25" end="16" resetval="0x3FF" description="Read returns 0x3FF." range="" rwaccess="R; returns 1s"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="START" width="2" begin="11" end="10" resetval="0x0" description="Starting quarter (1KB each unit) of bitstream buffer. Software can write a byte address to the lower 16 bits of the register." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="10" begin="9" end="0" resetval="0x000" description="Read returns 0." range="" rwaccess="R"/>
+  </register>
+  <register id="VLCDJD_DCTQM" acronym="VLCDJD_DCTQM" offset="0x54" width="32" description="Decode DCT coefficient and quantizer matrix pointers">
+    <bitfield id="RESERVED" width="7" begin="31" end="25" resetval="0x00" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="QM" width="2" begin="24" end="23" resetval="0x0" description="Quarter (128 bytes/unit) of quantization matrix. Software can write a byte address to the upper 16 bits of the register." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="9" begin="22" end="14" resetval="0x000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DCT" width="10" begin="13" end="4" resetval="0x000" description="128-bit/word address of DCT coefficients. Software can write a byte address to the lower 16 bits of the register." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+  </register>
+  <register id="VLCDJD_CTRLTBL" acronym="VLCDJD_CTRLTBL" offset="0x58" width="32" description="Decode control table base">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="ADDR" width="10" begin="11" end="2" resetval="0x000" description="Starting address of decode control table, 32-bit word. Software can write a byte address into the entire register." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="1" end="0" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+  </register>
+  <register id="VLCDJD_DCDTBL01" acronym="VLCDJD_DCDTBL01" offset="0x5C" width="32" description="Decode Huffman tables 0 and 1">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DCDTBL1" width="10" begin="27" end="18" resetval="0x000" description="Starting byte address of decode table 1, 32-bit word. Software can write a byte address into the lower 16 bits of the register. This is for Luma AC." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="17" end="12" resetval="0x00" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DCDTBL0" width="10" begin="11" end="2" resetval="0x000" description="Starting byte address of decode table 0, 32-bit word. Software can write a byte address into the lower 16 bits of the register. This is for Luma DC." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="1" end="0" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+  </register>
+  <register id="VLCDJD_DCDTBL23" acronym="VLCDJD_DCDTBL23" offset="0x60" width="32" description="Decode Huffman tables 2 and 3">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DCDTBL3" width="10" begin="27" end="18" resetval="0x000" description="Starting byte address of decode table 3, 32-bit word. Software can write a byte address into the lower 16 bits of the register. This is for Chroma AC." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="17" end="12" resetval="0x00" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DCDTBL2" width="10" begin="11" end="2" resetval="0x000" description="Starting byte address of decode table 2, 32-bit word. Software can write a byte address into the lower 16 bits of the register. This is for Chroma DC." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="1" end="0" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+  </register>
+  <register id="VLCDJD_DCTERR" acronym="VLCDJD_DCTERR" offset="0x64" width="32" description="">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="ERRPTR" width="14" begin="13" end="0" resetval="0x0000" description="Byte address pointer to DCT coefficients, near where decode error occurs (read-only)" range="" rwaccess="R"/>
+  </register>
+</module>

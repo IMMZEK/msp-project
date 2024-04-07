@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+
+<module description="RCSS_ECAP" id="RCSS_ECAP">
+  
+  
+  <register acronym="TSCTR" description="Time-Stamp Counter" id="TSCTR" offset="0x0" width="32">
+    
+  <bitfield begin="31" description="Active 32-bit counter register that is used as the capture time-base[[br]]HR mode :[[br]]1) This register reads HRCOUNTER value and is not writable[[br]]2) can be reset using CTRFILTRESET[[br]]3) Its not synchronized to SYSCLK domain so reads may not be accurate" end="0" id="TSCTR" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CTRPHS" description="Counter Phase Offset Value Register" id="CTRPHS" offset="0x4" width="32">
+    
+  <bitfield begin="31" description="Counter phase value register that can be programmed for phase lag/lead. This register CTRPHS is loaded into TSCTR upon either a SYNCI event or S/W force via a control bit. Used to achieve phase control synchronization with respect to other eCAP and EPWM time-bases.[[br]] This register is not applicable in HR mode." end="0" id="CTRPHS" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CAP1" description="Capture 1 Register" id="CAP1" offset="0x8" width="32">
+    
+  <bitfield begin="31" description="This register can be loaded (written) by:[[br]]- Time-Stamp counter value (TSCTR) during a capture event[[br]]- Software - may be useful for test purposes or initialization[[br]]- ARPD shadow register (CAP3) when used in APWM mode" end="0" id="CAP1" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CAP2" description="Capture 2 Register" id="CAP2" offset="0xC" width="32">
+    
+  <bitfield begin="31" description="This register can be loaded (written) by:[[br]]- Time-Stamp ( counter value) during a capture event[[br]]- Software - may be useful for test purposes[[br]]- ACMP shadow register (CAP4) when used in APWM mode" end="0" id="CAP2" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CAP3" description="Capture 3 Register" id="CAP3" offset="0x10" width="32">
+    
+  <bitfield begin="31" description="In CMP mode, this is a time-stamp capture register. [[br]] [[br]]In APWM mode, this is the period shadow (APRD) register. You can update the PWM period value through this register. CAP3 (APRD) shadows CAP1 in this mode." end="0" id="CAP3" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CAP4" description="Capture 4 Register" id="CAP4" offset="0x14" width="32">
+    
+  <bitfield begin="31" description="In CMP mode, this is a time-stamp capture register. [[br]] [[br]]In APWM mode, this is the compare shadow (ACMP) register. You can update the PWM compare value via this register. CAP4 (ACMP) shadows CAP2 in this mode." end="0" id="CAP4" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="ECCTL0" description="Capture Control Register 0" id="ECCTL0" offset="0x24" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="7" id="NU_1" rwaccess="R" width="25"></bitfield>
+    
+  <bitfield begin="6" description="Capture input source select bits[[br]]0000000 capture input is ECAPxINPUT[0] [[br]]0000001 capture input is ECAPxINPUT[1] [[br]]0000010 capture input is ECAPxINPUT[2][[br]]... [[br]]1111111 capture input is ECAPxINPUT[127]" end="0" id="INPUTSEL" rwaccess="RW" width="7"></bitfield>
+  </register>
+  
+  
+  <register acronym="ECCTL1_ECCTL2" description="Capture Control Register 1 &amp; Capture Control Register 2" id="ECCTL1_ECCTL2" offset="0x28" width="32">
+    
+  <bitfield begin="31" description="This bit field reads current status on modulo counter[[br]]00b (R) = CAP1 register gets loaded on next capture event.[[br]]01b (R) = CAP2 register gets loaded on next capture event.[[br]]10b (R) = CAP3 register gets loaded on next capture event.[[br]]11b (R) = CAP4 register gets loaded on next capture event. " end="30" id="MODCNTRSTS" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="29" description="DMA event select[[br]]00b (R/W) = DMA interrupt source is CEVT1[[br]]01b (R/W) = DMA interrupt source is CEVT2[[br]]10b (R/W) = DMA interrupt source is CEVT3[[br]]11b (R/W) = DMA interrupt source is CEVT4 " end="28" id="DMAEVTSEL" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="27" description="Reset Bit[[br]]0h (R) = No effect[[br]]1h (W) = Resets event filter, counter, modulo counter and CEVT[1,2,3,4] and CNTOVF , HRERROR flags[[br]] [[br]]Note: This provides an ability start capture module from known state in case spurious inputs are captured while ECAP is configured. " end="27" id="CTRFILTRESET" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="26" description="APWM output polarity select. This is applicable only in APWM operating mode.  0 ECAP_OUTPUT_ACTIVE_HIGH Output is active high (Compare value defines high time) 1 ECAP_OUTPUT_ACTIVE_LOW Output is active low (Compare value defines low time)" end="26" id="APWMPOL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="25" description="CAP/APWM operating mode select  0 ECAP_MODULE  ECAP module operates in capture mode. This mode forces the following configuration:[[br]]- Inhibits TSCTR resets via CTR = PRD event[[br]]- Inhibits shadow loads on CAP1 and 2 registers[[br]]- Permits user to enable CAP1-4 register load[[br]]- CAPx/APWMx pin operates as a capture input 1 ECAP_MODULE_APWM ECAP module operates in APWM mode. This mode forces the following configuration:[[br]]- Resets TSCTR on CTR = PRD event (period boundary[[br]]- Permits shadow loading on CAP1 and 2 registers[[br]]- Disables loading of time-stamps into CAP1-4 registers[[br]]- CAPx/APWMx pin operates as a APWM output" end="25" id="CAP_APWM" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="24" description="Software-forced Counter (TSCTR) Synchronizer. This provides the user a method to generate a synchronization pulse through software. In APWM mode, the synchronization pulse can also be sourced from the CTR = PRD event.  0 ECAP_ZERO_NOEFFECT Writing a zero has no effect. Reading always returns a zero 1 ECAP_WRITE_TSCTR Writing a one forces a TSCTR shadow load of current ECAP module and any ECAP modules down-stream providing the SYNCO_SEL bits are 0,0. After writing a 1, this bit returns to a zero.[[br]]Note: Selection CTR = PRD is meaningful only in APWM mode; however, you can choose it in CAP mode if you find doing so useful." end="24" id="SWSYNC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="Sync-Out Select  0x0 SWSYNC sync out signal is SWSYNC 0x1 ECAP_CTR_PRD_TO_SYNCOUT Select CTR = PRD event to be the sync-out signal 0x2 ECAP_DISABLE_SYNC_OUT Disable sync out signal 0x3 ECAP_DISABLE_SYNC_OUT Disable sync out signal" end="22" id="SYNCO_SEL" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="21" description="Counter (TSCTR) Sync-In select mode  0 ECAP_DISABLE_SYNC_IN Disable sync-in option 1 ECAP_ENABLE_COUNTER_REGISTER Enable counter (TSCTR) to be loaded from CTRPHS register upon either a SYNCI signal or a S/W force event." end="21" id="SYNCI_EN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="20" description="Time Stamp (TSCTR) Counter Stop (freeze) Control  0 ECAP_TSCTR_STOPPED TSCTR stopped 1 ECAP_TSCTR_FREE_RUNNING TSCTR free-running " end="20" id="TSCTRSTOP" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="19" description="Re-Arming Control. Note: The re-arm function is valid in one shot or continuous mode  0 ECAP_NO_EFFECT_RETURNS_0 Has no effect (reading always returns a 0) 1 ECAP_ARMS_ONESHOT Arms the one-shot sequence as follows:[[br]]1) Resets the Mod4 counter to zero[[br]]2) Unfreezes the Mod4 counter[[br]]3) Enables capture register loads" end="19" id="REARM" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="18" description="Stop value for one-shot mode. This is the number (between 1-4) of captures allowed to occur before the CAP(1-4) registers are frozen, that is, capture sequence is stopped.[[br]]Wrap value for continuous mode. This is the number (between 1-4) of the capture register in which the circular buffer wraps around and starts again. [[br]]Notes: STOP_WRAP is compared to Mod4 counter and, when equal, 2 actions occur:[[br]]- Mod4 counter is stopped (frozen)[[br]]- Capture register loads are inhibited[[br]]In one-shot mode, further interrupt events are blocked until re-armed.  0x0 ECAP_STOPEVENT1_WRAPEVENT2 Stop after Capture Event 1 in one-shot mode[[br]]Wrap after Capture Event 1 in continuous mode. 0x1 ECAP_STOPEVENT2_WRAPEVENT2 Stop after Capture Event 2 in one-shot mode[[br]]Wrap after Capture Event 2 in continuous mode. 0x2 ECAP_STOPEVENT3_WRAPEVENT2 Stop after Capture Event 3 in one-shot mode[[br]]Wrap after Capture Event 3 in continuous mode. 0x3 ECAP_STOPEVENT4_WRAPEVENT2 Stop after Capture Event 4 in one-shot mode[[br]]Wrap after Capture Event 4 in continuous mode." end="17" id="STOP_WRAP" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="16" description="Continuous or one-shot mode control (applicable only in capture mode)  0 ECAP_OPP_CONT Operate in continuous mode 1 ECAP_OPP_ONE Operate in one-Shot mode" end="16" id="CONT_ONESHT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="Emulation Control 0x0 - ECAP_STOP_EMU TSCTR counter stops immediately on emulation suspend 0x1 - ECAP_RUNS_UNTIL TSCTR counter runs until = 0 0x2 - ECAP_UNAF_EMU_SUS TSCTR counter is unaffected by emulation suspend (Run Free) 0x3 - ECAP_UNAF_EMU_SUS2 TSCTR counter is unaffected by emulation suspend (Run Free)" end="14" id="FREE_SOFT" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="13" description="Event Filter prescale select 0x00 ECAP_DIV1  Divide by 1 (i.e,. no prescale, by-pass the prescaler) 0x01 ECAP_DIV2 Divide by 2 0x02 ECAP_DIV4 Divide by 4 0x03 ECAP_DIV6 Divide by 6 0x04 ECAP_DIV8 Divide by 8 0x05 ECAP_DIV10 Divide by 10 0x1E ECAP_DIV60 Divide by 60 0x1F ECAP_DIV62 Divide by 62" end="9" id="PRESCALE" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="8" description="Enable Loading of CAP1-4 registers on a capture event. Note that this bit does not disable CEVTn events from being generated.  0 ECAP_DISABLE Disable CAP1-4 register loads at capture event time. 1 ECAP_ENABLE  Enable CAP1-4 register loads at capture event time." end="8" id="CAPLDEN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Counter Reset on Capture Event 4  0 ECAP_DO_NOT_RESET_EVENT4 Do not reset counter on Capture Event 4 (absolute time stamp operation) 1 ECAP_RESET_EVENT4 Reset counter after Capture Event 4 time-stamp has been captured (used in difference mode operation)" end="7" id="CTRRST4" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Capture Event 4 Polarity select  0 ECAP_CAP_EVENT4_RISE Capture Event 4 triggered on a rising edge (RE) 1 ECAP_CAP_EVENT4_FALL Capture Event 4 triggered on a falling edge (FE)" end="6" id="CAP4POL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Counter Reset on Capture Event 3  0 ECAP_DO_NOT_RESET_EVENT3 Do not reset counter on Capture Event 3 (absolute time stamp) 1 ECAP_RESET_EVENT3 Reset counter after Event 3 time-stamp has been captured (used in difference mode operation)" end="5" id="CTRRST3" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Capture Event 3 Polarity select  0 ECAP_CAP_EVENT3_RISE Capture Event 3 triggered on a rising edge (RE) 1 ECAP_CAP_EVENT3_FALL Capture Event 3 triggered on a falling edge (FE)" end="4" id="CAP3POL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Counter Reset on Capture Event 2  0 ECAP_DO_NOT_RESET_EVENT2 Do not reset counter on Capture Event 2 (absolute time stamp) 1 ECAP_RESET_EVENT2 Reset counter after Event 2 time-stamp has been captured (used in difference mode operation)" end="3" id="CTRRST2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Capture Event 2 Polarity select  0 ECAP_CAP_EVENT2_RISE Capture Event 2 triggered on a rising edge (RE) 1 ECAP_CAP_EVENT2_FALL Capture Event 2 triggered on a falling edge (FE)" end="2" id="CAP2POL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Counter Reset on Capture Event 1  0 ECAP_DO_NOT_RESET_EVENT1 Do not reset counter on Capture Event 1 (absolute time stamp) 1 ECAP_RESET_EVENT1 Reset counter after Event 1 time-stamp has been captured (used in difference mode operation)" end="1" id="CTRRST1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Capture Event 1 Polarity select  0 ECAP_CAP_EVENT1_RISE Capture Event 1 triggered on a rising edge (RE) 1 ECAP_CAP_EVENT1_FALL Capture Event 1 triggered on a falling edge (FE)" end="0" id="CAP1POL" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="ECEINT_ECFLG" description="The interrupt enable bits (CEVT1, ...) block any of the selected events from generating an interrupt. Events will still be latched into the flag bit (ECFLG register) and can be forced/cleared via the ECFRC/ECCLR registers.[[br]][[br]]The proper procedure for configuring peripheral modes and interrupts is as follows:[[br]][[br]]- Disable global interrupts[[br]]- Stop eCAP counter[[br]]- Disable eCAP interrupts[[br]]- Configure peripheral registers[[br]]- Clear spurious eCAP interrupt flags[[br]]- Enable eCAP interrupts[[br]]- Start eCAP counter[[br]]- Enable global interrupts &amp; Capture Interrupt Flag Register" id="ECEINT_ECFLG" offset="0x2C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="25" id="NU_4" rwaccess="R" width="7"></bitfield>
+    
+  <bitfield begin="24" description="High resolution error status flag  Read 0 ECAP_INDICATE_NO_EVENT Indicates no event occurred Read 1 ECAP_INDICATE_HIGH_RESOLUTION_ERROR Indicates the High resolution Error occurred" end="24" id="HRERROR_FLG" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="23" description="Compare Equal Compare Status Flag. This flag is active only in APWM mode.  Read 0 ECAP_INDICATE_NO_EVENT Indicates no event occurred Read 1 ECAP_INDICATE_COUNTER_COMPARE_REG Indicates the counter (TSCTR) reached the compare register value (ACMP)" end="23" id="CTR_CMP_FLG" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="22" description="Counter Equal Period Status Flag. This flag is only active in APWM mode.  Read 0 ECAP_INDICATE_NO_EVENT Indicates no event occurred Read 1 ECAP_INDICATE_PERIOD_VALUE_RESET Indicates the counter (TSCTR) reached the period register value (APRD) and was reset." end="22" id="CTR_PRD_FLG" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="21" description="Counter Overflow Status Flag. This flag is active in CAP and APWM mode.  Read 0 ECAP_INDICATE_NO_EVENT Indicates no event occurred Read 1 ECAP_INDICATE_COUNTER_TRANS Indicates the counter (TSCTR) has made the transition from FFFFFFFF to 00000000" end="21" id="CTROVF_FLG" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="20" description="Capture Event 4 Status Flag This flag is only active in CAP mode.  Read 0 ECAP_INDICATE_NO_EVENT Indicates no event occurred Read 1 ECAP_INDICATE_4TH_EVENT_ECAPX Indicates the fourth event occurred at ECAPx pin" end="20" id="CEVT4_FLG" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="19" description="Capture Event 3 Status Flag. This flag is active only in CAP mode.  Read 0 ECAP_INDICATE_NO_EVENT Indicates no event occurred Read 1 ECAP_INDICATE_3RD_EVENT_ECAPX Indicates the third event occurred at ECAPx pin." end="19" id="CEVT3_FLG" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="18" description="Capture Event 2 Status Flag. This flag is only active in CAP mode.  Read 0 ECAP_INDICATE_NO_EVENT Indicates no event occurred Read 1 ECAP_INDICATE_2ND_EVENT_ECAPX Indicates the second event occurred at ECAPx pin." end="18" id="CEVT2_FLG" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Capture Event 1 Status Flag. This flag is only active in CAP mode.  Read 0 ECAP_INDICATE_NO_EVENT  Indicates no event occurred Read 1 ECAP_INDICATE_1ST_EVENT_ECAPX Indicates the first event occurred at ECAPx pin." end="17" id="CEVT1_FLG" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="16" description="Global Interrupt Status Flag  Read 0 ECAP_INDICATE_NO_EVENT Indicates no event occurred Read 1 ECAP_INDICATE_INTERRUPT Indicates that an interrupt was generated." end="16" id="INT_FLG" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="9" id="NU_3" rwaccess="R" width="7"></bitfield>
+    
+  <bitfield begin="8" description="High resolution error interrupt enable  0 ECAP_DISAB_HRERROR_INTERRUPT Disable High Resolution Error as an Interrupt source 1 ECAP_ENAB_HRERROR_INTERRUPT Enable High Resolution Error as an Interrupt source" end="8" id="HRERROR" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Counter Equal Compare Interrupt Enable  0 ECAP_DISAB_CE_INTERRUPT Disable Compare Equal as an Interrupt source 1 ECAP_ENAB_CE_INTERRUPT Enable Compare Equal as an Interrupt source" end="7" id="CTR_EQ_CMP" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Counter Equal Period Interrupt Enable  0 ECAP_DISAB_PE_INTERRUPT Disable Period Equal as an Interrupt source 1 ECAP_ENAB_PE_INTERRUPT Enable Period Equal as an Interrupt source" end="6" id="CTR_EQ_PRD" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Counter Overflow Interrupt Enable  0 ECAP_DISAB_CO_INTERRUPT Disabled counter Overflow as an Interrupt source 1 ECAP_ENAB_CO_INTERRUPT Enable counter Overflow as an Interrupt source" end="5" id="CTROVF" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Capture Event 4 Interrupt Enable  0 ECAP_DISAB_CAP4_INTERRUPT Disable Capture Event 4 as an Interrupt source 1 ECAP_ENAB_CAP4_INTERRUPT Capture Event 4 Interrupt Enable" end="4" id="CEVT4" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Capture Event 3 Interrupt Enable  0 ECAP_DISAB_CAP3_INTERRUPT Disable Capture Event 3 as an Interrupt source 1 ECAP_ENAB_CAP3_INTERRUPT Enable Capture Event 3 as an Interrupt source" end="3" id="CEVT3" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Capture Event 2 Interrupt Enable  0 ECAP_DISAB_CAP2_INTERRUPT Disable Capture Event 2 as an Interrupt source 1 ECAP_ENAB_CAP2_INTERRUPT Enable Capture Event 2 as an Interrupt source" end="2" id="CEVT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Capture Event 1 Interrupt Enable  0 ECAP_DISAB_CAP1_INTERRUPT Disable Capture Event 1 as an Interrupt source 1 ECAP_ENAB_CAP1_INTERRUPT Enable Capture Event 1 as an Interrupt source" end="1" id="CEVT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved" end="0" id="NU_2" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="ECCLR_ECFRC" description="Capture Interrupt Clear Register &amp; Capture Interrupt Force Register" id="ECCLR_ECFRC" offset="0x30" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="25" id="NU_6" rwaccess="R" width="7"></bitfield>
+    
+  <bitfield begin="24" description="High resolution error Force interrupt 0 ECAP_NO_EFFECT_0 No effect. Always reads back a 0. 1 ECAP_1_SETS_CTR_CMP Writing a 1 sets the CTR_CMP flag." end="24" id="HRERROR_FRC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="Force Counter Equal Compare Interrupt. This event is only active in APWM mode. 0 ECAP_NO_EFFECT_0 No effect. Always reads back a 0. 1 ECAP_1_SETS_CTR_CMP Writing a 1 sets the CTR_CMP flag." end="23" id="CTR_CMP_FRC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="22" description="Force Counter Equal Period Interrupt. This event is only active in APWM mode. 0 ECAP_NO_EFFECT_0 No effect. Always reads back a 0. 1 ECAP_1_CLEARS_CTR_PRD Writing a 1 sets the CTR_PRD flag." end="22" id="CTR_PRD_FRC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="21" description="Force Counter Overflow 0 ECAP_NO_EFFECT_0 No effect. Always reads back a 0. 1 ECAP_1_SETS_CTROVF Writing a 1 to this bit sets the CTROVF flag." end="21" id="CTROVF_FRC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="20" description="Force Capture Event 4. This event is only active in CAP mode. 0 ECAP_NO_EFFECT_0 No effect. Always reads back a 0. 1 ECAP_1_SETS_CEVT4 Writing a 1 sets the CEVT4 flag." end="20" id="CEVT4_FRC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="19" description="Force Capture Event 3. This event is only active in CAP mode.  0 ECAP_NO_EFFECT_0 No effect. Always reads back a 0. 1 ECAP_1_SETS_CEVT3 Writing a 1 sets the CEVT3 flag." end="19" id="CEVT3_FRC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="18" description="Force Capture Event 2. This event is only active in CAP mode. 0 ECAP_NO_EFFECT_0 No effect. Always reads back a 0. 1 ECAP_1_SETS_CEVT2 Writing a 1 sets the CEVT2 flag." end="18" id="CEVT2_FRC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Force Capture Event 1. This event is only active in CAP mode.  0 ECAP_NO_EFFECT_0 No effect. Always reads back a 0. 1 ECAP_1_SETS_CEVT1 Sets the CEVT1 flag." end="17" id="CEVT1_FRC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="16" description="Reserved" end="9" id="NU_5" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="8" description="High resolution error status Clear 0 ECAP_0_NO_EFFECT Writing a 0 has no effect. Always reads back a 0 1 ECAP_1_CLEARS_HRERROR Writing a 1 clears the HRERROR flag." end="8" id="HRERROR" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Counter Equal Compare Status Clear 0 ECAP_0_NO_EFFECT Writing a 0 has no effect. Always reads back a 0 1 ECAP_1_CLEARS_CTR_CMP Writing a 1 clears the CTR=CMP flag." end="7" id="CTR_CMP" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Counter Equal Period Status Clear 0 ECAP_0_NO_EFFECT Writing a 0 has no effect. Always reads back a 0 1 ECAP_1_CLEARS_CTR_PRD Writing a 1 clears the CTR=PRD flag." end="6" id="CTR_PRD" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Counter Overflow Status Clear 0 ECAP_0_NO_EFFECT Writing a 0 has no effect. Always reads back a 0 1 ECAP_1_CLEARS_CTROVF Writing a 1 clears the CTROVF flag." end="5" id="CTROVF" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Capture Event 4 Status Clear 0 ECAP_0_NO_EFFECT Writing a 0 has no effect. Always reads back a 0 1 ECAP_1_CLEARS_CEVT4 Writing a 1 clears the CEVT4 flag." end="4" id="CEVT4" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Capture Event 3 Status Clear 0 ECAP_0_NO_EFFECT Writing a 0 has no effect. Always reads back a 0 1 ECAP_1_CLEARS_CEVT3 Writing a 1 clears the CEVT3 flag." end="3" id="CEVT3" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Capture Event 2 Status Clear 0 ECAP_0_NO_EFFECT Writing a 0 has no effect. Always reads back a 0 1 ECAP_1_CLEARS_CEVT2 Writing a 1 clears the CEVT2 flag." end="2" id="CEVT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Capture Event 1 Status Clear 0 ECAP_0_NO_EFFECT Writing a 0 has no effect. Always reads back a 0 1 ECAP_1_CLEARS_CEVT1 Writing a 1 clears the CEVT1 flag." end="1" id="CEVT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="ECAP Global Interrupt Status Clear 0 ECAP_0_NO_EFFECT Writing a 0 has no effect. Always reads back a 0 1 ECAP_1_CLEARS_INT Writing a 1 clears the INT flag and enable further interrupts to be generated if any of the event flags are set to 1" end="0" id="INT" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="ECAPSYNCINSEL" description="SYNC source select register" id="ECAPSYNCINSEL" offset="0x3C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="5" id="NU_7" rwaccess="R" width="27"></bitfield>
+    
+  <bitfield begin="4" description="These bits determines the source of SYNCIN signal.  0x00 DISABLE Disable Syncin to eCAP 0x01 EPWM1SYNCOUT 0x02 EPWM2SYNCOUT 0x03 EPWM3SYNCOUT 0x04 EPWM4SYNCOUT 0x05 EPWM5SYNCOUT 0x06 EPWM6SYNCOUT 0x07 EPWM7SYNCOUT 0x08 EPWM8SYNCOUT 0x09 EPWM9SYNCOUT 0x0A EPWM10SYNCOUT 0x0B EPWM11SYNCOUT 0x0C EPWM12SYNCOUT 0x0D EPWM13SYNCOUT 0x0E EPWM14SYNCOUT 0x0F EPWM15SYNCOUT 0x10 EPWM16SYNCOUT 0x11 ECAP1SYNCOUT 0x12 ECAP2SYNCOUT 0x13 ECAP3SYNCOUT 0x14 ECAP4SYNCOUT 0x15 ECAP5SYNCOUT 0x16 ECAP6SYNCOUT 0x17 ECAP7SYNCOUT 0x18 INPUTXBAROUT5 0x19 INPUTXBAROUT6 0x1A ETHERCATSYNC0 0x1B ETHERCATSYNC1 0x1C RSVD 0x1D RSVD 0x1E RSVD 0x1F RSVD" end="0" id="SEL" rwaccess="RW" width="5"></bitfield>
+  </register>
+</module>

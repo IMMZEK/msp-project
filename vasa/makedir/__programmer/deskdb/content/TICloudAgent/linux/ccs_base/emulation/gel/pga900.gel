@@ -1,0 +1,89 @@
+//####################################################
+//PGA900 GEL file
+//v1.1 March 4,2014
+//####################################################
+
+//*******************************************************************
+//Watchdog register
+//*******************************************************************
+#define WDOG_CTRL_STAT_ADDR (0x4000051C)
+
+//*******************************************************************
+//Remap register
+//*******************************************************************
+#define REMAP_ADDR (0x40000220)
+
+//*****************************************************************************
+//Read write prototype
+//*****************************************************************************
+#define WR_MEM_08(addr, data) *(unsigned char*)(addr) = (unsigned char)(data)
+#define RD_MEM_08(addr)       *(unsigned char*)(addr)
+
+//*****************************************************************************
+//Global Functions
+//*****************************************************************************
+
+//Watchdog is disabled to eliminate warm resets during debug
+Disable_Watchdog()
+{
+   WR_MEM_08(WDOG_CTRL_STAT_ADDR,0x00);
+}
+
+//Set the processor to User mode after a file is loaded, on a 
+//restart or on a reset
+//This will facilitate code loading and debug by putting the processor in a known
+//state
+
+PGA900StartState()
+{
+   xPSR = (xPSR & ~0x1F) | 0x10;   
+}
+
+OnFileLoaded()
+{
+   GEL_TextOut("****  PGA900 OnFileLoaded .......... \n","Output",1,1,1);	
+   PGA900StartState();
+   Config_Remap();
+   GEL_TextOut("****  PGA900 OnFileLoaded is done **** \n","Output",1,1,1);	
+}
+
+OnRestart()
+{
+   GEL_TextOut("****  PGA900 OnRestart .......... \n","Output",1,1,1);	
+   PGA900StartState();     
+   Config_Remap();
+   GEL_TextOut("****  PGA900 OnRestart is done **** \n","Output",1,1,1);	
+}
+
+OnReset()
+{
+   GEL_TextOut("****  PGA900 OnReset .......... \n","Output",1,1,1);	
+   PGA900StartState();
+   Disable_Watchdog();
+   Config_Remap();
+   GEL_TextOut("****  PGA900 OnReset is done **** \n","Output",1,1,1);	
+}
+
+Config_Remap()
+{
+   WR_MEM_08(REMAP_ADDR,0x01);
+}
+
+OnTargetConnect()
+{
+   GEL_MapOff();
+   GEL_MapReset();
+   GEL_MapAddStr(0x00000000, 0, 0x00002000, "R|W", 0);  // OTP
+   GEL_MapAddStr(0x21000000, 0, 0x00002000, "R|W", 0);  // Development RAM
+   GEL_MapAddStr(0x20000000, 0, 0x00000400, "R|W", 0);  // SRAM Internal
+   GEL_MapAddStr(0x40000000, 0, 0x00000080, "R|W", 0);  // EEPROM 
+   GEL_MapAddStr(0x40000080, 0, 0x00000008, "R|W", 0);  // EEPROM Cache
+   GEL_MapAddStr(0x40000088, 0, 0x00000578, "R|W", 0);  // Control and status registers
+   GEL_MapAddStr(0xE000E000, 0, 0x00000F00, "R|W", 0);  // M0 registers
+   GEL_MapOn();
+   PGA900StartState();
+   GEL_TextOut("****  PGA900 Initialization is in progress .......... \n","Output",1,1,1);	
+   Disable_Watchdog();
+   Config_Remap();
+   GEL_TextOut("****  PGA900 Initialization is Done ****************** \n","Output",1,1,1);	
+}

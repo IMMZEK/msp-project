@@ -1,0 +1,29 @@
+<module name="MPU_WD_TIMER" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="WDT_LOAD_REGISTER_0" acronym="WDT_LOAD_REGISTER_0" offset="0x0" width="32" description="When a new value is stored in this register, the is immediately loaded with this value and the prescaler state is cleared. This register is reset by warm reset of the MPU core.">
+    <bitfield id="NEWCOUNT" width="32" begin="31" end="0" resetval="0x0000 0000" description="New value to load intoWDT_COUNT_REGISTER_0." range="" rwaccess="RW"/>
+  </register>
+  <register id="WDT_COUNT_REGISTER_0" acronym="WDT_COUNT_REGISTER_0" offset="0x4" width="32" description="This register is a 32-bit decrementing counter. The decrement rate is programmed in the. The can be read to get the current count. It decrements if the MPU_WD_TIMER_C0 is enabled ([0] ENABLE = 0x1). If the MPU core is in debug state, the counter does not decrement until the MPU core returns to non-debug state. The decrements down to zero and stops. The only way to update the is to write to the . If a software failure prevents the from being refreshed, the reaches zero, the watchdog timeout status flag is set and all interrupt requests or reset requests enabled in the are signalled. If a reset request is enabled, the global PRCM is then responsible for resetting the MPUSS. Debug state is inferred by monitoring the DBGACK signal of the MPU core. This register is reset by warm reset of the MPU core.">
+    <bitfield id="CURRENTCOUNT" width="32" begin="31" end="0" resetval="0x0000 0000" description="Current count of the MPU_WD_TIMER." range="" rwaccess="R"/>
+  </register>
+  <register id="WDT_WARNING_REGISTER_0" acronym="WDT_WARNING_REGISTER_0" offset="0x8" width="32" description="The is compared to the . If is less than or equal to the and [8] WARNEN = 0b1, a warning interrupt is signalled to the MPU_INTC. The warning condition can be used to signal an interrupt that gives software a notice that the MPU_WD_TIMER_C0 is getting close to a timeout, when a more serious action should be taken.">
+    <bitfield id="WARNING_WATERMARK" width="32" begin="31" end="0" resetval="0x0000 0000" description="A warning condition occurs when theWDT_COUNT_REGISTER_0 value is less than or equal to the WDT_WARNING_REGISTER_0." range="" rwaccess="RW"/>
+  </register>
+  <register id="WDT_PRESCALER_REGISTER_0" acronym="WDT_PRESCALER_REGISTER_0" offset="0xC" width="32" description="This register is used to set the count rate of the MPU_WD_TIMER_C0 counter.">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x00 0000" description="Reserved. Ignored on writes. Reads return 0s." range="" rwaccess="R"/>
+    <bitfield id="PRESCALER" width="10" begin="9" end="0" resetval="0x000" description="Sets the prescaler ratio.WDT_COUNT_REGISTER_0 decrements every (PRESCALER + 1) MPU_DPLL_CLK clocks. Note: If the prescaler is set to (MPU_DPLL_CLK [in MHz] - 1), the MPU_WD_TIMER_C0 counter counts at a 1 microsecond rate." range="" rwaccess="RW"/>
+  </register>
+  <register id="WDT_CONTROL_REGISTER_0" acronym="WDT_CONTROL_REGISTER_0" offset="0x10" width="32" description="This register controls the behavior of the MPU_WD_TIMER_C0. This register is reset by warm reset of the MPU core.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x00 0000" description="Reserved. Ignored on writes. Reads return 0s." range="" rwaccess="R"/>
+    <bitfield id="WARNEN" width="1" begin="8" end="8" resetval="0" description="Warning Interrupt Enable. If this bit is set and the warning watermark test is true, a warning interrupt is generated to the MPU_INTC." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="Reserved. Ignored on writes. Reads return 0s." range="" rwaccess="R"/>
+    <bitfield id="MPUSSRSTEN" width="1" begin="3" end="3" resetval="0" description="MPUSS Reset Enable. If this field is 0b1 when the timer reaches zero, a request is sent to the global PRCM for a global warm reset." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0" description="Reserved. Ignored on writes. Reads return 0s." range="" rwaccess="R"/>
+    <bitfield id="INTREN" width="1" begin="1" end="1" resetval="0" description="Interrupt Enable. If this field is 0b1 when the timer reaches zero, an interrupt request is sent to the MPU_INTC." range="" rwaccess="RW"/>
+    <bitfield id="ENABLE" width="1" begin="0" end="0" resetval="0" description="Enable for MPU_WD_TIMER_C0. 0: MPU_WD_TIMER_C0 is disabled. It will not count down and it will not generate a reset request. All MPU_WD_TIMER_C0 registers may be accessed. 1: MPU_WD_TIMER_C0 is enabled. It will count down and generate a reset request if it reaches 0. This bit is reset by warm or power-on reset." range="" rwaccess="RW"/>
+  </register>
+  <register id="WDT_RESET_STATUS_REGISTER_0" acronym="WDT_RESET_STATUS_REGISTER_0" offset="0x14" width="32" description="The TO bit indicated that this MPU_WD_TIMER_C0 has timed out. This register is not reset by warm reset, but only by cold reset.">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="Reserved. Ignored on writes. Reads return 0s." range="" rwaccess="R"/>
+    <bitfield id="WARN" width="1" begin="1" end="1" resetval="0" description="Warning. Indicates that the count has passed the warning watermark level while theWDT_CONTROL_REGISTER_0[8] WARNEN bit was set. Write a '1' to this bit to reset it." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="TO" width="1" begin="0" end="0" resetval="0" description="Timeout. Indicates theWDT_COUNT_REGISTER_0 has reached zero (timed out) and the signalling enabled in the WDT_CONTROL_REGISTER_0 has occurred. Can be used to determine which MPU_WD_TIMER_C0 instance caused a reset. Write a '1' to this bit to reset it." range="" rwaccess="RW W1toClr"/>
+  </register>
+</module>

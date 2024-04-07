@@ -1,0 +1,12 @@
+export function setupFakeServerScript(data: any, initialPage: any, callback: any): void;
+export function cleanupFakeServerScript(): void;
+export function getFakeServerRequestsScript(): sinon.SinonFakeXMLHttpRequest[];
+export function installCloudAgentScript(options: any): void;
+export function uninstallCloudAgentScript(): void;
+export function getRexCloudAgentModuleSpiesScript(): string;
+export function waitForPromisesToResolveScript(indicies: any, callback: any): void;
+export function setupPromiseSyncronizationScript(): void;
+export function cleanupPromiseSyncronizationScript(): void;
+export function getActivePromiseIndiciesScript(): string[];
+export function updateUrlForTestingScript(link: any): void;
+export function clearCachesScript(): void;

@@ -1,0 +1,187 @@
+/**
+ * \file  AM263_Diagnostics.gel
+ *
+ * \brief GEL File to configure the PLLs on AM263x
+ */
+
+/* Copyright (c) 2021, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+/* Revision history:
+ * 
+ */
+
+menuitem "AM263x Diagnostics";
+
+
+
+hotmenu AM263x_Cryst_Clock_Loss_Status()
+{
+	unsigned int  val_crystal_clk_loss_stat;
+	val_crystal_clk_loss_stat = Read_MMR(MSS_TOP_RCM_U_BASE + MSS_TOP_RCM_CLK_LOSS_STATUS);
+	
+	if((val_crystal_clk_loss_stat & 1) == 0x1)
+		GEL_TextOut("Crystal Clock not present \n");
+	else
+		GEL_TextOut("Crystal Clock present \n");
+}
+
+
+
+hotmenu AM263x_RC_Clock_Boot_Status()
+{
+	unsigned int  val_rc_clk_boot_stat;
+	val_rc_clk_boot_stat = Read_MMR(MSS_TOP_RCM_U_BASE + MSS_TOP_RCM_CLK_LOSS_STATUS);
+	if((val_rc_clk_boot_stat & 0x100) == 1)
+		GEL_TextOut("RC Clock  present at boot \n");
+	else
+		GEL_TextOut("RC Clock not present at boot\n");
+}
+
+
+hotmenu AM263x_SOP_Mode()
+{
+	unsigned int  val_sop_mode ;
+	val_sop_mode = Read_MMR(MSS_TOP_RCM_U_BASE + MSS_TOP_RCM_SOP_MODE_VALUE);
+
+	GEL_TextOut("SOP MODE = %x    \n",,,,, val_sop_mode);
+	
+	if(val_sop_mode == 0)
+		GEL_TextOut("\n QSPI - 4S Functional boot mode\n");
+	else if(val_sop_mode == 1)
+		GEL_TextOut("\n UART Functional boot mode\n");
+	else if(val_sop_mode == 2)
+		GEL_TextOut("\n QSPI - 1S Functional boot mode\n");
+    else if(val_sop_mode == 4)
+        GEL_TextOut("\n QSPI - 4S Fallback UART boot mode\n");
+    else if(val_sop_mode == 5)
+        GEL_TextOut("\n QSPI - 1S Fallback UART boot mode\n");
+	else if(val_sop_mode == 11)
+        GEL_TextOut("\n Dev boot mode\n");
+	else 
+		GEL_TextOut("\n ERR... Reserved boot mode\n");		
+}
+
+AM263x_Check_supported_mode()
+{
+	unsigned int efuse;
+	unsigned int dual_or_lockstep;
+
+	efuse = Read_MMR(TOP_CTRL_U_BASE + TOP_CTRL_EFUSE1_ROW_12);
+
+	GEL_TextOut("\n efuse1=%x  \n" ,,,,,efuse );
+	if((((efuse & 0x10) == 0 ) && ((efuse & 0x20) == 0 ))) {
+		GEL_TextOut("\n The Device supports both LockStep & Dual Core mode \n");
+		dual_or_lockstep = 0;
+	}
+	else if (((efuse & 0x10) == 0x10 ) && ((efuse & 0x20) == 0x20) ){
+		GEL_TextOut("\n The Device supports only Dual core mode \n");
+		dual_or_lockstep = 0;
+	}
+	else if (((efuse & 0x10) == 0x10 ) && ((efuse & 0x20) == 0 )){
+		GEL_TextOut("\n The Device supports only Dual core mode \n");
+		dual_or_lockstep = 1;
+	}
+	else if (((efuse & 0x10) == 0 ) && ((efuse & 0x20 ) == 0x20)){
+		GEL_TextOut("\n The Device supports Lockstep mode \n");
+		dual_or_lockstep = 0;
+	}
+	else{
+		GEL_TextOut("\n This mode is not supported \n");
+		dual_or_lockstep = 0xFF;
+	}
+	return dual_or_lockstep;
+}
+
+AM263x_Check_supported_mode_jtagID()
+{
+    unsigned int jtagID;
+    unsigned int dual_or_lockstep;
+
+    jtagID = Read_MMR(TOP_CTRL_U_BASE + TOP_CTRL_JTAG_USERCODE_ID);
+
+    if((jtagID & 0x41100000) == 0x41100000) {
+        GEL_TextOut("\n The Device supports both LockStep & Dual Core mode \n");
+        dual_or_lockstep = 1;
+    }
+    else if ((jtagID & 0x41000000) == 0x41000000){
+        GEL_TextOut("\n The Device supports Lockstep mode \n");
+        dual_or_lockstep = 0;
+    }
+    else{
+        GEL_TextOut("\n This mode is not supported \n");
+        dual_or_lockstep = 0xFF;
+    }
+    return dual_or_lockstep;
+
+}
+
+hotmenu AM263x_Read_Device_Type()
+{
+    unsigned int dev_type;
+    dev_type = Read_MMR(TOP_CTRL_U_BASE + TOP_CTRL_EFUSE_DEVICE_TYPE);
+    GEL_TextOut("EFuse Device Type Value = %x    \n",,,,, dev_type);
+}
+
+hotmenu AM263x_Read_PG_Info()
+{
+	unsigned value;	
+	value = Read_MMR_Field(TOP_CTRL_U_BASE + 0x00000434,4,0);
+	GEL_TextOut("PG VERSION = %x\n",,,,,value);
+}
+
+
+hotmenu AM263x_dual_or_lockstep_mode_status()
+{
+	unsigned int r5fss0, r5fss1;
+	
+		r5fss0 = Read_MMR(MSS_CTRL_U_BASE + MSS_CTRL_R5SS0_STATUS_REG);
+		 GEL_TextOut("r5fss0 = %x    \n",,,,, r5fss0);
+		r5fss1 = Read_MMR(MSS_CTRL_U_BASE + MSS_CTRL_R5SS1_STATUS_REG);
+		 GEL_TextOut("r5fss1 = %x    \n",,,,, r5fss1);
+		
+		if((r5fss0 & (1 << 8)) != 0)
+		{
+			GEL_TextOut("\n R5FSS0 is in Lockstep mode \n");	
+		}
+		else
+		{
+			GEL_TextOut("\n R5FSS0 is in Dual core mode \n");	
+		}
+			
+		if((r5fss1 & (1 << 8)) != 0)
+		{
+			GEL_TextOut("\n R5FSS1 is in Lockstep mode \n");	
+		}
+		else
+		{
+			GEL_TextOut("\n R5FSS1 is in Dual core mode \n");	
+		}			
+}

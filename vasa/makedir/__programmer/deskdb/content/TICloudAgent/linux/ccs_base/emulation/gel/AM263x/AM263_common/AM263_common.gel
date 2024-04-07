@@ -1,0 +1,487 @@
+/* Copyright (c) 2021, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+#define DEBUG 	  0 //turn on this for debugging messages
+#define GEL_TRACE 0 //turn this on for gel_trace debug messages
+
+
+//Common Register Definitions
+#define IOMUX_U_BASE                  (0x53100000U)
+#define MSS_CTRL_U_BASE               (0x50D00000U)
+#define TOP_CTRL_U_BASE               (0x50D80000U)
+#define MSS_TOP_RCM_U_BASE            (0x53200000U)
+#define MSS_RCM_U_BASE                (0x53208000U)
+#define HSM_CTRL_U_BASE               (0x47000000U)
+#define HSM_SOC_CTRL_U_BASE           (0x40000000U)
+#define CONTROLSS_CTRL_U_BASE         (0x502F0000U)
+
+
+//Register Offsets
+#define IOMUX_IO_CFG_KICK0           							 (0x00000298U)
+#define IOMUX_IO_CFG_KICK1           							 (0x0000029CU)
+#define MSS_CTRL_LOCK0_KICK0    							     (0x00001008U)
+#define MSS_CTRL_LOCK0_KICK1          							 (0x0000100CU)
+#define MSS_TOP_RCM_LOCK0_KICK0                                  (0x00001008U)
+#define TOP_RCM_WARM_RESET_REQ                                   (0x00000008U)
+#define MSS_TOP_RCM_LOCK0_KICK1                                  (0x0000100CU)
+#define MSS_RCM_LOCK0_KICK0                                      (0x00001008U)
+#define MSS_RCM_LOCK0_KICK1                                      (0x0000100CU)
+#define TOP_CTRL_LOCK0_KICK0                                     (0x00001008U)
+#define TOP_CTRL_LOCK0_KICK1                                     (0x0000100CU)
+#define C2K_CTRL_LOCK0_KICK0                                     (0x00001008U)
+#define C2K_CTRL_LOCK0_KICK1                                     (0x0000100CU)
+#define MSS_CTRL_R5SS0_CONTROL                                   (0x00000020U)
+#define MSS_CTRL_R5SS0_CORE0_HALT                           	 (0x00000024U)
+#define MSS_CTRL_R5SS0_CORE1_HALT                      		     (0x00000028U)
+#define MSS_CTRL_R5SS0_FORCE_WFI                                 (0x00000038U)
+#define MSS_CTRL_R5SS1_CORE0_HALT                            	 (0x00000044U)
+#define MSS_CTRL_R5SS1_CORE1_HALT                        	     (0x00000048U)
+#define MSS_CTRL_R5SS1_CONTROL                                   (0x00000040U)
+#define MSS_CTRL_R5SS1_FORCE_WFI                                 (0x00000058U)
+#define MSS_CTRL_R5SS0_ROM_ECLIPSE                      	     (0x00000080U)
+#define MSS_CTRL_R5SS0_STATUS_REG                                (0x0000002CU)
+#define MSS_CTRL_R5SS1_STATUS_REG                                (0x0000004CU)
+#define MSS_CTRL_ICSSM_PRU0_GPIO_OUT_CTRL                        (0x00000824U)
+#define MSS_CTRL_ICSSM_PRU1_GPIO_OUT_CTRL                        (0x00000828U)
+#define MSS_RCM_R5SS0_RST_STATUS                                 (0x00000010U)
+#define MSS_RCM_R5SS0_RST_CAUSE_CLR                              (0x00000014U)
+#define MSS_RCM_R5SS0_DBG_RST_EN                                 (0x00000018U)
+#define MSS_RCM_R5SS0_RST_ASSERDLY                               (0x0000001CU)
+#define MSS_RCM_R5SS0_RST2ASSERTDLY                              (0x00000020U)
+#define MSS_RCM_R5SS0_RST_WFICHECK                               (0x00000024U)
+#define MSS_RCM_R5SS1_RST_STATUS                                 (0x00000030U)
+#define MSS_RCM_R5SS1_RST_CAUSE_CLR                              (0x00000034U)
+#define MSS_RCM_R5SS1_DBG_RST_EN                                 (0x00000038U)
+#define MSS_RCM_R5SS1_RST_ASSERDLY                               (0x0000003CU)
+#define MSS_RCM_R5SS1_RST2ASSERTDLY                              (0x00000040U)
+#define MSS_RCM_R5SS1_RST_WFICHECK                               (0x00000044U)
+#define MSS_RCM_R5SS0_POR_RST_CTRL                               (0x00000500U)
+#define MSS_RCM_R5SS1_POR_RST_CTRL                               (0x00000504U)
+#define MSS_RCM_R5SS0_CORE0_GRST_CTRL                                 (0x00000508U)
+#define MSS_RCM_R5SS1_CORE0_GRST_CTRL                                 (0x0000050CU)
+#define MSS_RCM_R5SS0_CORE1_GRST_CTRL                                 (0x00000510U)
+#define MSS_RCM_R5SS1_CORE1_GRST_CTRL                                 (0x00000514U)
+#define MSS_RCM_R5SS0_CORE0_LRST_CTRL                                 (0x00000518U)
+#define MSS_RCM_R5SS1_CORE0_LRST_CTRL                                 (0x0000051CU)
+#define MSS_RCM_R5SS0_CORE1_LRST_CTRL                                 (0x00000520U)
+#define MSS_RCM_R5SS1_CORE1_LRST_CTRL                                 (0x00000524U)
+#define IOMUX_QSPI0_CSN0_CFG_REG                                           (0x00000000U)
+#define IOMUX_QSPI0_CSN1_CFG_REG                                           (0x00000004U)
+#define IOMUX_QSPI0_CLK_CFG_REG                                            (0x00000008U)
+#define IOMUX_QSPI0_D0_CFG_REG                                             (0x0000000CU)
+#define IOMUX_QSPI0_D1_CFG_REG                                             (0x00000010U)
+#define IOMUX_QSPI0_D2_CFG_REG                                             (0x00000014U)
+#define IOMUX_QSPI0_D3_CFG_REG                                             (0x00000018U)
+#define IOMUX_MCAN0_RX_CFG_REG                                             (0x0000001CU)
+#define IOMUX_MCAN0_TX_CFG_REG                                             (0x00000020U)
+#define IOMUX_MCAN1_RX_CFG_REG                                             (0x00000024U)
+#define IOMUX_MCAN1_TX_CFG_REG                                             (0x00000028U)
+#define IOMUX_SPI0_CS0_CFG_REG                                             (0x0000002CU)
+#define IOMUX_SPI0_CLK_CFG_REG                                             (0x00000030U)
+#define IOMUX_SPI0_D0_CFG_REG                                              (0x00000034U)
+#define IOMUX_SPI0_D1_CFG_REG                                              (0x00000038U)
+#define IOMUX_SPI1_CS0_CFG_REG                                             (0x0000003CU)
+#define IOMUX_SPI1_CLK_CFG_REG                                             (0x00000040U)
+#define IOMUX_SPI1_D0_CFG_REG                                              (0x00000044U)
+#define IOMUX_SPI1_D1_CFG_REG                                              (0x00000048U)
+#define IOMUX_LIN1_RXD_CFG_REG                                             (0x0000004CU)
+#define IOMUX_LIN1_TXD_CFG_REG                                             (0x00000050U)
+#define IOMUX_LIN2_RXD_CFG_REG                                             (0x00000054U)
+#define IOMUX_LIN2_TXD_CFG_REG                                             (0x00000058U)
+#define IOMUX_I2C1_SCL_CFG_REG                                             (0x0000005CU)
+#define IOMUX_I2C1_SDA_CFG_REG                                             (0x00000060U)
+#define IOMUX_UART0_RTSN_CFG_REG                                           (0x00000064U)
+#define IOMUX_UART0_CTSN_CFG_REG                                           (0x00000068U)
+#define IOMUX_UART0_RXD_CFG_REG                                            (0x0000006CU)
+#define IOMUX_UART0_TXD_CFG_REG                                            (0x00000070U)
+#define IOMUX_RGMII1_RXC_CFG_REG                                           (0x00000074U)
+#define IOMUX_RGMII1_RX_CTL_CFG_REG                                        (0x00000078U)
+#define IOMUX_RGMII1_RD0_CFG_REG                                           (0x0000007CU)
+#define IOMUX_RGMII1_RD1_CFG_REG                                           (0x00000080U)
+#define IOMUX_RGMII1_RD2_CFG_REG                                           (0x00000084U)
+#define IOMUX_RGMII1_RD3_CFG_REG                                           (0x00000088U)
+#define IOMUX_RGMII1_TXC_CFG_REG                                           (0x0000008CU)
+#define IOMUX_RGMII1_TX_CTL_CFG_REG                                        (0x00000090U)
+#define IOMUX_RGMII1_TD0_CFG_REG                                           (0x00000094U)
+#define IOMUX_RGMII1_TD1_CFG_REG                                           (0x00000098U)
+#define IOMUX_RGMII1_TD2_CFG_REG                                           (0x0000009CU)
+#define IOMUX_RGMII1_TD3_CFG_REG                                           (0x000000A0U)
+#define IOMUX_MDIO0_MDIO_CFG_REG                                           (0x000000A4U)
+#define IOMUX_MDIO0_MDC_CFG_REG                                            (0x000000A8U)
+#define IOMUX_EPWM0_A_CFG_REG                                              (0x000000ACU)
+#define IOMUX_EPWM0_B_CFG_REG                                              (0x000000B0U)
+#define IOMUX_EPWM1_A_CFG_REG                                              (0x000000B4U)
+#define IOMUX_EPWM1_B_CFG_REG                                              (0x000000B8U)
+#define IOMUX_EPWM2_A_CFG_REG                                              (0x000000BCU)
+#define IOMUX_EPWM2_B_CFG_REG                                              (0x000000C0U)
+#define IOMUX_EPWM3_A_CFG_REG                                              (0x000000C4U)
+#define IOMUX_EPWM3_B_CFG_REG                                              (0x000000C8U)
+#define IOMUX_EPWM4_A_CFG_REG                                              (0x000000CCU)
+#define IOMUX_EPWM4_B_CFG_REG                                              (0x000000D0U)
+#define IOMUX_EPWM5_A_CFG_REG                                              (0x000000D4U)
+#define IOMUX_EPWM5_B_CFG_REG                                              (0x000000D8U)
+#define IOMUX_EPWM6_A_CFG_REG                                              (0x000000DCU)
+#define IOMUX_EPWM6_B_CFG_REG                                              (0x000000E0U)
+#define IOMUX_EPWM7_A_CFG_REG                                              (0x000000E4U)
+#define IOMUX_EPWM7_B_CFG_REG                                              (0x000000E8U)
+#define IOMUX_EPWM8_A_CFG_REG                                              (0x000000ECU)
+#define IOMUX_EPWM8_B_CFG_REG                                              (0x000000F0U)
+#define IOMUX_EPWM9_A_CFG_REG                                              (0x000000F4U)
+#define IOMUX_EPWM9_B_CFG_REG                                              (0x000000F8U)
+#define IOMUX_EPWM10_A_CFG_REG                                             (0x000000FCU)
+#define IOMUX_EPWM10_B_CFG_REG                                             (0x00000100U)
+#define IOMUX_EPWM11_A_CFG_REG                                             (0x00000104U)
+#define IOMUX_EPWM11_B_CFG_REG                                             (0x00000108U)
+#define IOMUX_EPWM12_A_CFG_REG                                             (0x0000010CU)
+#define IOMUX_EPWM12_B_CFG_REG                                             (0x00000110U)
+#define IOMUX_EPWM13_A_CFG_REG                                             (0x00000114U)
+#define IOMUX_EPWM13_B_CFG_REG                                             (0x00000118U)
+#define IOMUX_EPWM14_A_CFG_REG                                             (0x0000011CU)
+#define IOMUX_EPWM14_B_CFG_REG                                             (0x00000120U)
+#define IOMUX_EPWM15_A_CFG_REG                                             (0x00000124U)
+#define IOMUX_EPWM15_B_CFG_REG                                             (0x00000128U)
+#define IOMUX_UART1_RXD_CFG_REG                                            (0x0000012CU)
+#define IOMUX_UART1_TXD_CFG_REG                                            (0x00000130U)
+#define IOMUX_MMC0_CLK_CFG_REG                                             (0x00000134U)
+#define IOMUX_MMC0_CMD_CFG_REG                                             (0x00000138U)
+#define IOMUX_MMC0_D0_CFG_REG                                              (0x0000013CU)
+#define IOMUX_MMC0_D1_CFG_REG                                              (0x00000140U)
+#define IOMUX_MMC0_D2_CFG_REG                                              (0x00000144U)
+#define IOMUX_MMC0_D3_CFG_REG                                              (0x00000148U)
+#define IOMUX_MMC0_WP_CFG_REG                                              (0x0000014CU)
+#define IOMUX_MMC0_CD_CFG_REG                                              (0x00000150U)
+#define IOMUX_PR0_MDIO0_MDIO_CFG_REG                                       (0x00000154U)
+#define IOMUX_PR0_MDIO0_MDC_CFG_REG                                        (0x00000158U)
+#define IOMUX_PR0_PRU0_GPO5_CFG_REG                                        (0x0000015CU)
+#define IOMUX_PR0_PRU0_GPO9_CFG_REG                                        (0x00000160U)
+#define IOMUX_PR0_PRU0_GPO10_CFG_REG                                       (0x00000164U)
+#define IOMUX_PR0_PRU0_GPO8_CFG_REG                                        (0x00000168U)
+#define IOMUX_PR0_PRU0_GPO6_CFG_REG                                        (0x0000016CU)
+#define IOMUX_PR0_PRU0_GPO4_CFG_REG                                        (0x00000170U)
+#define IOMUX_PR0_PRU0_GPO0_CFG_REG                                        (0x00000174U)
+#define IOMUX_PR0_PRU0_GPO1_CFG_REG                                        (0x00000178U)
+#define IOMUX_PR0_PRU0_GPO2_CFG_REG                                        (0x0000017CU)
+#define IOMUX_PR0_PRU0_GPO3_CFG_REG                                        (0x00000180U)
+#define IOMUX_PR0_PRU0_GPO16_CFG_REG                                       (0x00000184U)
+#define IOMUX_PR0_PRU0_GPO15_CFG_REG                                       (0x00000188U)
+#define IOMUX_PR0_PRU0_GPO11_CFG_REG                                       (0x0000018CU)
+#define IOMUX_PR0_PRU0_GPO12_CFG_REG                                       (0x00000190U)
+#define IOMUX_PR0_PRU0_GPO13_CFG_REG                                       (0x00000194U)
+#define IOMUX_PR0_PRU0_GPO14_CFG_REG                                       (0x00000198U)
+#define IOMUX_PR0_PRU1_GPO5_CFG_REG                                        (0x0000019CU)
+#define IOMUX_PR0_PRU1_GPO9_CFG_REG                                        (0x000001A0U)
+#define IOMUX_PR0_PRU1_GPO10_CFG_REG                                       (0x000001A4U)
+#define IOMUX_PR0_PRU1_GPO8_CFG_REG                                        (0x000001A8U)
+#define IOMUX_PR0_PRU1_GPO6_CFG_REG                                        (0x000001ACU)
+#define IOMUX_PR0_PRU1_GPO4_CFG_REG                                        (0x000001B0U)
+#define IOMUX_PR0_PRU1_GPO0_CFG_REG                                        (0x000001B4U)
+#define IOMUX_PR0_PRU1_GPO1_CFG_REG                                        (0x000001B8U)
+#define IOMUX_PR0_PRU1_GPO2_CFG_REG                                        (0x000001BCU)
+#define IOMUX_PR0_PRU1_GPO3_CFG_REG                                        (0x000001C0U)
+#define IOMUX_PR0_PRU1_GPO16_CFG_REG                                       (0x000001C4U)
+#define IOMUX_PR0_PRU1_GPO15_CFG_REG                                       (0x000001C8U)
+#define IOMUX_PR0_PRU1_GPO11_CFG_REG                                       (0x000001CCU)
+#define IOMUX_PR0_PRU1_GPO12_CFG_REG                                       (0x000001D0U)
+#define IOMUX_PR0_PRU1_GPO13_CFG_REG                                       (0x000001D4U)
+#define IOMUX_PR0_PRU1_GPO14_CFG_REG                                       (0x000001D8U)
+#define IOMUX_PR0_PRU1_GPO19_CFG_REG                                       (0x000001DCU)
+#define IOMUX_PR0_PRU1_GPO18_CFG_REG                                       (0x000001E0U)
+#define IOMUX_EXT_REFCLK0_CFG_REG                                          (0x000001E4U)
+#define IOMUX_SDFM0_CLK0_CFG_REG                                           (0x000001E8U)
+#define IOMUX_SDFM0_D0_CFG_REG                                             (0x000001ECU)
+#define IOMUX_SDFM0_CLK1_CFG_REG                                           (0x000001F0U)
+#define IOMUX_SDFM0_D1_CFG_REG                                             (0x000001F4U)
+#define IOMUX_SDFM0_CLK2_CFG_REG                                           (0x000001F8U)
+#define IOMUX_SDFM0_D2_CFG_REG                                             (0x000001FCU)
+#define IOMUX_SDFM0_CLK3_CFG_REG                                           (0x00000200U)
+#define IOMUX_SDFM0_D3_CFG_REG                                             (0x00000204U)
+#define IOMUX_EQEP0_A_CFG_REG                                              (0x00000208U)
+#define IOMUX_EQEP0_B_CFG_REG                                              (0x0000020CU)
+#define IOMUX_EQEP0_STROBE_CFG_REG                                         (0x00000210U)
+#define IOMUX_EQEP0_INDEX_CFG_REG                                          (0x00000214U)
+#define IOMUX_I2C0_SDA_CFG_REG                                             (0x00000218U)
+#define IOMUX_I2C0_SCL_CFG_REG                                             (0x0000021CU)
+#define IOMUX_MCAN2_TX_CFG_REG                                             (0x00000220U)
+#define IOMUX_MCAN2_RX_CFG_REG                                             (0x00000224U)
+#define IOMUX_CLKOUT0_CFG_REG                                              (0x00000228U)
+#define IOMUX_WARMRSTN_CFG_REG                                             (0x0000022CU)
+#define IOMUX_SAFETY_ERRORN_CFG_REG                                        (0x00000230U)
+#define IOMUX_TDI_CFG_REG                                                  (0x00000234U)
+#define IOMUX_TDO_CFG_REG                                                  (0x00000238U)
+#define IOMUX_TMS_CFG_REG                                                  (0x0000023CU)
+#define IOMUX_TCK_CFG_REG                                                  (0x00000240U)
+#define IOMUX_QSPI0_CLKLB_CFG_REG                                          (0x00000244U)
+#define IOMUX_QUAL_GRP_0_CFG_REG                                           (0x00000248U)
+#define IOMUX_QUAL_GRP_1_CFG_REG                                           (0x0000024CU)
+#define IOMUX_QUAL_GRP_2_CFG_REG                                           (0x00000250U)
+#define IOMUX_QUAL_GRP_3_CFG_REG                                           (0x00000254U)
+#define IOMUX_QUAL_GRP_4_CFG_REG                                           (0x00000258U)
+#define IOMUX_QUAL_GRP_5_CFG_REG                                           (0x0000025CU)
+#define IOMUX_QUAL_GRP_6_CFG_REG                                           (0x00000260U)
+#define IOMUX_QUAL_GRP_7_CFG_REG                                           (0x00000264U)
+#define IOMUX_QUAL_GRP_8_CFG_REG                                           (0x00000268U)
+#define IOMUX_QUAL_GRP_9_CFG_REG                                           (0x0000026CU)
+#define IOMUX_QUAL_GRP_10_CFG_REG                                          (0x00000270U)
+#define IOMUX_QUAL_GRP_11_CFG_REG                                          (0x00000274U)
+#define IOMUX_QUAL_GRP_12_CFG_REG                                          (0x00000278U)
+#define IOMUX_QUAL_GRP_13_CFG_REG                                          (0x0000027CU)
+#define IOMUX_QUAL_GRP_14_CFG_REG                                          (0x00000280U)
+#define IOMUX_QUAL_GRP_15_CFG_REG                                          (0x00000284U)
+#define IOMUX_QUAL_GRP_16_CFG_REG                                          (0x00000288U)
+#define IOMUX_QUAL_GRP_17_CFG_REG                                          (0x0000028CU)
+#define IOMUX_USER_MODE_EN                                                 (0x00000290U)
+#define IOMUX_PADGLBL_CFG_REG                                              (0x00000294U)
+#define MSS_CTRL_L2IOCRAM_MEM_INIT                                         (0x00000240U)
+#define TOP_CTRL_EFUSE_DEVICE_TYPE                                         (0x00000030U)
+#define IOMUX_CLKOUT0_CFG_REG                                              (0x00000228U)
+#define IOMUX_SDFM0_CLK0_CFG_REG                                           (0x000001E8U)
+#define MSS_CTRL_TPCC_MEM_INIT_DONE                                        (0x00000264U)
+#define MSS_CTRL_TPCC_MEM_INIT                                             (0x00000260U)
+#define MSS_CTRL_MAILBOXRAM_MEM_INIT_DONE                                  (0x00000254U)
+#define MSS_CTRL_MAILBOXRAM_MEM_INIT                                       (0x00000250U)
+#define TOP_CTRL_EFUSE1_ROW_12                                             (0x00000428U)
+#define TOP_CTRL_JTAG_USERCODE_ID                                          (0x00000038U)
+
+
+/* ************************************************************************* */
+/* Global Helper Functions */
+/* ************************************************************************* */
+
+/* Read from an MMR. */
+Read_MMR(unsigned int mmr_address){
+    unsigned int * p_mmr;
+    p_mmr = (unsigned int *) mmr_address;
+    return *p_mmr;
+}
+
+/* Write to an MMR. */
+Write_MMR(unsigned int mmr_address, unsigned int mmr_value){
+    unsigned int * p_mmr;
+    p_mmr = (unsigned int *) mmr_address;
+    *p_mmr = mmr_value;
+}
+
+/* Write to a specific field in an MMR. */
+Write_MMR_Field(unsigned int mmr_address, unsigned int field_value, unsigned int width, unsigned int leftshift){
+    unsigned int * p_mmr;
+    unsigned int mask;
+    p_mmr = (unsigned int *) mmr_address;   //Grab the MMR value
+    mask = (1 << width) - 1 << leftshift; //Build a mask of 1s for the field. 
+    mask = ~(mask); //Invert the mask so that the field will be zero'd out with the AND operation.
+    *p_mmr &= mask; //Zero out the field in the register.
+    *p_mmr |= (field_value << leftshift); //Assign the value to that specific field.
+}
+
+/* Read from a specific field in an MMR. */
+Read_MMR_Field(unsigned int mmr_address, unsigned int width, unsigned int leftshift){
+    unsigned int * p_mmr;
+    unsigned int mask;
+    unsigned int retval;
+    p_mmr = (unsigned int *) mmr_address;
+    mask = (1 << width) - 1 << leftshift; //Build a mask of 1s for the field. 
+    retval = (*p_mmr & mask) >> leftshift; //Bitwise AND the mask with the register value, and then shift the field back down to the LSB
+    return retval;
+}
+
+
+/*=========CCS Scripts Tab - Gel Functions===========*/
+menuitem "AM263x Device Configuration";
+	
+hotmenu MSS_IOMUX_Unlock()
+{
+    Write_MMR(IOMUX_U_BASE + IOMUX_IO_CFG_KICK0, 0x83E70B13);
+    Write_MMR(IOMUX_U_BASE + IOMUX_IO_CFG_KICK1, 0x95A4F1E0);
+    GEL_TextOut("MSS_IOMUX Control Registers Unlocked\n");
+}
+
+hotmenu MSS_CTRL_unlock()
+{
+    Write_MMR(MSS_CTRL_U_BASE + MSS_CTRL_LOCK0_KICK0,0x01234567);
+    Write_MMR(MSS_CTRL_U_BASE + MSS_CTRL_LOCK0_KICK1,0xFEDCBA8);
+	GEL_TextOut("MSS_CTRL Control Registers Unlocked\n");
+}
+
+hotmenu MSS_TOPRCM_unlock()
+{
+    Write_MMR(MSS_TOP_RCM_U_BASE + MSS_TOP_RCM_LOCK0_KICK0,0x01234567);
+    Write_MMR(MSS_TOP_RCM_U_BASE + MSS_TOP_RCM_LOCK0_KICK1,0xFEDCBA8);
+    GEL_TextOut("MSS_TOP_RCM Control Registers Unlocked\n");
+}
+
+hotmenu MSS_RCM_unlock()
+{
+    Write_MMR(MSS_RCM_U_BASE + MSS_RCM_LOCK0_KICK0,0x01234567);
+    Write_MMR(MSS_RCM_U_BASE + MSS_RCM_LOCK0_KICK1 ,0xFEDCBA8);
+    GEL_TextOut("MSS_RCM Control Registers Unlocked\n");
+}
+
+hotmenu TOP_CTRL_unlock()
+{
+    Write_MMR(TOP_CTRL_U_BASE + TOP_CTRL_LOCK0_KICK0,0x01234567);
+    Write_MMR(TOP_CTRL_U_BASE + TOP_CTRL_LOCK0_KICK1,0xFEDCBA8);
+    GEL_TextOut("TOP_CTRL Control Registers Unlocked\n");
+}
+
+hotmenu HSM_CTRL_unlock()
+{
+    Write_MMR(HSM_CTRL_U_BASE + HSM_CTRL_LOCK0_KICK0,0x01234567);
+    Write_MMR(HSM_CTRL_U_BASE + HSM_CTRL_LOCK0_KICK1,0xFEDCBA8);
+    GEL_TextOut("HSM_CTRL Control Registers Unlocked\n");
+}
+
+hotmenu HSM_SOC_CTRL_unlock()
+{
+    Write_MMR(HSM_SOC_CTRL_U_BASE + HSM_SOC_CTRL_LOCK0_KICK0,0x01234567);
+    Write_MMR(HSM_SOC_CTRL_U_BASE + HSM_SOC_CTRL_LOCK0_KICK1,0xFEDCBA8);
+    GEL_TextOut("HS_SOC_CTRL Control Registers Unlocked\n");
+}	
+
+hotmenu C2K_CTRL_unlock()
+{
+    Write_MMR(CONTROLSS_CTRL_U_BASE + C2K_CTRL_LOCK0_KICK0,0x01234567);
+    Write_MMR(CONTROLSS_CTRL_U_BASE + C2K_CTRL_LOCK0_KICK1,0xFEDCBA8);
+    GEL_TextOut("\n CONTROLSS_CTRL Control Registers Unlocked\n");
+}	
+    
+hotmenu R5F_ROM_eclipse()
+{
+	Write_MMR(MSS_CTRL_U_BASE + MSS_CTRL_R5SS0_ROM_ECLIPSE,0x7);
+    GEL_TextOut("R5F ROM Eclipse\n");
+}
+
+hotmenu R5F_SS0_CoreA_unhalt()
+{
+	Write_MMR(MSS_CTRL_U_BASE + MSS_CTRL_R5SS0_CORE0_HALT,0x00000000);
+	GEL_TextOut("R5FSS0_0 Released\n");
+}
+
+
+hotmenu R5F_SS0_CoreB_unhalt()
+{
+
+	Write_MMR(MSS_CTRL_U_BASE + MSS_CTRL_R5SS0_CORE1_HALT,0x00000000);
+    GEL_TextOut("R5FSS0_1 Released\n");
+}
+
+
+hotmenu R5F_SS1_CoreA_unhalt()
+{
+	Write_MMR(MSS_CTRL_U_BASE + MSS_CTRL_R5SS1_CORE0_HALT,0x00000000);
+    GEL_TextOut("R5FSS1_0 Released\n");
+}
+
+
+hotmenu R5F_SS1_CoreB_unhalt()
+{
+	Write_MMR(MSS_CTRL_U_BASE + MSS_CTRL_R5SS1_CORE1_HALT,0x00000000);
+    GEL_TextOut("R5FSS1_1 Released\n");
+}
+
+
+hotmenu R5F_SS0_Reset_Dualcore()
+{
+  Write_MMR(MSS_RCM_U_BASE+MSS_RCM_R5SS0_RST2ASSERTDLY, 0x0);  
+  Write_MMR(MSS_RCM_U_BASE+MSS_RCM_R5SS0_RST_WFICHECK, 0x00000707);  
+
+  Write_MMR(MSS_CTRL_U_BASE+MSS_CTRL_R5SS0_CONTROL, 0x707);
+  Write_MMR(MSS_CTRL_U_BASE+MSS_CTRL_R5SS0_CONTROL, 0x700);
+  Write_MMR(MSS_CTRL_U_BASE+MSS_CTRL_R5SS0_CONTROL, 0x70700);
+  Write_MMR(MSS_CTRL_U_BASE+MSS_CTRL_R5SS0_CONTROL, 0x00000000);
+  //Write_MMR(MSS_CTRL_U_BASE+MSS_CTRL_R5SS0_FORCE_WFI, 0x7); //STC Control
+
+  GEL_TextOut("\n\n*** R5FSS0 Reset DualCore ***\n");
+}
+
+hotmenu R5F_SS1_Reset_Dualcore()
+{
+	  Write_MMR(MSS_RCM_U_BASE + MSS_RCM_R5SS1_RST2ASSERTDLY, 0x0);  
+	  Write_MMR(MSS_RCM_U_BASE+MSS_RCM_R5SS1_RST_WFICHECK, 0x00000707);
+
+	  Write_MMR(MSS_CTRL_U_BASE+MSS_CTRL_R5SS1_CONTROL, 0x707);
+	  Write_MMR(MSS_CTRL_U_BASE+MSS_CTRL_R5SS1_CONTROL, 0x700);
+	  Write_MMR(MSS_CTRL_U_BASE+MSS_CTRL_R5SS1_CONTROL, 0x70700);
+	  Write_MMR(MSS_CTRL_U_BASE+MSS_CTRL_R5SS1_CONTROL, 0x00000000);
+	 // Write_MMR(MSS_CTRL_U_BASE+MSS_CTRL_R5SS1_FORCE_WFI, 0x7);  //STC Control
+
+	  GEL_TextOut("\n\n***R5FSS1 Reset DualCore ***\n");
+}
+
+
+hotmenu R5F_SS0_Reset_Lockstep()
+{
+  Write_MMR(MSS_RCM_U_BASE+MSS_RCM_R5SS0_RST2ASSERTDLY, 0x0);
+  Write_MMR(MSS_RCM_U_BASE+MSS_RCM_R5SS0_RST_WFICHECK, 0x00000707);
+
+  Write_MMR(MSS_CTRL_U_BASE+MSS_CTRL_R5SS0_FORCE_WFI, 0x7);
+
+  GEL_TextOut("\n\n***R5FSS0 Reset for Lockstep ***\n");
+}
+
+hotmenu R5F_SS1_Reset_Lockstep()
+{
+	  Write_MMR(MSS_RCM_U_BASE + MSS_RCM_R5SS1_RST2ASSERTDLY, 0x0);
+	  Write_MMR(MSS_RCM_U_BASE+MSS_RCM_R5SS1_RST_WFICHECK, 0x00000707);
+	  Write_MMR(MSS_CTRL_U_BASE+MSS_CTRL_R5SS1_FORCE_WFI, 0x7);
+
+	  GEL_TextOut("\n\n*** R5FSS1 Reset for Lockstep ***\n");
+}
+
+hotmenu MSS_L2_Mem_Init()
+{
+    Write_MMR(MSS_CTRL_U_BASE + MSS_CTRL_L2IOCRAM_MEM_INIT,0xF);
+    GEL_TextOut("L2 Mem Init Complete\n");
+}
+
+hotmenu MSS_TPCC_Mem_Init()
+{
+    Write_MMR(MSS_CTRL_U_BASE + MSS_CTRL_TPCC_MEM_INIT,0x1);
+    GEL_TextOut("TPCC Mem Init Complete\n");
+}
+
+hotmenu MailBox_MEM_Init()
+{
+    Write_MMR(MSS_CTRL_U_BASE + MSS_CTRL_MAILBOXRAM_MEM_INIT , 0x1);
+
+    while( ((Read_MMR(MSS_CTRL_U_BASE + MSS_CTRL_MAILBOXRAM_MEM_INIT_DONE) & 0x1)   != 0x1) ) {
+    }
+    GEL_TextOut("MailBox Mem Init Complete\n");
+}
+
+hotmenu SoC_Warm_Reset()
+{
+
+    //unlock Top_RCM
+    MSS_TOPRCM_unlock();
+    GEL_TextOut("Warm Request Starting from R5F0\n");
+    GEL_TextOut("Momentarily JTAG Connection will be Lost\n");
+    GEL_TextOut("Please Ignore the CCS Error & Verify the Reset reason @ 0x5320000C\n");
+    Write_MMR(MSS_TOP_RCM_U_BASE + TOP_RCM_WARM_RESET_REQ, 0x0);
+
+}

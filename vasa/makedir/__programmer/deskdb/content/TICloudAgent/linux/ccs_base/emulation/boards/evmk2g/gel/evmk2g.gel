@@ -1,0 +1,2949 @@
+/******************************************************************************
+ * Copyright (c) 2012-16 Texas Instruments Incorporated - http://www.ti.com
+ * 
+ *  Redistribution and use in source and binary forms, with or without 
+ *  modification, are permitted provided that the following conditions 
+ *  are met:
+ *
+ *    Redistributions of source code must retain the above copyright 
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ *    Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the 
+ *    documentation and/or other materials provided with the   
+ *    distribution.
+ *
+ *    Neither the name of Texas Instruments Incorporated  the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+ *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+ *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ *****************************************************************************
+ *
+ *  Filename: evmk2g.gel    
+ *    Description:  Galileo system initialization GEL for use with the Galileo 
+ *                  EVM. This GEL has functions that handle the Main PLL 
+ *                  initialization. 
+ *                        
+ *                  More functions may be added as needed at a later date.
+ *        
+ *      Author: Rahul Prabhu                  
+ *      Revision History: 
+ *
+ *    Rev 0.1 - 02/06/2012
+ *    -     Initial file creation - based on latest Appleton PLL init sequnce
+ *              +   Updated MAINPLLCTL0 and MAINPLLCTL1 MMR addresses for Keystone-2               
+ *    Rev 1.0 - 02/10/2012
+ *    -     Updates for Kepler 
+ *              +   Changed CLKIN_val and PLLM_val values according to 1GHz and 1.3GHz clock options. 
+ *              +   Removed non-relevat PLL init combinations.
+ *              +   Clean-up and formattting improvements.
+ *    -     Kepler QT specific Workarounds.
+ *              +   Added dummy reads between all Write->Read sequences to make them Write->Read->Read
+ *                  as a workaround for a potential Kepler QT PLL model bug, where the first Read following
+ *                  a Write to a PLL controller MMR seems to return the pre-write value of the MMR.            
+ *    Rev 4.0 - 01/21/2014
+ *    -     Updates for Galileo (Mark McKeown)
+ *              +   Changed CLKIN_val and PLLM_val values for 400, 600, 800, & 1000MHz clocks
+ *				+	Moved RESET assert from step 9 to step 3 where it belongs according to 6.4.4.3 PLL 
+ *					Initialization Sequences in  clock_arch_galileo_v0.93.pdf
+ *    Rev 5.0 - 08/07/2014
+ *    -     Set_Pll1: fixed hotmenu function names, GEL_TextOut for 50MHz ref clk instead of 100MHz
+ *	  - 	Set_Tetris_Pll: Changed Multiplier values for 50MHz ref clk instead of 100Mhz, updated hotmenu function names
+ * DONE	1) try moving reset (step 3) between steps 2 and 4
+ * 		2) remove extra steps 2b, 2c, 2d after "step 3"
+ * 		3) add step 8c
+ * 		4) check values for PLLDIV2 & PLLDIV3 - only SYSCLK2 and SYSCLK3 are programmable.
+ *   Rev 6.0 - 08/29/2014 (Sunil K)
+ *    -     Added NSS PLL definitions & setup function (SET_NSS_PLL)
+ *    - 	Added Hot menu (SET NSS PLL for 50MHz -> 1000MHz) to setup NSS PLL for 50MHZ sysclkp/n input for QT
+ *   Rev 7.0 - 04/30/2015 (Uday G)
+ *	  - 	Modified PLLM, PLLD, OD values to correspond to 24MHZ reference clock
+ *    -     Added DSS, DDR, UART PLL definitions & setup function
+ *    - 	Added ability to output all PLLs on OBSCLK
+ *    -     Verified GEL on Galileo Silicon
+ *   Rev 8.0 - 11/25/2015 (Pratap)
+ *    -     Added Configurations for enabling PSC
+ *    -     Added clock configurations for DSS 9MHz and 25MHz
+ *   Rev 9.0 - 
+ *    -     Added DSP out-of-reset routine 01/20/2016 (Lalindra J)
+ *    -     Changed the DDR PLL settings as per DPO analysis 01/22/2016 (SenthilKumar S)
+ *   Rev 10.0 - 
+ *    -     Updated Core and System PLL to 1GHz 05/05/2017 
+ *    -     Updated DDR PLL settings for 1066Mhz PLL and EMIF timings for faster DDR speeds (SenthilKumar S)
+ *    -     Added Initialization of ARM, DSP and DDR to different speeds based on JTAGID
+ *   Rev 11.0 - 
+ *    -     Updated clock and DDR configuration to use DEVSPEED and ARM DEVSPEED
+ *    -     Fixed DDR_MR2 setting to avoid JEDEC spec violation (EMUPACK-96)
+ ---------------------------------------------------------------------------*/
+
+//******************************************************
+// BOOT and CONFIG dsp system modules Definitions
+#define CHIP_LEVEL_REG              0x02620000
+#define JTAGID                      *(unsigned int*)(CHIP_LEVEL_REG + 0x0018)
+#define JTAGID_1G                   0x8BB0602F
+#define EFUSE_BOOTROM               (0x02620C90u)
+#define DEVSTAT                     *(unsigned int*)(CHIP_LEVEL_REG + 0x0020)
+
+// Boot cfg registers
+#define KICK0                       *(unsigned int*)(CHIP_LEVEL_REG + 0x0038)
+#define KICK1                       *(unsigned int*)(CHIP_LEVEL_REG + 0x003C)
+#define KICK0_UNLOCK                (0x83E70B13)
+#define KICK1_UNLOCK                (0x95A4F1E0)
+#define KICK_LOCK                   0
+#define TINPSEL                     *(unsigned int*)(CHIP_LEVEL_REG + 0x0300)
+#define TOUTPSEL                    *(unsigned int*)(CHIP_LEVEL_REG + 0x0304)
+#define MAINPLLCTL0                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0350) //0x0328)
+#define MAINPLLCTL1                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0354) //0x032C)
+#define MAIN_PLLD_OFFSET            0
+#define MAIN_PLLD_MASK              0xFFFFFFC0
+#define MAIN_PLLM_OFFSET            12
+#define MAIN_PLLM_MASK              0xFFF80FFF
+#define MAIN_BWADJ0_OFFSET          24
+#define MAIN_BWADJ0_MASK            0x00FFFFFF
+#define MAIN_ENSAT_OFFSET           6
+#define MAIN_ENSAT_MASK             0xFFFFFFBF
+#define MAIN_BWADJ1_OFFSET          0
+#define MAIN_BWADJ1_MASK            0xFFFFFFF0
+
+#define CHIP_MISC1                  *(unsigned int*)(CHIP_LEVEL_REG + 0x0C7C)
+#define ARMPLL_ENABLE_OFFSET        13
+
+#define DDR3PLLCTL0                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0360)
+#define DDR3PLLCTL1                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0364)
+#define DDR3MUX						*(unsigned int*)(CHIP_LEVEL_REG + 0x0690)
+#define OBSCLKCTL                   *(unsigned int*)(CHIP_LEVEL_REG + 0x0C80)    
+
+#define TETRIS_BASE                 0x01E80000
+
+#define TETRIS_CPU0_PDSTAT          *(unsigned int*)(TETRIS_BASE + 0x0404)
+// Tetris-UL subsystem and A15 core are in a single common power domain and fully controlled by the SoC level PSC. 
+// As per design team (BTS_SPEC.538 WEBS) we should not access the Tetris DPSC registers for Galileo 
+// By default the Tetris power domain is ON and no need to write to any registers
+// Based on above commenting out the following and any relevant code that attempts to set the same
+//#define TETRIS_CPU0_PDCTL           *(unsigned int*)(TETRIS_BASE + 0x0408)
+//#define TETRIS_CPU0_PTCMD           *(unsigned int*)(TETRIS_BASE + 0x0400)
+
+// Commented following lines since Galileo has only one A15 core
+//#define TETRIS_CPU1_PTCMD           *(unsigned int*)(TETRIS_BASE + 0x040C)
+//#define TETRIS_CPU1_PDSTAT          *(unsigned int*)(TETRIS_BASE + 0x0410)
+//#define TETRIS_CPU1_PDCTL           *(unsigned int*)(TETRIS_BASE + 0x0414)
+
+//#define TETRIS_CPU2_PTCMD           *(unsigned int*)(TETRIS_BASE + 0x0418)
+//#define TETRIS_CPU2_PDSTAT          *(unsigned int*)(TETRIS_BASE + 0x041C)
+//#define TETRIS_CPU2_PDCTL           *(unsigned int*)(TETRIS_BASE + 0x0420)
+
+//#define TETRIS_CPU3_PTCMD           *(unsigned int*)(TETRIS_BASE + 0x0424)
+//#define TETRIS_CPU3_PDSTAT          *(unsigned int*)(TETRIS_BASE + 0x0428)
+//#define TETRIS_CPU3_PDCTL           *(unsigned int*)(TETRIS_BASE + 0x042C)
+
+#define SECPLLCTL0                  *(unsigned int*)(CHIP_LEVEL_REG + 0x0370)
+#define SECPLLCTL1                  *(unsigned int*)(CHIP_LEVEL_REG + 0x0374)
+
+#define	ICSSPLLCTL0				  	*(unsigned int*)(CHIP_LEVEL_REG + 0x0388)
+#define ICSSPLLCTL1                 *(unsigned int*)(CHIP_LEVEL_REG + 0x038C)
+
+#define	NSSPLLCTL0				  	*(unsigned int*)(CHIP_LEVEL_REG + 0x0358)
+#define NSSPLLCTL1                  *(unsigned int*)(CHIP_LEVEL_REG + 0x035C)
+
+#define	UARTPLLCTL0				  	*(unsigned int*)(CHIP_LEVEL_REG + 0x0390)
+#define UARTPLLCTL1                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0394)
+
+//******************************************************
+//Boot CFG DDR Registers
+
+// DDR3 tuning registers
+#define DATA0_GTLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x043C))
+#define DATA1_GTLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x0440))
+#define DATA2_GTLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x0444))
+#define DATA3_GTLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x0448))
+#define DATA4_GTLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x044C))
+#define DATA5_GTLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x0450))
+#define DATA6_GTLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x0454))
+#define DATA7_GTLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x0458))
+#define DATA8_GTLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x045C))
+
+#define DATA0_WRLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x040C))
+#define DATA1_WRLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x0410))
+#define DATA2_WRLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x0414))
+#define DATA3_WRLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x0418))
+#define DATA4_WRLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x041C))
+#define DATA5_WRLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x0420))
+#define DATA6_WRLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x0424))
+#define DATA7_WRLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x0428))
+#define DATA8_WRLVL_INIT_RATIO      (*(unsigned int*)(CHIP_LEVEL_REG + 0x042C))
+
+#define DDR3_CONFIG_REG_0           (*(unsigned int*)(CHIP_LEVEL_REG + 0x0404))
+#define DDR3_CONFIG_REG_12          (*(unsigned int*)(CHIP_LEVEL_REG + 0x0434)) 
+#define DDR3_CONFIG_REG_13          (*(unsigned int*)(CHIP_LEVEL_REG + 0x0438)) 
+
+#define DDR3_CONFIG_REG_52          (*(unsigned int*)(CHIP_LEVEL_REG + 0x04D4)) 
+#define DDR3_CONFIG_REG_53          (*(unsigned int*)(CHIP_LEVEL_REG + 0x04D8)) 
+#define DDR3_CONFIG_REG_54          (*(unsigned int*)(CHIP_LEVEL_REG + 0x04DC)) 
+#define DDR3_CONFIG_REG_55          (*(unsigned int*)(CHIP_LEVEL_REG + 0x04E0)) 
+#define DDR3_CONFIG_REG_56          (*(unsigned int*)(CHIP_LEVEL_REG + 0x04E4)) 
+#define DDR3_CONFIG_REG_57          (*(unsigned int*)(CHIP_LEVEL_REG + 0x04E8)) 
+#define DDR3_CONFIG_REG_58          (*(unsigned int*)(CHIP_LEVEL_REG + 0x04EC)) 
+#define DDR3_CONFIG_REG_59          (*(unsigned int*)(CHIP_LEVEL_REG + 0x04F0)) 
+#define DDR3_CONFIG_REG_60          (*(unsigned int*)(CHIP_LEVEL_REG + 0x04F4)) 
+
+
+//******************************************************
+// PLL 1 definitions (DSP and ARM clock and subsystems)
+#define PLL1_BASE                   0x02310000
+#define PLL1_PLLCTL                 (*(unsigned int*)(PLL1_BASE + 0x100))   // PLL1 Control
+#define PLL1_OCSEL					(*(unsigned int*)(PLL1_BASE + 0x104))   // PLL1 OCSEL for Observation clock
+#define PLL1_SECCTL                 (*(unsigned int*)(PLL1_BASE + 0x108))   // PLL1 Secondary Control
+#define PLL1_PLLM                   (*(unsigned int*)(PLL1_BASE + 0x110))   // PLL1 Multiplier
+#define PLL1_DIV1                   (*(unsigned int*)(PLL1_BASE + 0x118))   // DIV1 divider
+#define PLL1_DIV2                   (*(unsigned int*)(PLL1_BASE + 0x11C))   // DIV2 divider
+#define PLL1_DIV3                   (*(unsigned int*)(PLL1_BASE + 0x120))   // DIV3 divider
+#define PLL1_CMD                    (*(unsigned int*)(PLL1_BASE + 0x138))   // CMD control
+#define PLL1_STAT                   (*(unsigned int*)(PLL1_BASE + 0x13C))   // STAT control
+#define PLL1_ALNCTL                 (*(unsigned int*)(PLL1_BASE + 0x140))   // ALNCTL control
+#define PLL1_DCHANGE                (*(unsigned int*)(PLL1_BASE + 0x144))   // DCHANGE status
+#define PLL1_CKEN                   (*(unsigned int*)(PLL1_BASE + 0x148))   // CKEN control
+#define PLL1_CKSTAT                 (*(unsigned int*)(PLL1_BASE + 0x14C))   // CKSTAT status
+#define PLL1_SYSTAT                 (*(unsigned int*)(PLL1_BASE + 0x150))   // SYSTAT status
+#define PLL1_DIV4                   (*(unsigned int*)(PLL1_BASE + 0x160))   // DIV4 divider
+#define PLL1_DIV5                   (*(unsigned int*)(PLL1_BASE + 0x164))   // DIV5 divider
+#define PLL1_DIV6                   (*(unsigned int*)(PLL1_BASE + 0x168))   // DIV6 divider
+#define PLL1_DIV7                   (*(unsigned int*)(PLL1_BASE + 0x16C))   // DIV7 divider
+#define PLL1_DIV8                   (*(unsigned int*)(PLL1_BASE + 0x170))   // DIV8 divider
+#define PLL1_DIV9                   (*(unsigned int*)(PLL1_BASE + 0x174))   // DIV9 divider
+#define PLL1_DIV10                  (*(unsigned int*)(PLL1_BASE + 0x178))   // DIV10 divider
+#define PLL1_DIV11                  (*(unsigned int*)(PLL1_BASE + 0x17C))   // DIV11 divider
+#define PLL1_DIV12                  (*(unsigned int*)(PLL1_BASE + 0x180))   // DIV12 divider
+#define PLL1_DIV13                  (*(unsigned int*)(PLL1_BASE + 0x184))   // DIV13 divider
+#define PLL1_DIV14                  (*(unsigned int*)(PLL1_BASE + 0x188))   // DIV14 divider
+#define PLL1_DIV15                  (*(unsigned int*)(PLL1_BASE + 0x18C))   // DIV15 divider
+#define PLL1_DIV16                  (*(unsigned int*)(PLL1_BASE + 0x190))   // DIV16 divider
+#define PLLPWRDN_OFFSET             1
+#define PLLPWRDN_MASK               0xFFFFFFFD
+#define PLLRST_OFFSET               3
+#define PLLRST_MASK                 0xFFFFFFF7
+#define PLLENSRC_OFFSET             5
+#define PLLENSRC_MASK               0xFFFFFFDF
+#define PLLEN_OFFSET                0
+#define PLLEN_MASK                  0xFFFFFFFE
+#define OUTPUT_DIVIDE_OFFSET        19
+#define OUTPUT_DIVIDE_MASK          0xFF87FFFF    
+#define BYPASS_OFFSET               23
+#define BYPASS_MASK                 0xFF7FFFFF
+#define PLLM_OFFSET                 0
+#define PLLM_MASK                   0xFFFFFFC0
+#define GOSET_OFFSET                0
+#define GOSET_MASK                  0xFFFFFFFE
+#define GOSTAT_OFFSET               0
+#define GOSTAT_MASK                 0xFFFFFFFE
+
+// ARMPLL definitions
+#define SEC_PLLCTL0_PLLD_OFFSET     0
+#define SEC_PLLCTL0_PLLD_MASK		0xFFFFFFC0
+#define SEC_PLLCTL0_PLLM_OFFSET     6
+#define SEC_PLLCTL0_PLLM_MASK       0xFFFF003F
+#define SEC_PLLCTL0_BWADJ_OFFSET    24
+#define SEC_PLLCTL0_BWADJ_MASK      0x00FFFFFF
+#define SEC_PLLCTL0_OD_OFFSET       19
+#define SEC_PLLCTL0_OD_MASK         0xFF87FFFF
+#define SEC_PLLCTL0_BYPASS_OFFSET   23
+#define SEC_PLLCTL0_BYPASS_MASK     0xFF7FFFFF
+#define SEC_PLLCTL1_RESET_OFFSET    14
+#define SEC_PLLCTL1_RESET_MASK      0xFFFFBFFF
+#define SEC_PLLCTL1_PWRDWN_OFFSET   15
+#define SEC_PLLCTL1_PWRDWN_MASK     0xFFFF7FFF
+#define SEC_PLLCTL1_ENSTAT_OFFSET   6
+#define SEC_PLLCTL1_ENSTAT_MASK     0xFFFFFFBF
+
+//******************************************************
+// DDR3 definitions
+#define DDR_BASE_ADDR 0x21000000
+
+#define DDR_MIDR                    (*(unsigned int*)(DDR_BASE_ADDR + 0x00000000))
+#define DDR_SDCFG                   (*(unsigned int*)(DDR_BASE_ADDR + 0x00000008))
+#define DDR_SDRFC                   (*(unsigned int*)(DDR_BASE_ADDR + 0x00000010))
+#define DDR_SDTIM1                  (*(unsigned int*)(DDR_BASE_ADDR + 0x00000018))
+#define DDR_SDTIM2                  (*(unsigned int*)(DDR_BASE_ADDR + 0x00000020))
+#define DDR_SDTIM3                  (*(unsigned int*)(DDR_BASE_ADDR + 0x00000028))
+#define DDR_PMCTL                   (*(unsigned int*)(DDR_BASE_ADDR + 0x00000038))
+#define DDR_ZQCFG                   (*(unsigned int*)(DDR_BASE_ADDR + 0x000000C8))
+#define DDR_TMPALRT                 (*(unsigned int*)(DDR_BASE_ADDR + 0x000000CC))
+#define DDR_RDWR_LVL_RMP_CTRL       (*(unsigned int*)(DDR_BASE_ADDR + 0x000000D8))
+#define DDR_RDWR_LVL_CTRL           (*(unsigned int*)(DDR_BASE_ADDR + 0x000000DC))
+#define DDR_DDRPHYC                 (*(unsigned int*)(DDR_BASE_ADDR + 0x000000E4))
+
+//******************************************************
+// XMC Register Definitions
+#define XMC_BASE_ADDR               (0x08000000)
+#define XMPAX2_L                    (*(int*)(XMC_BASE_ADDR + 0x00000010))
+#define XMPAX2_H                    (*(int*)(XMC_BASE_ADDR + 0x00000014))
+
+//******************************************************
+// MSMC Register Definitions
+#define MSMC_CFG_BASE               (0x0BC00000)
+#define SMS_MPAXH_0_0               (MSMC_CFG_BASE + 0x00000204)
+#define SES_MPAXH_0_0               (MSMC_CFG_BASE + 0x00000604)   
+
+//******************************************************
+// PSC Register Definitions
+
+#define PSC_CFG_BASE				(0x02350000)
+
+#define PSC_MDCTL00           		(0xA00)
+#define PSC_MDSTAT00          		(0x800)
+#define PSC_PDCTL00           		(0x300)
+#define PSC_PDSTAT00          		(0x200)
+
+#define PSC_MDCTL_BASE        		PSC_CFG_BASE + PSC_MDCTL00
+#define PSC_MDSTAT_BASE       		PSC_CFG_BASE + PSC_MDSTAT00
+#define PSC_PDCTL_BASE        		PSC_CFG_BASE + PSC_PDCTL00
+#define PSC_PDSTAT_BASE       		PSC_CFG_BASE + PSC_PDSTAT00
+
+#define PMMC_PDCTL					(*(unsigned int*)(PSC_PDCTL_BASE + 0x000))
+#define PMMC_MDCTL					(*(unsigned int*)(PSC_MDCTL_BASE + 0x004))
+
+#define PSC_PTCMD             		(*(unsigned int*)(PSC_CFG_BASE + 0x120))
+#define PSC_PTCMD_H           		(*(unsigned int*)(PSC_CFG_BASE + 0x124))
+#define PSC_PTSTAT           		(*(unsigned int*)(PSC_CFG_BASE + 0x128))
+#define PSC_PTSTAT_H          		(*(unsigned int*)(PSC_CFG_BASE + 0x12C))
+
+/* BB register field read macro */
+#define BB_REG_FIELD_READ(reg_addr) (unsigned int)((*((unsigned int*)reg_addr)))
+
+#define MAIN_PLL_CTL0_ADDR	0x02620350
+#define MAIN_PLL_CTL1_ADDR	0x02620354
+#define PLLCTL_ADDR			0x02310100
+#define SECCTL_ADDR			0x02310108
+#define PLLM_ADDR			0x02310110
+#define PLLDIV1_ADDR 		0x02310118
+#define PLLDIV2_ADDR		0x0231011C
+#define PLLDIV3_ADDR		0x02310120
+#define PLLCMD_ADDR			0x02310138
+#define PLLSTAT_ADDR		0x0231013C
+#define PLLDIV4_ADDR		0x02310160
+#define PLLDIV5_ADDR		0x02310164
+#define PLLDIV6_ADDR		0x02310168
+#define PLLDIV7_ADDR		0x0231016C
+#define PLLDIV8_ADDR		0x02310170
+
+/* DSS-UL PLL definitions */
+#define DSS_PLL_CTL0 			  *(unsigned int*)(CHIP_LEVEL_REG + 0x380)
+#define DSS_PLL_CTL1 			  *(unsigned int*)(CHIP_LEVEL_REG + 0x384)
+#define DSS_PLL_CTL0_BYPASS_EN    (1)
+#define DSS_PLL_CTL0_BYPASS_SHIFT (23)
+#define DSS_PLL_CTL0_BYPASS_MASK  (0x00000000)
+#define DSS_PLL_CTL0_CLKOD_SHIFT  (19)
+#define DSS_PLL_CTL0_CLKOD_MASK   (0x00780000)
+#define DSS_PLL_CTL0_PLLM_SHIFT   (6)
+#define DSS_PLL_CTL0_PLLM_MASK    (0x0007FFC0)
+#define DSS_PLL_CTL0_PLLD_SHIFT   (0)
+#define DSS_PLL_CTL0_PLLD_MASK    (0x0000003F)
+#define DSS_PLL_MULTIPLIER_MAX     (512)	//The max is really 4096 but recommended to stay below 512 for low jitter
+#define DSS_PLL_REF_DIVIDER_MAX    (64)
+#define DSS_PLL_OUTPUT_DIVIDER_MAX (16)
+
+
+#define PD0         (0)     // Power Domain-0
+#define PD1         (1)     // Power Domain-1
+#define PD2         (2)     // Power Domain-2
+#define PD3         (3)     // Power Domain-3
+#define PD4         (4)     // Power Domain-4
+#define PD5         (5)     // Power Domain-5
+#define PD6         (6)     // Power Domain-6
+#define PD7         (7)     // Power Domain-7
+#define PD8         (8)     // Power Domain-8
+#define PD9         (9)     // Power Domain-9
+#define PD10        (10)    // Power Domain-10
+#define PD11        (11)    // Power Domain-11
+#define PD12        (12)    // Power Domain-12
+#define PD13        (13)    // Power Domain-13
+#define PD14        (14)    // Power Domain-14
+#define PD15        (15)    // Power Domain-15
+
+// Modules on power domain 0
+#define LPSC_ALWAYSON  (0)
+
+// Modules on power domain 1
+#define LPSC_PMMC      (1)
+#define LPSC_DEBUG     (2)
+
+// Modules on power domain 2
+#define LPSC_NSS       (3)
+
+// Modules on power domain 3
+#define LPSC_SA        (4)
+
+// Modules on power domain 4
+#define LPSC_TERANET   (5)
+
+// Modules on power domain 5
+#define LPSC_SYS_COMP  (6)
+#define LPSC_QSPI      (7)
+#define LPSC_MMC       (8)
+#define LPSC_GPMC      (9)
+#define LPSC_MLB       (11)
+#define LPSC_EHRPWM    (12)
+#define LPSC_EQEP      (13)
+#define LPSC_ECAP      (14)
+#define LPSC_MCASP     (15)
+
+// Modules on power domain 7
+#define LPSC_MSMC      (17)
+
+// Modules on power domain 8
+#define LPSC_C66X_COREPAC_0  (18)
+
+// Modules on power domain 9
+#define LPSC_ARM       (19)
+
+// Modules on power domain 10
+#define LPSC_ASRC       (20)
+
+// Modules on power domain 11
+#define LPSC_ICSS      (21)
+
+// Modules on power domain 12
+#define LPSC_DSS       (23)
+
+// Modules on power domain 13
+#define LPSC_PCIE      (24)
+
+// Modules on power domain 14
+#define LPSC_USB_0     (25)
+#define LPSC_USB_1     (26)
+
+// Modules on power domain 15
+#define LPSC_DDR3      (27)
+
+#define PSC_DISABLE   (0x2)
+#define PSC_ENABLE    (0x3)
+// Global timeout value
+#define GTIMEOUT 2000
+
+#define TIMEOUT_ID 10
+
+// Timeout definitions
+int _GEL_Global_Timeout1 = 0;
+
+/*----------Out-of-reset definitions-----------*/
+#define WR_MEM_32(addr, data)   *(unsigned int*)(addr) =(unsigned int)(data)
+#define RD_MEM_32(addr)         *(unsigned int*)(addr)
+#define uint32_t                unsigned int
+
+/*******************************************************************************
+        KS2 Registers Map Defines
+*******************************************************************************/
+/***** Power Domain Definitions *****/
+#define KS2_PDCTL5  0x02350314
+#define KS2_PDCTL8  0x02350320
+#define KS2_PDCTL9  0x02350324
+#define KS2_PDCTL10 0x02350328
+#define KS2_PDCTL11 0x0235032C
+#define KS2_PDCTL12 0x02350330
+#define KS2_PDCTL13 0x02350334
+#define KS2_PDCTL14 0x02350338
+#define KS2_PDCTL15 0x0235033C
+
+/***** Module Control Register Definitions *****/
+#define KS2_MDCTL5  0x02350A14
+#define KS2_MDCTL15 0x02350A3C
+#define KS2_MDCTL16 0x02350A40
+#define KS2_MDCTL17 0x02350A44
+#define KS2_MDCTL18 0x02350A48
+#define KS2_MDCTL19 0x02350A4C
+#define KS2_MDCTL20 0x02350A50
+#define KS2_MDCTL21 0x02350A54
+#define KS2_MDCTL22 0x02350A58
+
+/****************************************************************************
+ *
+ * NAME
+ *      Global_Default_Setup_Silent
+ *
+ * PURPOSE:
+ *      Setup almost everything ready for a new debug session:
+ *      DSP modules and EVM board modules.
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Global_Default_Setup_Silent()
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+Global_Default_Setup_Silent()
+{
+	int devSpeed, armSpeed;
+
+	GEL_Reset();
+
+    // Only core 0 can set these
+    if (DNUM == 0)
+    {
+		GEL_TextOut( "Starting K2G GP EVM Initialization .. \n");
+		devSpeed = Read_device_speed (); 
+		armSpeed = Read_arm_speed ();
+		if (( devSpeed == 1000) && (armSpeed == 1000))
+		{
+            /* This is 1000MHz chip */
+			CORE_PLL_INIT_24MHz_to_1000MHz();
+			TETRIS_PLL_INIT_24MHZ_to_1000MHz();
+			
+        }
+		else if ((devSpeed == 600) && (armSpeed == 600))
+		{	
+			/* This is 600MHz chip */
+			CORE_PLL_INIT_24MHz_to_600MHz(); 
+			TETRIS_PLL_INIT_24MHZ_to_600MHz();
+        }
+		else {
+			GEL_TextOut( "Device Variant not supported on the EVM .. \n");
+		}
+	    	
+		// Common configuration for 600 Mhz and 1Ghz variants
+		Set_Psc_All_On();
+		UART_PLL_INIT_24MHz_TO_384MHz();
+		NSS_PLL_INIT_24MHz_TO_1000MHz();
+		ICSS_POWERUP_AND_PLL_INIT_24MHz_to_200MHz();
+		DSS_PLL_INIT_24MHZ_to_25MHz();
+		InitXMC();
+		if (( devSpeed == 1000) && (armSpeed == 1000))
+		{
+			InitEmif_DDR3A_NO_ECC_1066MHz();
+		}
+		else{
+			InitEmif_DDR3A_NO_ECC_800MHz();
+		}
+		
+		GEL_TextOut( "K2G GP EVM Initialization Complete. \n");		
+    }
+}
+
+OnTargetConnect()
+{
+    Global_Default_Setup_Silent();
+}
+
+Read_PLL_Reg()
+{
+	unsigned int reg_value = 0xFFFFFFFF;
+	
+	reg_value = BB_REG_FIELD_READ(MAIN_PLL_CTL0_ADDR);
+	GEL_TextOut(" The value of MAIN_PLL_CTL0_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(MAIN_PLL_CTL1_ADDR);
+	GEL_TextOut(" The value of MAIN_PLL_CTL1_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(PLLCTL_ADDR);
+	GEL_TextOut(" The value of PLLCTL_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(SECCTL_ADDR);
+	GEL_TextOut(" The value of SECCTL_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(PLLM_ADDR);
+	GEL_TextOut(" The value of PLLM_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(PLLDIV1_ADDR);
+	GEL_TextOut(" The value of PLLDIV1_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(PLLDIV2_ADDR);
+	GEL_TextOut(" The value of PLLDIV2_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(PLLDIV3_ADDR);
+	GEL_TextOut(" The value of PLLDIV3_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(PLLCMD_ADDR);
+	GEL_TextOut(" The value of PLLCMD_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(PLLSTAT_ADDR);
+	GEL_TextOut(" The value of PLLSTAT_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(PLLDIV4_ADDR);
+	GEL_TextOut(" The value of PLLDIV4_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(PLLDIV5_ADDR);
+	GEL_TextOut(" The value of PLLDIV5_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(PLLDIV6_ADDR);
+	GEL_TextOut(" The value of PLLDIV6_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(PLLDIV7_ADDR);
+	GEL_TextOut(" The value of PLLDIV7_ADDR is %x \n",,,,,reg_value);
+	
+	reg_value = BB_REG_FIELD_READ(PLLDIV8_ADDR);
+	GEL_TextOut(" The value of PLLDIV8_ADDR is %x \n",,,,,reg_value);
+}
+
+
+//********************************************************************************************************************************
+//********************************************************************************************************************************
+//********************************************************************************************************************************
+//********************************************************************************************************************************
+/*
+   Set_Pll1() - This function executes the main PLL initialization 
+   sequence needed to get the main PLL up after coming out of an initial power up 
+   before it is locked or after it is already locked.
+
+   Index value determines multiplier, divier used and clock reference assumed for 
+   output display. 
+ */
+Set_Pll1(int index)
+{
+    int i, TEMP;
+    unsigned int BYPASS_val;     
+    unsigned int BWADJ_val;     
+    unsigned int OD_val;            
+
+    float CLKIN_val;
+    unsigned int PLLM_val;
+    unsigned int PLLD_val;
+    unsigned int PLLDIV3_val; //example value for SYSCLK2 (from 6614 spec) Default /2 - Fast Peripherals, (L2, MSMC, DDR3 EMIF, EDMA0...)
+    unsigned int PLLDIV4_val; //example value for SYSCLK3 (from 6614 spec) Default /3 - Switch Fabric
+    unsigned int PLLDIV7_val; //example value for SYSCLK6 (from 6614 spec) Defualt /6 - Slow Peripherals (UART, SPI, I2C, GPIO...)
+
+    unsigned int debug_info_on;
+    unsigned int delay;
+
+    if(index == 400){                 // 24MHz -> 400 MHz
+        CLKIN_val   = 24;           // setup CLKIN to 24.00 MHz
+        PLLM_val    = 100;           // setup PLLM (PLL multiplier) 
+        PLLD_val    = 1;            // setup PLLD (reference divider)
+        OD_val      = 6;            // setup OD 
+    }
+	else if(index == 600){            // 24MHz -> 600 MHz
+        CLKIN_val   = 24;          // setup CLKIN to 24.00 MHz
+        PLLM_val    = 100;           // setup PLLM (PLL multiplier) 
+        PLLD_val    = 1;            // setup PLLD (reference divider)
+        OD_val      = 4;            // setup OD 
+    }
+	else if(index == 100){                 // 24MHz -> 100 MHz
+        CLKIN_val   = 24;           // setup CLKIN to 24.00 MHz
+        PLLM_val    = 100;           // setup PLLM (PLL multiplier) 
+        PLLD_val    = 2;            // setup PLLD (reference divider)
+        OD_val      = 12;            // setup OD 
+    }
+	else if(index == 200){            // 24MHz -> 200 MHz
+        CLKIN_val   = 24;          // setup CLKIN to 24.00 MHz
+        PLLM_val    = 100;           // setup PLLM (PLL multiplier) 
+        PLLD_val    = 1;            // setup PLLD (reference divider)
+        OD_val      = 12;            // setup OD 
+    }
+	else if(index == 1000){			// 24MHz -> 1 GHz
+		CLKIN_val	= 24;			// setup CLKIN to 24.00 MHz
+		PLLM_val	= 250;			// setup PLL (PLL multplier)
+		PLLD_val	= 3;			// setup PLLD (reference divider)
+		OD_val		= 2;			// setup OD
+	}
+
+    PLLDIV3_val = 2;            // setup PLL output divider 3 to /2
+    PLLDIV4_val = 5;            // setup PLL output divider 4 to /3
+    PLLDIV7_val = 6;            // setup PLL output divider 7 to /6
+
+    BYPASS_val      = PLL1_SECCTL & ~BYPASS_MASK;   // get value of the BYPASS field
+    BWADJ_val       = (PLLM_val-1) >> 1;              // setup BWADJ to be 1/2 the value of PLLM
+	
+    debug_info_on   = 0;
+    delay           = 1000; // fix this!
+
+    /* Step 1: Unlock Boot Config Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    /* Step 2: Check if SECCTL bypass is low or high indicating what state the Main PLL is currently in. if 
+       the Main PLL is in bypass still (not yet setup) execute the following steps.  */
+
+//Step 1 - pretend to wait 100uS for "PLL to become stable"
+   
+//Step 2 - Check the status of BYPASS
+    if(BYPASS_val != 0x00000000){ // PLL bypass enabled - Execute PLL setup for PLL fresh out of power on reset
+        if(debug_info_on){
+            GEL_TextOut("Detected PLL bypass enabled: SECCTL[BYPASS] = %x\n",,,,, BYPASS_val);
+        }
+	
+        /* Step 2a: Set MAINPLLCTL1[ENSAT] = 1 - This enables proper biasing of PLL analog circuitry */          
+		// MAIN_ENSAT_OFFSET = 6
+//Step 2a - In MAINPLLCTL1, write ENSAT
+        MAINPLLCTL1 |= (1 << MAIN_ENSAT_OFFSET); 
+        if(debug_info_on){
+            GEL_TextOut("(2a) MAINPLLCTL1 = %x\n",,,,, MAINPLLCTL1);
+        }        
+
+        /* Step 2b: Set PLLCTL[PLLEN] = 0 This enables bypass in PLL controller MUX *///PLLEN_OFFSET = 0 
+//Step 2c - In PLLCTL, write PLLEN = 0
+        PLL1_PLLCTL &= ~(1 << PLLEN_OFFSET);        
+        if(debug_info_on){    
+            GEL_TextOut("(2b) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+        }    
+
+        /* Step 2c: Set PLLCTL[PLLENSRC] = 0 - This enables PLLEN to control PLL controller MUX */    
+		//PLLENSRC_OFFSET = 5
+//Step 2b - In PLLCTL, write PLLENSRC = 0
+        PLL1_PLLCTL &= ~(1 << PLLENSRC_OFFSET);
+        if(debug_info_on){    
+            GEL_TextOut("(2c) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+        }    
+
+        /* Step 2d: Wait 4 reference clock cycles (slowest of ALTCORE or SYSCLK) to make sure 
+           that the PLL controller MUX switches properly to bypass. */
+        if(debug_info_on){    
+            GEL_TextOut("(2d) Delay...\n",,,,,);
+        }        
+//Step 2d - Wait 4 cycles of the reference clock (to make sure the PLL controller mux switches properly to the bypass)		
+        for(i = 0; i < delay; i++); // this delay is much more than required         
+
+        /* Step 2e: Set SECCTL[BYPASS] = 1 - enables bypass in PLL MUX */    
+		//BYPASS_OFFSET = 23
+//Step 2e - In SECCTL, write BYPASS = 1		
+        PLL1_SECCTL |= (1 << BYPASS_OFFSET);        
+        if(debug_info_on){    
+            GEL_TextOut("(2e) SECCTL = %x\n",,,,, PLL1_SECCTL);
+        }    
+
+        /* Step 2f: Set PLLCTL[PLLPWRDN] = 1 - power down the PLL */      
+		//PLLPWRDN_OFFSET = 1
+//Step 2f - In PLLCTL, write PLLPWRDN = 1		
+        PLL1_PLLCTL |= (1 << PLLPWRDN_OFFSET);
+        if(debug_info_on){    
+            GEL_TextOut("(2f) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+        }    
+
+        /* Step 2g: Wait for at least 5us for the PLL to power down */
+        if(debug_info_on){    
+            GEL_TextOut("(2g) Delay...\n",,,,,);
+        }    
+//Step 2g - Wait for at least 5 us		
+        for(i = 0; i < delay; i++); // this delay is much more than required 
+
+        /* Step 2h: Set PLLCTL[PLLPWRDN] = 0 - Power the PLL back up */    
+		//PLLPWRDN_OFFSET = 1
+//Step 2h - In PLLCTL, write PLLPWRDN = 0		
+        PLL1_PLLCTL &= ~(1 << PLLPWRDN_OFFSET);
+        if(debug_info_on){    
+            GEL_TextOut("(2h) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+        }            
+
+    }
+    else{ // PLL bypass disabled - Execute PLL setup for PLL that has previously been locked (skip to Step 3)
+	
+        if(debug_info_on){    
+            GEL_TextOut("Detected PLL bypass disabled: SECCTL[BYPASS] = %x\n",,,,, BYPASS_val);
+        }
+
+        /* Step 3a: Set PLLCTL[PLLEN] = 0 This enables bypass in PLL controller MUX *///PLLEN_OFFSET = 0        
+		
+//!!!Extra Step 2c - In PLLCTL, write PLLEN = 0		
+        PLL1_PLLCTL &= ~(1 << PLLEN_OFFSET);        
+        if(debug_info_on){    
+            GEL_TextOut("(3a) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+        }    
+
+        /* Step 3b: Set PLLCTL[PLLENSRC] = 0 - This enables PLLEN to control PLL controller MUX */    
+		//PLLENSRC_OFFSET = 5
+//!!!Extra Step 2b - In PLLCTL, write PLLENSRC = 0		
+        PLL1_PLLCTL &= ~(1 << PLLENSRC_OFFSET);
+        if(debug_info_on){    
+            GEL_TextOut("(3b) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+        }
+
+        /* Step 3c: Wait 4 reference clock cycles (slowest of ALTCORE or SYSCLK) to make sure that the PLL controller MUX switches properly to bypass. */
+//!!!Extra Step 2d - Wait 4 cycles of the reference clock (to make sure the PLL controller mux switches properly to the bypass)		
+		
+        if(debug_info_on){    
+            GEL_TextOut("(3c) Delay...\n",,,,,);
+        }        
+        for(i = 0; i < delay; i++); // this delay is much more than required       
+	
+    }
+
+//!!!Why was Step 3 MOVED to "STEP 9"? - In PLLCTL, write PLLRST = 1 (PLL is reset)	
+//MM Step 3 PLLCTL, write PLLRST = 1 (PLL is reset) - moved to its correct place from between Step 8e and Step 9 below
+//Step 3 - PLLCTL, write PLLRST = 1 (PLL is reset)
+	PLL1_PLLCTL |= (1 << PLLRST_OFFSET);
+
+    /* Step 4: Programming PLLM[5:0] in the PLLM register of the PLL controller and
+       programming PLLM[12:6] in the MAINPLLCTL0 register */        
+	//PLLM_val    = 52;  (1000)
+    PLL1_PLLM &= PLLM_MASK;             // clear the PLLM[5:0] bit field
+	//MM	   0xFFFFFFC0
+	//		   0x0000003F
+	//			0x0000003F		38
+	//					0x3F	26
+	//				&	0x33
+	//				 	0x33
+	//PLL1_PLLM	|= 0x26 = 0x00000033 
+	//0x33 = 0011 0011   ... 0x33 = 51 decimal (= 52 - 1)
+//Step 4a - PLLM in PLLM	
+	PLL1_PLLM |= ~PLLM_MASK & (PLLM_val - 1);   // set the PLLM[5:0] bit field to the 6 LSB of PLLM_val
+	
+    if(debug_info_on){
+        GEL_TextOut("(4)PLLM[PLLM] = %x\n",,,,, PLL1_PLLM);
+    }    
+	//MM 0x33 gets wiped away by >>6 - MAINPLLCTL0 cleared PLLM[12:6]  
+	//MAIN_PLLM_MASK = 0xFFF80FFF
+	//MAIN_PLLM_OFFSET = 12
+	
+
+    
+	MAINPLLCTL0 &= MAIN_PLLM_MASK;      // clear the PLLM[12:6] bit field
+//Step 4b - PLLM in MAINPLLCTL0	
+    MAINPLLCTL0 |= ~MAIN_PLLM_MASK & (( (PLLM_val - 1) >> 6) << MAIN_PLLM_OFFSET);  // set the PLLM[12:6] bit field to the 7 MSB of PLL_val
+
+    if(debug_info_on){
+        GEL_TextOut("MAINPLLCTL0 = %x\n",,,,, MAINPLLCTL0);
+    }
+
+    /* Step 5: Programming BWADJ[7:0] in the MAINPLLCTL0 register and BWADJ[11:8] in MAINPLLCTL1 register */            
+    MAINPLLCTL0 &= MAIN_BWADJ0_MASK;    // clear the MAIN_BWADJ0 bit field
+	//BWADJ_val = (PLLM_val) >> 1;  
+	// if PLLM_val = 52: BWADJ_val = 26 >>1 = 0x1A (52/2 = 26)
+	//MAIN_BWADJ0_MASK = 0x00FFFFFF		
+	//~MAIN_BWADJ0_MASK  = 0xFF000000	 0x19			   24
+//Step 5a - BWADJ in MAINPLLCTL0
+    MAINPLLCTL0 |= ~MAIN_BWADJ0_MASK & ((BWADJ_val - 1) << MAIN_BWADJ0_OFFSET); // set the MAIN_BWADJ[7:0] bit field to the 8 LSB of BWADJ_val
+	//~MAIN_BWADJ0_MASK  = 0xFF000000
+    if(debug_info_on){
+        GEL_TextOut("(5) MAINPLLCTL0 = %x\n",,,,, MAINPLLCTL0);
+    }
+
+    MAINPLLCTL1 &= MAIN_BWADJ1_MASK;    // clear the MAIN_BWADJ1 bit field
+	//MAIN_BWADJ1_MASK = 0xFFFFFFF0
+	//0x19 wiped away by >> 8 - MAINPLLCTL1 cleared MAIN_BWADJ[11:8] to 4 MSB of BWADJ_val
+//Step 5b - BWADJ in MAINPLLCTL1
+    MAINPLLCTL1 |= ~MAIN_BWADJ1_MASK & (( (BWADJ_val - 1) >> 8) << MAIN_BWADJ1_OFFSET); // set the MAIN_BWADJ[11:8] bit field to the 4 MSB of BWADJ_val
+
+    if(debug_info_on){
+        GEL_TextOut("(5) MAINPLLCTL1 = %x\n",,,,, MAINPLLCTL1);
+    }
+	
+    /* Step 6: Programming PLLD[5:0] in the MAINPLLCTL0 register */            
+    MAINPLLCTL0 &= MAIN_PLLD_MASK;      // clear the PLLD bit field
+	//MAIN_PLLD_MASK = 0xFFFFFFC0
+	//PLLD_val    = 1; globally - MAINPLLCTL0 cleared PLLD[5:0] 
+	
+//Step 6 - Program PLLD in MAINPLLCTL0    
+	MAINPLLCTL0 |= ~MAIN_PLLD_MASK & (PLLD_val - 1);    // set the PLLD[5:0] bit field of PLLD to PLLD_val
+
+    if(debug_info_on){
+        GEL_TextOut("(6) MAINPLLCTL0 = %x\n",,,,, MAINPLLCTL0);
+    }
+
+    /* Step 7: Programming OD[3:0] in the SECCTL register */            
+    PLL1_SECCTL &= OUTPUT_DIVIDE_MASK;  // clear the OD bit field
+	//OD_val = 2; globally
+	//OUTPUT_DIVIDE_OFFSET = 19
+	// OUTPUT_DIVIDE_MASK = 0xFF87FFFF
+	//~OUTPUT_DIVIDE_MASK = 0x00780000
+	//0x00810000 & 0xFF87FFFF = 0x00810000
+//Step 7 - In SECCTL, write OD = 1 (divide by 2)	
+	    PLL1_SECCTL |= ~OUTPUT_DIVIDE_MASK & (OD_val - 1) << OUTPUT_DIVIDE_OFFSET;  // set the OD[3:0] bit field of PLLD to OD_val    
+
+    if(debug_info_on){
+        GEL_TextOut("(7) SECCTL = %x\n",,,,, PLL1_SECCTL);
+    }
+	
+    /* Step 8: Following steps are needed to change the default output dividers */            
+
+    /* Step 8a: Check that the GOSTAT bit in PLLSTAT is cleared to show that no GO
+       operation is currently in progress*/
+    if(debug_info_on){    
+        GEL_TextOut("(8a) Delay...\n",,,,,);
+    }    
+//Step 8a - Check that the GOSTAT bit in PLLSTAT
+    while((PLL1_STAT) & 0x00000001);
+
+    /* Step 8b: Program the RATIO field in PLLDIVn to the desired new divide-down rate.
+       If RATIO field is changed, the PLL controller will flag the change in the
+       corresponding bit of DCHANGE*/
+    //PLLDIV3_val = 2;            // setup PLL output divider 3 to /2
+//Step 8b - Program the RATIO field in PLLDIVn	
+    //PLL1_DIV3 = (PLLDIV3_val-1) | 0x8000;  //Set PLLDIV3 //UDAY-TODO: Confirm
+//In Galileo, only SYSCLK2 and SYSCLK3 are programmable
+	//PLLDIV4_val = 5;            // setup PLL output divider 4 to /3
+	//PLL1_DIV4 = (PLLDIV4_val-1) | 0x8000;  //Set PLLDIV4
+	//PLLDIV7_val = 6;            // setup PLL output divider 7 to /6
+	//PLL1_DIV7 = (PLLDIV7_val-1) | 0x8000;  //Set PLLDIV7
+	//MM how come PLL1_DIV7 = 0x00000000 instead of PLLDIV7_val = 0x00008005 ... ?? 
+	//!!!
+
+    if(debug_info_on){
+        GEL_TextOut("PLL1_DIV3 = %x\n",,,,, PLL1_DIV3);
+        //GEL_TextOut("PLL1_DIV4 = %x\n",,,,, PLL1_DIV4);
+		GEL_TextOut("PLL1_DIV4 skipped - not programmable in Galileo\n");
+        //GEL_TextOut("PLL1_DIV7 = %x\n",,,,, PLL1_DIV7); //!!!
+		GEL_TextOut("PLL1_DIV7 skipped - not programmable in Galileo\n");
+    }
+
+	
+//Step 8c MISSING - Set the respective ALNn bits in ALNCTL to align any SYSCLKs after the GO operation.
+
+    /* Step 8c: Set GOSET bit in PLLCMD to initiate the GO operation to change the divide
+       values and align the SYSCLKs as programmed */
+	   
+//Step 8d - Set the GOSET bit in PLLCMD	   
+    PLL1_CMD |= 0x00000001;
+
+    /*Step 8d/e: Read the GOSTAT bit in PLLSTAT to make sure the bit returns to 0 to
+      indicate that the GO operation has completed */
+    if(debug_info_on){    
+        GEL_TextOut("(8d/e) Delay...\n",,,,,);
+    }    
+//Step 8e - Read the GOSTAT bit in PLLSTAT to make sure the bit returns to 0 to indicate that the GO operation has completed.
+    while((PLL1_STAT) & 0x00000001);
+    
+    /* Step 9: Set PLLCTL[PLLRST] = 1 - Assert PLL reset (Previously Step 3)*/  
+	//MM woah what? Previously step 3?!
+	//PLLRST_OFFSET = 3
+	
+//!!!Step 3 - In PLLCTL, write PLLRST = 1 (PLL is reset)	
+//!!!
+//MM - moved RESET from here to Step 3 above
+	//PLL1_PLLCTL |= (1 << PLLRST_OFFSET);
+
+    /* Step 10: Wait for the at least 7us for the PLL reset properly (128 CLKIN1 cycles) */        
+    if(debug_info_on){    
+        GEL_TextOut("(10) Delay...\n",,,,,);
+    }    
+	
+	//Step 9 - Wait for at least 7 us
+    for(i=0;i<delay;i++);
+
+    /* Step 11: Set PLLCTL[PLLRST] = 0 - De-Assert PLL reset */        
+	
+//Step 10 - In PLLCTL, write PLLRST = 0 (PLL reset is released)    
+	PLL1_PLLCTL &= ~(1 << PLLRST_OFFSET);
+
+    /* Step 12: Wait for PLL to lock (2000 CLKIN1 cycles) */
+    if(debug_info_on){    
+        GEL_TextOut("(12) Delay...\n",,,,,);
+    }    
+	
+//Step 11 - Wait for at least 500 * CLKIN cycles * (PLLD + 1) (PLL lock time)    
+	for(i=0;i<delay;i++);
+
+    /* Step 13: In SECCTL, write BYPASS = 0 (enable PLL mux to switch to PLL mode) */
+	//BYPASS_OFFSET = 23
+
+
+	
+//Step 12 - In SECCTL, write BYPASS = 0 (enable PLL mux to switch to PLL mode)	
+    PLL1_SECCTL &= ~(1 << BYPASS_OFFSET);        
+    if(debug_info_on){    
+        GEL_TextOut("(13) SECCTL = %x\n",,,,, PLL1_SECCTL);
+    }    
+
+    /* Step 14: In PLLCTL, write PLLEN = 1 to enable PLL mode */
+//Step 13 - In PLLCTL, write PLLEN = 1 (enable PLL controller mux to switch to PLL mode)	
+    PLL1_PLLCTL |= (1 << PLLEN_OFFSET);        
+    if(debug_info_on){    
+        GEL_TextOut("(14) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+    }    
+
+    /* Step 15: Lock Boot Config Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+
+    //GEL_TextOut("PLL has been configured (CLKIN * PLLM / PLLD / PLLOD = PLLOUT):\n",,,,,);
+    GEL_TextOut("PLL has been configured (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val,(CLKIN_val * PLLM_val / PLLD_val / OD_val) );
+
+	if(index == 400){				// 24MHz -> 400 MHz
+       //GEL_TextOut("PLL has been configured to 400MHz (with ref clock 24MHz, -sysclkp_period 41.6666)\n");
+    }
+	else if(index == 600){		// 24MHz -> 600 MHz
+       //GEL_TextOut("PLL has been configured to 600MHz (with ref clock 24MHz, -sysclkp_period 41.6666)\n");
+    }
+	
+	//By default, Tetris domain is ON
+	//GEL_TextOut("Switching on ARM Core 0\n",,,,,);
+    //TETRIS_CPU0_PDCTL   = 0x00000000;
+    //TETRIS_CPU0_PTCMD   = 0x00000001;    
+
+    // GEL_TextOut("Switching on ARM Core 1\n",,,,,);
+    // TETRIS_CPU1_PDCTL   = 0x00000000;
+    // TETRIS_CPU1_PTCMD   = 0x00000001;    
+    
+    // GEL_TextOut("Switching on ARM Core 2\n",,,,,);
+    // TETRIS_CPU2_PDCTL   = 0x00000000;
+    // TETRIS_CPU2_PTCMD   = 0x00000001;    
+    
+    // GEL_TextOut("Switching on ARM Core 3\n",,,,,);
+    // TETRIS_CPU3_PDCTL   = 0x00000000;
+    // TETRIS_CPU3_PTCMD   = 0x00000001;
+}
+
+Set_Tetris_Pll(int index)		
+{
+    unsigned int BWADJ_val;     
+    unsigned int OD_val;            
+    unsigned int PLLM_val;
+    unsigned int PLLD_val;
+	float CLKIN_val;
+    int i;
+
+    //By default, Tetris domain is ON
+	//GEL_TextOut("Switching on ARM Core 0\n",,,,,);
+    //TETRIS_CPU0_PDCTL   = 0x00000000;
+    //TETRIS_CPU0_PTCMD   = 0x00000001;    
+
+    // GEL_TextOut("Switching on ARM Core 1\n",,,,,);
+    // TETRIS_CPU1_PDCTL   = 0x00000000;
+    // TETRIS_CPU1_PTCMD   = 0x00000001;    
+    
+    // GEL_TextOut("Switching on ARM Core 2\n",,,,,);
+    // TETRIS_CPU2_PDCTL   = 0x00000000;
+    // TETRIS_CPU2_PTCMD   = 0x00000001;    
+    
+    // GEL_TextOut("Switching on ARM Core 3\n",,,,,);
+    // TETRIS_CPU3_PDCTL   = 0x00000000;
+    // TETRIS_CPU3_PTCMD   = 0x00000001;
+
+    if(index == 200){                 // 24 MHz -> 200 MHz
+        CLKIN_val   = 24;          // setup CLKIN to 24 MHz
+        PLLM_val    = 100;           // setup PLLM (PLL multiplier)
+        OD_val      = 12;            // setup OD 
+		PLLD_val	= 1;
+    }
+    else if(index == 400){            // 24 MHz -> 400 MHz
+        CLKIN_val   = 24;          // setup CLKIN to 24 MHz
+        PLLM_val    = 100;           // setup PLLM (PLL multiplier) 
+        OD_val      = 6;            // setup OD 
+		PLLD_val	= 1;
+    }
+    else if(index == 600){          // 24 MHz -> 600 MHz 
+        CLKIN_val   = 24;           // setup CLKIN to 24 MHz
+        PLLM_val    = 100;          // setup PLLM (PLL multiplier)
+        OD_val      = 4;            // setup OD 
+		PLLD_val	= 1;
+    }
+	else if(index == 1000){			// 24MHz -> 1 GHz
+		CLKIN_val	= 24;			// setup CLKIN to 24.00 MHz
+		PLLM_val	= 250;			// setup PLL (PLL multplier)
+		OD_val		= 2;			// setup OD
+		PLLD_val	= 3;			// setup PLLD (reference divider)
+	}
+
+    BWADJ_val       = (PLLM_val-1) >> 1;            // setup BWADJ to be 1/2 the value of PLLM
+
+    /* Step 1: Unlock Boot Config Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    //Step 1 : Assert SEC PLL Reset
+    SECPLLCTL1 = ((1 << SEC_PLLCTL1_RESET_OFFSET) | (1 << SEC_PLLCTL1_ENSTAT_OFFSET));
+
+    //Step 2 : Change CLKF/OD/BWADJ etc. for SEC PLL
+    SECPLLCTL0 = ((BWADJ_val << SEC_PLLCTL0_BWADJ_OFFSET) |
+                  ((OD_val-1) << SEC_PLLCTL0_OD_OFFSET)|
+                  ((PLLM_val-1) << SEC_PLLCTL0_PLLM_OFFSET) | 
+				   ((PLLD_val-1) << SEC_PLLCTL0_PLLD_OFFSET)
+				  );
+
+    //Step 3 : Make sure the resets are held for 5us
+    for(i = 0; i < 200000; i++);
+
+    //Step 4 : Remove SEC PLL reset
+    SECPLLCTL1 = (1 << SEC_PLLCTL1_ENSTAT_OFFSET);
+
+    //Step 5 : Wait for PLL to lock (4000 CLKIN1 cycles)
+    for(i = 0; i < 4000; i++);
+
+    //Step 6 : Get the PLL out of Bypass
+    SECPLLCTL0 &= ~(1 << SEC_PLLCTL0_BYPASS_OFFSET);
+    //CHIP_MISC1 |= (1 << ARMPLL_ENABLE_OFFSET); 
+   
+
+    //Step 6 : Lock Boot Config Registers
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+    
+    GEL_TextOut("ARM PLL has been configured with ref clock 24MHz, -sysclkp_period 41.6666 (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val, (CLKIN_val * PLLM_val)/PLLD_val/OD_val);
+
+}
+
+Set_ICSS_Pll(int index)		
+{
+
+    unsigned int BWADJ_val;     
+    unsigned int OD_val;            
+    unsigned int PLLM_val;
+	unsigned int PLLD_val;
+    float CLKIN_val;
+    int i;
+
+    if(index == 200){                 // 24 MHz -> 200 MHz
+        CLKIN_val   = 24;          // setup CLKIN to 200 MHz
+        PLLM_val    = 250;           // setup PLLM (PLL multiplier)
+		PLLD_val    = 3;           // setup PLLD (PLL divider) 
+        OD_val      = 10;            // setup OD
+    }
+
+    BWADJ_val       = (PLLM_val-1) >> 1;            // setup BWADJ to be 1/2 the value of PLLM
+    //OD_val          = 2;                            // setup OD to a fixed /2
+
+    /* Step 1: Unlock Boot Config Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    //Step 1 : Assert SEC PLL Reset
+    ICSSPLLCTL1 = ((1 << SEC_PLLCTL1_RESET_OFFSET) | (1 << SEC_PLLCTL1_ENSTAT_OFFSET));
+
+    //Step 2 : Change CLKF/OD/BWADJ etc. for SEC PLL
+    ICSSPLLCTL0 = ((BWADJ_val << SEC_PLLCTL0_BWADJ_OFFSET) |
+                  ((OD_val-1) << SEC_PLLCTL0_OD_OFFSET)|
+                  ((PLLM_val-1) << SEC_PLLCTL0_PLLM_OFFSET)|
+				  (PLLD_val-1));
+
+    //Step 3 : Make sure the resets are held for 5us
+    for(i = 0; i < 200000; i++);
+
+    //Step 4 : Remove SEC PLL reset
+    ICSSPLLCTL1 &= ~(1 << SEC_PLLCTL1_RESET_OFFSET);
+
+    //Step 5 : Wait for PLL to lock (4000 CLKIN1 cycles)
+    for(i = 0; i < 4000; i++);
+
+    //Step 6 : Get the PLL out of Bypass
+    ICSSPLLCTL0 &= ~(1 << SEC_PLLCTL0_BYPASS_OFFSET);
+    
+   
+    //Step 6 : Lock Boot Config Registers
+    //KICK0 = 0x00000000;
+   // KICK1 = 0x00000000;
+    
+    GEL_TextOut("ICSS PLL has been configured (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val, (CLKIN_val * PLLM_val)/(PLLD_val*OD_val));
+
+}
+
+Set_DDR_Pll(int index)		
+{
+    unsigned int BWADJ_val;     
+    unsigned int OD_val;            
+    unsigned int PLLM_val;
+	unsigned int PLLD_val;
+    float CLKIN_val;
+    int i;
+
+    if(index == 200){                 // 24 MHz -> 200 MHz
+        CLKIN_val   = 24;             // setup CLKIN to 200 MHz
+        PLLM_val    = 133;            // setup PLLM (PLL multiplier)
+		PLLD_val    = 1;              // setup PLLD (PLL divider) 
+        OD_val      = 16;             // setup OD
+    }
+	
+	if(index == 266){                 // 24 MHz -> 200 MHz
+        CLKIN_val   = 24;             // setup CLKIN to 266 MHz
+        PLLM_val    = 155;            // setup PLLM (PLL multiplier)
+		PLLD_val    = 1;              // setup PLLD (PLL divider) 
+        OD_val      = 14;             // setup OD
+    }
+
+    BWADJ_val       = (PLLM_val-1) >> 1;            // setup BWADJ to be 1/2 the value of PLLM
+
+    /* Step 1: Unlock Boot Config Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    //Step 1 : Assert SEC PLL Reset
+    DDR3PLLCTL1 = ((1 << SEC_PLLCTL1_RESET_OFFSET) | (1 << SEC_PLLCTL1_ENSTAT_OFFSET));
+
+    //Step 2 : Change CLKF/OD/BWADJ etc. for SEC PLL
+    DDR3PLLCTL0 = ((BWADJ_val << SEC_PLLCTL0_BWADJ_OFFSET) |
+                  ((OD_val-1) << SEC_PLLCTL0_OD_OFFSET)|
+                  ((PLLM_val-1) << SEC_PLLCTL0_PLLM_OFFSET)|
+				  (PLLD_val-1));
+
+    //Step 3 : Make sure the resets are held for 5us
+    for(i = 0; i < 200000; i++);
+
+    //Step 4 : Remove SEC PLL reset
+    DDR3PLLCTL1 &= ~(1 << SEC_PLLCTL1_RESET_OFFSET);
+
+    //Step 5 : Wait for PLL to lock (4000 CLKIN1 cycles)
+    for(i = 0; i < 4000; i++);
+
+    //Step 6 : Get the PLL out of Bypass
+    DDR3PLLCTL0 &= ~(1 << SEC_PLLCTL0_BYPASS_OFFSET);
+	
+	DDR3MUX = 0x0;
+   
+    //Step 6 : Lock Boot Config Registers
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+    
+    GEL_TextOut("DDR PLL has been configured (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val, (CLKIN_val * PLLM_val)/(PLLD_val*OD_val));
+
+}
+
+Set_UART_Pll(int index)		
+{
+
+    unsigned int BWADJ_val;     
+    unsigned int OD_val;            
+    unsigned int PLLM_val;
+	unsigned int PLLD_val;
+    float CLKIN_val;
+    int i;
+
+    if(index == 384){                 // 24 MHz -> 200 MHz
+        CLKIN_val   = 24;          // setup CLKIN to 200 MHz
+        PLLM_val    = 128;           // setup PLLM (PLL multiplier)
+		PLLD_val    = 1;           // setup PLLD (PLL divider) 
+        OD_val      = 8;            // setup OD
+    }
+
+    BWADJ_val       = (PLLM_val-1) >> 1;            // setup BWADJ to be 1/2 the value of PLLM
+
+    /* Step 1: Unlock Boot Config Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    //Step 1 : Assert SEC PLL Reset
+    UARTPLLCTL1 = ((1 << SEC_PLLCTL1_RESET_OFFSET) | (1 << SEC_PLLCTL1_ENSTAT_OFFSET));
+
+    //Step 2 : Change CLKF/OD/BWADJ etc. for SEC PLL
+    UARTPLLCTL0 = ((BWADJ_val << SEC_PLLCTL0_BWADJ_OFFSET) |
+                  ((OD_val-1) << SEC_PLLCTL0_OD_OFFSET)|
+                  ((PLLM_val-1) << SEC_PLLCTL0_PLLM_OFFSET)|
+				  (PLLD_val-1));
+
+    //Step 3 : Make sure the resets are held for 5us
+    for(i = 0; i < 200000; i++);
+
+    //Step 4 : Remove SEC PLL reset
+    UARTPLLCTL1 &= ~(1 << SEC_PLLCTL1_RESET_OFFSET);
+
+    //Step 5 : Wait for PLL to lock (4000 CLKIN1 cycles)
+    for(i = 0; i < 4000; i++);
+
+    //Step 6 : Get the PLL out of Bypass
+    UARTPLLCTL0 &= ~(1 << SEC_PLLCTL0_BYPASS_OFFSET);
+   
+    //Step 6 : Lock Boot Config Registers
+    //KICK0 = 0x00000000;
+   // KICK1 = 0x00000000;
+    
+    GEL_TextOut("UART PLL has been configured (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val, (CLKIN_val * PLLM_val)/(PLLD_val*OD_val));
+
+}
+
+Set_Msmc_Non_Shared()
+{
+    unsigned int privid;
+
+    for (privid = 0; privid < 16; privid++)
+    {
+        *(unsigned int*)(SMS_MPAXH_0_0 + (0x40 * privid)) |= 0x00000080;
+        *(unsigned int*)(SES_MPAXH_0_0 + (0x40 * privid)) |= 0x00000080;
+    }
+}
+Set_NSS_Pll(int index)		
+{
+
+    unsigned int BWADJ_val;     
+    unsigned int OD_val;            
+    unsigned int PLLM_val;
+	unsigned int PLLD_val;
+    float CLKIN_val;
+    int i;
+
+	if (index == 1000) {
+		CLKIN_val   = 24;         	// sysclk input is 24 MHz
+		PLLM_val    = 250;           // setup PLLM (PLL multiplier)
+		PLLD_val    = 3;            // setup PLLD (PLL divider)
+		OD_val      = 2;            // setup OD 
+	}
+
+    /* Step 1: Unlock Boot Config Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    //Step 1 : Assert SEC PLL Reset
+    NSSPLLCTL1 = ((1 << SEC_PLLCTL1_RESET_OFFSET) | (1 << SEC_PLLCTL1_ENSTAT_OFFSET));
+
+    BWADJ_val       = (PLLM_val-1) >> 1;            // setup BWADJ to be 1/2 the value of PLLM
+
+    //Step 2 : Change CLKF/OD/BWADJ etc. for SEC PLL
+    NSSPLLCTL0 = ((BWADJ_val << SEC_PLLCTL0_BWADJ_OFFSET) |
+                  ((OD_val-1) << SEC_PLLCTL0_OD_OFFSET)|
+                  ((PLLM_val-1) << SEC_PLLCTL0_PLLM_OFFSET)|
+				  (PLLD_val-1));
+
+    //Step 3 : Make sure the resets are held for 5us
+    for(i = 0; i < 200000; i++);
+
+    //Step 4 : Remove SEC PLL reset
+    NSSPLLCTL1 &= ~(1 << SEC_PLLCTL1_RESET_OFFSET);
+
+    //Step 5 : Wait for PLL to lock (4000 CLKIN1 cycles)
+    for(i = 0; i < 4000; i++);
+
+    //Step 6 : Get the PLL out of Bypass
+    NSSPLLCTL0 &= ~(1 << SEC_PLLCTL0_BYPASS_OFFSET);
+    
+   
+    //Step 6 : Lock Boot Config Registers
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+    
+    GEL_TextOut("NSS PLL has been configured (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val, (CLKIN_val * PLLM_val)/PLLD_val/OD_val);
+
+}
+
+/*
+* Configures the DSS PLL
+*
+* REFCLK = 24MHz
+*/
+Set_DSS_Pll(int freq)
+{
+       unsigned int PLLM_val   = 0;      //Reference Multiplier
+       unsigned int PLLD_val    = 0;      //Reference Divider
+       unsigned int OD_val = 0;      //Output Divider
+	   unsigned int BWADJ_val, i;  
+	   float CLKIN_val;
+       //unsigned int temp = 0;
+
+       if (freq == 148)
+       {
+			//148.5 MHz PLL
+			CLKIN_val   = 24;         	// sysclk input is 24 MHz
+			PLLM_val   = 198;
+			PLLD_val    = 4;
+			OD_val = 8;
+       }              
+       if (freq == 74) 
+       { 	
+			//74.25 MHz PLL
+			CLKIN_val   = 24;         	// sysclk input is 24 MHz
+			 PLLM_val   = 198;
+			 PLLD_val    = 4;
+			 OD_val = 16;
+       }
+       if (freq == 9) 
+       {	//9 MHz PLL
+		CLKIN_val   = 24;         	// sysclk input is 24 MHz
+                PLLM_val   = 12;
+                PLLD_val    = 4;
+                OD_val = 8;
+       }
+       if (freq == 25)
+       {	//24.75 MHz PLL (HDMI)
+		CLKIN_val   = 24;         	// sysclk input is 24 MHz
+		PLLM_val   = 198;
+		PLLD_val    = 12;
+		OD_val = 16;
+       }
+		
+	  /* Step 1: Unlock Boot Config Registers */
+	  KICK0 = KICK0_UNLOCK;
+	  KICK1 = KICK1_UNLOCK;
+
+	  /* Get current CTL0 register contents */
+	  //temp = DSS_PLL_CTL0;
+	  /* Clear settings for the PLL */
+	  //temp &= ~(DSS_PLL_CTL0_BYPASS_MASK | DSS_PLL_CTL0_CLKOD_MASK | DSS_PLL_CTL0_PLLM_MASK | DSS_PLL_CTL0_PLLD_MASK);
+	  /* Set PLL settings */
+	  //temp |= (pllMult << DSS_PLL_CTL0_PLLM_SHIFT) | (pllDiv << DSS_PLL_CTL0_PLLD_SHIFT) | (clkOutDiv << DSS_PLL_CTL0_CLKOD_SHIFT) | (DSS_PLL_CTL0_BYPASS_EN << DSS_PLL_CTL0_BYPASS_SHIFT);
+	  /* Write settings to register */
+	  //DSS_PLL_CTL0 = temp;
+	  
+	  //Step 1 : Assert SEC PLL Reset
+	  DSS_PLL_CTL1 = ((1 << SEC_PLLCTL1_RESET_OFFSET) | (1 << SEC_PLLCTL1_ENSTAT_OFFSET));
+
+	  BWADJ_val       = (PLLM_val-1) >> 1;            // setup BWADJ to be 1/2 the value of PLLM
+
+	//Step 2 : Change CLKF/OD/BWADJ etc. for SEC PLL
+	DSS_PLL_CTL0 = ((BWADJ_val << SEC_PLLCTL0_BWADJ_OFFSET) |
+				  ((OD_val-1) << SEC_PLLCTL0_OD_OFFSET)|
+				  ((PLLM_val-1) << SEC_PLLCTL0_PLLM_OFFSET)|
+				  (PLLD_val-1));
+
+	//Step 3 : Make sure the resets are held for 5us
+	for(i = 0; i < 200000; i++);
+
+	//Step 4 : Remove SEC PLL reset
+	DSS_PLL_CTL1 &= ~(1 << SEC_PLLCTL1_RESET_OFFSET);
+
+	//Step 5 : Wait for PLL to lock (4000 CLKIN1 cycles)
+	for(i = 0; i < 4000; i++);
+
+	//Step 6 : Get the PLL out of Bypass
+	DSS_PLL_CTL0 &= ~(1 << SEC_PLLCTL0_BYPASS_OFFSET);
+
+	//Step 6 : Lock Boot Config Registers
+	KICK0 = 0x00000000;
+	KICK1 = 0x00000000;
+		
+    GEL_TextOut("DSS PLL has been configured (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val, (CLKIN_val * PLLM_val)/PLLD_val/OD_val);
+
+	KICK0 = 0x00000000;
+	KICK1 = 0x00000000;
+}
+
+
+
+//*************************************************************************************************
+//*************************************************************************************************
+//*************************************************************************************************
+//*************************************************************************************************
+//*************************************************************************************************
+//*************************************************************************************************
+
+
+///*--------------------------------------------------------------*///
+///* Galileo EVM Function Menu                                     *///
+///*--------------------------------------------------------------*///
+
+///* Galileo PLL Function *///
+menuitem "Galileo PLL Functions";
+
+/* BB register field read macro */
+#define BB_REG_FIELD_READ(reg_value, reg_high, reg_low) (unsigned int)(((*(unsigned int*)reg_value)&((0xFFFFFFFF>>((31-reg_high)+reg_low))<<reg_low))>>reg_low)
+
+hotmenu Read_device_speed()
+{
+	unsigned int reg_field;
+	
+	//Get device speed
+	GEL_TextOut("Reading Device Speed from BOOTCFG_EFUSE_BOOTROM\n");
+	
+	reg_field = BB_REG_FIELD_READ(EFUSE_BOOTROM,23,16);
+	reg_field = reg_field & 0xFF;
+
+	reg_field = BB_REG_FIELD_READ(EFUSE_BOOTROM,23,16);
+	reg_field = reg_field & 0xFF;
+	if((reg_field & 0xFF) == 0x01)
+    {
+		GEL_TextOut(" DEVICE SPEED[23:16] ---> 600 MHz\n");
+		return(600);
+	}
+	else if((reg_field & 0xF8) == 0x08)
+    {
+		GEL_TextOut("DEVICE SPEED[23:16] ---> 1000 MHz\n");
+		return(1000);
+    }
+	else if((reg_field & 0x40) == 0x40)
+    {
+		GEL_TextOut("DEVICE SPEED[23:16] ---> 600 MHz\n");
+		return(600);
+	}
+	else {
+		GEL_TextOut("DEVICE SPEED EFUSE bits Incorrectly configured\n");
+		return(0);
+	}
+}
+
+hotmenu Read_arm_speed()
+{
+	unsigned int reg_field;
+	
+	// ARM Speed check starts here
+	reg_field = BB_REG_FIELD_READ(EFUSE_BOOTROM,9,0);
+	reg_field = reg_field & 0xFFF;
+
+	if((reg_field & 0xFF2) == 0x002)
+	{	
+		GEL_TextOut("ARM SPEED[9:0] ---> 600 MHz\n");
+		return(600);
+	}
+	else if((reg_field & 0xF10) == 0x010)
+	{	
+		GEL_TextOut("ARM SPEED[9:0] ---> 1000 MHz\n");
+		return(1000);		
+	}
+	else if((reg_field & 0xF80) == 0x080)
+	{	
+		GEL_TextOut("ARM SPEED[9:0] ---> 600 MHz\n");
+		return(600);
+	}
+	else
+	{	
+		GEL_TextOut("ARM SPEED EFUSE bits Incorrectly configured\n");
+		return(0);
+	}
+}
+
+hotmenu CORE_PLL_INIT_24MHz_to_400MHz()
+{
+    Set_Pll1(400); // call Set_Pll1 with index = 1 -> 24 MHz to 400 MHz operation 
+}
+
+hotmenu CORE_PLL_INIT_24MHz_to_600MHz()
+{
+    Set_Pll1(600); // call Set_Pll1 with index = 2 -> 24 MHz to 600 MHz operation 
+
+}
+
+hotmenu CORE_PLL_INIT_24MHz_to_1000MHz()
+{
+    Set_Pll1(1000); // call Set_Pll1 with index = 3 -> 24 MHz to 1000 MHz operation 
+
+}
+
+hotmenu TETRIS_PLL_INIT_24MHZ_to_200MHz()
+{
+    Set_Tetris_Pll(200); // 24 MHz to 200 MHz operation 
+}
+
+hotmenu TETRIS_PLL_INIT_24MHZ_to_400MHz()
+{
+    Set_Tetris_Pll(400); // 24 MHz to 400 MHz operation 
+}
+
+hotmenu TETRIS_PLL_INIT_24MHZ_to_600MHz()
+{
+    Set_Tetris_Pll(600); // 24 MHz to 600 MHz operation 
+}
+
+hotmenu TETRIS_PLL_INIT_24MHZ_to_1000MHz()
+{
+    Set_Tetris_Pll(1000); // 24 MHz to 1000 MHz operation 
+}
+
+hotmenu DDR_PLL_INIT_24MHZ_to_200MHz()
+{
+	Set_DDR_Pll(200);
+}
+
+hotmenu DDR_PLL_INIT_24MHZ_to_266MHz()
+{
+	Set_DDR_Pll(266);
+}
+
+hotmenu ICSS_POWERUP_AND_PLL_INIT_24MHz_to_200MHz()
+{
+    Set_ICSS_Pll(200);
+}
+
+hotmenu DSS_PLL_INIT_24MHZ_to_148_5MHz()
+{
+	Set_DSS_Pll(148);
+}
+
+hotmenu DSS_PLL_INIT_24MHZ_to_74_25MHz()
+{
+	Set_DSS_Pll(74);
+}
+
+hotmenu DSS_PLL_INIT_24MHZ_to_9MHz()
+{
+	Set_DSS_Pll(9);
+}
+
+hotmenu DSS_PLL_INIT_24MHZ_to_25MHz()
+{
+	Set_DSS_Pll(25);
+}
+
+/* Function to program NSS PLL to 1000MHZ from 24MHz input sysclkp */
+hotmenu NSS_PLL_INIT_24MHz_TO_1000MHz()
+{
+    Set_NSS_Pll(1000);
+}
+
+/* Function to program UART PLL to 384MHZ from 24MHz input sysclkp */
+hotmenu UART_PLL_INIT_24MHz_TO_384MHz()
+{
+    Set_UART_Pll(384);
+}
+
+hotmenu SET_MSMC_NONSHARED()
+{
+    Set_Msmc_Non_Shared();
+}
+
+hotmenu CORE_PLL_READ_REGISTER_VALUES()
+{
+	Read_PLL_Reg();
+}
+
+///* Function to enable CORE PLL observation clock for PLL output *///
+hotmenu ENABLE_CORE_PLL_OBSCLK()
+{
+    /* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    /* set bit 1 to enable power to the CORE PLL observation clock, clear bit 0 to view the CORE PLL observation (output) clock */
+    //OBSCLKCTL |= (1 << 1);  /* set bit 1 to enable power to the observation clock */
+    //OBSCLKCTL &= ~(1 << 0); /* clear bit 0 to view the CORE PLL clock */ 
+	OBSCLKCTL = 0x201;
+	PLL1_OCSEL = 0x11;
+	
+    /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+
+    GEL_TextOut("CORE PLL observation clock enabled and configured to show CORE PLL output\n");
+}
+
+hotmenu ENABLE_TETRIS_PLL_OBSCLK()
+{
+	/* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+	OBSCLKCTL = 0x803;
+	 /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+	GEL_TextOut("Observation clock enabled and configured to show ARM PLL output\n");
+}
+
+hotmenu ENABLE_ICSS_PLL_OBSCLK()
+{
+	/* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+	OBSCLKCTL = 0x2005;
+	 /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+	GEL_TextOut("Observation clock enabled and configured to show ARM PLL output\n");
+}
+
+hotmenu ENABLE_NSS_PLL_OBSCLK()
+{
+	/* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+	OBSCLKCTL = 0x10008;
+	 /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+	GEL_TextOut("Observation clock enabled and configured to show ARM PLL output\n");
+}
+
+hotmenu ENABLE_UART_PLL_OBSCLK()
+{
+	/* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+	OBSCLKCTL = 0x1004;
+	 /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+	GEL_TextOut("Observation clock enabled and configured to show ARM PLL output\n");
+}
+
+
+/* Function to enable DDR PLL observation clock for PLL output */
+hotmenu ENABLE_DSS_PLL_OBSCLK ()
+{
+    /* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    /* set bit 1 to enable power to the CORE PLL observation clock, clear bit 0 to view the CORE PLL observation (output) clock */
+    OBSCLKCTL = 0x402;
+
+    /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+
+    GEL_TextOut("Observation clock enabled and configured to show DSS-UL PLL output\n");
+}
+
+
+/* Function to enable DDR PLL observation clock for PLL output */
+hotmenu ENABLE_DDR_PLL_OBSCLK ()
+{
+    /* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    /* set bit 1 to enable power to the CORE PLL observation clock, clear bit 0 to view the CORE PLL observation (output) clock */
+    //OBSCLKCTL |= (1 << 3);  /* set bit 3 to enable power to the observation clock */
+    //OBSCLKCTL |= (1 << 2);  /* set bit 2 to view the DDR PLL clock */ 
+    OBSCLKCTL = 0x4006;
+    
+    /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+
+    GEL_TextOut("DDR PLL observation clock enabled and configured to show DDR PLL output\n");
+}
+
+/* Function to release Cortex M3 from reset */
+hotmenu RELEASE_CORTEX_M3_RESET ()
+{
+	PMMC_PDCTL |= 0x1;
+	PMMC_MDCTL = (1 << 8) | 0x3;
+	PSC_PTCMD = 0x1;
+	GEL_TextOut("Cortex M3 is released from reset\n");
+}
+hotmenu UNLOCK_BOOT_CFG_REG ()
+{
+	/* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+	GEL_TextOut("Unlocked Boot CFG Registers \n");
+}
+
+hotmenu LOCK_BOOT_CFG_REG ()
+{
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+	GEL_TextOut("Locked Boot CFG Registers \n");
+}
+
+#define XMC_BASE_ADDR (0x08000000)
+#define XMPAX2_L     (*(int*)(XMC_BASE_ADDR + 0x00000010))
+#define XMPAX2_H     (*(int*)(XMC_BASE_ADDR + 0x00000014))
+
+xmc_setup()
+{
+  /* mapping for ddr emif registers XMPAX*2 */
+
+    XMPAX2_L =  0x121010FF;  /* replacement addr + perm */
+    XMPAX2_H =  0x2101000B;    /* base addr + seg size (64KB)*/	//"1B"-->"B" by xj
+ GEL_TextOut("XMC setup complete.\n");
+	}
+
+/* DDR3A_BASE_ADDR  corresponds to DDR3A_SLV.CONFIG:MSMC_SES.CONFIG 
+/*--------------------------------------------------------------*/
+/* ddr3_setup()                                                 */
+/* DDR3 initialization                                          */
+/*--------------------------------------------------------------*/
+
+#define CHIP_LEVEL_REG              0x02620000
+
+/******************* PLL registers **********************************/
+/*Boot cfg registers*/
+#define KICK0                       *(unsigned int*)(CHIP_LEVEL_REG + 0x0038)
+#define KICK1                       *(unsigned int*)(CHIP_LEVEL_REG + 0x003C)
+#define KICK0_UNLOCK                (0x83E70B13)
+#define KICK1_UNLOCK                (0x95A4F1E0)
+#define KICK_LOCK                   0
+#define TINPSEL                     *(unsigned int*)(CHIP_LEVEL_REG + 0x0300)
+#define TOUTPSEL                    *(unsigned int*)(CHIP_LEVEL_REG + 0x0304)
+#define MAINPLLCTL0                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0350) //0x0328)
+#define MAINPLLCTL1                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0354) //0x032C)
+#define MAIN_PLLD_OFFSET            0
+#define MAIN_PLLD_MASK              0xFFFFFFC0
+#define MAIN_PLLM_OFFSET            12
+#define MAIN_PLLM_MASK              0xFFF80FFF
+#define MAIN_BWADJ0_OFFSET          24
+#define MAIN_BWADJ0_MASK            0x00FFFFFF
+#define MAIN_ENSAT_OFFSET           6
+#define MAIN_ENSAT_MASK             0xFFFFFFBF
+#define MAIN_BWADJ1_OFFSET          0
+#define MAIN_BWADJ1_MASK            0xFFFFFFF0
+
+#define OBSCLKCTL                   *(unsigned int*)(CHIP_LEVEL_REG + 0x0C80)
+
+/* PA PLL Registers */
+#define BYPASS_BIT_SHIFT 23
+#define CLKF_BIT_SHIFT   6
+#define CLKR_BIT_SHIFT   0
+#define DEVSTAT    (*((unsigned int *) 0x02620020))
+#define PAPLLCTL0                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0358) 
+#define PAPLLCTL1                 *(unsigned int*)(CHIP_LEVEL_REG + 0x035C) 
+#define PASSCLKSEL_MASK    (1 << 17)    /* Tells the configuration of the PASSCLKSEL pin */
+#define PA_PLL_BYPASS_MASK (1 << BYPASS_BIT_SHIFT)    /* Tells whether the PA PLL is in BYPASS mode or not */
+#define PA_PLL_CLKOD_MASK  (0x00780000) /* Tells the output divider value for the PA PLL */
+#define PA_PLL_CLKF_MASK   (0x0007FFC0) /* Tells the multiplier value for the PA PLL */
+#define PA_PLL_CLKR_MASK   (0x0000003F) /* Tells the divider value for the PA PLL */
+#define PA_PLL_RESET_MASK  (0x00004000)
+
+
+#define CHIP_MISC1                  *(unsigned int*)(CHIP_LEVEL_REG + 0x0C7C)
+#define ARMPLL_ENABLE_OFFSET        13
+
+
+#define DDR3APLLCTL0  			*(unsigned int*)(CHIP_LEVEL_REG + 0x0360)
+#define DDR3APLLCTL1  			*(unsigned int*)(CHIP_LEVEL_REG + 0x0364)
+#define DDR3BPLLCTL0  			*(unsigned int*)(CHIP_LEVEL_REG + 0x0368)
+#define DDR3BPLLCTL1  			*(unsigned int*)(CHIP_LEVEL_REG + 0x036C)
+
+//******************************************************
+// PLL 1 definitions (DSP and ARM clock and subsystems)
+#define PLL1_BASE                   0x02310000
+#define PLL1_PLLCTL                 (*(unsigned int*)(PLL1_BASE + 0x100))   // PLL1 Control
+#define PLL1_SECCTL                 (*(unsigned int*)(PLL1_BASE + 0x108))   // PLL1 Secondary Control
+#define PLL1_PLLM                   (*(unsigned int*)(PLL1_BASE + 0x110))   // PLL1 Multiplier
+#define PLL1_DIV1                   (*(unsigned int*)(PLL1_BASE + 0x118))   // DIV1 divider
+#define PLL1_DIV2                   (*(unsigned int*)(PLL1_BASE + 0x11C))   // DIV2 divider
+#define PLL1_DIV3                   (*(unsigned int*)(PLL1_BASE + 0x120))   // DIV3 divider
+#define PLL1_CMD                    (*(unsigned int*)(PLL1_BASE + 0x138))   // CMD control
+#define PLL1_STAT                   (*(unsigned int*)(PLL1_BASE + 0x13C))   // STAT control
+#define PLL1_ALNCTL                 (*(unsigned int*)(PLL1_BASE + 0x140))   // ALNCTL control
+#define PLL1_DCHANGE                (*(unsigned int*)(PLL1_BASE + 0x144))   // DCHANGE status
+#define PLL1_CKEN                   (*(unsigned int*)(PLL1_BASE + 0x148))   // CKEN control
+#define PLL1_CKSTAT                 (*(unsigned int*)(PLL1_BASE + 0x14C))   // CKSTAT status
+#define PLL1_SYSTAT                 (*(unsigned int*)(PLL1_BASE + 0x150))   // SYSTAT status
+#define PLL1_DIV4                   (*(unsigned int*)(PLL1_BASE + 0x160))   // DIV4 divider
+#define PLL1_DIV5                   (*(unsigned int*)(PLL1_BASE + 0x164))   // DIV5 divider
+#define PLL1_DIV6                   (*(unsigned int*)(PLL1_BASE + 0x168))   // DIV6 divider
+#define PLL1_DIV7                   (*(unsigned int*)(PLL1_BASE + 0x16C))   // DIV7 divider
+#define PLL1_DIV8                   (*(unsigned int*)(PLL1_BASE + 0x170))   // DIV8 divider
+#define PLL1_DIV9                   (*(unsigned int*)(PLL1_BASE + 0x174))   // DIV9 divider
+#define PLL1_DIV10                  (*(unsigned int*)(PLL1_BASE + 0x178))   // DIV10 divider
+#define PLL1_DIV11                  (*(unsigned int*)(PLL1_BASE + 0x17C))   // DIV11 divider
+#define PLL1_DIV12                  (*(unsigned int*)(PLL1_BASE + 0x180))   // DIV12 divider
+#define PLL1_DIV13                  (*(unsigned int*)(PLL1_BASE + 0x184))   // DIV13 divider
+#define PLL1_DIV14                  (*(unsigned int*)(PLL1_BASE + 0x188))   // DIV14 divider
+#define PLL1_DIV15                  (*(unsigned int*)(PLL1_BASE + 0x18C))   // DIV15 divider
+#define PLL1_DIV16                  (*(unsigned int*)(PLL1_BASE + 0x190))   // DIV16 divider
+#define PLLPWRDN_OFFSET             1
+#define PLLPWRDN_MASK               0xFFFFFFFD
+#define PLLRST_OFFSET               3
+#define PLLRST_MASK                 0xFFFFFFF7
+#define PLLENSRC_OFFSET             5
+#define PLLENSRC_MASK               0xFFFFFFDF
+#define PLLEN_OFFSET                0
+#define PLLEN_MASK                  0xFFFFFFFE
+#define OUTPUT_DIVIDE_OFFSET        19
+#define OUTPUT_DIVIDE_MASK          0xFF87FFFF    
+#define BYPASS_OFFSET               23
+#define BYPASS_MASK                 0xFF7FFFFF
+#define PLLM_OFFSET                 0
+#define PLLM_MASK                   0xFFFFFFC0
+#define GOSET_OFFSET                0
+#define GOSET_MASK                  0xFFFFFFFE
+#define GOSTAT_OFFSET               0
+#define GOSTAT_MASK                 0xFFFFFFFE
+
+#define OUTPUT_DIVIDE_OFFSET        19
+#define OUTPUT_DIVIDE_MASK          0xFF87FFFF   
+
+// ARMPLL definitions
+#define SEC_PLLCTL0_PLLM_OFFSET     6
+#define SEC_PLLCTL0_PLLM_MASK       0xFFFF003F
+#define SEC_PLLCTL0_BWADJ_OFFSET    24
+#define SEC_PLLCTL0_BWADJ_MASK      0x00FFFFFF
+#define SEC_PLLCTL0_OD_OFFSET       19
+#define SEC_PLLCTL0_OD_MASK         0xFF87FFFF
+#define SEC_PLLCTL0_BYPASS_OFFSET   23
+#define SEC_PLLCTL0_BYPASS_MASK     0xFF7FFFFF
+#define SEC_PLLCTL1_RESET_OFFSET    14
+#define SEC_PLLCTL1_RESET_MASK      0xFFFFBFFF
+#define SEC_PLLCTL1_PWRDWN_OFFSET   15
+#define SEC_PLLCTL1_PWRDWN_MASK     0xFFFF7FFF
+#define SEC_PLLCTL1_ENSTAT_OFFSET   6
+#define SEC_PLLCTL1_ENSTAT_MASK     0xFFFFFFBF
+
+/*----------------DDR3A Register definition---------------------*/
+
+#define DDR3A_BASE_ADDR (0x21010000)
+#define DDR3A_STATUS   (*(int*)(DDR3A_BASE_ADDR + 0x00000004))
+#define DDR3A_SDCFG    (*(int*)(DDR3A_BASE_ADDR + 0x00000008))
+#define DDR3A_SDRFC    (*(int*)(DDR3A_BASE_ADDR + 0x00000010))
+#define DDR3A_SDTIM1   (*(int*)(DDR3A_BASE_ADDR + 0x00000018))
+#define DDR3A_SDTIM2   (*(int*)(DDR3A_BASE_ADDR + 0x0000001C))
+#define DDR3A_SDTIM3   (*(int*)(DDR3A_BASE_ADDR + 0x00000020))
+#define DDR3A_SDTIM4   (*(int*)(DDR3A_BASE_ADDR + 0x00000028))
+#define DDR3A_ZQCFG    (*(int*)(DDR3A_BASE_ADDR + 0x000000C8))
+#define DDR3A_TMPALRT  (*(int*)(DDR3A_BASE_ADDR + 0x000000CC))
+#define DDR3A_DDRPHYC  (*(int*)(DDR3A_BASE_ADDR + 0x000000E4))
+#define DDR3A_ECC_CTRL (*(int*)(DDR3A_BASE_ADDR + 0x00000110))
+
+#define DDR3A_PHY_CFG_BASE (0x02329000)
+#define DDR3A_PIR    (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000004))
+#define DDR3A_PGCR0  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000008))
+#define DDR3A_PGCR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x0000000C))
+#define DDR3A_PGCR2  (*(int*)(DDR3A_PHY_CFG_BASE + 0x0000008C))
+#define DDR3A_PGSR0  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000010))
+#define DDR3A_PGSR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000014))
+#define DDR3A_PLLCR  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000018))
+#define DDR3A_PTR0   (*(int*)(DDR3A_PHY_CFG_BASE + 0x0000001C))
+#define DDR3A_PTR1   (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000020))
+#define DDR3A_PTR2   (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000024))
+#define DDR3A_PTR3   (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000028))
+#define DDR3A_PTR4   (*(int*)(DDR3A_PHY_CFG_BASE + 0x0000002C))
+#define DDR3A_DSGCR  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000040))
+#define DDR3A_DCR    (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000044))
+#define DDR3A_MR0    (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000054))
+#define DDR3A_MR1    (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000058))
+#define DDR3A_MR2    (*(int*)(DDR3A_PHY_CFG_BASE + 0x0000005C))
+#define DDR3A_DTCR   (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000068))
+#define DDR3A_DTPR0  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000048))
+#define DDR3A_DTPR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x0000004C))
+#define DDR3A_DTPR2  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000050))
+
+#define DDR3A_ZQ0CR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000184))
+#define DDR3A_ZQ1CR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000194))
+#define DDR3A_ZQ2CR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x000001A4))
+#define DDR3A_ZQ3CR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x000001B4))
+
+#define DDR3A_DATX8_4 (*(int*)(DDR3A_PHY_CFG_BASE + 0x000002C0))
+#define DDR3A_DATX8_5 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000300))
+#define DDR3A_DATX8_6 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000340))
+#define DDR3A_DATX8_7 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000380))
+#define DDR3A_DATX8_8 (*(int*)(DDR3A_PHY_CFG_BASE + 0x000003C0))
+
+#define DDR3_TEST_START_ADDRESS (*(int*)(0x80000000))
+
+#define IODDRM_MASK            0x00000180  
+#define ZCKSEL_MASK            0x01800000
+#define CL_MASK				   0x00000072
+#define WR_MASK				   0x00000E00
+#define BL_MASK				   0x00000003
+#define RRMODE_MASK            0x00040000
+#define UDIMM_MASK             0x20000000
+#define BYTEMASK_MASK          0x0000FC00
+#define MPRDQ_MASK             0x00000080
+#define PDQ_MASK               0x00000070
+#define NOSRA_MASK             0x08000000
+#define ECC_MASK               0x00000001
+#define RRMODE_MASK            0x00040000
+
+#define DDR3A_DX0GSR0 (*(int*)(DDR3A_PHY_CFG_BASE + 0x000001C4)) //0x71
+#define DDR3A_DX1GSR0 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000204)) //0x81
+#define DDR3A_DX2GSR0 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000244)) //0x91
+#define DDR3A_DX3GSR0 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000284)) //0xA1
+#define DDR3A_DX4GSR0 (*(int*)(DDR3A_PHY_CFG_BASE + 0x000002C4)) //0xB1
+#define DDR3A_DX5GSR0 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000304)) //0xC1
+#define DDR3A_DX6GSR0 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000344)) //0xD1
+#define DDR3A_DX7GSR0 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000384)) //0xE1
+#define DDR3A_DX8GSR0 (*(int*)(DDR3A_PHY_CFG_BASE + 0x000003C4)) //0xF1
+
+#define TETRIS_BASE                 0x01E80000
+
+#define TETRIS_CPU0_PTCMD           *(unsigned int*)(TETRIS_BASE + 0x0400)
+#define TETRIS_CPU0_PDSTAT          *(unsigned int*)(TETRIS_BASE + 0x0404)
+#define TETRIS_CPU0_PDCTL           *(unsigned int*)(TETRIS_BASE + 0x0408)
+
+#define TETRIS_CPU1_PTCMD           *(unsigned int*)(TETRIS_BASE + 0x040C)
+#define TETRIS_CPU1_PDSTAT          *(unsigned int*)(TETRIS_BASE + 0x0410)
+#define TETRIS_CPU1_PDCTL           *(unsigned int*)(TETRIS_BASE + 0x0414)
+
+#define TETRIS_CPU2_PTCMD           *(unsigned int*)(TETRIS_BASE + 0x0418)
+#define TETRIS_CPU2_PDSTAT          *(unsigned int*)(TETRIS_BASE + 0x041C)
+#define TETRIS_CPU2_PDCTL           *(unsigned int*)(TETRIS_BASE + 0x0420)
+
+#define TETRIS_CPU3_PTCMD           *(unsigned int*)(TETRIS_BASE + 0x0424)
+#define TETRIS_CPU3_PDSTAT          *(unsigned int*)(TETRIS_BASE + 0x0428)
+#define TETRIS_CPU3_PDCTL           *(unsigned int*)(TETRIS_BASE + 0x042C)
+
+#define SECPLLCTL0                  *(unsigned int*)(CHIP_LEVEL_REG + 0x0370)
+#define SECPLLCTL1                  *(unsigned int*)(CHIP_LEVEL_REG + 0x0374)
+unsigned int read_val;
+
+
+
+
+//*************************************************************************************************
+//*************************************************************************************************
+//*************************************************************************************************
+//*************************************************************************************************
+//*************************************************************************************************
+//*************************************************************************************************
+
+
+
+ddr3_memory_test ()
+{
+    unsigned int temp;
+	int i,j;
+	
+	int *ptr;
+	unsigned int PATTERN1 = 0xA5A5A5A5;
+	int TEST_NUM_WORDS = 1000;
+	
+	int flag = 0;
+	
+	ptr = (int *)0x80000000;
+	
+	for (j = 0; j < TEST_NUM_WORDS; j++)
+	{
+		ptr[j] = PATTERN1;
+	}
+
+    GEL_TextOut( "DDR3 memory test... starting at 0x80000000\n" );
+	
+	for (i = 0; i < TEST_NUM_WORDS; i++)
+	{
+		temp=ptr[i];
+		GEL_TextOut("Addr offset: %x Expected: 0xA5A5A5A5 Read: %x \n",,,,, i*4, temp);
+		if (temp != PATTERN1) {
+			GEL_TextOut("ERROR!ERROR!ERROR!\n");
+			flag = 1;
+		}
+	}
+	
+	if (flag)
+	{
+		GEL_TextOut("Errors found during memory test.\n");
+	}
+	else
+	{
+		GEL_TextOut("No errors found during memory test.\n");
+	}
+}
+	
+
+
+/*----------------------------------------------------- DDR3A only --------------------------------------------------------------------------*/
+ddr3A_setup_800(int ECC_Enable, int DUAL_RANK)
+{
+	unsigned int multiplier = 133;
+	unsigned int divider = 0;
+	unsigned int OD_val = 16;
+	
+	int temp,i;
+	int delay = 2000;
+    KICK0 = 0x83E70B13;
+    KICK1 = 0x95A4F1E0;
+	 
+	// Poll for IDONE=1 in the PHY General Status Register 0 (address offset 0x010).
+	 do { 
+    read_val = DDR3A_PGSR0;
+    } while ((read_val&0x00000001) != 0x00000001);
+		
+	//	Clocks are enabled and frequency is stable---------------------------------------
+		
+	//DDR3A PLL setup
+	GEL_TextOut ( "DDR3 PLL Setup ... \n");
+    //DDR3APLLCTL0 = DDR3APLLCTL0 & 0xFF7FFFFF;
+	//	Set ENSAT = 1
+	DDR3APLLCTL1 |= 0x00000040;
+	// Put the PLL in PLL Mode  
+	DDR3APLLCTL0 |= 0x00800000;
+	
+	// Program the necessary multipliers/dividers and BW adjustments            
+    // Set the divider values 
+	DDR3APLLCTL0 &= ~(0x0000003F);
+	DDR3APLLCTL0 |= (divider & 0x0000003F);
+	
+    // Program OD[3:0] in the SECCTL register            
+    DDR3APLLCTL0 &= OUTPUT_DIVIDE_MASK;  // clear the OD bit field
+    DDR3APLLCTL0 |= ~OUTPUT_DIVIDE_MASK & (OD_val - 1) << OUTPUT_DIVIDE_OFFSET;  // set the OD[3:0] bit field of PLLD to OD_val    
+
+	// Set the Multipler values 
+	DDR3APLLCTL0 &= ~(0x0007FFC0);
+	DDR3APLLCTL0 |= ((multiplier << 6) & 0x0007FFC0 );
+	temp = (multiplier >> 1);
+	DDR3APLLCTL0 &= ~(0xFF000000); 
+	DDR3APLLCTL0 |= ((temp << 24) & 0xFF000000);
+	DDR3APLLCTL1 &= ~(0x0000000F);
+	DDR3APLLCTL1 |= ((temp >> 8) & 0x0000000F);
+	
+	// In PLL Controller, reset the PLL (bit 13 in DDR3APLLCTL1 register) 
+	DDR3APLLCTL1 |= 0x00004000;
+	for(i=0;i<delay;i++);
+	// In DDR3PLLCTL1, write PLLRST = 0 to bring PLL out of reset 
+    DDR3APLLCTL1 &= ~(0x00004000);
+	for(i=0;i<delay;i++);
+	
+	// Put the PLL in PLL Mode  
+	DDR3APLLCTL0 &= ~(0x00800000); // ReSet the Bit 23
+	GEL_TextOut( "DDR3 PLL Setup complete, DDR3A clock now running at 400MHz.\n" );
+	//DDR3A PLL setup complete ---------------------------------------
+
+
+	/*------------------------------- ECO FIX -----------------------------------------*/
+	// DDR3 write leveling ECO - Assert & release DDR PHY RESET after DDR PLL setup...
+	DDR3APLLCTL1 = DDR3APLLCTL1 | 0x80000000;	//Assert DDR PHY reset after PLL enabled
+	for(i=0;i<delay;i++);
+	DDR3APLLCTL1 = DDR3APLLCTL1 & 0x7FFFFFFF;	//Release DDR PHY reset
+	
+	do {   // Poll IDONE after resetting PHY 
+		read_val = DDR3A_PGSR0;	
+	   } while ((read_val&0x00000001) != 0x00000001);
+	/*------------------------- Start PHY Configuration -------------------------------*/
+
+	 //DDR3A_PGCR1 = 0x0280C487;
+	 //MM from xls - 0x0080C507
+	 //MM - from xls - 0x0080C507
+
+	
+	// Program FRQSEL in the PLL Control Register (address offset 0x018).
+	 DDR3A_PLLCR = 0xDC000; //Set FRQSEL=11, for ctl_clk between 166-275MHz
+	 
+	// Program WLSTEP=1, IODDRM=2(DDR3L), and ZCKSEL in the PHY General Configuration Register 1 (address offset 0x00C).
+	 DDR3A_PGCR1 |= (1 << 2); //WLSTEP = 1
+	 DDR3A_PGCR1 &= ~(IODDRM_MASK);
+	 DDR3A_PGCR1 |= (( 2 << 7) & IODDRM_MASK);	//MM - changed for DDR3L (changed to 2)
+	 DDR3A_PGCR1 &= ~(ZCKSEL_MASK);
+	 DDR3A_PGCR1 |= (( 1 << 23) & ZCKSEL_MASK);
+ 
+    
+	// Program PHY Timing Parameters Register 0-4 (address offset 0x01C - 0x02C).
+
+	DDR3A_PTR0 = 0x42C21590;
+	DDR3A_PTR1 = 0xD05612C0;	
+	
+	// Maintain default values of Phy Timing Parameters Register 2 in PUB
+	
+	DDR3A_PTR3 = 0x06C30D40; 	//0x18061A80; 
+	DDR3A_PTR4 = 0x6413880; 	//0x0AAE7100;
+	
+	// Program PDQ, MPRDQ, and BYTEMASK in the DRAM Configuration Register (address offset 0x044). 
+	// All other fields must be left at their default values.
+ 
+	DDR3A_DCR &= ~(PDQ_MASK); //PDQ = 0
+	DDR3A_DCR &= ~(MPRDQ_MASK); //MPRDQ = 0
+	DDR3A_DCR &= ~(BYTEMASK_MASK);
+	DDR3A_DCR |= (( 1 << 10) & BYTEMASK_MASK);
+ 
+	if(DUAL_RANK==1){
+		//Assumes Address Mirrored DIMM
+		DDR3A_DCR &= ~(NOSRA_MASK);
+		DDR3A_DCR |= (( 1 << 27) & NOSRA_MASK);
+		DDR3A_DCR &= ~(UDIMM_MASK);
+		DDR3A_DCR |= (( 1 << 29) & UDIMM_MASK);
+	}
+	
+	// Program DRAM Timing Parameters Register 0-2 (address offset 0x048 - 0x050). 
+	DDR3A_DTPR0 = 0x550F6644;	//MM - calculated: 0x550F6644, orig: 0x50CE6644
+	DDR3A_DTPR1 = 0x328341E0;	//MM - calculated: 0x328341E0, orig: 0x32834180		//Increase tWLO to 12
+	DDR3A_DTPR2 = 0x50022A00;	
+
+
+	// Program BL=0, CL, WR, and PD=1 in the Mode Register 0 (address offset 0x054). 
+	// All other fields must be left at their default values.
+	DDR3A_MR0 = 0x00001430; //MM - calculated: 0x00001430, orig: 0x00001420 //-CL - 6, CWL - 5
+	
+	
+	// Program DIC, RTT, and TDQS in the Mode Register 1 (address offset 0x058). 
+	// All other fields must be left at their default values.
+	
+	DDR3A_MR1 = 0x00000006;
+
+	// Program Mode Register 2 (address offset 0x05C).
+	// Maintaining default values of Program Mode Register 2
+	//DDR3A_MR2 = 0x00000018;
+
+	// Program DTMPR=1, DTEXD, DTEXG, RANKEN=1 or 3, and RFSHDT=7 in the Data Training Configuration Register (address offset 0x068). 
+	// All other fields must be left at their default values.
+	if(DUAL_RANK==1){
+		DDR3A_DTCR = 0x730035C7; //Dual-rank
+	}
+	else{
+		DDR3A_DTCR = 0x710035C7; //Single-rank
+	}
+	// Program tREFPRD=(5*tREFI/ddr_clk_period) in the PHY General Configuration Register 2 (address offset 0x08C). 
+	//All other fields must be left at their default values.
+	
+	DDR3A_PGCR2 = 0x00F03D09; //NOBUB = 0, FXDLAT = 0 	
+	//DDR3A_PGCR2 = 0x00F83D09; //NOBUB = 0, FXDLAT = 1 
+	
+	//Set Impedence Register and DFIPU0=1 
+	DDR3A_ZQ0CR1 = 0x0001005D; 
+	DDR3A_ZQ1CR1 = 0x0001005B;
+	DDR3A_ZQ2CR1 = 0x0001005B;
+	
+	
+	// Re-trigger PHY initialization in DDR PHY through the VBUSP interface.
+	// Program 0x00000033 to the PHY Initialization Register (address offset 0x004) to re-trigger PLL, ZCAL, and DCAL initialization.
+
+	DDR3A_PIR = 0x00000033;
+	
+	// Poll for IDONE=1 in the PHY General Status Register 0 (address offset 0x010).
+     do { 
+    read_val = DDR3A_PGSR0;
+    } while ((read_val&0x00000001) != 0x00000001);
+
+	//---------------------------------------------------------------------------------------------------------					
+	
+	if(ECC_Enable == 0)
+	{
+		read_val = DDR3A_DATX8_4;				
+		DDR3A_DATX8_4 = read_val & 0xFFFFFFFE; //Disable ECC byte lane
+	}
+
+	read_val = DDR3A_DATX8_5;				
+	  DDR3A_DATX8_5 = read_val & 0xFFFFFFFE; //Disable BL5 byte lane - not present in K2G
+
+	read_val = DDR3A_DATX8_6;				
+	  DDR3A_DATX8_6 = read_val & 0xFFFFFFFE; //Disable BL6 byte lane - not present in K2G
+
+	read_val = DDR3A_DATX8_7;				
+	  DDR3A_DATX8_7 = read_val & 0xFFFFFFFE; //Disable BL7 byte lane - not present in K2G
+
+	read_val = DDR3A_DATX8_8;				
+	  DDR3A_DATX8_8 = read_val & 0xFFFFFFFE; //Disable BL8 byte lane - not present in K2G
+	
+	// Trigger DDR3 initialization and leveling/training in DDR PHY through the VBUSP interface.
+	// If using a 16-bit wide DDR interface, program DXEN=0 in the DATX8 2-7 General Configuration Registers (address offsets 0x240, 0x280, 0x2C0, 0x300, 0x340, and 0x380) to disable the leveling/training for the upper byte lanes.
+	// If using a 32-bit wide DDR interface, program DXEN=0 in the DATX8 4-7 General Configuration Registers (address offsets 0x2C0, 0x300, 0x340, and 0x380) to disable the leveling/training for the upper byte lanes.
+	// If ECC is not required, program DXEN=0 in the DATX8 8 General Configuration Register (address offset 0x3C0) to disable the leveling/training for the ECC byte lane.
+	// NOTE: Setup supports 64-bit by default,  ECC enable by default.
+ 
+	// Program 0x0000XF81 to the PHY Initialization Register (address offset 0x004) to trigger DDR3 initialization and leveling/training sequences 
+	//DDR3A_PIR = 0x0000FF81; //WLADJ - ON
+	DDR3A_PIR =   0x00000F81; //WLADJ - ON
+	//DDR3A_PIR = 0x00000781;  //WLADJ - OFF
+	
+
+	//---------------------------------------------------------------------------------------------------------					
+			
+	// Poll for IDONE=1 in the PHY General Status Register 0 (address offset 0x010).
+	do {              
+		read_val = DDR3A_PGSR0;
+	   } while ((read_val&0x00000001) != 0x00000001);
+	   
+
+	/* End PHY Configuration */
+	
+	if(ECC_Enable==1)
+	{
+		//Enable ECC
+		//0xB0000000: ECC_EN=1, ECC_VERIFY_EN=1, RMW_EN=1
+		//0x50000000: ECC_EN=1, ECC_VERIFY_EN=0, RMW_EN=1
+		DDR3A_ECC_CTRL = 0xB0000000;
+		read_val = DDR3A_ECC_CTRL;
+		if(read_val!=0xB0000000){
+			GEL_TextOut("\nIncorrect data written to DDR3A_ECC_CTRL..");
+		}
+	}
+	
+	//---------------------------------------------------------------------------------------------------------					
+	/* START EMIF INITIALIZATION
+	  ++++++++++++++++++SDCFG Register Calculation+++++++++++++++++++
+	  | 31 - 29  | 28 |27 - 25 | 24   | 23 - 22| 21 - 17 |
+	  |SDRAM_TYPE|Rsvd|DDR_TERM| DDQS | DYN_ODT|  Rsvd   |
+	  |  0x011   |  0 | 0x011  | 0x1  |   0x00 |   0x0   |
+
+	  | 16-14 |13 - 12 |  11 - 8 |  7   |6 - 5 |  4  |  3  |  2  |  1 - 0  |
+	  |   CWL | NM     |   CL    | Rsvd |IBANK | Rsvd|EBANK| Rsvd|PAGE_SIZE|
+	  |  0x11 | 0x01   |  0x1110 |  0x0 | 0x11 | 0x0 |  0  |  0  |   0x10  |
+	  SDCFG = 0x0110 0011 0010 0010 0011 0011 1011 0010
+	  SDCFG = 0x6700486A;//0x63223332
+
+	  SDRAM_TYPE = 3
+	  DDR_TERM = 3 (RZQ/4 = 1; RZQ/6=3)
+	  DDQS = 1 
+	  DYN_ODT = 0 
+	  
+	  CWL = 3 (CWL5=0; CWL6=1; CWL7=2; CWL8=3)
+	  NM = 1 (64-bit=0, 32-bit=1, 16-bit=2)
+	  CL = 14 (CL5=2; CL6=4; CL7=6; CL8=8; CL9=10; CL10=12; CL11=14)
+	  IBANK = 3 (8bank)
+	  EBANK = 0 (0 - pad_cs_o_n[0] , 1 - pad_cs_o_n[1:0])
+	  PAGE_SIZE = 2 (1024page-size=2; 2048page-size=3)
+	*/
+	/* Start DDR3A EMIF Configuration */
+	// Configure the EMIF through the VBUSM interface.
+	// Program all EMIF MMRs.
+
+	if(DUAL_RANK==1){
+		DDR3A_SDCFG    = 0x6200046A; 	//Dual-rank
+	}
+	else{
+		DDR3A_SDCFG    = 0x62005662; 	//Single-rank, 32-bit //MM - calculated: 0x62005662, orig: 0x62000462 (orig,NM=01:62001462)
+	}																	 
+	
+    DDR3A_SDTIM1   = 0x0A385033;	//MM - calculated: 0x0A385033, orig: 0x0A384C23
+    DDR3A_SDTIM2   = 0x00001CA5;
+    DDR3A_SDTIM3   = 0x21ADFF32;
+	DDR3A_SDTIM4   = 0x533F067F;
+
+	if(DUAL_RANK==1){
+		DDR3A_ZQCFG    = 0xF0073200;	//Dual-rank
+	}
+	else{
+		DDR3A_ZQCFG    = 0x70073200;	//Single-rank
+	}
+ 	
+	//8.b.	Program reg_initref_dis=0 in the SDRAM Refresh Control Register (address offset 0x10).
+    DDR3A_SDRFC = 0x00000C34;
+      
+	GEL_TextOut("DDR3A initialization complete \n");
+	   /* End  DDR3A EMIF Configuration */
+
+	}	
+
+
+ddr3A_setup_1066(int ECC_Enable, int DUAL_RANK){
+	unsigned int multiplier = 155;
+	unsigned int divider = 0;
+	unsigned int OD_val = 14;
+
+	int temp,i;
+	int delay = 2000;
+	
+	KICK0 = 0x83E70B13;
+	KICK1 = 0x95A4F1E0;
+
+	// Poll for IDONE=1 in the PHY General Status Register 0 (address offset 0x010).
+	do {
+		read_val = DDR3A_PGSR0;
+	} while ((read_val&0x00000001) != 0x00000001);
+
+	//	Clocks are enabled and frequency is stable---------------------------------------
+		
+	//DDR3A PLL setup
+	GEL_TextOut ( "DDR3 PLL Setup ... \n");
+    //DDR3APLLCTL0 = DDR3APLLCTL0 & 0xFF7FFFFF;
+	//	Set ENSAT = 1
+	DDR3APLLCTL1 |= 0x00000040;
+	// Put the PLL in PLL Mode  
+	DDR3APLLCTL0 |= 0x00800000;
+	
+	// Program the necessary multipliers/dividers and BW adjustments            
+    // Set the divider values 
+	DDR3APLLCTL0 &= ~(0x0000003F);
+	DDR3APLLCTL0 |= (divider & 0x0000003F);
+	
+    // Program OD[3:0] in the SECCTL register            
+    DDR3APLLCTL0 &= OUTPUT_DIVIDE_MASK;  // clear the OD bit field
+    DDR3APLLCTL0 |= ~OUTPUT_DIVIDE_MASK & (OD_val - 1) << OUTPUT_DIVIDE_OFFSET;  // set the OD[3:0] bit field of PLLD to OD_val    
+
+	// Set the Multipler values 
+	DDR3APLLCTL0 &= ~(0x0007FFC0);
+	DDR3APLLCTL0 |= ((multiplier << 6) & 0x0007FFC0 );
+	temp = (multiplier >> 1);
+	DDR3APLLCTL0 &= ~(0xFF000000); 
+	DDR3APLLCTL0 |= ((temp << 24) & 0xFF000000);
+	DDR3APLLCTL1 &= ~(0x0000000F);
+	DDR3APLLCTL1 |= ((temp >> 8) & 0x0000000F);
+	
+	// In PLL Controller, reset the PLL (bit 13 in DDR3APLLCTL1 register) 
+	DDR3APLLCTL1 |= 0x00004000;
+	for(i=0;i<delay;i++);
+	// In DDR3PLLCTL1, write PLLRST = 0 to bring PLL out of reset 
+    DDR3APLLCTL1 &= ~(0x00004000);
+	for(i=0;i<delay;i++);
+	
+	// Put the PLL in PLL Mode  
+	DDR3APLLCTL0 &= ~(0x00800000); // ReSet the Bit 23
+	GEL_TextOut( "DDR3 PLL Setup complete, DDR3A clock now running at 533MHz.\n" );
+	//DDR3A PLL setup complete ---------------------------------------
+
+	/*------------------------------- ECO FIX -----------------------------------------*/
+	// DDR3 write leveling ECO - Assert & release DDR PHY RESET after DDR PLL setup...
+	DDR3APLLCTL1 = DDR3APLLCTL1 | 0x80000000;       //Assert DDR PHY reset after PLL enabled
+	for(i=0; i<delay; i++) ;
+	DDR3APLLCTL1 = DDR3APLLCTL1 & 0x7FFFFFFF;       //Release DDR PHY reset
+
+	do {   // Poll IDONE after resetting PHY
+		read_val = DDR3A_PGSR0;
+	} while ((read_val&0x00000001) != 0x00000001);
+	/*------------------------- Start PHY Configuration -------------------------------*/
+
+	//DDR3A_PGCR1 = 0x0280C487;
+	//MM from xls - 0x0080C507
+	//MM - from xls - 0x0080C507
+
+	// Program FRQSEL in the PLL Control Register (address offset 0x018).
+	DDR3A_PLLCR = 0xDC000;  //Set FRQSEL=11, for ctl_clk between 166-275MHz
+
+	// Program WLSTEP=1, IODDRM=2(DDR3L), and ZCKSEL in the PHY General Configuration Register 1 (address offset 0x00C).
+	DDR3A_PGCR1 |= (1 << 2);  //WLSTEP = 1
+	DDR3A_PGCR1 &= ~(IODDRM_MASK);
+	DDR3A_PGCR1 |= (( 2 << 7) & IODDRM_MASK);       //MM - changed for DDR3L (changed to 2)
+	DDR3A_PGCR1 &= ~(ZCKSEL_MASK);
+	DDR3A_PGCR1 |= (( 1 << 23) & ZCKSEL_MASK);
+
+	// Program PHY Timing Parameters Register 0-4 (address offset 0x01C - 0x02C).
+
+	DDR3A_PTR0 = 0x42C21590;
+	DDR3A_PTR1 = 0xD05612C0;
+
+	// Maintain default values of Phy Timing Parameters Register 2 in PUB
+
+	DDR3A_PTR3 = 0x0904111D; 		//0x06C30D40;	//0x18061A80;
+	DDR3A_PTR4 = 0x0859A072;		//0x6413880;    //0x0AAE7100;
+
+	// Program PDQ, MPRDQ, and BYTEMASK in the DRAM Configuration Register (address offset 0x044).
+	// All other fields must be left at their default values.
+
+	DDR3A_DCR &= ~(PDQ_MASK); //PDQ = 0
+	DDR3A_DCR &= ~(MPRDQ_MASK); //MPRDQ = 0
+	DDR3A_DCR &= ~(BYTEMASK_MASK);
+	DDR3A_DCR |= (( 1 << 10) & BYTEMASK_MASK);
+
+	if(DUAL_RANK==1) {
+		//Assumes Address Mirrored DIMM
+		DDR3A_DCR &= ~(NOSRA_MASK);
+		DDR3A_DCR |= (( 1 << 27) & NOSRA_MASK);
+		DDR3A_DCR &= ~(UDIMM_MASK);
+		DDR3A_DCR |= (( 1 << 29) & UDIMM_MASK);
+	}
+
+	// Program DRAM Timing Parameters Register 0-2 (address offset 0x048 - 0x050).
+	DDR3A_DTPR0 = 0x6D147744;	//0x550F6644;       //MM - calculated: 0x550F6644, orig: 0x50CE6644
+	DDR3A_DTPR1 = 0x32845A80;	//0x328341E0;       //MM - calculated: 0x328341E0, orig: 0x32834180		//Increase tWLO to 12
+	DDR3A_DTPR2 = 0x50023600;	//0x50022A00;
+
+	// Program BL=0, CL, WR, and PD=1 in the Mode Register 0 (address offset 0x054).
+	// All other fields must be left at their default values.
+	DDR3A_MR0 = 0x00001830;		//0x00001430; //MM - calculated: 0x00001430, orig: 0x00001420 //-CL - 6, CWL - 5
+
+	// Program DIC, RTT, and TDQS in the Mode Register 1 (address offset 0x058).
+	// All other fields must be left at their default values.
+
+	DDR3A_MR1 = 0x00000006;
+
+	// Program Mode Register 2 (address offset 0x05C).
+	// Maintaining default values of Program Mode Register 2
+	DDR3A_MR2 = 0x00000008;
+
+	// Program DTMPR=1, DTEXD, DTEXG, RANKEN=1 or 3, and RFSHDT=7 in the Data Training Configuration Register (address offset 0x068).
+	// All other fields must be left at their default values.
+	if(DUAL_RANK==1) {
+		DDR3A_DTCR = 0x730035C7; //Dual-rank
+	}
+	else{
+		DDR3A_DTCR = 0x710035C7; //Single-rank
+	}
+	// Program tREFPRD=(5*tREFI/ddr_clk_period) in the PHY General Configuration Register 2 (address offset 0x08C).
+	//All other fields must be left at their default values.
+
+	DDR3A_PGCR2 = 0x00F05159;		//0x00F03D09; //NOBUB = 0, FXDLAT = 0
+	//DDR3A_PGCR2 = 0x00F83D09; //NOBUB = 0, FXDLAT = 1
+
+	//Set Impedence Register and DFIPU0=1
+	DDR3A_ZQ0CR1 = 0x0001005D;
+	DDR3A_ZQ1CR1 = 0x0001005B;
+	DDR3A_ZQ2CR1 = 0x0001005B;
+
+	// Re-trigger PHY initialization in DDR PHY through the VBUSP interface.
+	// Program 0x00000033 to the PHY Initialization Register (address offset 0x004) to re-trigger PLL, ZCAL, and DCAL initialization.
+
+	DDR3A_PIR = 0x00000033;
+
+	// Poll for IDONE=1 in the PHY General Status Register 0 (address offset 0x010).
+	do {
+		read_val = DDR3A_PGSR0;
+	} while ((read_val&0x00000001) != 0x00000001);
+
+	//---------------------------------------------------------------------------------------------------------
+
+	if(ECC_Enable == 0)
+	{
+		read_val = DDR3A_DATX8_4;
+		DDR3A_DATX8_4 = read_val & 0xFFFFFFFE; //Disable ECC byte lane
+	}
+
+	read_val = DDR3A_DATX8_5;
+	DDR3A_DATX8_5 = read_val & 0xFFFFFFFE;   //Disable BL5 byte lane - not present in K2G
+
+	read_val = DDR3A_DATX8_6;
+	DDR3A_DATX8_6 = read_val & 0xFFFFFFFE;   //Disable BL6 byte lane - not present in K2G
+
+	read_val = DDR3A_DATX8_7;
+	DDR3A_DATX8_7 = read_val & 0xFFFFFFFE;   //Disable BL7 byte lane - not present in K2G
+
+	read_val = DDR3A_DATX8_8;
+	DDR3A_DATX8_8 = read_val & 0xFFFFFFFE;   //Disable BL8 byte lane - not present in K2G
+
+	// Trigger DDR3 initialization and leveling/training in DDR PHY through the VBUSP interface.
+	// If using a 16-bit wide DDR interface, program DXEN=0 in the DATX8 2-7 General Configuration Registers (address offsets 0x240, 0x280, 0x2C0, 0x300, 0x340, and 0x380) to disable the leveling/training for the upper byte lanes.
+	// If using a 32-bit wide DDR interface, program DXEN=0 in the DATX8 4-7 General Configuration Registers (address offsets 0x2C0, 0x300, 0x340, and 0x380) to disable the leveling/training for the upper byte lanes.
+	// If ECC is not required, program DXEN=0 in the DATX8 8 General Configuration Register (address offset 0x3C0) to disable the leveling/training for the ECC byte lane.
+	// NOTE: Setup supports 64-bit by default,  ECC enable by default.
+
+	// Program 0x0000XF81 to the PHY Initialization Register (address offset 0x004) to trigger DDR3 initialization and leveling/training sequences
+	//DDR3A_PIR = 0x0000FF81; //WLADJ - ON
+	DDR3A_PIR =   0x00000F81; //WLADJ - ON
+	//DDR3A_PIR = 0x00000781;  //WLADJ - OFF
+
+	//---------------------------------------------------------------------------------------------------------
+
+	// Poll for IDONE=1 in the PHY General Status Register 0 (address offset 0x010).
+	do {
+		read_val = DDR3A_PGSR0;
+	} while ((read_val&0x00000001) != 0x00000001);
+
+	/* End PHY Configuration */
+
+	if(ECC_Enable==1)
+	{
+		//Enable ECC
+		//0xB0000000: ECC_EN=1, ECC_VERIFY_EN=1, RMW_EN=1
+		//0x50000000: ECC_EN=1, ECC_VERIFY_EN=0, RMW_EN=1
+		DDR3A_ECC_CTRL = 0xB0000000;
+		read_val = DDR3A_ECC_CTRL;
+		if(read_val!=0xB0000000) {
+			GEL_TextOut("\nIncorrect data written to DDR3A_ECC_CTRL..");
+		}
+	}
+
+	//---------------------------------------------------------------------------------------------------------
+	/* START EMIF INITIALIZATION
+	 ++++++++++++++++++SDCFG Register Calculation+++++++++++++++++++
+	 | 31 - 29  | 28 |27 - 25 | 24   | 23 - 22| 21 - 17 |
+	 |SDRAM_TYPE|Rsvd|DDR_TERM| DDQS | DYN_ODT|  Rsvd   |
+	 |  0x011   |  0 | 0x011  | 0x1  |   0x00 |   0x0   |
+
+	 | 16-14 |13 - 12 |  11 - 8 |  7   |6 - 5 |  4  |  3  |  2  |  1 - 0  |
+	 |   CWL | NM     |   CL    | Rsvd |IBANK | Rsvd|EBANK| Rsvd|PAGE_SIZE|
+	 |  0x11 | 0x01   |  0x1110 |  0x0 | 0x11 | 0x0 |  0  |  0  |   0x10  |
+	   SDCFG = 0x0110 0011 0010 0010 0011 0011 1011 0010
+	   SDCFG = 0x6700486A;//0x63223332
+
+	   SDRAM_TYPE = 3
+	   DDR_TERM = 3 (RZQ/4 = 1; RZQ/6=3)
+	   DDQS = 1
+	   DYN_ODT = 0
+
+	   CWL = 3 (CWL5=0; CWL6=1; CWL7=2; CWL8=3)
+	   NM = 1 (64-bit=0, 32-bit=1, 16-bit=2)
+	   CL = 14 (CL5=2; CL6=4; CL7=6; CL8=8; CL9=10; CL10=12; CL11=14)
+	   IBANK = 3 (8bank)
+	   EBANK = 0 (0 - pad_cs_o_n[0] , 1 - pad_cs_o_n[1:0])
+	   PAGE_SIZE = 2 (1024page-size=2; 2048page-size=3)
+	 */
+	/* Start DDR3A EMIF Configuration */
+	// Configure the EMIF through the VBUSM interface.
+	// Program all EMIF MMR’s.
+
+	if(DUAL_RANK==1) {
+		DDR3A_SDCFG    = 0x6200046A;    //Dual-rank
+	}
+	else{
+		DDR3A_SDCFG    = 0x62005662;    //Single-rank, 32-bit //MM - calculated: 0x62005662, orig: 0x62000462 (orig,NM=01:62001462)
+	}
+
+	DDR3A_SDTIM1   = 0x0E4C6843;		//0x0A385033;    //MM - calculated: 0x0A385033, orig: 0x0A384C23
+	DDR3A_SDTIM2   = 0x00001CC6;		//0x00001CA5;
+	DDR3A_SDTIM3   = 0x323DFF32;		//0x21ADFF32;
+	DDR3A_SDTIM4   = 0x533F08AF;		//0x533F067F;
+
+	if(DUAL_RANK==1) {
+		DDR3A_ZQCFG    = 0xF0073200;    //Dual-rank
+	}
+	else{
+		DDR3A_ZQCFG    = 0x70073200;    //Single-rank
+	}
+
+	//8.b.	Program reg_initref_dis=0 in the SDRAM Refresh Control Register (address offset 0x10).
+	DDR3A_SDRFC = 0x00001044;		//0x00000C34;
+
+	GEL_TextOut("DDR3A initialization complete \n");
+	/* End  DDR3A EMIF Configuration */
+
+}
+
+
+/*--------------------------------------------------------------*/
+/* 66AK2Gx MENU                                              */
+/*--------------------------------------------------------------*/
+
+menuitem "Generic Functions";
+
+/****************************************************************************
+ *
+ * NAME
+ *      Global_Default_Setup
+ *
+ * PURPOSE:
+ *      Setup almost everything ready for a new debug session:
+ *      DSP modules and EVM board modules.
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Global_Default_Setup()
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+hotmenu Global_Default_Setup()
+{
+    GEL_TextOut( "Global Default Setup...\n" );
+    Global_Default_Setup_Silent();
+    GEL_TextOut( "Global Default Setup... Done.\n" );
+}
+
+// hotmenu Reset()
+// {
+    // GEL_Reset();
+// }
+
+hotmenu InitXMC()
+{
+    xmc_setup();
+}
+
+hotmenu K2G_TakeDSPOutofReset()
+{
+	K2G_out_of_reset();
+}
+
+menuitem "DDR3 Functions";
+
+
+// hotmenu InitEmif_DDR3A_ECC_DUAL_RANK(){
+	// ddr3A_setup_800(1,1);
+// }
+
+// hotmenu InitEmif_DDR3A_NO_ECC_DUAL_RANK(){
+	// ddr3A_setup_800(0,1);
+// }
+
+hotmenu InitEmif_DDR3A_ECC_1066MHz()
+{
+      ddr3A_setup_1066(1,0);
+}   
+
+hotmenu InitEmif_DDR3A_NO_ECC_1066MHz()
+{
+	ddr3A_setup_1066(0,0);
+}   
+
+hotmenu InitEmif_DDR3A_ECC_800MHz()
+{
+	  ddr3A_setup_800(1,0);
+}   
+
+hotmenu InitEmif_DDR3A_NO_ECC_800MHz()
+{
+	ddr3A_setup_800(0,0);
+} 
+
+menuitem "Tests";
+
+hotmenu ddr3_write_read_test()
+{
+	ddr3_memory_test ();
+}
+
+/****************************************************************************
+ *
+ * NAME
+ *      Set_PSC_State
+ *
+ * PURPOSE:
+ *      Set a new power state for the specified domain id in a power controler
+ *      domain. Wait for the power transition to complete.
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Set_PSC_State(unsigned int pd,unsigned int id,unsigned int state)
+ *
+ *      pd    - (i) power domain.
+ *
+ *      id    - (i) module id to use for module in the specified power domain
+ *
+ *      state - (i) new state value to set
+ *                  0 = RESET
+ *                  1 = SYNC RESET
+ *                  2 = DISABLE
+ *                  3 = ENABLE
+ *
+ * RETURN VALUE
+ *      0 if ok, !=0 for error
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+Set_PSC_State(unsigned int pd,unsigned int id,unsigned int state)
+{
+	unsigned int* mdctl;
+	unsigned int* mdstat;
+	unsigned int* pdctl;
+	int ret=0;
+
+	// Only core0 can set PSC
+	if (DNUM == 0)
+	{
+		mdctl = ( unsigned int* )(PSC_MDCTL_BASE + ( 4 * id ));
+		mdstat = ( unsigned int* )( PSC_MDSTAT_BASE + ( 4 * id ));
+		pdctl = ( unsigned int* )(PSC_PDCTL_BASE + ( 4 * pd ));
+
+		// If state is already set, do nothing
+		if ( ( *mdstat & 0x1f ) == state )
+		{
+			return(0);
+		}
+
+		// Wait for GOSTAT to clear
+		Set_Timeout(GTIMEOUT);
+		while( Get_Timeout() && (PSC_PTSTAT & (0x1 << pd)) != 0 );
+
+		// Check if we got timeout error while waiting
+		if (!Get_Timeout())
+		{
+			GEL_TextOut( "Set_PSC_State... Timeout Error #01 pd=%d, md=%d!\n",,2,,,pd,id);
+			ret=1;
+		}
+		else
+		{
+			// Set power domain control
+			*pdctl = (*pdctl) | 0x00000001;
+
+			// Set MDCTL NEXT to new state
+			*mdctl = ((*mdctl) & ~(0x1f)) | state;
+
+			// Start power transition by setting PTCMD GO to 1
+			PSC_PTCMD = (PSC_PTCMD) | (0x1<<pd);
+
+			// Wait for PTSTAT GOSTAT to clear
+			Set_Timeout(GTIMEOUT);
+			while( Get_Timeout() && (PSC_PTSTAT & (0x1 << pd)) != 0 );
+
+			// Check if we got timeout error while waiting
+			if (!Get_Timeout())
+			{
+				GEL_TextOut( "Set_PSC_State... Timeout Error #02 pd=%d, md=%d!\n",,2,,,pd,id);
+				ret=2;
+			}
+			else
+			{
+				// Verify state changed
+				Set_Timeout(GTIMEOUT);
+				while(Get_Timeout() && ( *mdstat & 0x1f ) != state );
+
+				// Check if we got timeout error while waiting
+				if (!Get_Timeout())
+				{
+					GEL_TextOut( "Set_PSC_State... Timeout Error #03 pd=%d, md=%d!\n",,2,,,pd,id);
+					ret=3;
+				}
+			}
+		}
+
+		// Kill the currently running timeout
+		Kill_Timeout();
+	}
+	else
+	{
+		GEL_TextOut("DSP core #%d cannot set PSC.\n",,2,,,DNUM);
+	}
+
+	return(ret);
+}
+
+/****************************************************************************
+
+ *
+ * NAME
+ *      K2G_out_of_reset
+ *
+ * PURPOSE:
+ *	This routine brings the C66x core out of reset after booting Linux, or at the u-boot prompt. 
+ *	These steps are necessary in to order to load an application on the C66x core, 
+ *	without interfering with the operation of Linux running on the A15.
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      K2G_out_of_reset();
+ *
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+
+ ****************************************************************************/
+K2G_out_of_reset()
+{
+	GEL_TextOut("\nTaking K2G DSP 0 out of reset\n");
+	WR_MEM_32(KS2_PDCTL8, 0x1);
+	WR_MEM_32(KS2_MDCTL18, 0x103);
+	GEL_TextOut("\nDone taking K2G DSP 0 out of reset!\n");
+}
+
+/****************************************************************************
+ *
+ * NAME
+ *      Get_Timeout
+ *
+ * PURPOSE:
+ *      Query the running state of a timeout period started by Set_Timeout.
+ *      (see Set_Timeout for more info).
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Get_Timeout()
+ *
+ * RETURN VALUE
+ *      0:expired, 1:running
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+Get_Timeout()
+{
+	if (!_GEL_Global_Timeout1)
+	{
+		// Cancel the current timer
+		GEL_CancelTimer(TIMEOUT_ID);
+	}
+
+	// Return the global timeout status 1=running, 0=expired
+	return _GEL_Global_Timeout1;
+}
+
+/****************************************************************************
+ *
+ * NAME
+ *      Kill_Timeout
+ *
+ * PURPOSE:
+ *      Cancel a running timeout period before it expires
+ *      (see Set_Timeout for more info).
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Kill_Timeout()
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+Kill_Timeout()
+{
+	// Cancel the current timer
+	GEL_CancelTimer(TIMEOUT_ID);
+
+	// The timeout period is expired
+	_GEL_Global_Timeout1=0;
+}
+
+/****************************************************************************
+ *
+ * NAME
+ *      _Timeout_Callback
+ *
+ * PURPOSE:
+ *      Internal Callback function used by Set_timeout
+ *      (see Set_Timeout for more info).
+ *
+ * USAGE
+ *      This routine must not be called by itself.
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+_Timeout_Callback()
+{
+	// The timeout period is expired
+	_GEL_Global_Timeout1=0;
+}
+/****************************************************************************
+ *
+ * NAME
+ *      Set_Timeout
+ *
+ * PURPOSE:
+ *      Starts a timeout period of msec. The running timeout period can be
+ *      query with Get_Timeout. To kill a running timeout before the end,
+ *      call Kill_Timeout. Only one timeout period can be used at any time.
+ *      A timeout period can be used to measure a period of time while doing
+ *      anything else. Not accurate, sets timer at least as big as desired.
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Set_Timeout(msec)
+ *
+ *      msec - (i) timeout period in msec (not very precise < sec range)
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+Set_Timeout(msec)
+{
+	// Cancel the current timer if not already expired
+	GEL_CancelTimer(TIMEOUT_ID);
+
+	// Starts the timeout period
+	_GEL_Global_Timeout1=1;
+
+	// Setup a callback routine with specified timeout
+	GEL_SetTimer(msec, TIMEOUT_ID, "_Timeout_Callback()");
+}
+
+/****************************************************************************
+ *
+ * NAME
+ *      Set_Psc_All_On
+ *
+ * PURPOSE:
+ *      Enable all PSC modules and DSP power domains on ALWAYSON, and wait
+ *      for these power transitions to complete.
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Set_Psc_All_On()
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+hotmenu Set_Psc_All_On( )
+{
+	unsigned int i=0;
+
+	// Only core0 can set PSC
+	if (DNUM == 0)
+	{		
+		GEL_TextOut( "Power on all PSC modules and DSP domains... \n");
+		Set_PSC_State(PD1, LPSC_PMMC, PSC_ENABLE);
+		Set_PSC_State(PD1, LPSC_DEBUG, PSC_ENABLE);		
+		Set_PSC_State(PD2, LPSC_NSS, PSC_ENABLE);		
+		Set_PSC_State(PD3, LPSC_SA, PSC_ENABLE);		
+		Set_PSC_State(PD5, LPSC_SYS_COMP, PSC_ENABLE);
+		Set_PSC_State(PD5, LPSC_QSPI, PSC_ENABLE);
+		Set_PSC_State(PD5, LPSC_MMC, PSC_ENABLE);
+		Set_PSC_State(PD5, LPSC_GPMC, PSC_ENABLE);
+		Set_PSC_State(PD5, LPSC_MLB, PSC_ENABLE);
+		Set_PSC_State(PD5, LPSC_EHRPWM, PSC_ENABLE);
+		Set_PSC_State(PD5, LPSC_EQEP, PSC_ENABLE);
+		Set_PSC_State(PD5, LPSC_ECAP, PSC_ENABLE);
+		Set_PSC_State(PD5, LPSC_MCASP, PSC_ENABLE);				
+		Set_PSC_State(PD7, LPSC_MSMC, PSC_ENABLE);		
+		Set_PSC_State(PD11, LPSC_ICSS, PSC_ENABLE);
+		Set_PSC_State(PD12, LPSC_DSS, PSC_ENABLE);		
+		Set_PSC_State(PD13, LPSC_PCIE, PSC_ENABLE);		
+		Set_PSC_State(PD14, LPSC_USB_0, PSC_ENABLE);
+		Set_PSC_State(PD14, LPSC_USB_1, PSC_ENABLE);
+		Set_PSC_State(PD15, LPSC_DDR3, PSC_ENABLE);
+		
+		if (JTAGID == JTAGID_1G){
+			Set_PSC_State(PD10, LPSC_ASRC, PSC_ENABLE);
+		}
+
+		GEL_TextOut( "Power on PCIE PSC modules and DSP domains... Done.\n" );
+	}
+	else
+	{
+		GEL_TextOut("DSP core #%d cannot set PSC.\n",,2,,,DNUM);
+	}
+}
+
+
+#define MDIO_CTL 			  *(unsigned int*)(0x4200F00 + 0x04)
+#define MDIO_PHY_REG          *(unsigned int*)(0x4200F00 + 0x80)
+
+
+hotmenu MDIO_Init()
+{
+	MDIO_CTL = 0x411400ff;
+	GEL_TextOut( "MDIO is enabled\n");
+}
+
+hotmenu MDIO_Set_GB_Loopback()
+{
+	MDIO_PHY_REG = 0xc0004140;
+	GEL_TextOut( "PHY reg0 is set to 0x4140.\n");
+	MDIO_PHY_REG = 0xc1201300;;
+	GEL_TextOut( "PHY reg9 is set to 0x1300.\n");
+}

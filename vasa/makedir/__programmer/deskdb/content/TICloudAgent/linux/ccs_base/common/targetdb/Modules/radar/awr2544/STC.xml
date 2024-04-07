@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+
+<module description="STC" id="STC">
+  
+  
+  <register acronym="STCGCR0" description="Self test Global control Reg0. *NOT BYTE ACCESSIBLE" id="STCGCR0" offset="0x0" width="32">
+    
+  <bitfield begin="31" description="Number of intervals of the self test run (RWP - Read, Priviledge Mode Write only)  Count of intervals that need to be covered for a specific selftest run. The selftest controller sends out “complete” indication once it runs all of the intervals programmed in this field.  INTCOUNT_B16=0 is an invalid configuration for a selftest. " end="16" id="INTCOUNT_B16" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved bits" end="11" id="NU0" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="10" description="Idle cycles before and after capture clock (RWP - Read, Priviledge Mode Write only)  Idle Cycles before and after capture clock.  This value is used to insert that many idle cycles in the Capture phase. Programmable idle cycles allow implementation flexibility on SCAN_EN signal at chip level based on the size of the UUT and timing requirements. " end="8" id="CAP_IDLE_CYCLE" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="7" description="Idle cycles before and after capture clock (RWP - Read, Priviledge Mode Write only). *NOT BYTE ACCESSIBLE  Idle Cycles between scan_en going high to func_clk_en generation and scan_en going high to misr_log_en generation.  This value is used to insert that many idle cycles in the shift clock (scan_en going high to func_clk_en generation) and misr_log_clk (scan_en going high to misr_log_en generation) generation. Programmable idle cycles allow implementation flexibility on SCAN_EN signal at chip level based on the size of the UUT and timing requirements. " end="5" id="SCANEN_HIGH_CAP_IDLE_CYCLE" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="4" description="Reserved bits" end="2" id="NU1" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="1" description="Restart/Continue or preload (RWP - Read, Priviledge Mode Write only)  This bit specifies the selftest controller whether to continue the run from next interval onwards, restart from ROM address 0 or preload from a prescribed interval. This bit gets reset after the completion of selftest run. 00 = Continue NSTC run from previous interval 01 = Restart NSTC run from ROM address 0 1X = Start from segment number specified in STC_SEGPLR register " end="0" id="RS_CNT_B1" rwaccess="RW" width="2"></bitfield>
+  </register>
+  
+  
+  <register acronym="STCGCR1" description="Self test Global control Reg1" id="STCGCR1" offset="0x4" width="32">
+    
+  <bitfield begin="31" description="Reserved bits" end="12" id="NU2" rwaccess="R" width="20"></bitfield>
+    
+  <bitfield begin="11" description="Selects the Segment0 CORE for self test (RWP - Read, Priviledge Mode Write only)  Select the Segment0 CORE for Self -Test 0001 = Select CORE for selftest Other = CORE not selected.  " end="8" id="SEG0_CORE_SEL" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="7" description="Reserved bits" end="7" id="NU3" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Codec Spread Mode control signal (RWP - Read, Priviledge Mode Write only)  This bit is used to configure the codec in spread / X-OR mode. 1 = Spread mode 0 = XOR mode " end="6" id="CODEC_SPREAD_MODE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="LP scan mode (RWP - Read, Priviledge Mode Write only)  This bit is used to decide the scan configuration: 1 = Operates in Low Power Scan Mode.  0 = Operates in Normal Scan Mode. " end="5" id="LP_SCAN_MODE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Rom access inversion mode (RWP - Read, Priviledge Mode Write only) - NOT SUPPORTED" end="4" id="ROM_ACCESS_INV" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Self test enable key (RWP - Read, Priviledge Mode Write only)  1010 = Self test run enabled  All values other than 1010 = Self test run disabled  " end="0" id="ST_ENA_B4" rwaccess="RW" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="STCTPR" description="Time out counter preload register" id="STCTPR" offset="0x8" width="32">
+    
+  <bitfield begin="31" description="Self test time out preload (RWP - Read, Priviledge Mode Write only)  This register contains the total number of STC clock cycles it will take before a self-test timeout error will be triggered after the initiation of the self-test run. This is a fail safe feature to avoid system hang-up situation on account of any run away self test issues. This register should be loaded with a meaningful count value for this feature to be effective. This register value (preload count value) gets loaded into the self test timeout down counter whenever a self test run is initiated (ST_ENA is enabled). and gets disabled on completion of a self test run. " end="0" id="TO_PRELOAD" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="STC_CADDR" description="Current Address register for CORE1" id="STC_CADDR" offset="0xC" width="32">
+    
+  <bitfield begin="31" description="Current ROM Address for CORE1  This register reflects the current ROM address (for micro code load) accessed during selftest for CORE1 in of case segment0 and all the remaining segmentsn  where n = 1 to 3)." end="0" id="ADDR" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="STCCICR" description="Current Interval count register" id="STCCICR" offset="0x10" width="32">
+    
+  <bitfield begin="31" description="Specifies the last interval number for CORE2  This specifies the Last executed Interval number for CORE2 of Segment0 if self test is being executed for secondary core as well. This field is applicable only for Segment 0." end="16" id="CORE2_ICOUNT" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Specifies the last interval number for CORE1  This specifies the Last executed Interval number of a self-test run." end="0" id="CORE1_ICOUNT" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="STCGSTAT" description="Global Status Register" id="STCGSTAT" offset="0x14" width="32">
+    
+  <bitfield begin="31" description="Reserved bits" end="12" id="NU4" rwaccess="R" width="20"></bitfield>
+    
+  <bitfield begin="11" description="Tells whether self test is currently active or not.  1010   = Self test is active Others   = SelfTest is not active Once the self-test completes and ST_ENA_B4 key is cleared, this field will reflect the inactive value. " end="8" id="ST_ACTIVE" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="7" description="Reserved bits" end="2" id="NU5" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="1" description="Test_fail flag (RCP - Read, Clear on Writing in Priviledge Mode)  0   = Self test run has not failed 1   = SelfTest run has failed. Write Clear. " end="1" id="TEST_FAIL" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Test_done_flag (RCP - Read, Clear on Writing in Priviledge Mode)  0   = Not completed 1   = SelfTest run Completed " end="0" id="TEST_DONE" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="STCFSTAT" description="Fail Status Register" id="STCFSTAT" offset="0x18" width="32">
+    
+  <bitfield begin="31" description="Reserved bits" end="5" id="NU6" rwaccess="R" width="27"></bitfield>
+    
+  <bitfield begin="4" description="Failed Segment ID (RCP - Read, Clear on Writing in Priviledge Mode)  This field captures the Segment number for which any of the failures like TO_ER_B1, CPU1_FAIL_B1 and CPU2_FAIL_B1 occur. 00   = Failure on Segment 0 01   = Failure on Segment 1 10   = Failure on Segment 2 11   = Failure on Segment 3 " end="3" id="FSEG_ID" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="2" description="Tells whether self test failed because of time out error (RCP - Read, Clear on Writing in Priviledge Mode)  0   = No time out error occurred 1   = SelfTest run failed due to a timeout error " end="2" id="TO_ER_B1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Tells whether MISR mismatch happenned in CORE2 when in Segment0 mode (RCP - Read, Clear on Writing in Priviledge Mode)  0   = No MISR mismatch for CORE2 1   = Self test run failed due to MISR mismatch for CORE2 " end="1" id="CPU2_FAIL_B1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Tells whether MISR mismatch happenned in CORE1 (RCP - Read, Clear on Writing in Priviledge Mode)  Applicable to all segments. 0   = No MISR mismatch for CORE1 1   = Self test run failed due to MISR mismatch for CORE1 " end="0" id="CPU1_FAIL_B1" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="STCSCSCR" description="Signature compare Self Check Register" id="STCSCSCR" offset="0x1C" width="32">
+    
+  <bitfield begin="31" description="Reserved bits" end="5" id="NU7" rwaccess="R" width="27"></bitfield>
+    
+  <bitfield begin="4" description="Fault Insertion bit (RWP - Read, Priviledge Mode Write only)  0   =  No fault insertion. 1   =  Inserts fault in the logic unedr test which will make signature compare fail. This feature is used as diagnostic check of the STC IP. " end="4" id="FAULT_INS_B1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Signature compare logic self check key enable/disable (RWP - Read, Priviledge Mode Write only)  1010   = Signature compare logic Self Check is enabled All values other than 1010   = Signature compare logic Self Check is disabled " end="0" id="SELF_CHECK_KEY_B4" rwaccess="RW" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="STC_CADDR2" description="Current Address register for CORE2" id="STC_CADDR2" offset="0x20" width="32">
+    
+  <bitfield begin="31" description="Current ROM Address for CORE2  This register reflects the current ROM address(for micro code load) accessed during selftest for CORE2 in of case segment0." end="0" id="ADDR" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="STC_CLKDIV" description="Clock Divider Register" id="STC_CLKDIV" offset="0x24" width="32">
+    
+  <bitfield begin="31" description="Reserved bits" end="27" id="NU8" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="26" description="Clock division for Seg0 (RWP - Read, Priviledge Mode Write only) *NOT SUPPORTED  X   =  Division ratio is X+1 for Segment 0" end="24" id="CLKDIV0" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="23" description="Reserved bits" end="19" id="NU9" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="18" description="Clock division for Seg1 (RWP - Read, Priviledge Mode Write only) *NOT SUPPORTED  X   =  Division ratio is X+1 for Segment 1" end="16" id="CLKDIV1" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="15" description="Reserved bits" end="11" id="NU10" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="10" description="Clock division for Seg2 (RWP - Read, Priviledge Mode Write only) *NOT SUPPORTED  X   =  Division ratio is X+1 for Segment 2" end="8" id="CLKDIV2" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="7" description="Reserved bits" end="3" id="NU11" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="2" description="Clock division for Seg3 (RWP - Read, Priviledge Mode Write only) *NOT SUPPORTED  X   =  Division ratio is X+1 for Segment 3" end="0" id="CLKDIV3" rwaccess="RW" width="3"></bitfield>
+  </register>
+  
+  
+  <register acronym="STC_SEGPLR" description="Segment 1st interval Preload Register" id="STC_SEGPLR" offset="0x28" width="32">
+    
+  <bitfield begin="31" description="Reserved bits" end="2" id="NU12" rwaccess="R" width="30"></bitfield>
+    
+  <bitfield begin="1" description="Segment number for which preload is to be started (RWP - Read, Priviledge Mode Write only)  This specifies the segment for which the address of its First interval will be pre-loaded into the NSTC ROM address counter. The 1st address of each segment are defined in SEGx_START_ADDR register.The address of the 1st interval of the selected segment is loaded into the NSTC ROM address counter when the RS_CNT_B1 bits of STC_GCR0 are set to 1X 00   =  Preload the address of the 1st interval of segment 0. 01   =  Preload the address of the 1st interval of segment 1. 10   =  Preload the address of the 1st interval of segment 2. 11   =  Preload the address of the 1st interval of segment 3. " end="0" id="SEGID_PLOAD" rwaccess="RW" width="2"></bitfield>
+  </register>
+  
+  
+  <register acronym="SEG0_START_ADDR" description="ROM Start address for Segment0" id="SEG0_START_ADDR" offset="0x2C" width="32">
+    
+  <bitfield begin="31" description="Reserved bits" end="20" id="NU13" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="19" description="Segment 0 Start Address (RWP - Read, Priviledge Mode Write only)  This register holds the ROM address for the start of first interval of the segment. When STC_GCR0.RS_CNT_B1 field is set to (1x) “PRELOAD” option, this register is used to determine the ROM start address for the Segment selected in ST_SEGPLR register.  Valid number of bits depends on RTL paramerter ADDR" end="0" id="SEG_START_ADDR" rwaccess="RW" width="20"></bitfield>
+  </register>
+  
+  
+  <register acronym="SEG1_START_ADDR" description="ROM Start address for Segment1" id="SEG1_START_ADDR" offset="0x30" width="32">
+    
+  <bitfield begin="31" description="Reserved bits" end="20" id="NU14" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="19" description="Segment 1 Start Address (RWP - Read, Priviledge Mode Write only)  This register holds the ROM address for the start of first interval of the segment. When STC_GCR0.RS_CNT_B1 field is set to (1x) “PRELOAD” option, this register is used to determine the ROM start address for the Segment selected in ST_SEGPLR register.   Valid number of bits depends on RTL paramerter ADDR. This register is present only when RTL parameter NUM_SEG = 1." end="0" id="SEG_START_ADDR" rwaccess="RW" width="20"></bitfield>
+  </register>
+  
+  
+  <register acronym="SEG2_START_ADDR" description="ROM Start address for Segment2" id="SEG2_START_ADDR" offset="0x34" width="32">
+    
+  <bitfield begin="31" description="Reserved bits" end="20" id="NU15" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="19" description="Segment 2 Start Address (RWP - Read, Priviledge Mode Write only)  This register holds the ROM address for the start of first interval of the segment. When STC_GCR0.RS_CNT_B1 field is set to (1x) “PRELOAD” option, this register is used to determine the ROM start address for the Segment selected in ST_SEGPLR register.  Valid number of bits depends on RTL paramerter ADDR. This register is present only when RTL parameter NUM_SEG = 2." end="0" id="SEG_START_ADDR" rwaccess="RW" width="20"></bitfield>
+  </register>
+  
+  
+  <register acronym="SEG3_START_ADDR" description="ROM Start address for Segment3" id="SEG3_START_ADDR" offset="0x38" width="32">
+    
+  <bitfield begin="31" description="Reserved bits" end="20" id="NU16" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="19" description="Segment 3 Start Address (RWP - Read, Priviledge Mode Write only)  This register holds the ROM address for the start of first interval of the segment. When STC_GCR0.RS_CNT_B1 field is set to (1x) “PRELOAD” option, this register is used to determine the ROM start address for the Segment selected in ST_SEGPLR register.  Valid number of bits depends on RTL paramerter ADDR. This register is present only when RTL parameter NUM_SEG = 3." end="0" id="SEG_START_ADDR" rwaccess="RW" width="20"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_0" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_0" offset="0x3C" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR0" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_1" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_1" offset="0x40" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR1" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_2" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_2" offset="0x44" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR2" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_3" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_3" offset="0x48" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR3" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_4" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_4" offset="0x4C" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR4" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_5" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_5" offset="0x50" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR5" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_6" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_6" offset="0x54" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR6" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_7" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_7" offset="0x58" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR7" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_8" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_8" offset="0x5C" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR8" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_9" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_9" offset="0x60" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR9" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_10" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_10" offset="0x64" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR10" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_11" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_11" offset="0x68" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR11" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_12" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_12" offset="0x6C" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR12" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_13" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_13" offset="0x70" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR13" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_14" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_14" offset="0x74" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR14" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_15" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_15" offset="0x78" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR15" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_16" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_16" offset="0x7C" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR16" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_17" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_17" offset="0x80" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR17" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_18" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_18" offset="0x84" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR18" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_19" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_19" offset="0x88" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR19" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_20" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_20" offset="0x8C" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR20" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_21" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_21" offset="0x90" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR21" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_22" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_22" offset="0x94" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR22" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_23" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_23" offset="0x98" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR23" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_24" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_24" offset="0x9C" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR24" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_25" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_25" offset="0xA0" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR25" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_26" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_26" offset="0xA4" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR26" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE1_CURMISR_27" description="Holds the MISR signature for CORE1" id="CORE1_CURMISR_27" offset="0xA8" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE1  This register contains the MISR data of the current interval for CORE1 in the case of segment0 and the remaining Segments 1 to 3. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C1MISR27" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_0" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_0" offset="0xAC" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR0" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_1" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_1" offset="0xB0" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR1" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_2" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_2" offset="0xB4" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR2" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_3" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_3" offset="0xB8" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR3" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_4" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_4" offset="0xBC" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR4" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_5" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_5" offset="0xC0" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR5" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_6" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_6" offset="0xC4" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR6" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_7" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_7" offset="0xC8" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR7" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_8" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_8" offset="0xCC" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR8" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_9" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_9" offset="0xD0" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR9" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_10" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_10" offset="0xD4" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR10" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_11" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_11" offset="0xD8" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR11" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_12" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_12" offset="0xDC" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR12" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_13" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_13" offset="0xE0" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR13" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_14" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_14" offset="0xE4" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR14" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_15" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_15" offset="0xE8" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR15" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_16" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_16" offset="0xEC" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR16" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_17" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_17" offset="0xF0" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR17" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_18" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_18" offset="0xF4" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR18" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_19" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_19" offset="0xF8" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR19" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_20" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_20" offset="0xFC" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR20" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_21" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_21" offset="0x100" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR21" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_22" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_22" offset="0x104" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR22" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_23" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_23" offset="0x108" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR23" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_24" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_24" offset="0x10C" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR24" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_25" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_25" offset="0x110" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR25" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_26" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_26" offset="0x114" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR26" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CORE2_CURMISR_27" description="Holds the MISR signature for CORE2" id="CORE2_CURMISR_27" offset="0x118" width="32">
+    
+  <bitfield begin="31" description="MISR Signature for CORE2  This register contains the MISR data from the CORE2 for the current interval. This is applicable to Segment 0 alone. This value will be compared with the GOLDEN MISR value copied from ROM. This register gets reset to its default value with Power on or system reset assertion. The MISR values should be read only after the Self Test is completed." end="0" id="C2MISR27" rwaccess="R" width="32"></bitfield>
+  </register>
+</module>

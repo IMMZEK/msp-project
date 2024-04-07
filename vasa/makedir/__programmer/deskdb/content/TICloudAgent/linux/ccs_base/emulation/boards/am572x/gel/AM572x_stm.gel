@@ -1,0 +1,228 @@
+/*******************************************************************/
+/* This GEL file is loaded on the command line of Code Composer    */
+/* The StartUp() function is called every time you start           */
+/* Code Composer.  You can customize this function to              */
+/* initialize wait states or to perform other initialization.      */
+/*                                                                 */
+/* AM572x Sequences for STM system trace                           */
+/*                                                                 */
+/*                                                                 */
+/*******************************************************************/
+
+
+#define WR_MEM_32(addr, data)   *(unsigned int*)(addr) =(unsigned int)(data)
+#define RD_MEM_32(addr)         *(unsigned int*)(addr)
+#define uint32_t                unsigned int
+
+
+/**********************************************************************
+ *
+ *  DEFINITIONS
+ *
+ **********************************************************************/
+
+
+#define CM_DIV_M6_DPLL_CORE             0x4A004140
+// AM572x control core: PAD CONF Registers
+
+#define SEC_EMU_MRM_PERM_REG_LOW_0      0x4A226088
+
+#define PAD0_SYS_BOOT5_PAD1_DPM_EMU0    0x4A1001AC
+#define PAD0_DPM_EMU1_PAD1_DPM_EMU2     0x4A1001B0
+#define PAD0_DPM_EMU3_PAD1_DPM_EMU4     0x4A1001b4
+
+#define AM572x_DRM_BASE_ADDR            0x54160000
+
+#define DRM_CLAIM                       0x54160050
+#define DPM_CTRL0                       0x54160080
+#define DPM_CTRL1                       0x54160084
+#define DPM_CTRL2                       0x54160088
+#define DPM_CTRL3                       0x5416008C
+#define DPM_CTRL4                       0x54160090
+
+#define STM_SWMCTRL0                    0x54161024
+#define STM_PTI_CONFIG                  0x5416103C
+#define STM_LOCK_ACCESS                 0x54161FB0
+#define STM_TESTCTRL                    0x54161050
+
+#define CONTROL_SMART2IO_PADCONF_0      0x4A1005B0
+#define CONTROL_SMART2IO_PADCONF_1      0x4A1005B4
+
+#define UNLOCK_VALUE                    0xC5ACCE55
+
+#define DEBUGSS_CFGBUS_TPIU                        0x80023000
+#define DEBUGSS_CFGBUS_CSTPIU_LOCKACCESS           *(unsigned int *)
+#define DEBUGSS_CFGBUS_CSTPIU_FFCR                 *(unsigned int *) 0x80023304
+#define DEBUGSS_CFGBUS_CSTPIU_FORMSTAT             *(unsigned int *) 0x80023300
+
+
+menuitem "STM_Utility";
+
+/**********************************************************************
+ *
+ *  FUNCTIONS
+ *
+ *  Three solutions to change the frequency of the STM clock
+ *   1/ Best option to get a divide by 2 or 4 is to change the divider in
+ *      CM_EMU_DEBUGSS_CLKCTRL which will derive an /2 or /4 ..etc
+ *   2/ Another solution is to change the M6 divider, this should be avoided
+ *      because it will affect other debugss clocks also (dbgclk, pclk)
+ *      SDC timing closure on dbgclk = 166MHz, ref_a_clk = 166MHz.
+ *   3/ A third option which allows better granularity is to use the
+ *      peripheral DPLL M7 divider  (ref_b_clk) which will impact
+ *      dbgclk/pclks.... - PLEASE contact Madhav if you want to do this.
+ *      (we will do this for validation purposes anyway)
+ *
+ *   The sequences in this gel FILE SHOULD BE used in the following order:
+ *    (Cortex-A15)
+ *    1/ Setup_STM_Clocking_Modes()
+ *    2/ Configure_EMU0_4_For_STM for 4 pin trace or Configure_EMU0_1_For_STM()
+ *              for 1 pin trace
+ *    3/ Enable_Pattern_Generator_in_STM_1_pin_mode() or
+ *             Enable_Pattern_Generator_in_STM_4_pin_mode()
+ *
+ *
+ *    Note that the drive strength of the I/O (EMU0..4) are for 1-10pF external
+ *    load. It can be changed by using the hotmenu GEL functions to use 10-16pF
+ *    external load (Configure_EMU0_4_SmartIO_Load_10pF_16pF())
+ *
+ *   Configure FPGA as follows: (on TEB)
+ *      * Do not allow FPGA to drive EMU0/1 pins (disable WIR mode)
+ *      * Configure QSWITCH2 register in FPGA using HPC tool as follows
+ *        Set bits 25:24 to 0x1 and 23:22 to 0x1 to route EMU2..4 through
+ *        switches controlled by the FPGA to the 20 Pin TI header.
+ *
+ *      * Also configure QSWITCH4 register to disconnect FPGA from EMU0/1
+ *
+ *
+ *      * Also need to ensure EMU0..4 disconnected from MIPI 60 connector
+ *        through resistor bank on board.
+ *
+ *      * Also need to ensure EMU2..4 connected to TI-20 JTAG header
+ *
+ **********************************************************************/
+
+hotmenu Enable_ETB_For_STM()
+{
+    int value;
+
+    // Configure Trace Funnel
+    *(int*)0xD4164FB0@data = UNLOCK_VALUE;
+
+    //Enable port 7 to pass STM data to ETB
+    *(int*)0x80024000@data = 0x380;
+
+    value = *((int*)0x80024000@data);
+
+    if ((value & 0xFF) != 0x80)
+    {
+         GEL_TextOut("< DEBUGSS FUNNEL UPDATE FAILED \n");
+    }
+    else
+    {
+        GEL_TextOut("< DEBUGSS FUNNEL UPDATE SUCCEEDED \n");
+    }
+
+    GEL_TextOut("Disabling TPIU... \n");
+    disable_TPIU();
+}
+
+hotmenu Enable_ETB_For_PTM()
+{
+    int value;
+
+    // Configure CS Trace Funnel
+    *(int*)0xD4158FB0@data = UNLOCK_VALUE;
+
+    //Enable port 0,1 to pass PTM data to ETB
+    *(int*)0xD4158000@data = 0x303;
+
+    // Configure Trace Funnel
+    *(int*)0xD4164FB0@data = UNLOCK_VALUE;
+
+    //Enable port 0 to pass MPU ATB data to ETB
+    *(int*)0x80024000@data = 0x301;
+
+    value = *((int*)0x80024000@data);
+
+    if ((value & 0xFF) != 0x01)
+    {
+         GEL_TextOut("< DEBUGSS FUNNEL UPDATE FAILED \n");
+    }
+    else
+    {
+        GEL_TextOut("< DEBUGSS FUNNEL UPDATE SUCCEEDED \n");
+    }
+
+    GEL_TextOut("Disabling TPIU... \n");
+    disable_TPIU();
+}
+
+hotmenu Enable_ETB_For_DSP1()
+{
+    int value;
+
+    // Configure Trace Funnel
+    *(int*)0xD4164FB0@data = UNLOCK_VALUE;
+
+    //Enable port 1 to pass DSP1 ATB data to ETB
+    *(int*)0x80024000@data = 0x302;
+
+    value = *((int*)0x80024000@data);
+
+    if ((value & 0xFF) != 0x02)
+    {
+         GEL_TextOut("< DEBUGSS FUNNEL UPDATE FAILED \n");
+    }
+    else
+    {
+        GEL_TextOut("< DEBUGSS FUNNEL UPDATE SUCCEEDED \n");
+    }
+
+    GEL_TextOut("Disabling TPIU... \n");
+    disable_TPIU();
+}
+
+hotmenu Enable_ETB_For_DSP2()
+{
+    int value;
+
+    // Configure Trace Funnel
+    *(int*)0xD4164FB0@data = UNLOCK_VALUE;
+
+    //Enable port 2 to pass DSP2 ATB data to ETB
+    *(int*)0x80024000@data = 0x304;
+
+    value = *((int*)0x80024000@data);
+
+    if ((value & 0xFF) != 0x04)
+    {
+         GEL_TextOut("< DEBUGSS FUNNEL UPDATE FAILED \n");
+    }
+    else
+    {
+        GEL_TextOut("< DEBUGSS FUNNEL UPDATE SUCCEEDED \n");
+    }
+
+    GEL_TextOut("Disabling TPIU... \n");
+    disable_TPIU();
+}
+
+disable_TPIU()
+{
+    unsigned int count = 0;
+
+    // Manual flush
+    DEBUGSS_CFGBUS_CSTPIU_FFCR@data |= (1 << 6);
+
+    // Stop the formatter
+    DEBUGSS_CFGBUS_CSTPIU_FFCR@data |= ((1 << 12) | (1<<6));
+
+    // Poll for the "formatter stopped" status bit FtStopped [2]
+    while ( ((DEBUGSS_CFGBUS_CSTPIU_FORMSTAT@data & 0x2) == 0x0) && (count < 100))
+    {
+        count++;
+    }
+
+    GEL_TextOut("---<<< TPIU formatter has been stopped >>>---\n");
+}

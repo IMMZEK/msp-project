@@ -1,0 +1,254 @@
+/*********************************************************************
+*                    SEGGER Microcontroller GmbH                     *
+*       Solutions for real time microcontroller applications         *
+**********************************************************************
+*                                                                    *
+*            (c) 1995 - 2018 SEGGER Microcontroller GmbH             *
+*                                                                    *
+*       www.segger.com     Support: support@segger.com               *
+*                                                                    *
+**********************************************************************
+----------------------------------------------------------------------
+Purpose : Support for TI AM180x L138
+---------------------------END-OF-HEADER------------------------------
+*/
+
+/*********************************************************************
+*
+*       Constants (similar to defines)
+*
+**********************************************************************
+*/
+
+/*********************************************************************
+*
+*       Local functions
+*
+**********************************************************************
+*/
+
+/*********************************************************************
+*
+*       _WriteIceReg
+*
+*  Function description
+*    Writes an Ice-Breaker regsiter
+*/
+void _WriteIceReg(int Reg, int v) {
+  JTAG_StoreIR(0x2);                 // Scan chain select
+  JTAG_StoreClocks(1);
+  JTAG_StoreDR(2, 5);                // Scan chain 2 is Ice breaker
+  JTAG_StoreClocks(1);
+  JTAG_StoreIR(0xC);                 // Intest
+  JTAG_StoreClocks(1);
+  JLINK_JTAG_StartDR();
+  JLINK_JTAG_WriteDRCont(v, 32);
+  v = Reg;
+  v |= (1 << 5);
+  JTAG_WriteDREnd(v, 6);
+  JTAG_WriteClocks(100);
+}
+
+/*********************************************************************
+*
+*       _ReadIceReg
+*
+*  Function description
+*    Reads an Ice-Breaker register
+*/
+int _ReadIceReg(int Reg) {
+  int BitPos;
+  int v;
+  int Tmp;
+  
+  JTAG_StoreIR(0x2);                 // Scan chain select
+  JTAG_StoreClocks(1);
+  JTAG_StoreDR(2, 5);                // Scan chain 2 is Ice breaker
+  JTAG_StoreClocks(1);
+  JTAG_StoreIR(0xC);                 // Intest
+  JTAG_StoreClocks(1);
+  JLINK_JTAG_StartDR();
+  JLINK_JTAG_WriteDRCont(v, 32);
+  Tmp = Reg;
+  Tmp |= (0 << 5);
+  JTAG_WriteDREnd(Tmp, 6);
+  JTAG_StoreClocks(100);
+  JLINK_JTAG_StartDR();
+  BitPos = JLINK_JTAG_WriteDRCont(v, 32);
+  v = JTAG_GetU32(BitPos);
+  Tmp = Reg;
+  Tmp |= (0 << 5);
+  JTAG_WriteDREnd(Tmp, 6);
+  JTAG_StoreClocks(100);
+  return v;
+}
+
+/*********************************************************************
+*
+*       _InitIcePick
+*
+*  Function description
+*    Configures the ICEPick so that the CPU core also becomes
+*    visible in the JTAG chain.
+*/
+void _InitIcePick(void) {
+  int v;
+  int BitPos;
+  int Speed;
+  int ICEPickIdCode;
+  int CoreIdCode;
+  //
+  // Reduce target interface speed, as ICEPick does not seem to like high interface speeds
+  //
+  Speed = JTAG_Speed;
+  JTAG_Speed = 50;
+  Report("J-Link script: Init ICEPick");
+  //
+  // After power-on and TAP reset, only the TI ICEPick is in the scan chain
+  //
+  JTAG_Reset();                           // Perform TAP reset and auto-detection of total IR Len
+  if (JTAG_TotalIRLen != 6) {
+    MessageBox1("Can not find ICE-Pick (IRLen mismatch). Expected 0x00000006, found: ", JTAG_TotalIRLen);
+  }
+  //
+  // Check IDCODE of ICEPick
+  //
+  JLINK_CORESIGHT_Configure("IRPre=0;DRPre=0;IRPost=0;DRPost=0;IRLenDevice=6;PerformTIFInit=0");  // Make sure we do not output the JTAG <-> SWD switching sequence as TI devices with ICEPick do not support SWD anyhow and do not like the switching sequence
+  JTAG_WriteIR(4);                              // ICEPICK IDCODE instruction
+  BitPos = JTAG_WriteDR(0x00000000, 32);
+  ICEPickIdCode = JTAG_GetU32(BitPos);
+  if ((ICEPickIdCode & 0x00000FFF) != 0x0000002F) {
+    MessageBox1("Can not find ICE-Pick (IDCODE mismatch). Expected 0xXXXXXX2F, found: ", ICEPickIdCode);
+  }
+  //
+  // Put ARM core in JTAG chain
+  //
+  Report("J-Link script: Enabling CPU core.");
+  JTAG_WriteIR(7);
+  JTAG_WriteDR(0x89, 8);
+  JTAG_WriteIR(2);
+  JTAG_WriteDR(0x81000080, 32);
+  JTAG_WriteDR(0xA2002108, 32);   // Secondary debug TAP 2 register
+  JTAG_WriteIR(0x3F);                  // Bypass
+  JTAG_WriteClocks(10);
+  //
+  // Configure JTAG chain, so J-Link knows to which devices it has to "talk" to.
+  // CPU core is in scan chain now, so we have to re-configure the JTAG chain settings
+  //
+  JLINK_CORESIGHT_Configure("IRPre=0;DRPre=0;IRPost=6;DRPost=1;IRLenDevice=4;PerformTIFInit=0");  // Make sure we do not output the JTAG <-> SWD switching sequence as TI devices with ICEPick do not support SWD anyhow and do not like the switching sequence
+  CPU=ARM926EJS;
+  JTAG_AllowTAPReset=0; 
+  //
+  // Talk to ICEPick again, to enable ETB
+  //
+  Report("J-Link script: Enabling ETB.");
+  JLINK_CORESIGHT_Configure("IRPre=4;DRPre=1;IRPost=0;DRPost=0;IRLenDevice=6;PerformTIFInit=0");  // Make sure we do not output the JTAG <-> SWD switching sequence as TI devices with ICEPick do not support SWD anyhow and do not like the switching sequence
+  JTAG_WriteIR(7);
+  JTAG_WriteDR(0x89, 8);
+  JTAG_WriteIR(2);
+  JTAG_WriteDR(0xa3302108, 32);        // Secondary debug TAP 3 register
+  JTAG_WriteIR(0x3F);                  // Bypass
+  JTAG_WriteClocks(10);
+  //
+  // Configure JTAG chain, so J-Link knows to which devices it has to "talk" to.
+  // ETB is also in scan chain now, so we have to re-configure the JTAG chain settings
+  //
+  JLINK_CORESIGHT_Configure("IRPre=4;DRPre=1;IRPost=6;DRPost=1;IRLenDevice=4;PerformTIFInit=0");  // Make sure we do not output the JTAG <-> SWD switching sequence as TI devices with ICEPick do not support SWD anyhow and do not like the switching sequence
+  //
+  // Get IDCODE of core
+  //
+  JTAG_StoreIR(0xE);  // Cmd: ROUTER
+  JTAG_StoreDR(v, 32);
+  BitPos = JTAG_StoreDR(v, 32);
+  CoreIdCode = JTAG_GetU32(BitPos);
+  //
+  // Register JTAG devices
+  // TDI -> ICEPick -> CPU -> ETB -> TDO
+  //
+  JTAG_SetDeviceId(0, 0x2B900F0F);   // ETB
+  JTAG_SetDeviceId(1, CoreIdCode);   // CPU
+  JTAG_SetDeviceId(2, ICEPickIdCode);
+  //
+  // Restore target interface speed
+  //
+  JTAG_Speed = Speed;  // Restore original JTAG speed
+}
+
+/*********************************************************************
+*
+*       Global functions
+*
+**********************************************************************
+*/
+
+/*********************************************************************
+*
+*       InitEMU
+*/
+void InitEMU(void) {
+  EMU_ETB_IsPresent = 1;    // Tells the J-Link DLL that the connected device has an ETB
+  EMU_ETM_IsPresent = 1;    // Tells the J-Link DLL that the connected device has an ETM
+  EMU_ETB_UseETB = 1;       // Make ETB usable in IDEs (e.g. IAR EWARM)
+}
+
+/*********************************************************************
+*
+*       ResetTarget
+*/
+void ResetTarget(void) {
+  int Speed;
+
+  Report("J-Link script: ResetTarget()");
+  //
+  // Reduce target interface speed, as ICEPick does not seem to like high interface speeds
+  //
+  Speed = JTAG_Speed;
+  JTAG_Speed = 50;
+  //
+  // Reset core via ResetPin + TRST + halt CPU via vector catch
+  //
+  _WriteIceReg(0,3);    // Set Debug request
+// Reset via reset pin seems to cause bad JTAG communication... For now, do not do any reset for this device...
+//  _WriteIceReg(2,1);    // Write vector catch register, to halt core immediately after reset
+//  JTAG_ResetPin = 0;
+//  SYS_Sleep(50);
+//  JTAG_ResetPin = 1;
+//  SYS_Sleep(50);
+//  JTAG_Write(0x1F, 0, 6);                // Issue TAP reset to make sure that TAP state machine is in a known state
+//  _InitIcePick();
+  //
+  // Restore target interface speed
+  //
+  JTAG_Speed = Speed;  // Restore original JTAG speed
+}
+
+/*********************************************************************
+*
+*       InitTarget
+*/
+void InitTarget(void) {
+  int v;
+  int Speed;
+
+  Report("J-Link script: InitTarget()");
+  //
+  // Reduce target interface speed, as ICEPick does not seem to like high interface speeds
+  //
+  Speed = JTAG_Speed;
+  JTAG_Speed = 50;
+  JTAG_Write(0x1F, 0, 6);                // Issue TAP reset to make sure that TAP state machine is in a known state
+  _InitIcePick();
+  //
+  // Halt the CPU to verify it can be halted. If it can not, let's reset the CPU
+  //
+  _WriteIceReg(0,3);
+  v = _ReadIceReg(1);
+  if ((v & 9) != 9) {
+    Report("J-Link script: Could not halt CPU, Executing Reset");
+    ResetTarget();  // Reset core via ResetPin
+  }
+  //
+  // Restore target interface speed
+  //
+  JTAG_Speed = Speed;  // Restore original JTAG speed
+}

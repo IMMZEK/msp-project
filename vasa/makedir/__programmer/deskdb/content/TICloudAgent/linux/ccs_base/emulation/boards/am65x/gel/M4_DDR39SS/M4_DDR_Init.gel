@@ -1,0 +1,1273 @@
+#define NODDR 0x0
+#define DDR4 0x1
+#define DDR3 0x2
+#define LPDDR4 0x3
+
+#define CTRLMMR_WKUP_PADCONFIG16			(0x0001C040U)
+#define WKUP_GPIO0_CFG0_BASE		(0x42110000)
+#define GPIO_SET_DATA01				(0x18)
+#define GPIO_DIR01					(0x10)
+
+//just for compatibility
+DDR4_800MHz_Initialization_for_EVM() 
+{
+	DDR_Initialization();
+}
+menuitem "DDR_Initialization"
+
+hotmenu DDR_Initialization()
+{
+	unsigned int DDRType;
+	unsigned int DDRFreq;
+	
+    Enable_VTT_Regulator();
+    DDR_Controller_PHY_Config();
+	//Determine which DDR is being used
+	if( (Read_MMR(DDRSS_DDRCTL_MSTR) & 0x1) == 0x1)
+		DDRType = DDR3;
+	else if( (Read_MMR(DDRSS_DDRCTL_MSTR) & 0x10) == 0x10)
+		DDRType = DDR4;
+	else if( (Read_MMR(DDRSS_DDRCTL_MSTR) & 0x20) == 0x20)
+		DDRType = LPDDR4;
+	else 
+		DDRType = NODDR;
+
+	if(DDRType == DDR4)
+	{
+	    PHY_Init();
+		SDRAM_Init(0x7);
+		//Full_Training();
+		if(WriteLeveling_Training())
+		{
+			if(DQSGate_Training())
+				if(WriteLevelAdjustment())
+					if(Training2())
+						if(VREF_Training())
+							Cleanup_Training();
+		}
+		if(Read_MMR(DDRSS_DDRPHY_PGSR0)==0x80004FFF) 
+		{
+			GEL_TextOut("\n\n====\nDDR4 Initialization has PASSED!!!!\nDDR is configured for %dMHz operation\n====\n\n",,,,,GetDDRPLLStatus());
+		}
+		else
+		{
+			GEL_TextOut("\n\n====\n\nDDR4 Initialization has FAILED!!!!\nDDR is configured for %dMHz operation\n====\n\n",,,,,GetDDRPLLStatus());
+			GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_PGSR0)); 
+		}
+	}
+	if(DDRType == DDR3)
+	{
+		PHY_Init();
+		SDRAM_Init(0x3);
+		//Full_Training();
+		if(WriteLeveling_Training())
+		{
+			Enable_DQS_PD();
+			if(DQSGate_Training())
+			{
+				Disable_DQS_PD();
+				if(WriteLevelAdjustment())
+					if(Training2())
+						Cleanup_Training();
+			}	
+		}
+		if(Read_MMR(DDRSS_DDRPHY_PGSR0)==0x80000FFF) 
+		{
+			GEL_TextOut("\n\n====\nDDR3 Initialization has PASSED!!!!\nDDR is configured for %dMHz operation\n====\n\n",,,,,GetDDRPLLStatus());	
+		}
+		else
+		{
+			GEL_TextOut("\n\n====\n\nDDR3 Initialization has FAILED!!!!\nDDR is configured for %dMHz operation\n====\n\n",,,,,GetDDRPLLStatus());
+			GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_PGSR0)); 
+		}
+	}
+	if(DDRType == LPDDR4)
+	{
+		PHY_Init();
+		SDRAM_Init(0x7);
+		SDRAM_Init(0x7);
+		//Full_Training();
+		if(WriteLeveling_Training())
+		{	
+			Enable_DQS_PD();
+			if(DQSGate_Training())
+			{
+				Disable_DQS_PD();
+				if(DDRx_Train_DQS2DQ())
+					if(WriteLevelAdjustment())
+						if(Training2())
+							if(VREF_Training())
+								Cleanup_Training();
+			}
+		}
+	
+		Write_MMR(DDRSS_DDRPHY_DX8SL0DXCTL2, 0x001C1830);
+		Write_MMR(DDRSS_DDRPHY_DX8SL1DXCTL2, 0x001C1830);
+		Write_MMR(DDRSS_DDRPHY_DX8SL2DXCTL2, 0x001C1830);
+	  
+		if(Read_MMR(DDRSS_DDRPHY_PGSR0)==0x8000CFFF) 
+		{
+			GEL_TextOut("\n\n====\nLPDDR4 Initialization has PASSED!!!!\nDDR is configured for %dMHz operation\n====\n\n",,,,,GetDDRPLLStatus());
+		}
+		else
+		{
+			GEL_TextOut("\n\n====\n\nLPDDR4 Initialization has FAILED!!!!\nDDR is configured for %dMHz operation\n====\n\n",,,,,GetDDRPLLStatus());
+			GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_PGSR0)); 
+		}
+	}
+	if(DDRType == NODDR)
+	{
+		GEL_TextOut("\n\n====\n\nDDR Type not recognized.  Initialization has FAILED!!!!\n\n====\n\n");
+	}
+}	
+		
+menuitem "DDR Testing"
+
+hotmenu Enable_VTT_Regulator()
+{
+    ;//-----------------------------------------------------------------------------                            
+    ;// Enable VTT Regulator                            
+    ;//-----------------------------------------------------------------------------                            
+                                
+	//Configure PADCONFIG16 for WKUP_GPIO0_28 (MCU_OSPI1_D0)
+	//Unlock CTRL MMR Partition 7
+	//running from R5 or A53, so no address offset needed
+	CTRL_Unlock(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG16);
+	
+	Write_MMR(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG16,0x20007);  //change to muxmode7, enable pullup, enable driver
+
+	Write_MMR(WKUP_GPIO0_CFG0_BASE + GPIO_SET_DATA01, 0x10000000); //set GPIO28=1
+	Write_MMR(WKUP_GPIO0_CFG0_BASE + GPIO_DIR01, Read_MMR(WKUP_GPIO0_CFG0_BASE + GPIO_DIR01) & ~0x10000000); //enable output for WKUP_GPIO0_28
+	
+	//relock the kick registers
+	CTRL_Relock(WKUP_CTRL_MMR0_CFG0_BASE + CTRLMMR_WKUP_PADCONFIG16);
+		
+    GEL_TextOut( "VTT Regulator Enabled \n");
+}
+
+hotmenu DisableReset()
+{
+    Write_MMR(    DDRSS_V2H_CTL_REG  ,   0x000073FF    );  /* VBUSMC2HIF Control Register*/     
+}
+hotmenu PHY_Init()
+{
+        unsigned int i;
+
+	;//-----------------------------------------------------------------------------                        					
+	;// Perform PHY initialization                                                                          					
+	;//-----------------------------------------------------------------------------                        					
+//	Write_MMR( 	DDRSS_DDRPHY_PIR	,	0x72 	); 	/* PHY Initialization Register */  
+						/*  Impedance Calibration */
+						/*  PLL Init              */
+						/*  DDL Calibration       */
+						/*  PHY Reset             */
+	Write_MMR( 	DDRSS_DDRPHY_PIR	,	0x73 	); 	/* PHY Initialization Register - kicks off init*/
+						
+	for(i=0;i<100;i++);  // must wait 10 clock cycles before polling for init done					
+						
+	while ((Read_MMR(DDRSS_DDRPHY_PGSR0) & 0x1U) != 0x1U)                                					/* wait for PGSR0.IDONE */
+	{                                                                                                    					
+	/* wait for PHY Init done*/                                                                                  					
+	}                                                                                                    					
+	GEL_TextOut( "\nPHY Init complete \n");					
+	for(i=0;i<100;i++);					// wait another 32 ctl_clk cycles before resuming further traffic
+}						
+
+hotmenu SDRAM_Init(unsigned int mask)
+{
+    unsigned int i;
+    //-----------------------------------------------------------------------------                                                
+    // Perform SDRAM initialization                                                                                                
+    //-----------------------------------------------------------------------------                                                
+
+    GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_PGSR0));       
+
+//  Write_MMR(    DDRSS_DDRPHY_PIR ,   0x180   );  /* PHY Initialization Register */        // 0x02988004 0x30000004 0x180 PUB performs DRAM initialization
+  Write_MMR(    DDRSS_DDRPHY_PIR ,   0x181   );  /* PHY Initialization Register */        // 0x02988004 0x30000004 0x181 PUB performs DRAM initialization
+                                
+//    Write_MMR(    DDRSS_DDRPHY_PIR ,   0x00040000  );  /* PHY Initialization Register */        // let controller perform DRAM initialization  
+//    Write_MMR(    DDRSS_DDRPHY_PIR ,   0x00040001  );  /* PHY Initialization Register */        // let controller perform DRAM initialization  //Step 10
+                                  
+    for(i=0;i<100;i++);                  // must wait 10 clock cycles before polling for init done      
+                                
+    while ((Read_MMR(DDRSS_DDRPHY_PGSR0) & 0x8000001f) != 0x8000001fU)                                                /* wait for init done, PLL lock, DDL Calibration, Impedance Calibration, DRAM Init done)*/      
+    {                                                                                                                           
+    /* Busy Loop */                                                                                                         
+    }                                                                                                                           
+                                
+                                                                 
+    for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic       
+
+    GEL_TextOut( "\nWaiting for DRAM Init to complete... \n");
+  
+    while ((Read_MMR(DDRSS_DDRCTL_STAT) & mask) != 0x1U)                                                  /* wait for operating_mode signal */        //Step 14
+    {                                                                                                                           
+    /* Busy Loop */                                                                                                         
+    }                                                   
+    
+    GEL_TextOut( "\nDRAM Init complete\n");
+    GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_PGSR0));        
+}
+
+
+hotmenu Full_Training()
+{
+    unsigned int i;
+    Write_MMR(    DDRSS_DDRPHY_PIR ,   0x0002FE01  );  /* PHY Initialization Register */        // kick off training   //Step 16
+    for(i=0;i<100;i++);  // must wait 10 clock cycles before polling for init done                          
+    GEL_TextOut( "\nWaiting for training to complete \n");
+    while ((Read_MMR(DDRSS_DDRPHY_PGSR0) & 0x1U) != 0x1U){}           /* wait for training to be done */      //Step 17
+    GEL_TextOut( "\nFull training complete \n");
+    GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_PGSR0));       
+    for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic       
+    
+    Write_MMR(    DDRSS_DDRCTL_RFSHCTL3    ,   Read_MMR(DDRSS_DDRCTL_RFSHCTL3) & ~0x1    );  /* Refresh Control Register 3 */    //enable auto refreshes by the controller   //Step 18
+    
+}
+
+hotmenu Enable_DQS_PD()
+{
+	unsigned int i;
+	unsigned int temp;
+	
+	temp = Read_MMR(DDRSS_DDRPHY_DX8SL0DQSCTL);
+	temp &= ~0xFF;
+	temp |= 0xF7;
+	// Enable DATX8 slice DQS pull-downs and DQSN pull-ups 
+	Write_MMR( DDRSS_DDRPHY_DX8SL0DQSCTL, temp );//355ohm DQSn PU/ DQS PD
+	
+	temp = Read_MMR(DDRSS_DDRPHY_DX8SL1DQSCTL);
+	temp &= ~0xFF;
+	temp |= 0xF7;
+	// Enable DATX8 slice DQS pull-downs and DQSN pull-ups 
+	Write_MMR( DDRSS_DDRPHY_DX8SL1DQSCTL, temp );
+
+	temp = Read_MMR(DDRSS_DDRPHY_DX8SL2DQSCTL);
+	temp &= ~0xFF;
+	temp |= 0xF7;
+	// Enable DATX8 slice DQS pull-downs and DQSN pull-ups 
+	Write_MMR( DDRSS_DDRPHY_DX8SL2DQSCTL, temp );  
+    for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic   
+}
+
+hotmenu Disable_DQS_PD()
+{
+	unsigned int i;
+	unsigned int temp;
+	// Disable DATX8 slice DQS pull-downs and DQSN pull-ups
+	temp = Read_MMR(DDRSS_DDRPHY_DX8SL0DQSCTL);
+	temp &= ~0xFF;
+	Write_MMR( DDRSS_DDRPHY_DX8SL0DQSCTL, temp );
+
+	// Disable DATX8 slice DQS pull-downs and DQSN pull-ups
+	temp = Read_MMR(DDRSS_DDRPHY_DX8SL1DQSCTL);
+	temp &= ~0xFF;
+	Write_MMR( DDRSS_DDRPHY_DX8SL1DQSCTL, temp );
+
+	// Disable DATX8 slice DQS pull-downs and DQSN pull-ups
+	temp = Read_MMR(DDRSS_DDRPHY_DX8SL2DQSCTL);
+	temp &= ~0xFF;
+	Write_MMR( DDRSS_DDRPHY_DX8SL2DQSCTL, temp );
+
+    for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic   
+}
+
+hotmenu WriteLeveling_Training()
+{
+    unsigned int i;
+	unsigned int status;
+        
+    //Write leveling
+   
+    Write_MMR(    DDRSS_DDRPHY_PIR ,   0x00000201  );  /* PHY Initialization Register */        // kick off training   //Step 16
+    for(i=0;i<100;i++);  // must wait 10 clock cycles before polling for init done                          
+    GEL_TextOut( "\nWaiting for write leveling to complete \n");
+    while ((Read_MMR(DDRSS_DDRPHY_PGSR0) & 0x20U) != 0x20U){}           /* wait for training to be done */      //Step 17
+    GEL_TextOut( "\nWrite leveling done \n");
+    GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,status = Read_MMR(DDRSS_DDRPHY_PGSR0));       
+    for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic       
+    	
+	if(status & 0x200000)
+	{
+		GEL_TextOut("****ERROR in Write Leveling****\n");
+		//checking status per byte
+		GEL_TextOut("checking Write Leveling status per byte...\n");
+		GEL_TextOut("\nDDRSS_DDRPHY_DX0GSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX0GSR0));
+		GEL_TextOut("\nDDRSS_DDRPHY_DX1GSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX1GSR0));
+		GEL_TextOut("\nDDRSS_DDRPHY_DX2GSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX2GSR0));
+		GEL_TextOut("\nDDRSS_DDRPHY_DX3GSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX3GSR0));
+        GEL_TextOut("\nDDRSS_DDRPHY_DX4GSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX4GSR0));
+		return 0;
+	}
+	else
+	{
+		GEL_TextOut( "\nWrite Leveling completed successfully \n");
+	}
+    return 1;
+}
+
+hotmenu DQSGate_Training()
+{
+    unsigned int i;
+	unsigned int status;    
+    
+//Read DQS Gate training
+    Write_MMR(    DDRSS_DDRPHY_PIR ,   0x0000401  );  /* PHY Initialization Register */        // kick off training   //Step 16
+    for(i=0;i<100;i++);  // must wait 10 clock cycles before polling for init done                          
+    GEL_TextOut( "\nWaiting for Read DQS training to complete \n");
+    while ((Read_MMR(DDRSS_DDRPHY_PGSR0) & 0x40U) != 0x40U){}           /* wait for training to be done */      //Step 17
+    GEL_TextOut( "\nRead DQS training done \n");
+    GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,status = Read_MMR(DDRSS_DDRPHY_PGSR0));       
+    for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic       
+     
+    if(status & 0x400000)
+	{
+		GEL_TextOut("****ERROR in DQS Gate Training****\n");
+		//checking per byte status
+		GEL_TextOut("checking DQS Gate Training status per byte...\n");
+		GEL_TextOut("\nDDRSS_DDRPHY_DX0RSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX0RSR0));
+		GEL_TextOut("\nDDRSS_DDRPHY_DX1RSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX1RSR0));
+		GEL_TextOut("\nDDRSS_DDRPHY_DX2RSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX2RSR0));
+		GEL_TextOut("\nDDRSS_DDRPHY_DX3RSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX3RSR0));
+		GEL_TextOut("\nDDRSS_DDRPHY_DX4RSR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX4RSR0));
+		return 0;
+	}
+	else
+	{
+		GEL_TextOut( "\nRead DQS training completed successfully \n");
+	}
+    return 1;
+}
+
+hotmenu DDRx_Train_DQS2DQ()
+{
+    unsigned int i;
+    unsigned int status;
+
+    GEL_TextOut("--->>> Starting the DQS2DQ Training Process <<<---\n");                                 
+
+    Write_MMR(DDRSS_DDRPHY_PIR, 0x00100001U); /* PHY Initialization Register */
+    
+    while ((Read_MMR(DDRSS_DDRPHY_PGSR0) & 0x8000807fU) != 0x8000807fU);
+    GEL_TextOut( "\nDQS2DQ Training done\n");
+
+    GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,status = Read_MMR(DDRSS_DDRPHY_PGSR0));       
+    for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic       
+
+    if(status & 0x40000U)
+    {
+        GEL_TextOut("****ERROR in DQS2DQ Training****\n");
+        //checking per byte status
+        GEL_TextOut("checking DQS2DQ status per byte...\n");
+        GEL_TextOut("\nDDRSS_DDRPHY_DX0GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX0GSR2));
+        GEL_TextOut("\nDDRSS_DDRPHY_DX1GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX1GSR2));
+        GEL_TextOut("\nDDRSS_DDRPHY_DX2GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX2GSR2));
+        GEL_TextOut("\nDDRSS_DDRPHY_DX3GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX3GSR2));
+        GEL_TextOut("\nDDRSS_DDRPHY_DX4GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX4GSR2));
+        return 0;
+    }
+    else
+    {
+        GEL_TextOut( "\nDQS2DQ completed successfully \n");
+    }
+    
+    return 1;
+}
+
+
+hotmenu WriteLevelAdjustment()
+{
+unsigned int i;
+unsigned int status;
+
+//Write leveling adjustment
+Write_MMR(    DDRSS_DDRPHY_PIR ,   0x0000801  );  /* PHY Initialization Register */        // kick off training   //Step 16
+for(i=0;i<100;i++);  // must wait 10 clock cycles before polling for init done                          
+GEL_TextOut( "\nWaiting for Write leveling adjustment to complete \n");
+while ((Read_MMR(DDRSS_DDRPHY_PGSR0) & 0x80U) != 0x80U){}           /* wait for training to be done */      //Step 17
+GEL_TextOut( "\nWrite leveling adjustment done \n");
+
+GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,status = Read_MMR(DDRSS_DDRPHY_PGSR0));       
+for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic       
+
+
+if(status & 0x800000)
+{
+    GEL_TextOut("****ERROR in Write Leveling Adjustment Training****\n");
+    //checking per byte status
+    GEL_TextOut("checking Write Leveling Adjustment status per byte...\n");
+    GEL_TextOut("\nDDRSS_DDRPHY_DX0RSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX0RSR2));
+    GEL_TextOut("\nDDRSS_DDRPHY_DX1RSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX1RSR2));
+    GEL_TextOut("\nDDRSS_DDRPHY_DX2RSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX2RSR2));
+    GEL_TextOut("\nDDRSS_DDRPHY_DX3RSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX3RSR2));
+    GEL_TextOut("\nDDRSS_DDRPHY_DX4RSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX4RSR2));
+    GEL_TextOut("\nDDRSS_DDRPHY_DX0RSR3 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX0RSR3));
+    GEL_TextOut("\nDDRSS_DDRPHY_DX1RSR3 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX1RSR3));
+    GEL_TextOut("\nDDRSS_DDRPHY_DX2RSR3 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX2RSR3));
+    GEL_TextOut("\nDDRSS_DDRPHY_DX3RSR3 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX3RSR3));
+    GEL_TextOut("\nDDRSS_DDRPHY_DX4RSR3 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX4RSR3));
+    return 0;
+}
+else
+{
+    GEL_TextOut( "\nWrite Leveling Adjustment completed successfully \n");
+}
+return 1;
+}
+
+hotmenu Training2()
+{
+        unsigned int i;
+        unsigned int status;
+    
+//Read deskew
+        Write_MMR(    DDRSS_DDRPHY_PIR ,   0x0001001  );  /* PHY Initialization Register */        // kick off training   //Step 16
+        for(i=0;i<100;i++);  // must wait 10 clock cycles before polling for init done                          
+        GEL_TextOut( "\nWaiting for Read deskew to complete \n");
+        while ((Read_MMR(DDRSS_DDRPHY_PGSR0) & 0x100U) != 0x100U){}           /* wait for training to be done */      //Step 17
+        GEL_TextOut( "\nRead deskew complete \n");
+        GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,status = Read_MMR(DDRSS_DDRPHY_PGSR0));       
+        for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic       
+        if(status & 0x1000000)
+        {
+            GEL_TextOut("****ERROR in Read deskew Training****\n");
+            //checking per byte status
+            GEL_TextOut("checking Read Deskew status per byte...\n");
+            GEL_TextOut("\nDDRSS_DDRPHY_DX0GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX0GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX1GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX1GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX2GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX2GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX3GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX3GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX4GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX4GSR2));
+            return 0;
+        }
+        else
+        {
+            GEL_TextOut( "\nRead Deskew completed successfully \n");
+        }      
+        
+//Write deskew
+        Write_MMR(    DDRSS_DDRPHY_PIR ,   0x0002001  );  /* PHY Initialization Register */        // kick off training   //Step 16
+        for(i=0;i<100;i++);  // must wait 10 clock cycles before polling for init done                          
+        GEL_TextOut( "\nWaiting for Write deskew to complete \n");
+        while ((Read_MMR(DDRSS_DDRPHY_PGSR0) & 0x200U) != 0x200U){}           /* wait for training to be done */      //Step 17
+        GEL_TextOut( "\nWrite deskew complete \n");
+        GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,status = Read_MMR(DDRSS_DDRPHY_PGSR0));       
+        for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic       
+        if(status & 0x2000000)
+        {
+            GEL_TextOut("****ERROR in Write Deskew Training****\n");
+            //checking per byte status
+            GEL_TextOut("checking Write Deskew status per byte...\n");
+            GEL_TextOut("\nDDRSS_DDRPHY_DX0GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX0GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX1GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX1GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX2GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX2GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX3GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX3GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX4GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX4GSR2));
+            return 0;
+        }
+        else
+        {
+            GEL_TextOut( "\nWrite Deskew completed successfully \n");
+        }
+//Read Eye training
+        Write_MMR(    DDRSS_DDRPHY_PIR ,   0x0004001  );  /* PHY Initialization Register */        // kick off training   //Step 16
+        for(i=0;i<100;i++);  // must wait 10 clock cycles before polling for init done                          
+        GEL_TextOut( "\nWaiting for Read Eye training to complete \n");
+        while ((Read_MMR(DDRSS_DDRPHY_PGSR0) & 0x400U) != 0x400U){}           /* wait for training to be done */      //Step 17
+        GEL_TextOut( "\nRead Eye training complete \n");
+        GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,status = Read_MMR(DDRSS_DDRPHY_PGSR0));       
+        for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic       
+
+        if(status & 0x4000000)
+        {
+            GEL_TextOut("****ERROR in Read Eye Training****\n");
+            //checking per byte status
+            GEL_TextOut("checking Read Eye status per byte...\n");
+            GEL_TextOut("\nDDRSS_DDRPHY_DX0GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX0GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX1GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX1GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX2GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX2GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX3GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX3GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX4GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX4GSR2));
+            return 0;
+        }
+        else
+        {
+            GEL_TextOut( "\nRead Eye Training completed successfully \n");
+        }
+        
+//Write Eye training
+        Write_MMR(    DDRSS_DDRPHY_PIR ,   0x0008001  );  /* PHY Initialization Register */        // kick off training   //Step 16
+        for(i=0;i<100;i++);  // must wait 10 clock cycles before polling for init done                          
+        GEL_TextOut( "\nWaiting for Write Eye training to complete \n");
+        while ((Read_MMR(DDRSS_DDRPHY_PGSR0) & 0x800U) != 0x800U){}           /* wait for training to be done */      //Step 17
+        GEL_TextOut( "\nWrite Eye training complete \n");
+        GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,status=Read_MMR(DDRSS_DDRPHY_PGSR0));       
+        for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic       
+        if(status & 0x8000000)
+        {
+            GEL_TextOut("****ERROR in Write Eye Training****\n");
+            //checking per byte status
+            GEL_TextOut("checking Write Eye status per byte...\n");
+            GEL_TextOut("\nDDRSS_DDRPHY_DX0GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX0GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX1GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX1GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX2GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX2GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX3GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX3GSR2));
+            GEL_TextOut("\nDDRSS_DDRPHY_DX4GSR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX4GSR2));
+            return 0;
+        }
+        else
+        {
+            GEL_TextOut( "\nWrite Eye Training completed successfully \n");
+        }
+        return 1;
+}
+
+hotmenu VREF_Training()
+{     
+	unsigned int i;
+	unsigned int status;
+//VREF training
+        Write_MMR(    DDRSS_DDRPHY_PIR ,   0x0020001  );  /* PHY Initialization Register */        // kick off training   //Step 16
+        for(i=0;i<100;i++);  // must wait 10 clock cycles before polling for init done                          
+        GEL_TextOut( "\nWaiting for VREF training to complete \n");
+        while ((Read_MMR(DDRSS_DDRPHY_PGSR0) & 0x4000U) != 0x4000U){}           /* wait for training to be done */      //Step 17
+        GEL_TextOut( "\nVREF training complete \n");
+        GEL_TextOut("DDRSS_DDRPHY_PGSR0 = %x\n",,,,,status=Read_MMR(DDRSS_DDRPHY_PGSR0));       
+        for(i=0;i<100;i++);                 // wait another 32 ctl_clk cycles before resuming further traffic   
+        if(status & 0x80000)
+         {
+             GEL_TextOut("****ERROR in VREF Training****\n");
+             //checking per byte status
+             GEL_TextOut("checking VREF Training status per byte...\n");
+             GEL_TextOut("\nDDRSS_DDRPHY_DX0GSR3 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX0GSR3));
+             GEL_TextOut("\nDDRSS_DDRPHY_DX1GSR3 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX1GSR3));
+             GEL_TextOut("\nDDRSS_DDRPHY_DX2GSR3 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX2GSR3));
+             GEL_TextOut("\nDDRSS_DDRPHY_DX3GSR3 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX3GSR3));
+             GEL_TextOut("\nDDRSS_DDRPHY_DX4GSR3 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX4GSR3));
+             return 0;
+         }
+         else
+         {
+             GEL_TextOut( "\nVREF Training completed successfully \n");
+         }
+        return 1;
+}
+
+hotmenu Cleanup_Training()
+{
+	unsigned int i;
+	unsigned int DGSL0, DGSL1, DGSL2, DGSL3, DGSL4, RDDLY,RD2WR_WR2RD;
+	
+        //update RDDLY after training has determined DGSL
+        Write_MMR(  DDRSS_DDRPHY_RANKIDR ,   0x00000000  );  /* Rank ID Register */ 
+        DGSL0 = (Read_MMR(DDRSS_DDRPHY_DX0GTR0) & 0x1F) >> 2;
+        DGSL1 = (Read_MMR(DDRSS_DDRPHY_DX1GTR0) & 0x1F) >> 2;
+        DGSL2 = (Read_MMR(DDRSS_DDRPHY_DX2GTR0) & 0x1F) >> 2;
+        DGSL3 = (Read_MMR(DDRSS_DDRPHY_DX3GTR0) & 0x1F) >> 2;
+        DGSL4 = (Read_MMR(DDRSS_DDRPHY_DX4GTR0) & 0x1F) >> 2;
+               
+        
+        RDDLY = DGSL0;
+        if(DGSL1 < RDDLY )
+            RDDLY = DGSL1;
+        if(DGSL2 < RDDLY )
+            RDDLY = DGSL2;
+        if(DGSL3 < RDDLY )
+            RDDLY = DGSL3;
+        if(DGSL4 < RDDLY )
+            RDDLY = DGSL4;
+        
+        RDDLY += 5;  //from spec: It is recommended that DXnGCR0.RDDLY be set to 5 + minn,x(DXnGTR0.RxDGSL[4:2]), 
+                    //where n is the byte lane index and x is the rank index.
+        
+        Write_MMR(  DDRSS_DDRPHY_DX0GCR0 ,   (Read_MMR(DDRSS_DDRPHY_DX0GCR0) & ~0xF00000) | (RDDLY << 20));  /* update RDDLY based on DGSL value*/ 
+        Write_MMR(  DDRSS_DDRPHY_DX1GCR0 ,   (Read_MMR(DDRSS_DDRPHY_DX1GCR0) & ~0xF00000) | (RDDLY << 20));  /* update RDDLY based on DGSL value*/ 
+        Write_MMR(  DDRSS_DDRPHY_DX2GCR0 ,   (Read_MMR(DDRSS_DDRPHY_DX2GCR0) & ~0xF00000) | (RDDLY << 20));  /* update RDDLY based on DGSL value*/
+        Write_MMR(  DDRSS_DDRPHY_DX3GCR0 ,   (Read_MMR(DDRSS_DDRPHY_DX3GCR0) & ~0xF00000) | (RDDLY << 20));  /* update RDDLY based on DGSL value*/ 
+        Write_MMR(  DDRSS_DDRPHY_DX4GCR0 ,   (Read_MMR(DDRSS_DDRPHY_DX4GCR0) & ~0xF00000) | (RDDLY << 20));  /* update RDDLY based on DGSL value*/ 
+                
+		//need to add System Latency derived from training back into rd2wr and wr2rd parameter
+		//formula:  rd2wr: RL+BL/2 + 1 + WR_PREAMBLE - WL + max(DXnGTR0.DGSL)/2
+        //formula:  wr2rd: CWL+PL+BL/2+tWTR_L + max(DXnGTR0.DGSL)/2
+        Write_MMR(    DDRSS_DDRPHY_RANKIDR ,   0x00000000  );  /* Rank ID Register */  //selects Rank 0    
+
+		DGSL0 = Read_MMR(DDRSS_DDRPHY_DX0GTR0);
+		DGSL0 = DGSL0 & 0x1F;
+		DGSL1 = Read_MMR(DDRSS_DDRPHY_DX1GTR0);
+		DGSL1 = DGSL1 & 0x1F;
+		DGSL2 = Read_MMR(DDRSS_DDRPHY_DX2GTR0);
+		DGSL2 = DGSL2 & 0x1F;
+		DGSL3 = Read_MMR(DDRSS_DDRPHY_DX3GTR0);
+		DGSL3 = DGSL3 & 0x1F;
+		DGSL4 = Read_MMR(DDRSS_DDRPHY_DX4GTR0);
+	    DGSL4 = DGSL4 & 0x1F;
+				
+		//find maximum value across all bytes
+		RD2WR_WR2RD = DGSL0;
+		if(DGSL1 > RD2WR_WR2RD)
+		    RD2WR_WR2RD = DGSL1;
+		if(DGSL2 > RD2WR_WR2RD)
+		    RD2WR_WR2RD = DGSL2;
+		if(DGSL3 > RD2WR_WR2RD)
+		    RD2WR_WR2RD = DGSL3;
+		if(DGSL4 > RD2WR_WR2RD)
+		    RD2WR_WR2RD = DGSL4;
+
+        RD2WR_WR2RD = RD2WR_WR2RD >> 1;  //divide value by 2
+		        
+		//now add in adjustment to DRAMTMG2 bit fields for rd2wr and wr2rd
+	    Write_MMR(DDRSS_DDRCTL_SWCTL,Read_MMR(DDRSS_DDRCTL_SWCTL) & ~0x1); //SWCTL.sw_done = 0
+		//adjust rd2wr
+		Write_MMR(DDRSS_DDRCTL_DRAMTMG2, (Read_MMR(DDRSS_DDRCTL_DRAMTMG2)) + (RD2WR_WR2RD << 8));
+		//adjust wr2rd
+		Write_MMR(DDRSS_DDRCTL_DRAMTMG2, (Read_MMR(DDRSS_DDRCTL_DRAMTMG2)) + RD2WR_WR2RD);
+		        
+		Write_MMR(DDRSS_DDRCTL_SWCTL,Read_MMR(DDRSS_DDRCTL_SWCTL) | 0x1); //SWCTL.sw_done = 1
+		while((Read_MMR(DDRSS_DDRCTL_SWSTAT) & 0x1) == 0x0); //wait until SWSTAT=1
+		
+		//re-enable refresh and disable PUBMODE after training is complete
+        Write_MMR(  DDRSS_DDRCTL_RFSHCTL3    ,   Read_MMR(DDRSS_DDRCTL_RFSHCTL3) & ~0x1    );  /* Refresh Control Register 3 */    //enable auto refreshes by the controller   //Step 18
+        Write_MMR(  DDRSS_DDRPHY_PGCR1 ,   (Read_MMR(DDRSS_DDRPHY_PGCR1) & ~0x40)); /*disable PUBMODE*/ 
+
+}
+hotmenu RegisterDump()
+{
+    unsigned int i;
+    //GEL_EnableFileOutput("c:\\Userdata\\RegisterDump.txt",0,0);
+
+    GEL_TextOut("\n*******DDR Controller Registers********\n");
+
+    for(i=0x02980000;i<0x02980388;i=i+4)
+    {
+           GEL_TextOut("%x: %x\n","",,,,i,Read_MMR(i));
+    }
+
+    GEL_TextOut("\n*******DDR PHY REGS********\n");
+
+    for(i=0x02988000;i<0x029897F8;i=i+4)
+    {
+           GEL_TextOut("%x: %x\n","",,,,i,Read_MMR(i));
+    }
+
+    
+    //GEL_DisableFileOutput("c:\\UserData\\RegisterDump.txt");
+    GEL_TextOut("RegDump done\n");
+}
+
+hotmenu RegDecode()
+{
+    unsigned int StartRegaddr,byte,index,regaddr;
+    unsigned int write_data_delay_integer_byte0,write_data_delay_remainder_byte0;
+    unsigned int write_data_delay_integer_byte1,write_data_delay_remainder_byte1;
+    unsigned int write_data_delay_integer_byte2,write_data_delay_remainder_byte2;
+    unsigned int write_data_delay_integer_byte3,write_data_delay_remainder_byte3;
+    unsigned int write_data_delay_integer_byte4,write_data_delay_remainder_byte4;
+
+    
+    
+    //Read out GCR regs
+    StartRegaddr = 0x2988700;
+    GEL_TextOut("Byte0       Byte1      Byte2       Byte3     Byte4(ECC)\n",,,,);
+    for(index=0;index<8;index++)
+    {
+        regaddr = StartRegaddr + (index*4);  
+        GEL_TextOut("DXnGCR%d: %x  %x  %x  %x  %x\n","",,,,index,Read_MMR(regaddr),Read_MMR(regaddr+0x100),Read_MMR(regaddr+0x200),Read_MMR(regaddr+0x300),Read_MMR(regaddr+0x400));    
+    }       
+
+    //Read out GSR regs
+    StartRegaddr = 0x29887E0;
+    GEL_TextOut("Byte0       Byte1      Byte2      Byte3       Byte4(ECC)\n",,,,);
+    for(index=0;index<7;index++)
+    {
+        regaddr = StartRegaddr + (index*4);  
+        GEL_TextOut("DXnGSR%d: %x  %x  %x  %x  %x\n","",,,,index,Read_MMR(regaddr),Read_MMR(regaddr+0x100),Read_MMR(regaddr+0x200),Read_MMR(regaddr+0x300),Read_MMR(regaddr+0x400));    
+    }    
+    //Read out RSR regs
+    StartRegaddr = 0x29887D0;
+    GEL_TextOut("Byte0       Byte1      Byte2      Byte3      Byte4(ECC)\n",,,,);
+    for(index=0;index<4;index++)
+    {
+        regaddr = StartRegaddr + (index*4);  
+        GEL_TextOut("DXnRSR%d: %x  %x  %x  %x  %x\n","",,,,index,Read_MMR(regaddr),Read_MMR(regaddr+0x100),Read_MMR(regaddr+0x200),Read_MMR(regaddr+0x300),Read_MMR(regaddr+0x400));    
+    }    
+          
+    //Read out LCDLR (Local Calibrated Delay Line) regs
+    Write_MMR(    DDRSS_DDRPHY_RANKIDR ,   0x00000000  );  /* Rank ID Register */  //selects Rank 0    
+
+    StartRegaddr = 0x2988780;
+    GEL_TextOut("            Byte0       Byte1      Byte2      Byte3      Byte4(ECC)\n",,,,);
+    for(index=0;index<6;index++)
+    {
+        regaddr = StartRegaddr + (index*4);  
+        GEL_TextOut("DXnLCDLR%d for rank0: %x  %x  %x  %x  %x\n","",,,,index,Read_MMR(regaddr),Read_MMR(regaddr+0x100),Read_MMR(regaddr+0x200),Read_MMR(regaddr+0x300),Read_MMR(regaddr+0x400));    
+    }    
+    
+	//read out GTR 
+    regaddr = 0x29887C0;
+    GEL_TextOut("Byte0       Byte1      Byte2      Byte3      Byte4(ECC)\n",,,,);
+    GEL_TextOut("DXnGTR0 for rank0: %x  %x  %x  %x  %x\n","",,,,index,Read_MMR(regaddr),Read_MMR(regaddr+0x100),Read_MMR(regaddr+0x200),Read_MMR(regaddr+0x300),Read_MMR(regaddr+0x400));    
+                    
+    //Read out LCDLR for rank 1
+    Write_MMR(    DDRSS_DDRPHY_RANKIDR ,   0x00010001  );  /* Rank ID Register */  //selects Rank 1    
+
+    StartRegaddr = 0x2988780;
+    GEL_TextOut("            Byte0       Byte1      Byte2      Byte3      Byte4(ECC)\n",,,,);
+    for(index=0;index<6;index++)
+    {
+        regaddr = StartRegaddr + (index*4);  
+        GEL_TextOut("DXnLCDLR%d for rank1: %x  %x  %x  %x  %x\n","",,,,index,Read_MMR(regaddr),Read_MMR(regaddr+0x100),Read_MMR(regaddr+0x200),Read_MMR(regaddr+0x300),Read_MMR(regaddr+0x400));    
+    }    
+
+	//Read out GTR for rank 1
+    regaddr = 0x29887C0;
+    GEL_TextOut("Byte0       Byte1      Byte2      Byte3      Byte4(ECC)\n",,,,);
+    GEL_TextOut("DXnGTR0 for rank1: %x  %x  %x  %x  %x\n","",,,,index,Read_MMR(regaddr),Read_MMR(regaddr+0x100),Read_MMR(regaddr+0x200),Read_MMR(regaddr+0x300),Read_MMR(regaddr+0x400));    
+                   
+	//Read out ZQnDR regs
+    StartRegaddr = 0x298868C;
+    GEL_TextOut("Byte0       Byte1      Byte2      Byte3      Byte4(ECC)\n",,,,);
+    for(index=0;index<2;index++)
+    {
+        regaddr = StartRegaddr + (index*4);  
+        GEL_TextOut("ZqnDR%d: %x  %x  %x  %x  %x\n","",,,,index,Read_MMR(regaddr),Read_MMR(regaddr+0x20),Read_MMR(regaddr+0x40),Read_MMR(regaddr+0x60),Read_MMR(regaddr+0x80));    
+    }    
+
+    //Read out MR regs
+    GEL_TextOut("\nDDRSS_DDRPHY_MR0_DDR4 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_MR0_DDR4));
+    GEL_TextOut("DDRSS_DDRPHY_MR1_DDR4 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_MR1_DDR4));
+    GEL_TextOut("DDRSS_DDRPHY_MR2_DDR4 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_MR2_DDR4));
+    GEL_TextOut("DDRSS_DDRPHY_MR3_DDR4 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_MR3_DDR4));
+    GEL_TextOut("DDRSS_DDRPHY_MR4_DDR4 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_MR4_DDR4));
+    GEL_TextOut("DDRSS_DDRPHY_MR5_DDR4 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_MR5_DDR4));
+    GEL_TextOut("DDRSS_DDRPHY_MR6_DDR4 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_MR6_DDR4));
+
+    if((Read_MMR(DDRSS_DDRPHY_MR1_DDR4) & 0x700) == 0) GEL_TextOut("Memory ODT (RTTnom in MR1) disabled\n");
+    if((Read_MMR(DDRSS_DDRPHY_MR1_DDR4) & 0x700) == 0x100) GEL_TextOut("Memory ODT (RTTnom in MR1) RZQ/4 60ohm\n");
+    if((Read_MMR(DDRSS_DDRPHY_MR1_DDR4) & 0x700) == 0x200) GEL_TextOut("Memory ODT (RTTnom in MR1) RZQ/2 120ohm\n");
+    if((Read_MMR(DDRSS_DDRPHY_MR1_DDR4) & 0x700) == 0x300) GEL_TextOut("Memory ODT (RTTnom in MR1) RZQ/4 40ohm\n");
+    if((Read_MMR(DDRSS_DDRPHY_MR1_DDR4) & 0x700) == 0x400) GEL_TextOut("Memory ODT (RTTnom in MR1) RZQ/1 240ohm\n");
+    if((Read_MMR(DDRSS_DDRPHY_MR1_DDR4) & 0x700) == 0x500) GEL_TextOut("Memory ODT (RTTnom in MR1) RZQ/5 48ohm\n");
+    if((Read_MMR(DDRSS_DDRPHY_MR1_DDR4) & 0x700) == 0x600) GEL_TextOut("Memory ODT (RTTnom in MR1) RZQ/3 80ohm\n");
+    if((Read_MMR(DDRSS_DDRPHY_MR1_DDR4) & 0x700) == 0x700) GEL_TextOut("Memory ODT (RTTnom in MR1) RZQ/7 34ohm\n");
+        
+    if((Read_MMR(DDRSS_DDRPHY_MR1_DDR4) & 0x6) == 0x0) GEL_TextOut("Memory ODI (ODI in MR1) RZQ/7 34ohm\n");
+    if((Read_MMR(DDRSS_DDRPHY_MR1_DDR4) & 0x6) == 0x2) GEL_TextOut("Memory ODI (ODI in MR1) RZQ/5 48ohm\n");
+        
+    GEL_TextOut("Maxwell ODT ZQ0PR0.ZPROG_HOST_ODT = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF00) >> 8);
+    if(  ((Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF00) >> 8) == 0x1) GEL_TextOut("Maxwell ODT 240ohm\n");
+    if(  ((Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF00) >> 8) == 0x2) GEL_TextOut("Maxwell ODT 160ohm\n");
+    if(  ((Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF00) >> 8) == 0x3) GEL_TextOut("Maxwell ODT 120ohm\n");
+    if(  ((Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF00) >> 8) == 0x7) GEL_TextOut("Maxwell ODT 60ohm\n");
+    if(  ((Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF00) >> 8) == 0x9) GEL_TextOut("Maxwell ODT 48ohm\n");
+    if(  ((Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF00) >> 8) == 0xB) GEL_TextOut("Maxwell ODT 402ohm\n");
+    
+    
+    GEL_TextOut("Maxwell ODI ZQ0PR0.ASYM_PD_DRV = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF0) >> 4);
+    GEL_TextOut("Maxwell ODI ZQ0PR0.ASYM_PU_DRV = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF) >> 0);
+    if(  ((Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF0) >> 4) == 0x1) GEL_TextOut("Maxwell ODI 240ohm\n");
+    if(  ((Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF0) >> 4) == 0x3) GEL_TextOut("Maxwell ODI 120ohm\n");
+    if(  ((Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF0) >> 4) == 0x9) GEL_TextOut("Maxwell ODI 48ohm\n");
+    if(  ((Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF0) >> 4) == 0xB) GEL_TextOut("Maxwell ODI 40ohm\n");
+    if(  ((Read_MMR(DDRSS_DDRPHY_ZQ0PR0) & 0xF0) >> 4) == 0xD) GEL_TextOut("Maxwell ODI 34.3ohm\n");
+
+      //Host ODT control for DQSP[5:4] and DQSN {19:18]
+     
+    //
+    if((Read_MMR(DDRSS_DDRPHY_DX0GCR3) & 0x30) >> 4 == 0x0) GEL_TextOut("Maxwell ODT for DQSP is DYNAMIC\n");
+    if((Read_MMR(DDRSS_DDRPHY_DX0GCR3) & 0x30) >> 4 == 0x1) GEL_TextOut("Maxwell ODT for DQSP is ON\n");
+    if((Read_MMR(DDRSS_DDRPHY_DX0GCR3) & 0x30) >> 4 == 0x2) GEL_TextOut("Maxwell ODT for DQSP is OFF\n");
+
+    if((Read_MMR(DDRSS_DDRPHY_DX0GCR3) & 0xC0000) >> 18 == 0x0) GEL_TextOut("Maxwell ODT for DQSN is DYNAMIC\n");
+    if((Read_MMR(DDRSS_DDRPHY_DX0GCR3) & 0xC0000) >> 18 == 0x1) GEL_TextOut("Maxwell ODT for DQSN is ON\n");
+    if((Read_MMR(DDRSS_DDRPHY_DX0GCR3) & 0xC0000) >> 18 == 0x2) GEL_TextOut("Maxwell ODT for DQSN is OFF\n");
+    
+    if((Read_MMR(DDRSS_DDRPHY_DX0GCR2) & 0xFFFF) == 0x0000) GEL_TextOut("Maxwell ODT for DQn for byte 0 is DYNAMIC\n");
+    if((Read_MMR(DDRSS_DDRPHY_DX0GCR2) & 0xFFFF) == 0x5555) GEL_TextOut("Maxwell ODT for DQn for byte 0 is ON\n");
+    if((Read_MMR(DDRSS_DDRPHY_DX0GCR2) & 0xFFFF) == 0xAAAA) GEL_TextOut("Maxwell ODT for DQn for byte 0 is OFF\n");
+    
+    //VREF for DQn
+    GEL_TextOut("\n");
+    GEL_TextOut("Maxwell VREF for DQn (check value in REFSEL table)\n");
+    GEL_TextOut("REFSELRANGE = %d\n",,,,,(Read_MMR(DDRSS_DDRPHY_PGCR5) & 0x4) >> 2);
+    GEL_TextOut("DX0GCR5 = %x = %d\n",,,,,Read_MMR(DDRSS_DDRPHY_DX0GCR5) & 0xFF,Read_MMR(DDRSS_DDRPHY_DX0GCR5) & 0xFF);
+    GEL_TextOut("DX1GCR5 = %x = %d\n",,,,,Read_MMR(DDRSS_DDRPHY_DX1GCR5) & 0xFF,Read_MMR(DDRSS_DDRPHY_DX1GCR5) & 0xFF);
+    GEL_TextOut("DX2GCR5 = %x = %d\n",,,,,Read_MMR(DDRSS_DDRPHY_DX2GCR5) & 0xFF,Read_MMR(DDRSS_DDRPHY_DX2GCR5) & 0xFF);
+    GEL_TextOut("DX3GCR5 = %x = %d\n",,,,,Read_MMR(DDRSS_DDRPHY_DX3GCR5) & 0xFF,Read_MMR(DDRSS_DDRPHY_DX3GCR5) & 0xFF);
+    GEL_TextOut("DX4GCR5 = %x = %d\n",,,,,Read_MMR(DDRSS_DDRPHY_DX4GCR5) & 0xFF,Read_MMR(DDRSS_DDRPHY_DX4GCR5) & 0xFF);
+  
+    
+    //VREF for ZQn
+     if((Read_MMR(DDRSS_DDRPHY_ZQCR) & 0x200000) >> 25)  //REFSELRANGE=1 for ZQ
+     {
+         //if((Read_MMR(DDRSS_DDRPHY_ZQ0PR1) & 0xFF) == 0x) GEL_TextOut("Maxwell VREF for DQn = 15% VDDQ\n");
+     }
+     else //REFSELRANGE=0 for ZQ
+     {
+         if((Read_MMR(DDRSS_DDRPHY_ZQ0PR1) & 0x7F7F) == 0x0B0B) GEL_TextOut("Maxwell VREF for ZQ = 50% VDDQ\n");
+         if((Read_MMR(DDRSS_DDRPHY_ZQ0PR1) & 0x7F7F) == 0x4343) GEL_TextOut("Maxwell VREF for ZQ = 70% VDDQ\n");
+
+     }
+    
+	
+	//VREF for DQS gate
+     //VREF for DQn
+     GEL_TextOut("\n");
+     GEL_TextOut("Maxwell VREF for DQn (check value in REFSEL table)\n");
+     GEL_TextOut("REFSELRANGE for byte 0 = %d\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0GCR4) >> 15) & 0x1);
+     GEL_TextOut("DX0GCR4 = %x = %d\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0GCR4) >> 8) & 0x7F,(Read_MMR(DDRSS_DDRPHY_DX0GCR4) >> 8) & 0x7F);
+     GEL_TextOut("REFSELRANGE for byte 1 = %d\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX1GCR4) >> 15) & 0x1);
+     GEL_TextOut("DX1GCR4 = %x = %d\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX1GCR4) >> 8) & 0x7F,(Read_MMR(DDRSS_DDRPHY_DX1GCR4) >> 8) & 0x7F);
+     GEL_TextOut("REFSELRANGE for byte 2 = %d\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX2GCR4) >> 15) & 0x1);
+     GEL_TextOut("DX2GCR4 = %x = %d\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX2GCR4) >> 8) & 0x7F,(Read_MMR(DDRSS_DDRPHY_DX2GCR4) >> 8) & 0x7F);
+     GEL_TextOut("REFSELRANGE for byte 3 = %d\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX3GCR4) >> 15) & 0x1);
+     GEL_TextOut("DX3GCR4 = %x = %d\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX3GCR4) >> 8) & 0x7F,(Read_MMR(DDRSS_DDRPHY_DX3GCR4) >> 8) & 0x7F);
+     GEL_TextOut("REFSELRANGE for byte 4 = %d\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX4GCR4) >> 15) & 0x1);
+     GEL_TextOut("DX4GCR4 = %x = %d\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX4GCR4) >> 8) & 0xFF,(Read_MMR(DDRSS_DDRPHY_DX4GCR4) >> 8) & 0xFF);
+ 
+	
+    GEL_TextOut("Write Leveling Period Byte0: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0GSR0) & 0xFF80) >> 7);
+    GEL_TextOut("Write Leveling Period Byte1: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX1GSR0) & 0xFF80) >> 7);
+    GEL_TextOut("Write Leveling Period Byte2: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX2GSR0) & 0xFF80) >> 7);
+    GEL_TextOut("Write Leveling Period Byte3: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX3GSR0) & 0xFF80) >> 7);
+    GEL_TextOut("Write Leveling Period Byte4(ECC): %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX4GSR0) & 0xFF80) >> 7);
+
+    GEL_TextOut("Read DQS Gating Period Byte 0: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0GSR0) & 0x3FE0000) >> 17);
+    GEL_TextOut("Read DQS Gating Period Byte 1: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX1GSR0) & 0x3FE0000) >> 17);
+    GEL_TextOut("Read DQS Gating Period Byte 2: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX2GSR0) & 0x3FE0000) >> 17);
+    GEL_TextOut("Read DQS Gating Period Byte 3: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX3GSR0) & 0x3FE0000) >> 17);
+    GEL_TextOut("Read DQS Gating Period Byte 4(ECC): %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX4GSR0) & 0x3FE0000) >> 17);
+
+    if(Read_MMR(DDRSS_DDRPHY_DX0GSR2) & 0x00400000) 
+            GEL_TextOut("Read DQS Gating Status Calibration Completed\n",,,,,);
+    else
+            GEL_TextOut("Read DQS Gating Status Calibration not complete\n",,,,,);
+    GEL_TextOut("Read DQS Gating Status Period Byte 0: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0GSR2) & 0xFF800000) >> 23);
+    GEL_TextOut("Read DQS Gating Status Period Byte 1: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX1GSR2) & 0xFF800000) >> 23);
+    GEL_TextOut("Read DQS Gating Status Period Byte 2: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX2GSR2) & 0xFF800000) >> 23);
+    GEL_TextOut("Read DQS Gating Status Period Byte 3: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX3GSR2) & 0xFF800000) >> 23);
+    GEL_TextOut("Read DQS Gating Status Period Byte 4(ECC): %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX4GSR2) & 0xFF800000) >> 23);
+
+    GEL_TextOut("Master Delay Lines\n");
+    GEL_TextOut("Addr/Ctrl: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_ACMDLR0)));
+    GEL_TextOut("Byte0: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0MDLR0)));
+    GEL_TextOut("Byte1: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX1MDLR0)));
+    GEL_TextOut("Byte2: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX2MDLR0)));
+    GEL_TextOut("Byte3: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX3MDLR0)));
+    GEL_TextOut("Byte4: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX4MDLR0)));
+        
+    Write_MMR(    DDRSS_DDRPHY_RANKIDR ,   0x00000000  );  /* Rank ID Register */  //selects Rank 0    
+   
+    write_data_delay_remainder_byte0 = Read_MMR(DDRSS_DDRPHY_DX0LCDLR1) & 0x3FF;
+    write_data_delay_integer_byte0 = (Read_MMR(DDRSS_DDRPHY_DX0GTR0) & 0x7000000) >> 24;
+    write_data_delay_remainder_byte1 = Read_MMR(DDRSS_DDRPHY_DX1LCDLR1) & 0x3FF;
+    write_data_delay_integer_byte1 = (Read_MMR(DDRSS_DDRPHY_DX1GTR0) & 0x7000000) >> 24;
+    write_data_delay_remainder_byte2 = Read_MMR(DDRSS_DDRPHY_DX2LCDLR1) & 0x3FF;
+    write_data_delay_integer_byte2 = (Read_MMR(DDRSS_DDRPHY_DX2GTR0) & 0x7000000) >> 24;
+    write_data_delay_remainder_byte3 = Read_MMR(DDRSS_DDRPHY_DX3LCDLR1) & 0x3FF;
+    write_data_delay_integer_byte3 = (Read_MMR(DDRSS_DDRPHY_DX3GTR0) & 0x7000000) >> 24;
+    write_data_delay_remainder_byte4 = Read_MMR(DDRSS_DDRPHY_DX4LCDLR1) & 0x3FF;
+    write_data_delay_integer_byte4 = (Read_MMR(DDRSS_DDRPHY_DX4GTR0) & 0x7000000) >> 24;
+    GEL_TextOut("Write Data Delay    DXnGTR0.WDQSL    +   LCDLR1.WDQD\n");
+    GEL_TextOut("Byte 0 %x UI %x\n",,,,,write_data_delay_integer_byte0,write_data_delay_remainder_byte0);
+    GEL_TextOut("Byte 1 %x UI %x\n",,,,,write_data_delay_integer_byte1,write_data_delay_remainder_byte1);
+    GEL_TextOut("Byte 2 %x UI %x\n",,,,,write_data_delay_integer_byte2,write_data_delay_remainder_byte2);
+    GEL_TextOut("Byte 3 %x UI %x\n",,,,,write_data_delay_integer_byte3,write_data_delay_remainder_byte3);
+    GEL_TextOut("Byte 4 %x UI %x\n",,,,,write_data_delay_integer_byte4,write_data_delay_remainder_byte4);
+
+    GEL_TextOut("Result of Write Leveling Algorithm\n");
+    GEL_TextOut("Write leveling Delay     WLSL  +  LCDLR0.WLD\n");
+    GEL_TextOut("Byte0 = %x  %x\n",,,,,((Read_MMR(DDRSS_DDRPHY_DX0GTR0) & 0xF0000) >> 16),(Read_MMR(DDRSS_DDRPHY_DX0LCDLR0) & 0x1FF));
+    GEL_TextOut("Byte1 = %x  %x\n",,,,,((Read_MMR(DDRSS_DDRPHY_DX1GTR0) & 0xF0000) >> 16),(Read_MMR(DDRSS_DDRPHY_DX1LCDLR0) & 0x1FF));
+    GEL_TextOut("Byte2 = %x  %x\n",,,,,((Read_MMR(DDRSS_DDRPHY_DX2GTR0) & 0xF0000) >> 16),(Read_MMR(DDRSS_DDRPHY_DX2LCDLR0) & 0x1FF));
+    GEL_TextOut("Byte3 = %x  %x\n",,,,,((Read_MMR(DDRSS_DDRPHY_DX3GTR0) & 0xF0000) >> 16),(Read_MMR(DDRSS_DDRPHY_DX3LCDLR0) & 0x1FF));
+    GEL_TextOut("Byte4 = %x  %x\n",,,,,((Read_MMR(DDRSS_DDRPHY_DX4GTR0) & 0xF0000) >> 16),(Read_MMR(DDRSS_DDRPHY_DX4LCDLR0) & 0x1FF));
+
+    GEL_TextOut("Result of Read DQS training\n");
+    GEL_TextOut("Read DQS Gate delay     DXnGTR0.DGSL  +  LCDLR2.DQSGD\n");
+    GEL_TextOut("Byte0 = %x  %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX0GTR0) & 0x1F,Read_MMR(DDRSS_DDRPHY_DX0LCDLR2) & 0x1FF);
+    GEL_TextOut("Byte1 = %x  %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX1GTR0) & 0x1F,Read_MMR(DDRSS_DDRPHY_DX1LCDLR2) & 0x1FF);
+    GEL_TextOut("Byte2 = %x  %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX2GTR0) & 0x1F,Read_MMR(DDRSS_DDRPHY_DX2LCDLR2) & 0x1FF);
+    GEL_TextOut("Byte3 = %x  %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX3GTR0) & 0x1F,Read_MMR(DDRSS_DDRPHY_DX3LCDLR2) & 0x1FF);
+    GEL_TextOut("Byte4 = %x  %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DX4GTR0) & 0x1F,Read_MMR(DDRSS_DDRPHY_DX4LCDLR2) & 0x1FF);
+
+    GEL_TextOut("Bit Delays\n");
+    GEL_TextOut("Write Delay, Byte0 DQ0: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR0) >> 0) & 0x3F);
+    GEL_TextOut("Write Delay, Byte0 DQ1: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR0) >> 8) & 0x3F);
+    GEL_TextOut("Write Delay, Byte0 DQ2: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR0) >> 16) & 0x3F);
+    GEL_TextOut("Write Delay, Byte0 DQ3: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR0) >> 24) & 0x3F);
+    GEL_TextOut("Write Delay, Byte0 DQ4: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR1) >> 0) & 0x3F);
+    GEL_TextOut("Write Delay, Byte0 DQ5: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR1) >> 8) & 0x3F);
+    GEL_TextOut("Write Delay, Byte0 DQ6: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR1) >> 16) & 0x3F);
+    GEL_TextOut("Write Delay, Byte0 DQ7: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR1) >> 24) & 0x3F);
+    GEL_TextOut("Write Delay, Byte0  DM: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR2) >> 0) & 0x3F);
+    GEL_TextOut("Write Delay, Byte0 DQS: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR2) >> 8) & 0x3F);
+    GEL_TextOut("Write Delay, Byte0  OE: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR2) >> 16) & 0x3F);
+    GEL_TextOut("Write Delay, Byte0 DQSN: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR2) >> 24) & 0x3F);
+    GEL_TextOut("Read Delay, Byte0 DQ0: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR3) >> 0) & 0x3F);
+    GEL_TextOut("Read Delay, Byte0 DQ1: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR3) >> 8) & 0x3F);
+    GEL_TextOut("Read Delay, Byte0 DQ2: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR3) >> 16) & 0x3F);
+    GEL_TextOut("Read Delay, Byte0 DQ3: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR3) >> 24) & 0x3F);
+    GEL_TextOut("Read Delay, Byte0 DQ4: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR4) >> 0) & 0x3F);
+    GEL_TextOut("Read Delay, Byte0 DQ5: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR4) >> 8) & 0x3F);
+    GEL_TextOut("Read Delay, Byte0 DQ6: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR4) >> 16) & 0x3F);
+    GEL_TextOut("Read Delay, Byte0 DQ7: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR4) >> 24) & 0x3F);
+    GEL_TextOut("Read Delay, Byte0  DM: %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DX0BDLR5) >> 0) & 0x3F);
+
+
+}
+
+hotmenu EyeMargin_Status()
+{ 
+	GEL_TextOut("Result of data training...\n");
+	Write_MMR(DDRSS_DDRPHY_DTCR0,(((Read_MMR(DDRSS_DDRPHY_DTCR0) & ~0xF0000)) | 0x00000)); //read results for byte 0
+    GEL_TextOut("DTEDR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR0));
+    GEL_TextOut("DTEDR1 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR1));
+    GEL_TextOut("DTEDR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR2));
+	GEL_TextOut("Byte 0 WDQ LCDL Min = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR0) & 0x1FF);
+	GEL_TextOut("Byte 0 WDQ LCDL Max = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DTEDR0) & 0x3FE00) >> 9);
+	GEL_TextOut("Byte 0 RDQS LCDL Min = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR1) & 0x1FF);
+	GEL_TextOut("Byte 0 RDQS LCDL Max = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DTEDR1) & 0x3FE00) >> 9);
+	GEL_TextOut("Byte 0 RDQSN LCDL Min = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR2) & 0x1FF);
+	GEL_TextOut("Byte 0 RDQSN LCDL Max = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DTEDR2) & 0x3FE00) >> 9);
+	
+	
+	Write_MMR(DDRSS_DDRPHY_DTCR0,(((Read_MMR(DDRSS_DDRPHY_DTCR0) & ~0xF0000)) | 0x10000)); //read results for byte 1
+    GEL_TextOut("DTEDR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR0));
+    GEL_TextOut("DTEDR1 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR1));
+    GEL_TextOut("DTEDR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR2));
+	GEL_TextOut("Byte 1 WDQ LCDL Min = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR0) & 0x1FF);
+	GEL_TextOut("Byte 1 WDQ LCDL Max = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DTEDR0) & 0x3FE00) >> 9);
+	GEL_TextOut("Byte 1 RDQS LCDL Min = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR1) & 0x1FF);
+	GEL_TextOut("Byte 1 RDQS LCDL Max = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DTEDR1) & 0x3FE00) >> 9);
+	GEL_TextOut("Byte 1 RDQSN LCDL Min = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR2) & 0x1FF);
+	GEL_TextOut("Byte 1 RDQSN LCDL Max = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DTEDR2) & 0x3FE00) >> 9);
+	
+	Write_MMR(DDRSS_DDRPHY_DTCR0,(((Read_MMR(DDRSS_DDRPHY_DTCR0) & ~0xF0000)) | 0x20000)); //read results for byte 2
+    GEL_TextOut("DTEDR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR0));
+    GEL_TextOut("DTEDR1 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR1));
+    GEL_TextOut("DTEDR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR2));
+	GEL_TextOut("Byte 2 WDQ LCDL Min = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR0) & 0x1FF);
+	GEL_TextOut("Byte 2 WDQ LCDL Max = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DTEDR0) & 0x3FE00) >> 9);
+	GEL_TextOut("Byte 2 RDQS LCDL Min = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR1) & 0x1FF);
+	GEL_TextOut("Byte 2 RDQS LCDL Max = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DTEDR1) & 0x3FE00) >> 9);
+	GEL_TextOut("Byte 2 RDQSN LCDL Min = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR2) & 0x1FF);
+	GEL_TextOut("Byte 2 RDQSN LCDL Max = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DTEDR2) & 0x3FE00) >> 9);
+		
+	Write_MMR(DDRSS_DDRPHY_DTCR0,(((Read_MMR(DDRSS_DDRPHY_DTCR0) & ~0xF0000)) | 0x30000)); //read results for byte 3
+    GEL_TextOut("DTEDR0 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR0));
+    GEL_TextOut("DTEDR1 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR1));
+    GEL_TextOut("DTEDR2 = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR2));
+	GEL_TextOut("Byte 3 WDQ LCDL Min = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR0) & 0x1FF);
+	GEL_TextOut("Byte 3 WDQ LCDL Max = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DTEDR0) & 0x3FE00) >> 9);
+	GEL_TextOut("Byte 3 RDQS LCDL Min = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR1) & 0x1FF);
+	GEL_TextOut("Byte 3 RDQS LCDL Max = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DTEDR1) & 0x3FE00) >> 9);
+	GEL_TextOut("Byte 3 RDQSN LCDL Min = %x\n",,,,,Read_MMR(DDRSS_DDRPHY_DTEDR2) & 0x1FF);
+	GEL_TextOut("Byte 3 RDQSN LCDL Max = %x\n",,,,,(Read_MMR(DDRSS_DDRPHY_DTEDR2) & 0x3FE00) >> 9);
+	
+	}
+		
+        
+
+hotmenu Data_WrRd_test()
+{
+    unsigned int i,SIZE,j;
+    unsigned int read_data;
+    unsigned int i,j,err_cnt32,rd_data32;
+    unsigned int * rd32_ptr;
+    unsigned int * wr32_ptr;
+    unsigned int temp_loop,temp_data;
+	
+	SIZE = 0x1000;
+	
+	*(unsigned int *)0x80000000 =0xACED1234;
+
+    err_cnt32=0;
+
+	GEL_TextOut("Starting WrRd Test 1: \*wr32_ptr=i \n");
+
+    wr32_ptr=(unsigned int *)0x80000000; //make sure no conflict with code location
+    for(i=0;i<SIZE/4;i++)
+    {
+        //MM *wr32_ptr=i;
+		j = (i&0xFF);
+		*wr32_ptr= (j | (j<<8) | (j<<16) | (j<<24));
+		
+        wr32_ptr++;
+    }
+
+    rd32_ptr=(unsigned int *)0x80000000; //make sure no conflict with code location
+    for(i=0;i<SIZE/4;i++)
+    {
+		j = (i&0xFF);
+        rd_data32=*rd32_ptr;
+		//MM if(rd_data32!=i)
+        if(rd_data32!=(j | (j<<8) | (j<<16) | (j<<24)))
+        {
+            err_cnt32++;
+            GEL_TextOut("Data verification failed at %x Expected = %x Actual= %x\n","",,,,(rd32_ptr),(j | (j<<8) | (j<<16) | (j<<24)),rd_data32);
+			//GEL_TextOut("DXnLCDLR%d: %x  %x  %x  %x\n","",,,,index,Read_MMR(regaddr),Read_MMR(regaddr+0x100),Read_MMR(regaddr+0x200),Read_MMR(regaddr+0x300));    
+
+        }
+        rd32_ptr++;
+    }
+	
+	GEL_TextOut("Starting WrRd Test 2: \*wr32_ptr=\~i \n");
+
+	
+    wr32_ptr=(unsigned int *)0x80000000; //make sure no conflict with code location
+    for(i=0;i<SIZE/4;i++)
+    {
+		j = (~i&0xFF);
+        //MM *wr32_ptr=~i;
+		*wr32_ptr= (j | (j<<8) | (j<<16) | (j<<24));
+
+        wr32_ptr++;
+    }
+    rd32_ptr=(unsigned int *)0x80000000; //make sure no conflict with code location
+    for(i=0;i<SIZE/4;i++)
+    {
+		j = (~i&0xFF);
+		
+        rd_data32=*rd32_ptr;
+        //MM if(rd_data32!=~i)
+        if(rd_data32 != (j | (j<<8) | (j<<16) | (j<<24)))
+        {
+            err_cnt32++;
+            //GEL_TextOut(" Data verification failed at %x Expected = %x Actual= %x\n",(rd32_ptr),i,rd_data32);
+			 GEL_TextOut("Data verification failed at %x Expected = %x Actual= %x\n","",,,,(rd32_ptr),(j | (j<<8) | (j<<16) | (j<<24)),rd_data32);
+        }
+        rd32_ptr++;
+    }
+    if(err_cnt32==0)
+    {
+        GEL_TextOut("\nDDR Basic read/write test Passed! \n");
+    }
+    else
+    {
+        GEL_TextOut("\n!!!!! DDR Basic read/write test Failed !!!!\n");
+
+    }
+
+}
+
+pow(unsigned int x,unsigned int y)
+{
+	unsigned int result = 1;
+	unsigned int exponent = y;
+	unsigned int base = x;
+	while (exponent != 0)
+	{
+        result *= base;
+        --exponent;
+    }
+	return(result);
+}
+
+
+ 
+//should only be run from A53 
+hotmenu AddrMapCheck()
+{
+	unsigned int DDR_32B_ADDR_EN;
+	unsigned long DDR_START_ADDR = 0x800000000;
+	unsigned long *i;
+	unsigned long offset;
+	unsigned int status;
+	unsigned long start_offset,end_offset;
+	unsigned long index;
+	unsigned int count;
+	
+	GEL_TextOut("Running Address Map Check...\n");
+	
+	DDR_32B_ADDR_EN = Read_MMR(0x40F04030);  //save off bit
+	
+	//create contiguous address map for DDR
+	CTRL_Unlock(0x40F04030);
+	Write_MMR(0x40F04030,(Read_MMR(0x40F04030) & ~0x1)); 
+		
+	 
+	i = (unsigned long *)DDR_START_ADDR;
+	start_offset = 4;
+	end_offset = 8;
+	offset = start_offset;
+	do
+	{
+		offset = start_offset;
+		do{
+			i = DDR_START_ADDR + offset;
+			*i = (unsigned long)i;
+			//GEL_TextOut("*%x = %x\n",,,,,i,*i);
+			offset = offset<<1;
+		}
+		while (offset < end_offset);
+		
+		//verify
+		offset = start_offset;
+		do{
+			i = DDR_START_ADDR + offset;
+			//GEL_TextOut("Verify *%x = %x\n",,,,,i,*i);
+			if(*i != i)
+			{
+				//GEL_TextOut("Fail\n",,,,,);
+				status = 0;
+			}
+			else
+			{
+				//GEL_TextOut("Pass\n",,,,,);
+				status = 1;
+			}
+			offset = offset<<1;
+		}
+		while ((offset < end_offset) && (status == 1));
+
+		end_offset = end_offset<<1;
+
+	}
+	while(status==1);
+	
+	end_offset = end_offset>>1;
+	count=0;
+	index = 1;
+	while(index < end_offset)
+	{
+		//GEL_TextOut("index = %x, count=%d\n",,,,,index,count);
+		index = index<<1;
+	    count++;
+	}
+	
+	count = count - 1; 
+	
+	if(count>39) 
+	{
+		GEL_TextOut("Total DDR capacity detected = %dTBytes\n",,,,,pow(2,count-40));
+	}
+	else if (count>29)
+	{
+		GEL_TextOut("Total DDR capacity detected = %dGBytes\n",,,,,pow(2,count-30));
+	}
+	else if (count>19)
+	{	
+		GEL_TextOut("Total DDR capacity detected = %dMBytes\n",,,,,pow(2,count-20));
+	}
+	else if (count>9)
+	{
+		GEL_TextOut("Total DDR capacity detected = %dKBytes\n",,,,,pow(2,count-10));
+	}
+	else
+		GEL_TextOut("Total DDR capacity detected = %dBytes\n",,,,,pow(2,count));
+	
+	CTRL_Unlock(0x40F04030);
+	Write_MMR(0x40F04030,DDR_32B_ADDR_EN); 
+	CTRL_Relock(0x40F04030);
+}
+
+hotmenu ECC_RegDump_Decode()
+{
+	unsigned int temp;
+	
+	GEL_TextOut("\n");
+	GEL_TextOut("DDR ECC RegDump & Decode...\n");
+		
+	temp = Read_MMR(DDRSS_DDRCTL_ECCCFG0);
+	GEL_TextOut("DDRSS_DDRCTL_ECCCFG0 = %x\n",,,,,(temp));
+	GEL_TextOut(" - uncorrected_err_threshold =  %d \n",,,,,(temp & 0x0F000000)>>24);
+	GEL_TextOut(" - eccap_en =  %d \n",,,,,(temp&(1<<6))>>6);
+	GEL_TextOut(" - inline_ecc_en = %d \n",,,,,(temp&(1<<5))>>5);
+	GEL_TextOut(" - dis_scrub = %d \n",,,,,(temp&(1<<4))>>4);
+	GEL_TextOut(" - test_mode = %d \n",,,,,(temp&(1<<3))>>3);
+	GEL_TextOut(" - ecc_mode =  %d (4 = ECC enabled - SEC/DED over 1 beat)\n",,,,,(temp&0x7));
+		
+	temp = Read_MMR(DDRSS_DDRCTL_ECCCFG1);
+	GEL_TextOut("DDRSS_DDRCTL_ECCCFG1 = %x\n",,,,,(temp));
+	GEL_TextOut(" - poison_chip_en =  %d \n",,,,,(temp&(1<<2))>>2);
+	GEL_TextOut(" - data_poison_bit = %d (0 -> 2-bit (uncorrectable), 1 -> 1-bit (correctable)\n",,,,,(temp&(1<<1))>>1);
+	GEL_TextOut(" - data_poison_en =  %d \n",,,,,(temp&0x1));
+	
+	temp = Read_MMR(DDRSS_DDRCTL_ECCSTAT);
+	GEL_TextOut("DDRSS_DDRCTL_ECCSTAT = %x\n",,,,,(temp));
+	GEL_TextOut(" - ecc_uncorrected_err =   %d\n",,,,,(temp>>16));
+	GEL_TextOut(" - ecc_corrected_err =     %d\n",,,,,(temp&0x0000FFFF)>>8);
+	GEL_TextOut(" - ecc_corrected_bit_num = %d\n",,,,,(temp&0x0000007F));
+	
+	GEL_TextOut("DDRSS_DDRCTL_ECCCLR = %x\n",,,,,(Read_MMR(DDRSS_DDRCTL_ECCCLR)));
+	
+	temp = Read_MMR(DDRSS_DDRCTL_ECCERRCNT);
+	GEL_TextOut("DDRSS_DDRCTL_ECCERRCNT = %x\n",,,,,(temp));
+	GEL_TextOut(" - ecc_uncorr_err_cnt = %d\n",,,,,(temp>>16));
+	GEL_TextOut(" - ecc_corr_err_cnt =   %d\n",,,,,(temp&0x0000FFFF));
+
+	
+	temp = Read_MMR(DDRSS_DDRCTL_ECCCADDR0);
+	GEL_TextOut("DDRSS_DDRCTL_ECCCADDR0 (Corrected) = %x\n",,,,,(temp));
+	GEL_TextOut(" - ecc_corr_rank = %x\n",,,,,(temp>>24));
+	GEL_TextOut(" - ecc_corr_row =  %x\n",,,,,(temp&0x00FFFFFF));
+	
+	temp = Read_MMR(DDRSS_DDRCTL_ECCCADDR1);
+	GEL_TextOut("DDRSS_DDRCTL_ECCCADDR1 (Corrected) = %x\n",,,,,(temp));
+	GEL_TextOut(" - ecc_corr_cid =  %x\n",,,,,(temp>>28));
+	GEL_TextOut(" - ecc_corr_bg =   %x\n",,,,,(temp&0x0F000000)>>24);
+	GEL_TextOut(" - ecc_corr_bank = %x\n",,,,,(temp&0x00FF0000)>>16);
+	GEL_TextOut(" - ecc_corr_col =  %x\n",,,,,(temp&0x00000FFF));
+	
+	GEL_TextOut("DDRSS_DDRCTL_ECCCSYN0 (Corrected) = %x\n",,,,,(Read_MMR(DDRSS_DDRCTL_ECCCSYN0)));
+	GEL_TextOut("DDRSS_DDRCTL_ECCCSYN2 (Corrected) = %x\n",,,,,(Read_MMR(DDRSS_DDRCTL_ECCCSYN2)));
+	GEL_TextOut("DDRSS_DDRCTL_ECCBITMASK0 = %x\n",,,,,(Read_MMR(DDRSS_DDRCTL_ECCBITMASK0)));
+	GEL_TextOut("DDRSS_DDRCTL_ECCBITMASK2 = %x\n",,,,,(Read_MMR(DDRSS_DDRCTL_ECCBITMASK2)));
+	
+	temp = Read_MMR(DDRSS_DDRCTL_ECCUADDR0);
+	GEL_TextOut("DDRSS_DDRCTL_ECCUADDR0 (Uncorrected) = %x\n",,,,,(temp));
+	GEL_TextOut(" - ecc_uncorr_rank = %x\n",,,,,(temp>>24));
+	GEL_TextOut(" - ecc_uncorr_row =  %x\n",,,,,(temp&0x0003FFFF));		
+	
+	temp = Read_MMR(DDRSS_DDRCTL_ECCUADDR1);
+	GEL_TextOut("DDRSS_DDRCTL_ECCUADDR1 (Uncorrected) = %x\n",,,,,(temp));
+	GEL_TextOut(" - ecc_uncorr_cid =  %x\n",,,,,(temp>>28));
+	GEL_TextOut(" - ecc_uncorr_bg =   %x\n",,,,,(temp&0x0F000000)>>24);
+	GEL_TextOut(" - ecc_uncorr_bank = %x\n",,,,,(temp&0x00FF0000)>>16);
+	GEL_TextOut(" - ecc_uncorr_col =  %x\n",,,,,(temp&0x00000FFF));
+
+	GEL_TextOut("DDRSS_DDRCTL_ECCUSYN0 (Uncorrected) = %x\n",,,,,(Read_MMR(DDRSS_DDRCTL_ECCUSYN0)));
+	GEL_TextOut("DDRSS_DDRCTL_ECCUSYN2 (Uncorrected) = %x\n",,,,,(Read_MMR(DDRSS_DDRCTL_ECCUSYN2)));
+
+    temp = Read_MMR(DDRSS_DDRCTL_ECCPOISONADDR0);
+    GEL_TextOut("DDRSS_DDRCTL_ECCPOISONADDR0 = %x\n",,,,,(temp));
+    GEL_TextOut(" - ecc_poison_rank = %x\n",,,,,(temp>>24));
+    GEL_TextOut(" - ecc_poison_cid =  %x\n",,,,,(temp&0x00FF0000)>>16);
+    GEL_TextOut(" - ecc_poison_col =  %x\n",,,,,(temp&0x00000FFF));
+
+	temp = Read_MMR(DDRSS_DDRCTL_ECCPOISONADDR1);
+	GEL_TextOut("DDRSS_DDRCTL_ECCPOISONADDR1 = %x\n",,,,,(temp));
+	GEL_TextOut(" - ecc_poison_bg =   %x\n",,,,,(temp&0x30000000)>>28);
+	GEL_TextOut(" - ecc_poison_bank = %x\n",,,,,(temp&0x07000000)>>24);
+	GEL_TextOut(" - ecc_poison_row =  %x\n",,,,,(temp&0x00FFFFFF));
+
+	GEL_TextOut("DDRSS_DDRCTL_ADVECCINDEX = %x\n",,,,,(Read_MMR(DDRSS_DDRCTL_ADVECCINDEX)));
+	GEL_TextOut("DDRSS_DDRCTL_ECCPOISONPAT0 = %x\n",,,,,(Read_MMR(DDRSS_DDRCTL_ECCPOISONPAT0)));
+	GEL_TextOut("DDRSS_DDRCTL_ECCPOISONPAT2 = %x\n",,,,,(Read_MMR(DDRSS_DDRCTL_ECCPOISONPAT2)));
+}
+
+
+   
+GetDDRPLLStatus()
+{
+  unsigned int M_INT_MULT_val;
+  unsigned int N_DIV_val;
+  unsigned int M2_DIV_val;
+  float CLKIN_val;
+  float dcoclkldo;
+  float clkout;
+  
+  CLKIN_val = Get_CLKIN();    //get input clock
+
+  M_INT_MULT_val = ((Read_MMR(0x00683020)) >> 8) & 0xFFF;
+  N_DIV_val = (Read_MMR(0x00683020)) & 0xFF;
+  M2_DIV_val = ((Read_MMR(0x00683028)) >> 8) & 0x7F;
+  
+  dcoclkldo = ((float) CLKIN_val*(M_INT_MULT_val))/(N_DIV_val+1);
+  clkout = dcoclkldo/M2_DIV_val;
+  
+  return((unsigned int)(clkout*2));  //return DDR frequency
+
+}  
+
+

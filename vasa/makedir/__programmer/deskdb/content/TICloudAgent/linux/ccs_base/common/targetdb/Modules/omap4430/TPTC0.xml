@@ -1,0 +1,222 @@
+<module name="TPTC0" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="TPTC_TCSTAT" acronym="TPTC_TCSTAT" offset="0x100" width="32" description="TC Status Register">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="DFSTRTPTR" width="2" begin="13" end="12" resetval="0x0" description="Dst FIFO Start Pointer Represents the offset to the head entry of Dst Register FIFO, in units of *entries*.Legal values = 0x0 to 0x3" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="3" begin="11" end="9" resetval="0x0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="ACTV" width="1" begin="8" end="8" resetval="1" description="Channel Active Channel Active is a logical-OR of each of the *BUSY/ACTV signals. The ACTV bit must remain high through the life of a TR.0 : Channel is idle.1 : Channel is busy." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="DSTACTV" width="3" begin="6" end="4" resetval="0x0" description="Destination Active State Specifies the number of TRs that are resident in the Dst Register FIFO at a given instant. Legal values are constrained by the DSTREGDEPTH parameter." range="" rwaccess="R">
+      <bitenum value="0" token="DSTACTV_0_r" description="FIFO set is empty."/>
+      <bitenum value="1" token="DSTACTV_1_r" description="Dst FIFO contains 1 TR"/>
+      <bitenum value="2" token="DSTACTV_2_r" description="Dst FIFO contains 2 TR"/>
+      <bitenum value="3" token="DSTACTV_3_r" description="Dst FIFO contains 3 TR"/>
+      <bitenum value="4" token="DSTACTV_4_r" description="Dst FIFO contains 4 TR"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="WSACTV" width="1" begin="2" end="2" resetval="0" description="Write Status Active0 : Write status is not pending. Write status has been received for all previously issued write commands.1 : Write Status is pending. Write status has not been received for all previously issued write commands." range="" rwaccess="R"/>
+    <bitfield id="SRCACTV" width="1" begin="1" end="1" resetval="0" description="Source Active State0 : Source Active set is idle. Any TR written to Prog Set will immediately transition to Source Active set as long as the Dst FIFO Set is not full (DSTFULL == 1).1 : Source Active set is busy either performing read transfers or waiting to perform read transfers for current Transfer Request." range="" rwaccess="R"/>
+    <bitfield id="PROGBUSY" width="1" begin="0" end="0" resetval="0" description="Program Register Set Busy0 : Prog set idle and is available for programming.1 : Prog set busy.User should poll for PROGBUSY equal to 0 prior to re-programming the Program Register set." range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_INTSTAT" acronym="TPTC_INTSTAT" offset="0x104" width="32" description="Interrupt Status Register">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="TRDONE" width="1" begin="1" end="1" resetval="0" description="TR Done Event Status:0 : Condition not detected.1 : Set when TC has completed a Transfer Request.TRDONE should be set when the write status is returned for the final write of a TR.Cleared when write 1" range="" rwaccess="R"/>
+    <bitfield id="PROGEMPTY" width="1" begin="0" end="0" resetval="0" description="Program Set Empty Event Status:PROGEMPTY = 0 : Condition not detected.PROGEMPTY = 1 : Set when Program Register set transitions to empty state.Cleared when write 1" range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_INTEN" acronym="TPTC_INTEN" offset="0x108" width="32" description="Interrupt Enable Register">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="write 0's for future compatibility reads return 0's" range="" rwaccess="RW"/>
+    <bitfield id="TRDONE" width="1" begin="1" end="1" resetval="0" description="TR Done Event Enable:0 : disabled.1 : enabled, and contributes to interrupt generation" range="" rwaccess="RW"/>
+    <bitfield id="PROGEMPTY" width="1" begin="0" end="0" resetval="0" description="Program Set Empty Event Enable:0 : PROGEMPTY Event is disabled.1 : PROGEMPTY Event is enabled, and contributes to interrupt generation" range="" rwaccess="RW"/>
+  </register>
+  <register id="TPTC_INTCLR" acronym="TPTC_INTCLR" offset="0x10C" width="32" description="Interrupt Clear Register">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="write 0's for future compatibility" range="" rwaccess="W"/>
+    <bitfield id="TRDONE" width="1" begin="1" end="1" resetval="0" description="TR Done Event Clear:0 : no effect.1 : clears TRDONE bit" range="" rwaccess="W"/>
+    <bitfield id="PROGEMPTY" width="1" begin="0" end="0" resetval="0" description="Program Set Empty Event Clear:0 : no effect.1 : clears PROGEMPTY bit" range="" rwaccess="W"/>
+  </register>
+  <register id="TPTC_INTCMD" acronym="TPTC_INTCMD" offset="0x110" width="32" description="Interrupt Command Register">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="write 0's for future compatibility" range="" rwaccess="W"/>
+    <bitfield id="SET" width="1" begin="1" end="1" resetval="0" description="Set TPTC interrupt:Write 1: causes TPTC interrupt to be pulsed unconditionally.Write 0: no affect." range="" rwaccess="W"/>
+    <bitfield id="EVAL" width="1" begin="0" end="0" resetval="0" description="Evaluate state of TPTC interruptWrite 1 causes TPTC interrupt to be pulsed if any of the TPTC_INTSTAT bits are set to 1.Write 0: no affect." range="" rwaccess="W"/>
+  </register>
+  <register id="TPTC_ERRSTAT" acronym="TPTC_ERRSTAT" offset="0x120" width="32" description="Error Status Register">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0000000" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="MMRAERR" width="1" begin="3" end="3" resetval="0" description="MMR Address Error:0 : Condition not detected.1 : User attempted to read or write to invalid address configuration memory map.No additional error information is recorded." range="" rwaccess="R"/>
+    <bitfield id="TRERR" width="1" begin="2" end="2" resetval="0" description="TR Error:TR detected that violates FIFO Mode transfer (SAM or DAM is 1) alignment rules or has ACNT or BCNT == 0. No additional error information is recorded." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="1" end="1" resetval="0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="BUSERR" width="1" begin="0" end="0" resetval="0" description="Bus Error Event:0: Condition not detected.1: TC has detected an error code on the write response bus or read response bus.Error information is stored in Error Details Register (TPTC_ERRDET)." range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_ERREN" acronym="TPTC_ERREN" offset="0x124" width="32" description="Error Enable Register">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0000000" description="write 0's for future compatibility reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="MMRAERR" width="1" begin="3" end="3" resetval="0" description="Interrupt enable MMRAERR:0: disabled.1: enabled, and contributes to the TPTC error interrupt generation." range="" rwaccess="RW"/>
+    <bitfield id="TRERR" width="1" begin="2" end="2" resetval="0" description="Interrupt enable for TRERR:0: disabled.1: enabled, and contributes to the TPTC error interrupt generation." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="1" end="1" resetval="0" description="write 0's for future compatibility reads return 0's" range="" rwaccess="RW"/>
+    <bitfield id="BUSERR" width="1" begin="0" end="0" resetval="0" description="Interrupt enable for BUSERR:0: disabled.1: enabled, and contributes to the TPTC error interrupt generation." range="" rwaccess="RW"/>
+  </register>
+  <register id="TPTC_ERRCLR" acronym="TPTC_ERRCLR" offset="0x128" width="32" description="Error Clear Register">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0000000" description="write 0's for future compatibility" range="" rwaccess="W"/>
+    <bitfield id="MMRAERR" width="1" begin="3" end="3" resetval="0" description="Interrupt clear for MMRAERR:Write 0 : no effect.Write 1: clears MMRAERR bit. This does not clear the TPTC_ERRDET register." range="" rwaccess="W"/>
+    <bitfield id="TRERR" width="1" begin="2" end="2" resetval="0" description="Interrupt clear for TRERR:Writes 0: no effect.Write of 1: clears TRERR bit. This does not clear the ERRDET register." range="" rwaccess="W"/>
+    <bitfield id="RESERVED" width="1" begin="1" end="1" resetval="0" description="write 0's for future compatibility" range="" rwaccess="W"/>
+    <bitfield id="BUSERR" width="1" begin="0" end="0" resetval="0" description="Interrupt clear for BUSERR:Writes 0: no effect.Write 1: clears BUSERR bit. This does not clear the ERRDET register." range="" rwaccess="W"/>
+  </register>
+  <register id="TPTC_ERRDET" acronym="TPTC_ERRDET" offset="0x12C" width="32" description="Error Details Register">
+    <bitfield id="RESERVED" width="14" begin="31" end="18" resetval="0x0000" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="TCCHEN" width="1" begin="17" end="17" resetval="0" description="Contains the OPT.TCCHEN value programmed by the user for the Read or Write transaction that resulted in an error." range="" rwaccess="R"/>
+    <bitfield id="TCINTEN" width="1" begin="16" end="16" resetval="0" description="Contains the OPT.TCINTEN value programmed by the user for the Read or Write transaction that resulted in an error." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="2" begin="15" end="14" resetval="0x0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="TCC" width="6" begin="13" end="8" resetval="0x00" description="Transfer Complete Code:Contains the OPT.TCC value programmed by the user for the Read or Write transaction that resulted in an error." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="STAT" width="4" begin="3" end="0" resetval="0x0" description="Transaction Status:Stores the non-zero status/error code that was detected on the read status or write status bus. MS-bit effectively serves as the read vs. write error code. If read status and write status are returned on the same cycle, then the TC chooses non-zero version. If both are non-zero then write status is treated as higher priority." range="" rwaccess="R">
+      <bitenum value="0" token="STAT_0_r" description="No Error (should not cause error to be latched)"/>
+      <bitenum value="1" token="STAT_1_r" description="Read Addressing error"/>
+      <bitenum value="2" token="STAT_2_r" description="Read Privilege error"/>
+      <bitenum value="3" token="STAT_3_r" description="Read Timeout error"/>
+      <bitenum value="4" token="STAT_4_r" description="Read Data error"/>
+      <bitenum value="7" token="STAT_7_r" description="Read Exclusive-operation failure"/>
+      <bitenum value="8" token="STAT_8_r" description="No Error (should not cause error to be latched)"/>
+      <bitenum value="9" token="STAT_9_r" description="Write Addressing error"/>
+      <bitenum value="10" token="STAT_10_r" description="Write Privilege error"/>
+      <bitenum value="11" token="STAT_11_r" description="Write Timeout error"/>
+      <bitenum value="12" token="STAT_12_r" description="Write Data error"/>
+      <bitenum value="15" token="STAT_15_r" description="Write Exclusive-operation failure"/>
+    </bitfield>
+  </register>
+  <register id="TPTC_ERRCMD" acronym="TPTC_ERRCMD" offset="0x130" width="32" description="Error Command Register">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="write 0's for future compatibility" range="" rwaccess="W"/>
+    <bitfield id="SET" width="1" begin="1" end="1" resetval="0" description="Set TPTC error interrupt:Write 1: cause TPTC error interrupt to be pulsed unconditionally.Write 0: no affect." range="" rwaccess="W"/>
+    <bitfield id="EVAL" width="1" begin="0" end="0" resetval="0" description="Evaluate state of TPTC error interruptWrite 1: cause TPTC error interrupt to be pulsed if any of the TPTC_ERRSTAT bits are set to 1.Write 0: no affect." range="" rwaccess="W"/>
+  </register>
+  <register id="TPTC_RDRATE" acronym="TPTC_RDRATE" offset="0x140" width="32" description="Read Rate Register">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0000 0000" description="write 0's for future compatibility reads return 0's" range="" rwaccess="RW"/>
+    <bitfield id="RDRATE" width="3" begin="2" end="0" resetval="0x0" description="Read Rate Control:Controls the number of cycles between read commands. This is a global setting that applies to all TRs for this TC." range="" rwaccess="RW">
+      <bitenum value="0" token="RDRATE_0" description="Reads issued as fast as possible."/>
+      <bitenum value="1" token="RDRATE_1" description="4 cycles between reads"/>
+      <bitenum value="2" token="RDRATE_2" description="8 cycles between reads"/>
+      <bitenum value="3" token="RDRATE_3" description="16 cycles between reads"/>
+      <bitenum value="4" token="RDRATE_4" description="32 cycles between reads"/>
+    </bitfield>
+  </register>
+  <register id="TPTC_POPT" acronym="TPTC_POPT" offset="0x200" width="32" description="Prog Set Options">
+    <bitfield id="RESERVED" width="9" begin="31" end="23" resetval="0x000" description="write 0's for future compatibility reads return 0's" range="" rwaccess="RW"/>
+    <bitfield id="TCCHEN" width="1" begin="22" end="22" resetval="0" description="Transfer complete chaining enable:0: disabled.1: enabled." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="21" end="21" resetval="0" description="write 0's for future compatibility reads return 0's" range="" rwaccess="RW"/>
+    <bitfield id="TCINTEN" width="1" begin="20" end="20" resetval="0" description="Transfer complete interrupt enable:0: disabled.1: enabled." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="19" end="18" resetval="0x0" description="write 0's for future compatibility reads return 0's" range="" rwaccess="RW"/>
+    <bitfield id="TCC" width="6" begin="17" end="12" resetval="0x00" description="Transfer Complete Code:The 6-bit code is used to set the relevant bit in CER or IPR of the TPCC module." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0" description="write 0's for future compatibility reads return 0's" range="" rwaccess="RW"/>
+    <bitfield id="FWID" width="3" begin="10" end="8" resetval="0x0" description="FIFO width control:Applies if either SAM or DAM is set to FIFO mode." range="" rwaccess="RW">
+      <bitenum value="0" token="FWID_0" description="FIFO width is 8-bit"/>
+      <bitenum value="1" token="FWID_1" description="FIFO width is 16-bit"/>
+      <bitenum value="2" token="FWID_2" description="FIFO width is 32-bit"/>
+      <bitenum value="3" token="FWID_3" description="FIFO width is 64-bit"/>
+      <bitenum value="4" token="FWID_4" description="FIFO width is 128-bit"/>
+      <bitenum value="5" token="FWID_5" description="FIFO width is 256-bit"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="write 0's for future compatibility reads return 0's" range="" rwaccess="RW"/>
+    <bitfield id="PRI" width="3" begin="6" end="4" resetval="0x0" description="Transfer Priority:" range="" rwaccess="RW">
+      <bitenum value="0" token="PRI_0" description="Priority 0 - Highest priority"/>
+      <bitenum value="1" token="PRI_1" description="Priority 1"/>
+      <bitenum value="2" token="PRI_2" description="Priority 2"/>
+      <bitenum value="3" token="PRI_3" description="Priority 3"/>
+      <bitenum value="4" token="PRI_4" description="Priority 4"/>
+      <bitenum value="5" token="PRI_5" description="Priority 5"/>
+      <bitenum value="6" token="PRI_6" description="Priority 6"/>
+      <bitenum value="7" token="PRI_7" description="Priority 7 - Lowest Priority"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="3" end="2" resetval="0x0" description="write 0's for future compatibility reads return 0's" range="" rwaccess="RW"/>
+    <bitfield id="DAM" width="1" begin="1" end="1" resetval="0" description="Destination Address Mode within an array:0: INCR, Dst addressing within an array increments.1: FIFO, Dst addressing within an array wraps around upon reaching FIFO width." range="" rwaccess="RW"/>
+    <bitfield id="SAM" width="1" begin="0" end="0" resetval="0" description="Source Address Mode within an array:0: INCR, Src addressing within an array increments.1: FIFO, Src addressing within an array wraps around upon reaching FIFO width." range="" rwaccess="RW"/>
+  </register>
+  <register id="TPTC_PSRC" acronym="TPTC_PSRC" offset="0x204" width="32" description="Prog Set Src Address">
+    <bitfield id="SADDR" width="32" begin="31" end="0" resetval="0x0000 0000" description="Source address for Program Register Set" range="" rwaccess="RW"/>
+  </register>
+  <register id="TPTC_PCNT" acronym="TPTC_PCNT" offset="0x208" width="32" description="Prog Set Count">
+    <bitfield id="BCNT" width="16" begin="31" end="16" resetval="0x0000" description="B-Dimension count.Number of arrays to be transferred, where each array is ACNT in length." range="" rwaccess="RW"/>
+    <bitfield id="ACNT" width="16" begin="15" end="0" resetval="0x0000" description="A-Dimension count.Number of bytes to be transferred in first dimension." range="" rwaccess="RW"/>
+  </register>
+  <register id="TPTC_PDST" acronym="TPTC_PDST" offset="0x20C" width="32" description="Prog Set Dst Address">
+    <bitfield id="DADDR" width="32" begin="31" end="0" resetval="0x0000 0000" description="Destination address for Program Register Set" range="" rwaccess="RW"/>
+  </register>
+  <register id="TPTC_PBIDX" acronym="TPTC_PBIDX" offset="0x210" width="32" description="Prog Set B-Dim Idx">
+    <bitfield id="DBIDX" width="16" begin="31" end="16" resetval="0x0000" description="B-Idx offset between Destination arrays:Represents the offset in bytes between the starting address of each destination array (recall that there are BCNT arrays of ACNT elements). DBIDX is always used, regardless of whether DAM is Increment or FIFO mode." range="" rwaccess="RW"/>
+    <bitfield id="SBIDX" width="16" begin="15" end="0" resetval="0x0000" description="B-Idx offset between Source arrays:Represents the offset in bytes between the starting address of each source array (recall that there are BCNT arrays of ACNT elements). SBIDX is always used, regardless of whether SAM is Increment or FIFO mode." range="" rwaccess="RW"/>
+  </register>
+  <register id="TPTC_PMPPRXY" acronym="TPTC_PMPPRXY" offset="0x214" width="32" description="Prog Set Mem Protect Proxy">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x000000" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="9" end="9" resetval="0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PRIV" width="1" begin="8" end="8" resetval="0" description="Privilege Level:0 : User level privilege1 : Supervisor level privilegePRIV is always updated with the value from the configuration bus privilege field on any/every write to Program Set BIDX Register (trigger register). The PRIV value for the SA Set and DF Set are copied from the value in the Program set along with the remainder of the parameter values. The privilege ID is issued on the VBusM read and write command bus such that the target endpoints can perform memory protection checks based on the PRIV of the external host that sets up the DMA transaction." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="PRIVID" width="4" begin="3" end="0" resetval="0x0" description="Privilege ID:PRIVID is always updated with the value from configuration bus privilege ID field on any/every write to Program Set BIDX Register (trigger register). The PRIVID value for the SA Set and DF Set are copied from the value in the Program set along with the remainder of the parameter values. The privilege ID is issued on the VBusM read and write command bus such that the target endpoints can perform memory protection checks based on the privid of the external host that sets up the DMA transaction." range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_SAOPT" acronym="TPTC_SAOPT" offset="0x240" width="32" description="Src Actv Set Options">
+    <bitfield id="RESERVED" width="9" begin="31" end="23" resetval="0x000" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="TCCHEN" width="1" begin="22" end="22" resetval="0" description="Transfer complete chaining enable:0: disabled.1: enabled." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="21" end="21" resetval="0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="TCINTEN" width="1" begin="20" end="20" resetval="0" description="Transfer complete interrupt enable:0: disabled.1: enabled." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="2" begin="19" end="18" resetval="0x0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="TCC" width="6" begin="17" end="12" resetval="0x00" description="Transfer Complete Code:The 6-bit code is used to set the relevant bit in CER or IPR of the TPCC module." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="FWID" width="3" begin="10" end="8" resetval="0x0" description="FIFO width control: Applies if either SAM or DAM is set to FIFO mode." range="" rwaccess="R">
+      <bitenum value="0" token="FWID_0_r" description="FIFO width is 8-bit"/>
+      <bitenum value="1" token="FWID_1_r" description="FIFO width is 16-bit"/>
+      <bitenum value="2" token="FWID_2_r" description="FIFO width is 32-bit"/>
+      <bitenum value="3" token="FWID_3_r" description="FIFO width is 64-bit"/>
+      <bitenum value="4" token="FWID_4_r" description="FIFO width is 128-bit"/>
+      <bitenum value="5" token="FWID_5_r" description="FIFO width is 256-bit"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="PRI" width="3" begin="6" end="4" resetval="0x0" description="Transfer Priority:" range="" rwaccess="R">
+      <bitenum value="0" token="PRI_0_r" description="Priority 0 - Highest priority"/>
+      <bitenum value="1" token="PRI_1_r" description="Priority 1"/>
+      <bitenum value="2" token="PRI_2_r" description="Priority 2"/>
+      <bitenum value="3" token="PRI_3_r" description="Priority 3"/>
+      <bitenum value="4" token="PRI_4_r" description="Priority 4"/>
+      <bitenum value="5" token="PRI_5_r" description="Priority 5"/>
+      <bitenum value="6" token="PRI_6_r" description="Priority 6"/>
+      <bitenum value="7" token="PRI_7_r" description="Priority 7 - Lowest Priority"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="3" end="2" resetval="0x0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="DAM" width="1" begin="1" end="1" resetval="0" description="Destination Address Mode within an array:0: INCR, Dst addressing within an array increments.1: FIFO, Dst addressing within an array wraps around upon reaching FIFO width." range="" rwaccess="R"/>
+    <bitfield id="SAM" width="1" begin="0" end="0" resetval="0" description="Source Address Mode within an array:0: INCR, Src addressing within an array increments.1: FIFO, Src addressing within an array wraps around upon reaching FIFO width." range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_SASRC" acronym="TPTC_SASRC" offset="0x244" width="32" description="Src Actv Set Src Address">
+    <bitfield id="SADDR" width="32" begin="31" end="0" resetval="0x0000 0000" description="Source address for Source Active Register Set:Initial value is copied from PSRC.SADDR. TC updates value according to source addressing mode (OPT.SAM) and/or source index value (BIDX.SBIDX) after each read command is issued. When a TR is complete, the final value should be the address of the last read command issued." range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_SACNT" acronym="TPTC_SACNT" offset="0x248" width="32" description="Src Actv Set Count">
+    <bitfield id="BCNT" width="16" begin="31" end="16" resetval="0x0000" description="B-Dimension count:Number of arrays to be transferred, where each array is ACNT in length. Count Remaining for Src Active Register Set. Represents the amount of data remaining to be read. Initial value is copied from PCNT. TC decrements ACNT and BCNT as necessary after each read command is issued. Final value should be 0 when TR is complete." range="" rwaccess="R"/>
+    <bitfield id="ACNT" width="16" begin="15" end="0" resetval="0x0000" description="A-Dimension count:Number of bytes to be transferred in first dimension. Count Remaining for Src Active Register Set. Represents the amount of data remaining to be read. Initial value is copied from PCNT. TC decrements ACNT and BCNT as necessary after each read command is issued. Final value should be 0 when TR is complete." range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_SADST" acronym="TPTC_SADST" offset="0x24C" width="32" description="return 0x0 w/o AERROR">
+    <bitfield id="DADDR" width="32" begin="31" end="0" resetval="0x0000 0000" description="Destination address is not applicable for Src Active Register Set. Reads return 0x0" range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_SABIDX" acronym="TPTC_SABIDX" offset="0x250" width="32" description="Src Actv Set B-Dim Idx">
+    <bitfield id="DBIDX" width="16" begin="31" end="16" resetval="0x0000" description="Dest B-Idx for Source Active Register SetValue copied from PBIDX: B-Idx offset between Destination arrays: Represents the offset in bytes between the starting address of each destination array (recall that there are BCNT arrays of ACNT elements). DBIDX is always used, regardless of whether DAM is Increment or FIFO mode." range="" rwaccess="R"/>
+    <bitfield id="SBIDX" width="16" begin="15" end="0" resetval="0x0000" description="Source B-Idx for Source Active Register SetValue copied from PBIDX: B-Idx offset between Source arrays: Represents the offset in bytes between the starting address of each source array (recall that there are BCNT arrays of ACNT elements). SBIDX is always used, regardless of whether SAM is Increment or FIFO mode." range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_SAMPPRXY" acronym="TPTC_SAMPPRXY" offset="0x254" width="32" description="Src Actv Set Mem Protect Proxy">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x000000" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="9" end="9" resetval="0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PRIV" width="1" begin="8" end="8" resetval="0" description="Privilege Level:0 : User level privilege1 : Supervisor level privilege PRIV is always updated with the value from the configuration bus privilege field on any/every write to Program Set BIDX Register (trigger register). The PRIV value for the SA Set and DF Set are copied from the value in the Program set along with the remainder of the parameter values. The privilege ID is issued on the VBusM read and write command bus such that the target endpoints can perform memory protection checks based on the PRIV of the external host that sets up the DMA transaction." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="PRIVID" width="4" begin="3" end="0" resetval="0x0" description="Privilege ID:PRIVID is always updated with the value from configuration bus privilege ID field on any/every write to Program Set BIDX Register (trigger register). The PRIVID value for the SA Set and DF Set are copied from the value in the Program set along with the remainder of the parameter values. The privilege ID is issued on the VBusM read and write command bus such that the target endpoints can perform memory protection checks based on the privid of the external host that sets up the DMA transaction." range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_SACNTRLD" acronym="TPTC_SACNTRLD" offset="0x258" width="32" description="Src Actv Set Cnt Reload">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="ACNTRLD" width="16" begin="15" end="0" resetval="0x0000" description="A-Cnt Reload value for Source Active Register set.Value copied from PCNT.ACNT: Represents the originally programmed value of ACNT. The Reload value is used to reinitialize ACNT after each array is serviced (that is, ACNT decrements to 0). by the Src offset in bytes between the starting address of each source array (recall that there are BCNT arrays of ACNT bytes)" range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_SASRCBREF" acronym="TPTC_SASRCBREF" offset="0x25C" width="32" description="Src Actv Set Src Addr A-Reference">
+    <bitfield id="SADDRBREF" width="32" begin="31" end="0" resetval="0x0000 0000" description="Source address reference for Source Active Register Set:Represents the starting address for the array currently being read. The next array's starting address is calculated as the 'reference address' plus the 'source b-idx' value." range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_SADSTBREF" acronym="TPTC_SADSTBREF" offset="0x260" width="32" description="return 0x0 w/o AERROR">
+    <bitfield id="DADDRBREF" width="32" begin="31" end="0" resetval="0x0000 0000" description="Dst address reference is not applicable for Src Active Register Set. Reads return 0x0." range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_DFCNTRLD" acronym="TPTC_DFCNTRLD" offset="0x280" width="32" description="Dst FIFO Set Cnt Reload">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="ACNTRLD" width="16" begin="15" end="0" resetval="0x0000" description="A-Cnt Reload value for Destination FIFO Register set.Value copied from PCNT.ACNT: Represents the originally programmed value of ACNT. The Reload value is used to reinitialize ACNT after each array is serviced (that is, ACNT decrements to 0). by the Src offset in bytes between the starting address of each source array (recall that there are BCNT arrays of ACNT bytes)" range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_DFSRCBREF" acronym="TPTC_DFSRCBREF" offset="0x284" width="32" description="return 0x0 w/o AERROR">
+    <bitfield id="SADDRBREF" width="32" begin="31" end="0" resetval="0x0000 0000" description="Source address reference is not applicable for Dst FIFO Register Set. Reads return 0x0." range="" rwaccess="R"/>
+  </register>
+  <register id="TPTC_DFDSTBREF" acronym="TPTC_DFDSTBREF" offset="0x288" width="32" description="Dst FIFO Set Dst Addr A-Reference">
+    <bitfield id="DADDRBREF" width="32" begin="31" end="0" resetval="0x0000 0000" description="Destination address reference for Dst FIFO Register Set:Represents the starting address for the array currently being written. The next array's starting address is calculated as the 'reference address' plus the 'dest bidx' value." range="" rwaccess="R"/>
+  </register>
+</module>
