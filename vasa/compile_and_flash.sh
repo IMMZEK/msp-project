@@ -8,6 +8,7 @@ PROJ_NAME="vasa"
 # --- Available Cores ---
 # 0: Texas Instruments XDS100v2 USB Debug Probe_0/C28xx_CPU1
 # 1: Texas Instruments XDS100v2 USB Debug Probe_0/CPU1_CLA1
+# 
 # 2: Texas Instruments XDS100v2 USB Debug Probe_0/C28xx_CPU2
 # 3: Texas Instruments XDS100v2 USB Debug Probe_0/CPU2_CLA1
 
