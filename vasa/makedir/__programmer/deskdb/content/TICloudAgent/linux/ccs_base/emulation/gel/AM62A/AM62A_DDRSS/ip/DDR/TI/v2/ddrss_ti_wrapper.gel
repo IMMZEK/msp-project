@@ -1,0 +1,78 @@
+unsigned int i =0;
+unsigned int j=0;
+
+TI_setup_ECC(uint32_t size) {
+
+    TI_enable_ECC();
+    // after priming/ pre-loading good ECC data into DRAM (by writing to it) then ecc_ck=1
+    //printf("--->>> After priming ECC memory, enable ECC_CK bit with hotmenu AM64 DDR Memory config --> Enable_TI_InlineECC_CK_During_Reads\(\)<<<---\n");
+
+    //PRIME ECC HERE
+
+    HW_WR_REG32((AM62A_DDRSS_SS_BASE + 0x120), 0x17); //ECC Control Register 0x120 ecc_en =1, rmw_en = 1, ecc_ck=1, wr_alloc = 1
+    printf("--->>> ECC setup and configured! <<<---\n");
+}
+
+TI_enable_ECC() {
+
+    //0x130	ECC Range 0 Start Address Register	16:0	ecc_str_adr_0 = 0 caddress[31:16]
+    HW_WR_REG32((AM62A_DDRSS_SS_BASE + 0x130), 0x0);
+
+    //0x134	ECC Range 0 End Address Register	16:0	ecc_end_adr_0 = 0xFFFF caddress[31:16]
+    HW_WR_REG32((AM62A_DDRSS_SS_BASE + 0x134), 0xFFFF);	//FFFFF for all
+
+    HW_WR_REG32((AM62A_DDRSS_SS_BASE + 0x120), 0x03); //ECC Control Register 0x120 ecc_en = 1, rmw_en = 1, wr_alloc = 0, ecc_ck=0
+}
+
+
+TI_disable_ECC() {
+
+    HW_WR_REG32((AM62A_DDRSS_SS_BASE + 0x120), 0x00); //ECC Control Register 0x120 ecc_en = 0, rmw_en = 0, wr_alloc = 0, ecc_ck=0
+
+    HW_WR_REG32((AM62A_DDRSS_SS_BASE + 0x130), 0xFFFF);
+    HW_WR_REG32((AM62A_DDRSS_SS_BASE + 0x134), 0x0);
+
+    printf("--->>> ECC Disabled! <<<---\n");
+}
+
+TI_set_DDR_size(uint32_t value) {
+	
+    HW_WR_REG32(AM62A_DDRSS_SS_BASE + 0x020,(HW_RD_REG32(AM62A_DDRSS_SS_BASE + 0x020) & ~0x3FF) | value); //VBUSM2AXI Control Register sdram_idx, region_idx 0x11 --> 0x0F = log2(connected SDRAM size) - 16
+	
+}
+
+TI_test_1bit_error_correction(uint32_t ddr_address) {
+    //Enable ECC and RMW
+    HW_WR_REG32(AM62A_DDRSS_SS_BASE + 0x120, 0x3);
+
+    printf("ECC for every 64-bit data\n");
+
+    printf("Priming ECC for first ~2KB\n");
+
+    //Set address region for 128KB
+    HW_WR_REG32(AM62A_DDRSS_SS_BASE + 0x130, 0x0);
+    HW_WR_REG32(AM62A_DDRSS_SS_BASE + 0x134, 0x1);
+
+
+    for(i=0; i<2304; i+=4)
+    {
+        HW_WR_REG32( (ddr_address + i), 0xA5A5A5A5);
+    }
+
+//    printf("Reducing ECC range and injecting 1-bit errors for every 64 bits\n");
+//    HW_WR_REG32((AM62A_DDRSS_SS_BASE + 0x130), 0xFFFF);
+//    HW_WR_REG32(AM62A_DDRSS_SS_BASE + 0x134, 0x0);
+//    //Per block, 128 bytes of ECC and 1024 B of data
+//    for(i=0;i<2304;i+=576)
+//    {
+//        for(j=0;j<256;j+=8)
+//        {
+//            HW_WR_REG32( ddr_address + i + j, 0xA5A5A5A5 + 2^((j/8)%32)   );
+//            //HW_WR_REG32( ddr_address + i + j +328, 0xA5A5A5A5 + (2^(j/8))%32   );
+//        }
+//    }
+
+
+    //HW_WR_REG32((AM62A_DDRSS_SS_BASE + 0x130), 0x0);
+    //HW_WR_REG32(AM62A_DDRSS_SS_BASE + 0x134, 0x1);
+}

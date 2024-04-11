@@ -1,0 +1,131 @@
+menuitem "sDMA_Access"
+
+
+
+
+#define DMA_BASE_ADDR     0x48056000
+#define SRC_ADDRESS       0x80000000
+#define DST_ADDRESS      0x85000000
+#define ELEMENT_NUM       52000
+#define FRAME_NUM   1000
+#define DATA_NUM   (ELEMENT_NUM*FRAME_NUM)
+ 
+unsigned int*	  DMA4_SYSSTATUS_REG 	= (int*) (DMA_BASE_ADDR + 0x28);
+unsigned int*     DMA4_OCP_SYSCONFIG    = (int*) (DMA_BASE_ADDR + 0x2c);
+unsigned int*     DMA4_CAPS_0 			= (int*) (DMA_BASE_ADDR + 0x64);
+unsigned int*     DMA4_CAPS_2 			= (int*) (DMA_BASE_ADDR + 0x6c);
+unsigned int*     DMA4_CAPS_3 			= (int*) (DMA_BASE_ADDR + 0x70);
+unsigned int*     DMA4_CAPS_4 			= (int*) (DMA_BASE_ADDR + 0x74);
+unsigned int*     DMA4_GCR 				= (int*) (DMA_BASE_ADDR + 0x78);
+unsigned int*     DMA4_CCR				= (int*) (DMA_BASE_ADDR + 0x80);
+unsigned int*     DMA4_CLNK_CTR			= (int*) (DMA_BASE_ADDR + 0x84);
+unsigned int*     DMA4_CICR				= (int*) (DMA_BASE_ADDR + 0x88);
+unsigned int*     DMA4_CSR				= (int*) (DMA_BASE_ADDR + 0x8C);
+unsigned int*     DMA4_CSDP				= (int*) (DMA_BASE_ADDR + 0x90);
+unsigned int*     DMA4_CEN				= (int*) (DMA_BASE_ADDR + 0x94);
+unsigned int*     DMA4_CFN 				= (int*) (DMA_BASE_ADDR + 0x98);
+unsigned int*     DMA4_CSSA 			= (int*) (DMA_BASE_ADDR + 0x9C);
+unsigned int*     DMA4_CDSA				= (int*) (DMA_BASE_ADDR + 0xA0);
+unsigned int*     DMA4_CSE 				= (int*) (DMA_BASE_ADDR + 0xA4);
+unsigned int*     DMA4_CSF				= (int*) (DMA_BASE_ADDR + 0xA8);
+unsigned int*     DMA4_CDE				= (int*) (DMA_BASE_ADDR + 0xAC);
+unsigned int*     DMA4_CDF				= (int*) (DMA_BASE_ADDR + 0xB0);
+unsigned int*     DMA4_CSAC				= (int*) (DMA_BASE_ADDR + 0xB4);
+unsigned int*     DMA4_CDAC				= (int*) (DMA_BASE_ADDR + 0xB8);
+unsigned int*     DMA4_CCEN				= (int*) (DMA_BASE_ADDR + 0xBC);
+unsigned int*     DMA4_CCFN				= (int*) (DMA_BASE_ADDR + 0xC0);
+unsigned int*     DMA4_COLOUR			= (int*) (DMA_BASE_ADDR + 0xC4);
+
+unsigned int*     src_buffer ; 
+unsigned int*     dst_buffer ;  
+ 
+//hotmenu DMA_TRANSFER(){
+
+hotmenu sDMA_TRANSFER()
+
+{
+
+int i,error_count = 0;
+int wrt_src_data = 0x00010001;
+
+src_buffer   = (int*) SRC_ADDRESS ;
+dst_buffer  =  (int*) DST_ADDRESS ; 
+
+
+GEL_TextOut("DATA PLACEMENT IN THE SOURCE BUFFER \n\r");
+for(i = 0;i < DATA_NUM ; i ++) {
+      *src_buffer   = wrt_src_data;
+     *src_buffer++;   
+     wrt_src_data = wrt_src_data + 0x00010001;
+}
+
+GEL_TextOut("CONFIGURING SDMA REGISTERS \n\r");
+/*channel source dest parameters*/
+*DMA4_CSDP  = 0x00008702; //0x0000C1C2;
+
+/*Channel Element Number*/
+*DMA4_CEN  = ELEMENT_NUM;
+
+/*Channel Frame Number*/
+*DMA4_CFN  = FRAME_NUM;
+
+
+ /*Source Start Address*/
+GEL_TextOut("Initializing Sorce and Destination address of Channel\n\r");
+
+*DMA4_CSSA  =  SRC_ADDRESS ;
+
+ /*Destinationt Start Address*/
+*DMA4_CDSA  = DST_ADDRESS ;
+
+/*Channel Control Register*/
+*DMA4_CCR   = 0x04005040;
+
+/*                           */
+* DMA4_CSE  =	0x0; 
+* DMA4_CSF  =	0x0; 
+* DMA4_CDE  =	0x0; 
+* DMA4_CDF	=   0x0; 
+/* Enabling Block Interrupt */
+* DMA4_CICR	&=	0x20;
+
+GEL_TextOut("DMA CHANNEL ENABLED \n\r");
+*DMA4_CCR   |= 0x80 ;
+
+GEL_TextOut("POLLING FOR COMPLETION OF TRANSFER \n\r");
+while(  (*(int*)(DMA4_CSR)) != 0x20) {
+
+}
+GEL_TextOut("done  \n\r");
+/* Clearing Interrupt status */
+* DMA4_CSR	|=	0x20;
+
+GEL_TextOut("CHECKING DATA AT SOURCE AND DESTINATION  \n\r");
+src_buffer   = (int*) SRC_ADDRESS ;
+dst_buffer  =  (int*) DST_ADDRESS ; 
+
+for(i=0;i<DATA_NUM;i ++) {
+     
+      if( (*(int*)(src_buffer)) != (*(int*)(dst_buffer))  ) {
+                     GEL_TextOut("DATA MISMATCH \n\r");
+                     error_count++; 
+     }
+     *src_buffer++;
+     *dst_buffer++;
+}
+
+    
+
+if(error_count == 0) {
+  GEL_TextOut(" *************SDMA TRANSFER PASSED******************** \n\r");
+}
+else {   
+ GEL_TextOut(" *************SDMA TRANSFER FAILED******************** \n\r");
+}
+  
+
+} 
+
+
+
+

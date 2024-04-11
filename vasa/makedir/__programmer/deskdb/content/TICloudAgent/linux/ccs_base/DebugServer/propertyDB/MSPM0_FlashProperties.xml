@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PropertyList xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <!-- TMS470RAX Nodes-->
+    <node id="FlashProgrammerNode">
+        <name>MSPM0 Flash Settings</name>
+        <children>
+            <child>FlashResetGroup</child>
+            <child>FlashEraseGroup</child>
+			<child>ProgramGroup</child>
+            <child>DssmEraseGroup</child>
+            <child>DssmResetGroup</child>
+            <child>SRAMGroup</child>
+            <child>AdvancedGroup</child>
+        </children>
+    </node>
+
+    <!-- TMS470RAX Groups -->
+    <group id="FlashResetGroup">
+        <name>Reset Configuration</name>
+        <children>
+            <child>FlashResetBeforeLoadSetting</child>
+            <child>FlashResetAfterLoadSetting</child>
+            <child>FlashResetType</child>
+        </children>
+    </group>
+
+    <group id="DssmEraseGroup">
+        <name>DSSM Mass Erase</name>
+        <children>
+            <child>ManualMassErase</child>
+            <child>AutomaticMassErase</child>
+        </children>
+    </group>
+
+    <group id="DssmResetGroup">
+        <name>DSSM Factory Reset</name>
+        <children>
+            <child>ManualFactoryReset</child>
+            <child>AutomaticFactoryReset</child>
+        </children>
+    </group>
+
+    <group id="FlashEraseGroup">
+        <name>Erase Configuration</name>
+        <children>
+            <child>MSPM0EraseText</child>
+            <child>FlashEraseSelection</child>
+            <child>FlashEraseSectorsText</child>
+            <child>FlashEraseSectorsStartAddress</child>
+			<child>FlashEraseSectorsEndAddress</child>
+            <!-- <child>FlashNonMainIgnoreErase</child> -->
+        </children>
+    </group>
+    <group id="ProgramGroup">
+        <name>Program Configuration</name>
+        <children>
+            <child>FlashVerification</child>
+        </children>
+    </group>
+    <group id="SRAMGroup">
+        <name>SRAM Configuration</name>
+        <children>
+            <child>EraseECCSRAMText</child>
+            <child>EraseECCSRAM</child>
+        </children>
+    </group>
+    <group id="AdvancedGroup">
+        <name>Advanced Configuration</name>
+        <children>
+            <child>FlashSkipDeviceID</child>
+        </children>
+    </group>
+    <!-- Reset Settings -->
+    <property id="FlashResetBeforeLoadSetting">
+        <target>TMS470RAX</target>
+        <name>Reset target before program load</name>
+        <valueType>Boolean</valueType>
+        <defaultValue>1</defaultValue>
+    </property>
+    <property id="FlashResetAfterLoadSetting">
+        <target>TMS470RAX</target>
+        <name>Reset target after program load</name>
+        <valueType>Boolean</valueType>
+        <defaultValue>1</defaultValue>
+    </property>
+    <property id="FlashResetType">
+        <target>TMS470RAX</target>
+        <name>Reset Type</name>
+        <valueType>ChoiceList</valueType>
+        <values>
+            <value>Soft reset</value>
+            <value>Hard reset</value>
+        </values>
+        <defaultValue>Hard reset</defaultValue>
+        <disableIf>
+            <property id="FlashResetBeforeLoadSetting">0</property>
+            <property id="FlashResetAfterLoadSetting">0</property>
+        </disableIf>
+    </property>
+
+    <!-- Erase Settings -->
+    <property id="MSPM0EraseText">
+        <target>TMS470RAX</target>
+        <name>!!!Warning: Modifying NONMAIN incorrectly, or erasing it without programming can permanently lock the device!!!
+        See MSPM0 documentation for more details</name>
+        <valueType>Text</valueType>
+    </property>
+    <property id="FlashEraseSelection">
+        <target>TMS470RAX</target>
+        <name>Erase method</name>
+        <valueType>ChoiceList</valueType>
+        <values>
+            <value>Erase MAIN memory only</value>
+            <value>Erase MAIN and NONMAIN memory (see warning above)</value>
+            <value>Erase MAIN and NONMAIN necessary sectors only (see warning above)</value>
+            <value>Erase MAIN memory sectors by range (specify below)</value>
+            <value>Do not erase Flash memory</value>
+        </values>
+        <defaultValue>Erase MAIN memory only</defaultValue>
+    </property>
+    <property id="FlashEraseSectorsText">
+		<target>TMS470RAX</target>
+		<name>Sector Erase: all 1kB sectors between Start and End address will be erased</name>
+		<valueType>Text</valueType>
+	</property>
+    <property id="FlashEraseSectorsStartAddress">
+        <target>TMS470RAX</target>
+        <name>Sector Erase Start Address: 0x</name>
+        <valueType>String</valueType>
+        <defaultValue>0</defaultValue>
+    </property>
+    <property id="FlashEraseSectorsEndAddress">
+        <target>TMS470RAX</target>
+        <name>Sector Erase End Address: 0x</name>
+        <valueType>String</valueType>
+        <defaultValue>0</defaultValue>
+    </property>
+    <property id="FlashNonMainIgnoreErase">
+        <target>TMS470RAX</target>
+        <name>Allow writes to NON-MAIN without erasing (see warning above)</name>
+        <valueType>Boolean</valueType>
+        <defaultValue>0</defaultValue>
+    </property>
+    <!-- Program Settings -->
+    <property id="FlashVerification">
+        <target>TMS470RAX</target>
+        <name>Perform CRC verification</name>
+        <valueType>Boolean</valueType>
+        <defaultValue>1</defaultValue>
+    </property>
+    <!--  DSSM Commands  -->
+    <property id="ManualMassErase">
+        <target>TMS470RAX</target>
+        <name>Mass erase manual</name>
+        <valueType>Button</valueType>
+        <action>DPActiveDebugSession.expression.evaluate("GEL_EvalOnTarget( "CORTEX_M0P", "MSPM0_MailboxMassErase_Manual()", 0 )");</action>
+    </property>
+        <property id="AutomaticMassErase">
+        <target>TMS470RAX</target>
+        <name>Mass erase auto</name>
+        <valueType>Button</valueType>
+        <action>DPActiveDebugSession.expression.evaluate("GEL_EvalOnTarget( "CORTEX_M0P", "MSPM0_MailboxMassErase_Auto()", 1)");</action>
+    </property>
+        <property id="ManualFactoryReset">
+        <target>TMS470RAX</target>
+        <name>Factory reset manual</name>
+        <valueType>Button</valueType>
+        <action>DPActiveDebugSession.expression.evaluate("GEL_EvalOnTarget( "CORTEX_M0P", "MSPM0_Mailbox_FactoryReset_Manual()", 0 )");</action>
+    </property>
+        <property id="AutomaticFactoryReset">
+        <target>TMS470RAX</target>
+        <name>Factory reset auto</name>
+        <valueType>Button</valueType>
+        <action>DPActiveDebugSession.expression.evaluate("GEL_EvalOnTarget( "CORTEX_M0P", "MSPM0_Mailbox_FactoryReset_Auto()", 1 )");</action>
+    </property>
+    <!-- Sram setting-->
+    <property id="EraseECCSRAMText">
+        <target>TMS470RAX</target>
+        <name>Note: Option will be ignored if device does not support ECC in SRAM region.
+        See MSPM0 documentation for more details</name>
+        <valueType>Text</valueType>
+    </property>
+    <property id="EraseECCSRAM">
+        <target>TMS470RAX</target>
+        <name>Erase ECC SRAM</name>
+        <valueType>Boolean</valueType>
+        <defaultValue>0</defaultValue>
+    </property>
+    <!-- Advanced Settings -->
+    <property id="FlashSkipDeviceID">
+        <target>TMS470RAX</target>
+        <name>Skip Device ID Check</name>
+        <valueType>Boolean</valueType>
+        <defaultValue>0</defaultValue>
+    </property>
+
+</PropertyList>

@@ -1,0 +1,86 @@
+<div class="modal-header">
+	<a class="close" ng-click="$dismiss()" aria-label="close">&times;</a>
+	<h3 class="modal-title"> <span>{{vm.title}}</span></h3>
+</div>
+<div class="modal-body form-group">
+	<form name="myForm">
+		<div class="input-group">
+			<label class="input-group-addon">Format:</label>
+			<select id="export-format" class="form-control" ng-model="vm.format" uib-tooltip="{{vm.quickGuide()}}"
+				tooltip-placement="top">
+				<option id="export-format-bin">BIN</option>
+				<option id="export-format-coff">COFF</option>
+				<option id="export-format-intelhex">INTELHEX</option>
+				<option id="export-format-txthex">TI-TXT</option>
+			</select>
+			<label class="input-group-addon" ng-if="vm.pageInfoList.length > 1">Page:</label>
+			<select class="form-control" ng-model="vm.curPage" ng-if="vm.pageInfoList.length > 1"
+				uib-tooltip="Memory Page to read." tooltip-placement="top" tooltip-trigger="mouseenter"
+				tooltip-popup-delay="300">
+				<option ng-repeat="pageInfo in vm.pageInfoList">{{pageInfo.name}}</option>
+			</select>
+		</div>
+
+		<div class="input-group" ng-show="!vm.showTable()">
+			<label class="input-group-addon">Start Address:</label>
+			<input id="export-address" type="text" class="form-control" ng-model="vm.addrInput" placeholder="0x00000000"
+				ng-pattern="vm.validateAddressRegex">
+			<label class="input-group-addon">End Address:</label>
+			<input id="export-endAddress" type="text" class="form-control" ng-model="vm.endAddrInput" placeholder="0xFFFFFFFF"
+				ng-pattern="vm.validateAddressRegex">
+		</div>
+		<div style="margin-top:20px;" ng-show="vm.showTable()">
+			<table class="table table-hover">
+				<tr>
+					<td><label>Start Address</label></td>
+					<td colspan="2"><label>End Address</label></td>
+				</tr>
+				<tr ng-repeat="range in vm.exportConfig.ranges">
+					<td ng-class="range.addressError ? 'has-error' : ''"><input id="export-range-address$index"
+							type="text" class="form-control" ng-model="vm.exportConfig.ranges[$index].address"
+							placeholder="0x00000000" ng-pattern="vm.validateAddressRegex"
+							ng-change="vm.exportConfig.ranges[$index].addressError=false">
+					</td>
+					<td style="vertical-align:bottom;">-</td>
+					<td ng-class="range.endAddressError ? 'has-error' : ''"><input id="export-range-endAddress$index"
+							type="text" class="form-control" ng-model="vm.exportConfig.ranges[$index].endAddress"
+							placeholder="0xFFFFFFFF"
+							ng-change="vm.exportConfig.ranges[$index].endAddressError=false"></td>
+					<td><i ng-hide="$index===0" class="glyphicon glyphicon-remove clickable"
+							style="vertical-align:bottom;" ng-click="vm.removeRange($index)" uib-tooltip="Remove"
+							tooltip-placement="top"></i></td>
+				</tr>
+				<tr uib-tooltip="Add memory range" tooltip-placement="bottom">
+					<td id="export-range-add" class="clickable" colspan="3" ng-click="vm.addRange()"
+						style="border-bottom: 1px solid #ddd; color: #888;">
+						<i class="glyphicon glyphicon-plus"></i> Add Range
+					</td>
+				</tr>
+			</table>
+
+		</div>
+
+		<div class="form-group" style="margin-top:20px;">
+			<label class="control-label">File:</label>
+			<div class="input-group">
+				<input id="export-path" type="text" class="form-control" ng-model="vm.path"
+					placeholder="export_memory{{vm.getExtension()}}" ng-pattern="vm.validFileName">
+				<span ng-hide="!vm.isNW()" class="input-group-btn">
+					<button type="button" style="display:table-cell;margin-left:8px;margin-right:20px;"
+						class="btn btn-success btn-sm" id="browse-export" ng-click="vm.browseExportFile();">
+						<span class="glyphicon glyphicon-hdd"></span> Browse
+					</button>
+				</span>
+			</div>
+		</div>
+	</form>
+	<div style="margin-top:10px;">
+		<div style="color:red;">{{vm.msg}}</div>
+	</div>
+</div>
+<div class="modal-footer">
+	<button id="export-generate" type="button" class="btn btn-primary" ng-click="vm.exportToLocal()">
+		Generate
+	</button>
+	<button class="btn btn-default" type="button" ng-click="$dismiss('Cancel Clicked')">Cancel</button>
+</div>

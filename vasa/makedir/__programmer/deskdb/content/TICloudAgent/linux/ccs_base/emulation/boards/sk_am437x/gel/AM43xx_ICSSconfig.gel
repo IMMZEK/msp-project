@@ -1,0 +1,63 @@
+//----------------------
+// GEL file for AM437x EVM -- PRU-ICSS
+// rev 1.1
+//
+
+menuitem "PRU_ICSS"
+
+hotmenu PRU_ICSS_Init()
+{
+	PRU_ICSS_PRCM_Enable();
+
+	GEL_MemoryFill(0x54400000, 0, 16*1024, 0x0, 0xC);
+	GEL_MemoryFill(0x54410000, 0, 32*1024, 0x0, 0xC);
+	GEL_MemoryFill(0x54440000, 0, 4*1024, 0x0, 0xC);
+	GEL_MemoryFill(0x54442000, 0, 4*1024, 0x0, 0xC);
+}
+
+
+hotmenu PRU_ICSS_PRCM_Enable()
+{
+	GEL_TextOut("\t**** PRU-ICSS PRCM Enable Step 1 is in progress **** \n","Output",1,1,1);	 									
+	*((unsigned int*) 0x44DF0810)      |= 0x2;  //RM_PER_RSTCTRL. Assert Reset
+	*((unsigned int*) 0x44DF0810)      &= 0xFFFFFFFD; //RM_PER_RSTCTRL. Clear Reset 
+	GEL_TextOut("\t**** PRU-ICSS PRCM Enable Step 1 is Done **** \n","Output",1,1,1);
+	
+	GEL_TextOut("\t**** PRU-ICSS PRCM Enable Step 2 is in progress **** \n","Output",1,1,1);	 									
+	*((unsigned int*) 0x44DF8B20)      |= 0x2; //CM_PER_PRU_ICSS_CLKCTRL
+	
+	GEL_TextOut("\t**** PRU-ICSS PRCM Enable Step 2 is Done **** \n","Output",1,1,1);
+}
+
+
+hotmenu PRU_ICSS1_PRU0_and_1_Start()
+{
+	GEL_TextOut("\t**** PRU-ICSS PRU0&1 is being started **** \n","Output",1,1,1);
+	*((unsigned int*) 0x54424000)      = 0xB;
+	*((unsigned int*) 0x54422000)      = 0xB;
+}
+
+
+hotmenu PRU_ICSS1_PRU0_and_1_Halt()
+{
+	GEL_TextOut("\t**** PRU-ICSS PRU0&1 is being Halted **** \n","Output",1,1,1);
+	*((unsigned int*) 0x54424000)      =  0;
+	*((unsigned int*) 0x54422000)      =  0;
+}
+
+
+hotmenu PRU_ICSS0_PRU0_and_1_Start()
+{
+	GEL_TextOut("\t**** PRU-ICSS PRU0&1 is being started **** \n","Output",1,1,1);
+	*((unsigned int*) 0x54464000)      = 0xB;
+	*((unsigned int*) 0x54462000)      = 0xB;
+}
+
+
+hotmenu PRU_ICSS0_PRU0_and_1_Halt()
+{
+	GEL_TextOut("\t**** PRU-ICSS PRU0&1 is being Halted **** \n","Output",1,1,1);
+	*((unsigned int*) 0x54464000)      =  0;
+	*((unsigned int*) 0x54462000)      =  0;
+}
+

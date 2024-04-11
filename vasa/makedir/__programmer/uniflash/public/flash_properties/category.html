@@ -1,0 +1,40 @@
+<div class="uf-property-category" ng-show="categoryPropertyList.length>0" ng-style="vm.minimal&&{'margin-bottom':'4px'}" ng-mouseenter="vm.hover=true" ng-mouseleave="vm.hover=false">
+    <!-- quick settings controls -->
+	<span ng-show="vm.hideQuick&&vm.hover" ng-click="$event.stopPropagation();" style="float:right;position:relative;top:6px;right:11px;font-size:12px;">
+		<span ng-class="{'disabled':vm.ufQuickSettingsSrv.getIndex(vm.category,'category')===0}"  class="glyphicon glyphicon-arrow-up uf-btn-fg" ng-click="vm.ufQuickSettingsSrv.moveEntryUp(vm.ufQuickSettingsSrv.getIndex(vm.category,'category'))" title="Move Setting Up"></span>
+		<span  ng-class="{'disabled':vm.ufQuickSettingsSrv.getIndex(vm.category,'category')===(vm.ufQuickSettingsSrv.getPinnedList().length-1)}" class="glyphicon glyphicon-arrow-down uf-btn-fg" ng-click="vm.ufQuickSettingsSrv.moveEntryDown(vm.ufQuickSettingsSrv.getIndex(vm.category,'category'))" title="Move Setting Down"></span>
+		<span class="glyphicon glyphicon-remove uf-btn-fg" ng-click="vm.ufQuickSettingsSrv.remove(vm.ufQuickSettingsSrv.getIndex(vm.category,'category'))" title="Remove Item from My Quick Settings"></span>
+	</span>
+	
+	<!-- Category Title -->
+	<div ng-hide="vm.minimal" class="uf-panel-minimal-heading" ng-click="hideSettingsInCategory=!hideSettingsInCategory">
+		 {{vm.category}} <span class="glyphicon" ng-class="hideSettingsInCategory?'glyphicon-triangle-right':'glyphicon-triangle-bottom'"></span>
+		 <!-- Toggling control -->
+		 <span ng-if="vm.toggle" style="font-weight:400;" ng-click="$event.stopPropagation();">| 
+			 <a href="" ng-click="vm.toggling('flip');" uib-tooltip="Toggle checkboxes in this group" tooltip-placement="right" tooltip-popup-delay="500">toggle</a> | 
+			 <a href="" ng-click="vm.toggling('on');" uib-tooltip="Check all checkboxes in this group" tooltip-placement="right" tooltip-popup-delay="500">on</a> | 
+			 <a href="" ng-click="vm.toggling('off');" uib-tooltip="Uncheck all checkboxes in this group" tooltip-placement="right" tooltip-popup-delay="500">off</a>
+		</span>
+		<!-- connect/read info control -->
+		<span ng-if="vm.read" style="font-weight:400;" ng-click="$event.stopPropagation();">| 
+			 <a href="" ng-click="vm.connect();" uib-tooltip="Connect and read information from the target" tooltip-placement="right" tooltip-popup-delay="500">read</a>
+		</span>
+		<!-- quick settings add button for categories -->
+		<span ng-show="vm.ufSettingsDisplayControlSrv.showPinSetting&&!vm.hideQuick" ng-click="vm.ufQuickSettingsSrv.addEntry(vm.category,'category');$event.stopPropagation();" ng-class="{'disabled':vm.ufQuickSettingsSrv.added(vm.category,'category')}" style="float:right;margin-right:3px;" title="Add group to Quick Settings">
+			<i class="material-icons uf-btn-fg" style="font-size:20px;">add_circle</i>
+		</span>
+	</div>
+
+	<!-- Category Settings -->
+	<div class="defaultDisplay" ng-class="{'collapsedDisplay':hideSettingsInCategory,'minimalDisplay':vm.minimal}">
+		<span ng-repeat="prop in categoryPropertyList = vm.ufPropertiesDB.getPropertiesListByCategory([vm.category],vm.showButton,vm.ufContext.getCurrentCore().name,vm.searchable)" ng-show="!hideSettingsInCategory">
+			<div ng-style="prop.valueType==='Button'&&!vm.ufSettingsDisplayControlSrv.showPinSetting&&{'display':'inline'}" ng-class="{'highlight_hover_light3':vm.ufSettingsDisplayControlSrv.showPinSetting}" style="position:relative;">	
+				<uf-property id="{{prop._id}}" title="ID: {{prop._id}}" minimal="{{vm.minimal}}" searchable="{{vm.searchable}}"></uf-property>
+
+				<div ng-show="vm.ufSettingsDisplayControlSrv.showPinSetting&&!vm.minimal&&!vm.hideQuick" style="display:inline-block;position:absolute;top:0;right:0;cursor:pointer;" ng-click="vm.ufQuickSettingsSrv.addEntry(prop._id,'property');" ng-class="{'disabled':vm.ufQuickSettingsSrv.added(prop._id,'property')}" title="Add setting to Quick Settings">
+					<i class="material-icons uf-btn-fg" style="font-size:20px;">add_circle</i>
+				</div>
+			</div>
+		</span>
+	</div>
+</div>

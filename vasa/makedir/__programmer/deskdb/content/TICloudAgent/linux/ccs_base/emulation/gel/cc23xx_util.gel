@@ -1,0 +1,150 @@
+/* \file        cc23xx_util.gel
+ * \brief       Utility functions used to check which device is being connected to.
+ *              Note: this gel script is intended to be loaded only on loki devices.
+ *
+ * \revision    $Revision$
+ */
+int _deviceId = -1;
+int _partId   = -1;
+
+/** \brief  Reads the DEVICEID from the target and stores it in 'GEL'::_deviceId if it has not already been read */
+ReadDeviceId()
+{
+    if('GEL'::_deviceId == -1)
+    {
+        // Read DEVICEID from device
+        'GEL'::_deviceId = GEL_EvalOnTarget("CS_DAP_0", "'REG'::CFGAP_DEVICEID");
+    }
+}
+
+/** \brief  Reads the PARTID from the target and stores it in 'GEL'::_partId if it has not already been read */
+ReadPartId()
+{
+    if('GEL'::_partId == -1)
+    {
+        // Read PARTID from device
+        'GEL'::_partId = GEL_EvalOnTarget("CS_DAP_0", "'REG'::CFGAP_PARTID");
+    }
+}
+
+/** \brief Determine if device is a CC27XX device */
+IsCC27xx()
+{
+    int result = 0;
+
+    ReadDeviceId();
+
+    if(('GEL'::_deviceId & 0x0FFFFFFF) == 0x0BB9802F)
+    {
+        result = 1;
+    }
+
+    return result;
+}
+
+/** \brief Determine if device is a CC27xxx10 device
+ */
+IsCC27xxx10()
+{
+    int result = 0;
+    int variantId = 0;
+
+    ReadPartId();
+
+    variantId = 'GEL'::_partId & 0xff;
+
+    if (variantId == 0xE8 || variantId == 0xDE || variantId == 0xDF
+    || variantId == 0x60 || variantId == 0x9D || variantId == 0xE6)
+    {
+        result = 1;
+    }
+
+    return result;
+}
+
+/** \brief Determine if device is a CC27xxx7 device
+ */
+IsCC27xxx7()
+{
+    int result = 0;
+    int variantId = 0;
+
+    ReadPartId();
+
+    variantId = 'GEL'::_partId & 0xff;
+
+    if (variantId == 0x48 || variantId == 0xFB || variantId == 0x87 || variantId == 0xAB)
+    {
+        result = 1;
+    }
+
+    return result;
+}
+
+/** \brief  Determine if device is a CC23XX device */
+IsCC23xx()
+{
+
+    int result = 0;
+
+    if(    IsCC23x0R5()
+        || IsCC23x0R2()
+      )
+    {
+        result = 1;
+    }
+
+    return result;
+
+}
+
+/** \brief  Determine if device is a CC2340R2 device */
+IsCC23x0R2()
+{
+
+    int result = 0;
+
+    ReadDeviceId();
+
+    if(('GEL'::_deviceId & 0x0FFFFFFF) == 0x0BB8502F)
+    {
+        result = 1;
+    }
+
+    return result;
+}
+
+/** \brief  Determine if device is a CC23x0R5 device */
+IsCC23x0R5()
+{
+
+    int result = 0;
+
+    ReadDeviceId();
+    if(('GEL'::_deviceId & 0x0FFFFFFF) == 0x0BB8402F)
+    {
+        result = 1;
+    }
+
+    return result;
+}
+
+/** \brief  Determine if device is a CC23x0R5 rev A with trim state A or B */
+IsCC23x0R5_rev_A_trim_state_A_or_B()
+{
+    int result = 0;
+    int trimState;
+
+    if(IsCC23x0R5() && ((('GEL'::_deviceId & 0xF0000000) >> 28) == 0x0))
+    {
+        trimState = ((*((unsigned int *) 0x4E0003AC)) & 0xFF000000) >> 24;
+        if (trimState == 0xFF || trimState == 0xFE)
+        {
+            result = 1;
+        }
+    }
+
+    return result;
+}
+
+

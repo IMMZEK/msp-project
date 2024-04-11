@@ -1,0 +1,77 @@
+<!-- Read Target Device button overlay -->
+<div style="position:absolute;left:50%;top:50%;z-index:10;transform: translate(-50%, -50%);" ng-show="vm.showInitOverlay">
+	<button id="memory-connect" class="btn btn-lg btn-primary" ng-click="vm.init();">Read Target Device</button>
+</div>
+<div id="memory-busy" ng-show="!vm.initializing.$$state.status" style="position:absolute;left:45%;top:45%;z-index:10;width:200px"
+ cg-busy="{promise:vm.initializing,message:vm.loadMessage}"></div>
+
+<!-- Controls bar (Address lookup, Export, Refresh) -->
+<div class="uf-search-bar" ng-class="{'true':'grayout-div-section', false:''}[vm.showInitOverlay]">
+	<div class="form-group" style="padding:0;margin:0;">
+		<form>
+			<div class="input-group" style="width:100%;font-size:16px;">
+				<label class="input-group-addon" style="padding:0 5px 0 4px;font-weight:500;">{{(vm.curPage &&
+					vm.pageInfoList.length > 1)? vm.curPage + ' Page: ' : ''}}Address:</label>
+				<div class="col-xs-2" style="padding:0;">
+					<input id="memory-address" type="text" name="address" placeholder="0x00000000" class="uf-flash-properties-search-input"
+					 ng-model="vm.addrInput" ng-pattern="vm.validateAddressRegex" ng-disabled="!vm.isInit" uib-popover="Must be a valid 32bit hexadecimal address eg:0x123456ab"
+					 popover-is-open="vm.isAddrInputPopoverOpen" popover-trigger="focus" popover-placement="bottom" style="padding-left:3px;line-height:22px;color:#117788;position:relative;top:0px;font-weight:500;">
+				</div>
+				<div ng-if="vm.pageInfoList.length > 1">
+					<select class="form-control" style="width:auto;" ng-model="vm.curPage">
+						<option ng-repeat="pageInfo in vm.pageInfoList">{{pageInfo.name}}</option>
+					</select>
+				</div>
+				<button id="memory-go" style="margin-left:10px;position:relative;top:-1px;" class="btn btn-sm btn-default" ng-click="vm.goToMemHighlight(vm.addrInput)"
+				 ng-disabled="!vm.isInit">Go</button>
+				<span ng-show="vm.ufMemoryRanges.getMemoryRanges().length > 0">
+					<span style="font-size: 13px; font-weight: 500; padding-left: 6px; color: #666">Memory Ranges:</span>
+					<select class="uf-property-select" ng-model="vm.selectedMemoryRange">
+						<option ng-repeat="range in vm.ufMemoryRanges.getMemoryRanges()" value="{{$index}}">{{range.name}}</option>
+					</select>
+					<button style="margin-left:10px;position:relative;top:-1px;" class="btn btn-sm btn-default" ng-click="vm.goToMemRange()"
+					 ng-disabled="!vm.isInit">Go</button>
+				</span>
+				<div style="float:right;margin-right:15px;position:relative;top:-1px;">
+					<button id="memory-export" style="margin-right:5px;" class="btn btn-sm btn-success" ng-click="vm.export(vm.core, vm.pageInfoList)"
+					 ng-disabled="!vm.isInit">
+						<span class="glyphicon glyphicon-export"></span> Export
+					</button>
+					<button id="memory-refresh" class="btn btn-sm btn-info" ng-click="vm.refreshTable()" ng-disabled="!vm.isInit">
+						<span class="glyphicon glyphicon-refresh"></span> Refresh
+					</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+<!-- main body -->
+<div id="memory-browser" class="uf-main-content" ng-class="{'true':'grayout-div-section', false:''}[vm.showInitOverlay]"
+ style="padding:0;" scroll-position rows="vm.rows" top-row="vm.currentTopRow" center-row="vm.currentCenterRow"
+ update-scroll-info="vm.updateScrollInfo">
+	<div ng-style="'height=' + {{vm.viewHeight}} + ';'" style="padding:0;margin:0;">
+		<table class="table table-hover uf-memory-view" ng-disabled="!vm.isInit" style="padding:0;margin:0;">
+			<tr>
+				<td id="memory-load-up" colspan="{{vm.cols+1}}" style="text-align:center;cursor:pointer;" ng-click="vm.loadUp()"
+				 ng-show="!vm.isAtTopLimit"><span>Load More...</span></td>
+			</tr>
+			<tr id="memory-row-{{row.addrStr}}" ng-repeat="row in vm.rows track by row.addrStr">
+				<td id="memory-row-{{row.addrStr}}-header" style="background-color:#fafafa;border:none;border-right:1px solid #ddd;text-align:right;padding-left:0;padding-right:10px;width:auto;">
+					<span style="font-weight:500;color:#777;">{{row.addrStr}}</span>
+				</td>
+				<td id="memory-row-{{row.addrStr}}-{{$index}}" ng-repeat="cell in row.cells track by cell.addrStr" ng-style="cell.style"
+				 class="{{::vm.cellClass}}" style="text-align:center;">
+					<span uib-tooltip-template="'myTooltipTemplate.html'" tooltip-placement="{{vm.toolTipDirection(cell.addr)}}">{{cell.val}}</span>
+					<script type="text/ng-template" id="myTooltipTemplate.html">
+						<div ng-repeat="byte in vm.cellTootip(cell)">{{byte}}</div>
+					</script>
+				</td>
+			</tr>
+			<tr>
+				<td id="memory-load-down" colspan="{{vm.cols+1}}" style="text-align:center;cursor:pointer;" ng-click="vm.loadDown()"
+				 ng-show="!vm.isAtBottomLimit"><span>Load More...</span></td>
+			</tr>
+		</table>
+	</div>
+</div>

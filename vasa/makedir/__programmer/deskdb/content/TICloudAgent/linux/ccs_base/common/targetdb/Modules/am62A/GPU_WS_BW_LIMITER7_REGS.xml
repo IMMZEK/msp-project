@@ -1,0 +1,87 @@
+<module name="GPU_WS_BW_LIMITER7_REGS" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+	<register id="REGS_PID" acronym="REGS_PID" offset="0x0" width="32" description="">
+		<bitfield id="SCHEME" width="2" begin="31" end="30" resetval="0x1" description="PID scheme" range="31 - 30" rwaccess="R"/> 
+		<bitfield id="BU" width="2" begin="29" end="28" resetval="0x2" description="PID bu identifier" range="29 - 28" rwaccess="R"/> 
+		<bitfield id="FUNC" width="12" begin="27" end="16" resetval="0x1632" description="PID function identifier" range="27 - 16" rwaccess="R"/> 
+		<bitfield id="RTL_VER" width="5" begin="15" end="11" resetval="0x5" description="PID RTL version number" range="15 - 11" rwaccess="R"/> 
+		<bitfield id="MAJOR_REV" width="3" begin="10" end="8" resetval="0x1" description="PID Major revision number" range="10 - 8" rwaccess="R"/> 
+		<bitfield id="CUSTOM" width="2" begin="7" end="6" resetval="0x0" description="PID custom" range="7 - 6" rwaccess="R"/> 
+		<bitfield id="MINOR_REV" width="6" begin="5" end="0" resetval="0x0" description="PID Minor revision number" range="5 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_CTRL" acronym="REGS_CTRL" offset="0x4" width="32" description="">
+		<bitfield id="REGION_FILTER_EN" width="1" begin="4" end="4" resetval="0x0" description="Enable the region filter, which will only apply the bandwith and transaction limits to the configured address regions" range="4" rwaccess="R/W"/> 
+		<bitfield id="WR_TXN_ENABLE" width="1" begin="3" end="3" resetval="0x0" description="Enable limiting maximum outstanding write transactions" range="3" rwaccess="R/W"/> 
+		<bitfield id="RD_TXN_ENABLE" width="1" begin="2" end="2" resetval="0x0" description="Enable limiting maximum outstanding read transactions" range="2" rwaccess="R/W"/> 
+		<bitfield id="WR_BW_ENABLE" width="1" begin="1" end="1" resetval="0x0" description="Enable write bandwidth limiting" range="1" rwaccess="R/W"/> 
+		<bitfield id="RD_BW_ENABLE" width="1" begin="0" end="0" resetval="0x0" description="Enable read bandwidth limiting" range="0" rwaccess="R/W"/>
+	</register>
+	<register id="REGS_WR_BW_CIR" acronym="REGS_WR_BW_CIR" offset="0x200" width="32" description="">
+		<bitfield id="CIR" width="32" begin="31" end="0" resetval="0x0" description="Committed Information Rate" range="31 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="REGS_WR_BW_PIR" acronym="REGS_WR_BW_PIR" offset="0x204" width="32" description="">
+		<bitfield id="PIR" width="32" begin="31" end="0" resetval="0x0" description="Peak Information Rate" range="31 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="REGS_WR_BW_BURST_OFFSET" acronym="REGS_WR_BW_BURST_OFFSET" offset="0x208" width="32" description="">
+		<bitfield id="OFFSET" width="16" begin="15" end="0" resetval="0x0" description="Burst Offset - the number of bytes before the Committed Information Rate is applied at startup or after a period of inactivity. Peak Information Rate will still apply" range="15 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="REGS_WR_BW_INFO" acronym="REGS_WR_BW_INFO" offset="0x20C" width="32" description="">
+		<bitfield id="COLOR" width="2" begin="1" end="0" resetval="0x0" description="Write Bandwidth three-color marker output from rategen submodule" range="1 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_WR_BW_STATS" acronym="REGS_WR_BW_STATS" offset="0x220" width="32" description="">
+		<bitfield id="WINDOW" width="16" begin="31" end="16" resetval="0x1024" description="Statistics window size. This cannot be set to 0. If 16'd0 is written, it will be set to the reset value of 16'd1024" range="31 - 16" rwaccess="R/W"/> 
+		<bitfield id="OVERFLOW" width="1" begin="9" end="9" resetval="0x0" description="Statistics overflow error" range="9" rwaccess="R"/> 
+		<bitfield id="CLR" width="1" begin="8" end="8" resetval="0x0" description="Clear statistics data. Resets statistics counters at 0" range="8" rwaccess="W"/> 
+		<bitfield id="EN" width="1" begin="0" end="0" resetval="0x0" description="Enable write bandwidth statistics" range="0" rwaccess="R/W"/>
+	</register>
+	<register id="REGS_WR_BW_STATS_THRSHLD" acronym="REGS_WR_BW_STATS_THRSHLD" offset="0x224" width="32" description="">
+		<bitfield id="THRESHOLD" width="32" begin="31" end="0" resetval="0x0" description="Write bandwidth stats threshold in bytes. Note that this is total bytes, unlike CIR and PIR. CIR and PIR are based on a rolling window, and the statistics threshold is based on a fixed window. This will still take into account DDR bytes used, so can be compared to CIR and PIR directly if the bandwidths are converted via the equations for CIR and PIR. The threshold bandwidth is programmed here as bytes per window" range="31 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="REGS_WR_BW_WINDOWS_CNT" acronym="REGS_WR_BW_WINDOWS_CNT" offset="0x228" width="32" description="">
+		<bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="Write bandwidth window count - the number of windows elapsed since statistics collection began" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_WR_BW_CIR_CNT" acronym="REGS_WR_BW_CIR_CNT" offset="0x22C" width="32" description="">
+		<bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="The total number of statistics windows in which Write Commit Information Rate occurred. Note that if PIR is set to a lower value than CIR or if the burst offset feature is used, this will also count times that PIR is reached." range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_WR_BW_PIR_CNT" acronym="REGS_WR_BW_PIR_CNT" offset="0x230" width="32" description="">
+		<bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="The total number of statistics windows in which Write Peak Information Rate occurred" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_WR_BW_THRSHLD_CNT" acronym="REGS_WR_BW_THRSHLD_CNT" offset="0x234" width="32" description="">
+		<bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="The total number of statistics windows in which Write bytes transferred exceeded the statistics threshold" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_WR_BYTES_MAX" acronym="REGS_WR_BYTES_MAX" offset="0x238" width="32" description="">
+		<bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="Max number of bytes in a single window. This number accounts for DDR bandwidth consumed, not simply the accumulation of the packet bytecnt values across a window. The max bandwidth calculation is the total bytes value in this MMR divided by the windows size in WR_BW_STATS.window and multiplied with the interface frequency: WR_BYTES_MAX * FREQ / WR_BW_STATS.window" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_WR_TXN" acronym="REGS_WR_TXN" offset="0x400" width="32" description="">
+		<bitfield id="LIMIT" width="16" begin="15" end="0" resetval="0x64" description="The maximum number of outstanding write transactions allowed. NOTE: This cannot be programmed to a zero. If a zero is written, it will default to the reset value of 16'd64, as a limit of zero outstanding transactions would hang the interface." range="15 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="REGS_WR_TXN_INFO" acronym="REGS_WR_TXN_INFO" offset="0x40C" width="32" description="">
+		<bitfield id="OCC" width="7" begin="6" end="0" resetval="0x0" description="Write transaction scoreboard occupancy" range="6 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_WR_TXN_STATS" acronym="REGS_WR_TXN_STATS" offset="0x420" width="32" description="">
+		<bitfield id="WINDOW" width="16" begin="31" end="16" resetval="0x1024" description="Statistics window size. This cannot be set to 0. If 16'd0 is written, it will be set to the reset value of 16'd1024" range="31 - 16" rwaccess="R/W"/> 
+		<bitfield id="OVERFLOW" width="1" begin="9" end="9" resetval="0x0" description="Statistics overflow error" range="9" rwaccess="R"/> 
+		<bitfield id="CLR" width="1" begin="8" end="8" resetval="0x0" description="Clear statistics data. Resets statistics counters at 0" range="8" rwaccess="W"/> 
+		<bitfield id="EN" width="1" begin="0" end="0" resetval="0x0" description="Enable write transaction statistics" range="0" rwaccess="R/W"/>
+	</register>
+	<register id="REGS_WR_TXN_STATS_THRSHLD" acronym="REGS_WR_TXN_STATS_THRSHLD" offset="0x424" width="32" description="">
+		<bitfield id="THRESHOLD" width="16" begin="15" end="0" resetval="0x0" description="Write transaction statistics threshold. The threshold can be set to any value, though it will saturate at the outstanding transaction limit if it is set to a value greater than the programmed outstanding write transaction limit" range="15 - 0" rwaccess="R/W"/>
+	</register>
+	<register id="REGS_WR_TXN_WINDOWS_CNT" acronym="REGS_WR_TXN_WINDOWS_CNT" offset="0x428" width="32" description="">
+		<bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="Write transaction window count - the number of windows elapsed since statistics collection began" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_WR_TXN_LMT_CNT" acronym="REGS_WR_TXN_LMT_CNT" offset="0x42C" width="32" description="">
+		<bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="The number of statistics windows in which the outstanding write transaction limit was reached" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_WR_TXN_THRSHLD_CNT" acronym="REGS_WR_TXN_THRSHLD_CNT" offset="0x430" width="32" description="">
+		<bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="The number of statistics windows in which the number of outstanding write transactions was greater than or equal to the threshold in WR_TXN_STATS_THRSHLD" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_WR_TXN_LIMIT_TOTAL" acronym="REGS_WR_TXN_LIMIT_TOTAL" offset="0x434" width="32" description="">
+		<bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="The total number of cycles with the write transactions outstanding at the programmed limit since statistics collection began" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_WR_TXN_THRSHLD_TOTAL" acronym="REGS_WR_TXN_THRSHLD_TOTAL" offset="0x438" width="32" description="">
+		<bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="The total number of cycles with write transactions outstanding greater than or equal to the statistics threshold in WR_TXN_STATS_THRSHLD since statistics collection began" range="31 - 0" rwaccess="R"/>
+	</register>
+	<register id="REGS_WR_TXN_MAX" acronym="REGS_WR_TXN_MAX" offset="0x43C" width="32" description="">
+		<bitfield id="VAL" width="16" begin="15" end="0" resetval="0x0" description="The maximum outstanding write transactions at any point in time, regardless of the programmed limit" range="15 - 0" rwaccess="R"/>
+	</register>
+</module>

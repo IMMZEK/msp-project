@@ -1,0 +1,636 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<module name="MCSPI2" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+	<register id="MCSPI_REVISION" acronym="MCSPI_REVISION" offset="0x0" width="32" description="This register contains the hard coded RTL revision number.">
+		<bitfield id="Reserved" width="24" begin="31" end="8" resetval="0x000000" description="Reads returns 0" range="" rwaccess="R"/>
+		<bitfield id="REV" width="8" begin="7" end="0" resetval="See" description="IP revision[7:4] . Major revision . [3:0] . Minor revision . Example: 0x10 for 1.0, 0x21 for 2.1 ." range="" rwaccess="R"/>
+	</register>
+	<register id="MCSPI_SYSCONFIG" acronym="MCSPI_SYSCONFIG" offset="0x10" width="32" description="This register allows control of various parameters of the module interface. It is not sensitive to software reset.">
+		<bitfield id="Reserved" width="22" begin="31" end="10" resetval="0x000000" description="Reads returns 0" range="" rwaccess="RW"/>
+		<bitfield id="CLOCKACTIVITY" width="2" begin="9" end="8" resetval="0x0" description="Clocks activity during wake up mode period" range="" rwaccess="RW">
+			<bitenum value="0" token="CLOCKACTIVITY_0" description="Interface and Functional clocks may be switched off."/>
+			<bitenum value="1" token="CLOCKACTIVITY_1" description="Interface clock is maintained. Functional clock may be switched off."/>
+			<bitenum value="2" token="CLOCKACTIVITY_2" description="Functional clock is maintained. Interface clock may be switched off."/>
+			<bitenum value="3" token="CLOCKACTIVITY_3" description="Interface and Functional clocks are maintained."/>
+		</bitfield>
+		<bitfield id="Reserved" width="3" begin="7" end="5" resetval="0x0" description="Reads returns 0" range="" rwaccess="RW"/>
+		<bitfield id="SIDLEMODE" width="2" begin="4" end="3" resetval="0x0" description="Power management" range="" rwaccess="RW">
+			<bitenum value="0" token="SIDLEMODE_0" description="If an idle request is detected, the McSPI acknowledges it unconditionally and goes in Inactive mode. Interrupt, DMA requests and wake up lines are unconditionally de-asserted and the module wake-up capability is deactivated even if the bit[ ENAWAKEUP] is set."/>
+			<bitenum value="1" token="SIDLEMODE_1" description="If an idle request is detected, the request is ignored and the module does not switch to wake up mode and keeps on behaving normally."/>
+			<bitenum value="2" token="SIDLEMODE_2" description="If an idle request is detected, the module will switch to wake up mode based on its internal activity and the wake up capability can be used if the bit[ENAWAKEUP] is set."/>
+			<bitenum value="3" token="SIDLEMODE_3" description="Reserved - do not use."/>
+		</bitfield>
+		<bitfield id="ENAWAKEUP" width="1" begin="2" end="2" resetval="0" description="Wake-up feature control" range="" rwaccess="RW">
+			<bitenum value="0" token="ENAWAKEUP_0" description="Wake-up capability disabled"/>
+			<bitenum value="1" token="ENAWAKEUP_1" description="Wake-up capability enabled"/>
+		</bitfield>
+		<bitfield id="SOFTRESET" width="1" begin="1" end="1" resetval="0" description="Software reset. Read always returns 0." range="" rwaccess="RW">
+			<bitenum value="0" token="SOFTRESET_0" description="Normal mode."/>
+			<bitenum value="1" token="SOFTRESET_1" description="Trigger a module reset. This bit is automatically reset by hardware."/>
+		</bitfield>
+		<bitfield id="AUTOIDLE" width="1" begin="0" end="0" resetval="0" description="Internal interface Clock gating strategy" range="" rwaccess="RW">
+			<bitenum value="0" token="AUTOIDLE_0" description="interface clock is free-running"/>
+			<bitenum value="1" token="AUTOIDLE_1" description="Automatic interface clock gating strategy is applied, based on the module interface activity"/>
+		</bitfield>
+	</register>
+	<register id="MCSPI_SYSSTATUS" acronym="MCSPI_SYSSTATUS" offset="0x14" width="32" description="This register provides status information about the module excluding the interrupt status information">
+		<bitfield id="Reserved" width="31" begin="31" end="1" resetval="0x00000000" description="Reserved for module specific status information.Read returns 0 ." range="" rwaccess="R"/>
+		<bitfield id="RESETDONE" width="1" begin="0" end="0" resetval="0" description="Internal Reset Monitoring" range="" rwaccess="R">
+			<bitenum value="0" token="RESETDONE_0" description="Internal module reset is on-going"/>
+			<bitenum value="1" token="RESETDONE_1" description="Reset completed"/>
+		</bitfield>
+	</register>
+	<register id="MCSPI_IRQSTATUS" acronym="MCSPI_IRQSTATUS" offset="0x18" width="32" description="The interrupt status regroups all the status of the module internal events that can generate an interrupt">
+		<bitfield id="Reserved" width="14" begin="31" end="18" resetval="0x0000" description="Reads returns 0" range="" rwaccess="RW"/>
+		<bitfield id="EOW" width="1" begin="17" end="17" resetval="0x0" description="End of word count event when a channel is enabled using the FIFO buffer and the channel had sent the number of SPI word defined by MCSPI_XFERLEVEL[31:16] WCNT bit field." range="" rwaccess="RW">
+			<bitenum value="0" token="EOW_0_w" description="Event status bit unchanged."/>
+			<bitenum value="0" token="EOW_0_r" description="Event false."/>
+			<bitenum value="1" token="EOW_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="EOW_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="WKS" width="1" begin="16" end="16" resetval="0x0" description="Wake-up event in slave mode when an active control signal is detected on the spim_csx line programmed in theMCSPI_CHxCONF[SPIENSLV] field (where x=0 only)" range="" rwaccess="RW">
+			<bitenum value="0" token="WKS_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="WKS_0_r" description="Event false"/>
+			<bitenum value="1" token="WKS_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="WKS_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="Reserved" width="1" begin="15" end="15" resetval="0x0" description="Reads returns 0." range="" rwaccess="RW"/>
+		<bitfield id="RX3_FULL" width="1" begin="14" end="14" resetval="0x0" description="MCSPI_RX3 register is full (only when channel 3 is enabled)" range="" rwaccess="RW">
+			<bitenum value="0" token="RX3_FULL_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="RX3_FULL_0_r" description="Event false"/>
+			<bitenum value="1" token="RX3_FULL_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="RX3_FULL_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="TX3_UNDERFLOW" width="1" begin="13" end="13" resetval="0x0" description="MCSPI_TX3 register underflow (only when channel 3 is enabled)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX3_UNDERFLOW_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="TX3_UNDERFLOW_0_r" description="Event false"/>
+			<bitenum value="1" token="TX3_UNDERFLOW_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="TX3_UNDERFLOW_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="TX3_EMPTY" width="1" begin="12" end="12" resetval="0x0" description="MCSPI_TX3 register is empty (only when channel 3 is enabled)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX3_EMPTY_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="TX3_EMPTY_0_r" description="Event false"/>
+			<bitenum value="1" token="TX3_EMPTY_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="TX3_EMPTY_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="Reserved" width="1" begin="11" end="11" resetval="0x0" description="Read returns 0." range="" rwaccess="RW"/>
+		<bitfield id="RX2_FULL" width="1" begin="10" end="10" resetval="0x0" description="MCSPI_RX2 register full (only when channel 2 is enabled)" range="" rwaccess="RW">
+			<bitenum value="0" token="RX2_FULL_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="RX2_FULL_0_r" description="Event false"/>
+			<bitenum value="1" token="RX2_FULL_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="RX2_FULL_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="TX2_UNDERFLOW" width="1" begin="9" end="9" resetval="0x0" description="MCSPI_TX2 register underflow (only when channel 2 is enabled)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX2_UNDERFLOW_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="TX2_UNDERFLOW_0_r" description="Event false"/>
+			<bitenum value="1" token="TX2_UNDERFLOW_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="TX2_UNDERFLOW_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="TX2_EMPTY" width="1" begin="8" end="8" resetval="0x0" description="MCSPI_TX2 register empty (only when channel 2 is enabled)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX2_EMPTY_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="TX2_EMPTY_0_r" description="Event false"/>
+			<bitenum value="1" token="TX2_EMPTY_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="TX2_EMPTY_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="Reserved" width="1" begin="7" end="7" resetval="0x0" description="Read returns 0." range="" rwaccess="RW"/>
+		<bitfield id="RX1_FULL" width="1" begin="6" end="6" resetval="0x0" description="MCSPI_RX1 register full (only when channel 1 is enabled)" range="" rwaccess="RW">
+			<bitenum value="0" token="RX1_FULL_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="RX1_FULL_0_r" description="Event false"/>
+			<bitenum value="1" token="RX1_FULL_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="RX1_FULL_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="TX1_UNDERFLOW" width="1" begin="5" end="5" resetval="0x0" description="MCSPI_TX1 register underflow (only when channel 1 is enabled)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX1_UNDERFLOW_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="TX1_UNDERFLOW_0_r" description="Event false"/>
+			<bitenum value="1" token="TX1_UNDERFLOW_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="TX1_UNDERFLOW_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="TX1_EMPTY" width="1" begin="4" end="4" resetval="0x0" description="MCSPI_TX1 register empty (only when channel 1 is enabled)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX1_EMPTY_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="TX1_EMPTY_0_r" description="Event false"/>
+			<bitenum value="1" token="TX1_EMPTY_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="TX1_EMPTY_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="RX0_OVERFLOW" width="1" begin="3" end="3" resetval="0x0" description="MCSPI_RX0 register overflow (only in slave mode)" range="" rwaccess="RW">
+			<bitenum value="0" token="RX0_OVERFLOW_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="RX0_OVERFLOW_0_r" description="Event false"/>
+			<bitenum value="1" token="RX0_OVERFLOW_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="RX0_OVERFLOW_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="RX0_FULL" width="1" begin="2" end="2" resetval="0x0" description="MCSPI_RX0 register full (only when channel 0 is enabled)" range="" rwaccess="RW">
+			<bitenum value="0" token="RX0_FULL_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="RX0_FULL_0_r" description="Event false"/>
+			<bitenum value="1" token="RX0_FULL_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="RX0_FULL_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="TX0_UNDERFLOW" width="1" begin="1" end="1" resetval="0x0" description="MCSPI_TX0 register underflow (only when channel 0 is enabled)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX0_UNDERFLOW_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="TX0_UNDERFLOW_0_r" description="Event false"/>
+			<bitenum value="1" token="TX0_UNDERFLOW_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="TX0_UNDERFLOW_1_r" description="Event is pending."/>
+		</bitfield>
+		<bitfield id="TX0_EMPTY" width="1" begin="0" end="0" resetval="0x0" description="MCSPI_TX0 register empty (only when channel 0 is enabled)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX0_EMPTY_0_w" description="Event status bit unchanged"/>
+			<bitenum value="0" token="TX0_EMPTY_0_r" description="Event false"/>
+			<bitenum value="1" token="TX0_EMPTY_1_w" description="Event status bit is reset."/>
+			<bitenum value="1" token="TX0_EMPTY_1_r" description="Event is pending."/>
+		</bitfield>
+	</register>
+	<register id="MCSPI_IRQENABLE" acronym="MCSPI_IRQENABLE" offset="0x1C" width="32" description="This register allows to enable/disable the module internal sources of interrupt, on an event-by-event basis.">
+		<bitfield id="Reserved" width="14" begin="31" end="18" resetval="0x0000" description="Reads return 0" range="" rwaccess="RW"/>
+		<bitfield id="EOWKE" width="1" begin="17" end="17" resetval="0x0" description="End of Word count Interrupt Enable." range="" rwaccess="RW">
+			<bitenum value="0" token="EOWKE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="EOWKE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="WKE" width="1" begin="16" end="16" resetval="0x0" description="Wake-up event interrupt enable in slave mode when an active control signal is detected on the spim_csx line programmed in theMCSPI_CHxCONF[SPIENSLV] field (where x=0 only)" range="" rwaccess="RW">
+			<bitenum value="0" token="WKE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="WKE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="Reserved" width="1" begin="15" end="15" resetval="0x0" description="Read returns 0." range="" rwaccess="RW"/>
+		<bitfield id="RX3_FULL_ENABLE" width="1" begin="14" end="14" resetval="0x0" description="MCSPI_RX3 register full interrupt enable (channel 3)" range="" rwaccess="RW">
+			<bitenum value="0" token="RX3_FULL_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="RX3_FULL_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="TX3_UNDERFLOW_ENABLE" width="1" begin="13" end="13" resetval="0x0" description="MCSPI_TX3 register underflow interrupt enable (channel 3)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX3_UNDERFLOW_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="TX3_UNDERFLOW_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="TX3_EMPTY_ENABLE" width="1" begin="12" end="12" resetval="0x0" description="MCSPI_TX3 register empty interrupt enable (channel 3)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX3_EMPTY_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="TX3_EMPTY_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="Reserved" width="1" begin="11" end="11" resetval="0x0" description="Read returns 0." range="" rwaccess="RW"/>
+		<bitfield id="RX2_FULL_ENABLE" width="1" begin="10" end="10" resetval="0x0" description="MCSPI_RX2 register full interrupt enable (channel 2)" range="" rwaccess="RW">
+			<bitenum value="0" token="RX2_FULL_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="RX2_FULL_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="TX2_UNDERFLOW_ENABLE" width="1" begin="9" end="9" resetval="0x0" description="MCSPI_TX2 register underflow interrupt enable (channel 2)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX2_UNDERFLOW_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="TX2_UNDERFLOW_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="TX2_EMPTY_ENABLE" width="1" begin="8" end="8" resetval="0x0" description="MCSPI_TX2 register empty interrupt enable (channel 2)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX2_EMPTY_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="TX2_EMPTY_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="Reserved" width="1" begin="7" end="7" resetval="0x0" description="Read returns 0." range="" rwaccess="RW"/>
+		<bitfield id="RX1_FULL_ENABLE" width="1" begin="6" end="6" resetval="0x0" description="MCSPI_RX1 register full interrupt enable (channel 1)" range="" rwaccess="RW">
+			<bitenum value="0" token="RX1_FULL_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="RX1_FULL_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="TX1_UNDERFLOW_ENABLE" width="1" begin="5" end="5" resetval="0x0" description="MCSPI_TX1 register underflow interrupt enable (channel 1)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX1_UNDERFLOW_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="TX1_UNDERFLOW_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="TX1_EMPTY_ENABLE" width="1" begin="4" end="4" resetval="0x0" description="MCSPI_TX1 register empty interrupt enable (channel 1)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX1_EMPTY_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="TX1_EMPTY_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="RX0_OVERFLOW_ENABLE" width="1" begin="3" end="3" resetval="0x0" description="MCSPI_RX0 register overflow interrupt enable (channel 0)" range="" rwaccess="RW">
+			<bitenum value="0" token="RX0_OVERFLOW_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="RX0_OVERFLOW_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="RX0_FULL_ENABLE" width="1" begin="2" end="2" resetval="0x0" description="MCSPI_RX0 register full interrupt enable (channel 0)" range="" rwaccess="RW">
+			<bitenum value="0" token="RX0_FULL_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="RX0_FULL_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="TX0_UNDERFLOW_ENABLE" width="1" begin="1" end="1" resetval="0x0" description="MCSPI_TX0 register underflow interrupt enable (channel 0)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX0_UNDERFLOW_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="TX0_UNDERFLOW_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+		<bitfield id="TX0_EMPTY_ENABLE" width="1" begin="0" end="0" resetval="0x0" description="MCSPI_TX0 register empty interrupt enable (channel 0)" range="" rwaccess="RW">
+			<bitenum value="0" token="TX0_EMPTY_ENABLE_0" description="Interrupt disabled"/>
+			<bitenum value="1" token="TX0_EMPTY_ENABLE_1" description="Interrupt enabled"/>
+		</bitfield>
+	</register>
+	<register id="MCSPI_WAKEUPENABLE" acronym="MCSPI_WAKEUPENABLE" offset="0x20" width="32" description="The wake-up enable register allows to enable/disable the module internal sources of wake-up on event-by-event basis.">
+		<bitfield id="Reserved" width="31" begin="31" end="1" resetval="0x00000000" description="Reads return 0" range="" rwaccess="RW"/>
+		<bitfield id="WKEN" width="1" begin="0" end="0" resetval="0" description="Wake-up functionality in slave mode when an active control signal is detected on the spim_cs line programmed in the fieldMCSPI_CHxCONF[SPIENSLV]" range="" rwaccess="RW">
+			<bitenum value="0" token="WKEN_0" description="The event is not allowed to wake-up the system, even if the global control bit MCSPI_SYSCONF[ENAWAKEUP] is set."/>
+			<bitenum value="1" token="WKEN_1" description="The event is allowed to wake-up the system if the global control bit MCSPI_SYSCONF[ENAWAKEUP] is set."/>
+		</bitfield>
+	</register>
+	<register id="MCSPI_SYST" acronym="MCSPI_SYST" offset="0x24" width="32" description="This register is used to check the correctness of the system interconnect either internally to peripheral bus, or externally to device IO pads, when the module is configured in system test (SYSTEST) mode.">
+		<bitfield id="Reserved" width="20" begin="31" end="12" resetval="0x00000" description="Reads returns 0" range="" rwaccess="RW"/>
+		<bitfield id="SSB" width="1" begin="11" end="11" resetval="0" description="Set status bitThis bit must be cleared prior attempting to clear a status bit of the MCSPI_ IRQSTATUS register. . Writing 1 into this bit sets to 1 all status bits contained in the register. ." range="" rwaccess="RW">
+			<bitenum value="0" token="SSB_0" description="No action. Writing 0 does not clear already set status bits;"/>
+			<bitenum value="1" token="SSB_1" description="Force to 1 all status bits of MCSPI_ IRQSTATUS register."/>
+		</bitfield>
+		<bitfield id="SPIENDIR" width="1" begin="10" end="10" resetval="0" description="Set the direction of the spim_cs lines and spim_clk line" range="" rwaccess="RW">
+			<bitenum value="0" token="SPIENDIR_0" description="Output (as in master mode)"/>
+			<bitenum value="1" token="SPIENDIR_1" description="Input (as in slave mode)"/>
+		</bitfield>
+		<bitfield id="SPIDATDIR1" width="1" begin="9" end="9" resetval="0" description="Set the direction of the SPIDAT[1] (spim_simo)" range="" rwaccess="RW">
+			<bitenum value="0" token="SPIDATDIR1_0" description="Output"/>
+			<bitenum value="1" token="SPIDATDIR1_1" description="Input"/>
+		</bitfield>
+		<bitfield id="SPIDATDIR0" width="1" begin="8" end="8" resetval="0" description="Set the direction of the SPIDAT[0] (spim_somi)" range="" rwaccess="RW">
+			<bitenum value="0" token="SPIDATDIR0_0" description="Output"/>
+			<bitenum value="1" token="SPIDATDIR0_1" description="Input"/>
+		</bitfield>
+		<bitfield id="WAKD" width="1" begin="7" end="7" resetval="0" description="SWAKEUP output (signal data value of internal signal to system).The signal is driven high or low according to the value written into this register bit. ." range="" rwaccess="RW">
+			<bitenum value="0" token="WAKD_0" description="The pin is driven low."/>
+			<bitenum value="1" token="WAKD_1" description="The pin is driven high."/>
+		</bitfield>
+		<bitfield id="SPICLK" width="1" begin="6" end="6" resetval="0" description="spim_clk line (signal data value)If[SPIENDIR] = 1 (input mode direction), this bit returns the value on the spim_clk line (high or low) and a write into this bit has no effect. . If[SPIENDIR] = 0 (output mode direction), the spim_clk line is driven high or low according to the value written into this register. ." range="" rwaccess="RW"/>
+		<bitfield id="SPIDAT_1" width="1" begin="5" end="5" resetval="0" description="spim_somi line (signal data value)If[SPIDATDIR1] = 0 (output mode direction), the spim_somi line is driven high or low according to the value written into this register. . If[SPIDATDIR1] = 1 (input mode direction), this bit returns the value on the spim_somi line (high or low) and a write into this bit has no effect. ." range="" rwaccess="RW"/>
+		<bitfield id="SPIDAT_0" width="1" begin="4" end="4" resetval="0" description="spim_simo line (signal data value)If[SPIDATDIR0] = 0 (output mode direction), the spim_simo line is driven high or low according to the value written into this register. . If[SPIDATDIR0] = 1 (input mode direction), this bit returns the value on the spim_simo line (high or low) and a write into this bit has no effect. ." range="" rwaccess="RW"/>
+		<bitfield id="SPIEN_3" width="1" begin="3" end="3" resetval="0" description="spim_cs3 line (signal data value)If[SPIENDIR] = 0 (output mode direction), the spim_cs3 line is driven high or low according to the value written into this register. . If[SPIENDIR] = 1 (input mode direction), this bit returns the value on the spim_cs3 line (high or low) and a write into this bit has no effect. ." range="" rwaccess="RW"/>
+		<bitfield id="PIEN_2" width="1" begin="2" end="2" resetval="0" description="spim_cs2 line (signal data value)If[SPIENDIR] = 0 (output mode direction), the spim_cs2 line is driven high or low according to the value written into this register. . If[SPIENDIR] = 1 (input mode direction), this bit returns the value on the spim_cs2 line (high or low) and a write into this bit has no effect. ." range="" rwaccess="RW"/>
+		<bitfield id="SPIEN_1" width="1" begin="1" end="1" resetval="0" description="spim_cs1 line (signal data value)If[SPIENDIR] = 0 (output mode direction), the spim_cs1 line is driven high or low according to the value written into this register. . If[SPIENDIR] = 1 (input mode direction), this bit returns the value on the spim_cs1 line (high or low) and a write into this bit has no effect. ." range="" rwaccess="RW"/>
+		<bitfield id="SPIEN_0" width="1" begin="0" end="0" resetval="0" description="spim_cs0 line (signal data value)If[SPIENDIR] = 0 (output mode direction), the spim_cs0 line is driven high or low according to the value written into this register. . If[SPIENDIR] = 1 (input mode direction), this bit returns the value on the spim_cs0 line (high or low) and a write into this bit has no effect. ." range="" rwaccess="RW"/>
+	</register>
+	<register id="MCSPI_MODULCTRL" acronym="MCSPI_MODULCTRL" offset="0x28" width="32" description="This register is dedicated to the configuration of the serial port interface.">
+		<bitfield id="Reserved" width="28" begin="31" end="4" resetval="0x0000000" description="Reads returns 0" range="" rwaccess="RW"/>
+		<bitfield id="SYSTEM_TEST" width="1" begin="3" end="3" resetval="0" description="Enables the system test mode" range="" rwaccess="RW">
+			<bitenum value="0" token="SYSTEM_TEST_0" description="Functional mode"/>
+			<bitenum value="1" token="SYSTEM_TEST_1" description="System test mode (SYSTEST)"/>
+		</bitfield>
+		<bitfield id="MS" width="1" begin="2" end="2" resetval="1" description="Master/ Slave" range="" rwaccess="RW">
+			<bitenum value="0" token="MS_0" description="Master - The module generates the spim_clk and spim_cs for channel x"/>
+			<bitenum value="1" token="MS_1" description="Slave - The module receive"/>
+		</bitfield>
+		<bitfield id="Reserved" width="1" begin="1" end="1" resetval="0" description="(returns 0 after writing 0) (returns 1 after writing 1)" range="" rwaccess="RW"/>
+		<bitfield id="SINGLE" width="1" begin="0" end="0" resetval="0" description="Single forced channel/multichannel (master mode only)" range="" rwaccess="RW">
+			<bitenum value="0" token="SINGLE_0" description="One or more channels will be used in master mode with automatic chip-select generation."/>
+			<bitenum value="1" token="SINGLE_1" description="Only one channel will be used in master mode and the chip-select is driven by the[20] FORCE bit. This bit must be set in force spim_cs mode."/>
+		</bitfield>
+	</register>
+	<register id="MCSPI_CHxCONF_0" acronym="MCSPI_CHxCONF_0" offset="0x2C" width="32" description="This register is dedicated to the configuration of the channel x.">
+		<bitfield id="Reserved" width="2" begin="31" end="30" resetval="0x00" description="Read returns 0s." range="" rwaccess="RW"/>
+		<bitfield id="CLKG" width="1" begin="29" end="29" resetval="0x0" description="Clock divider granularity. This register defines the granularity of channel clock divider: power of two or one clock cycle granularity. When this bit is set, theMCSPI_CHxCTRL[15:8] EXTCLK bit field must be configured to reach a maximum of 4096 clock divider ratio. Then the clock divider ratio is a concatenation of MCSPI_CHxCONF[5:2] CLKD and EXTCLK values." range="" rwaccess="RW">
+			<bitenum value="0" token="CLKG_0" description="Clock granularity of power of two"/>
+			<bitenum value="1" token="CLKG_1" description="One clock cycle ganularity"/>
+		</bitfield>
+		<bitfield id="FFER" width="1" begin="28" end="28" resetval="0x0" description="FIFO enabled for Receive. Only one channel can have this bit field set." range="" rwaccess="RW">
+			<bitenum value="0" token="FFER_0" description="The buffer is not used to Receive data"/>
+			<bitenum value="1" token="FFER_1" description="The buffer is used to Receive data"/>
+		</bitfield>
+		<bitfield id="FFEW" width="1" begin="27" end="27" resetval="0x0" description="FIFO enabled for Transmit. Only one channel can have this bit field set." range="" rwaccess="RW">
+			<bitenum value="0" token="FFEW_0" description="The buffer is not used to Transmit data"/>
+			<bitenum value="1" token="FFEW_1" description="The buffer is used to Transmit data"/>
+		</bitfield>
+		<bitfield id="TCS" width="2" begin="26" end="25" resetval="0x0" description="Chip select time controlDefines the number of interface clock cycles between CS toggling and first (or last) edge of SPI clock. ." range="" rwaccess="RW">
+			<bitenum value="0" token="TCS_0" description="0.5 clock cycle"/>
+			<bitenum value="1" token="TCS_1" description="1.5 clock cycles"/>
+			<bitenum value="2" token="TCS_2" description="2.5 clock cycles"/>
+			<bitenum value="3" token="TCS_3" description="3.5 clock cycles"/>
+		</bitfield>
+		<bitfield id="SBPOL" width="1" begin="24" end="24" resetval="0x0" description="Start bit polarity" range="" rwaccess="RW">
+			<bitenum value="0" token="SBPOL_0" description="Start bit polarity is held to 0 during SPI transfer."/>
+			<bitenum value="1" token="SBPOL_1" description="Start bit polarity is held to 1 during SPI transfer."/>
+		</bitfield>
+		<bitfield id="SBE" width="1" begin="23" end="23" resetval="0x0" description="Start bit enable for SPI transfer" range="" rwaccess="RW">
+			<bitenum value="0" token="SBE_0" description="Default SPI transfer length as specified by WL bit field"/>
+			<bitenum value="1" token="SBE_1" description="Start bit D/CX added before SPI transfer. Polarity is defined by[SBPOL]."/>
+		</bitfield>
+		<bitfield id="Reserved" width="2" begin="22" end="21" resetval="0x0" description="Write the reset value. Read returns the reset value." range="" rwaccess="RW"/>
+		<bitfield id="FORCE" width="1" begin="20" end="20" resetval="0x0" description="Manual spim_csx assertion to keep spim_csx for channel x active between SPI words (single channel master mode only). TheMCSPI_MODULCTRL[0] SINGLE bit must bit set to 1." range="" rwaccess="RW">
+			<bitenum value="0" token="FORCE_0" description="Writing 0 into this bit drives the spin_csx line low for channel x when [6] EPOL = 0, and drives it high when [6] EPOL = 1."/>
+			<bitenum value="1" token="FORCE_1" description="Writing 1 into this bit drives the spim_csx line high for channel x when[E6] EPOL = 0, and drives it low when [6] EPOL = 1."/>
+		</bitfield>
+		<bitfield id="TURBO" width="1" begin="19" end="19" resetval="0x0" description="Turbo mode" range="" rwaccess="RW">
+			<bitenum value="0" token="TURBO_0" description="Turbo is deactivated (recommended for single SPI word transfer)"/>
+			<bitenum value="1" token="TURBO_1" description="Turbo is activated to maximize the throughput for multi-SPI word transfers."/>
+		</bitfield>
+		<bitfield id="IS" width="1" begin="18" end="18" resetval="0x1" description="Input select" range="" rwaccess="RW">
+			<bitenum value="0" token="IS_0" description="Data Line 0 (spim_somi) selected for reception"/>
+			<bitenum value="1" token="IS_1" description="Data Line 1 (spim_simo) selected for reception"/>
+		</bitfield>
+		<bitfield id="DPE1" width="1" begin="17" end="17" resetval="0x1" description="Transmission enable for data line 1 (spim_simo)" range="" rwaccess="RW">
+			<bitenum value="0" token="DPE1_0" description="Data Line 1 (spim_simo) selected for transmission"/>
+			<bitenum value="1" token="DPE1_1" description="No transmission on data Line 1 (spim_simo)"/>
+		</bitfield>
+		<bitfield id="DPE0" width="1" begin="16" end="16" resetval="0x0" description="Transmission enable for data line 0 (spim_somi)" range="" rwaccess="RW">
+			<bitenum value="0" token="DPE0_0" description="Data Line 0 (spim_somi) selected for transmission"/>
+			<bitenum value="1" token="DPE0_1" description="No transmission on data Line 0 (spim_somi)"/>
+		</bitfield>
+		<bitfield id="DMAR" width="1" begin="15" end="15" resetval="0x0" description="DMA Read requestThe DMA Read request line is asserted when the channel is enabled and a new data is available in the receive register of the channel. . The DMA Read request line is deasserted on read completion of the receive register of the channel. ." range="" rwaccess="RW">
+			<bitenum value="0" token="DMAR_0" description="DMA read request disabled"/>
+			<bitenum value="1" token="DMAR_1" description="DMA read request enabled"/>
+		</bitfield>
+		<bitfield id="DMAW" width="1" begin="14" end="14" resetval="0x0" description="DMA Write request.The DMA write request line is asserted when the channel is enabled and the register of the channel is empty. . The DMA write request line is deasserted on load completion of the register of the channel. ." range="" rwaccess="RW">
+			<bitenum value="0" token="DMAW_0" description="DMA write request disabled"/>
+			<bitenum value="1" token="DMAW_1" description="DMA write request enabled"/>
+		</bitfield>
+		<bitfield id="TRM" width="2" begin="13" end="12" resetval="0x0" description="Transmit/receive modes" range="" rwaccess="RW">
+			<bitenum value="0" token="TRM_0" description="Transmit and receive mode"/>
+			<bitenum value="1" token="TRM_1" description="Receive-only mode"/>
+			<bitenum value="2" token="TRM_2" description="Transmit-only mode"/>
+			<bitenum value="3" token="TRM_3" description="Reserved"/>
+		</bitfield>
+		<bitfield id="WL" width="5" begin="11" end="7" resetval="0x00" description="SPI word length" range="" rwaccess="RW">
+			<bitenum value="0" token="WL_0" description="Reserved"/>
+			<bitenum value="1" token="WL_1" description="Reserved"/>
+			<bitenum value="2" token="WL_2" description="Reserved"/>
+			<bitenum value="3" token="WL_3" description="The SPI word is 4-bit long"/>
+			<bitenum value="4" token="WL_4" description="The SPI word is 5-bit long"/>
+			<bitenum value="5" token="WL_5" description="The SPI word is 6-bit long"/>
+			<bitenum value="6" token="WL_6" description="The SPI word is 7-bit long"/>
+			<bitenum value="7" token="WL_7" description="The SPI word is 8-bit long"/>
+			<bitenum value="8" token="WL_8" description="The SPI word is 9-bit long"/>
+			<bitenum value="9" token="WL_9" description="The SPI word is 10-bit long"/>
+			<bitenum value="10" token="WL_10" description="The SPI word is 11-bit long"/>
+			<bitenum value="11" token="WL_11" description="The SPI word is 12-bit long"/>
+			<bitenum value="12" token="WL_12" description="The SPI word is 13-bit long"/>
+			<bitenum value="13" token="WL_13" description="The SPI word is 14-bit long"/>
+			<bitenum value="14" token="WL_14" description="The SPI word is 15-bit long"/>
+			<bitenum value="15" token="WL_15" description="The SPI word is 16-bit long"/>
+			<bitenum value="16" token="WL_16" description="The SPI word is 17-bit long"/>
+			<bitenum value="17" token="WL_17" description="The SPI word is 18-bit long"/>
+			<bitenum value="18" token="WL_18" description="The SPI word is 19-bit long"/>
+			<bitenum value="19" token="WL_19" description="The SPI word is 20-bit long"/>
+			<bitenum value="20" token="WL_20" description="The SPI word is 21-bit long"/>
+			<bitenum value="21" token="WL_21" description="The SPI word is 22-bit long"/>
+			<bitenum value="22" token="WL_22" description="The SPI word is 23-bit long"/>
+			<bitenum value="23" token="WL_23" description="The SPI word is 24-bit long"/>
+			<bitenum value="24" token="WL_24" description="The SPI word is 25-bit long"/>
+			<bitenum value="25" token="WL_25" description="The SPI word is 26-bit long"/>
+			<bitenum value="26" token="WL_26" description="The SPI word is 27-bit long"/>
+			<bitenum value="27" token="WL_27" description="The SPI word is 28-bit long"/>
+			<bitenum value="28" token="WL_28" description="The SPI word is 29-bit long"/>
+			<bitenum value="29" token="WL_29" description="The SPI word is 30-bit long"/>
+			<bitenum value="30" token="WL_30" description="The SPI word is 31-bit long"/>
+			<bitenum value="31" token="WL_31" description="The SPI word is 32-bit long"/>
+		</bitfield>
+		<bitfield id="EPOL" width="1" begin="6" end="6" resetval="0x0" description="spim_csx polarity for channel x" range="" rwaccess="RW">
+			<bitenum value="0" token="EPOL_0" description="spim_csx is held high during the active state."/>
+			<bitenum value="1" token="EPOL_1" description="spim_csx is held low during the active state."/>
+		</bitfield>
+		<bitfield id="CLKD" width="4" begin="5" end="2" resetval="0x0" description="Frequency divider for spim_clk (for master device only)" range="" rwaccess="RW">
+			<bitenum value="0" token="CLKD_0" description="1"/>
+			<bitenum value="1" token="CLKD_1" description="2"/>
+			<bitenum value="2" token="CLKD_2" description="4"/>
+			<bitenum value="3" token="CLKD_3" description="8"/>
+			<bitenum value="4" token="CLKD_4" description="16"/>
+			<bitenum value="5" token="CLKD_5" description="32"/>
+			<bitenum value="6" token="CLKD_6" description="64"/>
+			<bitenum value="7" token="CLKD_7" description="128"/>
+			<bitenum value="8" token="CLKD_8" description="256"/>
+			<bitenum value="9" token="CLKD_9" description="512"/>
+			<bitenum value="10" token="CLKD_10" description="1024"/>
+			<bitenum value="11" token="CLKD_11" description="2048"/>
+			<bitenum value="12" token="CLKD_12" description="4096"/>
+			<bitenum value="13" token="CLKD_13" description="8192"/>
+			<bitenum value="14" token="CLKD_14" description="16384"/>
+			<bitenum value="15" token="CLKD_15" description="32768"/>
+		</bitfield>
+		<bitfield id="POL" width="1" begin="1" end="1" resetval="0x0" description="spim_clk polarity" range="" rwaccess="RW">
+			<bitenum value="0" token="POL_0" description="spim_clk is held high during the active state."/>
+			<bitenum value="1" token="POL_1" description="spim_clk is held low during the active state."/>
+		</bitfield>
+		<bitfield id="PHA" width="1" begin="0" end="0" resetval="0x0" description="spim_clk phase" range="" rwaccess="RW">
+			<bitenum value="0" token="PHA_0" description="Data are latched on odd-numbered edges of spim_clk."/>
+			<bitenum value="1" token="PHA_1" description="Data are latched on even-numbered edges of spim_clk."/>
+		</bitfield>
+	</register>
+	<register id="MCSPI_CHxCONF_1" acronym="MCSPI_CHxCONF_1" offset="0x40" width="32" description="This register is dedicated to the configuration of the channel x.">
+		<bitfield id="Reserved" width="2" begin="31" end="30" resetval="0x00" description="Read returns 0s." range="" rwaccess="RW"/>
+		<bitfield id="CLKG" width="1" begin="29" end="29" resetval="0x0" description="Clock divider granularity. This register defines the granularity of channel clock divider: power of two or one clock cycle granularity. When this bit is set, theMCSPI_CHxCTRL[15:8] EXTCLK bit field must be configured to reach a maximum of 4096 clock divider ratio. Then the clock divider ratio is a concatenation of MCSPI_CHxCONF[5:2] CLKD and EXTCLK values." range="" rwaccess="RW">
+			<bitenum value="0" token="CLKG_0" description="Clock granularity of power of two"/>
+			<bitenum value="1" token="CLKG_1" description="One clock cycle ganularity"/>
+		</bitfield>
+		<bitfield id="FFER" width="1" begin="28" end="28" resetval="0x0" description="FIFO enabled for Receive. Only one channel can have this bit field set." range="" rwaccess="RW">
+			<bitenum value="0" token="FFER_0" description="The buffer is not used to Receive data"/>
+			<bitenum value="1" token="FFER_1" description="The buffer is used to Receive data"/>
+		</bitfield>
+		<bitfield id="FFEW" width="1" begin="27" end="27" resetval="0x0" description="FIFO enabled for Transmit. Only one channel can have this bit field set." range="" rwaccess="RW">
+			<bitenum value="0" token="FFEW_0" description="The buffer is not used to Transmit data"/>
+			<bitenum value="1" token="FFEW_1" description="The buffer is used to Transmit data"/>
+		</bitfield>
+		<bitfield id="TCS" width="2" begin="26" end="25" resetval="0x0" description="Chip select time controlDefines the number of interface clock cycles between CS toggling and first (or last) edge of SPI clock. ." range="" rwaccess="RW">
+			<bitenum value="0" token="TCS_0" description="0.5 clock cycle"/>
+			<bitenum value="1" token="TCS_1" description="1.5 clock cycles"/>
+			<bitenum value="2" token="TCS_2" description="2.5 clock cycles"/>
+			<bitenum value="3" token="TCS_3" description="3.5 clock cycles"/>
+		</bitfield>
+		<bitfield id="SBPOL" width="1" begin="24" end="24" resetval="0x0" description="Start bit polarity" range="" rwaccess="RW">
+			<bitenum value="0" token="SBPOL_0" description="Start bit polarity is held to 0 during SPI transfer."/>
+			<bitenum value="1" token="SBPOL_1" description="Start bit polarity is held to 1 during SPI transfer."/>
+		</bitfield>
+		<bitfield id="SBE" width="1" begin="23" end="23" resetval="0x0" description="Start bit enable for SPI transfer" range="" rwaccess="RW">
+			<bitenum value="0" token="SBE_0" description="Default SPI transfer length as specified by WL bit field"/>
+			<bitenum value="1" token="SBE_1" description="Start bit D/CX added before SPI transfer. Polarity is defined by[SBPOL]."/>
+		</bitfield>
+		<bitfield id="Reserved" width="2" begin="22" end="21" resetval="0x0" description="Write the reset value. Read returns the reset value." range="" rwaccess="RW"/>
+		<bitfield id="FORCE" width="1" begin="20" end="20" resetval="0x0" description="Manual spim_csx assertion to keep spim_csx for channel x active between SPI words (single channel master mode only). TheMCSPI_MODULCTRL[0] SINGLE bit must bit set to 1." range="" rwaccess="RW">
+			<bitenum value="0" token="FORCE_0" description="Writing 0 into this bit drives the spin_csx line low for channel x when [6] EPOL = 0, and drives it high when [6] EPOL = 1."/>
+			<bitenum value="1" token="FORCE_1" description="Writing 1 into this bit drives the spim_csx line high for channel x when[E6] EPOL = 0, and drives it low when [6] EPOL = 1."/>
+		</bitfield>
+		<bitfield id="TURBO" width="1" begin="19" end="19" resetval="0x0" description="Turbo mode" range="" rwaccess="RW">
+			<bitenum value="0" token="TURBO_0" description="Turbo is deactivated (recommended for single SPI word transfer)"/>
+			<bitenum value="1" token="TURBO_1" description="Turbo is activated to maximize the throughput for multi-SPI word transfers."/>
+		</bitfield>
+		<bitfield id="IS" width="1" begin="18" end="18" resetval="0x1" description="Input select" range="" rwaccess="RW">
+			<bitenum value="0" token="IS_0" description="Data Line 0 (spim_somi) selected for reception"/>
+			<bitenum value="1" token="IS_1" description="Data Line 1 (spim_simo) selected for reception"/>
+		</bitfield>
+		<bitfield id="DPE1" width="1" begin="17" end="17" resetval="0x1" description="Transmission enable for data line 1 (spim_simo)" range="" rwaccess="RW">
+			<bitenum value="0" token="DPE1_0" description="Data Line 1 (spim_simo) selected for transmission"/>
+			<bitenum value="1" token="DPE1_1" description="No transmission on data Line 1 (spim_simo)"/>
+		</bitfield>
+		<bitfield id="DPE0" width="1" begin="16" end="16" resetval="0x0" description="Transmission enable for data line 0 (spim_somi)" range="" rwaccess="RW">
+			<bitenum value="0" token="DPE0_0" description="Data Line 0 (spim_somi) selected for transmission"/>
+			<bitenum value="1" token="DPE0_1" description="No transmission on data Line 0 (spim_somi)"/>
+		</bitfield>
+		<bitfield id="DMAR" width="1" begin="15" end="15" resetval="0x0" description="DMA Read requestThe DMA Read request line is asserted when the channel is enabled and a new data is available in the receive register of the channel. . The DMA Read request line is deasserted on read completion of the receive register of the channel. ." range="" rwaccess="RW">
+			<bitenum value="0" token="DMAR_0" description="DMA read request disabled"/>
+			<bitenum value="1" token="DMAR_1" description="DMA read request enabled"/>
+		</bitfield>
+		<bitfield id="DMAW" width="1" begin="14" end="14" resetval="0x0" description="DMA Write request.The DMA write request line is asserted when the channel is enabled and the register of the channel is empty. . The DMA write request line is deasserted on load completion of the register of the channel. ." range="" rwaccess="RW">
+			<bitenum value="0" token="DMAW_0" description="DMA write request disabled"/>
+			<bitenum value="1" token="DMAW_1" description="DMA write request enabled"/>
+		</bitfield>
+		<bitfield id="TRM" width="2" begin="13" end="12" resetval="0x0" description="Transmit/receive modes" range="" rwaccess="RW">
+			<bitenum value="0" token="TRM_0" description="Transmit and receive mode"/>
+			<bitenum value="1" token="TRM_1" description="Receive-only mode"/>
+			<bitenum value="2" token="TRM_2" description="Transmit-only mode"/>
+			<bitenum value="3" token="TRM_3" description="Reserved"/>
+		</bitfield>
+		<bitfield id="WL" width="5" begin="11" end="7" resetval="0x00" description="SPI word length" range="" rwaccess="RW">
+			<bitenum value="0" token="WL_0" description="Reserved"/>
+			<bitenum value="1" token="WL_1" description="Reserved"/>
+			<bitenum value="2" token="WL_2" description="Reserved"/>
+			<bitenum value="3" token="WL_3" description="The SPI word is 4-bit long"/>
+			<bitenum value="4" token="WL_4" description="The SPI word is 5-bit long"/>
+			<bitenum value="5" token="WL_5" description="The SPI word is 6-bit long"/>
+			<bitenum value="6" token="WL_6" description="The SPI word is 7-bit long"/>
+			<bitenum value="7" token="WL_7" description="The SPI word is 8-bit long"/>
+			<bitenum value="8" token="WL_8" description="The SPI word is 9-bit long"/>
+			<bitenum value="9" token="WL_9" description="The SPI word is 10-bit long"/>
+			<bitenum value="10" token="WL_10" description="The SPI word is 11-bit long"/>
+			<bitenum value="11" token="WL_11" description="The SPI word is 12-bit long"/>
+			<bitenum value="12" token="WL_12" description="The SPI word is 13-bit long"/>
+			<bitenum value="13" token="WL_13" description="The SPI word is 14-bit long"/>
+			<bitenum value="14" token="WL_14" description="The SPI word is 15-bit long"/>
+			<bitenum value="15" token="WL_15" description="The SPI word is 16-bit long"/>
+			<bitenum value="16" token="WL_16" description="The SPI word is 17-bit long"/>
+			<bitenum value="17" token="WL_17" description="The SPI word is 18-bit long"/>
+			<bitenum value="18" token="WL_18" description="The SPI word is 19-bit long"/>
+			<bitenum value="19" token="WL_19" description="The SPI word is 20-bit long"/>
+			<bitenum value="20" token="WL_20" description="The SPI word is 21-bit long"/>
+			<bitenum value="21" token="WL_21" description="The SPI word is 22-bit long"/>
+			<bitenum value="22" token="WL_22" description="The SPI word is 23-bit long"/>
+			<bitenum value="23" token="WL_23" description="The SPI word is 24-bit long"/>
+			<bitenum value="24" token="WL_24" description="The SPI word is 25-bit long"/>
+			<bitenum value="25" token="WL_25" description="The SPI word is 26-bit long"/>
+			<bitenum value="26" token="WL_26" description="The SPI word is 27-bit long"/>
+			<bitenum value="27" token="WL_27" description="The SPI word is 28-bit long"/>
+			<bitenum value="28" token="WL_28" description="The SPI word is 29-bit long"/>
+			<bitenum value="29" token="WL_29" description="The SPI word is 30-bit long"/>
+			<bitenum value="30" token="WL_30" description="The SPI word is 31-bit long"/>
+			<bitenum value="31" token="WL_31" description="The SPI word is 32-bit long"/>
+		</bitfield>
+		<bitfield id="EPOL" width="1" begin="6" end="6" resetval="0x0" description="spim_csx polarity for channel x" range="" rwaccess="RW">
+			<bitenum value="0" token="EPOL_0" description="spim_csx is held high during the active state."/>
+			<bitenum value="1" token="EPOL_1" description="spim_csx is held low during the active state."/>
+		</bitfield>
+		<bitfield id="CLKD" width="4" begin="5" end="2" resetval="0x0" description="Frequency divider for spim_clk (for master device only)" range="" rwaccess="RW">
+			<bitenum value="0" token="CLKD_0" description="1"/>
+			<bitenum value="1" token="CLKD_1" description="2"/>
+			<bitenum value="2" token="CLKD_2" description="4"/>
+			<bitenum value="3" token="CLKD_3" description="8"/>
+			<bitenum value="4" token="CLKD_4" description="16"/>
+			<bitenum value="5" token="CLKD_5" description="32"/>
+			<bitenum value="6" token="CLKD_6" description="64"/>
+			<bitenum value="7" token="CLKD_7" description="128"/>
+			<bitenum value="8" token="CLKD_8" description="256"/>
+			<bitenum value="9" token="CLKD_9" description="512"/>
+			<bitenum value="10" token="CLKD_10" description="1024"/>
+			<bitenum value="11" token="CLKD_11" description="2048"/>
+			<bitenum value="12" token="CLKD_12" description="4096"/>
+			<bitenum value="13" token="CLKD_13" description="8192"/>
+			<bitenum value="14" token="CLKD_14" description="16384"/>
+			<bitenum value="15" token="CLKD_15" description="32768"/>
+		</bitfield>
+		<bitfield id="POL" width="1" begin="1" end="1" resetval="0x0" description="spim_clk polarity" range="" rwaccess="RW">
+			<bitenum value="0" token="POL_0" description="spim_clk is held high during the active state."/>
+			<bitenum value="1" token="POL_1" description="spim_clk is held low during the active state."/>
+		</bitfield>
+		<bitfield id="PHA" width="1" begin="0" end="0" resetval="0x0" description="spim_clk phase" range="" rwaccess="RW">
+			<bitenum value="0" token="PHA_0" description="Data are latched on odd-numbered edges of spim_clk."/>
+			<bitenum value="1" token="PHA_1" description="Data are latched on even-numbered edges of spim_clk."/>
+		</bitfield>
+	</register>
+	<register id="MCSPI_CHxSTAT_0" acronym="MCSPI_CHxSTAT_0" offset="0x30" width="32" description="This register provides status information about and registers of channel x.">
+		<bitfield id="Reserved" width="25" begin="31" end="7" resetval="0x00000000" description="Read returns 0s." range="" rwaccess="R"/>
+		<bitfield id="RXFFF" width="1" begin="6" end="6" resetval="0x0" description="Channel x FIFO Receive Buffer Full Status" range="" rwaccess="R">
+			<bitenum value="0" token="RXFFF_0_r" description="FIFO Receive Buffer is not full"/>
+			<bitenum value="1" token="RXFFF_1_r" description="FIFO Receive Buffer is full"/>
+		</bitfield>
+		<bitfield id="RXFFE" width="1" begin="5" end="5" resetval="0x0" description="Channel x FIFO Receive Buffer Empty Status" range="" rwaccess="R">
+			<bitenum value="0" token="RXFFE_0_r" description="FIFO Receive Buffer is not empty"/>
+			<bitenum value="1" token="RXFFE_1_r" description="FIFO Receive Buffer is empty"/>
+		</bitfield>
+		<bitfield id="TXFFF" width="1" begin="4" end="4" resetval="0x0" description="Channel x FIFO Transmit Buffer Full Status" range="" rwaccess="R">
+			<bitenum value="0" token="TXFFF_0_r" description="FIFO Transmit Buffer is not full"/>
+			<bitenum value="1" token="TXFFF_1_r" description="FIFO Transmit Buffer is full"/>
+		</bitfield>
+		<bitfield id="TXFFE" width="1" begin="3" end="3" resetval="0x0" description="Channel x FIFO Transmit Buffer Empty Status" range="" rwaccess="R">
+			<bitenum value="0" token="TXFFE_0_r" description="FIFO Transmit Buffer is not empty"/>
+			<bitenum value="1" token="TXFFE_1_r" description="FIFO Transmit Buffer is empty"/>
+		</bitfield>
+		<bitfield id="EOT" width="1" begin="2" end="2" resetval="0x0" description="Channel x end-of-transfer status. The definitions of beginning and end of transfer vary with master versus slave and the transfer format (transmit/receive mode, turbo mode). See dedicated chapters for details." range="" rwaccess="R">
+			<bitenum value="0" token="EOT_0_r" description="This flag is automatically cleared when the shift register is loaded with the data from the register (beginning of transfer)."/>
+			<bitenum value="1" token="EOT_1_r" description="This flag is automatically set to one at the end of an SPI transfer."/>
+		</bitfield>
+		<bitfield id="TXS" width="1" begin="1" end="1" resetval="0x0" description="Channel xMCSPI_TXx register status" range="" rwaccess="R">
+			<bitenum value="0" token="TXS_0_r" description="Register is full."/>
+			<bitenum value="1" token="TXS_1_r" description="Register is empty."/>
+		</bitfield>
+		<bitfield id="RXS" width="1" begin="0" end="0" resetval="0x0" description="Channel xMCSPI_RXx register status" range="" rwaccess="R">
+			<bitenum value="0" token="RXS_0_r" description="Register is empty."/>
+			<bitenum value="1" token="RXS_1_r" description="Register is full."/>
+		</bitfield>
+	</register>
+	<register id="MCSPI_CHxSTAT_1" acronym="MCSPI_CHxSTAT_1" offset="0x44" width="32" description="This register provides status information about and registers of channel x.">
+		<bitfield id="Reserved" width="25" begin="31" end="7" resetval="0x00000000" description="Read returns 0s." range="" rwaccess="R"/>
+		<bitfield id="RXFFF" width="1" begin="6" end="6" resetval="0x0" description="Channel x FIFO Receive Buffer Full Status" range="" rwaccess="R">
+			<bitenum value="0" token="RXFFF_0_r" description="FIFO Receive Buffer is not full"/>
+			<bitenum value="1" token="RXFFF_1_r" description="FIFO Receive Buffer is full"/>
+		</bitfield>
+		<bitfield id="RXFFE" width="1" begin="5" end="5" resetval="0x0" description="Channel x FIFO Receive Buffer Empty Status" range="" rwaccess="R">
+			<bitenum value="0" token="RXFFE_0_r" description="FIFO Receive Buffer is not empty"/>
+			<bitenum value="1" token="RXFFE_1_r" description="FIFO Receive Buffer is empty"/>
+		</bitfield>
+		<bitfield id="TXFFF" width="1" begin="4" end="4" resetval="0x0" description="Channel x FIFO Transmit Buffer Full Status" range="" rwaccess="R">
+			<bitenum value="0" token="TXFFF_0_r" description="FIFO Transmit Buffer is not full"/>
+			<bitenum value="1" token="TXFFF_1_r" description="FIFO Transmit Buffer is full"/>
+		</bitfield>
+		<bitfield id="TXFFE" width="1" begin="3" end="3" resetval="0x0" description="Channel x FIFO Transmit Buffer Empty Status" range="" rwaccess="R">
+			<bitenum value="0" token="TXFFE_0_r" description="FIFO Transmit Buffer is not empty"/>
+			<bitenum value="1" token="TXFFE_1_r" description="FIFO Transmit Buffer is empty"/>
+		</bitfield>
+		<bitfield id="EOT" width="1" begin="2" end="2" resetval="0x0" description="Channel x end-of-transfer status. The definitions of beginning and end of transfer vary with master versus slave and the transfer format (transmit/receive mode, turbo mode). See dedicated chapters for details." range="" rwaccess="R">
+			<bitenum value="0" token="EOT_0_r" description="This flag is automatically cleared when the shift register is loaded with the data from the register (beginning of transfer)."/>
+			<bitenum value="1" token="EOT_1_r" description="This flag is automatically set to one at the end of an SPI transfer."/>
+		</bitfield>
+		<bitfield id="TXS" width="1" begin="1" end="1" resetval="0x0" description="Channel xMCSPI_TXx register status" range="" rwaccess="R">
+			<bitenum value="0" token="TXS_0_r" description="Register is full."/>
+			<bitenum value="1" token="TXS_1_r" description="Register is empty."/>
+		</bitfield>
+		<bitfield id="RXS" width="1" begin="0" end="0" resetval="0x0" description="Channel xMCSPI_RXx register status" range="" rwaccess="R">
+			<bitenum value="0" token="RXS_0_r" description="Register is empty."/>
+			<bitenum value="1" token="RXS_1_r" description="Register is full."/>
+		</bitfield>
+	</register>
+	<register id="MCSPI_CHxCTRL_0" acronym="MCSPI_CHxCTRL_0" offset="0x34" width="32" description="This register is dedicated to enable the channel x">
+		<bitfield id="Reserved" width="16" begin="31" end="16" resetval="0x0000" description="Read returns 0s." range="" rwaccess="RW"/>
+		<bitfield id="EXTCLK" width="8" begin="15" end="8" resetval="0x00" description="Clock ratio extension: This register is used to concatenate withMCSPI_CHxCONF[5:2] CLKD bit field for clock ratio only when granularity is one clock cycle (MCSPI_CHxCONF[28] CLKG bit set to 1). Then the max value reached is 4096 clock divider ratio." range="" rwaccess="RW">
+			<bitenum value="0" token="EXTCLK_0" description="Clock ratio is CLKD + 1"/>
+			<bitenum value="1" token="EXTCLK_1" description="Clock ratio is CLKD + 1 + 16"/>
+			<bitenum value="255" token="EXTCLK_255" description="Clock ratio is CLKD + 1 + 4080"/>
+		</bitfield>
+		<bitfield id="Reserved" width="7" begin="7" end="1" resetval="0x00" description="Read returns 0s." range="" rwaccess="RW"/>
+		<bitfield id="EN" width="1" begin="0" end="0" resetval="0x0" description="Channel enable" range="" rwaccess="RW">
+			<bitenum value="0" token="EN_0" description="Channel x is not active."/>
+			<bitenum value="1" token="EN_1" description="Channel x is active."/>
+		</bitfield>
+	</register>
+	<register id="MCSPI_CHxCTRL_1" acronym="MCSPI_CHxCTRL_1" offset="0x48" width="32" description="This register is dedicated to enable the channel x">
+		<bitfield id="Reserved" width="16" begin="31" end="16" resetval="0x0000" description="Read returns 0s." range="" rwaccess="RW"/>
+		<bitfield id="EXTCLK" width="8" begin="15" end="8" resetval="0x00" description="Clock ratio extension: This register is used to concatenate withMCSPI_CHxCONF[5:2] CLKD bit field for clock ratio only when granularity is one clock cycle (MCSPI_CHxCONF[28] CLKG bit set to 1). Then the max value reached is 4096 clock divider ratio." range="" rwaccess="RW">
+			<bitenum value="0" token="EXTCLK_0" description="Clock ratio is CLKD + 1"/>
+			<bitenum value="1" token="EXTCLK_1" description="Clock ratio is CLKD + 1 + 16"/>
+			<bitenum value="255" token="EXTCLK_255" description="Clock ratio is CLKD + 1 + 4080"/>
+		</bitfield>
+		<bitfield id="Reserved" width="7" begin="7" end="1" resetval="0x00" description="Read returns 0s." range="" rwaccess="RW"/>
+		<bitfield id="EN" width="1" begin="0" end="0" resetval="0x0" description="Channel enable" range="" rwaccess="RW">
+			<bitenum value="0" token="EN_0" description="Channel x is not active."/>
+			<bitenum value="1" token="EN_1" description="Channel x is active."/>
+		</bitfield>
+	</register>
+	<register id="MCSPI_TXx_0" acronym="MCSPI_TXx_0" offset="0x38" width="32" description="This register contains a single SPI word to transmit on the serial link, whatever SPI word length is.">
+		<bitfield id="TDATA" width="32" begin="31" end="0" resetval="0x00000000" description="Channel 0 Data to transmit" range="" rwaccess="RW"/>
+	</register>
+	<register id="MCSPI_TXx_1" acronym="MCSPI_TXx_1" offset="0x4C" width="32" description="This register contains a single SPI word to transmit on the serial link, whatever SPI word length is.">
+		<bitfield id="TDATA" width="32" begin="31" end="0" resetval="0x00000000" description="Channel 0 Data to transmit" range="" rwaccess="RW"/>
+	</register>
+	<register id="MCSPI_RXx_0" acronym="MCSPI_RXx_0" offset="0x3C" width="32" description="This register contains a single SPI word received through the serial link, what ever SPI word length is.">
+		<bitfield id="RDATA" width="32" begin="31" end="0" resetval="0x00000000" description="Channel 0 Received Data" range="" rwaccess="R"/>
+	</register>
+	<register id="MCSPI_RXx_1" acronym="MCSPI_RXx_1" offset="0x50" width="32" description="This register contains a single SPI word received through the serial link, what ever SPI word length is.">
+		<bitfield id="RDATA" width="32" begin="31" end="0" resetval="0x00000000" description="Channel 0 Received Data" range="" rwaccess="R"/>
+	</register>
+	<register id="MCSPI_XFERLEVEL" acronym="MCSPI_XFERLEVEL" offset="0x7C" width="32" description="This register provides transfer levels needed while using FIFO buffer during transfer.">
+		<bitfield id="WCNT" width="16" begin="31" end="16" resetval="0x0000" description="Spi word counter: This register holds the programmable value of number of SPI word to be transferred on channel which is using the FIFO buffer. When transfer had started, a read back in this register returns the current SPI word transfer index." range="" rwaccess="RW">
+			<bitenum value="0" token="WCNT_0" description="Counter not used"/>
+			<bitenum value="1" token="WCNT_1" description="One spi word"/>
+			<bitenum value="65534" token="WCNT_65534" description="65534 spi word"/>
+			<bitenum value="65535" token="WCNT_65535" description="65535 spi word"/>
+		</bitfield>
+		<bitfield id="Reserved" width="2" begin="15" end="14" resetval="0x0" description="Read returns 0s." range="" rwaccess="RW"/>
+		<bitfield id="AFL" width="6" begin="13" end="8" resetval="0x00" description="Buffer Almost Full: This register holds the programmable almost full level value used to determine almost full buffer condition. If the user wants an interrupt or a DMA read request to be issued during a receive operation when the data buffer holds at least I bytes, then this bit field must be set to I-1." range="" rwaccess="RW">
+			<bitenum value="0" token="AFL_0" description="One byte"/>
+			<bitenum value="1" token="AFL_1" description="2 bytes"/>
+			<bitenum value="62" token="AFL_62" description="63 bytes"/>
+			<bitenum value="63" token="AFL_63" description="64 bytes"/>
+		</bitfield>
+		<bitfield id="Reserved" width="2" begin="7" end="6" resetval="0x0" description="Read returns 0s." range="" rwaccess="RW"/>
+		<bitfield id="AEL" width="6" begin="5" end="0" resetval="0x00" description="Buffer Almost Empty: This register holds the programmable almost empty level value used to determine almost empty buffer condition. If the user wants an interrupt or a DMA write request to be issued during a transmit operation when the data buffer is able to receive I bytes, then this bit field must be set to I-1." range="" rwaccess="RW">
+			<bitenum value="0" token="AEL_0" description="One byte"/>
+			<bitenum value="1" token="AEL_1" description="2 bytes"/>
+			<bitenum value="62" token="AEL_62" description="63 bytes"/>
+			<bitenum value="63" token="AEL_63" description="64 bytes"/>
+		</bitfield>
+	</register>
+</module>

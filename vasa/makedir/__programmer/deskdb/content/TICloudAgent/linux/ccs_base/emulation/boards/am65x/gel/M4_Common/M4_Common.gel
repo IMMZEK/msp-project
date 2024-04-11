@@ -1,0 +1,488 @@
+
+
+#define DEBUG 				0 
+#define DELAY 				500
+#define USE_SILICON_MODEL	1
+#define WKUP_PID_PG1		0x6180020C
+#define WKUP_PID_PG2		0x61800211
+#define CTRLMMR_WKUP_PID			0x0
+//#define WKUP_CTRL_MMR0_CFG0_BASE_ADDR 0x43000000
+
+#define WAKEUP_PSC_BASE		(0x42000000)
+#define MAIN_PSC_BASE       (0x00400000)
+#define PSC_PID             (0x44827A00)
+#define M3_MCUMAIN_OFFSET   (0x20000000)  //Mapped using RAT
+#define M3_MCU_OFFSET	    (0x20000000)  //Mapped using RAT
+#define M3_MAIN_OFFSET      (0x80000000)  //Mapped using RAT
+#define CTRLMMR_WKUP_DEVSTAT		0x30
+
+#define WKUP_CTRL_MMR0_CFG0_BASE 	(0x43000000U)
+#define MCU_CTRL_MMR0_CFG0_BASE     (0x40F00000U)
+#define CTRL_MMR0_CFG0_BASE			(0x00100000U)
+
+#define LOCK0_KICK0_OFFSET	(0x00001008U)
+#define LOCK0_KICK1_OFFSET	(0x0000100CU)
+#define LOCK1_KICK0_OFFSET	(0x00005008U)
+#define LOCK1_KICK1_OFFSET	(0x0000500CU)
+#define LOCK2_KICK0_OFFSET	(0x00009008U)
+#define LOCK2_KICK1_OFFSET	(0x0000900CU)
+#define LOCK3_KICK0_OFFSET	(0x0000D008U)
+#define LOCK3_KICK1_OFFSET	(0x0000D00CU)
+#define LOCK6_KICK0_OFFSET	(0x00019008U)
+#define LOCK6_KICK1_OFFSET	(0x0001900CU)
+#define LOCK7_KICK0_OFFSET	(0x0001D008U)
+#define LOCK7_KICK1_OFFSET	(0x0001D00CU)
+
+#define CTRLMMR_MCU_LOCK0_KICK0		(0x00001008U)
+#define CTRLMMR_MCU_LOCK0_KICK1		(0x0000100CU)
+#define CTRLMMR_MCU_LOCK1_KICK0		(0x00005008U)
+#define CTRLMMR_MCU_LOCK1_KICK1		(0x0000500CU)
+#define CTRLMMR_MCU_LOCK2_KICK0		(0x00009008U)
+#define CTRLMMR_MCU_LOCK2_KICK1		(0x0000900CU)
+#define CTRLMMR_MCU_LOCK6_KICK0		(0x00019008U)
+#define CTRLMMR_MCU_LOCK6_KICK1		(0x0001900CU)
+
+#define CTRLMMR_LOCK0_KICK0	(0x00001008U)
+#define CTRLMMR_LOCK0_KICK1	(0x0000100CU)
+#define CTRLMMR_LOCK1_KICK0	(0x00005008U)
+#define CTRLMMR_LOCK1_KICK1	(0x0000500CU)
+#define CTRLMMR_LOCK2_KICK0	(0x00009008U)
+#define CTRLMMR_LOCK2_KICK1	(0x0000900CU)
+#define CTRLMMR_LOCK3_KICK0	(0x0000D008U)
+#define CTRLMMR_LOCK3_KICK1	(0x0000D00CU)
+#define CTRLMMR_LOCK6_KICK0	(0x00019008U)
+#define CTRLMMR_LOCK6_KICK1	(0x0001900CU)
+#define CTRLMMR_LOCK7_KICK0	(0x0001D008U)
+#define CTRLMMR_LOCK7_KICK1	(0x0001D00CU)
+
+#define KICK0_UNLOCK_VAL				(0x68EF3490U)
+#define KICK1_UNLOCK_VAL				(0xD172BC5AU)
+#define KICK_LOCK_VAL					(0x00000000U)
+
+/* ************************************************************************* */
+/* Global Helper Functions */
+/* ************************************************************************* */
+/* Read from an MMR. */
+Read_MMR(unsigned int mmr_address){
+	unsigned int * p_mmr;
+	p_mmr = (unsigned int *) mmr_address;
+	return *p_mmr;
+}
+
+/* Write to an MMR. */
+Write_MMR(unsigned int mmr_address, unsigned int mmr_value){
+	unsigned int * p_mmr;
+	p_mmr = (unsigned int *) mmr_address;
+	*p_mmr = mmr_value;
+}
+
+SET_BITS(unsigned int BASE_ADDR, unsigned int REG_OFFSET, unsigned int VALUE, unsigned int WIDTH, unsigned int LSHIFT)
+{
+  unsigned int ONES_MASK;
+  unsigned int SELECT_BITS_MASK;
+  unsigned int VALUE_MASK;
+  unsigned int *REG;
+
+  //assign pointer to register memory address
+  REG = BASE_ADDR + REG_OFFSET;
+    
+  //create mask of ones of width WIDTH
+  ONES_MASK = (1 << WIDTH)-1;//NQ
+
+  //Create mask to select bits in register by left shifting ONES_MASK
+  //LSHIFT should be the starting bit you wish to write to
+  //for instiance to write a value to bits 3 and 4 (WIDTH = 2), LSHIFT should equal 3
+  SELECT_BITS_MASK = ONES_MASK << LSHIFT;
+
+  //create mask of value
+  VALUE_MASK = VALUE & ONES_MASK;
+  VALUE_MASK = VALUE_MASK << LSHIFT;
+
+  //write vlaue into selected bits of register
+  //value at address REG = (clear bits in regiter) | (value mask)
+  *REG = (*REG & ~SELECT_BITS_MASK) | (VALUE_MASK);
+}
+
+READ_BITS(unsigned int BASE_ADDR, unsigned int REG_OFFSET, unsigned int WIDTH, unsigned int RSHIFT)
+{
+  unsigned int ONES_MASK;
+  unsigned int SELECT_BITS_MASK;
+  unsigned int VALUE_MASK;
+  unsigned int *REG;
+
+  //assign pointer to register memory address
+  REG = BASE_ADDR + REG_OFFSET;
+  
+  //create mask of ones of width WIDTH
+  ONES_MASK = (1 << WIDTH)-1;
+
+  //Create mask to select bits in register by left shifting ONES_MASK
+  //RSHIFT should be the starting bit you wish to read from
+  //for instiance to read a value from bits 3 and 4 (WIDTH = 2), RSHIFT should equal 3
+  SELECT_BITS_MASK = ONES_MASK << RSHIFT;
+
+  //create mask of value
+  VALUE_MASK = *REG & SELECT_BITS_MASK;
+  VALUE_MASK = VALUE_MASK >> RSHIFT;
+
+  return VALUE_MASK;
+}
+
+//Accesses from M3 needs to be adjusted based on RAT configuration
+//map 512KB region  0x00000000-0x20000000 ==> 0x80000000-0xA0000000
+//map 512KB region  0x40000000-0x60000000 ==> 0x60000000-0x80000000
+
+AdjustBaseAddr(unsigned int addr)
+{
+	unsigned int read_pid;
+	unsigned int debug_info = DEBUG;
+	unsigned int AdjustedAddr=addr;
+	
+	//Check for running from M3
+	read_pid = *((unsigned int *)(WKUP_CTRL_MMR0_CFG0_BASE+CTRLMMR_WKUP_PID)); 
+	if ((read_pid != WKUP_PID_PG1) && (read_pid != WKUP_PID_PG2))
+	{
+		if(debug_info)
+			GEL_TextOut("Running from M3\n",,,,,);
+		if ( (addr >= 0x40000000) && (addr < 0x60000000))
+		    AdjustedAddr += M3_MCUMAIN_OFFSET;
+		if ( (addr >= 0x00000000) && (addr < 0x20000000))
+		    AdjustedAddr += M3_MAIN_OFFSET;
+	}
+	else
+		if(debug_info)
+			GEL_TextOut("Running from R5 or A53\n");
+		
+	return(AdjustedAddr);
+}
+
+
+//read CLKIN value from BOOTMODE setting
+Get_CLKIN()
+{ int temp;
+  float clock;
+  unsigned int addr;
+	
+	addr = AdjustBaseAddr(WKUP_CTRL_MMR0_CFG0_BASE);
+	temp = READ_BITS(addr,CTRLMMR_WKUP_DEVSTAT,2, 0); // Read CTRLMMR_WKUP_DEVSTAT to determine HFOSC0 frequency
+	if(temp ==0)
+	clock = 19.2;
+	else if (temp==1)
+	clock = 20;
+	else if (temp==2)
+	clock = 24;
+	else if (temp==3)
+	clock = 25;
+	else if (temp==4)
+	clock = 26;
+	else if (temp==5)
+	clock = 27;
+	else
+		GEL_TextOut("ERROR in determining CLKIN\n");
+	return clock;
+}
+
+//Unlocks Control Module partitions for a particular address 
+//Partition ranges
+//                          WKUP/MCU/Main
+//Partition 0               0x00000-0x04000      
+//Partition 1  (IP ctrl)    0x04000-0x08000
+//Partition 2  (Clock ctrl) 0x08000-0x0C000
+//Partition 3  (BIST ctrl)  0x0C000-0x10000      
+//Partition 4      
+//Partition 5	                                    
+//Partition 6  (Pwr/rst)    0x018000-0x1C000
+//Partition 7  (PadConf)    0x01C000-0x20000
+
+dialog Unlock_Register(unsigned int addr "Address to unlock:")
+{
+	CTRL_Unlock(addr);
+}
+
+
+CTRL_Unlock(unsigned int addr)
+{
+	int offset,base,partition,unlock_flag;
+	unsigned int debug_info = DEBUG;
+	
+	//Determine which partition the address offset is 
+	
+	base = 0xFFFE0000 & addr;   //get address base
+	offset = 0x1FFFF & addr;  //get offset
+	
+	
+	//get partition
+	partition = offset >> 14;
+	
+	if(debug_info) {
+	    GEL_TextOut("base = %x\n",,,,,base);
+		GEL_TextOut("offset = %x\n",,,,,offset);
+		GEL_TextOut("partition = %x\n",,,,,partition);
+	}
+	if(partition==0)
+	{
+		Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+		Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+		unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+	}		
+	else if (partition==1)
+	{
+		Write_MMR(base+LOCK1_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+		Write_MMR(base+LOCK1_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+		unlock_flag = Read_MMR(base+LOCK1_KICK0_OFFSET) & 0x1;
+	}
+	else if (partition==2)
+	{
+		Write_MMR(base+LOCK2_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+		Write_MMR(base+LOCK2_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+		unlock_flag = Read_MMR(base+LOCK2_KICK0_OFFSET) & 0x1;
+	}	
+	else if (partition==3)
+	{
+		Write_MMR(base+LOCK3_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+		Write_MMR(base+LOCK3_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+		unlock_flag = Read_MMR(base+LOCK3_KICK0_OFFSET) & 0x1;
+	}	
+	else if (partition==6)
+	{
+		Write_MMR(base+LOCK6_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+		Write_MMR(base+LOCK6_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+		unlock_flag = Read_MMR(base+LOCK6_KICK0_OFFSET) & 0x1;
+	}	
+	else if (partition==7)
+	{
+		Write_MMR(base+LOCK7_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+		Write_MMR(base+LOCK7_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+		unlock_flag = Read_MMR(base+LOCK7_KICK0_OFFSET) & 0x1;
+	}
+	else
+	{
+		GEL_TextOut("Invalid Partition\n");
+	}	
+	
+	//Check for unlock
+	if(debug_info){
+		if(unlock_flag == 1)
+			GEL_TextOut("Partition successfully unlocked!\n");
+		else
+			GEL_TextOut("Error: Partition did not unlock!\n");
+	}
+}
+
+CTRL_Relock(int addr)
+{
+	int offset,base,partition,lock_flag;
+	unsigned int debug_info = DEBUG;
+	
+	//Determine which partition the address offset is 
+	
+	base=0xFFFE0000 & addr;   //get address base
+	offset = 0x1FFFF & addr;  //get offset
+	
+	//get partition
+	partition = offset >> 14;
+	if(partition==0)
+	{
+		Write_MMR(base+LOCK0_KICK0_OFFSET, KICK_LOCK_VAL);
+		Write_MMR(base+LOCK0_KICK1_OFFSET, KICK_LOCK_VAL);
+		lock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+	}		
+	else if (partition==1)
+	{
+		Write_MMR(base+LOCK1_KICK0_OFFSET, KICK_LOCK_VAL);
+		Write_MMR(base+LOCK1_KICK1_OFFSET, KICK_LOCK_VAL);
+		lock_flag = Read_MMR(base+LOCK1_KICK0_OFFSET) & 0x1;
+	}
+	else if (partition==2)
+	{
+		Write_MMR(base+LOCK2_KICK0_OFFSET, KICK_LOCK_VAL);
+		Write_MMR(base+LOCK2_KICK1_OFFSET, KICK_LOCK_VAL);
+		lock_flag = Read_MMR(base+LOCK2_KICK0_OFFSET) & 0x1;
+	}	
+	else if (partition==3)
+	{
+		Write_MMR(base+LOCK3_KICK0_OFFSET, KICK_LOCK_VAL);
+		Write_MMR(base+LOCK3_KICK1_OFFSET, KICK_LOCK_VAL);
+		lock_flag = Read_MMR(base+LOCK3_KICK0_OFFSET) & 0x1;
+	}	
+	else if (partition==6)
+	{
+		Write_MMR(base+LOCK6_KICK0_OFFSET, KICK_LOCK_VAL);
+		Write_MMR(base+LOCK6_KICK1_OFFSET, KICK_LOCK_VAL);
+		lock_flag = Read_MMR(base+LOCK6_KICK0_OFFSET) & 0x1;
+	}	
+	else if (partition==7)
+	{
+		Write_MMR(base+LOCK7_KICK0_OFFSET, KICK_LOCK_VAL);
+		Write_MMR(base+LOCK7_KICK1_OFFSET, KICK_LOCK_VAL);
+		lock_flag = Read_MMR(base+LOCK7_KICK0_OFFSET) & 0x1;
+	}
+	else
+	{
+		GEL_TextOut("Invalid Partition\n");
+	}	
+	
+	//Check for unlock
+	if(debug_info) {
+		if(lock_flag == 0)
+			GEL_TextOut("Partition successfully locked!\n");
+		else
+			GEL_TextOut("Error: Partition still unlocked!\n");
+	}
+}
+
+	
+hotmenu CTRL_Unlock_All()
+{
+    int unlock_flag;
+    unsigned int debug_info = DEBUG;
+    unsigned int base;
+    unsigned int read_pid;
+        
+    base = AdjustBaseAddr(0x43000000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("WKUP CTRL Partition0 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: WKUP CTRL Partition0 did not unlock!\n");
+    
+    base = AdjustBaseAddr(0x43004000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("WKUP CTRL Partition1 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: WKUP CTRL Partition1 did not unlock!\n");
+    
+    base = AdjustBaseAddr(0x43008000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("WKUP CTRL Partition2 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: WKUP CTRL Partition2 did not unlock!\n");
+    
+    base = AdjustBaseAddr(0x4300C000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("WKUP CTRL Partition3 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: WKUP CTRL Partition3 did not unlock!\n");
+    
+    base = AdjustBaseAddr(0x43018000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("WKUP CTRL Partition6 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: WKUP CTRL Partition6 did not unlock!\n");
+    
+    base = AdjustBaseAddr(0x4301C000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("WKUP CTRL Partition7 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: WKUP CTRL Partition7 did not unlock!\n");
+
+    base = AdjustBaseAddr(0x40F00000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("MCU CTRL Partition0 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: MCU CTRL Partition0 did not unlock!\n");
+    
+    base = AdjustBaseAddr(0x40F04000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("MCU CTRL Partition1 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: MCU CTRL Partition1 did not unlock!\n");
+    
+    base = AdjustBaseAddr(0x40F08000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("MCU CTRL Partition2 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: MCU CTRL Partition2 did not unlock!\n");
+    
+    base = AdjustBaseAddr(0x40F18000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("MCU CTRL Partition6 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: MCU CTRL Partition6 did not unlock!\n");
+
+    
+    base = AdjustBaseAddr(0x00100000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("MAIN CTRL Partition0 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: MAIN CTRL Partition0 did not unlock!\n");
+
+    base = AdjustBaseAddr(0x00104000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("MAIN CTRL Partition1 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: MAIN CTRL Partition1 did not unlock!\n");
+        
+    base = AdjustBaseAddr(0x00108000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("MAIN CTRL Partition2 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: MAIN CTRL Partition2 did not unlock!\n");
+        
+    base = AdjustBaseAddr(0x0010C000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("MAIN CTRL Partition3 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: MAIN CTRL Partition3 did not unlock!\n");
+        
+    base = AdjustBaseAddr(0x00118000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("MAIN CTRL Partition6 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: MAIN CTRL Partition6 did not unlock!\n");
+        
+    base = AdjustBaseAddr(0x0011C000);
+    Write_MMR(base+LOCK0_KICK0_OFFSET, KICK0_UNLOCK_VAL);
+    Write_MMR(base+LOCK0_KICK1_OFFSET, KICK1_UNLOCK_VAL);
+    unlock_flag = Read_MMR(base+LOCK0_KICK0_OFFSET) & 0x1;
+    if(unlock_flag == 1)
+        GEL_TextOut("MAIN CTRL Partition7 successfully unlocked!\n");
+    else
+        GEL_TextOut("Error: MAIN CTRL Partition7 did not unlock!\n");
+}
+    
+    

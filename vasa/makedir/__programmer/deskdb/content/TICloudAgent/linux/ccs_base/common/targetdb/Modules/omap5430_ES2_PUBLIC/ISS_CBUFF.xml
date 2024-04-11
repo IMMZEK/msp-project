@@ -1,0 +1,594 @@
+<module name="ISS_CBUFF" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="CBUFF_HL_REVISION" acronym="CBUFF_HL_REVISION" offset="0x0" width="32" description="IP revision identifier (X.Y.R) Used by software to track features, bugs, and compatibility">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="See" description="IP Revision" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_HL_HWINFO" acronym="CBUFF_HL_HWINFO" offset="0x4" width="32" description="Information about the IP module's hardware configuration.">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="CONTEXTS" width="2" begin="2" end="1" resetval="0x1" description="Number of contexts" range="" rwaccess="R">
+      <bitenum value="3" id="RSV" token="CONTEXTS_3_r" description="Reserved"/>
+      <bitenum value="2" id="EIGHT" token="CONTEXTS_2_r" description="8 contexts"/>
+      <bitenum value="1" id="FOUR" token="CONTEXTS_1_r" description="4 contexts"/>
+      <bitenum value="0" id="TWO" token="CONTEXTS_0_r" description="2 contexts"/>
+    </bitfield>
+    <bitfield id="ENABLE_FRAGMENTATION" width="1" begin="0" end="0" resetval="0" description="Provides information to software if fragmentation support is available" range="" rwaccess="R">
+      <bitenum value="1" id="ONE" token="ENABLE_FRAGMENTATION_1_r" description="Yes"/>
+      <bitenum value="0" id="ZERO" token="ENABLE_FRAGMENTATION_0_r" description="No"/>
+    </bitfield>
+  </register>
+  <register id="CBUFF_HL_SYSCONFIG" acronym="CBUFF_HL_SYSCONFIG" offset="0x10" width="32" description="Clock management configuration">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0000000" description="" range="" rwaccess="R"/>
+    <bitfield id="IDLEMODE" width="2" begin="3" end="2" resetval="0x2" description="Configuration of the local target state management mode. By definition, target can handle read/write transaction as long as it is out of IDLE state." range="" rwaccess="RW">
+      <bitenum value="0" id="force" token="IDLEMODE_0" description="Force-idle mode: local target's idle state follows (acknowledges) the system's idle requests unconditionally, that is, regardless of the IP module's internal requirements. Backup mode, for debug only."/>
+      <bitenum value="1" id="no" token="IDLEMODE_1" description="No-idle mode: local target never enters IDLE state. Backup mode, for debug only."/>
+      <bitenum value="3" id="smartwakeup" token="IDLEMODE_3" description="Reserved"/>
+      <bitenum value="2" id="smart" token="IDLEMODE_2" description="Smart-idle mode: local target's IDLE state eventually follows (acknowledges) the system's IDLE requests, depending on the IP module's internal requirements. IP module must not generate (IRQ- or DMA-request-related) wake-up events."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="1" end="1" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="SOFTRESET" width="1" begin="0" end="0" resetval="0" description="Software reset" range="" rwaccess="RW">
+      <bitenum value="0" id="done" token="SOFTRESET_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="SOFTRESET_1_w" description="Initiate software reset"/>
+      <bitenum value="1" id="pending" token="SOFTRESET_1_r" description="Reset (software or other) ongoing"/>
+      <bitenum value="0" id="Reset_done,_no_pending_action" token="SOFTRESET_0_r" description="Reset done, no pending action"/>
+    </bitfield>
+  </register>
+  <register id="CBUFF_HL_IRQSTATUS_RAW" acronym="CBUFF_HL_IRQSTATUS_RAW" offset="0x20" width="32" description="Per-event raw interrupt status vector. Raw status is set even if event is not enabled. Write 1 to set the (raw) status, mostly for debug.">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="IRQ_CTX3_OVR" width="1" begin="27" end="27" resetval="0" description="Buffer overflow event." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_CTX3_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX3_OVR_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX3_OVR_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_CTX3_OVR_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX2_OVR" width="1" begin="26" end="26" resetval="0" description="Buffer overflow event." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_CTX2_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX2_OVR_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX2_OVR_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_CTX2_OVR_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX1_OVR" width="1" begin="25" end="25" resetval="0" description="Buffer overflow event." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_CTX1_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX1_OVR_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX1_OVR_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_CTX1_OVR_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX0_OVR" width="1" begin="24" end="24" resetval="0" description="Buffer overflow event." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_CTX0_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX0_OVR_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX0_OVR_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_CTX0_OVR_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="23" end="20" resetval="0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="IRQ_CTX3_INVALID" width="1" begin="19" end="19" resetval="0" description="Invalid access." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_CTX3_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX3_INVALID_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX3_INVALID_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_CTX3_INVALID_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX2_INVALID" width="1" begin="18" end="18" resetval="0" description="Invalid access." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_CTX2_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX2_INVALID_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX2_INVALID_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_CTX2_INVALID_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX1_INVALID" width="1" begin="17" end="17" resetval="0" description="Invalid access." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_CTX1_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX1_INVALID_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX1_INVALID_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_CTX1_INVALID_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX0_INVALID" width="1" begin="16" end="16" resetval="0" description="Invalid access." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_CTX0_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX0_INVALID_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX0_INVALID_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_CTX0_INVALID_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="IRQ_CTX3_READY" width="1" begin="11" end="11" resetval="0" description="The WB physical window is ready to be accessed by the CPU." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_CTX3_READY_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX3_READY_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX3_READY_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_CTX3_READY_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX2_READY" width="1" begin="10" end="10" resetval="0" description="The WB physical window is ready to be accessed by the CPU." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_CTX2_READY_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX2_READY_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX2_READY_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_CTX2_READY_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX1_READY" width="1" begin="9" end="9" resetval="0" description="The WB physical window is ready to be accessed by the CPU." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_CTX1_READY_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX1_READY_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX1_READY_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_CTX1_READY_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX0_READY" width="1" begin="8" end="8" resetval="0" description="The WB physical window is ready to be accessed by the CPU." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_CTX0_READY_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX0_READY_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX0_READY_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_CTX0_READY_0_r" description="No event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_OCP_ERR" width="1" begin="0" end="0" resetval="0" description="OCP error received in the master port." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noevent" token="IRQ_OCP_ERR_0_w" description="No action"/>
+      <bitenum value="1" id="pending" token="IRQ_OCP_ERR_1_w" description="Set event (debug)"/>
+      <bitenum value="1" id="pending" token="IRQ_OCP_ERR_1_r" description="Event pending"/>
+      <bitenum value="0" id="No_event_pending" token="IRQ_OCP_ERR_0_r" description="No event pending"/>
+    </bitfield>
+  </register>
+  <register id="CBUFF_HL_IRQSTATUS" acronym="CBUFF_HL_IRQSTATUS" offset="0x24" width="32" description="Per-event 'enabled' interrupt status vector. Enabled status is not set unless event is enabled. Write 1 to clear the status after interrupt has been serviced (raw status gets cleared, that is, even if not enabled).">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_CTX3_OVR" width="1" begin="27" end="27" resetval="0" description="Buffer overflow event. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX3_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_CTX3_OVR_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX3_OVR_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_CTX3_OVR_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX2_OVR" width="1" begin="26" end="26" resetval="0" description="Buffer overflow event. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX2_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_CTX2_OVR_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX2_OVR_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_CTX2_OVR_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX1_OVR" width="1" begin="25" end="25" resetval="0" description="Buffer overflow event. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX1_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_CTX1_OVR_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX1_OVR_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_CTX1_OVR_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX0_OVR" width="1" begin="24" end="24" resetval="0" description="Buffer overflow event. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX0_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_CTX0_OVR_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX0_OVR_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_CTX0_OVR_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="23" end="20" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_CTX3_INVALID" width="1" begin="19" end="19" resetval="0" description="Invalid access. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX3_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_CTX3_INVALID_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX3_INVALID_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_CTX3_INVALID_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX2_INVALID" width="1" begin="18" end="18" resetval="0" description="Invalid access. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX2_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_CTX2_INVALID_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX2_INVALID_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_CTX2_INVALID_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX1_INVALID" width="1" begin="17" end="17" resetval="0" description="Invalid access. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX1_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_CTX1_INVALID_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX1_INVALID_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_CTX1_INVALID_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX0_INVALID" width="1" begin="16" end="16" resetval="0" description="Invalid access. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX0_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_CTX0_INVALID_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX0_INVALID_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_CTX0_INVALID_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_CTX3_READY" width="1" begin="11" end="11" resetval="0" description="The WB physical window is ready to be accessed by the CPU. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX3_READY_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_CTX3_READY_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX3_READY_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_CTX3_READY_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX2_READY" width="1" begin="10" end="10" resetval="0" description="The WB physical window is ready to be accessed by the CPU. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX2_READY_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_CTX2_READY_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX2_READY_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_CTX2_READY_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX1_READY" width="1" begin="9" end="9" resetval="0" description="The WB physical window is ready to be accessed by the CPU. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX1_READY_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_CTX1_READY_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX1_READY_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_CTX1_READY_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX0_READY" width="1" begin="8" end="8" resetval="0" description="The WB physical window is ready to be accessed by the CPU. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX0_READY_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_CTX0_READY_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_CTX0_READY_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_CTX0_READY_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_OCP_ERR" width="1" begin="0" end="0" resetval="0" description="OCP error received in the master port." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_OCP_ERR_0_w" description="No action"/>
+      <bitenum value="1" id="clear" token="IRQ_OCP_ERR_1_w" description="Clear (raw) event"/>
+      <bitenum value="1" id="pending" token="IRQ_OCP_ERR_1_r" description="Event pending"/>
+      <bitenum value="0" id="noevent" token="IRQ_OCP_ERR_0_r" description="No (enabled) event pending"/>
+    </bitfield>
+  </register>
+  <register id="CBUFF_HL_IRQENABLE_SET" acronym="CBUFF_HL_IRQENABLE_SET" offset="0x28" width="32" description="Per-event interrupt enable bit vector. Write 1 to set (enable interrupt). Readout equal to corresponding _CLR register.">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_CTX3_OVR" width="1" begin="27" end="27" resetval="0" description="Buffer overflow event. Check the functional specification for more details." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_CTX3_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_CTX3_OVR_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX3_OVR_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX3_OVR_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX2_OVR" width="1" begin="26" end="26" resetval="0" description="Buffer overflow event. Check the functional specification for more details." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_CTX2_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_CTX2_OVR_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX2_OVR_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX2_OVR_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX1_OVR" width="1" begin="25" end="25" resetval="0" description="Buffer overflow event. Check the functional specification for more details." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_CTX1_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_CTX1_OVR_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX1_OVR_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX1_OVR_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX0_OVR" width="1" begin="24" end="24" resetval="0" description="Buffer overflow event. Check the functional specification for more details." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_CTX0_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_CTX0_OVR_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX0_OVR_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX0_OVR_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="23" end="20" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_CTX3_INVALID" width="1" begin="19" end="19" resetval="0" description="Invalid access. Check the functional specification for more details." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_CTX3_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_CTX3_INVALID_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX3_INVALID_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX3_INVALID_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX2_INVALID" width="1" begin="18" end="18" resetval="0" description="Invalid access. Check the functional specification for more details." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_CTX2_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_CTX2_INVALID_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX2_INVALID_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX2_INVALID_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX1_INVALID" width="1" begin="17" end="17" resetval="0" description="Invalid access. Check the functional specification for more details." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_CTX1_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_CTX1_INVALID_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX1_INVALID_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX1_INVALID_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX0_INVALID" width="1" begin="16" end="16" resetval="0" description="Invalid access. Check the functional specification for more details." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_CTX0_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_CTX0_INVALID_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX0_INVALID_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX0_INVALID_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_CTX3_READY" width="1" begin="11" end="11" resetval="0" description="The WB physical window is ready to be accessed by the CPU. Check the functional specification for more details." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_CTX3_READY_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_CTX3_READY_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX3_READY_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX3_READY_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX2_READY" width="1" begin="10" end="10" resetval="0" description="The WB physical window is ready to be accessed by the CPU. Check the functional specification for more details." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_CTX2_READY_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_CTX2_READY_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX2_READY_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX2_READY_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX1_READY" width="1" begin="9" end="9" resetval="0" description="The WB physical window is ready to be accessed by the CPU. Check the functional specification for more details." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_CTX1_READY_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_CTX1_READY_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX1_READY_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX1_READY_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX0_READY" width="1" begin="8" end="8" resetval="0" description="The WB physical window is ready to be accessed by the CPU. Check the functional specification for more details." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_CTX0_READY_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_CTX0_READY_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX0_READY_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX0_READY_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_OCP_ERR" width="1" begin="0" end="0" resetval="0" description="OCP error received in the master port." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="noaction" token="IRQ_OCP_ERR_0_w" description="No action"/>
+      <bitenum value="1" id="enable" token="IRQ_OCP_ERR_1_w" description="Enable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_OCP_ERR_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_OCP_ERR_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+  </register>
+  <register id="CBUFF_HL_IRQENABLE_CLR" acronym="CBUFF_HL_IRQENABLE_CLR" offset="0x2C" width="32" description="Per-event interrupt enable bit vector, line 0. Write 1 to clear (disable interrupt). Readout equal to corresponding _SET register.">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_CTX3_OVR" width="1" begin="27" end="27" resetval="0" description="Buffer overflow event. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX3_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_CTX3_OVR_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX3_OVR_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX3_OVR_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX2_OVR" width="1" begin="26" end="26" resetval="0" description="Buffer overflow event. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX2_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_CTX2_OVR_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX2_OVR_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX2_OVR_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX1_OVR" width="1" begin="25" end="25" resetval="0" description="Buffer overflow event. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX1_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_CTX1_OVR_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX1_OVR_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX1_OVR_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX0_OVR" width="1" begin="24" end="24" resetval="0" description="Buffer overflow event. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX0_OVR_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_CTX0_OVR_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX0_OVR_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX0_OVR_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="23" end="20" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_CTX3_INVALID" width="1" begin="19" end="19" resetval="0" description="Invalid access. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX3_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_CTX3_INVALID_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX3_INVALID_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX3_INVALID_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX2_INVALID" width="1" begin="18" end="18" resetval="0" description="Invalid access. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX2_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_CTX2_INVALID_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX2_INVALID_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX2_INVALID_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX1_INVALID" width="1" begin="17" end="17" resetval="0" description="Invalid access. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX1_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_CTX1_INVALID_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX1_INVALID_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX1_INVALID_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX0_INVALID" width="1" begin="16" end="16" resetval="0" description="Invalid access. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX0_INVALID_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_CTX0_INVALID_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX0_INVALID_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX0_INVALID_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_CTX3_READY" width="1" begin="11" end="11" resetval="0" description="The WB physical window is ready to be accessed by the CPU. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX3_READY_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_CTX3_READY_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX3_READY_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX3_READY_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX2_READY" width="1" begin="10" end="10" resetval="0" description="The WB physical window is ready to be accessed by the CPU. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX2_READY_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_CTX2_READY_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX2_READY_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX2_READY_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX1_READY" width="1" begin="9" end="9" resetval="0" description="The WB physical window is ready to be accessed by the CPU. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX1_READY_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_CTX1_READY_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX1_READY_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX1_READY_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="IRQ_CTX0_READY" width="1" begin="8" end="8" resetval="0" description="The WB physical window is ready to be accessed by the CPU. Check the functional specification for more details." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_CTX0_READY_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_CTX0_READY_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_CTX0_READY_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_CTX0_READY_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="IRQ_OCP_ERR" width="1" begin="0" end="0" resetval="0" description="OCP error received in the master port." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="noaction" token="IRQ_OCP_ERR_0_w" description="No action"/>
+      <bitenum value="1" id="disable" token="IRQ_OCP_ERR_1_w" description="Disable interrupt"/>
+      <bitenum value="1" id="enabled" token="IRQ_OCP_ERR_1_r" description="Interrupt enabled"/>
+      <bitenum value="0" id="disabled" token="IRQ_OCP_ERR_0_r" description="Interrupt disabled (masked)"/>
+    </bitfield>
+  </register>
+  <register id="CBUFF_CTX_CTRL_i_0" acronym="CBUFF_CTX_CTRL_i_0" offset="0x100" width="32" description="Context control register">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="TILERMODE" width="1" begin="11" end="11" resetval="0" description="Sets the expected value for ADDR[32]. If ADDR[32]=TILERMODE, ADDR[31:4] is processed and eventually translated. Otherwise, the access is handled as transparent, regardless of the other address bits." range="" rwaccess="RW"/>
+    <bitfield id="DONE" width="1" begin="10" end="10" resetval="0" description="Write this bit to 1 to indicate the CPU has finished processing its physical buffer. This bit is automatically cleared by hardware, reads always return 0. This bit has no effect when MODE=2 (read/write)" range="" rwaccess="W">
+      <bitenum value="0" id="ZERO" token="DONE_0_w" description="No effect."/>
+      <bitenum value="1" id="ONE" token="DONE_1_w" description="The CPU has completely processed the WB physical buffer."/>
+    </bitfield>
+    <bitfield id="WCOUNT" width="2" begin="9" end="8" resetval="0x0" description="Window count" range="" rwaccess="RW">
+      <bitenum value="0" id="W2" token="WCOUNT_0" description="2 windows"/>
+      <bitenum value="1" id="W4" token="WCOUNT_1" description="4 windows"/>
+      <bitenum value="3" id="W16" token="WCOUNT_3" description="16 windows"/>
+      <bitenum value="2" id="W8" token="WCOUNT_2" description="8 windows"/>
+    </bitfield>
+    <bitfield id="BCF" width="4" begin="7" end="4" resetval="0x0" description="This register controls the bandwidth control feedback loop output. 0: Control loop disabled. 1-15: The control feedback loop enabled. Behavior depends on functional mode, see , ." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="MODE" width="2" begin="2" end="1" resetval="0x0" description="Selects the functional mode of this context" range="" rwaccess="RW">
+      <bitenum value="0" id="WRITE" token="MODE_0" description="Write mode. ISS writes and CPU reads the physical space. CPU accesses are out of the scope of the CBUFF module; therefore, only writes are permitted between and ."/>
+      <bitenum value="1" id="READ" token="MODE_1" description="Read mode. Hardware reads and CPU writes the physical space. CPU accesses are out of the scope of the CBUFF module; therefore, only reads are permitted between and ."/>
+      <bitenum value="2" id="RWMODE" token="MODE_2" description="Read/Write mode. Read and writes are monitored by the CBUFF. WB is used to track current read positions WA is used to track current write position."/>
+    </bitfield>
+    <bitfield id="ENABLE" width="1" begin="0" end="0" resetval="0" description="Enable/disable" range="" rwaccess="RW">
+      <bitenum value="0" id="DI" token="ENABLE_0" description="Disables the context. This resets the internal state of the context. All accesses received on OCPI are transmitted to OCPO without modification. Disabling the context takes effect immediately. Software must ensure that no more accesses to the context are outstanding before disabling it. Otherwise memory corruption may occur."/>
+      <bitenum value="1" id="EN" token="ENABLE_1" description="Enable the context. All accesses between and are processed by the CBUFF."/>
+    </bitfield>
+  </register>
+  <register id="CBUFF_CTX_CTRL_i_1" acronym="CBUFF_CTX_CTRL_i_1" offset="0x120" width="32" description="Context control register">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="TILERMODE" width="1" begin="11" end="11" resetval="0" description="Sets the expected value for ADDR[32]. If ADDR[32]=TILERMODE, ADDR[31:4] is processed and eventually translated. Otherwise, the access is handled as transparent, regardless of the other address bits." range="" rwaccess="RW"/>
+    <bitfield id="DONE" width="1" begin="10" end="10" resetval="0" description="Write this bit to 1 to indicate the CPU has finished processing its physical buffer. This bit is automatically cleared by hardware, reads always return 0. This bit has no effect when MODE=2 (read/write)" range="" rwaccess="W">
+      <bitenum value="0" id="ZERO" token="DONE_0_w" description="No effect."/>
+      <bitenum value="1" id="ONE" token="DONE_1_w" description="The CPU has completely processed the WB physical buffer."/>
+    </bitfield>
+    <bitfield id="WCOUNT" width="2" begin="9" end="8" resetval="0x0" description="Window count" range="" rwaccess="RW">
+      <bitenum value="0" id="W2" token="WCOUNT_0" description="2 windows"/>
+      <bitenum value="1" id="W4" token="WCOUNT_1" description="4 windows"/>
+      <bitenum value="3" id="W16" token="WCOUNT_3" description="16 windows"/>
+      <bitenum value="2" id="W8" token="WCOUNT_2" description="8 windows"/>
+    </bitfield>
+    <bitfield id="BCF" width="4" begin="7" end="4" resetval="0x0" description="This register controls the bandwidth control feedback loop output. 0: Control loop disabled. 1-15: The control feedback loop enabled. Behavior depends on functional mode, see , ." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="MODE" width="2" begin="2" end="1" resetval="0x0" description="Selects the functional mode of this context" range="" rwaccess="RW">
+      <bitenum value="0" id="WRITE" token="MODE_0" description="Write mode. ISS writes and CPU reads the physical space. CPU accesses are out of the scope of the CBUFF module; therefore, only writes are permitted between and ."/>
+      <bitenum value="1" id="READ" token="MODE_1" description="Read mode. Hardware reads and CPU writes the physical space. CPU accesses are out of the scope of the CBUFF module; therefore, only reads are permitted between and ."/>
+      <bitenum value="2" id="RWMODE" token="MODE_2" description="Read/Write mode. Read and writes are monitored by the CBUFF. WB is used to track current read positions WA is used to track current write position."/>
+    </bitfield>
+    <bitfield id="ENABLE" width="1" begin="0" end="0" resetval="0" description="Enable/disable" range="" rwaccess="RW">
+      <bitenum value="0" id="DI" token="ENABLE_0" description="Disables the context. This resets the internal state of the context. All accesses received on OCPI are transmitted to OCPO without modification. Disabling the context takes effect immediately. Software must ensure that no more accesses to the context are outstanding before disabling it. Otherwise memory corruption may occur."/>
+      <bitenum value="1" id="EN" token="ENABLE_1" description="Enable the context. All accesses between and are processed by the CBUFF."/>
+    </bitfield>
+  </register>
+  <register id="CBUFF_CTX_CTRL_i_2" acronym="CBUFF_CTX_CTRL_i_2" offset="0x140" width="32" description="Context control register">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="TILERMODE" width="1" begin="11" end="11" resetval="0" description="Sets the expected value for ADDR[32]. If ADDR[32]=TILERMODE, ADDR[31:4] is processed and eventually translated. Otherwise, the access is handled as transparent, regardless of the other address bits." range="" rwaccess="RW"/>
+    <bitfield id="DONE" width="1" begin="10" end="10" resetval="0" description="Write this bit to 1 to indicate the CPU has finished processing its physical buffer. This bit is automatically cleared by hardware, reads always return 0. This bit has no effect when MODE=2 (read/write)" range="" rwaccess="W">
+      <bitenum value="0" id="ZERO" token="DONE_0_w" description="No effect."/>
+      <bitenum value="1" id="ONE" token="DONE_1_w" description="The CPU has completely processed the WB physical buffer."/>
+    </bitfield>
+    <bitfield id="WCOUNT" width="2" begin="9" end="8" resetval="0x0" description="Window count" range="" rwaccess="RW">
+      <bitenum value="0" id="W2" token="WCOUNT_0" description="2 windows"/>
+      <bitenum value="1" id="W4" token="WCOUNT_1" description="4 windows"/>
+      <bitenum value="3" id="W16" token="WCOUNT_3" description="16 windows"/>
+      <bitenum value="2" id="W8" token="WCOUNT_2" description="8 windows"/>
+    </bitfield>
+    <bitfield id="BCF" width="4" begin="7" end="4" resetval="0x0" description="This register controls the bandwidth control feedback loop output. 0: Control loop disabled. 1-15: The control feedback loop enabled. Behavior depends on functional mode, see , ." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="MODE" width="2" begin="2" end="1" resetval="0x0" description="Selects the functional mode of this context" range="" rwaccess="RW">
+      <bitenum value="0" id="WRITE" token="MODE_0" description="Write mode. ISS writes and CPU reads the physical space. CPU accesses are out of the scope of the CBUFF module; therefore, only writes are permitted between and ."/>
+      <bitenum value="1" id="READ" token="MODE_1" description="Read mode. Hardware reads and CPU writes the physical space. CPU accesses are out of the scope of the CBUFF module; therefore, only reads are permitted between and ."/>
+      <bitenum value="2" id="RWMODE" token="MODE_2" description="Read/Write mode. Read and writes are monitored by the CBUFF. WB is used to track current read positions WA is used to track current write position."/>
+    </bitfield>
+    <bitfield id="ENABLE" width="1" begin="0" end="0" resetval="0" description="Enable/disable" range="" rwaccess="RW">
+      <bitenum value="0" id="DI" token="ENABLE_0" description="Disables the context. This resets the internal state of the context. All accesses received on OCPI are transmitted to OCPO without modification. Disabling the context takes effect immediately. Software must ensure that no more accesses to the context are outstanding before disabling it. Otherwise memory corruption may occur."/>
+      <bitenum value="1" id="EN" token="ENABLE_1" description="Enable the context. All accesses between and are processed by the CBUFF."/>
+    </bitfield>
+  </register>
+  <register id="CBUFF_CTX_CTRL_i_3" acronym="CBUFF_CTX_CTRL_i_3" offset="0x160" width="32" description="Context control register">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="TILERMODE" width="1" begin="11" end="11" resetval="0" description="Sets the expected value for ADDR[32]. If ADDR[32]=TILERMODE, ADDR[31:4] is processed and eventually translated. Otherwise, the access is handled as transparent, regardless of the other address bits." range="" rwaccess="RW"/>
+    <bitfield id="DONE" width="1" begin="10" end="10" resetval="0" description="Write this bit to 1 to indicate the CPU has finished processing its physical buffer. This bit is automatically cleared by hardware, reads always return 0. This bit has no effect when MODE=2 (read/write)" range="" rwaccess="W">
+      <bitenum value="0" id="ZERO" token="DONE_0_w" description="No effect."/>
+      <bitenum value="1" id="ONE" token="DONE_1_w" description="The CPU has completely processed the WB physical buffer."/>
+    </bitfield>
+    <bitfield id="WCOUNT" width="2" begin="9" end="8" resetval="0x0" description="Window count" range="" rwaccess="RW">
+      <bitenum value="0" id="W2" token="WCOUNT_0" description="2 windows"/>
+      <bitenum value="1" id="W4" token="WCOUNT_1" description="4 windows"/>
+      <bitenum value="3" id="W16" token="WCOUNT_3" description="16 windows"/>
+      <bitenum value="2" id="W8" token="WCOUNT_2" description="8 windows"/>
+    </bitfield>
+    <bitfield id="BCF" width="4" begin="7" end="4" resetval="0x0" description="This register controls the bandwidth control feedback loop output. 0: Control loop disabled. 1-15: The control feedback loop enabled. Behavior depends on functional mode, see , ." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="MODE" width="2" begin="2" end="1" resetval="0x0" description="Selects the functional mode of this context" range="" rwaccess="RW">
+      <bitenum value="0" id="WRITE" token="MODE_0" description="Write mode. ISS writes and CPU reads the physical space. CPU accesses are out of the scope of the CBUFF module; therefore, only writes are permitted between and ."/>
+      <bitenum value="1" id="READ" token="MODE_1" description="Read mode. Hardware reads and CPU writes the physical space. CPU accesses are out of the scope of the CBUFF module; therefore, only reads are permitted between and ."/>
+      <bitenum value="2" id="RWMODE" token="MODE_2" description="Read/Write mode. Read and writes are monitored by the CBUFF. WB is used to track current read positions WA is used to track current write position."/>
+    </bitfield>
+    <bitfield id="ENABLE" width="1" begin="0" end="0" resetval="0" description="Enable/disable" range="" rwaccess="RW">
+      <bitenum value="0" id="DI" token="ENABLE_0" description="Disables the context. This resets the internal state of the context. All accesses received on OCPI are transmitted to OCPO without modification. Disabling the context takes effect immediately. Software must ensure that no more accesses to the context are outstanding before disabling it. Otherwise memory corruption may occur."/>
+      <bitenum value="1" id="EN" token="ENABLE_1" description="Enable the context. All accesses between and are processed by the CBUFF."/>
+    </bitfield>
+  </register>
+  <register id="CBUFF_CTX_START_i_0" acronym="CBUFF_CTX_START_i_0" offset="0x104" width="32" description="Start address of the virtual space managed by the context">
+    <bitfield id="ADDR" width="28" begin="31" end="4" resetval="0x0000000" description="Address, in 128-bit words" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_START_i_1" acronym="CBUFF_CTX_START_i_1" offset="0x124" width="32" description="Start address of the virtual space managed by the context">
+    <bitfield id="ADDR" width="28" begin="31" end="4" resetval="0x0000000" description="Address, in 128-bit words" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_START_i_2" acronym="CBUFF_CTX_START_i_2" offset="0x144" width="32" description="Start address of the virtual space managed by the context">
+    <bitfield id="ADDR" width="28" begin="31" end="4" resetval="0x0000000" description="Address, in 128-bit words" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_START_i_3" acronym="CBUFF_CTX_START_i_3" offset="0x164" width="32" description="Start address of the virtual space managed by the context">
+    <bitfield id="ADDR" width="28" begin="31" end="4" resetval="0x0000000" description="Address, in 128-bit words" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_END_i_0" acronym="CBUFF_CTX_END_i_0" offset="0x108" width="32" description="End address of the virtual space managed by the context">
+    <bitfield id="ADDR" width="28" begin="31" end="4" resetval="0x0000000" description="Address, in 128-bit words" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_END_i_1" acronym="CBUFF_CTX_END_i_1" offset="0x128" width="32" description="End address of the virtual space managed by the context">
+    <bitfield id="ADDR" width="28" begin="31" end="4" resetval="0x0000000" description="Address, in 128-bit words" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_END_i_2" acronym="CBUFF_CTX_END_i_2" offset="0x148" width="32" description="End address of the virtual space managed by the context">
+    <bitfield id="ADDR" width="28" begin="31" end="4" resetval="0x0000000" description="Address, in 128-bit words" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_END_i_3" acronym="CBUFF_CTX_END_i_3" offset="0x168" width="32" description="End address of the virtual space managed by the context">
+    <bitfield id="ADDR" width="28" begin="31" end="4" resetval="0x0000000" description="Address, in 128-bit words" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_WINDOWSIZE_i_0" acronym="CBUFF_CTX_WINDOWSIZE_i_0" offset="0x10C" width="32" description="Defines the size of a window">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="20" begin="23" end="4" resetval="0x00000" description="Size, in 128-bit words" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_WINDOWSIZE_i_1" acronym="CBUFF_CTX_WINDOWSIZE_i_1" offset="0x12C" width="32" description="Defines the size of a window">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="20" begin="23" end="4" resetval="0x00000" description="Size, in 128-bit words" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_WINDOWSIZE_i_2" acronym="CBUFF_CTX_WINDOWSIZE_i_2" offset="0x14C" width="32" description="Defines the size of a window">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="20" begin="23" end="4" resetval="0x00000" description="Size, in 128-bit words" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_WINDOWSIZE_i_3" acronym="CBUFF_CTX_WINDOWSIZE_i_3" offset="0x16C" width="32" description="Defines the size of a window">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="20" begin="23" end="4" resetval="0x00000" description="Size, in 128-bit words" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_THRESHOLD_F_i_0" acronym="CBUFF_CTX_THRESHOLD_F_i_0" offset="0x110" width="32" description="Threshold value used to check if a write window is full">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="THRESHOLD" width="24" begin="23" end="0" resetval="0x000000" description="Threshold value, in bytes" range="" rwaccess="RW"/>
+  </register>
+  <register id="CBUFF_CTX_THRESHOLD_F_i_1" acronym="CBUFF_CTX_THRESHOLD_F_i_1" offset="0x130" width="32" description="Threshold value used to check if a write window is full">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="THRESHOLD" width="24" begin="23" end="0" resetval="0x000000" description="Threshold value, in bytes" range="" rwaccess="RW"/>
+  </register>
+  <register id="CBUFF_CTX_THRESHOLD_F_i_2" acronym="CBUFF_CTX_THRESHOLD_F_i_2" offset="0x150" width="32" description="Threshold value used to check if a write window is full">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="THRESHOLD" width="24" begin="23" end="0" resetval="0x000000" description="Threshold value, in bytes" range="" rwaccess="RW"/>
+  </register>
+  <register id="CBUFF_CTX_THRESHOLD_F_i_3" acronym="CBUFF_CTX_THRESHOLD_F_i_3" offset="0x170" width="32" description="Threshold value used to check if a write window is full">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="THRESHOLD" width="24" begin="23" end="0" resetval="0x000000" description="Threshold value, in bytes" range="" rwaccess="RW"/>
+  </register>
+  <register id="CBUFF_CTX_THRESHOLD_S_i_0" acronym="CBUFF_CTX_THRESHOLD_S_i_0" offset="0x114" width="32" description="Threshold value used to control the BCF synchronization mechanism">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="THRESHOLD" width="24" begin="23" end="0" resetval="0x000000" description="Threshold value, in bytes" range="" rwaccess="RW"/>
+  </register>
+  <register id="CBUFF_CTX_THRESHOLD_S_i_1" acronym="CBUFF_CTX_THRESHOLD_S_i_1" offset="0x134" width="32" description="Threshold value used to control the BCF synchronization mechanism">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="THRESHOLD" width="24" begin="23" end="0" resetval="0x000000" description="Threshold value, in bytes" range="" rwaccess="RW"/>
+  </register>
+  <register id="CBUFF_CTX_THRESHOLD_S_i_2" acronym="CBUFF_CTX_THRESHOLD_S_i_2" offset="0x154" width="32" description="Threshold value used to control the BCF synchronization mechanism">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="THRESHOLD" width="24" begin="23" end="0" resetval="0x000000" description="Threshold value, in bytes" range="" rwaccess="RW"/>
+  </register>
+  <register id="CBUFF_CTX_THRESHOLD_S_i_3" acronym="CBUFF_CTX_THRESHOLD_S_i_3" offset="0x174" width="32" description="Threshold value used to control the BCF synchronization mechanism">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="THRESHOLD" width="24" begin="23" end="0" resetval="0x000000" description="Threshold value, in bytes" range="" rwaccess="RW"/>
+  </register>
+  <register id="CBUFF_CTX_STATUS_i_0" acronym="CBUFF_CTX_STATUS_i_0" offset="0x118" width="32" description="Status register">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="WA" width="4" begin="11" end="8" resetval="0x0" description="Valid values depend on theCBUFF_CTX_CTRL_i[9:8] WCOUNT bit field." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="WB" width="4" begin="3" end="0" resetval="0x0" description="Valid values depend on the CBUFF_CTX_CTRL_I[9:8] WCOUNT bit field." range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_STATUS_i_1" acronym="CBUFF_CTX_STATUS_i_1" offset="0x138" width="32" description="Status register">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="WA" width="4" begin="11" end="8" resetval="0x0" description="Valid values depend on theCBUFF_CTX_CTRL_i[9:8] WCOUNT bit field." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="WB" width="4" begin="3" end="0" resetval="0x0" description="Valid values depend on the CBUFF_CTX_CTRL_I[9:8] WCOUNT bit field." range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_STATUS_i_2" acronym="CBUFF_CTX_STATUS_i_2" offset="0x158" width="32" description="Status register">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="WA" width="4" begin="11" end="8" resetval="0x0" description="Valid values depend on theCBUFF_CTX_CTRL_i[9:8] WCOUNT bit field." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="WB" width="4" begin="3" end="0" resetval="0x0" description="Valid values depend on the CBUFF_CTX_CTRL_I[9:8] WCOUNT bit field." range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_STATUS_i_3" acronym="CBUFF_CTX_STATUS_i_3" offset="0x178" width="32" description="Status register">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="" range="" rwaccess="R"/>
+    <bitfield id="WA" width="4" begin="11" end="8" resetval="0x0" description="Valid values depend on theCBUFF_CTX_CTRL_i[9:8] WCOUNT bit field." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="WB" width="4" begin="3" end="0" resetval="0x0" description="Valid values depend on the CBUFF_CTX_CTRL_I[9:8] WCOUNT bit field." range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_PHY_i_0" acronym="CBUFF_CTX_PHY_i_0" offset="0x11C" width="32" description="Start address of the first physical buffer managed by the context when fragmentation support is disabled.">
+    <bitfield id="ADDR" width="28" begin="31" end="4" resetval="0x0000000" description="Address, in 128 bit words." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_PHY_i_1" acronym="CBUFF_CTX_PHY_i_1" offset="0x13C" width="32" description="Start address of the first physical buffer managed by the context when fragmentation support is disabled.">
+    <bitfield id="ADDR" width="28" begin="31" end="4" resetval="0x0000000" description="Address, in 128 bit words." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_PHY_i_2" acronym="CBUFF_CTX_PHY_i_2" offset="0x15C" width="32" description="Start address of the first physical buffer managed by the context when fragmentation support is disabled.">
+    <bitfield id="ADDR" width="28" begin="31" end="4" resetval="0x0000000" description="Address, in 128 bit words." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="CBUFF_CTX_PHY_i_3" acronym="CBUFF_CTX_PHY_i_3" offset="0x17C" width="32" description="Start address of the first physical buffer managed by the context when fragmentation support is disabled.">
+    <bitfield id="ADDR" width="28" begin="31" end="4" resetval="0x0000000" description="Address, in 128 bit words." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+</module>

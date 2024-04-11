@@ -1,0 +1,261 @@
+<module name="MMU_DSP" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="MMU_REVISION" acronym="MMU_REVISION" offset="0x0" width="32" description="This register contains the IP revision code">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="See" description="IP Revision" range="" rwaccess="R"/>
+  </register>
+  <register id="MMU_SYSCONFIG" acronym="MMU_SYSCONFIG" offset="0x10" width="32" description="This register controls the various parameters of the OCP interface">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x000000" description="Write 0's for future compatibility Reads returns 0" range="" rwaccess="R"/>
+    <bitfield id="CLOCKACTIVITY" width="2" begin="9" end="8" resetval="0x0" description="Clock activity during wake-up mode 00 Functional and Interconnect clocks can be switched off" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="3" begin="7" end="5" resetval="0x0" description="Write 0's for future compatibility Reads returns 0" range="" rwaccess="R"/>
+    <bitfield id="IDLEMODE" width="2" begin="4" end="3" resetval="0x0" description="IdleMode" range="" rwaccess="RW">
+      <bitenum value="0" id="SfIdle" token="IDLEMODE_0" description="Force-idle. An idle request is acknowledged unconditionally"/>
+      <bitenum value="1" id="SnIdle" token="IDLEMODE_1" description="No-idle. An idle request is never acknowledged"/>
+      <bitenum value="2" id="SsIdle" token="IDLEMODE_2" description="Smart-idle. Acknowledgement to an idle request is given based on the internal activity of the module"/>
+      <bitenum value="3" id="Res" token="IDLEMODE_3" description="reserved do not use"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0" description="Write 0's for future compatibility Reads returns 0" range="" rwaccess="R"/>
+    <bitfield id="SOFTRESET" width="1" begin="1" end="1" resetval="0" description="Software reset. This bit is automatically reset by the hardware. During reads, it always return 0" range="" rwaccess="RW">
+      <bitenum value="0" id="always_r" token="SOFTRESET_0_r" description="always return 0"/>
+      <bitenum value="0" id="always_r" token="SOFTRESET_0_w" description="no functional effect"/>
+      <bitenum value="1" id="never_r" token="SOFTRESET_1_w" description="The module is reset"/>
+      <bitenum value="1" id="never_r" token="SOFTRESET_1_r" description="never happens"/>
+    </bitfield>
+    <bitfield id="AUTOIDLE" width="1" begin="0" end="0" resetval="0" description="Internal interconnect clock gating strategy" range="" rwaccess="RW">
+      <bitenum value="0" id="clkfree" token="AUTOIDLE_0" description="Interconnect clock is free-running"/>
+      <bitenum value="1" id="autoClkGate" token="AUTOIDLE_1" description="Automatic interconnect clock gating strategy is applied, based on the interconnect interface activity"/>
+    </bitfield>
+  </register>
+  <register id="MMU_SYSSTATUS" acronym="MMU_SYSSTATUS" offset="0x14" width="32" description="This register provides status information about the module, excluding the interrupt status information">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x000000" description="Reads returns 0" range="" rwaccess="R"/>
+    <bitfield id="RESETDONE" width="1" begin="0" end="0" resetval="-" description="Internal reset monitoring" range="" rwaccess="R">
+      <bitenum value="0" id="rstongoing" token="RESETDONE_0_r" description="Internal module reset in on-going"/>
+      <bitenum value="1" id="rstcomp" token="RESETDONE_1_r" description="Reset completed"/>
+    </bitfield>
+  </register>
+  <register id="MMU_IRQSTATUS" acronym="MMU_IRQSTATUS" offset="0x18" width="32" description="This interrupt status register regroups all the status of the module internal events that can generate an interrupt.">
+    <bitfield id="RESERVED" width="27" begin="31" end="5" resetval="0x0000000" description="Write 0's for future compatibility read returns 0" range="" rwaccess="R"/>
+    <bitfield id="MULTIHITFAULT" width="1" begin="4" end="4" resetval="0" description="Error due to multiple matches in the TLB" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="nMHF_r" token="MULTIHITFAULT_0_r" description="MultiHitFault false"/>
+      <bitenum value="0" id="nMHF_r" token="MULTIHITFAULT_0_w" description="MultiHitFault status bit unchanged"/>
+      <bitenum value="1" id="MHF_r" token="MULTIHITFAULT_1_w" description="MultiHitFault status bit is reset"/>
+      <bitenum value="1" id="MHF_r" token="MULTIHITFAULT_1_r" description="MultiHitFault is true ('pending')"/>
+    </bitfield>
+    <bitfield id="TABLEWALKFAULT" width="1" begin="3" end="3" resetval="0" description="Error response received during a Table Walk" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="nTWF_r" token="TABLEWALKFAULT_0_r" description="TableWalkFault false"/>
+      <bitenum value="0" id="nTWF_r" token="TABLEWALKFAULT_0_w" description="TableWalkFault status bit unchanged"/>
+      <bitenum value="1" id="TWF_r" token="TABLEWALKFAULT_1_w" description="TableWalkFault status bit is reset"/>
+      <bitenum value="1" id="TWF_r" token="TABLEWALKFAULT_1_r" description="TableWalkFault is true ('pending')"/>
+    </bitfield>
+    <bitfield id="EMUMISS" width="1" begin="2" end="2" resetval="0" description="Unrecoverable TLB miss during debug (hardware TWL disabled)" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="nEMUM_r" token="EMUMISS_0_r" description="EMUMiss false"/>
+      <bitenum value="0" id="nEMUM_r" token="EMUMISS_0_w" description="EMUMiss status bit unchanged"/>
+      <bitenum value="1" id="EMUM_r" token="EMUMISS_1_w" description="EMUMiss status bit is reset"/>
+      <bitenum value="1" id="EMUM_r" token="EMUMISS_1_r" description="EMUMiss is true ('pending')"/>
+    </bitfield>
+    <bitfield id="TRANSLATIONFAULT" width="1" begin="1" end="1" resetval="0" description="Invalid descriptor in translation tables (translation fault)" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="nFault_r" token="TRANSLATIONFAULT_0_r" description="TranslationFault false"/>
+      <bitenum value="0" id="nFault_r" token="TRANSLATIONFAULT_0_w" description="TranslationFault status bit unchanged"/>
+      <bitenum value="1" id="Fault_r" token="TRANSLATIONFAULT_1_w" description="TranslationFault status bit is reset"/>
+      <bitenum value="1" id="Fault_r" token="TRANSLATIONFAULT_1_r" description="TranslationFault is true ('pending')"/>
+    </bitfield>
+    <bitfield id="TLBMISS" width="1" begin="0" end="0" resetval="0" description="Unrecoverable TLB miss (hardware TWL disabled)" range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="nTLBM_r" token="TLBMISS_0_r" description="TLBMiss false"/>
+      <bitenum value="0" id="nTLBM_r" token="TLBMISS_0_w" description="TLBMiss status bit unchanged"/>
+      <bitenum value="1" id="TLBM_r" token="TLBMISS_1_w" description="TLBMiss status bit is reset"/>
+      <bitenum value="1" id="TLBM_r" token="TLBMISS_1_r" description="TLBMiss is true ('pending')"/>
+    </bitfield>
+  </register>
+  <register id="MMU_IRQENABLE" acronym="MMU_IRQENABLE" offset="0x1C" width="32" description="The interrupt enable register allows to mask/unmask the module internal sources of interrupt, on a event-by-event basis.">
+    <bitfield id="RESERVED" width="27" begin="31" end="5" resetval="0x0000000" description="Write 0's for future compatibility Read returns 0" range="" rwaccess="R"/>
+    <bitfield id="MULTIHITFAULT" width="1" begin="4" end="4" resetval="0" description="Error due to multiple matches in the TLB" range="" rwaccess="RW">
+      <bitenum value="0" id="MHFltMAsk" token="MULTIHITFAULT_0" description="MultiHitFault is masked"/>
+      <bitenum value="1" id="MHFltGInt" token="MULTIHITFAULT_1" description="MultiHitFault event generates an interrupt if occurs"/>
+    </bitfield>
+    <bitfield id="TABLEWALKFAULT" width="1" begin="3" end="3" resetval="0" description="Error response received during a Table Walk" range="" rwaccess="RW">
+      <bitenum value="0" id="TWLFltMAsk" token="TABLEWALKFAULT_0" description="TableWalkFault is masked"/>
+      <bitenum value="1" id="TWLFltGInt" token="TABLEWALKFAULT_1" description="TableWalkFault event generates an interrupt if occurs"/>
+    </bitfield>
+    <bitfield id="EMUMISS" width="1" begin="2" end="2" resetval="0" description="Unrecoverable TLB miss during debug (hardware TWL disabled)" range="" rwaccess="RW">
+      <bitenum value="0" id="EMUMFltMask" token="EMUMISS_0" description="EMUMiss interrupt is masked"/>
+      <bitenum value="1" id="EMUMFltGInt" token="EMUMISS_1" description="EMUMiss event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="TRANSLATIONFAULT" width="1" begin="1" end="1" resetval="0" description="Invalid descriptor in translation tables (translation fault)" range="" rwaccess="RW">
+      <bitenum value="0" id="TranFltMask" token="TRANSLATIONFAULT_0" description="TranslationFault is masked"/>
+      <bitenum value="1" id="TranFltGInt" token="TRANSLATIONFAULT_1" description="TranslationFault event generates an interrupt if occurs"/>
+    </bitfield>
+    <bitfield id="TLBMISS" width="1" begin="0" end="0" resetval="0" description="Unrecoverable TLB miss (hardware TWL disabled)" range="" rwaccess="RW">
+      <bitenum value="0" id="TrMissIntM" token="TLBMISS_0" description="TLBMiss interrupt is masked"/>
+      <bitenum value="1" id="TrMissGInt" token="TLBMISS_1" description="TLBMiss event generates an interrupt when if occurs"/>
+    </bitfield>
+  </register>
+  <register id="MMU_WALKING_ST" acronym="MMU_WALKING_ST" offset="0x40" width="32" description="This register provides status information about the table walking logic">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="Reads return 0" range="" rwaccess="R"/>
+    <bitfield id="TWLRUNNING" width="1" begin="0" end="0" resetval="0" description="Table Walking Logic is running" range="" rwaccess="R">
+      <bitenum value="0" id="TWLComp" token="TWLRUNNING_0_r" description="TWL Completed"/>
+      <bitenum value="1" id="TWLRun" token="TWLRUNNING_1_r" description="TWL Running"/>
+    </bitfield>
+  </register>
+  <register id="MMU_CNTL" acronym="MMU_CNTL" offset="0x44" width="32" description="This register programs the MMU features">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0000000" description="Write 0's for future compatibility Reads return 0" range="" rwaccess="R"/>
+    <bitfield id="EMUTLBUPDATE" width="1" begin="3" end="3" resetval="0" description="Enable TLB update on emulator table walk" range="" rwaccess="RW">
+      <bitenum value="0" id="EMUdis" token="EMUTLBUPDATE_0" description="Emulator TLB update disabled"/>
+      <bitenum value="1" id="EMUen" token="EMUTLBUPDATE_1" description="Emulator TLB update enabled"/>
+    </bitfield>
+    <bitfield id="TWLENABLE" width="1" begin="2" end="2" resetval="0" description="Table Walking Logic enable" range="" rwaccess="RW">
+      <bitenum value="0" id="TWLdis" token="TWLENABLE_0" description="TWL disabled"/>
+      <bitenum value="1" id="TWLen" token="TWLENABLE_1" description="TWL enabled"/>
+    </bitfield>
+    <bitfield id="MMUENABLE" width="1" begin="1" end="1" resetval="0" description="MMU enable" range="" rwaccess="RW">
+      <bitenum value="0" id="MMUdis" token="MMUENABLE_0" description="MMU disabled"/>
+      <bitenum value="1" id="MMUen" token="MMUENABLE_1" description="MMU enabled"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="0" end="0" resetval="0" description="Write 0's for future compatibility Reads return 0" range="" rwaccess="R"/>
+  </register>
+  <register id="MMU_FAULT_AD" acronym="MMU_FAULT_AD" offset="0x48" width="32" description="This register contains the virtual address that generated the interrupt">
+    <bitfield id="FAULTADDRESS" width="32" begin="31" end="0" resetval="0x0000 0000" description="Virtual address of the access that generated a fault" range="" rwaccess="R"/>
+  </register>
+  <register id="MMU_TTB" acronym="MMU_TTB" offset="0x4C" width="32" description="This register contains the Translation Table Base address">
+    <bitfield id="TTBADDRESS" width="25" begin="31" end="7" resetval="0x0000000" description="Translation Table Base Address" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="7" begin="6" end="0" resetval="0x00" description="Write 0's for future compatibility Reads retiurn 0" range="" rwaccess="R"/>
+  </register>
+  <register id="MMU_LOCK" acronym="MMU_LOCK" offset="0x50" width="32" description="This register locks some of the TLB entries">
+    <bitfield id="RESERVED" width="17" begin="31" end="15" resetval="0x00000" description="Write 0's for future compatibility Reads return 0" range="" rwaccess="R"/>
+    <bitfield id="BASEVALUE" width="5" begin="14" end="10" resetval="0x00" description="Locked entries base value" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="9" end="9" resetval="0" description="Write 0's for future compatibility Read returns 0" range="" rwaccess="R"/>
+    <bitfield id="CURRENTVICTIM" width="5" begin="8" end="4" resetval="0x00" description="Current entry to be updated either by the TWL or by the software Write value : TLB entry to be updated by software, Read value : TLB entry that will be updated by table walk logic" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="Write 0's for future compatibility Reads return 0" range="" rwaccess="R"/>
+  </register>
+  <register id="MMU_LD_TLB" acronym="MMU_LD_TLB" offset="0x54" width="32" description="This register loads a TLB entry (CAM+RAM)">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="Write 0's for future compatibility Reads return 0" range="" rwaccess="RW"/>
+    <bitfield id="LDTLBITEM" width="1" begin="0" end="0" resetval="0" description="Write (load) data in the TLB" range="" rwaccess="RW">
+      <bitenum value="0" id="always_r" token="LDTLBITEM_0_r" description="always return 0"/>
+      <bitenum value="0" id="always_r" token="LDTLBITEM_0_w" description="no functional effect"/>
+      <bitenum value="1" id="never_r" token="LDTLBITEM_1_w" description="load TLB data"/>
+      <bitenum value="1" id="never_r" token="LDTLBITEM_1_r" description="never happens"/>
+    </bitfield>
+  </register>
+  <register id="MMU_CAM" acronym="MMU_CAM" offset="0x58" width="32" description="This register holds a CAM entry">
+    <bitfield id="VATAG" width="20" begin="31" end="12" resetval="0x00000" description="Virtual address tag" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="8" begin="11" end="4" resetval="0x00" description="Write 0's for future compatibility Reads return 0" range="" rwaccess="R"/>
+    <bitfield id="P" width="1" begin="3" end="3" resetval="0" description="Preserved bit" range="" rwaccess="RW">
+      <bitenum value="0" id="CanFlush" token="P_0" description="TLB entry may be flushed"/>
+      <bitenum value="1" id="NoFlush" token="P_1" description="TLB entry is protected against flush"/>
+    </bitfield>
+    <bitfield id="V" width="1" begin="2" end="2" resetval="0" description="Valid bit" range="" rwaccess="RW">
+      <bitenum value="0" id="Invalid" token="V_0" description="TLB entry is invalid"/>
+      <bitenum value="1" id="Valid" token="V_1" description="TLB entry is valid"/>
+    </bitfield>
+    <bitfield id="PAGESIZE" width="2" begin="1" end="0" resetval="0x0" description="Page size" range="" rwaccess="RW">
+      <bitenum value="0" id="Section" token="PAGESIZE_0" description="Section (1 MiB)"/>
+      <bitenum value="1" id="Large" token="PAGESIZE_1" description="Large page (64 KiB)"/>
+      <bitenum value="2" id="Small" token="PAGESIZE_2" description="Small page (4 KiB)"/>
+      <bitenum value="3" id="Super" token="PAGESIZE_3" description="Supersection (16 MiB)"/>
+    </bitfield>
+  </register>
+  <register id="MMU_RAM" acronym="MMU_RAM" offset="0x5C" width="32" description="This register holds a RAM entry">
+    <bitfield id="PHYSICALADDRESS" width="20" begin="31" end="12" resetval="0x00000" description="Physical address of the page" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="11" end="10" resetval="0x0" description="Write 0's for future compatibility Reads return 0" range="" rwaccess="R"/>
+    <bitfield id="ENDIANNESS" width="1" begin="9" end="9" resetval="0" description="Endianness of the page" range="" rwaccess="RW">
+      <bitenum value="0" id="Little" token="ENDIANNESS_0" description="Little Endian"/>
+      <bitenum value="1" id="Big" token="ENDIANNESS_1" description="Big endian"/>
+    </bitfield>
+    <bitfield id="ELEMENTSIZE" width="2" begin="8" end="7" resetval="0x0" description="Element size of the page (8, 16, 32, no translation)" range="" rwaccess="RW">
+      <bitenum value="0" id="Byte" token="ELEMENTSIZE_0" description="8-bits"/>
+      <bitenum value="1" id="Short" token="ELEMENTSIZE_1" description="16-bits"/>
+      <bitenum value="2" id="Long" token="ELEMENTSIZE_2" description="32-bits"/>
+      <bitenum value="3" id="None" token="ELEMENTSIZE_3" description="No translation"/>
+    </bitfield>
+    <bitfield id="MIXED" width="1" begin="6" end="6" resetval="0" description="Mixed page attribute (use CPU element size)" range="" rwaccess="RW">
+      <bitenum value="0" id="TLBes" token="MIXED_0" description="Use TLB element size"/>
+      <bitenum value="1" id="CPUes" token="MIXED_1" description="Use CPU element size"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="5" end="0" resetval="0x00" description="Write 0's for future compatibility Reads return 0" range="" rwaccess="R"/>
+  </register>
+  <register id="MMU_GFLUSH" acronym="MMU_GFLUSH" offset="0x60" width="32" description="This register flushes all the non-protected TLB entries">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="Write 0's for future compatibility Reads return 0" range="" rwaccess="RW"/>
+    <bitfield id="GLOBALFLUSH" width="1" begin="0" end="0" resetval="0" description="Flush all the non-protected TLB entries when set" range="" rwaccess="RW">
+      <bitenum value="0" id="rtn0_r" token="GLOBALFLUSH_0_r" description="always return 0"/>
+      <bitenum value="0" id="rtn0_r" token="GLOBALFLUSH_0_w" description="no functional effect"/>
+      <bitenum value="1" id="never_r" token="GLOBALFLUSH_1_w" description="flush all the non-protected TLB entries"/>
+      <bitenum value="1" id="never_r" token="GLOBALFLUSH_1_r" description="never happens"/>
+    </bitfield>
+  </register>
+  <register id="MMU_FLUSH_ENTRY" acronym="MMU_FLUSH_ENTRY" offset="0x64" width="32" description="This register flushes the entry pointed to by the CAM virtual address">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="Write 0's for future compatibility Reads return 0" range="" rwaccess="RW"/>
+    <bitfield id="FLUSHENTRY" width="1" begin="0" end="0" resetval="0" description="Flush the TLB entry pointed by the virtual address (VATag) inMMU_CAM register, even if this entry is set protected" range="" rwaccess="RW">
+      <bitenum value="0" id="always_r" token="FLUSHENTRY_0_r" description="always return 0"/>
+      <bitenum value="0" id="always_r" token="FLUSHENTRY_0_w" description="no functional effect"/>
+      <bitenum value="1" id="never_r" token="FLUSHENTRY_1_w" description="flush all the TLB entries specified by the CAM register"/>
+      <bitenum value="1" id="never_r" token="FLUSHENTRY_1_r" description="never happens"/>
+    </bitfield>
+  </register>
+  <register id="MMU_READ_CAM" acronym="MMU_READ_CAM" offset="0x68" width="32" description="This register reads CAM data from a CAM entry">
+    <bitfield id="VATAG" width="20" begin="31" end="12" resetval="0x00000" description="Virtual address tag" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="8" begin="11" end="4" resetval="0x00" description="Reads return 0" range="" rwaccess="R"/>
+    <bitfield id="P" width="1" begin="3" end="3" resetval="0" description="Preserved bit" range="" rwaccess="R">
+      <bitenum value="0" id="CanFlush" token="P_0_r" description="TLB entry may be flushed"/>
+      <bitenum value="1" id="NoFlush" token="P_1_r" description="TLB entry is protected against flush"/>
+    </bitfield>
+    <bitfield id="V" width="1" begin="2" end="2" resetval="0" description="Valid bit" range="" rwaccess="R">
+      <bitenum value="0" id="Invalid" token="V_0_r" description="TLB entry is invalid"/>
+      <bitenum value="1" id="Valid" token="V_1_r" description="TLB entry is valid"/>
+    </bitfield>
+    <bitfield id="PAGESIZE" width="2" begin="1" end="0" resetval="0x0" description="Page size" range="" rwaccess="R">
+      <bitenum value="0" id="Section" token="PAGESIZE_0_r" description="Section (1 MiB)"/>
+      <bitenum value="1" id="Large" token="PAGESIZE_1_r" description="Large page (64 KiB)"/>
+      <bitenum value="2" id="Small" token="PAGESIZE_2_r" description="Small page (4 KiB)"/>
+      <bitenum value="3" id="Super" token="PAGESIZE_3_r" description="Supersection (16 MiB)"/>
+    </bitfield>
+  </register>
+  <register id="MMU_READ_RAM" acronym="MMU_READ_RAM" offset="0x6C" width="32" description="This register reads RAM data from a RAM entry">
+    <bitfield id="PHYSICALADDRESS" width="20" begin="31" end="12" resetval="0x00000" description="Physical address of the page" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="2" begin="11" end="10" resetval="0x0" description="Reads return 0" range="" rwaccess="R"/>
+    <bitfield id="ENDIANNESS" width="1" begin="9" end="9" resetval="0" description="Endianness of the page" range="" rwaccess="R">
+      <bitenum value="0" id="Little" token="ENDIANNESS_0_r" description="Little Endian"/>
+      <bitenum value="1" id="Big" token="ENDIANNESS_1_r" description="Big endian"/>
+    </bitfield>
+    <bitfield id="ELEMENTSIZE" width="2" begin="8" end="7" resetval="0x0" description="Element size of the page (8, 16, 32, no translation)" range="" rwaccess="R">
+      <bitenum value="0" id="Byte" token="ELEMENTSIZE_0_r" description="8-bits"/>
+      <bitenum value="1" id="Short" token="ELEMENTSIZE_1_r" description="16-bits"/>
+      <bitenum value="2" id="Long" token="ELEMENTSIZE_2_r" description="32-bits"/>
+      <bitenum value="3" id="None" token="ELEMENTSIZE_3_r" description="No translation"/>
+    </bitfield>
+    <bitfield id="MIXED" width="1" begin="6" end="6" resetval="0" description="Mixed page attribute (use CPU element size)" range="" rwaccess="R">
+      <bitenum value="0" id="TLBes" token="MIXED_0_r" description="Use TLB element size"/>
+      <bitenum value="1" id="CPUes" token="MIXED_1_r" description="Use CPU element size"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="5" end="0" resetval="0x00" description="Reads return 0" range="" rwaccess="R"/>
+  </register>
+  <register id="MMU_EMU_FAULT_AD" acronym="MMU_EMU_FAULT_AD" offset="0x70" width="32" description="This register contains the last virtual address of a fault caused by the debugger">
+    <bitfield id="EMUFAULTADDRESS" width="32" begin="31" end="0" resetval="0x0000 0000" description="Virtual address of the last emulator access that generated a fault" range="" rwaccess="R"/>
+  </register>
+  <register id="MMU_FAULT_PC" acronym="MMU_FAULT_PC" offset="0x80" width="32" description="Capture first fault PC value, controlled by[0] FAULTINDICATION. Notes: The address value is captured at [31:0] EMUFAULTADDRESS. Data-Read-access : corresponding PC. Data-write-access : not perfect accuracy due to Posted-write. All this description is valid only for the DSP MMU. The Cortex-M3 L2 MMU always reads zero from this register.">
+    <bitfield id="PC" width="32" begin="31" end="0" resetval="0x0000 0000" description="CPU program counter value where cause MMU fault" range="" rwaccess="R"/>
+  </register>
+  <register id="MMU_FAULT_STATUS" acronym="MMU_FAULT_STATUS" offset="0x84" width="32" description="">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="" range="" rwaccess="R"/>
+    <bitfield id="MMU_FAULT_TRANS_ID" width="4" begin="7" end="4" resetval="0x0" description="Master ID who cause a faultRead 0x9 to 0xF: reserved (for both MMU_IPU and MMU_DSP) enum=MMU_HW_TBL_WALK ." range="" rwaccess="R">
+      <bitenum value="0" id="DMA_RD2" token="MMU_FAULT_TRANS_ID_0_r" description="posted writes out of shared cache for MMU_IPU / DMA_DSP read port 1 for MMU_DSP"/>
+      <bitenum value="1" id="DMA_RD2" token="MMU_FAULT_TRANS_ID_1_r" description="IPU_C0 processor I/D bus access for MMU_IPU / DMA_DSP read port 2 for MMU_DSP"/>
+      <bitenum value="2" id="IPU_C0_S_MMU_IPU_DMA_DSP_MMU_DSP_2" token="MMU_FAULT_TRANS_ID_2_r" description="IPU_C0 processor S bus access for MMU_IPU / DMA_DSP write port 1 for MMU_DSP"/>
+      <bitenum value="3" id="IPU_C1_I/D_MMU_IPU_DMA_DSP_MMU_DSP_3" token="MMU_FAULT_TRANS_ID_3_r" description="IPU_C1 processor I/D bus access for MMU_IPU / DMA_DSP write port 2 for MMU_DSP"/>
+      <bitenum value="4" id="CACHE_MISC" token="MMU_FAULT_TRANS_ID_4_r" description="IPU_C1 processor S bus access for MMU_IPU / shared cache Evictions/stores/Non-cacheable for MMU_DSP"/>
+      <bitenum value="5" id="CACHE_CPU" token="MMU_FAULT_TRANS_ID_5_r" description="reserved for MMU_IPU / shared cache request for Program/Data for MMU_DSP"/>
+      <bitenum value="6" id="CACHE_DMA" token="MMU_FAULT_TRANS_ID_6_r" description="reserved for MMU_IPU / shared cache request for DMA for MMU_DSP"/>
+      <bitenum value="7" id="CACHE_DMA" token="MMU_FAULT_TRANS_ID_7_r" description="reserved (for both MMU_IPU and MMU_DSP)"/>
+      <bitenum value="8" id="MMU_HW_TBL_WALK" token="MMU_FAULT_TRANS_ID_8_r" description="MMU hardware table walk (for both MMU_IPU and MMU_DSP)"/>
+    </bitfield>
+    <bitfield id="RD_WR" width="1" begin="3" end="3" resetval="0" description="indicates read or write" range="" rwaccess="R"/>
+    <bitfield id="MMU_FAULT_TYPE" width="2" begin="2" end="1" resetval="0x0" description="MReq Type[1:0]" range="" rwaccess="R">
+      <bitenum value="2" id="DMA" token="MMU_FAULT_TYPE_2_r" description="reserved for MMU_IPU / DMA address for MMU_DSP"/>
+      <bitenum value="1" id="FETCH" token="MMU_FAULT_TYPE_1_r" description="Fetch address"/>
+      <bitenum value="0" id="LD_ST" token="MMU_FAULT_TYPE_0_r" description="Data Load/Store"/>
+    </bitfield>
+    <bitfield id="FAULTINDICATION" width="1" begin="0" end="0" resetval="0" description="indicates a MMU fault" range="" rwaccess="RW W1toClr"/>
+  </register>
+  <register id="DSPSS_MMU_GPR" acronym="DSPSS_MMU_GPR" offset="0x88" width="32" description="This register controls the MMU_DSP hardware debug output multiplexer. It also controls force-idle request generation. For more information about the use of this register, see chapter.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FORCE_IDLE_REQ" width="1" begin="15" end="15" resetval="0x0" description="Force-idle request to see existence of pending bus request. This bit must be used only for debug purposes, not in functional mode." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="11" begin="14" end="4" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="HWDEBUG_MUX" width="4" begin="3" end="0" resetval="0x0" description="Control HWDEBUG output MUX" range="" rwaccess="RW"/>
+  </register>
+</module>

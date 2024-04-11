@@ -1,0 +1,396 @@
+<module name="DSP1_EDMA_TPTC0" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="EDMA_TPTCn_PID" acronym="EDMA_TPTCn_PID" offset="0x0" width="32" description="Peripheral ID Register">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="TI internal data" description="IP Revision" range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_TCCFG" acronym="EDMA_TPTCn_TCCFG" offset="0x4" width="32" description="TC Configuration Register">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x0" description="Reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="DREGDEPTH" width="2" begin="9" end="8" resetval="See" description="Dst Register FIFO Depth Parameterization" range="" rwaccess="R">
+      <bitenum value="0" id="FIFODEPTH_1" token="DREGDEPTH_0" description="1 entry"/>
+      <bitenum value="1" id="FIFODEPTH_2" token="DREGDEPTH_1" description="2 entries"/>
+      <bitenum value="2" id="FIFODEPTH_4" token="DREGDEPTH_2" description="4 entries"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="7" end="6" resetval="0x0" description="Reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="BUSWIDTH" width="2" begin="5" end="4" resetval="See" description="Bus Width Parameterization" range="" rwaccess="R">
+      <bitenum value="0" id="BW_32BIT" token="BUSWIDTH_0" description="32-bit"/>
+      <bitenum value="1" id="BW_64BIT" token="BUSWIDTH_1" description="64-bit"/>
+      <bitenum value="2" id="BW_128BIT" token="BUSWIDTH_2" description="128-bit"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0x0" description="Reads return 0's" range="" rwaccess="R"/>
+    <bitfield id="FIFOSIZE" width="3" begin="2" end="0" resetval="See" description="Fifo Size Parameterization" range="" rwaccess="R">
+      <bitenum value="0" id="FIFO_32_BYTE" token="FIFOSIZE_0" description="32 byte FIFO"/>
+      <bitenum value="1" id="FIFO_64_BYTE" token="FIFOSIZE_1" description="64 byte FIFO"/>
+      <bitenum value="2" id="FIFO_256_BYTE" token="FIFOSIZE_2" description="128 byte FIFO"/>
+      <bitenum value="3" id="FIFO_512_BYTE" token="FIFOSIZE_3" description="256 byte FIFO"/>
+      <bitenum value="4" id="FIFO_128_BYTE" token="FIFOSIZE_4" description="512 byte FIFO"/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_TCSTAT" acronym="EDMA_TPTCn_TCSTAT" offset="0x100" width="32" description="TC Status Register">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="DFSTRTPTR" width="2" begin="12" end="11" resetval="0x0" description="Dst FIFO Start Pointer Represents the offset to the head entry of Dst Register FIFO, in units of *entries*. Legal values = 0x0 to 0x3" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="2" begin="10" end="9" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="ACTV" width="1" begin="8" end="8" resetval="0x1" description="Channel Active Channel Active is a logical-OR of each of the *BUSY/ACTV signals. The ACTV bit must remain high through the life of a TR." range="" rwaccess="R">
+      <bitenum value="0" id="Channel_is_idle" token="ACTV_0" description="Channel is idle"/>
+      <bitenum value="1" id="Channel_is_busy" token="ACTV_1" description="Channel is busy"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="DSTACTV" width="3" begin="6" end="4" resetval="0x0" description="Destination Active State Specifies the number of TRs that are resident in the Dst Register FIFO at a given instant. Legal values are constrained by the DSTREGDEPTH parameter." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="WSACTV" width="1" begin="2" end="2" resetval="0x0" description="Write Status Active" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="WSACTV_0" description="Write status is not pending. Write status has been received for all previously issued write commands."/>
+      <bitenum value="1" id="1" token="WSACTV_1" description="Write Status is pending. Write status has not been received for all previously issued write commands."/>
+    </bitfield>
+    <bitfield id="SRCACTV" width="1" begin="1" end="1" resetval="0x0" description="Source Active State" range="" rwaccess="R">
+      <bitenum value="0" id="TR_FIFO_(DSTFULL_0" token="SRCACTV_0" description="Source Active set is idle. Any TR written to Prog Set will immediately transition to Source Active set as long as the Dst FIFO Set is not full (DSTFULL == 1)."/>
+      <bitenum value="1" id="1" token="SRCACTV_1" description="Source Active set is busy either performing read transfers or waiting to perform read transfers for current Transfer Request."/>
+    </bitfield>
+    <bitfield id="PROGBUSY" width="1" begin="0" end="0" resetval="0x0" description="Program Register Set Busy" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="PROGBUSY_0" description="Program set idle and is available for programming."/>
+      <bitenum value="1" id="PROGBUSY_1" token="PROGBUSY_1" description="Program set busy. User should poll for PROGBUSY equal to '0' prior to re-programming the Program Register set."/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_INTSTAT" acronym="EDMA_TPTCn_INTSTAT" offset="0x104" width="32" description="Interrupt Status Register">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="TRDONE" width="1" begin="1" end="1" resetval="0x0" description="TR Done Event Status" range="" rwaccess="R">
+      <bitenum value="0" id="Condition_not_detected." token="TRDONE_0" description="Condition not detected."/>
+      <bitenum value="1" id="TC_TRDONE_TR._INTCLR.TRDONE_1" token="TRDONE_1" description="Set when TC has completed a Transfer Request. TRDONE should be set when the write status is returned for the final write of a TR. Cleared when write '1' to INTCLR.TRDONE register bit."/>
+    </bitfield>
+    <bitfield id="PROGEMPTY" width="1" begin="0" end="0" resetval="0x0" description="Program Set Empty Event Status" range="" rwaccess="R">
+      <bitenum value="0" id="Condition_not_detected" token="PROGEMPTY_0" description="Condition not detected"/>
+      <bitenum value="1" id="PROGEMPTY_1" token="PROGEMPTY_1" description="Set when Program Register set transitions to empty state. Cleared when write '1' to [0] PROGEMPTY register bit."/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_INTEN" acronym="EDMA_TPTCn_INTEN" offset="0x108" width="32" description="Interrupt Enable Register">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="TRDONE" width="1" begin="1" end="1" resetval="0x0" description="TR Done Event Enable" range="" rwaccess="RW">
+      <bitenum value="0" id="TRDONE_Event_is_disabled." token="TRDONE_0" description="TRDONE Event is disabled."/>
+      <bitenum value="1" id="TRDONE_1" token="TRDONE_1" description="TRDONE Event is enabled, and contributes to interrupt generation"/>
+    </bitfield>
+    <bitfield id="PROGEMPTY" width="1" begin="0" end="0" resetval="0x0" description="Program Set Empty Event Enable" range="" rwaccess="RW">
+      <bitenum value="0" id="PROGEMPTY_Event_is_disabled." token="PROGEMPTY_0" description="PROGEMPTY Event is disabled."/>
+      <bitenum value="1" id="PROGEMPTY_1" token="PROGEMPTY_1" description="PROGEMPTY Event is enabled, and contributes to interrupt generation"/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_INTCLR" acronym="EDMA_TPTCn_INTCLR" offset="0x10C" width="32" description="Interrupt Clear Register">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="TRDONE" width="1" begin="1" end="1" resetval="0x0" description="TR Done Event Clear" range="" rwaccess="W">
+      <bitenum value="0" id="have_no_effect." token="TRDONE_0_w" description="have no effect."/>
+      <bitenum value="1" id="Clear" token="TRDONE_1_w" description="Clear"/>
+    </bitfield>
+    <bitfield id="PROGEMPTY" width="1" begin="0" end="0" resetval="0x0" description="Program Set Empty Event Clear" range="" rwaccess="W">
+      <bitenum value="0" id="have_no_effect." token="PROGEMPTY_0_w" description="have no effect."/>
+      <bitenum value="1" id="Clear" token="PROGEMPTY_1_w" description="Clear"/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_INTCMD" acronym="EDMA_TPTCn_INTCMD" offset="0x110" width="32" description="Interrupt Command Register">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SET" width="1" begin="1" end="1" resetval="0x0" description="Set TPTC interrupt" range="" rwaccess="W">
+      <bitenum value="0" id="have_no_affect." token="SET_0_w" description="have no affect."/>
+      <bitenum value="1" id="SET_TPTC_1" token="SET_1_w" description="SET causes TPTC interrupt to be pulsed unconditionally"/>
+    </bitfield>
+    <bitfield id="EVAL" width="1" begin="0" end="0" resetval="0x0" description="Evaluate state of TPTC interrupt" range="" rwaccess="W">
+      <bitenum value="0" id="have_no_affect." token="EVAL_0_w" description="have no affect."/>
+      <bitenum value="1" id="TPTC_1" token="EVAL_1" description="causes TPTC interrupt to be pulsed if any of the bits are set to '1'."/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_ERRSTAT" acronym="EDMA_TPTCn_ERRSTAT" offset="0x120" width="32" description="Error Status Register">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="MMRAERR" width="1" begin="3" end="3" resetval="0x0" description="MR Address Error" range="" rwaccess="R">
+      <bitenum value="0" id="Condition_not_detected" token="MMRAERR_0" description="Condition not detected"/>
+      <bitenum value="1" id="1" token="MMRAERR_1" description="User attempted to read or write to invalid address configuration mMemory map. (Is only be set for non-emulation accesses). No additional error information is recorded."/>
+    </bitfield>
+    <bitfield id="TRERR" width="1" begin="2" end="2" resetval="0x0" description="TR Error: TR detected that violates FIFO Mode transfer (SAM or DAM is '1') alignment rules or has ACNT or BCNT == 0. No additional error information is recorded." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="1" end="1" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="BUSERR" width="1" begin="0" end="0" resetval="0x0" description="Bus Error Event" range="" rwaccess="R">
+      <bitenum value="0" id="Condition_not_detected." token="BUSERR_0" description="Condition not detected."/>
+      <bitenum value="1" id="TC_1" token="BUSERR_1" description="TC has detected an error code on the write response bus or read response bus. Error information is stored in Error Details Register ()."/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_ERREN" acronym="EDMA_TPTCn_ERREN" offset="0x124" width="32" description="Error Enable Register">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="MMRAERR" width="1" begin="3" end="3" resetval="0x0" description="Interrupt enable forEDMA_TPTCn_ERRSTAT[3] MMRAERR" range="" rwaccess="RW">
+      <bitenum value="0" id="BUSERR_is_disabled" token="MMRAERR_0" description="BUSERR is disabled"/>
+      <bitenum value="1" id="MMRAERR_TPTC_1" token="MMRAERR_1" description="MMRAERR is enabled, and contributes to the TPTC error interrupt generation."/>
+    </bitfield>
+    <bitfield id="TRERR" width="1" begin="2" end="2" resetval="0x0" description="Interrupt enable forEDMA_TPTCn_ERRSTAT[2] TRERR" range="" rwaccess="RW">
+      <bitenum value="0" id="BUSERR_is_disabled." token="TRERR_0" description="BUSERR is disabled."/>
+      <bitenum value="1" id="TRERR_TPTC_1" token="TRERR_1" description="TRERR is enabled, and contributes to the TPTC error interrupt generation."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="1" end="1" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="BUSERR" width="1" begin="0" end="0" resetval="0x0" description="Interrupt enable forEDMA_TPTCn_ERRSTAT[0] BUSERR" range="" rwaccess="RW">
+      <bitenum value="0" id="BUSERR_is_disabled." token="BUSERR_0" description="BUSERR is disabled."/>
+      <bitenum value="1" id="BUSERR_TPTC_1" token="BUSERR_1" description="BUSERR is enabled, and contributes to the TPTC error interrupt generation."/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_ERRCLR" acronym="EDMA_TPTCn_ERRCLR" offset="0x128" width="32" description="Error Clear Register">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="MMRAERR" width="1" begin="3" end="3" resetval="0x0" description="Interrupt clear forEDMA_TPTCn_ERRSTAT[3] MMRAERR" range="" rwaccess="W">
+      <bitenum value="0" id="have_no_effect" token="MMRAERR_0_w" description="have no effect"/>
+      <bitenum value="1" id="MMRAERR_MMRAERR_ERRDET_1" token="MMRAERR_1_w" description="to clear[3] MMRAERR bit. Write of '1' to [3] MMRAERR does not clear the ERRDET register."/>
+    </bitfield>
+    <bitfield id="TRERR" width="1" begin="2" end="2" resetval="0x0" description="Interrupt clear forEDMA_TPTCn_ERRSTAT[2] TRERR" range="" rwaccess="W">
+      <bitenum value="0" id="have_no_effect" token="TRERR_0_w" description="have no effect"/>
+      <bitenum value="1" id="TRERR_TRERR_ERRDET_1" token="TRERR_1_w" description="to clear[2] TRERR bit. Write of '1' to [2] TRERR does not clear the ERRDET register."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="1" end="1" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="BUSERR" width="1" begin="0" end="0" resetval="0x0" description="Interrupt clear forEDMA_TPTCn_ERRSTAT[0] BUSERR" range="" rwaccess="W">
+      <bitenum value="0" id="have_no_effect" token="BUSERR_0_w" description="have no effect"/>
+      <bitenum value="1" id="BUSERR_BUSERR_ERRDET_1" token="BUSERR_1_w" description="to clear[0] BUSERR bit Write of '1' to [0] BUSERR clears the ERRDET register."/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_ERRDET" acronym="EDMA_TPTCn_ERRDET" offset="0x12C" width="32" description="Error Details Register">
+    <bitfield id="RESERVED" width="14" begin="31" end="18" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="TCCHEN" width="1" begin="17" end="17" resetval="0x0" description="Contains theEDMA_TPCC_OPT_n[17] TCCHEN value programmed by the user for the Read or Write transaction that resulted in an error." range="" rwaccess="R"/>
+    <bitfield id="TCINTEN" width="1" begin="16" end="16" resetval="0x0" description="Contains theEDMA_TPCC_OPT_n[16] TCINTEN value programmed by the user for the Read or Write transaction that resulted in an error." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="2" begin="15" end="14" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="TCC" width="6" begin="13" end="8" resetval="0x0" description="Transfer Complete Code: Contains theEDMA_TPCC_OPT_n[13:8] TCC value programmed by the user for the Read or Write transaction that resulted in an error." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="STAT" width="4" begin="3" end="0" resetval="0x0" description="Transaction Status: Stores the non-zero status/error code that was detected on the read status or write status bus. MS-bit effectively serves as the read vs. write error code. If read status and write status are returned on the same cycle, then the TC chooses non-zero version. If both are non-zero then write status is treated as higher priority. Encoding of errors matches the CBA spec and is summarized here: 0xF =" range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_ERRCMD" acronym="EDMA_TPTCn_ERRCMD" offset="0x130" width="32" description="Error Command Register">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SET" width="1" begin="1" end="1" resetval="0x0" description="Set TPTC error interrupt" range="" rwaccess="W">
+      <bitenum value="0" id="have_no_affect" token="SET_0_w" description="have no affect"/>
+      <bitenum value="1" id="SET_TPTC_1" token="SET_1_w" description="to SET causes TPTC error interrupt to be pulsed unconditionally."/>
+    </bitfield>
+    <bitfield id="EVAL" width="1" begin="0" end="0" resetval="0x0" description="Evaluate state of TPTC error interrupt Write of '1'" range="" rwaccess="W">
+      <bitenum value="0" id="have_no_affect" token="EVAL_0_w" description="have no affect"/>
+      <bitenum value="1" id="EVAL_TPTC_1" token="EVAL_1_w" description="to EVAL causes TPTC error interrupt to be pulsed if any of the bits are set to '1'."/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_RDRATE" acronym="EDMA_TPTCn_RDRATE" offset="0x140" width="32" description="Read Rate Register">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="RDRATE" width="3" begin="2" end="0" resetval="0x0" description="Read Rate Control: Controls the number of cycles between read commands. This is a global setting that applies to all TRs for this TC." range="" rwaccess="RW"/>
+  </register>
+  <register id="EDMA_TPTCn_POPT" acronym="EDMA_TPTCn_POPT" offset="0x200" width="32" description="Program Set Options">
+    <bitfield id="RESERVED" width="9" begin="31" end="23" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="TCCHEN" width="1" begin="22" end="22" resetval="0x0" description="Transfer complete chaining enable" range="" rwaccess="RW">
+      <bitenum value="0" id="Transfer_complete_chaining_is_disabled." token="TCCHEN_0" description="Transfer complete chaining is disabled."/>
+      <bitenum value="1" id="Transfer_complete_chaining_is_enabled." token="TCCHEN_1" description="Transfer complete chaining is enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="21" end="21" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="TCINTEN" width="1" begin="20" end="20" resetval="0x0" description="Transfer complete interrupt enable" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="TCINTEN_0" description="Transfer complete interrupt is disabled."/>
+      <bitenum value="1" id="Transfer_complete_interrupt_is_enabled." token="TCINTEN_1" description="Transfer complete interrupt is enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="19" end="18" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="TCC" width="6" begin="17" end="12" resetval="0x0" description="Transfer Complete Code: The 6-bit code is used to set the relevant bit in CER orEDMA_TPCC_IPR of the TPCC module." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FWID" width="3" begin="10" end="8" resetval="0x0" description="FIFO width control: Applies if either SAM or DAM is set to FIFO mode." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PRI" width="3" begin="6" end="4" resetval="0x0" description="Transfer Priority: 0x0: Priority 0 - Highest priority 0x1: Priority 1 ... 0x7: Priority 7 - Lowest priority" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="3" end="2" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="DAM" width="1" begin="1" end="1" resetval="0x0" description="Destination Address Mode within an array" range="" rwaccess="RW">
+      <bitenum value="0" id="INCR,_0" token="DAM_0" description="INCR, Destination addressing within an array increments."/>
+      <bitenum value="1" id="FIFO,_FIFO_1" token="DAM_1" description="FIFO, Destination addressing within an array wraps around upon reaching FIFO width."/>
+    </bitfield>
+    <bitfield id="SAM" width="1" begin="0" end="0" resetval="0x0" description="Source Address Mode within an array" range="" rwaccess="RW">
+      <bitenum value="0" id="INCR,_0" token="SAM_0" description="INCR, Source addressing within an array increments."/>
+      <bitenum value="1" id="FIFO,_FIFO_1" token="SAM_1" description="FIFO, Source addressing within an array wraps around upon reaching FIFO width."/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_PSRC" acronym="EDMA_TPTCn_PSRC" offset="0x204" width="32" description="Program Set Source Address">
+    <bitfield id="SADDR" width="32" begin="31" end="0" resetval="0x0" description="Source address for Program Register Set" range="" rwaccess="RW"/>
+  </register>
+  <register id="EDMA_TPTCn_PCNT" acronym="EDMA_TPTCn_PCNT" offset="0x208" width="32" description="Program Set Count">
+    <bitfield id="BCNT" width="16" begin="31" end="16" resetval="0x0" description="B-Dimension count. Number of arrays to be transferred, where each array is ACNT in length." range="" rwaccess="RW"/>
+    <bitfield id="ACNT" width="16" begin="15" end="0" resetval="0x0" description="A-Dimension count. Number of bytes to be transferred in first dimension." range="" rwaccess="RW"/>
+  </register>
+  <register id="EDMA_TPTCn_PDST" acronym="EDMA_TPTCn_PDST" offset="0x20C" width="32" description="Program Set Destination Address">
+    <bitfield id="DADDR" width="32" begin="31" end="0" resetval="0x0" description="Destination address for Program Register Set" range="" rwaccess="RW"/>
+  </register>
+  <register id="EDMA_TPTCn_PBIDX" acronym="EDMA_TPTCn_PBIDX" offset="0x210" width="32" description="Program Set B-Dim Idx">
+    <bitfield id="DBIDX" width="16" begin="31" end="16" resetval="0x0" description="Dest B-Idx for Program Register Set: B-Idx offset between Destination arrays: Represents the offset in bytes between the starting address of each destination array (recall that there are BCNT arrays of ACNT elements). DBIDX is always used, regardless of whether DAM is Increment or FIFO mode." range="" rwaccess="RW"/>
+    <bitfield id="SBIDX" width="16" begin="15" end="0" resetval="0x0" description="Source B-Idx for Program Register Set: B-Idx offset between Source arrays: Represents the offset in bytes between the starting address of each source array (recall that there are BCNT arrays of ACNT elements). SBIDX is always used, regardless of whether SAM is Increment or FIFO mode." range="" rwaccess="RW"/>
+  </register>
+  <register id="EDMA_TPTCn_PMPPRXY" acronym="EDMA_TPTCn_PMPPRXY" offset="0x214" width="32" description="Program Set Memory Protect Proxy">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="PRIV" width="1" begin="8" end="8" resetval="0x0" description="Privilege Level" range="" rwaccess="R">
+      <bitenum value="0" id="User_level_privilege" token="PRIV_0" description="User level privilege"/>
+      <bitenum value="1" id="BIDX_PRIV_SA_DF_ID_PRIV_DMA_1" token="PRIV_1" description="Supervisor level privilege.PRIV is always updated with the value from the configuration bus privilege field on any/every write to Program Set BIDX Register (trigger register). The PRIV value for the SA Set and DF Set are copied from the value in the Program set along with the remainder of the parameter values. The privilege ID is issued on the VBusM read and write command bus such that the target endpoints can perform mMemory protection checks based on the PRIV of the external host that sets up the DMA transaction."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="PRIVID" width="4" begin="3" end="0" resetval="0x0" description="Privilege ID: EDMA_TPTCn_PMPPRXY.PRIVID is always updated with the value from configuration bus privilege ID field on any/every write to Program Set BIDX Register (trigger register). The PRIVID value for the SA Set and DF Set are copied from the value in the Program set along with the remainder of the parameter values. The privilege ID is issued on the VBusM read and write command bus such that the target endpoints can perform mMemory protection checks based on the privid of the external host that sets up the DMA transaction." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_SAOPT" acronym="EDMA_TPTCn_SAOPT" offset="0x240" width="32" description="Source Actve Set Options">
+    <bitfield id="RESERVED" width="9" begin="31" end="23" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="TCCHEN" width="1" begin="22" end="22" resetval="0x0" description="Transfer complete chaining enable" range="" rwaccess="R">
+      <bitenum value="0" id="Transfer_complete_chaining_is_disabled." token="TCCHEN_0" description="Transfer complete chaining is disabled."/>
+      <bitenum value="1" id="Transfer_complete_chaining_is_enabled." token="TCCHEN_1" description="Transfer complete chaining is enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="21" end="21" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="TCINTEN" width="1" begin="20" end="20" resetval="0x0" description="Transfer complete interrupt enable" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="TCINTEN_0" description="Transfer complete interrupt is disabled."/>
+      <bitenum value="1" id="Transfer_complete_interrupt_is_enabled." token="TCINTEN_1" description="Transfer complete interrupt is enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="19" end="18" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="TCC" width="6" begin="17" end="12" resetval="0x0" description="Transfer Complete Code The 6-bit code is used to set the relevant bit in EDMA_TPCC_CER or EDMA_TPCC_IPR of the TPCC module." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="FWID" width="3" begin="10" end="8" resetval="0x0" description="FIFO width control Applies if either SAM or DAM is set to FIFO mode." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="PRI" width="3" begin="6" end="4" resetval="0x0" description="Transfer Priority... ." range="" rwaccess="R">
+      <bitenum value="0" id="Priority_0_-_Highest_priority" token="PRI_0" description="Priority 0 - Highest priority"/>
+      <bitenum value="1" id="Priority_1" token="PRI_1" description="Priority 1"/>
+      <bitenum value="7" id="Priority_7_-_Lowest_priority" token="PRI_7" description="Priority 7 - Lowest priority"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="3" end="2" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="DAM" width="1" begin="1" end="1" resetval="0x0" description="Destination Address Mode within an array" range="" rwaccess="R">
+      <bitenum value="0" id="INCR,_0" token="DAM_0" description="INCR, Destination addressing within an array increments."/>
+      <bitenum value="1" id="FIFO,_FIFO_1" token="DAM_1" description="FIFO, Destination addressing within an array wraps around upon reaching FIFO width."/>
+    </bitfield>
+    <bitfield id="SAM" width="1" begin="0" end="0" resetval="0x0" description="Source Address Mode within an array" range="" rwaccess="R">
+      <bitenum value="0" id="INCR,_0" token="SAM_0" description="INCR, Source addressing within an array increments."/>
+      <bitenum value="1" id="FIFO,_FIFO_1" token="SAM_1" description="FIFO, Source addressing within an array wraps around upon reaching FIFO width."/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_SASRC" acronym="EDMA_TPTCn_SASRC" offset="0x244" width="32" description="Source Active Set Source Address">
+    <bitfield id="SADDR" width="32" begin="31" end="0" resetval="0x0" description="Source address for Source Active Register Set: Initial value is copied from EDMA_TPTCn_PSRC.SADDR. TC updates value according to source addressing mode (EDMA_TPCC_OPT_n.SAM) and/or source index value (BIDX.SBIDX) after each read command is issued. When a TR is complete, the final value should be the address of the last read command issued." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_SACNT" acronym="EDMA_TPTCn_SACNT" offset="0x248" width="32" description="Source Active Set Count">
+    <bitfield id="BCNT" width="16" begin="31" end="16" resetval="0x0" description="B-Dimension count: Number of arrays to be transferred, where each array is ACNT in length. Count Remaining for Source Active Register Set. Represents the amount of data remaining to be read. Initial value is copied from EDMA_TPTCn_PCNT. TC decrements ACNT and BCNT as necessary after each read command is issued. Final value should be 0 when TR is complete." range="" rwaccess="R"/>
+    <bitfield id="ACNT" width="16" begin="15" end="0" resetval="0x0" description="A-Dimension count: Number of bytes to be transferred in first dimension. Count Remaining for Source Active Register Set. Represents the amount of data remaining to be read. Initial value is copied from EDMA_TPTCn_PCNT. TC decrements ACNT and BCNT as necessary after each read command is issued. Final value should be 0 when TR is complete." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_SADST" acronym="EDMA_TPTCn_SADST" offset="0x24C" width="32" description="Source Active Destination Address Register Reserved, return 0x0 w/o AERROR">
+    <bitfield id="DADDR" width="32" begin="31" end="0" resetval="0x0" description="Destination address is not applicable for Source Active Register Set. Reads return 0x0" range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_SABIDX" acronym="EDMA_TPTCn_SABIDX" offset="0x250" width="32" description="Source Active Set B-Dim Idx">
+    <bitfield id="DBIDX" width="16" begin="31" end="16" resetval="0x0" description="Destination B-Idx for Source Active Register Set. Value copied from EDMA_TPTCn_PBIDX: B-Idx offset between Destination arrays: Represents the offset in bytes between the starting address of each destination array (recall that there are BCNT arrays of ACNT elements). DBIDX is always used, regardless of whether DAM is Increment or FIFO mode." range="" rwaccess="R"/>
+    <bitfield id="SBIDX" width="16" begin="15" end="0" resetval="0x0" description="Source B-Idx for Source Active Register Set. Value copied fromEDMA_TPTCn_PBIDX: B-Idx offset between Source arrays: Represents the offset in bytes between the starting address of each source array (recall that there are BCNT arrays of ACNT elements). SBIDX is always used, regardless of whether SAM is Increment or FIFO mode." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_SAMPPRXY" acronym="EDMA_TPTCn_SAMPPRXY" offset="0x254" width="32" description="Source Active Set Mem Protect Proxy">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="PRIV" width="1" begin="8" end="8" resetval="0x0" description="Privilege Level" range="" rwaccess="R">
+      <bitenum value="0" id="User_level_privilege" token="PRIV_0" description="User level privilege"/>
+      <bitenum value="1" id="SAMPPRXY.PRIV_BIDX_PRIV_SA_DF_ID_PRIV_DMA_1" token="PRIV_1" description="Supervisor level privilege SAMPPRXY.PRIV is always updated with the value from the configuration bus privilege field on any/every write to Program Set BIDX Register (trigger register). The PRIV value for the SA Set and DF Set are copied from the value in the Program set along with the remainder of the parameter values. The privilege ID is issued on the VBusM read and write command bus such that the target endpoints can perform mMemory protection checks based on the PRIV of the external host that sets up the DMA transaction."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="PRIVID" width="4" begin="3" end="0" resetval="0x0" description="Privilege ID SAMPPRXY.PRIVID is always updated with the value from configuration bus privilege ID field on any/every write to Program Set BIDX Register (trigger register). The PRIVID value for the SA Set and DF Set are copied from the value in the Program set along with the remainder of the parameter values. The privilege ID is issued on the VBusM read and write command bus such that the target endpoints can perform mMemory protection checks based on the privid of the external host that sets up the DMA transaction." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_SACNTRLD" acronym="EDMA_TPTCn_SACNTRLD" offset="0x258" width="32" description="Source Active Set Count Reload">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="ACNTRLD" width="16" begin="15" end="0" resetval="0x0" description="A-Cnt Reload value for Source Active Register set. Value copied from EDMA_TPTCn_PCNT[15:0] ACNT: Represents the originally programmed value of ACNT. The Reload value is used to reinitialize ACNT after each array is serviced (i.e., ACNT decrements to 0). by the Src offset in bytes between the starting address of each source array (recall that there are BCNT arrays of ACNT bytes)" range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_SASRCBREF" acronym="EDMA_TPTCn_SASRCBREF" offset="0x25C" width="32" description="Source Active Set Source Address A-Reference">
+    <bitfield id="SADDRBREF" width="32" begin="31" end="0" resetval="0x0" description="Source address reference for Source Active Register Set: Represents the starting address for the array currently being read. The next array's starting address is calculated as the 'reference address' plus the 'source b-idx' value." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_SADSTBREF" acronym="EDMA_TPTCn_SADSTBREF" offset="0x260" width="32" description="Source Active Destination Address B-Reference Register Reserved, return 0x0 w/o AERROR">
+    <bitfield id="DADDRBREF" width="32" begin="31" end="0" resetval="0x0" description="Destination address reference is not applicable for Src Active Register Set. Reads return 0x0." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFCNTRLD" acronym="EDMA_TPTCn_DFCNTRLD" offset="0x280" width="32" description="Destination FIFO Set Count Reload">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="ACNTRLD" width="16" begin="15" end="0" resetval="0x0" description="A-Cnt Reload value for Destination FIFO Register set. Value copied fromEDMA_TPTCn_PCNT[15:0] ACNT: Represents the originally programmed value of ACNT. The Reload value is used to reinitialize ACNT after each array is serviced (i.e., ACNT decrements to 0). by the Src offset in bytes between the starting address of each source array (recall that there are BCNT arrays of ACNT bytes)" range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFSRCBREF" acronym="EDMA_TPTCn_DFSRCBREF" offset="0x284" width="32" description="Destination FIFO Set Destination Address B Reference Reserved, return 0x0 w/o AERROR">
+    <bitfield id="SADDRBREF" width="32" begin="31" end="0" resetval="0x0" description="Source address reference is not applicable for Dst FIFO Register Set. Reads return 0x0." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFDSTBREF" acronym="EDMA_TPTCn_DFDSTBREF" offset="0x288" width="32" description="Destination FIFO Set Destination Address A-Reference">
+    <bitfield id="DADDRBREF" width="32" begin="31" end="0" resetval="0x0" description="Destination address reference for Dst FIFO Register Set: Represents the starting address for the array currently being written. The next array's starting address is calculated as the 'reference address' plus the 'dest bidx' value." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFOPTi_0" acronym="EDMA_TPTCn_DFOPTi_0" offset="0x300" width="32" description="Destination FIFO Set Options">
+    <bitfield id="RESERVED" width="9" begin="31" end="23" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="TCCHEN" width="1" begin="22" end="22" resetval="0x0" description="Transfer complete chaining enable" range="" rwaccess="R">
+      <bitenum value="0" id="Transfer_complete_chaining_is_disabled." token="TCCHEN_0" description="Transfer complete chaining is disabled."/>
+      <bitenum value="1" id="Transfer_complete_chaining_is_enabled." token="TCCHEN_1" description="Transfer complete chaining is enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="21" end="21" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="TCINTEN" width="1" begin="20" end="20" resetval="0x0" description="Transfer complete interrupt enable" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="TCINTEN_0" description="Transfer complete interrupt is disabled."/>
+      <bitenum value="1" id="Transfer_complete_interrupt_is_enabled." token="TCINTEN_1" description="Transfer complete interrupt is enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="19" end="18" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="TCC" width="6" begin="17" end="12" resetval="0x0" description="Transfer Complete Code The 6-bit code is used to set the relevant bit in CER or EDMA_TPCC_IPR of the TPCC module." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="FWID" width="3" begin="10" end="8" resetval="0x0" description="FIFO width control Applies if either SAM or DAM is set to FIFO mode." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="PRI" width="3" begin="6" end="4" resetval="0x0" description="Transfer Priority... ." range="" rwaccess="R">
+      <bitenum value="0" id="Priority_0_-_Highest_priority" token="PRI_0" description="Priority 0 - Highest priority"/>
+      <bitenum value="1" id="Priority_1" token="PRI_1" description="Priority 1"/>
+      <bitenum value="7" id="Priority_7_-_Lowest_priority" token="PRI_7" description="Priority 7 - Lowest priority"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="3" end="2" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="DAM" width="1" begin="1" end="1" resetval="0x0" description="Destination Address Mode within an array" range="" rwaccess="R">
+      <bitenum value="0" id="INCR,_0" token="DAM_0" description="INCR, Dst addressing within an array increments."/>
+      <bitenum value="1" id="FIFO,_FIFO_1" token="DAM_1" description="FIFO, Dst addressing within an array wraps around upon reaching FIFO width."/>
+    </bitfield>
+    <bitfield id="SAM" width="1" begin="0" end="0" resetval="0x0" description="Source Address Mode within an array" range="" rwaccess="R">
+      <bitenum value="0" id="INCR,_0" token="SAM_0" description="INCR, Source addressing within an array increments."/>
+      <bitenum value="1" id="FIFO,_FIFO_1" token="SAM_1" description="FIFO, Source addressing within an array wraps around upon reaching FIFO width."/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_DFOPTi_1" acronym="EDMA_TPTCn_DFOPTi_1" offset="0x340" width="32" description="Destination FIFO Set Options">
+    <bitfield id="RESERVED" width="9" begin="31" end="23" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="TCCHEN" width="1" begin="22" end="22" resetval="0x0" description="Transfer complete chaining enable" range="" rwaccess="R">
+      <bitenum value="0" id="Transfer_complete_chaining_is_disabled." token="TCCHEN_0" description="Transfer complete chaining is disabled."/>
+      <bitenum value="1" id="Transfer_complete_chaining_is_enabled." token="TCCHEN_1" description="Transfer complete chaining is enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="21" end="21" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="TCINTEN" width="1" begin="20" end="20" resetval="0x0" description="Transfer complete interrupt enable" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="TCINTEN_0" description="Transfer complete interrupt is disabled."/>
+      <bitenum value="1" id="Transfer_complete_interrupt_is_enabled." token="TCINTEN_1" description="Transfer complete interrupt is enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="19" end="18" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="TCC" width="6" begin="17" end="12" resetval="0x0" description="Transfer Complete Code The 6-bit code is used to set the relevant bit in CER or EDMA_TPCC_IPR of the TPCC module." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="FWID" width="3" begin="10" end="8" resetval="0x0" description="FIFO width control Applies if either SAM or DAM is set to FIFO mode." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="PRI" width="3" begin="6" end="4" resetval="0x0" description="Transfer Priority... ." range="" rwaccess="R">
+      <bitenum value="0" id="Priority_0_-_Highest_priority" token="PRI_0" description="Priority 0 - Highest priority"/>
+      <bitenum value="1" id="Priority_1" token="PRI_1" description="Priority 1"/>
+      <bitenum value="7" id="Priority_7_-_Lowest_priority" token="PRI_7" description="Priority 7 - Lowest priority"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="3" end="2" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="DAM" width="1" begin="1" end="1" resetval="0x0" description="Destination Address Mode within an array" range="" rwaccess="R">
+      <bitenum value="0" id="INCR,_0" token="DAM_0" description="INCR, Dst addressing within an array increments."/>
+      <bitenum value="1" id="FIFO,_FIFO_1" token="DAM_1" description="FIFO, Dst addressing within an array wraps around upon reaching FIFO width."/>
+    </bitfield>
+    <bitfield id="SAM" width="1" begin="0" end="0" resetval="0x0" description="Source Address Mode within an array" range="" rwaccess="R">
+      <bitenum value="0" id="INCR,_0" token="SAM_0" description="INCR, Source addressing within an array increments."/>
+      <bitenum value="1" id="FIFO,_FIFO_1" token="SAM_1" description="FIFO, Source addressing within an array wraps around upon reaching FIFO width."/>
+    </bitfield>
+  </register>
+  <register id="EDMA_TPTCn_DFSRCi_0" acronym="EDMA_TPTCn_DFSRCi_0" offset="0x304" width="32" description="Destination FIFO source address register Reserved, return 0x0 w/o AERROR">
+    <bitfield id="SADDR" width="32" begin="31" end="0" resetval="0x0" description="Source address is not applicable for Dst FIFO Register Set: Reads return 0x0." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFSRCi_1" acronym="EDMA_TPTCn_DFSRCi_1" offset="0x344" width="32" description="Destination FIFO source address register Reserved, return 0x0 w/o AERROR">
+    <bitfield id="SADDR" width="32" begin="31" end="0" resetval="0x0" description="Source address is not applicable for Dst FIFO Register Set: Reads return 0x0." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFCNTi_0" acronym="EDMA_TPTCn_DFCNTi_0" offset="0x308" width="32" description="Destination FIFO count register">
+    <bitfield id="BCNT" width="16" begin="31" end="16" resetval="0x0" description="B-Count Remaining for Dst Register Set: Number of arrays to be transferred, where each array is ACNT in length. Represents the amount of data remaining to be written. Initial value is copied from EDMA_TPTCn_PCNT. TC decrements ACNT and BCNT as necessary after each write dataphase is issued. Final value should be 0 when TR is complete." range="" rwaccess="R"/>
+    <bitfield id="ACNT" width="16" begin="15" end="0" resetval="0x0" description="A-Count Remaining for Dst Register Set: Number of bytes to be transferred in first dimension. Represents the amount of data remaining to be written. Initial value is copied from EDMA_TPTCn_PCNT. TC decrements ACNT and BCNT as necessary after each write dataphase is issued. Final value should be 0 when TR is complete." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFCNTi_1" acronym="EDMA_TPTCn_DFCNTi_1" offset="0x348" width="32" description="Destination FIFO count register">
+    <bitfield id="BCNT" width="16" begin="31" end="16" resetval="0x0" description="B-Count Remaining for Dst Register Set: Number of arrays to be transferred, where each array is ACNT in length. Represents the amount of data remaining to be written. Initial value is copied from EDMA_TPTCn_PCNT. TC decrements ACNT and BCNT as necessary after each write dataphase is issued. Final value should be 0 when TR is complete." range="" rwaccess="R"/>
+    <bitfield id="ACNT" width="16" begin="15" end="0" resetval="0x0" description="A-Count Remaining for Dst Register Set: Number of bytes to be transferred in first dimension. Represents the amount of data remaining to be written. Initial value is copied from EDMA_TPTCn_PCNT. TC decrements ACNT and BCNT as necessary after each write dataphase is issued. Final value should be 0 when TR is complete." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFDSTi_0" acronym="EDMA_TPTCn_DFDSTi_0" offset="0x30C" width="32" description="The destination FIFO destination address register">
+    <bitfield id="DADDR" width="32" begin="31" end="0" resetval="0x0" description="Destination address for Dst FIFO Register Set: Initial value is copied from EDMA_TPTCn_PDST[31:0] DADDR. TC updates value according to destination addressing mode (EDMA_TPCC_OPT_n. SAM) and/or dest index value (BIDX. DBIDX) after each write command is issued. When a TR is complete, the final value should be the address of the last write command issued." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFDSTi_1" acronym="EDMA_TPTCn_DFDSTi_1" offset="0x34C" width="32" description="The destination FIFO destination address register">
+    <bitfield id="DADDR" width="32" begin="31" end="0" resetval="0x0" description="Destination address for Dst FIFO Register Set: Initial value is copied from EDMA_TPTCn_PDST[31:0] DADDR. TC updates value according to destination addressing mode (EDMA_TPCC_OPT_n. SAM) and/or dest index value (BIDX. DBIDX) after each write command is issued. When a TR is complete, the final value should be the address of the last write command issued." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFBIDXi_0" acronym="EDMA_TPTCn_DFBIDXi_0" offset="0x310" width="32" description="The destination FIFO B-index register">
+    <bitfield id="DBIDX" width="16" begin="31" end="16" resetval="0x0" description="Dest B-Idx for Dest FIFO Register Set. Value copied from EDMA_TPTCn_PBIDX: B-Idx offset between Destination arrays: Represents the offset in bytes between the starting address of each destination array (recall that there are BCNT arrays of ACNT elements). DBIDX is always used, regardless of whether DAM is Increment or FIFO mode." range="" rwaccess="R"/>
+    <bitfield id="SBIDX" width="16" begin="15" end="0" resetval="0x0" description="Dest B-Idx for Dest FIFO Register Set. Value copied fromEDMA_TPTCn_PBIDX: B-Idx offset between Source arrays: Represents the offset in bytes between the starting address of each source array (recall that there are BCNT arrays of ACNT elements). SBIDX is always used, regardless of whether SAM is Increment or FIFO mode." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFBIDXi_1" acronym="EDMA_TPTCn_DFBIDXi_1" offset="0x350" width="32" description="The destination FIFO B-index register">
+    <bitfield id="DBIDX" width="16" begin="31" end="16" resetval="0x0" description="Dest B-Idx for Dest FIFO Register Set. Value copied from EDMA_TPTCn_PBIDX: B-Idx offset between Destination arrays: Represents the offset in bytes between the starting address of each destination array (recall that there are BCNT arrays of ACNT elements). DBIDX is always used, regardless of whether DAM is Increment or FIFO mode." range="" rwaccess="R"/>
+    <bitfield id="SBIDX" width="16" begin="15" end="0" resetval="0x0" description="Dest B-Idx for Dest FIFO Register Set. Value copied fromEDMA_TPTCn_PBIDX: B-Idx offset between Source arrays: Represents the offset in bytes between the starting address of each source array (recall that there are BCNT arrays of ACNT elements). SBIDX is always used, regardless of whether SAM is Increment or FIFO mode." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFMPPRXYi_0" acronym="EDMA_TPTCn_DFMPPRXYi_0" offset="0x314" width="32" description="The destination FIFO memory protection proxy register">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="PRIV" width="1" begin="8" end="8" resetval="0x0" description="Privilege Level" range="" rwaccess="R">
+      <bitenum value="0" id="User_level_privilege" token="PRIV_0" description="User level privilege"/>
+      <bitenum value="1" id="DFMPPRXY0.PRIV_BIDX_PRIV_SA_DF_ID_PRIV_DMA_1" token="PRIV_1" description="Supervisor level privilege DFMPPRXY0.PRIV is always updated with the value from the configuration bus privilege field on any/every write to Program Set BIDX Register (trigger register). The PRIV value for the SA Set and DF Set are copied from the value in the Program set along with the remainder of the parameter values. The privilege ID is issued on the VBusM read and write command bus such that the target endpoints can perform mMemory protection checks based on the PRIV of the external host that sets up the DMA transaction."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="PRIVID" width="4" begin="3" end="0" resetval="0x0" description="Privilege ID: DFMPPRXY0.PRIVID is always updated with the value from configuration bus privilege ID field on any/every write to Program Set BIDX Register (trigger register). The PRIVID value for the SA Set and DF Set are copied from the value in the Program set along with the remainder of the parameter values. The privilege ID is issued on the VBusM read and write command bus such that the target endpoints can perform mMemory protection checks based on the privid of the external host that sets up the DMA transaction." range="" rwaccess="R"/>
+  </register>
+  <register id="EDMA_TPTCn_DFMPPRXYi_1" acronym="EDMA_TPTCn_DFMPPRXYi_1" offset="0x354" width="32" description="The destination FIFO memory protection proxy register">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="PRIV" width="1" begin="8" end="8" resetval="0x0" description="Privilege Level" range="" rwaccess="R">
+      <bitenum value="0" id="User_level_privilege" token="PRIV_0" description="User level privilege"/>
+      <bitenum value="1" id="DFMPPRXY0.PRIV_BIDX_PRIV_SA_DF_ID_PRIV_DMA_1" token="PRIV_1" description="Supervisor level privilege DFMPPRXY0.PRIV is always updated with the value from the configuration bus privilege field on any/every write to Program Set BIDX Register (trigger register). The PRIV value for the SA Set and DF Set are copied from the value in the Program set along with the remainder of the parameter values. The privilege ID is issued on the VBusM read and write command bus such that the target endpoints can perform mMemory protection checks based on the PRIV of the external host that sets up the DMA transaction."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="Reserved" range="" rwaccess="R Return 0's"/>
+    <bitfield id="PRIVID" width="4" begin="3" end="0" resetval="0x0" description="Privilege ID: DFMPPRXY0.PRIVID is always updated with the value from configuration bus privilege ID field on any/every write to Program Set BIDX Register (trigger register). The PRIVID value for the SA Set and DF Set are copied from the value in the Program set along with the remainder of the parameter values. The privilege ID is issued on the VBusM read and write command bus such that the target endpoints can perform mMemory protection checks based on the privid of the external host that sets up the DMA transaction." range="" rwaccess="R"/>
+  </register>
+</module>

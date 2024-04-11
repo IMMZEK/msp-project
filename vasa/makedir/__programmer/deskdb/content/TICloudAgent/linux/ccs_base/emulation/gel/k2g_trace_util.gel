@@ -1,0 +1,282 @@
+/*------------------------------------------------------------------*/
+/* 66AK2G Sequences supporting TPIU Trace                           */
+/* Version 1.1                                                      */
+/*                                                                  */
+/* Ver 1.0: Initial version	(4/15/2014)			                    */
+/* Ver 1.1: Incorporated Pin I/O and Funnel functions (11/2/2015)   */
+/* Ver 1.2: Added ATB replicator programming (1/9/2019)             */
+/*------------------------------------------------------------------*/
+
+menuitem "TPIU Utility";
+
+//********************************************************************
+
+
+#define BTCFG_PADCONFIG30    0x02621078
+#define BTCFG_PADCONFIG31    0x0262107C
+#define BTCFG_PADCONFIG32    0x02621080
+#define BTCFG_PADCONFIG33    0x02621084
+#define BTCFG_PADCONFIG34    0x02621088
+#define BTCFG_PADCONFIG35    0x0262108C
+#define BTCFG_PADCONFIG36    0x02621090
+#define BTCFG_PADCONFIG37    0x02621094
+#define BTCFG_PADCONFIG38    0x02621098
+#define BTCFG_PADCONFIG39    0x0262109C
+#define BTCFG_PADCONFIG40    0x026210A0
+#define BTCFG_PADCONFIG41    0x026210A4
+#define BTCFG_PADCONFIG42    0x026210A8
+#define BTCFG_PADCONFIG43    0x026210AC
+#define BTCFG_PADCONFIG44    0x026210B0
+#define BTCFG_PADCONFIG45    0x026210B4
+#define BTCFG_PADCONFIG46    0x026210B8
+#define BTCFG_PADCONFIG47    0x026210BC
+#define PADUNLOCK0           0x02620038
+#define PADUNLOCK1           0x0262003C
+
+#define PADUNLOCK_VALUE0     0x83E70B13
+#define PADUNLOCK_VALUE1     0x95A4F1E0
+
+#define DAP_WAITCYCLES       1000
+#define SELECT_EMU_PINMUX_VAL 0x00160004
+
+
+#define CS_FUNNEL_CTL           0x80031000
+#define CS_FUNNEL_LOCK          0x80031FB0
+#define DS_FUNNEL_CTL           0x80002000
+#define DS_FUNNEL_LOCK          0x80002FB0
+#define PMCC_FUNNEL_CTL         0x80035000
+#define PMCC_FUNNEL_LOCK        0x80035FB0
+#define ATB_REP_FILT_0          0x80030000 // TPIU
+#define ATB_REP_FILT_1          0x80030004 // TBR
+#define ATB_REP_LOCK            0x80030FB0
+#define ATB_REP_DEVTYPE         0x80030FCC
+#define ATB_REP_DEVTYPE_VAL     0x00000022
+#define ATB_REP_FILT_NONE       0x00000000 // Allow all ATB IDs through to master port.
+#define ATB_REP_FILT_PTM        0x00000004 // PTM ATB IDs are in the 0x20s for legacy AET.
+#define UNLOCK_VALUE            0xC5ACCE55
+
+hotmenu Program_ATB_Replicator_TBR()
+{
+    unsigned int devtype = 0;
+    
+    // Program ATB replicator.
+    devtype = *(int*)ATB_REP_DEVTYPE@data;
+    
+    if ((devtype & ATB_REP_DEVTYPE_VAL) == ATB_REP_DEVTYPE_VAL) {
+        *(int*)ATB_REP_LOCK@data  = UNLOCK_VALUE;
+        *(int*)ATB_REP_FILT_0@data  = ATB_REP_FILT_PTM;  // Discard PTM ATB IDs for TPIU port
+        *(int*)ATB_REP_FILT_1@data  = ATB_REP_FILT_NONE; // Allow all ATB IDs for TBR port
+        
+        GEL_TextOut("ATB replicator programmed for TBR trace.\n",,,,,);
+    }
+}
+
+hotmenu Program_ATB_Replicator_TPIU()
+{
+    unsigned int devtype = 0;
+    
+    // Program ATB replicator.
+    devtype = *(int*)ATB_REP_DEVTYPE@data;
+    
+    if ((devtype & ATB_REP_DEVTYPE_VAL) == ATB_REP_DEVTYPE_VAL) {
+        *(int*)ATB_REP_LOCK@data  = UNLOCK_VALUE;
+        *(int*)ATB_REP_FILT_0@data  = ATB_REP_FILT_NONE; // Allow all ATB IDs for TPIU port
+        *(int*)ATB_REP_FILT_1@data  = ATB_REP_FILT_PTM;  // Discard PTM ATB IDs for TBR port
+        
+        GEL_TextOut("ATB replicator programmed for TPIU trace.\n",,,,,);
+    }
+}
+
+hotmenu Enable_Funnel_For_PTM()
+{
+	*(int*)CS_FUNNEL_LOCK@data  = UNLOCK_VALUE;
+	*(int*)CS_FUNNEL_CTL@data = 0x3FF;
+	*(int*)DS_FUNNEL_LOCK@data  = UNLOCK_VALUE;
+	*(int*)DS_FUNNEL_CTL@data = 0x301;
+	GEL_TextOut("Set trace funnel to PTM.\n");
+}
+
+hotmenu Enable_Funnel_For_STM()
+{
+	*(int*)CS_FUNNEL_LOCK@data  = UNLOCK_VALUE;
+	*(int*)CS_FUNNEL_CTL@data = 0x3FF;
+	*(int*)DS_FUNNEL_LOCK@data  = UNLOCK_VALUE;
+	*(int*)DS_FUNNEL_CTL@data = 0x380;
+	GEL_TextOut("Set trace funnel to STM.\n");
+}
+
+hotmenu Enable_Funnel_For_PMMC()
+{
+	*(int*)PMCC_FUNNEL_LOCK@data  = UNLOCK_VALUE;
+	*(int*)PMCC_FUNNEL_CTL@data = 0x3FF;
+	*(int*)DS_FUNNEL_LOCK@data  = UNLOCK_VALUE;
+	*(int*)DS_FUNNEL_CTL@data = 0x3FF;
+	GEL_TextOut("Set trace funnel to PMMC.\n");
+}
+
+hotmenu Set_PAD_IO()
+{
+	*(int*)PADUNLOCK0 = PADUNLOCK_VALUE0;
+	*(int*)PADUNLOCK1 = PADUNLOCK_VALUE1;
+	*(int*)BTCFG_PADCONFIG30 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG31 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG32 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG33 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG34 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG35 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG36 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG37 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG38 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG39 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG40 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG41 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG42 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG43 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG44 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG45 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG46 = SELECT_EMU_PINMUX_VAL;
+	*(int*)BTCFG_PADCONFIG47 = SELECT_EMU_PINMUX_VAL;
+	GEL_TextOut("Set PAD IO to output trace data.\n");
+}
+
+
+
+// Defines : BOOT and CONFIG dsp system modules
+#define CHIP_LEVEL_REG              0x02620000
+#define DEVSTAT                     *(unsigned int*)(CHIP_LEVEL_REG + 0x0020)
+
+// Defines : Boot cfg registers
+#define KICK0                       *(unsigned int*)(CHIP_LEVEL_REG + 0x0038)
+#define KICK1                       *(unsigned int*)(CHIP_LEVEL_REG + 0x003C)
+#define KICK0_UNLOCK                (0x83E70B13)
+#define KICK1_UNLOCK                (0x95A4F1E0)
+#define KICK_LOCK                   0
+
+// Defines : PLL 1 Registers (DSP and ARM clock and subsystems)
+#define PLL1_BASE                   0x02310000
+#define PLL1_PLLCTL                 (*(unsigned int*)(PLL1_BASE + 0x100))   // PLL1 Controlier
+#define PLL1_DIV3                   (*(unsigned int*)(PLL1_BASE + 0x120))   // DIV3 divider
+#define PLL1_CMD                    (*(unsigned int*)(PLL1_BASE + 0x138))   // CMD control
+#define PLL1_STAT                   (*(unsigned int*)(PLL1_BASE + 0x13C))   // STAT control
+
+// Defines : TPIU clock Hi/Low Frequencies
+#define TPIU_TRACE_CLK_SLOW_DIV_VALUE  16  // SLOWEST is /16
+#define TPIU_TRACE_CLK_FAST_DIV_VALUE  3   // FASTEST is /3
+
+// Macros : TRACE_CLK DIV_ENABLED and DIV_VALUE
+#define GET_TRACE_CLK_DIV_ENABLED()  ((PLL1_DIV3 >> 15 ) & 0x1)
+#define GET_TRACE_CLK_DIV_VALUE()    (((PLL1_DIV3) & 0xFF) + 1)
+
+
+SET_TRACE_CLK_DIV(int div_value)
+{
+
+    //Step 1: Unlock Boot Config Registers 
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    //Step 2a - Check that the GOSTAT bit in PLLSTAT 
+    while((PLL1_STAT) & 0x00000001);
+
+    //Step 2b - Program the RATIO field in PLLDIVn	
+    PLL1_DIV3 = ((div_value & 0x1FF) -1) | 0x8000;  //Set PLLDIV3
+	   
+    //Step 2c - Set the GOSET bit in PLLCMD	   
+    PLL1_CMD |= 0x00000001;
+
+    //Step 2d - Read the GOSTAT bit in PLLSTAT to make sure the bit returns to 0 to indicate that the GO operation has completed.
+    while((PLL1_STAT) & 0x00000001);
+    
+    //Step 3 - Lock Boot Config Registers 
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+}
+
+
+DISPLAY_TRACE_CLK_DIV()
+{
+	unsigned int TRACE_CLK_DIV_enabled; 
+	unsigned int TRACE_CLK_DIV_value;
+		
+	TRACE_CLK_DIV_enabled = GET_TRACE_CLK_DIV_ENABLED(); 	
+	TRACE_CLK_DIV_value   = GET_TRACE_CLK_DIV_VALUE();
+	
+	if(TRACE_CLK_DIV_enabled) {
+		GEL_TextOut("< TRACE_CLK divider is set to /%d\n",,,,, TRACE_CLK_DIV_value);
+	}
+	else {
+		GEL_TextOut("< TRACE_CLK divider is not enabled.\n");
+	}
+}
+
+hotmenu Set_TPIU_Trace_Clock_Freq_To_Slowest()
+{
+	SET_TRACE_CLK_DIV(TPIU_TRACE_CLK_SLOW_DIV_VALUE);
+	DISPLAY_TRACE_CLK_DIV();	
+    GEL_TextOut("< TPIU Trace clock has been configured to its slowest setting. \n");
+}
+
+hotmenu Set_TPIU_Trace_Clock_Freq_To_Fastest()
+{
+	SET_TRACE_CLK_DIV(TPIU_TRACE_CLK_FAST_DIV_VALUE);
+	DISPLAY_TRACE_CLK_DIV();	
+    GEL_TextOut("< TPIU Trace clock has been configured to its fastest setting. \n");
+}
+
+hotmenu Increase_TPIU_Trace_Clock_Freq()
+{
+	unsigned int last_TRACE_CLK_DIV_enabled; 
+	unsigned int last_TRACE_CLK_DIV_value;
+	unsigned int new_TRACE_CLK_DIV_value;
+	
+	last_TRACE_CLK_DIV_enabled = GET_TRACE_CLK_DIV_ENABLED();
+	last_TRACE_CLK_DIV_value = GET_TRACE_CLK_DIV_VALUE();
+	
+	
+	if(last_TRACE_CLK_DIV_enabled) {
+		if(last_TRACE_CLK_DIV_value <= (TPIU_TRACE_CLK_FAST_DIV_VALUE + 1) ) {
+			new_TRACE_CLK_DIV_value = TPIU_TRACE_CLK_FAST_DIV_VALUE;
+		}
+		else
+		{
+			new_TRACE_CLK_DIV_value = last_TRACE_CLK_DIV_value - 1;			
+		}
+		
+		SET_TRACE_CLK_DIV(new_TRACE_CLK_DIV_value);
+		DISPLAY_TRACE_CLK_DIV();	
+	    GEL_TextOut("< TPIU Trace clock frequency has increased. \n");
+	}
+	else {
+		GEL_TextOut("< TRACE_CLK divider is not enabled.  Please run 'Set_TPIU_Trace_Clock_Freq_To_Fastest' or 'Set_TPIU_Trace_Clock_Freq_To_Slowest'\n");
+	}	
+
+}
+
+hotmenu Decrease_TPIU_Trace_Clock_Freq()
+{
+	unsigned int last_TRACE_CLK_DIV_enabled; 
+	unsigned int last_TRACE_CLK_DIV_value;
+	unsigned int new_TRACE_CLK_DIV_value;
+	
+	last_TRACE_CLK_DIV_enabled = GET_TRACE_CLK_DIV_ENABLED();
+	last_TRACE_CLK_DIV_value = GET_TRACE_CLK_DIV_VALUE();
+	
+	
+	if(last_TRACE_CLK_DIV_enabled) {
+		if(last_TRACE_CLK_DIV_value >= (TPIU_TRACE_CLK_SLOW_DIV_VALUE - 1) ) {
+			new_TRACE_CLK_DIV_value = TPIU_TRACE_CLK_SLOW_DIV_VALUE;
+		}
+		else
+		{
+			new_TRACE_CLK_DIV_value = last_TRACE_CLK_DIV_value + 1;			
+		}
+		
+		SET_TRACE_CLK_DIV(new_TRACE_CLK_DIV_value);
+		DISPLAY_TRACE_CLK_DIV();	
+	    GEL_TextOut("< TPIU Trace clock frequency has decreased. \n");
+	}
+	else {
+		GEL_TextOut("< TRACE_CLK divider is not enabled.  Please run 'Set_TPIU_Trace_Clock_Freq_To_Fastest' or 'Set_TPIU_Trace_Clock_Freq_To_Slowest'\n");
+	}	
+
+}

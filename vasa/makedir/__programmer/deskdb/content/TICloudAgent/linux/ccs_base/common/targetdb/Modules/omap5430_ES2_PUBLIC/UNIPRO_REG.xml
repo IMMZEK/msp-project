@@ -1,0 +1,643 @@
+<module name="UNIPRO_REG" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="UNIPRO_REVISION" acronym="UNIPRO_REVISION" offset="0x0" width="32" description="IP revision code register.">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="0x-" description="Controller revision number. (TI internal data)" range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_HWINFO" acronym="UNIPRO_HWINFO" offset="0x4" width="32" description="Hardware module configuration register">
+    <bitfield id="RXCACHEENTRIES" width="4" begin="31" end="28" resetval="0x2" description="Defines the number of RX descriptor cache entries as : 0 -- 1 entry 1 -- 2 entries 2 -- 4 entries 3 -- 6 entries ... 15 -- 30 entries or more" range="" rwaccess="R"/>
+    <bitfield id="TXCACHEENTRIES" width="4" begin="27" end="24" resetval="0x2" description="Defines the number of TX descriptor cache entries as : 0 -- 1 entry 1 -- 2 entries 2 -- 4 entries 3 -- 6 entries ... 15 -- 30 entries or more" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="8" begin="23" end="16" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="RXFIFOSIZE" width="6" begin="15" end="10" resetval="0x04" description="Indicates RX FiFo size, in terms of number of blocks of 128 * 64b entries. Rx FiFo size (bytes) = 128 * 8 * RxFiFoSize 0 indicates less than 128*64b" range="" rwaccess="R"/>
+    <bitfield id="TXFIFOSIZE" width="6" begin="9" end="4" resetval="0x03" description="Indicates TX FiFo size, in terms of number of blocks of 128 * 64b entries. TX FiFo size (bytes) = 128 * 8 * TxFiFoSize 0 indicates less than 128 * 64b." range="" rwaccess="R"/>
+    <bitfield id="ADDRXDLANES" width="2" begin="3" end="2" resetval="0x2" description="Number of additional Rx data lanes on top of lane 1 0: no additional -- one Rx data lane total ... 3 : 3 additional -- 4 Rx data lanes total" range="" rwaccess="R"/>
+    <bitfield id="ADDTXDLANES" width="2" begin="1" end="0" resetval="0x1" description="Number of additional TX data lanes on top of lane 1 0: no additional -- one TX data lane total ... 3 : 3 additional -- 4 TX data lanes total" range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_SYSCONFIG" acronym="UNIPRO_SYSCONFIG" offset="0x10" width="32" description="Clock management configuration">
+    <bitfield id="RESERVED" width="26" begin="31" end="6" resetval="0x000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="STANDBYMODE" width="2" begin="5" end="4" resetval="0x2" description="Configuration of the local initiator state management mode. By definition, initiator may generate read/write transaction as long as it is out of STANDBY state. 0x0: Force-standby mode: local initiator is unconditionally placed in standby state. Backup mode, for debug only. 0x1: No-standby mode: local initiator is unconditionally placed out of standby state. Backup mode, for debug only. 0x2: Smart-standby mode: local initiator standby status depends on local conditions, i.e. the module's functional requirement from the initiator. IP module shall not generate (initiator-related) wakeup events. 0x3: Smart-Standby wakeup-capable mode: local initiator standby status depends on local conditions, i.e. the module's functional requirement from the initiator. IP module may generate (master-related) wakeup events when in standby state. Mode is only relevant if the appropriate IP module 'mwakeup' output is implemented." range="" rwaccess="RW"/>
+    <bitfield id="IDLEMODE" width="2" begin="3" end="2" resetval="0x2" description="Configuration of the local target state management mode. By definition, target can handle read/write transaction as long as it is out of IDLE state. 0x0: Force-idle mode: local target's idle state follows (acknowledges) the system's idle requests unconditionally, i.e. regardless of the IP module's internal requirements. Backup mode, for debug only. 0x1: No-idle mode: local target never enters idle state. Backup mode, for debug only. 0x2: Smart-idle mode: local target's idle state eventually follows (acknowledges) the system's idle requests, depending on the IP module's internal requirements. IP module shall not generate (IRQ- or DMA-request-related) wakeup events. 0x3: Smart-idle wakeup-capable mode: local target's idle state eventually follows (acknowledges) the system's idle requests, depending on the IP module's internal requirements. IP module may generate (IRQ- or DMA-request-related) wakeup events when in idle state. Mode is only relevant if the appropriate IP module 'swakeup' output(s) is (are) implemented." range="" rwaccess="RW"/>
+    <bitfield id="FREEEMU" width="1" begin="1" end="1" resetval="0" description="Sensitivity to emulation (debug) suspend input signal. 0: IP module is sensitive to emulation suspend 1: IP module is not sensitive to emulation suspend" range="" rwaccess="RW"/>
+    <bitfield id="SOFTRESET" width="1" begin="0" end="0" resetval="0" description="Software reset. (Optional) Read 0: Reset done, no pending action Write 0: No action Write 1: Initiate software reset Read 1: Reset (software or other) ongoing" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_IRQSTATUS_RAW" acronym="UNIPRO_IRQSTATUS_RAW" offset="0x24" width="32" description="Per-event raw interrupt status vector, line #0. Raw status is set even if event is not enabled. Write 1 to set the (raw) status, mostly for debug.">
+    <bitfield id="M_LANE_HIBERN8_EXIT" width="1" begin="31" end="31" resetval="0" description="M_LANE_HIBERN8Exit occured on logical lane 0. Used as async wakeup source." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PA_LM_HIBERNATE_EXIT" width="1" begin="30" end="30" resetval="0" description="Hibernate exit request has completed and result is in PowerChangeResultCode." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PA_LM_HIBERNATE_ENTER" width="1" begin="29" end="29" resetval="0" description="Hibernate enter request has completed and result is in PowerChangeResultCode." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PACP_GET_SET_CNF" width="1" begin="28" end="28" resetval="0" description="Indicates reception of a DME_PEER_GET.cnf or DME_PEER_SET.cnf" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PACP_GET_SET_IND" width="1" begin="27" end="27" resetval="0" description="Indicates reception of a DME_PEER_GET.ind or DME_PEER_SET.ind" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_TEST_MODE_IND" width="1" begin="26" end="26" resetval="0" description="Indicates the reception of a request to put the PA Layer in a specified test mode. Generated when a PACP_TEST_MODE_req frame is received before the start of the Link Startup sequence." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_TEST_MODE_CNF" width="1" begin="25" end="25" resetval="0" description="Reports the completion of a test mode request. Generated in response to a PA_LM_TEST_MODE.req from the DME, after having sent the PACP_TEST_MODE_req frame." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RESERVED" width="2" begin="24" end="23" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="FCX_PROTECTION_TIMER_EXPIRED" width="1" begin="22" end="22" resetval="0" description="Indicates that the FC0_PROTECTION_TIMER or FC1_PROTECTION_TIMER has expired." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="AFCX_REQUEST_TIMER_EXPIRED" width="1" begin="21" end="21" resetval="0" description="Indicates that the AFC0_REQUEST_TIMER or AFC1_REQUEST_TIMER has expired." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="TCX_REPLAY_TIMER_EXPIRED" width="1" begin="20" end="20" resetval="0" description="Indicates that the TC0_REPLAY_TIMER or TC1_REPLAY_TIMER has expired." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="T_ERROR" width="1" begin="19" end="19" resetval="0" description="Indicates that a T_PDU has been discarded (combines UNSUPPORTED_HEADER_TYPE, UNKNOWN_CPORTID, NO_CONNECTION_RX, CONTROLLED_SEGMENT_DROPPING, BAD_TC, SAFETY_VALVE_DROPPING)." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="N_ERROR" width="1" begin="18" end="18" resetval="0" description="Indicates that an N_PDU has been discarded (combines BAD_DEVICEID_ENC and LHDR_TRAP_PACKET_DROPPING)." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="DL_ERROR" width="1" begin="17" end="17" resetval="0" description="Indicates an error has occurred on Rx link which causes an NAC to be reported or that a NAC has been received (combines NAC_RECEIVED, CRC_ERROR, RX_BUFFER_OVERFLOW, MAX_FRAME_LENGTH_EXCEEDED, WRONG_SEQUENCE_NUMBER, AFC_FRAME_SYNTAX_ERROR, NAC_FRAME_SYNTAX_ERROR, EOF_SYNTAX_ERROR, FRAME_SYNTAX_ERROR, BAD_CTRL_SYMBOL_TYPE, PA_ERROR_IND_RECEIVED)." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PA_ERROR" width="1" begin="16" end="16" resetval="0" description="Indicates that a PA_ERROR has occurred (combines BAD_PHY_SYMBOL, UNMAPPED_PHY_ESC_SYMBOL, UNEXPECTED_PHY_ESC_SYMBOL, BAD_PA_PARAM)." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="T_LM_ENABLE_LAYER_CNF" width="1" begin="15" end="15" resetval="0" description="Set when Transport (L4) layer initialization phase is complete." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="N_LM_ENABLE_LAYER_CNF" width="1" begin="14" end="14" resetval="0" description="Set when Network (L3) layer initialization phase is complete." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="DL_LM_ENABLE_LAYER_CNF" width="1" begin="13" end="13" resetval="0" description="Set when Data link (L2) layer initialization phase is complete." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PA_LM_ENABLE_LAYER_CNF" width="1" begin="12" end="12" resetval="0" description="Set when Linkstartup (L1.5 initialization) phase is complete." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="DL_TC1_EMPTY" width="1" begin="11" end="11" resetval="0" description="All transmitted frames on TC1 have been acknowledged" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="DL_TC0_EMPTY" width="1" begin="10" end="10" resetval="0" description="All transmitted frames on TC0 have been acknowledged" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="RESERVED" width="2" begin="9" end="8" resetval="0x0" description="-" range="" rwaccess="R"/>
+    <bitfield id="TX_EOMF" width="1" begin="7" end="7" resetval="0" description="End of Message Fragment transmitted" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="RX_EOMF" width="1" begin="6" end="6" resetval="0" description="End of Message Fragment crossed" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="RX_EOM" width="1" begin="5" end="5" resetval="0" description="End of Message received" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PA_LM_PWR_MODE_CHANGED" width="1" begin="4" end="4" resetval="0" description="A Power Change Request has been accepted and the result is available in PowerChangeResultCode." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PA_LM_PWR_MODE" width="1" begin="3" end="3" resetval="0" description="A Power Change Request has been received and PAPowerModeUserData is available." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="RXENDPOINTRESET" width="1" begin="2" end="2" resetval="0" description="EndPointReset trigger ('TRG_EPR') has been received over the link." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="RXLINKSTARTUPPHASE1" width="1" begin="1" end="1" resetval="0" description="'TRG_UPR0' trigger event has been received over the PHY and the module has not yet entered the Link Startup sequence." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="TX_RX_LINERESET" width="1" begin="0" end="0" resetval="0" description="LINERESET received on M-RX or M-TX." range="" rwaccess="RW W1toSet"/>
+  </register>
+  <register id="UNIPRO_IRQSTATUS" acronym="UNIPRO_IRQSTATUS" offset="0x28" width="32" description="Per-event 'enabled' interrupt status vector, line #0. Enabled status isn't set unless event is enabled. Write 1 to clear the status after interrupt has been serviced (raw status gets cleared, i.e. even if not enabled).">
+    <bitfield id="M_LANE_HIBERN8_EXIT" width="1" begin="31" end="31" resetval="0" description="M_LANE_HIBERN8Exit occured on logical lane 0. Used as async wakeup source." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_HIBERNATE_EXIT" width="1" begin="30" end="30" resetval="0" description="Hibernate exit request has completed and result is in PowerChangeResultCode." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_HIBERNATE_ENTER" width="1" begin="29" end="29" resetval="0" description="Hibernate enter request has completed and result is in PowerChangeResultCode." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PACP_GET_SET_CNF" width="1" begin="28" end="28" resetval="0" description="Indicates reception of a DME_PEER_GET.cnf or DME_PEER_SET.cnf" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PACP_GET_SET_IND" width="1" begin="27" end="27" resetval="0" description="Indicates reception of a DME_PEER_GET.ind or DME_PEER_SET.ind" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_TEST_MODE_IND" width="1" begin="26" end="26" resetval="0" description="Indicates the reception of a request to put the PA Layer in a specified test mode. Generated when a PACP_TEST_MODE_req frame is received before the start of the Link Startup sequence." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_TEST_MODE_CNF" width="1" begin="25" end="25" resetval="0" description="Reports the completion of a test mode request. Generated in response to a PA_LM_TEST_MODE.req from the DME, after having sent the PACP_TEST_MODE_req frame." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RESERVED" width="2" begin="24" end="23" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="FCX_PROTECTION_TIMER_EXPIRED" width="1" begin="22" end="22" resetval="0" description="Indicates that the FC0_PROTECTION_TIMER or FC1_PROTECTION_TIMER has expired." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="AFCX_REQUEST_TIMER_EXPIRED" width="1" begin="21" end="21" resetval="0" description="Indicates that the AFC0_REQUEST_TIMER or AFC1_REQUEST_TIMER has expired." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="TCX_REPLAY_TIMER_EXPIRED" width="1" begin="20" end="20" resetval="0" description="Indicates that the TC0_REPLAY_TIMER or TC1_REPLAY_TIMER has expired." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="T_ERROR" width="1" begin="19" end="19" resetval="0" description="Indicates that a T_PDU has been discarded (combines UNSUPPORTED_HEADER_TYPE, UNKNOWN_CPORTID, NO_CONNECTION_RX, CONTROLLED_SEGMENT_DROPPING, BAD_TC, SAFETY_VALVE_DROPPING)." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="N_ERROR" width="1" begin="18" end="18" resetval="0" description="Indicates that an N_PDU has been discarded (combines BAD_DEVICEID_ENC and LHDR_TRAP_PACKET_DROPPING)." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="DL_ERROR" width="1" begin="17" end="17" resetval="0" description="Indicates an error has occurred on Rx link which causes an NAC to be reported or that a NAC has been received (combines NAC_RECEIVED, CRC_ERROR, RX_BUFFER_OVERFLOW, MAX_FRAME_LENGTH_EXCEEDED, WRONG_SEQUENCE_NUMBER, AFC_FRAME_SYNTAX_ERROR, NAC_FRAME_SYNTAX_ERROR, EOF_SYNTAX_ERROR, FRAME_SYNTAX_ERROR, BAD_CTRL_SYMBOL_TYPE, PA_ERROR_IND_RECEIVED)." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_ERROR" width="1" begin="16" end="16" resetval="0" description="Indicates that a PA_ERROR has occurred (combines BAD_PHY_SYMBOL, UNMAPPED_PHY_ESC_SYMBOL, UNEXPECTED_PHY_ESC_SYMBOL, BAD_PA_PARAM)." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="T_LM_ENABLE_LAYER_CNF" width="1" begin="15" end="15" resetval="0" description="Set when Transport (L4) layer initialization phase is complete." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="N_LM_ENABLE_LAYER_CNF" width="1" begin="14" end="14" resetval="0" description="Set when Network (L3) layer initialization phase is complete." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="DL_LM_ENABLE_LAYER_CNF" width="1" begin="13" end="13" resetval="0" description="Set when Data link (L2) layer initialization phase is complete." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_ENABLE_LAYER_CNF" width="1" begin="12" end="12" resetval="0" description="Set when Linkstartup (L1.5 initialization) phase is complete." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="DL_TC1_EMPTY" width="1" begin="11" end="11" resetval="0" description="All transmitted frames on TC1 have been acknowledged" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="DL_TC0_EMPTY" width="1" begin="10" end="10" resetval="0" description="All transmitted frames on TC0 have been acknowledged" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RESERVED" width="2" begin="9" end="8" resetval="0x0" description="-" range="" rwaccess="R"/>
+    <bitfield id="TX_EOMF" width="1" begin="7" end="7" resetval="0" description="End of Message Fragment transmitted" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RX_EOMF" width="1" begin="6" end="6" resetval="0" description="End of Message Fragment crossed" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RX_EOM" width="1" begin="5" end="5" resetval="0" description="End of Message received" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_PWR_MODE_CHANGED" width="1" begin="4" end="4" resetval="0" description="A Power Change Request has been accepted and the result is available in PowerChangeResultCode." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_PWR_MODE" width="1" begin="3" end="3" resetval="0" description="A Power Change Request has been received and PAPowerModeUserData is available." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RXENDPOINTRESET" width="1" begin="2" end="2" resetval="0" description="EndPointReset trigger ('TRG_EPR') has been received over the link." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RXLINKSTARTUPPHASE1" width="1" begin="1" end="1" resetval="0" description="'TRG_UPR0' trigger event has been received over the PHY and the module has not yet entered the Link Startup sequence." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="TX_RX_LINERESET" width="1" begin="0" end="0" resetval="0" description="LINERESET received on M-RX or M-TX" range="" rwaccess="RW W1toClr"/>
+  </register>
+  <register id="UNIPRO_IRQENABLE_SET" acronym="UNIPRO_IRQENABLE_SET" offset="0x2C" width="32" description="Per-event 'enabled' interrupt status vector, line #0. Enabled status isn't set unless event is enabled. Write 1 to clear the status after interrupt has been serviced (raw status gets cleared, i.e. even if not enabled).">
+    <bitfield id="M_LANE_HIBERN8_EXIT_EN" width="1" begin="31" end="31" resetval="0" description="M_LANE_HIBERN8Exit occured on logical lane 0. Used as async wakeup source." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PA_LM_HIBERNATE_EXIT_EN" width="1" begin="30" end="30" resetval="0" description="Hibernate exit request has completed and result is in PowerChangeResultCode." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PA_LM_HIBERNATE_ENTER_EN" width="1" begin="29" end="29" resetval="0" description="Hibernate enter request has completed and result is in PowerChangeResultCode." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PACP_GET_SET_CNF_EN" width="1" begin="28" end="28" resetval="0" description="Indicates reception of a DME_PEER_GET.cnf or DME_PEER_SET.cnf" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PACP_GET_SET_IND_EN" width="1" begin="27" end="27" resetval="0" description="Indicates reception of a DME_PEER_GET.ind or DME_PEER_SET.ind" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_TEST_MODE_IND_EN" width="1" begin="26" end="26" resetval="0" description="Indicates the reception of a request to put the PA Layer in a specified test mode. Generated when a PACP_TEST_MODE_req frame is received before the start of the Link Startup sequence." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_TEST_MODE_CNF_EN" width="1" begin="25" end="25" resetval="0" description="Reports the completion of a test mode request. Generated in response to a PA_LM_TEST_MODE.req from the DME, after having sent the PACP_TEST_MODE_req frame." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RESERVED" width="2" begin="24" end="23" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="FCX_PROTECTION_TIMER_EXPIRED_EN" width="1" begin="22" end="22" resetval="0" description="Indicates that the FC0_PROTECTION_TIMER or FC1_PROTECTION_TIMER has expired." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="AFCX_REQUEST_TIMER_EXPIRED_EN" width="1" begin="21" end="21" resetval="0" description="Indicates that the AFC0_REQUEST_TIMER or AFC1_REQUEST_TIMER has expired." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="TCX_REPLAY_TIMER_EXPIRED_EN" width="1" begin="20" end="20" resetval="0" description="Indicates that the TC0_REPLAY_TIMER or TC1_REPLAY_TIMER has expired." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="T_ERROR_EN" width="1" begin="19" end="19" resetval="0" description="Indicates that a T_PDU has been discarded (combines UNSUPPORTED_HEADER_TYPE, UNKNOWN_CPORTID, NO_CONNECTION_RX, CONTROLLED_SEGMENT_DROPPING, BAD_TC, SAFETY_VALVE_DROPPING)." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="N_ERROR_EN" width="1" begin="18" end="18" resetval="0" description="Indicates that an N_PDU has been discarded (combines BAD_DEVICEID_ENC and LHDR_TRAP_PACKET_DROPPING)." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="DL_ERROR_EN" width="1" begin="17" end="17" resetval="0" description="Indicates an error has occurred on Rx link which causes an NAC to be reported or that a NAC has been received (combines NAC_RECEIVED, CRC_ERROR, RX_BUFFER_OVERFLOW, MAX_FRAME_LENGTH_EXCEEDED, WRONG_SEQUENCE_NUMBER, AFC_FRAME_SYNTAX_ERROR, NAC_FRAME_SYNTAX_ERROR, EOF_SYNTAX_ERROR, FRAME_SYNTAX_ERROR, BAD_CTRL_SYMBOL_TYPE, PA_ERROR_IND_RECEIVED)." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PA_ERROR_EN" width="1" begin="16" end="16" resetval="0" description="Indicates that a PA_ERROR has occurred (combines BAD_PHY_SYMBOL, UNMAPPED_PHY_ESC_SYMBOL, UNEXPECTED_PHY_ESC_SYMBOL, BAD_PA_PARAM)." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="T_LM_ENABLE_LAYER_CNF_EN" width="1" begin="15" end="15" resetval="0" description="Set when Transport (L4) layer initialization phase is complete." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="N_LM_ENABLE_LAYER_CNF_EN" width="1" begin="14" end="14" resetval="0" description="Set when Network (L3) layer initialization phase is complete." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="DL_LM_ENABLE_LAYER_CNF_EN" width="1" begin="13" end="13" resetval="0" description="Set when Data link (L2) layer initialization phase is complete." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PA_LM_ENABLE_LAYER_CNF_EN" width="1" begin="12" end="12" resetval="0" description="Set when Linkstartup (L1.5 initialization) phase is complete." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="DL_TC1_EMPTY_EN" width="1" begin="11" end="11" resetval="0" description="All transmitted frames on TC1 have been acknowledged" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="DL_TC0_EMPTY_EN" width="1" begin="10" end="10" resetval="0" description="All transmitted frames on TC0 have been acknowledged" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="RESERVED" width="2" begin="9" end="8" resetval="0x0" description="-" range="" rwaccess="R"/>
+    <bitfield id="TX_EOMF_EN" width="1" begin="7" end="7" resetval="0" description="End of Message Fragment transmitted" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="RX_EOMF_EN" width="1" begin="6" end="6" resetval="0" description="End of Message Fragment crossed" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="RX_EOM_EN" width="1" begin="5" end="5" resetval="0" description="End of Message received" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PA_LM_PWR_MODE_CHANGED_EN" width="1" begin="4" end="4" resetval="0" description="A Power Change Request has been accepted and the result is available in PowerChangeResultCode." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PA_LM_PWR_MODE_EN" width="1" begin="3" end="3" resetval="0" description="A Power Change Request has been received and PAPowerModeUserData is available." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="RXENDPOINTRESET_EN" width="1" begin="2" end="2" resetval="0" description="EndPointReset trigger ('TRG_EPR') has been received over the link." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="RXLINKSTARTUPPHASE_EN" width="1" begin="1" end="1" resetval="0" description="'TRG_UPR0' trigger event has been received over the PHY and the module has not yet entered the Link Startup sequence." range="" rwaccess="RW W1toSet"/>
+    <bitfield id="TX_RX_LINERESET_EN" width="1" begin="0" end="0" resetval="0" description="LINERESET received on M-RX or M-TX" range="" rwaccess="RW W1toSet"/>
+  </register>
+  <register id="UNIPRO_IRQENABLE_CLR" acronym="UNIPRO_IRQENABLE_CLR" offset="0x30" width="32" description="Per-event 'clear' interrupt status vector, line #0. Readout equal to corresponding _SET register Write 1 to clear the status after interrupt has been serviced (raw status gets cleared, i.e. even if not enabled).">
+    <bitfield id="M_LANE_HIBERN8_EXIT_CLR" width="1" begin="31" end="31" resetval="0" description="M_LANE_HIBERN8Exit occured on logical lane 0. Used as async wakeup source." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_HIBERNATE_EXIT_CLR" width="1" begin="30" end="30" resetval="0" description="Hibernate exit request has completed and result is in PowerChangeResultCode." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_HIBERNATE_ENTER_CLR" width="1" begin="29" end="29" resetval="0" description="Hibernate enter request has completed and result is in PowerChangeResultCode." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PACP_GET_SET_CNF_CLR" width="1" begin="28" end="28" resetval="0" description="Indicates reception of a DME_PEER_GET.cnf or DME_PEER_SET.cnf" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PACP_GET_SET_IND_CLR" width="1" begin="27" end="27" resetval="0" description="Indicates reception of a DME_PEER_GET.ind or DME_PEER_SET.ind" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_TEST_MODE_IND_CLR" width="1" begin="26" end="26" resetval="0" description="Indicates the reception of a request to put the PA Layer in a specified test mode. Generated when a PACP_TEST_MODE_req frame is received before the start of the Link Startup sequence." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_TEST_MODE_CNF_CLR" width="1" begin="25" end="25" resetval="0" description="Reports the completion of a test mode request. Generated in response to a PA_LM_TEST_MODE.req from the DME, after having sent the PACP_TEST_MODE_req frame." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RESERVED" width="2" begin="24" end="23" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="FCX_PROTECTION_TIMER_EXPIRED_CLR" width="1" begin="22" end="22" resetval="0" description="Indicates that the FC0_PROTECTION_TIMER or FC1_PROTECTION_TIMER has expired." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="AFCX_REQUEST_TIMER_EXPIRED_CLR" width="1" begin="21" end="21" resetval="0" description="Indicates that the AFC0_REQUEST_TIMER or AFC1_REQUEST_TIMER has expired." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="TCX_REPLAY_TIMER_EXPIRED_CLR" width="1" begin="20" end="20" resetval="0" description="Indicates that the TC0_REPLAY_TIMER or TC1_REPLAY_TIMER has expired." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="T_ERROR_CLR" width="1" begin="19" end="19" resetval="0" description="Indicates that a T_PDU has been discarded (combines UNSUPPORTED_HEADER_TYPE, UNKNOWN_CPORTID, NO_CONNECTION_RX, CONTROLLED_SEGMENT_DROPPING, BAD_TC, SAFETY_VALVE_DROPPING)." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="N_ERROR_CLR" width="1" begin="18" end="18" resetval="0" description="Indicates that an N_PDU has been discarded (combines BAD_DEVICEID_ENC and LHDR_TRAP_PACKET_DROPPING)." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="DL_ERROR_CLR" width="1" begin="17" end="17" resetval="0" description="Indicates an error has occurred on Rx link which causes an NAC to be reported or that a NAC has been received (combines NAC_RECEIVED, CRC_ERROR, RX_BUFFER_OVERFLOW, MAX_FRAME_LENGTH_EXCEEDED, WRONG_SEQUENCE_NUMBER, AFC_FRAME_SYNTAX_ERROR, NAC_FRAME_SYNTAX_ERROR, EOF_SYNTAX_ERROR, FRAME_SYNTAX_ERROR, BAD_CTRL_SYMBOL_TYPE, PA_ERROR_IND_RECEIVED)." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_ERROR_CLR" width="1" begin="16" end="16" resetval="0" description="Indicates that a PA_ERROR has occurred (combines BAD_PHY_SYMBOL, UNMAPPED_PHY_ESC_SYMBOL, UNEXPECTED_PHY_ESC_SYMBOL, BAD_PA_PARAM)." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="T_LM_ENABLE_LAYER_CNF_CLR" width="1" begin="15" end="15" resetval="0" description="Set when Transport (L4) layer initialization phase is complete." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="N_LM_ENABLE_LAYER_CNF_CLR" width="1" begin="14" end="14" resetval="0" description="Set when Network (L3) layer initialization phase is complete." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="DL_LM_ENABLE_LAYER_CNF_CLR" width="1" begin="13" end="13" resetval="0" description="Set when Data link (L2) layer initialization phase is complete." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_ENABLE_LAYER_CNF_CLR" width="1" begin="12" end="12" resetval="0" description="Set when Linkstartup (L1.5 initialization) phase is complete." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="DL_TC1_EMPTY_CLR" width="1" begin="11" end="11" resetval="0" description="All transmitted frames on TC1 have been acknowledged" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="DL_TC0_EMPTY_CLR" width="1" begin="10" end="10" resetval="0" description="All transmitted frames on TC0 have been acknowledged" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RESERVED" width="2" begin="9" end="8" resetval="0x0" description="-" range="" rwaccess="R"/>
+    <bitfield id="TX_EOMF_CLR" width="1" begin="7" end="7" resetval="0" description="End of Message Fragment transmitted" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RX_EOMF_CLR" width="1" begin="6" end="6" resetval="0" description="End of Message Fragment crossed" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RX_EOM_CLR" width="1" begin="5" end="5" resetval="0" description="End of Message received" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_PWR_MODE_CHANGED_CLR" width="1" begin="4" end="4" resetval="0" description="A Power Change Request has been accepted and the result is available in PowerChangeResultCode." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PA_LM_PWR_MODE_CLR" width="1" begin="3" end="3" resetval="0" description="A Power Change Request has been received and PAPowerModeUserData is available." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RXENDPOINTRESET_CLR" width="1" begin="2" end="2" resetval="0" description="EndPointReset trigger ('TRG_EPR') has been received over the link." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RXLINKSTARTUPPHASE_CLR" width="1" begin="1" end="1" resetval="0" description="'TRG_UPR0' trigger event has been received over the PHY and the module has not yet entered the Link Startup sequence." range="" rwaccess="RW W1toClr"/>
+    <bitfield id="TX_RX_LINERESET_CLR" width="1" begin="0" end="0" resetval="0" description="LINERESET received on M-RX or M-TX" range="" rwaccess="RW W1toClr"/>
+  </register>
+  <register id="UNIPRO_IRQSTATUS_MERGER" acronym="UNIPRO_IRQSTATUS_MERGER" offset="0x34" width="32" description="This register is a simple IRQ merger. It does not correspond to real register">
+    <bitfield id="M_LANE_HIBERN8_EXIT" width="1" begin="31" end="31" resetval="0" description="M_LANE_HIBERN8Exit occured on logical lane 0. Used as async wakeup source." range="" rwaccess="R"/>
+    <bitfield id="INT_CPORT" width="11" begin="30" end="20" resetval="0x000" description="cport identifier related to the first T_ERROR that has occurred. Cleared when T_ERROR_CODE is cleared." range="" rwaccess="R"/>
+    <bitfield id="T_ERROR" width="1" begin="19" end="19" resetval="0" description="Indicates that a T_PDU has been discarded (combines UNSUPPORTED_HEADER_TYPE, UNKNOWN_CPORTID, NO_CONNECTION_RX, CONTROLLED_SEGMENT_DROPPING, BAD_TC, SAFETY_VALVE_DROPPING)." range="" rwaccess="R"/>
+    <bitfield id="N_ERROR" width="1" begin="18" end="18" resetval="0" description="Indicates that an N_PDU has been discarded (combines BAD_DEVICEID_ENC and LHDR_TRAP_PACKET_DROPPING)." range="" rwaccess="R"/>
+    <bitfield id="DL_ERROR" width="1" begin="17" end="17" resetval="0" description="Indicates an error has occurred on Rx link which causes an NAC to be reported or that a NAC has been received (combines NAC_RECEIVED, CRC_ERROR, RX_BUFFER_OVERFLOW, MAX_FRAME_LENGTH_EXCEEDED, WRONG_SEQUENCE_NUMBER, AFC_FRAME_SYNTAX_ERROR, NAC_FRAME_SYNTAX_ERROR, EOF_SYNTAX_ERROR, FRAME_SYNTAX_ERROR, BAD_CTRL_SYMBOL_TYPE, PA_ERROR_IND_RECEIVED)." range="" rwaccess="R"/>
+    <bitfield id="PA_ERROR" width="1" begin="16" end="16" resetval="0" description="Indicates that a PA_ERROR has occurred (combines BAD_PHY_SYMBOL, UNMAPPED_PHY_ESC_SYMBOL, UNEXPECTED_PHY_ESC_SYMBOL, BAD_PA_PARAM)." range="" rwaccess="R"/>
+    <bitfield id="DL_AFCERROR" width="1" begin="15" end="15" resetval="0" description="Merges: &amp;amp;gt; AFCX_REQUEST_TIMER_EXPIRED &amp;amp;gt; FCX_PROTECTION_TIMER_EXPIRED" range="" rwaccess="R"/>
+    <bitfield id="TCX_REPLAY_TIMER_EXPIRED" width="1" begin="14" end="14" resetval="0" description="Indicates that the TC0_REPLAY_TIMER or TC1_REPLAY_TIMER has expired." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="13" end="13" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="LM_ENABLE_LAYER_CNF" width="1" begin="12" end="12" resetval="0" description="Indicates that the current LAYER ENABLE command has completed. Merges &amp;amp;gt; PA_LM_ENABLE_LAYER_CNF &amp;amp;gt; DL_LM_ENABLE_LAYER_CNF &amp;amp;gt; N_LM_ENABLE_LAYER_CNF &amp;amp;gt; T_LM_ENABLE_LAYER_CNF" range="" rwaccess="R"/>
+    <bitfield id="DL_EMPTY" width="1" begin="11" end="11" resetval="0" description="Merges &amp;amp;gt; DL_TC0_empty &amp;amp;gt; DL_TC1_empty" range="" rwaccess="R"/>
+    <bitfield id="PACP_GET_SET" width="1" begin="10" end="10" resetval="0" description="Merges &amp;amp;gt;PACP_GET_SET_IND &amp;amp;gt;PACP_GET_SET_CNF &amp;amp;gt;PA_LM_TEST_MODE_CNF &amp;amp;gt;PA_LM_TEST_MODE_IND" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="2" begin="9" end="8" resetval="0x0" description="-" range="" rwaccess="R"/>
+    <bitfield id="TX_EOMF" width="1" begin="7" end="7" resetval="0" description="End of Message Fragment transmitted" range="" rwaccess="R"/>
+    <bitfield id="RX_EOMF" width="1" begin="6" end="6" resetval="0" description="End of Message Fragment crossed" range="" rwaccess="R"/>
+    <bitfield id="RX_EOM" width="1" begin="5" end="5" resetval="0" description="End of Message received" range="" rwaccess="R"/>
+    <bitfield id="PA_LM_PWR_MODE_CHANGED" width="1" begin="4" end="4" resetval="0" description="Merges &amp;amp;gt; PA_LM_PWR_MODE_CHANGED &amp;amp;gt; PA_LM_HIBERNATE_ENTER &amp;amp;gt; PA_LM_HIBERNATE_EXIT" range="" rwaccess="R"/>
+    <bitfield id="PA_LM_PWR_MODE" width="1" begin="3" end="3" resetval="0" description="A Power Change Request has been received and PAPowerModeUserData is available." range="" rwaccess="R"/>
+    <bitfield id="RXENDPOINTRESET" width="1" begin="2" end="2" resetval="0" description="Indicates that a Rx EndPoint reset has occured" range="" rwaccess="R"/>
+    <bitfield id="RXLINKSTARTUPPHASE1" width="1" begin="1" end="1" resetval="0" description="Indicates that the Rx link startup started" range="" rwaccess="R"/>
+    <bitfield id="RX_LINERESET" width="1" begin="0" end="0" resetval="0" description="LINERESET received on M-RX" range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_ERRORS" acronym="UNIPRO_ERRORS" offset="0x38" width="32" description="This register contains the error codes related to all UniPro ERROR interrupts.">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="T_ERROR_CODE" width="3" begin="26" end="24" resetval="0x0" description="The code of the received T_ERROR: 0: No T_ERROR occurred 1: UNSUPPORTED_HEADER_TYPE - T_PDU whose header contains unsupported values 2: UNKNOWN_CPORTID - The C-Port a received T_PDU is targeting does not exist 3: NO_CONNECTION_RX - T_PDU targeting a C-Port that has no established Connection 4: CONTROLLED_SEGMENT_DROPPING - Segment was dropped at the receiver due to insufficient buffer space 5: BAD_TC - T_PDU with a Traffic Class that is different than the T_TrafficClass attribute of the destination C-Port 6: reserved 7: SAFETY_VALVE_DROPPING - C-Port Safety Valve mechanism has discarded data. Write to clear." range="" rwaccess="RW WtoClr"/>
+    <bitfield id="RESERVED" width="6" begin="23" end="18" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="N_ERROR_CODE" width="2" begin="17" end="16" resetval="0x0" description="The code of the received N_ERROR: 0: No N_ERROR occurred 1: Reserved 2: BAD_DEVICEID_ENC - an N_PDU was received with a DestDeviceID_Enc less than N_DeviceID 3: LHDR_TRAP_PACKET_DROPPING - Indicates that a Long Header Packet has been dropped because the L3 extension was not available to accept the Packet Write to clear." range="" rwaccess="RW WtoClr"/>
+    <bitfield id="RESERVED" width="3" begin="15" end="13" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DL_ERROR_TC" width="1" begin="12" end="12" resetval="0" description="Indicates the TC for which a DL_ERROR occurred (valid only for TCx_REPLAY_TIMER_EXPIRED, AFCx_REQUEST_TIMER_EXPIRED, FCx_PROTECTION_TIMER_EXPIRED) 0: Traffic class 0 1: Traffic class 1 Write to clear." range="" rwaccess="RW WtoClr"/>
+    <bitfield id="DL_ERROR_CODE" width="4" begin="11" end="8" resetval="0x0" description="The code of the received DL_ERROR: 0: No DL_ERROR occurred 1: NAC_RECEIVED - NAC Frame has been received 2: TCx_REPLAY_TIMER_EXPIRED - TCx_REPLAY_TIMER has expired 3: AFCx_REQUEST_TIMER_EXPIRED - AFCx_REQUEST_TIMER has expired 4: FCx_PROTECTION_TIMER_EXPIRED - FCx_PROTECTION_TIMER has expired 5: CRC_ERROR - CRC error has been detected on either a Data or a Control Frame 6: RX_BUFFER_OVERFLOW - RX buffer overflows 7: MAX_FRAME_LENGTH_EXCEEDED - a Frame with a payload longer than the DL_MTU 8: WRONG_SEQUENCE_NUMBER - a correct Frame with a wrong Frame Sequence Number 9: AFC_FRAME_SYNTAX_ERROR - AFC symbol not followed by two data symbols 10: NAC_FRAME_SYNTAX_ERROR - NAC symbol not followed by one data symbol 11: EOF_SYNTAX_ERROR - EOF_EVEN symbol not followed by one data symbol 12: FRAME_SYNTAX_ERROR - unexpected framing sequence 13: BAD_CTRL_SYMBOL_TYPE - unsupported Data or Control Frame 14: PA_ERROR_IND_RECEIVED - PA_ERROR.ind has been received other: reserved Write to clear." range="" rwaccess="RW WtoClr"/>
+    <bitfield id="RESERVED" width="5" begin="7" end="3" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_ERROR_CODE" width="3" begin="2" end="0" resetval="0x0" description="The code of the received PA_ERROR: 0: No PA_ERROR occurred 1: BAD_PHY_SYMBOL - an invalid 9b symbol is received 2: UNMAPPED_PHY_ESC_SYMBOL - an undefined 9b symbol is received 3: UNEXPECTED_PHY_ESC_SYMBOL - C400 or C417 is received for PA_PDU[7:0] 4: BAD_PA_PARAM - ESC_PA with EscParam_PA other than 0 is received other: reserved Write to clear." range="" rwaccess="RW WtoClr"/>
+  </register>
+  <register id="UNIPRO_PA_PWR_CFG" acronym="UNIPRO_PA_PWR_CFG" offset="0x40" width="32" description="UNIPRO PA Power and Lane Configuration register. This register contains information about the programmed number of Active Lanes and Power Modes on Tx and Rx.">
+    <bitfield id="PA_LM_HIBERNATE_EXIT" width="1" begin="31" end="31" resetval="0" description="Writing 1 to this bit will trigger the Hibernate Exit sequence." range="" rwaccess="RW"/>
+    <bitfield id="PA_LM_HIBERNATE_ENTER" width="1" begin="30" end="30" resetval="0" description="Writing 1 to this bit will trigger the Hibernate Enter sequence." range="" rwaccess="RW"/>
+    <bitfield id="PA_ACTIVERXDATALANES" width="3" begin="29" end="27" resetval="0x1" description="Defines the number of Active Rx Data Lanes. Read value returns current Active Lanes updated after Linkstartup or succesfull power mode change. Writes directed to shadow register used for power mode change procedure." range="" rwaccess="RW RSpecial"/>
+    <bitfield id="PA_ACTIVETXDATALANES" width="3" begin="26" end="24" resetval="0x1" description="Defines the number of Active Tx Data Lanes. Read value returns current Active Lanes updated after Linkstartup or succesfull power mode change. Writes directed to shadow register used for power mode change procedure." range="" rwaccess="RW RSpecial"/>
+    <bitfield id="RESERVED" width="1" begin="23" end="23" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_RXTERMINATION" width="1" begin="22" end="22" resetval="0" description="Rx Termination Read value returns current Power Mode updated after Linkstartup or succesfull power mode change. Writes directed to shadow register used for power mode change procedure." range="" rwaccess="RW RSpecial"/>
+    <bitfield id="RESERVED" width="1" begin="21" end="21" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_RXHSGEAR" width="2" begin="20" end="19" resetval="0x1" description="RX Gear in High Speed Mode 0: reserved 1: HS_G1 2: HS_G2 3: HS_G3 Read value returns current Power Mode updated after Linkstartup or succesfull power mode change. Writes directed to shadow register used for power mode change procedure." range="" rwaccess="RW RSpecial"/>
+    <bitfield id="PA_RXPWMGEAR" width="3" begin="18" end="16" resetval="0x1" description="RX Gear in PWM Mode 0: reserved 1: PWM_G1 2: PWM_G2 3: PWM_G3 4: PWM_G4 5: PWM_G5 6: PWM_G6 7: PWM_G7 Read value returns current Power Mode updated after Linkstartup or succesfull power mode change. Writes directed to shadow register used for power mode change procedure." range="" rwaccess="RW RSpecial"/>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_TXTERMINATION" width="1" begin="14" end="14" resetval="0" description="Tx Termination Read value returns current Power Mode updated after Linkstartup or succesfull power mode change. Writes directed to shadow register used for power mode change procedure." range="" rwaccess="RW RSpecial"/>
+    <bitfield id="PA_HSSERIES" width="1" begin="13" end="13" resetval="0" description="TX and Rx Frequency Series in High Speed Mode 0: A 1: B Read value returns current Power Mode updated after Linkstartup or succesfull power mode change. Writes directed to shadow register used for power mode change procedure." range="" rwaccess="RW RSpecial"/>
+    <bitfield id="PA_TXHSGEAR" width="2" begin="12" end="11" resetval="0x1" description="TX Gear in High Speed Mode 0: reserved 1: HS_G1 2: HS_G2 3: HS_G3 Read value returns current Power Mode updated after Linkstartup or succesfull power mode change. Writes directed to shadow register used for power mode change procedure." range="" rwaccess="RW RSpecial"/>
+    <bitfield id="PA_TXPWMGEAR" width="3" begin="10" end="8" resetval="0x1" description="TX Gear in PWM Mode 0: reserved 1: PWM_G1 2: PWM_G2 3: PWM_G3 4: PWM_G4 5: PWM_G5 6: PWM_G6 7: PWM_G7 Read value returns current Power Mode updated after Linkstartup or succesfull power mode change. Writes directed to shadow register used for power mode change procedure." range="" rwaccess="RW RSpecial"/>
+    <bitfield id="PA_PWRMODE" width="8" begin="7" end="0" resetval="0x55" description="Defines the TX/RX Power mode. TX[b3:b0] RX[b7:b4] 0 : Off 1: Fast_Mode 2: Slow_Mode 3: Hibernate 4: FastAuto_Mode 5: SlowAuto_Mode 15: UNCHANGED Read value returns current Power Mode updated after Linkstartup or succesfull power mode change. Writes directed to shadow register used for power mode change procedure." range="" rwaccess="RW RSpecial"/>
+  </register>
+  <register id="UNIPRO_PA_CTRL" acronym="UNIPRO_PA_CTRL" offset="0x44" width="32" description="This register programs UniPro PA general configuration and control.">
+    <bitfield id="MPHY_RX_DATA_WIDTH" width="1" begin="31" end="31" resetval="0" description="Defines the width of the Data Bus on Rx. 0: 8 bits 1: 16 bits" range="" rwaccess="RW"/>
+    <bitfield id="MPHY_TX_DATA_WIDTH" width="1" begin="30" end="30" resetval="0" description="Defines the width of the Data Bus on Tx. 0: 8 bits 1: 16 bits" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="29" end="25" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="TIMER_CLK_DIVISOR" width="9" begin="24" end="16" resetval="0x085" description="Defines the ratio to be used for the generation of the timer clocks. Valid values 0x001-0x1FF. If CLKSEL_OPP = '0' the programmed value is used. If CLKSEL_OPP = '1' the value is multiplied by 2." range="" rwaccess="RW"/>
+    <bitfield id="PA_STALLNOCONFIGTIME" width="8" begin="15" end="8" resetval="0xFF" description="Specifies the minimum time to wait between bursts in HS mode expressed in Symbol Intervals." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_SLEEPNOCONFIGTIME" width="4" begin="3" end="0" resetval="0xF" description="Specifies the minimum time to wait between bursts in PWM mode expressed in Symbol Intervals." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_MPHY_CFGREADY" acronym="UNIPRO_MPHY_CFGREADY" offset="0x48" width="32" description="This register control MPHY_CFGREADY requests to M-TX/M-RX and monitors confirms.">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="27" end="27" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="RX2_CFGREADY_CNF" width="1" begin="26" end="26" resetval="0" description="CFGREADY.cnf received for M-RX2. Cleared by HW when new command is issued." range="" rwaccess="R"/>
+    <bitfield id="RX1_CFGREADY_CNF" width="1" begin="25" end="25" resetval="0" description="CFGREADY.cnf received for M-RX1. Cleared by HW when new command is issued." range="" rwaccess="R"/>
+    <bitfield id="RX0_CFGREADY_CNF" width="1" begin="24" end="24" resetval="0" description="CFGREADY.cnf received for M-RX0. Cleared by HW when new command is issued." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="4" begin="23" end="20" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="19" end="19" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="18" end="18" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="TX1_CFGREADY_CNF" width="1" begin="17" end="17" resetval="0" description="CFGREADY.cnf or LINERESET.cnf received for M-TX1. Cleared by HW when new command is issued." range="" rwaccess="R"/>
+    <bitfield id="TX0_CFGREADY_CNF" width="1" begin="16" end="16" resetval="0" description="CFGREADY.cnf or LINERESET.cnf received for M-TX0. Cleared by HW when new command is issued." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="RX2_LINERESET_IND" width="1" begin="14" end="14" resetval="0" description="Indicate LINERESET occurred for M-RX2. Cleared by SW." range="" rwaccess="RW"/>
+    <bitfield id="RX1_LINERESET_IND" width="1" begin="13" end="13" resetval="0" description="Indicate LINERESET occurred for M-RX1. Cleared by SW." range="" rwaccess="RW"/>
+    <bitfield id="RX0_LINERESET_IND" width="1" begin="12" end="12" resetval="0" description="Indicate LINERESET occurred for M-RX0. Cleared by SW." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="RX2_CFGREADY" width="1" begin="10" end="10" resetval="0" description="Sets CFGREADY for M-RX2." range="" rwaccess="W"/>
+    <bitfield id="RX1_CFGREADY" width="1" begin="9" end="9" resetval="0" description="Sets CFGREADY for M-RX1." range="" rwaccess="W"/>
+    <bitfield id="RX0_CFGREADY" width="1" begin="8" end="8" resetval="0" description="Sets CFGREADY for M-RX0" range="" rwaccess="W"/>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="6" end="6" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="TX1_LINERESET" width="1" begin="5" end="5" resetval="0" description="Sets LINERESET for M-TX1." range="" rwaccess="W"/>
+    <bitfield id="TX0_LINERESET" width="1" begin="4" end="4" resetval="0" description="Sets LINERESET for M-TX0" range="" rwaccess="W"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="TX1_CFGREADY" width="1" begin="1" end="1" resetval="0" description="Sets CFGREADY for M-TX1." range="" rwaccess="W"/>
+    <bitfield id="TX0_CFGREADY" width="1" begin="0" end="0" resetval="0" description="Sets CFGREADY for M-TX0" range="" rwaccess="W"/>
+  </register>
+  <register id="UNIPRO_MPHY_PWR" acronym="UNIPRO_MPHY_PWR" offset="0x4C" width="32" description="Tx/Rx M-PHY power control">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="27" end="27" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="RX2_PWR_STATUS" width="1" begin="26" end="26" resetval="0" description="Status of the M-RX2. Read 0x0: M-RX in OFF state Read 0x1: M-RX in ON state" range="" rwaccess="R"/>
+    <bitfield id="RX1_PWR_STATUS" width="1" begin="25" end="25" resetval="0" description="Status of the M-RX1. Read 0x0: M-RX in OFF state Read 0x1: M-RX in ON state" range="" rwaccess="R"/>
+    <bitfield id="RX0_PWR_STATUS" width="1" begin="24" end="24" resetval="0" description="Status of the M-RX0 Read 0x0: M-RX in OFF state Read 0x1: M-RX in ON state" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="4" begin="23" end="20" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="19" end="19" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="18" end="18" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="TX1_PWR_STATUS" width="1" begin="17" end="17" resetval="0" description="Status of the power control of M-TX1. Read 0x0: M-TX in OFF state Read 0x1: M-TX in ON state" range="" rwaccess="R"/>
+    <bitfield id="TX0_PWR_STATUS" width="1" begin="16" end="16" resetval="0" description="Status of the power control of M-TX0 Read 0x0: M-TX in OFF state Read 0x1: M-TX in ON state" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="RX2_PWR_CMD" width="1" begin="10" end="10" resetval="0" description="Command for power control of M-RX2. 0x0: Command to change to OFF state 0x1: Command to change to ON state" range="" rwaccess="RW"/>
+    <bitfield id="RX1_PWR_CMD" width="1" begin="9" end="9" resetval="0" description="Command for power control of M-RX1. 0x0: Command to change to OFF state 0x1: Command to change to ON state" range="" rwaccess="RW"/>
+    <bitfield id="RX0_PWR_CMD" width="1" begin="8" end="8" resetval="0" description="Command for power control of M-RX0 0x0: Command to change to OFF state 0x1: Command to change to ON state" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="TX1_PWR_CMD" width="1" begin="1" end="1" resetval="0" description="Command for power control of M-TX1. 0x0: Command to change to OFF state 0x1: Command to change to ON state" range="" rwaccess="RW"/>
+    <bitfield id="TX0_PWR_CMD" width="1" begin="0" end="0" resetval="0" description="Command for power control of M-TX0 0x0: Command to change to OFF state 0x1: Command to change to ON state" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PA_CFG" acronym="UNIPRO_PA_CFG" offset="0x50" width="32" description="PHYSICAL ADAPTER CONFIGURATION REGISTER This register contains, amongst other, the PA_MIB.">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_RXLSTERMINATIONCAPABILITY" width="1" begin="30" end="30" resetval="0" description="Specifies whether or not the inbound link supports terminated line in LS mode." range="" rwaccess="RW"/>
+    <bitfield id="PA_RXHSUNTERMINATIONCAPABILITY" width="1" begin="29" end="29" resetval="0" description="Specifies whether or not the inbound link supports unterminated line in HS mode." range="" rwaccess="RW"/>
+    <bitfield id="PA_MAXRXHSGEAR" width="2" begin="28" end="27" resetval="0x0" description="Maximum RX High Speed Gears (HS), 0 means no HS available 0: NO_HS 1: HS_G1 2: HS_G2 3: HS_G3" range="" rwaccess="RW"/>
+    <bitfield id="PA_MAXRXPWMGEAR" width="3" begin="26" end="24" resetval="0x0" description="Maximum RX Low Speed Gear (PWM) 0: Reserved 1: PWM_G1 2: PWM_G2 3: PWM_G3 4: PWM_G4 5: PWM_G5 6: PWM_G6 7: PWM_G7" range="" rwaccess="RW"/>
+    <bitfield id="PA_TXTRAILINGCLOCKS" width="8" begin="23" end="16" resetval="0xFF" description="Number of PHY byte clock cycles forced without data before a mode change from FAST_STATE or SLOW_STATE to SLEEP_STATE, or before data transmission pause while in FAST_STATE or SLOW_STATE." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_LM_PHY_RESET_REPROGRAM" width="1" begin="9" end="9" resetval="0" description="Indicates SW has reprogrammed PHY attributes after a PHY_RESET. 0:SW has not reprogrammed PHY attributes. 1:SW has reprogrammed PHY attributes." range="" rwaccess="W"/>
+    <bitfield id="PA_LM_PWR_MODE_RSP" width="1" begin="8" end="8" resetval="0" description="Response to PA_LM_PWR_MODE.ind Writing a 1 to this field confirms that PA_LM_PWR_MODE.ind is accepted and PA_PWRModeUserData fields are updated." range="" rwaccess="W"/>
+    <bitfield id="RESERVED" width="3" begin="7" end="5" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_LM_PWR_MODE_IND_DIR" width="1" begin="4" end="4" resetval="0" description="Indicates whether PA_LM_PWR_MODE.ind was from local or remote request. 0: remote request 1: local request" range="" rwaccess="RW WtoClr"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="POWERCHANGERESULTCODE" width="3" begin="2" end="0" resetval="0x0" description="The code of the accepted Power Change requets 0: PWR_OK - The request was accepted. 1: PWR_LOCAL - The local request was successfully applied 2: PWR_REMOTE - The remote request was successfully applied 3: PWR_BUSY - The request was aborted due to concurrent requests 4: PWR_ERROR_CAP - The request was rejected due to an impossible configuration. 5: PWR_FATAL_ERROR - The request was aborted due to a communication problem. The link may be inoperable. 6-7: reserved Write to clear." range="" rwaccess="RW WtoClr"/>
+  </register>
+  <register id="UNIPRO_PA_STATUS" acronym="UNIPRO_PA_STATUS" offset="0x54" width="32" description="PHYSICAL ADAPTER STATUS REGISTER This register contains, amongst other, the PA_MIB.">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_RXPWRSTATUS" width="3" begin="26" end="24" resetval="0x0" description="Power status for Rx 0x0 Off_state 0x1 Fast_state 0x2 Slow_state 0x3 Hibernate_state (ULPS State) 0x4 Sleep_state (STOP state) Reading this field actually triggers an M-CTRL-CFGGET request to the M-RX. The RX_FSM attribute is read for logical lane 0 and this is the value returned." range="" rwaccess="R"/>
+    <bitfield id="PA_MINRXTRAILINGCLOCKS" width="8" begin="23" end="16" resetval="0x01" description="Minimum number of PHY byte clock without data to receive before a mode change from FAST_STATE or SLOW_STATE to SLEEP_STATE, or before a pause in data transmission when in FAST_STATE or SLOW_STATE" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="2" begin="15" end="14" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_AVAILABLETXDATALANES" width="2" begin="13" end="12" resetval="0x1" description="0x0 1 lane 0x1 2 lanes 0x2 3 lanes 0x3 4 lanes (Programmed_Value = MIPI_Specified_Value - 1)" range="" rwaccess="R"/>
+    <bitfield id="PA_PHYTYPE" width="2" begin="11" end="10" resetval="0x1" description="0x0: encode D PHY 0x1: M PHY 0x2: reserved 0x3: reserved" range="" rwaccess="R"/>
+    <bitfield id="PA_AVAILABLERXDATALANES" width="2" begin="9" end="8" resetval="0x2" description="0x0 1 lane 0x1 2 lanes 0x2 3 lanes 0x3 4 lanes (Programmed_Value = MIPI_Specified_Value - 1)" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_LINERESET_DIR" width="1" begin="3" end="3" resetval="0" description="Indicates whether LINERESET was for M-RX or M-TX 0x0 M-RX 0x1 M-TX" range="" rwaccess="R"/>
+    <bitfield id="PA_TXPWRSTATUS" width="3" begin="2" end="0" resetval="0x4" description="Power status for Tx 0x0 Off_state 0x1 Fast_state 0x2 Slow_state 0x3 Hibernate_state (ULPS State) 0x4 Sleep_state (STOP state) Reading this field actually triggers an M-CTRL-CFGGET request to the M-TX. The TX_FSM attribute is read for logical lane 0 and this is the value returned." range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_PA_LOGICAL_LANE_MAP" acronym="UNIPRO_PA_LOGICAL_LANE_MAP" offset="0x5C" width="32" description="PHYSICAL ADAPTER STATUS REGISTER This register contains, amongst other, the PA_MIB. Note: this register is only writable in PHY Test mode">
+    <bitfield id="RESERVED" width="10" begin="31" end="22" resetval="0x000" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_CONNECTEDRXDATALANES" width="3" begin="21" end="19" resetval="0x0" description="Number of Rx Data Lanes Connected 0x0 0 lanes 0x1 1 lane 0x2 2 lanes 0x3 3 lanes 0x4 4 lanes" range="" rwaccess="RW"/>
+    <bitfield id="PA_CONNECTEDTXDATALANES" width="3" begin="18" end="16" resetval="0x0" description="Number of Tx Data Lanes Connected 0x0 0 lanes 0x1 1 lane 0x2 2 lanes 0x3 3 lanes 0x4 4 lanes" range="" rwaccess="RW"/>
+    <bitfield id="PA_LOGICALLANEMAP" width="16" begin="15" end="0" resetval="0x0000" description="Logical to Physical Lane mapping. Fields contain a valid value after succesfull Linkstartup sequence. Tx Lanes: Bits 1..0: Physical lane of logical lane 0 Bits 3..2: Physical lane of logical lane 1 Bits 5..4: Physical lane of logical lane 2 Bits 7..6: Physical lane of logical lane 3 Rx Lanes: Bits 9..8: Physical lane of logical lane 0 Bits 11..10: Physical lane of logical lane 1 Bits 13..12: Physical lane of logical lane 2 Bits 15..14: Physical lane of logical lane 3" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PA_VER_INFO" acronym="UNIPRO_PA_VER_INFO" offset="0x60" width="32" description="This register contains version information.">
+    <bitfield id="PA_LOCALVERINFO" width="16" begin="31" end="16" resetval="0x0002" description="Local Version Info. Delivered during the Link Startup Sequence to the peer and stored to there." range="" rwaccess="RW"/>
+    <bitfield id="PA_REMOTEVERINFO" width="16" begin="15" end="0" resetval="0x0000" description="Remote Peer's version information. Available after Link Startup Sequence." range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_MPHY_TIMING" acronym="UNIPRO_MPHY_TIMING" offset="0x64" width="32" description="This register defines the timing parameters that need to be respected on the M-PHY Control Interface..">
+    <bitfield id="TIMER_CLK_DIVISOR_40NS" width="8" begin="31" end="24" resetval="0x06" description="Defines the ratio to be used for the generation of a 40ns clock from UniPro OCP functional clock. Legal values 0x01 - 0xFF. If CLKSEL_OPP = '0' the programmed value is used. If CLKSEL_OPP = '1' the value is multiplied by 2." range="" rwaccess="RW"/>
+    <bitfield id="PA_SAVECONFIGTIME" width="8" begin="23" end="16" resetval="0xFF" description="Minimum reconfiguration time (expressed in 40 ns intervals). Downgraded value updated after Linkstartup completes." range="" rwaccess="RW"/>
+    <bitfield id="TACTIVATE" width="16" begin="15" end="0" resetval="0x2710" description="The period of time that M-TX shall drive DIF-N on the lines. The time is expressed in us. This field should be programmed to satisfy MPHY&#8217;s requirements for TACTIVATE and T_LINE_RESET. The time should be greater than MAX(TACTIVATE, T_LINE_RESET)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PACP_TIMING" acronym="UNIPRO_PACP_TIMING" offset="0x68" width="32" description="This register contains the timeout values for .">
+    <bitfield id="PA_PACPREQEOBTIMEOUT" width="16" begin="31" end="16" resetval="0x0064" description="Expiration value of the PACP_REQUEST_EoB_TIMER. The value is expressed in us." range="" rwaccess="RW"/>
+    <bitfield id="PA_PACPREQTIMEOUT" width="16" begin="15" end="0" resetval="0x07D0" description="Expiration value of the PACP_REQUEST_TIMER. The value is expressed in us." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_DL_STATUS" acronym="UNIPRO_DL_STATUS" offset="0x6C" width="32" description="DATA LINK STATUS REGISTER This register contains DL status information.">
+    <bitfield id="RESERVED" width="7" begin="31" end="25" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="DL_PEERTC1PRESENT" width="1" begin="24" end="24" resetval="0" description="This status bit is updated during the initilization phase following the DL_ENABLE_LAYER.req() command. It is set to zero by default. 0: indicates that the Peer Device does not support TC0 1: indicates that the Peer Device does support TC0" range="" rwaccess="R"/>
+    <bitfield id="DL_PEERTC1RXINITVAL" width="8" begin="23" end="16" resetval="0x00" description="This register get set after DL initilization. It is loaded with the credit value sent by the remote device on the first AFC exchange during the boot sequence." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="7" begin="15" end="9" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="DL_PEERTC0PRESENT" width="1" begin="8" end="8" resetval="0" description="This status bit is updated during the initilization phase following the DL_ENABLE_LAYER.req() command. It is set to zero by default. 0: indicates that the Peer Device does not support TC0 1: indicates that the Peer Device does support TC0" range="" rwaccess="R"/>
+    <bitfield id="DL_PEERTC0RXINITVAL" width="8" begin="7" end="0" resetval="0x00" description="This register get set after DL initilization. It is loaded with the credit value sent by the remote device on the first AFC exchange during the boot sequence." range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_CTRL" acronym="UNIPRO_CTRL" offset="0x70" width="32" description="This register regroups UniPro interface general control and configuration parameters">
+    <bitfield id="DL_LM_HIB_ENTER" width="1" begin="31" end="31" resetval="0" description="Write 1 to this field to trigger DL_LM_HIBERNATE_ENTER.req" range="" rwaccess="W"/>
+    <bitfield id="DL_LM_HIB_EXIT" width="1" begin="30" end="30" resetval="0" description="Write 1 to this field to trigger DL_LM_HIBERNATE_EXIT.req" range="" rwaccess="W"/>
+    <bitfield id="RESERVED" width="5" begin="29" end="25" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="TIMER_CLK_DIVISOR" width="9" begin="24" end="16" resetval="0x085" description="Defines the ratio to be used for the generation of the Timer clock from UniPro OCP functional clock. Legal values 0x001 - 0x1FF. If CLKSEL_OPP = '0' the programmed value is used. If CLKSEL_OPP = '1' the value is multiplied by 2." range="" rwaccess="RW"/>
+    <bitfield id="DL_CTRL_FRAME" width="1" begin="15" end="15" resetval="0" description="When 1, Indicates that Data Link engine has scheduled control frames whose transmission is not completed. When 0, all scheduled control frames in Data Link have been transmitted." range="" rwaccess="R"/>
+    <bitfield id="N_DEVICEID" width="7" begin="14" end="8" resetval="0x00" description="local DeviceID value" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="7" end="3" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="N_DEVICEID_VALID" width="1" begin="2" end="2" resetval="0" description="N_DeviceID attribute is valid. 0: N_DeviceID attribute is not valid. DeviceIDOffset = 0. 1: N_DeviceID attribute is valid. DeviceIDOffset = DestDeviceID_Enc - N_DeviceID" range="" rwaccess="RW"/>
+    <bitfield id="ENDIAN64" width="1" begin="1" end="1" resetval="0" description="64b word Data Receive endianness conversion control 0 : no endianness adaptation 1 : the two 32b halves constituting the 64b are swizzled" range="" rwaccess="RW"/>
+    <bitfield id="ENDIAN32" width="1" begin="0" end="0" resetval="0" description="32b word Data Receive endianness conversion control 0 : no endianness adaptation 1 : bytes in a 32b word are swizzled" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_MPHY_TIMING2" acronym="UNIPRO_MPHY_TIMING2" offset="0x74" width="32" description="This register defines timing parameters on the M-PHY Control Interface.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_HIBERN8TIME" width="16" begin="15" end="0" resetval="0x2710" description="The period of time in which M-TX must remain in Hibern8 once entered. Time is expressed in usec." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PA_LM_ENABLE_LAYER" acronym="UNIPRO_PA_LM_ENABLE_LAYER" offset="0x7C" width="32" description="PHYSICAL ADAPTER Command writing to the register initiates a link start up. The DME command has been renamedas PA_LM_ENABLE.req">
+    <bitfield id="VALUE" width="32" begin="31" end="0" resetval="0x0000 0000" description="" range="" rwaccess="W"/>
+  </register>
+  <register id="UNIPRO_DL_LM_ENABLE_LAYER" acronym="UNIPRO_DL_LM_ENABLE_LAYER" offset="0x80" width="32" description="Data Link Layer Command writing to the register initializes the data link layer. This corresponds to the DME command DL_LM_ENABLE_LAYER.req">
+    <bitfield id="VALUE" width="32" begin="31" end="0" resetval="0x0000 0000" description="" range="" rwaccess="W"/>
+  </register>
+  <register id="UNIPRO_N_LM_ENABLE_LAYER" acronym="UNIPRO_N_LM_ENABLE_LAYER" offset="0x84" width="32" description="Network Layer Command writing to the memory mapped address initiates a N_LM_ENABLE.req">
+    <bitfield id="VALUE" width="32" begin="31" end="0" resetval="0x0000 0000" description="" range="" rwaccess="W"/>
+  </register>
+  <register id="UNIPRO_T_LM_ENABLE_LAYER" acronym="UNIPRO_T_LM_ENABLE_LAYER" offset="0x88" width="32" description="Transport Layer Command writing to the memory mapped address initiates a T_LM_ENABLE.req ref. to UniPro 1.1 release [3].">
+    <bitfield id="VALUE" width="32" begin="31" end="0" resetval="0x0000 0000" description="" range="" rwaccess="W"/>
+  </register>
+  <register id="UNIPRO_ENDPOINTRESET" acronym="UNIPRO_ENDPOINTRESET" offset="0x8C" width="32" description="PHYSICAL ADAPTER Command writing to the register initiates transmission of an EndPointReset trgigger over the link to the peer device.">
+    <bitfield id="VALUE" width="32" begin="31" end="0" resetval="0x0000 0000" description="" range="" rwaccess="W"/>
+  </register>
+  <register id="UNIPRO_DL_TXFCVALUE_TC0" acronym="UNIPRO_DL_TXFCVALUE_TC0" offset="0x90" width="32" description="DATA LINK TX flow control value This register contains the timeout and threshold values for DL MIB for transmitter side">
+    <bitfield id="RESERVED" width="3" begin="31" end="29" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DL_TC0TXFCTHRESHOLD" width="7" begin="28" end="22" resetval="0x09" description="Threshold for triggering an AFC0 frame with REQ bit set to request flow control update from the remote end" range="" rwaccess="RW"/>
+    <bitfield id="DL_TC0REPLAYTIMEOUTVAL" width="12" begin="21" end="10" resetval="0xFFF" description="1 to 4095 us. (1 MHz clock derived from 1.6GHz) Timeout value for triggering retransmission of TC0 frame. Zero indicates timer is OFF" range="" rwaccess="RW"/>
+    <bitfield id="DL_FC0PROTECTIONTIMEOUTVAL" width="10" begin="9" end="0" resetval="0x1FF" description="1 to 1023 us. (1 MHz clock derived from 1.6GHz) Timeout value for triggering a request to remote end for flow control update. Zero indicates timer is OFF" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_DL_RXFCVALUE_TC0" acronym="UNIPRO_DL_RXFCVALUE_TC0" offset="0x94" width="32" description="DATA LINK RX flow control values This register contains the timeout and threshold values for DL MIB for receiver side">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="DL_TC0OUTACKTHRESHOLD" width="4" begin="23" end="20" resetval="0x0" description="0 to 15. Number of outstanding Acknowledgements for TC0" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="19" end="19" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="DL_AFC0CREDITTHRESHOLD" width="7" begin="18" end="12" resetval="0x00" description="0 to 127 Threshold for AFC triggering based on available credits" range="" rwaccess="RW"/>
+    <bitfield id="DL_AFC0REQTIMEOUTVAL" width="12" begin="11" end="0" resetval="0x7FF" description="1 to 4095 us. (1 MHz clock derived from 1.6GHz) TimeOut value for AFC triggering on receiver side. Zero indicates that the timer is OFF" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_DL_TXFCVALUE_TC1" acronym="UNIPRO_DL_TXFCVALUE_TC1" offset="0x98" width="32" description="DATA LINK TX flow control value This register contains the timeout and threshold values for DL MIB for transmitter side">
+    <bitfield id="RESERVED" width="3" begin="31" end="29" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DL_TC1TXFCTHRESHOLD" width="7" begin="28" end="22" resetval="0x09" description="Threshold for triggering an AFC1 frame with REQ bit set to request flow control update from the remote end" range="" rwaccess="RW"/>
+    <bitfield id="DL_TC1REPLAYTIMEOUTVAL" width="12" begin="21" end="10" resetval="0xFFF" description="1 to 4095 us. (1 MHz clock derived from 1.6GHz) Timeout value for triggering retransmission of TC1 frame. Zero indicates timer is OFF" range="" rwaccess="RW"/>
+    <bitfield id="DL_FC1PROTECTIONTIMEOUTVAL" width="10" begin="9" end="0" resetval="0x1FF" description="1 to 1023 us. (1 MHz clock derived from 1.6GHz) Timeout value for triggering a request to remote end for flow control update. Zero indicates timer is OFF" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_DL_RXFCVALUE_TC1" acronym="UNIPRO_DL_RXFCVALUE_TC1" offset="0x9C" width="32" description="DATA LINK RX flow control values This register contains the timeout and threshold values for DL MIB for receiver side">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="DL_TC1OUTACKTHRESHOLD" width="4" begin="23" end="20" resetval="0x0" description="0 to 15. Number of outstanding Acknowledgements for TC1" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="19" end="19" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="DL_AFC1CREDITTHRESHOLD" width="7" begin="18" end="12" resetval="0x00" description="0 to 127 Threshold for AFC triggering based on available credits" range="" rwaccess="RW"/>
+    <bitfield id="DL_AFC1REQTIMEOUTVAL" width="12" begin="11" end="0" resetval="0x7FF" description="1 to 4095 us. (1 MHz clock derived from 1.6GHz) TimeOut value for AFC triggering on receiver side. Zero indicates that the timer is OFF" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_STATISTICS" acronym="UNIPRO_STATISTICS" offset="0xA0" width="32" description="Status register containing Link Quality Statistics information.">
+    <bitfield id="TX_LINK" width="16" begin="31" end="16" resetval="0x0000" description="This field indicates the number of errors detected on Tx link. It is incremented every time an NAC is received indicating a Tx link error." range="" rwaccess="R"/>
+    <bitfield id="RX_LINK" width="16" begin="15" end="0" resetval="0x0000" description="This field indicates the number of CRC errors detected on Rx link. It is incremented by one every time a CRC error on Rx link causes NAC transmission." range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_TC0_SEG_ENTRY" acronym="UNIPRO_TC0_SEG_ENTRY" offset="0xA4" width="32" description="Holds current C-Port entry under TN_ACC segmentation process on traffic class 0, and flag indicating non-empty segmentation list">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x0 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="TC0_SEG_ACTIVE" width="1" begin="11" end="11" resetval="0" description="active list submitted to segmentation list exist for TC0" range="" rwaccess="RW"/>
+    <bitfield id="TC0_SEG_CPORT" width="11" begin="10" end="0" resetval="0x000" description="current C-Port under TN_ACC seg process for TC0" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TC1_SEG_ENTRY" acronym="UNIPRO_TC1_SEG_ENTRY" offset="0xA8" width="32" description="Holds current C-Port entry under TN_ACC segmentation process on traffic class 1, and flag indicating non-empty segmentation list">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x0 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="TC1_SEG_ACTIVE" width="1" begin="11" end="11" resetval="0" description="active list submitted to segmentation list exist for TC1" range="" rwaccess="RW"/>
+    <bitfield id="TC1_SEG_CPORT" width="11" begin="10" end="0" resetval="0x000" description="current C-Port under TN_ACC seg process for TC1" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_SEG_SIZE" acronym="UNIPRO_SEG_SIZE" offset="0xAC" width="32" description="Maximum segmentation packet size for traffic classes 0 and 1">
+    <bitfield id="NONACK_FRAMES_1_CONFIG" width="2" begin="31" end="30" resetval="0x0" description="Defines the Non acknowledged frames windows size in the transmit data link layer path for traffic class 1. The real number of non acknowledged frames is defined as : NWS(TC1) = pow (2, NonAck_Frames_1_Config + 1)" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="29" end="25" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="TC1_SEG_SIZE" width="9" begin="24" end="16" resetval="0x110" description="Traffic class 1 Transport segment payload size" range="" rwaccess="RW"/>
+    <bitfield id="NONACK_FRAMES_0_CONFIG" width="2" begin="15" end="14" resetval="0x0" description="Defines the Non acknowledged frames windows size in the transmit data link layer path for traffic class 0. The real number of non acknowledged frames is defined as : NWS(TC0) = pow (2, NonAck_Frames_0_Config + 1)" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="13" end="9" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="TC0_SEG_SIZE" width="9" begin="8" end="0" resetval="0x110" description="Traffic class 0 Transport segment payload size" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_CPORT_BASE" acronym="UNIPRO_CPORT_BASE" offset="0xB0" width="32" description="C-Port structures array base address">
+    <bitfield id="CPORT_BASE" width="25" begin="31" end="7" resetval="0x000 0000" description="128 bytes boundary aligned address" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="7" begin="6" end="0" resetval="0x00" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_NUM_CPORTS" acronym="UNIPRO_NUM_CPORTS" offset="0xB4" width="32" description="Defines the number of available CPORTS.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x0 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="T_NUM_CPORTS" width="12" begin="11" end="0" resetval="0x001" description="Defines the number of available C-Ports. Used to calculate valid C-Port range. Allowed values 1 to 2048." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_CLEAR_RX_EOMF" acronym="UNIPRO_CLEAR_RX_EOMF" offset="0xB8" width="32" description="coherent access command to clear the EoMF/EoM flag in C-Port structure">
+    <bitfield id="RESERVED" width="21" begin="31" end="11" resetval="0x00 0000" description="" range="" rwaccess="NA"/>
+    <bitfield id="C_Port" width="11" begin="10" end="0" resetval="0x000" description="command parameter : C-Port entry in CPORT structures array" range="" rwaccess="W"/>
+  </register>
+  <register id="UNIPRO_TX_LOCK" acronym="UNIPRO_TX_LOCK" offset="0xC0" width="32" description="Memory mapped command used for coherent set/clear of the TX_LOCK bit in the C-Port descriptor.">
+    <bitfield id="RESERVED" width="15" begin="31" end="17" resetval="0x0000" description="" range="" rwaccess="NA"/>
+    <bitfield id="SET_CLEAR" width="1" begin="16" end="16" resetval="0" description="command parameter : specifies operation type 0 : TX_LOCK should be cleared 1 : TX_LOCK should be set" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x00" description="" range="" rwaccess="NA"/>
+    <bitfield id="CPORT" width="11" begin="10" end="0" resetval="0x000" description="command parameter : cport entry in CPORT structures array" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TN_CACHE_OP" acronym="UNIPRO_TN_CACHE_OP" offset="0xC4" width="32" description="clean /or invalidate commands to TN_ACC caches structures">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x000 0000" description="" range="" rwaccess="NA"/>
+    <bitfield id="TX_CLEAN" width="1" begin="3" end="3" resetval="0" description="clean all dirty Tx cache entries" range="" rwaccess="W"/>
+    <bitfield id="TX_INVAL" width="1" begin="2" end="2" resetval="0" description="invalidate all Tx cache entries" range="" rwaccess="W"/>
+    <bitfield id="RX_CLEAN" width="1" begin="1" end="1" resetval="0" description="clean all dirty Rx cache entries" range="" rwaccess="W"/>
+    <bitfield id="RX_INVAL" width="1" begin="0" end="0" resetval="0" description="invalidate all Rx cache entries" range="" rwaccess="W"/>
+  </register>
+  <register id="UNIPRO_TN_CMD_STAT" acronym="UNIPRO_TN_CMD_STAT" offset="0xC8" width="32" description="status of pending register-mapped commands">
+    <bitfield id="RESERVED" width="27" begin="31" end="5" resetval="0x000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="TX_LOCK_BUSY" width="1" begin="4" end="4" resetval="0" description="Tx lock command is ongoing" range="" rwaccess="R"/>
+    <bitfield id="CREDITS_INC_BUSY" width="1" begin="3" end="3" resetval="0" description="credits increment command ongoing" range="" rwaccess="R"/>
+    <bitfield id="CLEAR_EOMF_BUSY" width="1" begin="2" end="2" resetval="0" description="EoMF clear ongoing" range="" rwaccess="R"/>
+    <bitfield id="TX_CACHE_BUSY" width="1" begin="1" end="1" resetval="0" description="operation on Tx cache ongoing" range="" rwaccess="R"/>
+    <bitfield id="RX_CACHE_BUSY" width="1" begin="0" end="0" resetval="0" description="operation on Rx cache ongoing" range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_PA_PWRMODEUSERDATA0" acronym="UNIPRO_PA_PWRMODEUSERDATA0" offset="0xE0" width="32" description="PA_PWRModeUserData received with the PA_LM_PWR_MODE indication and sent with PA_LM_PWR_MODE confirm.">
+    <bitfield id="PWRMODEUSERDATA" width="32" begin="31" end="0" resetval="0x0000 0000" description="PA_PWRModeUserData bytes 3..0" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PA_PWRMODEUSERDATA1" acronym="UNIPRO_PA_PWRMODEUSERDATA1" offset="0xE4" width="32" description="PA_PWRModeUserData received with the PA_LM_PWR_MODE indication and sent with PA_LM_PWR_MODE confirm.">
+    <bitfield id="PWRMODEUSERDATA" width="32" begin="31" end="0" resetval="0x0000 0000" description="PA_PWRModeUserData bytes 7..4" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PA_PWRMODEUSERDATA2" acronym="UNIPRO_PA_PWRMODEUSERDATA2" offset="0xE8" width="32" description="PA_PWRModeUserData received with the PA_LM_PWR_MODE indication and sent with PA_LM_PWR_MODE confirm.">
+    <bitfield id="PWRMODEUSERDATA" width="32" begin="31" end="0" resetval="0x0000 0000" description="PA_PWRModeUserData bytes 11..8" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PA_PWRMODEUSERDATA3" acronym="UNIPRO_PA_PWRMODEUSERDATA3" offset="0xEC" width="32" description="PA_PWRModeUserData received with the PA_LM_PWR_MODE indication and sent with PA_LM_PWR_MODE confirm.">
+    <bitfield id="PWRMODEUSERDATA" width="32" begin="31" end="0" resetval="0x0000 0000" description="PA_PWRModeUserData bytes 15..11" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PA_PWRMODEUSERDATA4" acronym="UNIPRO_PA_PWRMODEUSERDATA4" offset="0xF0" width="32" description="PA_PWRModeUserData received with the PA_LM_PWR_MODE indication and sent with PA_LM_PWR_MODE confirm.">
+    <bitfield id="PWRMODEUSERDATA" width="32" begin="31" end="0" resetval="0x0000 0000" description="PA_PWRModeUserData bytes 19..16" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PA_PWRMODEUSERDATA5" acronym="UNIPRO_PA_PWRMODEUSERDATA5" offset="0xF4" width="32" description="PA_PWRModeUserData received with the PA_LM_PWR_MODE indication and sent with PA_LM_PWR_MODE confirm.">
+    <bitfield id="PWRMODEUSERDATA" width="32" begin="31" end="0" resetval="0x0000 0000" description="PA_PWRModeUserData bytes 23..20" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF1_CONFIG1" acronym="UNIPRO_TF1_CONFIG1" offset="0x100" width="32" description="Test Feature">
+    <bitfield id="RESERVED" width="21" begin="31" end="11" resetval="0x00 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="TF_TST_CPORTID" width="11" begin="10" end="0" resetval="0x7FF" description="Select which CPORT the TestFeature 1 is connected to." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF1_CONFIG2" acronym="UNIPRO_TF1_CONFIG2" offset="0x104" width="32" description="Test Feature">
+    <bitfield id="TF_SRC_MESSAGE_SIZE" width="16" begin="31" end="16" resetval="0x0100" description="Size of each generated message." range="" rwaccess="RW"/>
+    <bitfield id="TF_SRC_INCR" width="8" begin="15" end="8" resetval="0x01" description="Increment value between two consecutive byte" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="TF_SRC_PATTERN" width="3" begin="3" end="1" resetval="0x0" description="0: Sawtooth Others: reserved" range="" rwaccess="R"/>
+    <bitfield id="TF_SRC_ON" width="1" begin="0" end="0" resetval="0" description="0: test feature is not active 1: test feature is active SW programs this field to enable/disable the test feature instance. HW resets the field to 0 when all messages have been transferred (as defined in TF_SRC_MESSAGE_COUNT)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF1_CONFIG3" acronym="UNIPRO_TF1_CONFIG3" offset="0x108" width="32" description="Test Feature">
+    <bitfield id="TF_SRC_INTER_MESSAGE_GAP" width="16" begin="31" end="16" resetval="0x0000" description="The time between 2 messages (timeout period). 0 to 65535 us (works with a 1MHz clock derived from the functional clock)." range="" rwaccess="RW"/>
+    <bitfield id="TF_SRC_MESSAGE_COUNT" width="16" begin="15" end="0" resetval="0x0100" description="The number of messages generated. Zero indicates infinite number. HW shall decrement this field when a message is sent." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF1_CONFIG4" acronym="UNIPRO_TF1_CONFIG4" offset="0x10C" width="32" description="Test Feature">
+    <bitfield id="TF_DST_MESSAGE_SIZE" width="16" begin="31" end="16" resetval="0x0100" description="Size of received test message." range="" rwaccess="RW"/>
+    <bitfield id="TF_DST_INCR" width="8" begin="15" end="8" resetval="0x01" description="The expected increment between two received bytes. In case of an unexpected byte value HW overwrites this field with the actual wrong increment." range="" rwaccess="RW"/>
+    <bitfield id="TF_DST_ERROR_DETECT_EN" width="1" begin="7" end="7" resetval="0" description="Error detection enable" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="6" end="6" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="TF_DST_ERROR_CODE" width="2" begin="5" end="4" resetval="0x0" description="Error Code that generated the TstDst. This field is updated by HW when TstDst detects an error: 0 : NO ERROR 1 : MSG_CORRUPT - segments of the incoming message have been dropped due to an L4 error (CSV or CSD) 2 : INVALID_MSG_SIZE - Mismatch between incoming Message lenght and TF_DST_MESSAGE_SIZE 3 : UNEXPECTED_BYTE_VALUE - Mismatch in the increment between the consecutive bytes in the incoming Message an TF_DST_INCR" range="" rwaccess="RW"/>
+    <bitfield id="TF_DST_PATTERN" width="3" begin="3" end="1" resetval="0x0" description="Expected received Pattern" range="" rwaccess="R"/>
+    <bitfield id="TF_DST_ON" width="1" begin="0" end="0" resetval="0" description="0: analyzer is inactive 1: analyzer is active SW programs this field to enable/disable the test feature instance. HW resets the field to 0 when the first error is discovered in the incoming message stream." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF1_CONFIG5" acronym="UNIPRO_TF1_CONFIG5" offset="0x110" width="32" description="Test Feature">
+    <bitfield id="TF_DST_MESSAGE_OFFSET" width="16" begin="31" end="16" resetval="0x0000" description="Offset of the error from start of message. This value is represents the index, starting from 1, of the byte with an incorrect increment. It's reset to zero after analyzing every incoming Message and finding no errors within it." range="" rwaccess="RW"/>
+    <bitfield id="TF_DST_MESSAGE_COUNT" width="16" begin="15" end="0" resetval="0x0000" description="Number of received messages. Incremented by HW on each EoM received for the CPORT_UNDER_TEST regardless of the correctness of the message." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF1_CONFIG6" acronym="UNIPRO_TF1_CONFIG6" offset="0x114" width="32" description="Test Feature">
+    <bitfield id="TF_DST_FC_CREDIT" width="32" begin="31" end="0" resetval="0x0000 0100" description="Number of credits passed to creditflow. This number can not exceed the MAXE2EFCcredit set for localbuffer size." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF1_CONFIG7" acronym="UNIPRO_TF1_CONFIG7" offset="0x118" width="32" description="Test Feature">
+    <bitfield id="TF_DST_INITIAL_FC_CREDITS" width="32" begin="31" end="0" resetval="0x0000 0100" description="The initial number of credits passed by the TstDst after enabling TstDst. This number can not exceed the MAXE2EFCcredit set for localbuffer size." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF1_CONFIG8" acronym="UNIPRO_TF1_CONFIG8" offset="0x11C" width="32" description="Test Feature">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="TF_DST_INTER_FC_TOKEN_GAP" width="16" begin="15" end="0" resetval="0x0000" description="Gap between 2 tokens. 0 to 65535 us (works with a 1MHz clock derived from the functional clock)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF2_CONFIG1" acronym="UNIPRO_TF2_CONFIG1" offset="0x120" width="32" description="Test Feature">
+    <bitfield id="RESERVED" width="21" begin="31" end="11" resetval="0x00 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="TF_TST_CPORTID" width="11" begin="10" end="0" resetval="0x7FF" description="Select which CPORT the TestFeature 1 is connected to." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF2_CONFIG2" acronym="UNIPRO_TF2_CONFIG2" offset="0x124" width="32" description="Test Feature">
+    <bitfield id="TF_SRC_MESSAGE_SIZE" width="16" begin="31" end="16" resetval="0x0100" description="Size of each generated message" range="" rwaccess="RW"/>
+    <bitfield id="TF_SRC_INCR" width="8" begin="15" end="8" resetval="0x01" description="Increment value between two consecutive byte" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="TF_SRC_PATTERN" width="3" begin="3" end="1" resetval="0x0" description="0: Sawtooth Others: reserved" range="" rwaccess="R"/>
+    <bitfield id="TF_SRC_ON" width="1" begin="0" end="0" resetval="0" description="0: test feature is not active 1: test feature is active SW programs this field to enable/disable the test feature instance. HW resets the field to 0 when all messages have been transferred (as defined in TF_SRC_MESSAGE_COUNT)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF2_CONFIG3" acronym="UNIPRO_TF2_CONFIG3" offset="0x128" width="32" description="Test Feature">
+    <bitfield id="TF_SRC_INTER_MESSAGE_GAP" width="16" begin="31" end="16" resetval="0x0000" description="The time between 2 messages (timeout period) 0 to 65535 us (works with a 1MHz clock derived from the functional clock)." range="" rwaccess="RW"/>
+    <bitfield id="TF_SRC_MESSAGE_COUNT" width="16" begin="15" end="0" resetval="0x0100" description="The number of messages generated. Zero indicates infinite number. HW shall decrement this field when a message is sent." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF2_CONFIG4" acronym="UNIPRO_TF2_CONFIG4" offset="0x12C" width="32" description="Test Feature">
+    <bitfield id="TF_DST_MESSAGE_SIZE" width="16" begin="31" end="16" resetval="0x0100" description="Size of received test message." range="" rwaccess="RW"/>
+    <bitfield id="TF_DST_INCR" width="8" begin="15" end="8" resetval="0x01" description="The expected increment between two received bytes. In case of an unexpected byte value HW overwrites this field with the actual wrong increment." range="" rwaccess="RW"/>
+    <bitfield id="TF_DST_ERROR_DETECT_EN" width="1" begin="7" end="7" resetval="0" description="Error detection enable" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="6" end="6" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="TF_DST_ERROR_CODE" width="2" begin="5" end="4" resetval="0x0" description="Error Code that generated the TstDst. This field is updated by HW when TstDst detects an error: 0 : NO ERROR 1 : MSG_CORRUPT - segments of the incoming message have been dropped due to an L4 error (CSV or CSD) 2 : INVALID_MSG_SIZE - Mismatch between incoming Message lenght and TF_DST_MESSAGE_SIZE 3 : UNEXPECTED_BYTE_VALUE - Mismatch in the increment between the consecutive bytes in the incoming Message an TF_DST_INCR" range="" rwaccess="RW"/>
+    <bitfield id="TF_DST_PATTERN" width="3" begin="3" end="1" resetval="0x0" description="Expected received Pattern" range="" rwaccess="R"/>
+    <bitfield id="TF_DST_ON" width="1" begin="0" end="0" resetval="0" description="0: analyzer is inactive 1: analyzer is active SW programs this field to enable/disable the test feature instance. HW resets the field to 0 when the first error is discovered in the incoming message stream." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF2_CONFIG5" acronym="UNIPRO_TF2_CONFIG5" offset="0x130" width="32" description="Test Feature">
+    <bitfield id="TF_DST_MESSAGE_OFFSET" width="16" begin="31" end="16" resetval="0x0000" description="Offset of the error from start of message. This value is represents the index, starting from 1, of the byte with an incorrect increment. It's reset to zero after analyzing every incoming Message and finding no errors within it." range="" rwaccess="RW"/>
+    <bitfield id="TF_DST_MESSAGE_COUNT" width="16" begin="15" end="0" resetval="0x0000" description="Number of received messages. Incremented by HW on each EoM received for the CPORT_UNDER_TEST regardless of the correctness of the message." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF2_CONFIG6" acronym="UNIPRO_TF2_CONFIG6" offset="0x134" width="32" description="Test Feature">
+    <bitfield id="TF_DST_FC_CREDIT" width="32" begin="31" end="0" resetval="0x0000 0100" description="Number of credits passed to creditflow. This number can not exceed the MAXE2EFCcredit set for localbuffer size." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF2_CONFIG7" acronym="UNIPRO_TF2_CONFIG7" offset="0x138" width="32" description="Test Feature">
+    <bitfield id="TF_DST_INITIAL_FC_CREDITS" width="32" begin="31" end="0" resetval="0x0000 0100" description="The initial number of credits passed by the TstDst after enabling TstDst. This number can not exceed the MAXE2EFCcredit set for localbuffer size." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TF2_CONFIG8" acronym="UNIPRO_TF2_CONFIG8" offset="0x13C" width="32" description="Test Feature">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="" range="" rwaccess="R"/>
+    <bitfield id="TF_DST_INTER_FC_TOKEN_GAP" width="16" begin="15" end="0" resetval="0x0000" description="Gap between 2 tokens. 0 to 65535 us (works with a 1MHz clock derived from the functional clock)." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PEER_SET_REQ_DATA" acronym="UNIPRO_PEER_SET_REQ_DATA" offset="0x180" width="32" description="Contains value to be written to remote attribute by DME_PEER_SET.req .">
+    <bitfield id="VALUE" width="32" begin="31" end="0" resetval="0x0000 0000" description="Attribute value" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PEER_GET_SET_REQ_ADDR" acronym="UNIPRO_PEER_GET_SET_REQ_ADDR" offset="0x184" width="32" description="Parameters for DME_PEER_GET.req and DME_PEER_SET.req">
+    <bitfield id="GET_SET" width="1" begin="31" end="31" resetval="0" description="Command direction: 0 : Read (Get) 1 : Write (Set)" range="" rwaccess="RW"/>
+    <bitfield id="ATTR_SET_TYPE" width="1" begin="30" end="30" resetval="0" description="For SET command: How Attribute is set: 0 : Normal 1 : Static For GET command: Reserved" range="" rwaccess="RW"/>
+    <bitfield id="CNF" width="1" begin="29" end="29" resetval="0" description="Indicates PEER_GET/SET request has completed" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="28" end="28" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="GEN_SELECTOR_INDEX" width="12" begin="27" end="16" resetval="0x000" description="Targeted M-PHY data lane, CPort, or test feature." range="" rwaccess="RW"/>
+    <bitfield id="ATTRIBUTE_ID" width="16" begin="15" end="0" resetval="0x0000" description="Targeted Attribute ID. Range: 0x0000 to 0x7FFF" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PEER_GET_CNF_DATA" acronym="UNIPRO_PEER_GET_CNF_DATA" offset="0x188" width="32" description="Attribute value for DME_PEER_SET.cnf or DME_PEER_GET.cnf to be sent from local device to remote device.">
+    <bitfield id="VALUE" width="32" begin="31" end="0" resetval="0x0000 0000" description="Attribute value" range="" rwaccess="RW">
+      <bitenum value="0" id="newEnum1" token="VALUE_0" description=""/>
+    </bitfield>
+  </register>
+  <register id="UNIPRO_PEER_GET_SET_CNF_RESULT" acronym="UNIPRO_PEER_GET_SET_CNF_RESULT" offset="0x18C" width="32" description="Result code for DME_PEER_GET.cnf or DME_PEER_SET.cnf that will be sent from local device to remote device.">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="CONFIG_RESULT_CODE" width="4" begin="3" end="0" resetval="0x0" description="Indicates the result of the PEER_GET or PEER_SET request. SUCCESS = 0 INVALID_MIB_ATTRIBUTE = 1 INVALID_MIB_ATTRIBUTE_VALUE = 2 READ_ONLY_MIB_ATTRIBUTE = 3 WRITE_ONLY_MIB_ATTRIBUTE = 4 BAD_INDEX = 5 LOCKED_MIB_ATTRIBUTE = 6 BAD_TEST_FEATURE_INDEX = 7 PEER_COMMUNICATION_FAILURE = 8 BUSY = 9 DME_FAILURE = 10" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_REMOTE_SET_REQ_DATA" acronym="UNIPRO_REMOTE_SET_REQ_DATA" offset="0x190" width="32" description="Attribute value received from remote device's DME_PEER_SET.req, to be written locally">
+    <bitfield id="VALUE" width="32" begin="31" end="0" resetval="0x0000 0000" description="Attribute value" range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_REMOTE_GET_SET_REQ_ADDR" acronym="UNIPRO_REMOTE_GET_SET_REQ_ADDR" offset="0x194" width="32" description="Parameters for DME_PEER_GET.req and DME_PEER_SET.req coming from remote device.">
+    <bitfield id="GET_SET" width="1" begin="31" end="31" resetval="0" description="Command direction: 0 : Read (Get) 1 : Write (Set)" range="" rwaccess="R"/>
+    <bitfield id="ATTR_SET_TYPE" width="1" begin="30" end="30" resetval="0" description="For SET command: How Attribute is set: 0 : Normal 1 : Static For GET command: Reserved" range="" rwaccess="R"/>
+    <bitfield id="CNF" width="1" begin="29" end="29" resetval="0" description="Cnf: defines the behavior of the receiving PA Layer 0: no PACP_SET_cnf frame shall be sent 1: a PACP_SET_cnf frame shall be sent to acknowledge the reception of the PACP_SET_req frame and to return the result of the operation" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="28" end="28" resetval="0" description="" range="" rwaccess="R"/>
+    <bitfield id="GEN_SELECTOR_INDEX" width="12" begin="27" end="16" resetval="0x000" description="Targeted M-PHY data lane, CPort, or test feature." range="" rwaccess="R"/>
+    <bitfield id="ATTRIBUTE_ID" width="16" begin="15" end="0" resetval="0x0000" description="Targeted Attribute ID. Range: 0x0000 to 0x7FFF" range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_LOCAL_GET_CNF_DATA" acronym="UNIPRO_LOCAL_GET_CNF_DATA" offset="0x198" width="32" description="Attribute value sent back from the remote device following a DME_PEER_GET.req issued from local device.">
+    <bitfield id="VALUE" width="32" begin="31" end="0" resetval="0x0000 0000" description="Attribute value" range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_LOCAL_GET_SET_CNF_RESULT" acronym="UNIPRO_LOCAL_GET_SET_CNF_RESULT" offset="0x19C" width="32" description="Result code sent back from the remote device following a DME_PEER_GET.req or DME_PEER_SET.req issued from local device.">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="CONFIG_RESULT_CODE" width="4" begin="3" end="0" resetval="0x0" description="Indicates the result of the PEER_GET or PEER_SET request. SUCCESS = 0 INVALID_MIB_ATTRIBUTE = 1 INVALID_MIB_ATTRIBUTE_VALUE = 2 READ_ONLY_MIB_ATTRIBUTE = 3 WRITE_ONLY_MIB_ATTRIBUTE = 4 BAD_INDEX = 5 LOCKED_MIB_ATTRIBUTE = 6 BAD_TEST_FEATURE_INDEX = 7 PEER_COMMUNICATION_FAILURE = 8 BUSY = 9 DME_FAILURE = 10" range="" rwaccess="R"/>
+  </register>
+  <register id="UNIPRO_PA_PHYTESTCTRL" acronym="UNIPRO_PA_PHYTESTCTRL" offset="0x1A0" width="32" description="PHY test control register">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x00 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="PA_LM_TEST_MODE_REQ" width="1" begin="8" end="8" resetval="0" description="Generated by the DME to request the local PA Layer to set the PA Layer of the peer Device to a specified test mode." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="7" end="5" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PHYTESTCTRL" width="5" begin="4" end="0" resetval="0x00" description="PHY Test Feature control register b0 : ContBurst b1 : CfgReady b2 : LineReset b3 : TestPatternTransmit b4 : TestPatternSelect" range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_PA_PACPFRAMECOUNT" acronym="UNIPRO_PA_PACPFRAMECOUNT" offset="0x1A4" width="32" description="PACP frame counter">
+    <bitfield id="PACPFRAMECOUNT" width="32" begin="31" end="0" resetval="0x0000 0000" description="Incremented by one if the received PACP frame has a validFunctionID and passes the checksum verification. Automatically rolls over to zero on an overflow. A PA_LM_SET request to PA_PACPFrameCount shall set the counter to zero." range="" rwaccess="RW WtoClr"/>
+  </register>
+  <register id="UNIPRO_PA_PACPERRORCOUNT" acronym="UNIPRO_PA_PACPERRORCOUNT" offset="0x1A8" width="32" description="PACP error counter">
+    <bitfield id="PACPERRORCOUNT" width="32" begin="31" end="0" resetval="0x0000 0000" description="Incremented by one for each PACP start symbol that is not part of a PACP frame that incremented PA_PACPFrameCount. Automatically rolls over to zero on an overflow. A PA_LM_SET request to PA_PACPFrameCount shall set the counter to zero." range="" rwaccess="RW WtoClr"/>
+  </register>
+  <register id="UNIPRO_CPORT_BIT_VECTOR_TX" acronym="UNIPRO_CPORT_BIT_VECTOR_TX" offset="0x1AC" width="32" description="Bit vector of TX EoMs">
+    <bitfield id="EOM_TX_HIGH" width="1" begin="31" end="31" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_30" width="1" begin="30" end="30" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_29" width="1" begin="29" end="29" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_28" width="1" begin="28" end="28" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_27" width="1" begin="27" end="27" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_26" width="1" begin="26" end="26" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_25" width="1" begin="25" end="25" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_24" width="1" begin="24" end="24" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_23" width="1" begin="23" end="23" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_22" width="1" begin="22" end="22" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_21" width="1" begin="21" end="21" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_20" width="1" begin="20" end="20" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_19" width="1" begin="19" end="19" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_18" width="1" begin="18" end="18" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_17" width="1" begin="17" end="17" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_16" width="1" begin="16" end="16" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_15" width="1" begin="15" end="15" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_14" width="1" begin="14" end="14" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_13" width="1" begin="13" end="13" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_12" width="1" begin="12" end="12" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_11" width="1" begin="11" end="11" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_10" width="1" begin="10" end="10" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_9" width="1" begin="9" end="9" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_8" width="1" begin="8" end="8" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_7" width="1" begin="7" end="7" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_6" width="1" begin="6" end="6" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_5" width="1" begin="5" end="5" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_4" width="1" begin="4" end="4" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_3" width="1" begin="3" end="3" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_2" width="1" begin="2" end="2" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_1" width="1" begin="1" end="1" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_TX_0" width="1" begin="0" end="0" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+  </register>
+  <register id="UNIPRO_CPORT_BIT_VECTOR_RX" acronym="UNIPRO_CPORT_BIT_VECTOR_RX" offset="0x1B0" width="32" description="Bit vector of RX EoMs">
+    <bitfield id="EOM_RX_HIGH" width="1" begin="31" end="31" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_30" width="1" begin="30" end="30" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_29" width="1" begin="29" end="29" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_28" width="1" begin="28" end="28" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_27" width="1" begin="27" end="27" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_26" width="1" begin="26" end="26" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_25" width="1" begin="25" end="25" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_24" width="1" begin="24" end="24" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_23" width="1" begin="23" end="23" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_22" width="1" begin="22" end="22" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_21" width="1" begin="21" end="21" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_20" width="1" begin="20" end="20" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_19" width="1" begin="19" end="19" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_18" width="1" begin="18" end="18" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_17" width="1" begin="17" end="17" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_16" width="1" begin="16" end="16" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_15" width="1" begin="15" end="15" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_14" width="1" begin="14" end="14" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_13" width="1" begin="13" end="13" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_12" width="1" begin="12" end="12" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_11" width="1" begin="11" end="11" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_10" width="1" begin="10" end="10" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_9" width="1" begin="9" end="9" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_8" width="1" begin="8" end="8" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_7" width="1" begin="7" end="7" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_6" width="1" begin="6" end="6" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_5" width="1" begin="5" end="5" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_4" width="1" begin="4" end="4" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_3" width="1" begin="3" end="3" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_2" width="1" begin="2" end="2" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_1" width="1" begin="1" end="1" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="EOM_RX_0" width="1" begin="0" end="0" resetval="0" description="" range="" rwaccess="RW W1toClr"/>
+  </register>
+  <register id="UNIPRO_TMPI_MTX0_ATTRIBUTE_0_3" acronym="UNIPRO_TMPI_MTX0_ATTRIBUTE_0_3" offset="0x800" width="32" description="Register mapped access to T-MPI attributes">
+    <bitfield id="VALUE" width="32" begin="31" end="0" resetval="0x0000 0000" description="Note: these are not physical registers within Unipro, but are address ranges to be used for accessing T-MPI attributes." range="" rwaccess="RW"/>
+  </register>
+  <register id="UNIPRO_TMPI_MTX0_ATTRIBUTE_252_255" acronym="UNIPRO_TMPI_MTX0_ATTRIBUTE_252_255" offset="0x8FC" width="32" description="Register mapped access to T-MPI attributes">
+    <bitfield id="VALUE" width="32" begin="31" end="0" resetval="0x0000 0000" description="Note: these are not physical registers within Unipro, but are address ranges to be used for accessing T-MPI attributes." range="" rwaccess="RW"/>
+  </register>
+</module>

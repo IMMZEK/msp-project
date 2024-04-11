@@ -1,0 +1,126 @@
+<div class="uf-target-setup-section">
+    <div ng-click="vm.showDeviceDetection=!vm.showDeviceDetection" class="uf-target-setup-section-title" ng-class="{'minimized':!vm.showDeviceDetection}"> 
+        <span class="glyphicon glyphicon-triangle-bottom rotatable slow" ng-class="{'rotated':!vm.showDeviceDetection,'unrotated':vm.showDeviceDetection}" style="font-size:11px;position:relative;top:0px;right:5px;"></span> Detected Devices
+    </div>
+    <div class="minimizable fast uf-detected-section" ng-class="{'show':vm.showDeviceDetection}">
+        <div style="padding:20px 30px;" ng-show="vm.ufPreferencesSrv.get('showDetectWelcomePage')">
+            <div style="margin-bottom:10px;">
+                <div style="font-size:18px;"><span style="color:#115566;font-weight:500;"><i class="material-icons" style="position:relative;top:4px;font-size:20px;">gps_fixed</i> Detect My Device</span></div>
+                <div>Connected devices will automatically appear here! 
+                    <a href="" ng-show="!vm.showDetectHelp" ng-click="vm.showDetectHelp=true" style="color:#118899;">[More Info]</a>
+                    <a href="" ng-show="vm.showDetectHelp" ng-click="vm.showDetectHelp=false" style="color:#118899;">[Hide]</a>
+                </div>
+                
+                <div ng-show="vm.showDetectHelp" style="width:800px;margin:10px auto;border-top:3px solid #118899;border-radius:0 0 5px 5px;" class="well well-sm">
+                    <div style="padding:0 8px;text-align:left">
+                        <ol style="padding-bottom:0;margin-bottom:0;">
+                            <li>For Cloud version, <span style="font-weight:500;color:#116677;">TI Cloud Agent Bridge Browser Extension</span> and <span style="font-weight:500;color:#116677;">TI Cloud Agent Application</span> needs to be installed first<br/>
+                            - You will be prompted to install the necessary dependencies when you click 'Start Now'</li>
+                            </li>
+                            <li>Additional files and drivers might need to be installed when new devices are plugged in</li>
+                            <li>
+                                <div>
+                                    <div>What is Supported? </div>
+                                    <ul>
+                                        <li>Most LaunchPads/BoosterPacks with XDS110 Debug Probe</li>
+                                        <li>MSP430 Boards</li>
+                                        <li>Probe Only (Device needs to be manually selected): 
+                                            <ul>
+                                                <li>Stellaris In-Circuit Debug Interface</li>
+                                                <li>Texas Instruments XDS100v2 USB Debug Probe</li>
+                                                <li>Texas Instruments XDS100v3 USB Debug Probe</li>
+                                                <li>Texas Instruments XDS2xx USB Debug Probe</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>The following settings are supported on startup
+                                <ul>
+                                    <li><span style="font-weight:600;">Automatic (Default)</span> - Device detection will automatically start when UniFlash is started</li>
+                                    <li><span style="font-weight:600;">Manual</span> - Click the "Detect" button to start device detection</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            <div tyle="margin-bottom:10px;">
+                <button id="StartDetectionBtn" class="btn btn-sm btn-default" ng-click="vm.startDetectionFromIntroPage()" uib-tooltip="New users will be prompted to install TI Cloud Agent on first use" tooltip-placement="bottom">Start Now</button> 
+            </div>
+        </div>
+
+        <div ng-show="!vm.ufPreferencesSrv.get('showDetectWelcomePage')">
+            <!-- Status bar -->
+            <div style="border-bottom:1px solid #eee;text-align:left;padding:10px 14px;background-color:#f8f8f8;">
+                <span style="font-weight:500;">Status</span>: 
+                
+                <!-- Active Status -->
+                <span ng-show="vm.ufTargetSetupSrv.getDeviceDetectorCreated() && !vm.ufTargetSetupSrv.getDetectingStatus() && (vm.ufSettingsSrv.autoTargetDetectionSelectValue === 'Auto')">
+                    <i class="material-icons uf-connected-state-true">fiber_manual_record</i> Active - Monitoring for changes...
+                </span>
+                <!-- Inactive Status -->
+                <span ng-show="(vm.ufSettingsSrv.autoTargetDetectionSelectValue === 'Manual') && ( !vm.ufTargetSetupSrv.getDetectingStatus() || vm.ufTargetSetupSrv.detectDownloadingStatus() )">
+                    <i class="material-icons uf-connected-state-false">fiber_manual_record</i> Inactive - Click 'Detect' to detect devices
+                </span>
+                <!-- Detecting Status -->
+                <span ng-show="(((vm.ufSettingsSrv.autoTargetDetectionSelectValue === 'Auto') && !vm.ufTargetSetupSrv.getDetectingStatus() && !vm.ufTargetSetupSrv.getDeviceDetectorCreated()) || (vm.ufTargetSetupSrv.getDetectingStatus() && !vm.ufTargetSetupSrv.detectDownloadingStatus()) ) && !vm.ufTargetSetupSrv.missingTICloudAgentStatus()">
+                    <i class="material-icons glyphicon-refresh-animate-slow" style="position:relative;top:3px;font-size:16px;">gps_fixed</i> Detecting Connected Devices...
+                </span>
+                <!-- Missing Cloud Agent Status -->
+                <span ng-show="vm.ufTargetSetupSrv.missingTICloudAgentStatus()">TI Cloud Agent needs to be installed first. Please follow the instructions in the pop-up (refresh to re-enable).</span>
+                <!-- Downloading Status -->
+                <div ng-show="vm.ufTargetSetupSrv.detectDownloadingStatus()">
+                    <span>New device was detected. Installing new files... (Please look for UAC dialogs)</span>
+                    <div class="progress progress-striped active" style="margin-bottom:0;">
+                        <div class="progress-bar" ng-style="vm.getDownloadPercentStyle()"></div>
+                    </div>
+                </div>
+                <!-- Settings control -->
+                <span class="uf-property" style="float:right;width:auto;position:relative;" ng-style="(vm.ufSettingsSrv.autoTargetDetectionSelectValue === 'Manual') && {'top':'-1px'}">
+                    Setting:
+                    <select style="background-color:transparent;" ng-change="vm.ufTargetSetupSrv.autoTargetDetectionSelectValueChanged()" ng-options="option for option in vm.ufSettingsSrv.autoTargetDetectionSelection" ng-model="vm.ufSettingsSrv.autoTargetDetectionSelectValue"></select>
+                    <button ng-show="vm.ufSettingsSrv.autoTargetDetectionSelectValue === 'Manual'" ng-class="vm.getDetectButtonClass()" ng-click="vm.startDetectionFromIntroPage()" style="position:relative;top:-2px;margin-left:6px;">Detect</button>
+                </span>
+            </div>
+            <!-- no debug probes -->
+            <div ng-show="(vm.ufTargetSetupSrv.getDetectedDeviceList().length === 0) && !vm.ufTargetSetupSrv.getDetectingStatus()" style="margin:20px 0;color:#777;font-size:14px;">
+                No debug probes/devices detected
+            </div>
+            <!-- debug probes list -->
+            <div ng-repeat="detectedDevice in vm.ufTargetSetupSrv.getDetectedDeviceList() | orderBy:'id':true" class="uf-detected-device-entry tic-clickable" ng-click="vm.ufTargetSetupSrv.setDetectDeviceStarted($index+1);vm.configureDetectedDevice(detectedDevice, $index)" ng-show="vm.ufTargetSetupSrv.getDetectedDeviceList().length > 0">
+                <div ng-init="curDeviceConfigurable = vm.isDeviceConfigurable(detectedDevice)" style="position:relative;padding-top:5px;">
+                    <!--<div style="position:absolute;top:-4px;left:8px;">
+                        <span ng-show="vm.ufTargetSetupSrv.getTrackNewStatus() && (vm.ufTargetSetupSrv.getNewestDetected() === detectedDevice.id) && !vm.msp430Connection(detectedDevice.connectionXml)" class="label label-info" style="position:relative;top:8px;margin-top:4px;font-size:14px;">NEW</span>
+                    </div>-->
+                    <img ng-show="matchedLP = vm.matchDetectedLP(detectedDevice)" ng-src="target_setup/img/lp/{{matchedLP.name}}.png" style="height:75px;border-radius:4px;margin-left:2px;position:relative;top:-2px;" />
+                    <div ng-show="!curDeviceConfigurable">
+                        <span style="font-weight:500;color:#666;">Connection: </span> 
+                        <span id="DetectedConnectionStr{{$index}}" style="font-weight:500;color:#115566;" ng-bind="vm.translateConnectionName(detectedDevice.connectionXml)">Detecting...</span>
+                    </div>
+                    <div>
+                        <span style="font-weight:500;color:#666;">Device: </span>
+                        <span id="DetectedDeviceStr{{$index}}" style="font-weight:500;color:#115566" ng-show="curDeviceConfigurable">{{detectedDevice.deviceName}}</span>
+                        <span id="DetectedManualStr{{$index}}" ng-show="!curDeviceConfigurable && ( !vm.msp430Connection(detectedDevice.connectionXml) || (detectedDevice.deviceName.indexOf('Unable to determine') > -1 ) )">
+                            <a href="">
+                                <span ng-show="(detectedDevice.deviceName.indexOf('Unable to determine') === -1 )">Unable to determine</span>
+                                <span ng-show="(detectedDevice.deviceName.indexOf('Unable to determine') > -1 )">{{detectedDevice.deviceName}}</span> 
+                                (click to manually select)
+                            </a>
+                        </span>
+                        <span ng-show="!curDeviceConfigurable && vm.msp430Connection(detectedDevice.connectionXml) && vm.ufTargetSetupSrv.getIdentifiedDevice($index)">{{vm.ufTargetSetupSrv.getIdentifiedDevice($index)}}</span>
+                    </div>
+                    <div ng-show="detectedDevice.serial">
+                        <span style="font-weight:500;color:#666;">Serial Number: </span> 
+                        <span id="DetectedSerialNum{{$index}}" style="font-weight:500;color:#118899">{{detectedDevice.serial}}</span>
+					</div>
+                    <div>
+                        <span ng-show="curDeviceConfigurable || (vm.msp430Connection(detectedDevice.connectionXml) && vm.ufTargetSetupSrv.getIdentifiedDevice($index))" class="btn btn-sm btn-primary" style="margin-top:4px;">Start</span>
+                    </div>
+                    <div class="glyphicon glyphicon-refresh glyphicon-refresh-animate" ng-show="vm.ufTargetSetupSrv.getDetectDeviceStarted()===$index+1" style="position:reliatve;top:9px;"></div>
+                    <div class="alert alert-dismissible alert-danger" ng-show="vm.errorMsg" style="margin:10px 30px 0 30px;">Error: {{vm.errorMsg}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

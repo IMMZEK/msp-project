@@ -1,0 +1,155 @@
+
+#define HWREG(x)                (*(unsigned int)(x))
+#define SYS0_DEVICE_ID_ADDR     0x400043FC
+
+StartUp(int major, int minor, int patch)
+{
+
+    /* Debugger specific handling */
+    if(GEL_MatchesConnection(".*TIXDS.*") == 1)
+    {
+        GEL_LoadGel("$(GEL_file_dir)/cc23xx_connect_util.gel");
+        GEL_LoadGel("$(GEL_file_dir)/cc23xx_xds.gel");
+        GEL_LoadGel("$(GEL_file_dir)/cc23xx_util.gel");
+
+        DefineResets(0);
+
+        // Issue Board Reset to ensure device is in a known state
+        // Note: If you want to attach to a running target without resetting the
+        //       device, you must comment out the following 4 lines:
+        if(!GEL_IsConnected())
+        {
+            // GEL_AdvancedReset("Board Reset");
+        }
+    }
+    else if(GEL_MatchesConnection(".*JLink.*") == 1)
+    {
+        GEL_TextOut("Error: J-Link debugger is not supported.\n");
+    }
+    else
+    {
+        GEL_TextOut("Error: Unknown debugger.\n");
+        return;
+    }
+}
+
+OnFileLoaded(int nErrorCode, int bSymbolsOnly)
+{
+    if (bSymbolsOnly == 0)
+    {
+    }
+}
+
+menuitem "CC23xx"
+hotmenu LoadRomSymbols()
+{
+    if(GEL_IsConnected() == 1)
+    {
+        if(IsCC23x0R5())
+        {
+            GEL_SymbolAdd("$(GEL_file_dir)/images/cc23xx/cc23x0r5_rom_syms.out");
+        }
+        else if(IsCC23x0R2())
+        {
+            GEL_SymbolAdd("$(GEL_file_dir)/images/cc23xx/cc23x0r2_rom_syms.out");
+        }
+        else
+        {
+        }
+    }
+    else
+    {
+        GEL_TextOut("No symbols loaded (not connected to target).\n");
+    }
+}
+
+memorymap_init()
+{
+    GEL_MapOff();
+    GEL_MapReset();
+    GEL_MapOn();
+
+    /*
+     * Syntax for GEL_MapAddStr.
+     * GEL_MapAddStr(address, page, length, "attribute", waitstate);
+
+    Basic Attribute Types           Derived Attribute Types
+    String      Description         String      Description
+    R           Read                NONE        No memory/protected
+    W           Write               RAM         Read and write
+    P           Port                ROM         Read only
+    EX          External            WOM         Write only
+    EM          Emulator            INPORT      Port read only
+    PR          Programmable        OUTPORT     Port write only
+    ER          Erasable            IOPORT      Port read and write
+    DA          Dual access         SARAM       Single access RAM
+    ASn         Access size         DARAM       Dual access RAM
+    SHnC        Shared              FLASH       Flash ROM
+    CACHE       Cache               EXRAM       External RAM
+    TX          Text                EXROM       External ROM
+    MN          Monitor             EPROM       Erasable write-able EPROM
+    SA          Single access       MONITOR     Monitor ROM
+    FL          Flash               PRAM        Program RAM
+    MR          Memory mapped       PROM        Program ROM
+    NULL        NULL                NULL        NULL
+    */
+
+    if(IsCC23xx())
+    {
+        if(IsCC23x0R5())
+        {
+            GEL_MapAddStr(0x00000000, 0, 0x00080000, "R", 0);   /* Flash            (512 kB) */
+            GEL_MapAddStr(0x20000000, 0, 0x00009000, "R|W", 0); /* SRAM              (36 kB) */
+        }
+        else if(IsCC23x0R2())
+        {
+            GEL_MapAddStr(0x00000000, 0, 0x00040000, "R", 0);   /* Flash            (256 kB) */
+            GEL_MapAddStr(0x20000000, 0, 0x00007000, "R|W", 0); /* SRAM              (28 kB) */
+        }
+
+        GEL_MapAddStr(0x0F000000, 0, 0x00005000, "R", 0);       /* ROM               (20 kB) */
+
+        GEL_MapAddStr(0x4E000000, 0, 0x00000400, "R", 0);       /* TRIM (trim+FCFG)   (1 kB) */
+        GEL_MapAddStr(0x4E010000, 0, 0x00000400, "R", 0);       /* ENGR (mfg data)    (1 kB) */
+        GEL_MapAddStr(0x4E020000, 0, 0x00000800, "R", 0);       /* NONMAIN (CCFG)     (2 kB) */
+    }
+
+    else if(IsCC27xx())
+    {
+        if(IsCC27xxx7())
+        {
+            GEL_MapAddStr(0x00000000, 0, 0x000C0000, "R", 0);   /* Flash           (768 kB)  */
+            GEL_MapAddStr(0x20000000, 0, 0x00020000, "R|W", 0); /* SRAM             (128 kB) */
+        }
+        else
+        {
+            GEL_MapAddStr(0x00000000, 0, 0x00100000, "R", 0);   /* Flash           (1024 kB) */
+            GEL_MapAddStr(0x20000000, 0, 0x00028800, "R|W", 0); /* SRAM             (162 kB) */
+        }
+
+        GEL_MapAddStr(0x0F000000, 0, 0x00008000, "R", 0);       /* ROM               (12 kB) */
+        GEL_MapAddStr(0x4E000000, 0, 0x00000400, "R", 0);       /* TRIM (trim+FCFG)   (1 kB) */
+        GEL_MapAddStr(0x4E010000, 0, 0x00000400, "R", 0);       /* ENGR (mfg data)    (1 kB) */
+        GEL_MapAddStr(0x4E020000, 0, 0x00000800, "R", 0);       /* NONMAIN (CCFG)     (2 kB) */
+        GEL_MapAddStr(0x4E020800, 0, 0x00000800, "R", 0);       /* NONMAIN (HSM OTP0) (2 kB) */
+        GEL_MapAddStr(0x4E040000, 0, 0x00000400, "R", 0);       /* NONMAIN (SCFG)     (1 kB) */
+        GEL_MapAddStr(0x4E060000, 0, 0x00000800, "R", 0);       /* NONMAIN (VLOG)     (2 kB) */
+        GEL_MapAddStr(0x4E060800, 0, 0x00000800, "R", 0);       /* NONMAIN (HSM OTP1) (2 kB) */
+    }
+
+    GEL_MapAddStr(0x40000000, 0, 0x00020000, "R|W", 0);         /* AON Infrastructure Peripherals */
+    GEL_MapAddStr(0x40020000, 0, 0x00010000, "R|W", 0);         /* SVT Infrastructure Peripherals */
+    GEL_MapAddStr(0x40030000, 0, 0x00020000, "R|W", 0);         /* SVT Serial Peripherals */
+    GEL_MapAddStr(0x40050000, 0, 0x00010000, "R|W", 0);         /* SVT Miscellaneous Peripherals (4K aperture)  */
+    GEL_MapAddStr(0x40060000, 0, 0x00020000, "R|W", 0);         /* SVT Miscellaneous Peripherals (16K aperture) */
+    GEL_MapAddStr(0x40080000, 0, 0x00080000, "R|W", 0);         /* SVT Miscellaneous Peripherals (AHB segment)  */
+
+    GEL_MapAddStr(0xE0000000, 0, 0x00100000, "R|W", 0);         /* PRIVATE Region. */
+
+    GEL_TextOut("Memory Map Initialization Complete.\n");
+}
+
+ProgramDefaultCcfg()
+{
+    GEL_EvalOnTarget("<parent>", "ProgramDefaultCcfg();");
+}

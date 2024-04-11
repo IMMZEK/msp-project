@@ -1,0 +1,263 @@
+/*********************************************************************
+*                    SEGGER Microcontroller GmbH                     *
+*       Solutions for real time microcontroller applications         *
+**********************************************************************
+*                                                                    *
+*            (c) 1995 - 2018 SEGGER Microcontroller GmbH             *
+*                                                                    *
+*       www.segger.com     Support: support@segger.com               *
+*                                                                    *
+**********************************************************************
+----------------------------------------------------------------------
+Purpose : J-Link script file for TI AM3517 device.
+          By default, only the TI ICEPick is in the JTAG chain
+          which means that we have to add the Cortex-A8 by configuring the ICEPick.
+          Moreover, the AM3517 also requires to set the DEBGEN signal in order to allow debugging.
+---------------------------END-OF-HEADER------------------------------
+*/
+
+/*********************************************************************
+*
+*       Constants (similar to defines)
+*
+**********************************************************************
+*/
+
+//
+// Cortex-M SFRs
+//
+__constant U32 _AIRCR_ADDR                    = 0xE000ED0C;
+__constant U32 _DHCSR_ADDR                    = 0xE000EDF0;
+__constant U32 _DCRSR_ADDR                    = 0xE000EDF4;
+__constant U32 _DCRDR_ADDR                    = 0xE000EDF8;
+__constant U32 _DEMCR_ADDR                    = 0xE000EDFC;
+//
+// Cortex-A/R SFRs
+//
+__constant U32 _APB_ADDR_CORE_DEBUG_REGS  = 0x80001000;
+__constant U32 _APB_ADDR_DSCR             = 0x80001000 + 0x88;  // Debug Status and Control Register
+__constant U32 _APB_ADDR_DRCR             = 0x80001000 + 0x90;  // Debug Run Control Register
+__constant U32 _APB_ADDR_VCR              = 0x80001000 + 0x1C;  // Vector catch register
+__constant U32 _APB_ADDR_PRCR             = 0x80001000 + 0x310;  // Device Power-down and Reset Control Register
+__constant U32 _APB_ADDR_PRSR             = 0x80001000 + 0x314;  // Device Power-down and Reset Status Register
+__constant U32 _APB_ADDR_LOCKACCESS       = 0x80001000 + 0xFB0;
+__constant U32 _APB_ADDR_LOCKSTATUS       = 0x80001000 + 0xFB4;
+//
+// DAP SFRs
+//
+__constant U32 _DAP_ACC_32BIT_AUTO_INC        = (1 << 29) | (1 << 25) | (1 << 24) | (1 << 4) | (2 << 0);  // HMASTER = DEBUG, Private access, Auto-increment, Access size: word;
+__constant U32 _DAP_ACC_8BIT_NO_AUTO_INC      = (1 << 29) | (1 << 25) | (1 << 24) | (0 << 4) | (0 << 0);  // HMASTER = DEBUG, Private access, no Auto-increment, Access size: byte;
+__constant U32 _DAP_ACC_16BIT_NO_AUTO_INC     = (1 << 29) | (1 << 25) | (1 << 24) | (0 << 4) | (1 << 0);  // HMASTER = DEBUG, Private access, no Auto-increment, Access size: half word;
+__constant U32 _DAP_ACC_32BIT_NO_AUTO_INC     = (1 << 29) | (1 << 25) | (1 << 24) | (0 << 4) | (2 << 0);  // HMASTER = DEBUG, Private access, no Auto-increment, Access size: word;
+__constant U32 _APB_CFG_32BIT_NO_AUTO_INC     = 0
+                                              | (1 << 31)   // Enable software access to the Debug APB bus.
+                                              | (0 << 4)    // Not auto-increment TAR after read/write access. Increment is never performed on access to banked data registers 0-3.
+                                              | (2 << 0)    // AP-access size: 32-bit
+                                              ;
+__constant U32 _AHB_ACC_32BIT_NO_AUTO_INC     = 0
+                                              | (1 << 29)
+                                              | (1 << 25)
+                                              | (1 << 24)
+                                              | (0 << 4)    // Not auto-increment TAR after read/write access. Increment is never performed on access to banked data registers 0-3.
+                                              | (2 << 0)    // AP-access size: 32-bit
+                                              ;
+__constant U32 _DP_CTRL_STAT_BIT_DBGPWRUPREQ  = (1 << 30);
+__constant U32 _DP_CTRL_STAT_BIT_SYSPWRUPREQ  = (1 << 28);
+__constant U32 _DP_CTRL_STAT_BIT_STICKYERR    = (1 <<  5);
+
+/*********************************************************************
+*
+*       Local functions
+*
+**********************************************************************
+*/
+
+/*********************************************************************
+*
+*       _ResetViaIcePick
+*
+*  Function description
+*    Reset CPU core via Ice Pick.
+*    This function can be used if the reset pin of the CPU is
+*    not connected to the reset pin of the JTAG connector
+*/
+void  _ResetViaIcePick(void) {
+  int v;
+  int BitPos;
+  //
+  // Set breakpoint to halt target as fast as possible after reset
+  // 1) Disable the breakpoint being set.
+  // 2) Write address to the BVR, leaving the bottom 2 bits zero.
+  // 3) Write the mask and control register to enable the breakpoint.
+  //
+  JLINK_CORESIGHT_WriteDP(JLINK_CORESIGHT_DP_REG_SELECT, (1 << 24) | (0 << 4));                  // Select AP[1] bank 0
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_CTRL, _APB_CFG_32BIT_NO_AUTO_INC);
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_ADDR, 0x54011000 + (0x50 << 2));
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_DATA, 0x00000000);
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_ADDR, 0x54011000 + (0x40 << 2));
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_DATA, 0x00014000);
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_ADDR, 0x54011000 + (0x50 << 2));
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_DATA, 7 | (0xF << 5) | (0 << 20));
+  JTAG_WriteClocks(1);   // Make sure that JTAG buffers are empty and breakpoint is set
+  //
+  // Perform reset via ICEPick:
+  // 1) Switch JTAG config to ICEPick
+  // 2) Perform reset (via ICEPick SFR accesses)
+  // 3) Switch JTAG config back to CPU core
+  //
+  JLINK_CORESIGHT_Configure("IRPre=4;DRPre=1;IRPost=0;DRPost=0;IRLenDevice=6;PerformTIFInit=0");  // Make sure we do not output the JTAG <-> SWD switching sequence as TI devices with ICEPick do not support SWD anyhow and do not like the switching sequence
+  JTAG_StoreIR(2);         // Cmd: ROUTER
+  v = 0x01000000;          // Read SYS_CNTL
+  JTAG_StoreDR(v, 32);
+  BitPos = JTAG_StoreDR(v, 32);
+  v = JTAG_GetU32(BitPos);
+  v &= 0x00FFFFFF;
+  v |= 0x81000001;         // Write SYS_CNTL and set SysReset bit
+  JTAG_StoreDR(v, 32);
+  v &= 0xFFFFFFFE;
+  v &= 0x00FFFFFF;
+  v |= 0x81000000;         // Write SYS_CNTL and clear SysReset bit
+  JTAG_WriteDR(v, 32);
+  JLINK_CORESIGHT_Configure("IRPre=0;DRPre=0;IRPost=6;DRPost=1;IRLenDevice=4;PerformTIFInit=0");  // Make sure we do not output the JTAG <-> SWD switching sequence as TI devices with ICEPick do not support SWD anyhow and do not like the switching sequence
+  //
+  // Read DSCR to check if CPU is halted
+  // Manually halt CPU if BP did not work
+  //
+  JLINK_CORESIGHT_WriteDP(JLINK_CORESIGHT_DP_REG_SELECT, (1 << 24) | (0 << 4));                  // Select AP[1] bank 0
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_CTRL, _APB_CFG_32BIT_NO_AUTO_INC);
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_ADDR, 0x54011000 + (0x22 << 2));
+  v = JLINK_CORESIGHT_ReadAP(JLINK_CORESIGHT_AP_REG_DATA);
+  if ((v & 1) == 0) {
+    Report("J-Link script: Core did not halt after reset. Halting core...");
+    JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_ADDR, 0x54011000 + (0x22 << 2));   // Enable debug halt mode by writing the DSCR
+    v |= (1 << 14);
+    JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_DATA, v);
+    JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_ADDR, 0x54011000 + (0x24 << 2));   // Write DRCR to halt CPU
+    JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_DATA, 1);
+  }
+  //
+  // Remove breakpoint
+  //
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_ADDR, 0x54011000 + (0x50 << 2));
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_DATA, 0);
+  JLINK_CORESIGHT_ReadAP(JLINK_CORESIGHT_AP_REG_DATA);      // Dummy read to make sure that BP change gets active
+}
+
+/*********************************************************************
+*
+*       _InitIcePick
+*
+*  Function description
+*    Configures the ICEPick so that the CPU core also becomes
+*    visible in the JTAG chain.
+*/
+void _InitIcePick(void) {
+  int v;
+  int BitPos;
+  int Speed;
+  int ICEPickIdCode;
+  int DAPIdCode;
+  //
+  // Reduce target interface speed, as ICEPick does not seem to like high interface speeds
+  //
+  Speed = JTAG_Speed;
+  JTAG_Speed = 50;
+  Report("J-Link script: Init ICEPick");
+  //
+  // After power-on and TAP reset, only the TI ICEPick is in the scan chain
+  //
+  JTAG_Reset();                           // Perform TAP reset and auto-detection of total IR Len
+  if (JTAG_TotalIRLen != 6) {
+    MessageBox1("Can not find ICE-Pick (IRLen mismatch). Expected 0x00000006, found: ", JTAG_TotalIRLen);
+  }
+  //
+  // Check IDCODE of ICEPick
+  //
+  JLINK_CORESIGHT_Configure("IRPre=0;DRPre=0;IRPost=0;DRPost=0;IRLenDevice=6;PerformTIFInit=0");  // Make sure we do not output the JTAG <-> SWD switching sequence as TI devices with ICEPick do not support SWD anyhow and do not like the switching sequence
+  JTAG_WriteIR(4);                              // ICEPICK IDCODE instruction
+  BitPos = JTAG_WriteDR(0x00000000, 32);
+  ICEPickIdCode = JTAG_GetU32(BitPos);
+  if ((ICEPickIdCode & 0x00000FFF) != 0x0000002F) {
+    MessageBox1("Can not find ICE-Pick (IDCODE mismatch). Expected 0xXXXXXX2F, found: ", ICEPickIdCode);
+  }
+  //
+  // Put ARM core in JTAG chain
+  //
+  Report("J-Link script: Enabling CPU core.");
+  JTAG_WriteIR(7);         // CONNECT
+  JTAG_WriteDR(0x89, 8);   // The ICEPick documentation (SPRUE64, 2.6 CONNECT instruction: Accessing the debug connect register). Bit 7 set means: Write debug connect register. We write 0x9 to the debug connect register which is the debug connect key.
+  JTAG_WriteIR(2);         // ROUTER (Accessing the mapped registers)
+  v = 0
+    | (1 << 31)     // Write mapped register
+    | (0x23 << 24)  // SDTAP3 register
+    | (1 << 13)     // Debug connect
+    | (1 << 8)      // TAP select
+    | (1 << 3)      // Force active
+    ;
+  JTAG_WriteDR(v, 32);
+  JTAG_WriteIR(0x3F);      // Bypass
+  JTAG_WriteClocks(10);
+  //
+  // Configure JTAG chain, so J-Link knows to which devices it has to "talk" to.
+  // CPU core is in scan chain now, so we have to re-configure the JTAG chain settings
+  //
+  JLINK_CORESIGHT_Configure("IRPre=0;DRPre=0;IRPost=6;DRPost=1;IRLenDevice=4;PerformTIFInit=0");  // Make sure we do not output the JTAG <-> SWD switching sequence as TI devices with ICEPick do not support SWD anyhow and do not like the switching sequence
+  CPU=CORTEX_A8;
+  JTAG_AllowTAPReset=0; 
+  //
+  // Get IDCODE of CoreSight DAP
+  //
+  JTAG_WriteIR(0xE);
+  BitPos = JTAG_WriteDR(0x00000000, 32);
+  DAPIdCode = JTAG_GetU32(BitPos);
+  //
+  // Register JTAG devices
+  //
+  JTAG_SetDeviceId(0, DAPIdCode);
+  JTAG_SetDeviceId(1, ICEPickIdCode);
+  //
+  // Set DBGEN signal in order to enable invasive debugging
+  //
+  JLINK_CORESIGHT_WriteDP(JLINK_CORESIGHT_DP_REG_CTRL_STAT, _DP_CTRL_STAT_BIT_DBGPWRUPREQ | _DP_CTRL_STAT_BIT_SYSPWRUPREQ);                                                        // Power-up DAP
+  JLINK_CORESIGHT_WriteDP(JLINK_CORESIGHT_DP_REG_SELECT, (1 << 24) | (0 << 4));                  // Select AP[1] bank 0
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_CTRL, _APB_CFG_32BIT_NO_AUTO_INC);
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_ADDR, 0xD401D030);
+  JLINK_CORESIGHT_WriteAP(JLINK_CORESIGHT_AP_REG_DATA, (1 << 13));        // Set DBGEN signal
+  //
+  // Restore target interface speed
+  //
+  JTAG_Speed = Speed;
+}
+
+/*********************************************************************
+*
+*       Global functions
+*
+**********************************************************************
+*/
+
+/*********************************************************************
+*
+*       ResetTarget
+*/
+void ResetTarget(void) {
+  Report("J-Link script: ResetTarget()");
+  _ResetViaIcePick();
+}
+
+/*********************************************************************
+*
+*       InitTarget
+*/
+void InitTarget(void) {
+  Report("J-Link script: InitTarget()");
+  //
+  // Reset debug logic in order to make sure that ONLY the ICEPick is in the JTAG chain
+  //
+  JTAG_TRSTPin = 0;
+  SYS_Sleep(50);
+  JTAG_TRSTPin = 1;
+  SYS_Sleep(50);
+  JTAG_Write(0x1F, 0, 6);
+  _InitIcePick();
+}

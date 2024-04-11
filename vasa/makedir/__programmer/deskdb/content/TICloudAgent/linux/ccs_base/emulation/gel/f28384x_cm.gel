@@ -1,0 +1,214 @@
+/********************************************************************/
+/* f28384x_cm.gel                                               */
+/* Version 1.00.0                                                   */
+/*                                                                  */
+/* This GEL file is to be used with the F28384x CM Device.      */
+/* Changes may be required to support specific hardware designs.    */
+/*                                                                  */
+/* Code Composer Studio supports six reserved GEL functions that    */
+/* automatically get executed if they are defined. They are:        */
+/*                                                                  */
+/* StartUp()              - Executed whenever CCS is invoked        */
+/* OnReset()              - Executed after Debug->Reset CPU         */
+/* OnRestart()            - Executed after Debug->Restart           */
+/* OnPreFileLoaded()      - Executed before File->Load Program      */
+/* OnFileLoaded()         - Executed after File->Load Program       */
+/* OnTargetConnect()      - Executed after Debug->Connect           */
+/*                                                                  */
+/********************************************************************/
+
+menuitem "StartUp"
+
+hotmenu StartUp()
+{
+}
+
+OnTargetConnect()
+{
+    CM_Disable_Flash_ECC();
+    CM_Ram_Init();
+    
+    /* Initialize the CCS memory map */ 
+    GEL_MapOff();
+    GEL_MapReset();
+    GEL_MapOn();
+    F28384x_Memory_Map();
+    
+    watchdog_enable();
+
+    uart_enable();
+}
+
+OnReset(int nErrorCode)
+{
+    /* If XRSn Reset occurred previously, re-activate Flash prior to accessing Flash */
+    if ((*(unsigned long *)0x400FE05C & 0x1) == 1)
+    {
+        Flash_Activate();
+    }
+    CM_Disable_Flash_ECC();
+}
+
+OnRestart ()
+{
+}
+
+OnPreFileLoaded()
+{
+    GEL_Reset();
+}
+
+menuitem "Initialize F28384x Memory Map"
+
+hotmenu F28384x_Memory_Map()
+{
+    /*
+     * Syntax for GEL_MapAddStr.
+     * GEL_MapAddStr(address, page, length, "attribute", waitstate);
+
+    Basic Attribute Types           Derived Attribute Types
+    String      Description         String      Description
+    R           Read                NONE        No memory/protected
+    W           Write               RAM         Read and write
+    P           Port                ROM         Read only
+    EX          External            WOM         Write only
+    EM          Emulator            INPORT      Port read only
+    PR          Programmable        OUTPORT     Port write only
+    ER          Erasable            IOPORT      Port read and write
+    DA          Dual access         SARAM       Single access RAM
+    ASn         Access size         DARAM       Dual access RAM
+    SHnC        Shared              FLASH       Flash ROM
+    CACHE       Cache               EXRAM       External RAM
+    TX          Text                EXROM       External ROM
+    MN          Monitor             EPROM       Erasable write-able EPROM
+    SA          Single access       MONITOR     Monitor ROM
+    FL          Flash               PRAM        Program RAM
+    MR          Memory mapped       PROM        Program ROM
+    NULL        NULL                NULL        NULL
+    */
+
+    GEL_MapAddStr(0x000000,     0, 0x18000,     "R",  0);         /* CM BOOT ROM, (96Kbytes) (Parity)   */
+    GEL_MapAddStr(0x200000,     0, 0x4000,      "R",  0);         /* CMBANK0, Sector 0 (16Kbytes) (ECC) */
+    GEL_MapAddStr(0x204000,     0, 0x4000,      "R",  0);         /* CMBANK0, Sector 1 (16Kbytes) (ECC) */
+    GEL_MapAddStr(0x208000,     0, 0x4000,      "R",  0);         /* CMBANK0, Sector 2 (16Kbytes) (ECC) */
+    GEL_MapAddStr(0x20C000,     0, 0x4000,      "R",  0);         /* CMBANK0, Sector 3 (16Kbytes) (ECC) */
+    GEL_MapAddStr(0x210000,     0, 0x10000,     "R",  0);         /* CMBANK0, Sector 4 (64Kbytes) (ECC) */
+    GEL_MapAddStr(0x220000,     0, 0x10000,     "R",  0);         /* CMBANK0, Sector 5 (64Kbytes) (ECC) */
+    GEL_MapAddStr(0x230000,     0, 0x10000,     "R",  0);         /* CMBANK0, Sector 6 (64Kbytes) (ECC) */
+    GEL_MapAddStr(0x240000,     0, 0x10000,     "R",  0);         /* CMBANK0, Sector 7 (64Kbytes) (ECC) */
+    GEL_MapAddStr(0x250000,     0, 0x10000,     "R",  0);         /* CMBANK0, Sector 8 (64Kbytes) (ECC) */
+    GEL_MapAddStr(0x260000,     0, 0x10000,     "R",  0);         /* CMBANK0, Sector 9 (64Kbytes) (ECC) */
+    GEL_MapAddStr(0x270000,     0, 0x4000,      "R",  0);         /* CMBANK0, Sector 10 (16Kbytes) (ECC) */
+    GEL_MapAddStr(0x274000,     0, 0x4000,      "R",  0);         /* CMBANK0, Sector 11 (16Kbytes) (ECC) */
+    GEL_MapAddStr(0x278000,     0, 0x4000,      "R",  0);         /* CMBANK0, Sector 12 (16Kbytes) (ECC) */
+    GEL_MapAddStr(0x27C000,     0, 0x4000,      "R",  0);         /* CMBANK0, Sector 13 (16Kbytes) (ECC) */
+	GEL_MapAddStr(0x280000,     0, 0x100000,    "R",  0);         /* Reserved for FLASH Expansion (1024KBytes) */
+    GEL_MapAddStr(0x380000,     0, 0x0800,      "R",  0);         /* CMBANK0 TI OTP (2Kbytes) (ECC)   */ 
+    GEL_MapAddStr(0x3C0000,     0, 0x0800,      "R",  0);         /* CMBANK0 USER OTP (2Kbytes) (ECC)   */ 
+    GEL_MapAddStr(0x800000,     0, 0x10000,     "R",  0);         /* CMBANK0 ECC bit map (64Kbytes)  */ 
+    GEL_MapAddStr(0x880000,     0, 0x100,       "R",  0);         /* CMBANK0 TI OTP ECC map (0.25Kbytes)  */ 
+    GEL_MapAddStr(0x888000,     0, 0x100,       "R",  0);         /* CMBANK0 USER OTP ECC map (0.25Kbytes)  */ 
+       
+    GEL_MapAddStr(0x1FFFE000,   0, 0x2000,      "R|W",  0);         /* C0RAM                      */
+    GEL_MapAddStr(0x1FFFC000,   0, 0x2000,      "R|W",  0);         /* C1RAM                      */
+    GEL_MapAddStr(0x20000000,   0, 0x10000,     "R|W",  0);         /* S0-S3 SRAM                 */
+    GEL_MapAddStr(0x20010000,   0, 0x4000,      "R|W",  0);         /* E0RAM                      */
+      
+    GEL_MapAddStr(0x20080000,   0, 0x800,       "R|W",  0);         /* CPU1TOCMMSGRAM0 (2Kbytes) (Parity)*/
+    GEL_MapAddStr(0x20080800,   0, 0x800,       "R|W",  0);         /* CPU1TOCMMSGRAM1 (2Kbytes) (Parity)*/
+    GEL_MapAddStr(0x20082000,   0, 0x800,       "R|W",  0);         /* CMTOCPU1MSGRAM0 (2Kbytes) (Parity)*/
+    GEL_MapAddStr(0x20082800,   0, 0x800,       "R|W",  0);         /* CMTOCPU1MSGRAM1 (2Kbytes) (Parity)*/
+    GEL_MapAddStr(0x20084000,   0, 0x800,       "R|W",  0);         /* CPU1TOCMMSGRAM0 (2Kbytes) (Parity)*/
+    GEL_MapAddStr(0x20084800,   0, 0x800,       "R|W",  0);         /* CPU2TOCMMSGRAM1 (2Kbytes) (Parity)*/
+    GEL_MapAddStr(0x20086000,   0, 0x800,       "R|W",  0);         /* CMTOCPU2MSGRAM0 (2Kbytes) (Parity)*/
+    GEL_MapAddStr(0x20086800,   0, 0x800,       "R|W",  0);         /* CMTOCPU2MSGRAM1 (2Kbytes) (Parity)*/
+    
+    GEL_MapAddStr(0x22000000,   0, 0x2000000,   "R|W",  0);         /* Bit-Banded RAM Zone              */
+
+    GEL_MapAddStr(0x40008000,   0, 0x1000,      "R|W",  0);         /* SSI0 Registers                   */
+    GEL_MapAddStr(0x4000c000,   0, 0x1000,      "R|W",  0);         /* UART0 Registers                  */
+    GEL_MapAddStr(0x40020000,   0, 0x1000,       "R|W",  0);        /* I2C0 Registers                   */
+    GEL_MapAddStr(0x40040000,   0, 0x1000,       "R|W",  0);        /* GCRC Registers                   */
+    GEL_MapAddStr(0x4004A000,   0, 0x1000,      "R|W",  0);         /* AES_SS_REGS Registers            */
+    GEL_MapAddStr(0x40050000,   0, 0x1000,      "R|W",  0);         /* USB MAC Registers                */
+    GEL_MapAddStr(0x40070000,   0, 0x1000,      "R|W",  0);         /* CAN-A Registers                  */
+    GEL_MapAddStr(0x40072000,   0, 0x1000,      "R|W",  0);         /* CAN-A Message RAM                */
+    GEL_MapAddStr(0x40074000,   0, 0x1000,      "R|W",  0);         /* CAN-B Registers                  */
+    GEL_MapAddStr(0x40076000,   0, 0x1000,      "R|W",  0);         /* CAN-B Message RAM                */
+    GEL_MapAddStr(0x40078000,   0, 0x4400,      "R|W",  0);         /* MCAN Message RAM                 */
+    GEL_MapAddStr(0x4007C400,   0, 0x40,        "R|W",  0);         /* MCAN_SS Registers                */
+    GEL_MapAddStr(0x4007C600,   0, 0x100,       "R|W",  0);         /* MCAN Registers                   */
+    GEL_MapAddStr(0x4007C800,   0, 0x400,       "R|W",  0);         /* MCAN_SS ECC Registers            */
+    GEL_MapAddStr(0x40080000,   0, 0x1000,      "R|W",  0);         /* Windowed Watch Dog Timer 0       */
+    GEL_MapAddStr(0x40081000,   0, 0x1000,      "R|W",  0);         /* CMNMIWD                          */
+    GEL_MapAddStr(0x40083000,   0, 0xC0,        "R|W",  0);         /* CM_GPIO_DATA_REGS                */
+    GEL_MapAddStr(0x40083100,   0, 0x30,        "R|W",  0);         /* CM_GPIO_DATA_READ_REGS           */
+    GEL_MapAddStr(0x40084000,   0, 0x1000,      "R|W",  0);         /* CPU Timer 1,2,3 Registers        */
+    GEL_MapAddStr(0x40085000,   0, 0x1000,      "R|W",  0);         /* DCSM Registers                   */
+
+    GEL_MapAddStr(0x400C0000,   0, 0x3000,       "R|W",  0);         /* EthernetMAC Registers                   */    
+    
+    GEL_MapAddStr(0x400CC000,   0, 0x1000,      "R|W",  0);         /* DMPU Registers                   */
+    GEL_MapAddStr(0x400CD000,   0, 0x1000,      "R|W",  0);         /* EMPU Registers                   */
+    GEL_MapAddStr(0x400fa000,   0, 0x600,       "R|W",  0);         /* Flash bank 1 Control             */
+    GEL_MapAddStr(0x400fa600,   0, 0x080,       "R|W",  0);         /* Flash bank 1 ECC Error Log       */
+    GEL_MapAddStr(0x400fc000,   0, 0x1000,      "R|W",  0);         /* CM System Control Registers      */
+    GEL_MapAddStr(0x400fd000,   0, 0x080,       "R|W",  0);         /* CPU1TOCM and CMTOCPU1 IPC Registers */
+    GEL_MapAddStr(0x400fd080,   0, 0x080,       "R|W",  0);         /* CPU2TOCM and CMTOCPU2 IPC Registers */
+    GEL_MapAddStr(0x400fe000,   0, 0x400,       "R|W",  0);         /* CM_MEM_INIT_AND_TEST_REGS        */
+    GEL_MapAddStr(0x400fe400,   0, 0x400,       "R|W",  0);         /* CM_ERROR_LOG_REGS                */
+    GEL_MapAddStr(0x400fe800,   0, 0x400,       "R|W",  0);         /* CM_DIAG_ERROR_LOG_REGS           */
+    GEL_MapAddStr(0x400ff000,   0, 0x1000,      "R|W",  0);         /* uDMA Registers                   */
+    
+    GEL_MapAddStr(0x42000000,   0, 0x2000000,   "R|W", 0);          /* Bit-Banded Peripheral Space      */
+    
+    GEL_MapAddStr(0x50001000,   0, 0x1000,       "R|W", 0);         /* DWT   */
+
+    GEL_MapAddStr(0xE000E000,   0, 0x1000,      "R|W", 0);          /* SCS (NVIC and MPU) */
+    GEL_MapAddStr(0xE0040000,   0, 0x1000,      "R|W", 0);          /* TPIU */
+    GEL_MapAddStr(0xE0042000,   0, 0x1000,      "R|W", 0);          /* ICECRUSHERCS */
+    GEL_MapAddStr(0xE0000000,   0, 0xf000,      "R|W", 0);
+
+    GEL_TextOut("Memory Map Initialization Complete\n");
+}
+
+hotmenu CM_Ram_Init()
+{
+    *(unsigned long *)0x400FE048 = 0xF;
+    *(unsigned long *)0x400FE008 = 0x3;
+    *(unsigned long *)0x400FE048 = 0x10;
+    *(unsigned long *)0x400FE028 = 0xF;
+}
+
+hotmenu Flash_Activate()
+{
+    int i;
+    *(unsigned long *)0x400FA048 = 0x1;
+    *(unsigned long *)0x400FA040 = 0x3;
+    for (i=0; i<10; i++)
+    {
+        R1 = 0x00000000;
+    }
+}
+hotmenu CM_Disable_Flash_ECC()
+{
+    *(unsigned short *)0x400FA600 = 0x0;    /* Disable Flash ECC */
+}
+
+hotmenu CM_Enable_Flash_ECC()
+{
+    *(unsigned short *)0x400FA600 |= 0xA;   /* Enable Flash ECC */
+}
+
+menuitem "Peripherals"
+hotmenu watchdog_enable()
+{
+    *(unsigned long*)0x4008000C |= 0x00000028; 
+    GEL_TextOut("Windowed Watchdog Enabled\n");
+}
+
+hotmenu uart_enable()
+{
+    *(unsigned long*)0x4000C000 |= 0xF;
+    GEL_TextOut("UART0 Enabled\n");
+}

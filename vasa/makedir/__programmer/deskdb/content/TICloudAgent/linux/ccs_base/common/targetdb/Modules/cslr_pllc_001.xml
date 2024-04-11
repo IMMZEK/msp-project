@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module id="PLLC" HW_revision="1" XML_version="1" description="This module propagates reset and clocks to the device">
+	<register id="PID" acronym="PID" offset="0" width="32" description="Contains peripheral ID and revision information">
+		<bitfield id="_RESV" width="8" begin="31" end="24" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="TYPE" width="8" begin="23" end="16" resetval="0x01" description="Peripheral Type: 0x01 to identify as PLLCTRL" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="CLASS" width="8" begin="15" end="8" resetval="0x08" description="Peripheral Class: 0x08" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="REV" width="8" begin="7" end="0" resetval="0x02" description="Peripheral Revision" range="-" rwaccess="R">
+         
+      </bitfield>
+	</register>
+	<register id="FUSERR" acronym="FUSERR" offset="0xE0" width="32" description="Stores error code from fusefarm">
+		<bitfield id="_RESV" width="27" begin="31" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="ERR" width="5" begin="4" end="0" resetval="0" description="Fusefarm Error. Actual default value depends on fusefarm error" range="-" rwaccess="R">
+         
+      </bitfield>
+	</register>
+	<register id="RSTYPE" acronym="RSTYPE" offset="0xE4" width="32" description="Latches cause of the last reset. Although the reset value of all bits are 0, after coming out of reset, one bit will be set to one to indicate cause of reset. Some bits may not be doc'd to users.">
+		<bitfield id="_RESV" width="28" begin="31" end="4" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="SRST" width="1" begin="3" end="3" resetval="0" description="If 1, means that system reset was the last reset to occur that is of highest priority" range="-" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+		<bitfield id="MRST" width="1" begin="2" end="2" resetval="0" description="If 1, means that maximum reset was the reset to occur that is of highest priority" range="-" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+		<bitfield id="XWRST" width="1" begin="1" end="1" resetval="0" description="If 1, means that external warm reset was the last reset to occur that is of highest priority" range="-" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+		<bitfield id="POR" width="1" begin="0" end="0" resetval="0" description="If 1, means that power on reset was the last reset to occur that is of highest priority" range="-" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+	</register>
+	<register id="RSTDEF" acronym="RSTDEF" offset="0xE8" width="32" description="Defines the operation caused by external warm reset pin xwrst_pi_n. May not be documented to users.">
+		<bitfield id="_RESV" width="31" begin="31" end="1" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="XWFUNC" width="1" begin="0" end="0" resetval="0" description="External Warm Reset Definition; May not be documented to users" range="-" rwaccess="RW">
+			<bitenum id="NORM" value="0" token="NORM" description="Normal mode. External warm reset causes xwrst operation"/>
+			<bitenum id="FAST" value="1" token="FAST" description="Fast mode. External warm reset causes system reset (srst) operation"/>
+		</bitfield>
+	</register>
+	<register id="PLLCTL" acronym="PLLCTL" offset="0x100" width="32" description="Controls PLL operations. Only document necessary bits to users">
+		<bitfield id="_RESV" width="23" begin="31" end="9" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="CLKMODE" width="1" begin="8" end="8" resetval="0" description="Reference Clock Selection; Actual default determined by module tieoff. May lock default value and doc as _RESV to users" range="-" rwaccess="RW">
+			<bitenum id="OSCIN" value="0" token="OSCIN" description="Internal oscillator"/>
+			<bitenum id="CLKIN" value="1" token="CLKIN" description="CLKIN square wave"/>
+		</bitfield>
+		<bitfield id="PLLSELB" width="1" begin="7" end="7" resetval="0" description="PLL Selection. Actual default determined by module tieoff. May lock default value and doc as _RESV to users" range="-" rwaccess="RW">
+			<bitenum id="PLLA" value="0" token="PLLA" description="PLL A is selected. PLL B in power down"/>
+			<bitenum id="PLLB" value="1" token="PLLB" description="PLL B is selected. PLL A in power down"/>
+		</bitfield>
+		<bitfield id="_RESV" width="1" begin="6" end="6" resetval="1" description="Reserved. Default to 1 for software backward compatibility (was STABLE bit in old PLLCTRL)" range="" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="PLLENSRC" width="1" begin="5" end="5" resetval="0" description="PLLEN mux control source. Actual default determined by module tieoff. May lock default value and doc as _RESV to users" range="-" rwaccess="RW">
+			<bitenum id="REGBIT" value="0" token="REGBIT" description="PLLEN mux is controlled by PLLCTL.PLLEN bit"/>
+			<bitenum id="PORT" value="1" token="PORT" description="PLLEN mux is controlled by input pllen_pi"/>
+		</bitfield>
+		<bitfield id="PLLDIS" width="1" begin="4" end="4" resetval="0" description="Asserts DISABLE to PLL if supported. Actual default determined by module tieoff. If not supported, do not document to users" range="-" rwaccess="RW">
+			<bitenum id="NO" value="0" token="NO" description="PLL disable de-asserted"/>
+			<bitenum id="YES" value="1" token="YES" description="PLL disable asserted"/>
+		</bitfield>
+		<bitfield id="PLLRST" width="1" begin="3" end="3" resetval="0" description="Asserts RESET to PLL if supported. Actual default determined by module tieoff. If not supported, do not document to users" range="-" rwaccess="RW">
+			<bitenum id="NO" value="0" token="NO" description="PLL reset not asserted"/>
+			<bitenum id="YES" value="1" token="YES" description="PLL reset asserted"/>
+		</bitfield>
+		<bitfield id="_RESV" width="1" begin="2" end="2" resetval="0" description="Reserved" range="" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="PLLPWRDN" width="1" begin="1" end="1" resetval="0" description="PLL Power down. Actual default determined by module tieoff" range="-" rwaccess="RW">
+			<bitenum id="NO" value="0" token="NO" description="PLL operation"/>
+			<bitenum id="YES" value="1" token="YES" description="PLL power down"/>
+		</bitfield>
+		<bitfield id="PLLEN" width="1" begin="0" end="0" resetval="0" description="PLL Mode Enable" range="-" rwaccess="RW">
+			<bitenum id="BYPASS" value="0" token="BYPASS" description="Bypass mode"/>
+			<bitenum id="PLL" value="1" token="PLL" description="PLL mode, not bypassed"/>
+		</bitfield>
+	</register>
+	<register id="OCSEL" acronym="OCSEL" offset="0x104" width="32" description="Controls the clock that outputs onto OBSCLK. May not need to document to users">
+		<bitfield id="_RESV" width="27" begin="31" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="OCSRC" width="5" begin="4" end="0" resetval="0" description="OBSCLK source. Actual default determined by module tieoff. May not document this bit to users. Even if document may not document all options." range="-" rwaccess="RW">
+			<bitenum id="OBSCLK" value="0" token="OBSCLK" description="output of OSCDIV1 is connected to OBSCLK"/>
+			<bitenum id="DISABLE" value="65536" token="DISABLE" description="output of OSCDIV1 drives 0"/>
+		</bitfield>
+	</register>
+	<register id="SECCTL" acronym="SECCTL" offset="0x108" width="32" description="Extra PLL controls. May not need to document all bits (or the entire register) to users">
+		<bitfield id="_RESV" width="8" begin="31" end="24" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="CTL7" width="1" begin="23" end="23" resetval="0" description="PLL Control output. Actual default determined by module tieoff. Maybe documented with more precise bit field name to control a specific PLL" range="" rwaccess="RW">
+         
+      </bitfield>
+		<bitfield id="CTL6" width="1" begin="22" end="22" resetval="0" description="PLL Control output. Actual default determined by module tieoff. Maybe documented with more precise bit field name to control a specific PLL" range="" rwaccess="RW">
+         
+      </bitfield>
+		<bitfield id="CTL5" width="1" begin="21" end="21" resetval="0" description="PLL Control output. Actual default determined by module tieoff. Maybe documented with more precise bit field name to control a specific PLL" range="" rwaccess="RW">
+         
+      </bitfield>
+		<bitfield id="CTL4" width="1" begin="20" end="20" resetval="0" description="PLL Control output. Actual default determined by module tieoff. Maybe documented with more precise bit field name to control a specific PLL" range="" rwaccess="RW">
+         
+      </bitfield>
+		<bitfield id="CTL3" width="1" begin="19" end="19" resetval="0" description="PLL Control output. Actual default determined by module tieoff. Maybe documented with more precise bit field name to control a specific PLL" range="" rwaccess="RW">
+         
+      </bitfield>
+		<bitfield id="CTL2" width="1" begin="18" end="18" resetval="0" description="PLL Control output. Actual default determined by module tieoff. Maybe documented with more precise bit field name to control a specific PLL" range="" rwaccess="RW">
+         
+      </bitfield>
+		<bitfield id="CTL1" width="1" begin="17" end="17" resetval="0" description="PLL Control output. Actual default determined by module tieoff. Maybe documented with more precise bit field name to control a specific PLL" range="" rwaccess="RW">
+         
+      </bitfield>
+		<bitfield id="CTL0" width="1" begin="16" end="16" resetval="0" description="PLL Control output. Actual default determined by module tieoff. Maybe documented with more precise bit field name to control a specific PLL" range="" rwaccess="RW">
+         
+      </bitfield>
+		<bitfield id="_RESV" width="16" begin="15" end="0" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+	</register>
+	<register id="PLLM" acronym="PLLM" offset="0x110" width="32" description="PLL Multiplier Control">
+		<bitfield id="_RESV" width="26" begin="31" end="6" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="PLLM" width="6" begin="5" end="0" resetval="0" description="PLL Multiplier Select. Actual default determined by module tieoff. May only document subset to users based on PLL multiply ratios supported" range="0 - 63" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+	<register id="PREDIV" acronym="PREDIV" offset="0x114" width="32" description="PLL Pre-Divider control. Do not document if Pre-Divider is not implemented">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="PREDEN" width="1" begin="15" end="15" resetval="0" description="Pre-Divider Enable. Actual default determined by module tieoff." range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="Pre-div disabled"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="Pre-div enabled"/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="PLL Pre-divider ratio. Actual default determined by module tieoff. May lock default and make bit R only" range="0 - 31" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+	<register id="PLLDIV1" acronym="PLLDIV1" offset="0x118" width="32" description="Divider 1 control--divider for SYSCLK1. Only document if this sysclk exists">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="D1EN" width="1" begin="15" end="15" resetval="0" description="Divider Enable. Actual default determined by module tieoff. May lock default and make bit R only" range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="Divider ratio. Actual default determined by module tieoff. May lock default and make bit R only" range="0 - 31" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+	<register id="PLLDIV2" acronym="PLLDIV2" offset="0x11C" width="32" description="Divider 2 control--divider for SYSCLK2. Only document if this sysclk exists">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="D2EN" width="1" begin="15" end="15" resetval="0" description="Divider Enable. Actual default determined by module tieoff. May lock default and make bit R only" range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="Divider ratio. Actual default determined by module tieoff. May lock default and make bit R only" range="0 - 31" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+	<register id="PLLDIV3" acronym="PLLDIV3" offset="0x120" width="32" description="Divider 3 control--divider for SYSCLK3. Only document if this sysclk exists">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="D3EN" width="1" begin="15" end="15" resetval="0" description="Divider Enable. Actual default determined by module tieoff. May lock default and make bit R only" range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="Divider ratio. Actual default determined by module tieoff. May lock default and make bit R only" range="0 - 31" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+	<register id="OSCDIV1" acronym="OSCDIV1" offset="0x124" width="32" description="Oscillator Divider control--divider for OBSCLK functional clock. Only document if this clock exists">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="OD1EN" width="1" begin="15" end="15" resetval="0" description="Oscillator Divider OD1 enable. Actual default determined by module tieoff" range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="Divider ratio. Actual default determined by module tieoff." range="0 - 31" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+	<register id="POSTDIV" acronym="POSTDIV" offset="0x128" width="32" description="Post-Divider control. Do not document if divider does not exist">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="POSTDEN" width="1" begin="15" end="15" resetval="0" description="Post-Divider enable. Actual default determined by module tieoff" range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="Divider ratio. Actual default determined by module tieoff. May lock default and make bit R only" range="0 - 31" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+	<register id="BPDIV" acronym="BPDIV" offset="0x12C" width="32" description="bypass divider control--divider for SYSCLKBP. Do not document if clock does not exist">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="BPDEN" width="1" begin="15" end="15" resetval="0" description="Bypass Divider Enable. Actual default determined by module tieoff" range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="Divider ratio. Actual default determined by module tieoff." range="0 - 31" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+	<register id="WAKEUP" acronym="WAKEUP" offset="0x130" width="32" description="controls events that can wakeup device from oscillator power down. May not document all bits (or entire register) to users.">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="WKEN15" width="1" begin="15" end="15" resetval="0" description="Wakeup Enable. Input wakeupin15 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN14" width="1" begin="14" end="14" resetval="0" description="Wakeup Enable. Input wakeupin14 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN13" width="1" begin="13" end="13" resetval="0" description="Wakeup Enable. Input wakeupin13 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN12" width="1" begin="12" end="12" resetval="0" description="Wakeup Enable. Input wakeupin12 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN11" width="1" begin="11" end="11" resetval="0" description="Wakeup Enable. Input wakeupin11 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN10" width="1" begin="10" end="10" resetval="0" description="Wakeup Enable. Input wakeupin10 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN09" width="1" begin="9" end="9" resetval="0" description="Wakeup Enable. Input wakeupin09 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN08" width="1" begin="8" end="8" resetval="0" description="Wakeup Enable. Input wakeupin08 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN07" width="1" begin="7" end="7" resetval="0" description="Wakeup Enable. Input wakeupin07 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN06" width="1" begin="6" end="6" resetval="0" description="Wakeup Enable. Input wakeupin06 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN05" width="1" begin="5" end="5" resetval="0" description="Wakeup Enable. Input wakeupin05 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN04" width="1" begin="4" end="4" resetval="0" description="Wakeup Enable. Input wakeupin04 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN03" width="1" begin="3" end="3" resetval="0" description="Wakeup Enable. Input wakeupin03 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN02" width="1" begin="2" end="2" resetval="0" description="Wakeup Enable. Input wakeupin02 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN01" width="1" begin="1" end="1" resetval="0" description="Wakeup Enable. Input wakeupin01 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+		<bitfield id="WKEN00" width="1" begin="0" end="0" resetval="0" description="Wakeup Enable. Input wakeupin00 can wake up device from osc power down." range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description="pin can't cause wakeup"/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description="high on pin can cause wakeup"/>
+		</bitfield>
+	</register>
+	<register id="PLLCMD" acronym="PLLCMD" offset="0x138" width="32" description="contains command bits for various operations. Writes of 1 initiates command. Writes of 0 clear the bit but have no effect. May not document all bits">
+		<bitfield id="_RESV" width="30" begin="31" end="2" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="OSCPWRDN" width="1" begin="1" end="1" resetval="0" description="Oscillator Power Down Command. May not document if not supported by device" range="-" rwaccess="RW">
+			<bitenum id="CLRBIT" value="0" token="CLRBIT" description="Clear bit (no effect)"/>
+			<bitenum id="SET" value="1" token="SET" description="Oscillator Power Down"/>
+		</bitfield>
+		<bitfield id="GOSET" width="1" begin="0" end="0" resetval="0" description="GO bit for SYSCLKx phase alignment" range="" rwaccess="RW">
+			<bitenum id="CLRBIT" value="0" token="CLRBIT" description="Clear bit (no effect)"/>
+			<bitenum id="SET" value="1" token="SET" description="Phase alignment"/>
+		</bitfield>
+	</register>
+	<register id="PLLSTAT" acronym="PLLSTAT" offset="0x13C" width="32" description="shows PLLCTRL status. May not need to document all bits">
+		<bitfield id="_RESV" width="29" begin="31" end="3" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="STABLE" width="1" begin="2" end="2" resetval="0" description="OSC counter done, oscillator assumed to be stable. By the time device comes out of reset, this bit should become 1. May not need to document" range="-" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+		<bitfield id="LOCK" width="1" begin="1" end="1" resetval="0" description="PLL Core Status. If supported, reflects if PLL is locked. Do not document if not supported by PLL" range="-" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+		<bitfield id="GOSTAT" width="1" begin="0" end="0" resetval="0" description="Status of GO operation. If 1, indicates GO operation in progress." range="" rwaccess="R">
+			<bitenum id="NONE" value="0" token="NONE" description=""/>
+			<bitenum id="INPROG" value="1" token="INPROG" description=""/>
+		</bitfield>
+	</register>
+	<register id="ALNCTL" acronym="ALNCTL" offset="0x140" width="32" description="Indicates which SYSCLKs need to be aligned for proper device operation. May lock defaults and make register R only. Actual default determined by module tieoff. Only document necessary bits">
+		<bitfield id="_RESV" width="24" begin="31" end="8" resetval="0" description="Reserved" range="" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="ALN8" width="1" begin="7" end="7" resetval="0" description="SYSCLK8 needs to be aligned to others selected in this register" range="" rwaccess="RW">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+		<bitfield id="ALN7" width="1" begin="6" end="6" resetval="0" description="SYSCLK7 needs to be aligned to others selected in this register" range="" rwaccess="RW">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+		<bitfield id="ALN6" width="1" begin="5" end="5" resetval="0" description="SYSCLK6 needs to be aligned to others selected in this register" range="" rwaccess="RW">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+		<bitfield id="ALN5" width="1" begin="4" end="4" resetval="0" description="SYSCLK5 needs to be aligned to others selected in this register" range="" rwaccess="RW">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+		<bitfield id="ALN4" width="1" begin="3" end="3" resetval="0" description="SYSCLK4 needs to be aligned to others selected in this register" range="" rwaccess="RW">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+		<bitfield id="ALN3" width="1" begin="2" end="2" resetval="0" description="SYSCLK3 needs to be aligned to others selected in this register" range="" rwaccess="RW">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+		<bitfield id="ALN2" width="1" begin="1" end="1" resetval="0" description="SYSCLK2 needs to be aligned to others selected in this register" range="" rwaccess="RW">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+		<bitfield id="ALN1" width="1" begin="0" end="0" resetval="0" description="SYSCLK1 needs to be aligned to others selected in this register" range="" rwaccess="RW">
+			<bitenum id="NO" value="0" token="NO" description=""/>
+			<bitenum id="YES" value="1" token="YES" description=""/>
+		</bitfield>
+	</register>
+	<register id="DCHANGE" acronym="DCHANGE" offset="0x144" width="32" description="Indicates if SYSCLK divide ratio has been modified. Only document bit if the respective SYSCLK is implemented.">
+		<bitfield id="_RESV" width="24" begin="31" end="8" resetval="0" description="Reserved" range="" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="SYS8" width="1" begin="7" end="7" resetval="0" description="SYSCLK8 divide ratio is modified" range="" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description="ratio not modified"/>
+			<bitenum id="YES" value="1" token="YES" description="ratio modified"/>
+		</bitfield>
+		<bitfield id="SYS7" width="1" begin="6" end="6" resetval="0" description="SYSCLK7 divide ratio is modified" range="" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description="ratio not modified"/>
+			<bitenum id="YES" value="1" token="YES" description="ratio modified"/>
+		</bitfield>
+		<bitfield id="SYS6" width="1" begin="5" end="5" resetval="0" description="SYSCLK6 divide ratio is modified" range="" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description="ratio not modified"/>
+			<bitenum id="YES" value="1" token="YES" description="ratio modified"/>
+		</bitfield>
+		<bitfield id="SYS5" width="1" begin="4" end="4" resetval="0" description="SYSCLK5 divide ratio is modified" range="" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description="ratio not modified"/>
+			<bitenum id="YES" value="1" token="YES" description="ratio modified"/>
+		</bitfield>
+		<bitfield id="SYS4" width="1" begin="3" end="3" resetval="0" description="SYSCLK4 divide ratio is modified" range="" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description="ratio not modified"/>
+			<bitenum id="YES" value="1" token="YES" description="ratio modified"/>
+		</bitfield>
+		<bitfield id="SYS3" width="1" begin="2" end="2" resetval="0" description="SYSCLK3 divide ratio is modified" range="" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description="ratio not modified"/>
+			<bitenum id="YES" value="1" token="YES" description="ratio modified"/>
+		</bitfield>
+		<bitfield id="SYS2" width="1" begin="1" end="1" resetval="0" description="SYSCLK2 divide ratio is modified" range="" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description="ratio not modified"/>
+			<bitenum id="YES" value="1" token="YES" description="ratio modified"/>
+		</bitfield>
+		<bitfield id="SYS1" width="1" begin="0" end="0" resetval="0" description="SYSCLK1 divide ratio is modified" range="" rwaccess="R">
+			<bitenum id="NO" value="0" token="NO" description="ratio not modified"/>
+			<bitenum id="YES" value="1" token="YES" description="ratio modified"/>
+		</bitfield>
+	</register>
+	<register id="CKEN" acronym="CKEN" offset="0x148" width="32" description="clock enable control for miscellaneous output clocks. Only document necessary bits to customers">
+		<bitfield id="_RESV" width="30" begin="31" end="2" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="OBSEN" width="1" begin="1" end="1" resetval="0" description="OBSCLK Enable. Actual default determined by tieoff. May not document to users" range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="AUXEN" width="1" begin="0" end="0" resetval="0" description="AUXCLK enable. Actual default determined by tieoff. Only document if clk exists" range="" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+	</register>
+	<register id="CKSTAT" acronym="CKSTAT" offset="0x14C" width="32" description="Clock status for all clocks except SYSCLKx. Only document necessary bits to users">
+		<bitfield id="_RESV" width="28" begin="31" end="4" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="BPON" width="1" begin="3" end="3" resetval="0" description="SYSCLKBP on status. Actual default determined by tieoff. Only document if clock exists" range="" rwaccess="R">
+			<bitenum id="OFF" value="0" token="OFF" description=""/>
+			<bitenum id="ON" value="1" token="ON" description=""/>
+		</bitfield>
+		<bitfield id="_RESV2" width="1" begin="2" end="2" resetval="0" description="Reserved. Was TCKON on PLLCTRL version 2.0" range="" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="OBSEN" width="1" begin="1" end="1" resetval="0" description="OBSCLK on status. Actual default determined by tieoff. May not document to users" range="" rwaccess="R">
+			<bitenum id="OFF" value="0" token="OFF" description=""/>
+			<bitenum id="ON" value="1" token="ON" description=""/>
+		</bitfield>
+		<bitfield id="AUXEN" width="1" begin="0" end="0" resetval="0" description="AUXCLK on status. Actual default determined by tieoff. Only document if clk exists" range="" rwaccess="R">
+			<bitenum id="OFF" value="0" token="OFF" description=""/>
+			<bitenum id="ON" value="1" token="ON" description=""/>
+		</bitfield>
+	</register>
+	<register id="SYSTAT" acronym="SYSTAT" offset="0x150" width="32" description="Indicates SYSCLK on/off status. Only document necessary bits to customers. Actual default determined by actual clock on/off status, which depends on PLLDIV[n].D[n]EN bit default">
+		<bitfield id="_RESV" width="24" begin="31" end="8" resetval="0" description="Reserved" range="" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="SYS8ON" width="1" begin="7" end="7" resetval="0" description="SYSCLK8 on status" range="" rwaccess="R">
+			<bitenum id="OFF" value="0" token="OFF" description=""/>
+			<bitenum id="ON" value="1" token="ON" description=""/>
+		</bitfield>
+		<bitfield id="SYS7ON" width="1" begin="6" end="6" resetval="0" description="SYSCLK7 on status" range="" rwaccess="R">
+			<bitenum id="OFF" value="0" token="OFF" description=""/>
+			<bitenum id="ON" value="1" token="ON" description=""/>
+		</bitfield>
+		<bitfield id="SYS6ON" width="1" begin="5" end="5" resetval="0" description="SYSCLK6 on status" range="" rwaccess="R">
+			<bitenum id="OFF" value="0" token="OFF" description=""/>
+			<bitenum id="ON" value="1" token="ON" description=""/>
+		</bitfield>
+		<bitfield id="SYS5ON" width="1" begin="4" end="4" resetval="0" description="SYSCLK5 on status" range="" rwaccess="R">
+			<bitenum id="OFF" value="0" token="OFF" description=""/>
+			<bitenum id="ON" value="1" token="ON" description=""/>
+		</bitfield>
+		<bitfield id="SYS4ON" width="1" begin="3" end="3" resetval="0" description="SYSCLK4 on status" range="" rwaccess="R">
+			<bitenum id="OFF" value="0" token="OFF" description=""/>
+			<bitenum id="ON" value="1" token="ON" description=""/>
+		</bitfield>
+		<bitfield id="SYS3ON" width="1" begin="2" end="2" resetval="0" description="SYSCLK3 on status" range="" rwaccess="R">
+			<bitenum id="OFF" value="0" token="OFF" description=""/>
+			<bitenum id="ON" value="1" token="ON" description=""/>
+		</bitfield>
+		<bitfield id="SYS2ON" width="1" begin="1" end="1" resetval="0" description="SYSCLK2 on status" range="" rwaccess="R">
+			<bitenum id="OFF" value="0" token="OFF" description=""/>
+			<bitenum id="ON" value="1" token="ON" description=""/>
+		</bitfield>
+		<bitfield id="SYS1ON" width="1" begin="0" end="0" resetval="0" description="SYSCLK1 on status" range="" rwaccess="R">
+			<bitenum id="OFF" value="0" token="OFF" description=""/>
+			<bitenum id="ON" value="1" token="ON" description=""/>
+		</bitfield>
+	</register>
+	<register id="PLLDIV4" acronym="PLLDIV4" offset="0x160" width="32" description="Divider 4 control--divider for SYSCLK4, Only document if this sysclk exists">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="D4EN" width="1" begin="15" end="15" resetval="0" description="Divider Enable. Actual default determined by module tieoff. May lock default and make bit R only" range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="Divider ratio. Actual default determined by module tieoff. May lock default and make bit R only" range="0 - 31" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+	<register id="PLLDIV5" acronym="PLLDIV5" offset="0x164" width="32" description="Divider 5 control--divider for SYSCLK5. Only document if this sysclk exists">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="D5EN" width="1" begin="15" end="15" resetval="0" description="Divider Enable. Actual default determined by module tieoff. May lock default and make bit R only" range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="Divider ratio. Actual default determined by module tieoff. May lock default and make bit R only" range="0 - 31" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+	<register id="PLLDIV6" acronym="PLLDIV6" offset="0x168" width="32" description="Divider 6 control--divider for SYSCLK6. Only document if this sysclk exists">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="D6EN" width="1" begin="15" end="15" resetval="0" description="Divider Enable. Actual default determined by module tieoff. May lock default and make bit R only" range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="Divider ratio. Actual default determined by module tieoff. May lock default and make bit R only" range="0 - 31" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+	<register id="PLLDIV7" acronym="PLLDIV7" offset="0x16C" width="32" description="Divider 7 control--divider for SYSCLK7. Only document if this sysclk exists">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="D7EN" width="1" begin="15" end="15" resetval="0" description="Divider Enable. Actual default determined by module tieoff. May lock default and make bit R only" range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="Divider ratio. Actual default determined by module tieoff. May lock default and make bit R only" range="0 - 31" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+	<register id="PLLDIV8" acronym="PLLDIV8" offset="0x170" width="32" description="Divider 8 control--divider for SYSCLK8. Only document if this sysclk exists">
+		<bitfield id="_RESV" width="16" begin="31" end="16" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="D8EN" width="1" begin="15" end="15" resetval="0" description="Divider Enable. Actual default determined by module tieoff. May lock default and make bit R only" range="-" rwaccess="RW">
+			<bitenum id="DISABLE" value="0" token="DISABLE" description=""/>
+			<bitenum id="ENABLE" value="1" token="ENABLE" description=""/>
+		</bitfield>
+		<bitfield id="_RESV" width="10" begin="14" end="5" resetval="0" description="Reserved" range="-" rwaccess="R">
+         
+      </bitfield>
+		<bitfield id="RATIO" width="5" begin="4" end="0" resetval="0" description="Divider ratio. Actual default determined by module tieoff. May lock default and make bit R only" range="0 - 31" rwaccess="RW">
+         
+      </bitfield>
+	</register>
+</module>

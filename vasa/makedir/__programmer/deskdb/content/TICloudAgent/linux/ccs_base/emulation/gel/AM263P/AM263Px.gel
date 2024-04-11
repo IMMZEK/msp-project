@@ -1,0 +1,284 @@
+/**
+ * \file  AM263Px.gel
+ *
+ * \brief Main AM263x GEL File, used to control and manage other GEL functions.
+ */
+
+/* Copyright (c) 2021, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+/*
+ *        Platform: AM263Px Sitara MCU SoCs - AM263Px
+ *        Usage: This GEL will be run from CCS upon connection to the AM263x Non Debuggable Device - "CS_DAP_0" Debug Core.
+ */
+
+
+StartUp(){
+	//Load the common GEL
+    GEL_LoadGel( "$(GEL_file_dir)/AM263Px_common/AM263Px_common.gel");
+
+    //Load the PLL GEL.
+	GEL_LoadGel( "$(GEL_file_dir)/AM263Px_PLL/AM263Px_PLL.gel");
+	
+	//Load Peripheral clocks gel file
+	GEL_LoadGel( "$(GEL_file_dir)/AM263Px_PLL/AM263Px_Periheral_Clocks.gel");
+	
+	//Load the PRU GEL.
+	GEL_LoadGel( "$(GEL_file_dir)/AM263Px_PRU/AM263Px_PRU.gel");
+
+	//Load Diagnostics gel file
+	GEL_LoadGel( "$(GEL_file_dir)/AM263Px_Diagnostics/AM263Px_Diagnostics.gel");
+	
+	//Load the PRU GEL.
+	GEL_LoadGel( "$(GEL_file_dir)/AM263Px_common/AM263Px_Registerpoke.gel");
+	
+    //Load the CPSW MDIO Config GEL.
+    GEL_LoadGel( "$(GEL_file_dir)/AM263_CPSW/AM263_cpsw_mdio_config.gel");
+
+    //Load the CPSW MDIO Config GEL.
+    GEL_LoadGel( "$(GEL_file_dir)/AM263_CPSW/AM263_cpsw_print_reg.gel");
+
+    //Load the CPSW MDIO Config GEL.
+    GEL_LoadGel( "$(GEL_file_dir)/AM263_CPSW/AM263_cpsw_ale_print_table.gel");
+
+    //Load the CPSW MDIO Config GEL.
+    GEL_LoadGel( "$(GEL_file_dir)/AM263_CPSW/AM263_cpsw_stats_print_regs.gel");
+
+    GEL_TextOut("Gel files loading on R5F0 Complete\n");
+    
+}
+
+OnTargetConnect(){
+    GEL_TextOut("***OnTargetConnect() Launched***\n\n");
+    GEL_TextOut("AM263Px Initialization Scripts Launched. \nPlease Wait...\n\n\n");
+
+    GEL_TextOut("AM263Px_Cryst_Clock_Loss_Status() Launched\n");
+    AM263x_Cryst_Clock_Loss_Status();
+    
+    GEL_TextOut("AM263Px_SOP_Mode() Launched\n");
+    AM263x_SOP_Mode();
+    
+    GEL_TextOut("AM263Px_Read_Device_Type() Launched\n");
+    AM263x_Read_Device_Type();
+    
+    GEL_TextOut("AM263Px_dual_or_lockstep_mode() Launched\n");
+    AM263x_dual_or_lockstep_mode();
+
+   
+
+    
+    Configure_Dual_Core_mode();     
+    
+    Configure_Plls_R5F_400_SYS_200_Clocks();
+
+    Configure_All_Peripheral_Clks();
+
+ 
+//    GEL_TextOut("Configure all Peripheral clocks()\n");
+//    Configure_All_Peripheral_Clks();
+
+//    GEL_TextOut("Configure all other cores()\n");
+//    Unhalt_ALL_R5F_cores();
+
+
+}
+
+
+menuitem "AM263Px Device Initialization";
+
+
+
+hotmenu Configure_Dual_Core_mode()
+{
+        MSS_CTRL_unlock();
+        MSS_TOPRCM_unlock();
+        MSS_RCM_unlock();
+        MSS_IOMUX_Unlock();
+        TOP_CTRL_unlock();
+        R5F_SS0_Reset_Dualcore();
+        R5F_SS1_Reset_Dualcore();
+        R5F_ROM_eclipse();
+       // Unhalt_All_R5F_cores();
+        R5F_SS0_CoreA_unhalt();             //Release R5FSS0_0 for program load
+        R5F_SS0_CoreB_unhalt();             //Release R5FSS0_1 for program load
+
+        R5F_SS1_CoreA_unhalt();             //Release R5FSS1_0 for program load
+        R5F_SS1_CoreB_unhalt();             //Release R5FSS1_1 for program load
+        MSS_L2_Mem_Init();
+        MailBox_MEM_Init();
+        GEL_TextOut("*********** R5FSS0/1 Dual Core mode Configured********\n");
+
+}
+hotmenu Configure_Lockstep_mode()
+{
+
+        MSS_CTRL_unlock();
+        MSS_TOPRCM_unlock();
+        MSS_RCM_unlock();
+        MSS_IOMUX_Unlock();
+        TOP_CTRL_unlock();
+        R5F_SS0_Reset_Lockstep();
+        R5F_SS1_Reset_Lockstep();
+        R5F_ROM_eclipse();
+        R5F_SS0_CoreA_unhalt();             //Release R5FSS0_0 for program load
+        R5F_SS0_CoreB_unhalt();             //Release R5FSS0_1 for program load
+           //Release R5FSS1_1 for program load
+      //  Unhalt_All_R5F_cores();
+        MSS_L2_Mem_Init();
+        MailBox_MEM_Init();
+
+}
+
+
+hotmenu Unhalt_ALL_R5F_cores()
+{
+    R5F_SS0_CoreA_unhalt();     //Release R5FSS0_0
+    R5F_SS0_CoreB_unhalt();     //Release R5FSS0_1
+    R5F_SS1_CoreA_unhalt();     //Release R5FSS1_0
+    R5F_SS1_CoreB_unhalt();     //Release R5FSS1_1
+    GEL_TextOut("\n\n All R5F Cores Released for program load\n");
+}
+
+// TODO: check for status bits and poll
+hotmenu Configure_Plls_R5F_400_SYS_200_Clocks()
+{
+    Program_Core_PLL();
+    Program_Per_PLL();
+    Program_SYS_CLK_DIVBY2();
+    // Switch R5SS and SYS_CLK to Core PLL, so that R5 run at 400MHz
+    Program_R5F_SYS_CLK_SRC();
+    GEL_TextOut("\n CLK Programmed R5F=400MHz and SYS_CLK=200MHz \n");
+}
+
+
+// TODO: check for status bits for all peripheral clocks.
+hotmenu Configure_All_Peripheral_Clks()
+{
+    GEL_TextOut("\n\n *** Enabling Peripheral Clocks *** \n");
+        GEL_TextOut("Enabling RTI[0:3] Clocks \n");
+        Program_RTI0_Clocks();
+        Program_RTI1_Clocks();
+        Program_RTI2_Clocks();
+        Program_RTI3_Clocks();
+        
+        GEL_TextOut("Enabling RTI_WDT[0:3] Clocks \n");
+        Program_RTI_WDT0_Clocks();
+        Program_RTI_WDT1_Clocks();
+        Program_RTI_WDT2_Clocks();
+        Program_RTI_WDT3_Clocks();
+        
+        GEL_TextOut("Enabling UART[0:5]/LIN[0:5] Clocks \n");
+        Program_LIN0_UART0_Clocks(); 
+        Program_LIN1_UART1_Clocks(); 
+        Program_LIN2_UART2_Clocks(); 
+        Program_LIN3_UART3_Clocks(); 
+        Program_LIN4_UART4_Clocks(); 
+        Program_LIN5_UART5_Clocks();
+        
+        GEL_TextOut("Enabling QSPI Clocks \n");
+        Program_OSPI_Clocks();
+        
+        GEL_TextOut("Enabling I2C Clocks \n");
+        Program_I2C_Clocks();
+        
+        GEL_TextOut("Enabling TRACE Clocks \n");
+        Program_Trace_Clocks();
+        
+        GEL_TextOut("Enabling MCAN[0:3] Clocks \n");
+        Program_MCAN0_Clocks();
+        Program_MCAN1_Clocks();
+        Program_MCAN2_Clocks();
+        Program_MCAN3_Clocks();
+        
+
+        GEL_TextOut("Enabling MMCSD Clocks \n");
+        Program_MMCSD_Clocks();
+        
+        GEL_TextOut("Enabling MCSPI[0:4] Clocks \n");
+        Program_MCSPI0_Clocks();
+        Program_MCSPI1_Clocks(); 
+        Program_MCSPI2_Clocks();
+        Program_MCSPI3_Clocks();
+        Program_MCSPI4_Clocks();
+        
+        GEL_TextOut("Enabling CONTROLSS Clocks \n");
+        Program_CONTROLSS_Clocks();
+        
+        GEL_TextOut("Enabling CPTS Clocks \n");
+        Program_CPTS_Clocks();
+        
+        GEL_TextOut("Enabling RGMI[5,50,250] Clocks \n");
+        Program_RGMII5_Clocks();
+        Program_RGMII50_Clocks();
+        Program_RGMII250_Clocks();
+        
+        GEL_TextOut("Enabling XTAL_TEMPSENSE_32K Clocks \n");
+        Program_XTAL_TEMPSENSE_32K_Clocks();
+        
+        GEL_TextOut("Enabling XTAL_MMC_32K Clocks \n");
+        Program_XTAL_MMC_32K_Clocks();
+        
+        GEL_TextOut("\n\n ***All IP Clocks are Enabled*** \n\n");
+}
+
+
+
+
+
+/*
+hotmenu Configure_R5F0()
+{
+    MSS_CTRL_unlock();
+    MSS_TOPRCM_unlock();
+    MSS_RCM_unlock();
+    MSS_IOMUX_Unlock();
+    TOP_CTRL_unlock();  
+    HSM_CTRL_unlock();
+     
+    
+//    GEL_TextOut("AM263Px Dual core switch\n");
+    Dual_core_switch();
+        
+    R5F_ROM_eclipse();
+    
+    TCM_MEM_Init();
+    MSS_L2_Mem_Init();
+    MailBox_MEM_Init(); 
+    
+    
+    R5F_SS0_CoreA_unhalt();
+
+    GEL_TextOut("*********** R5FSS0 COREA Out of Reset & Unhalted********\n");
+    GEL_TextOut("*********************************************************\n");
+    GEL_TextOut("Use Respective APIs to unhalt other R5F cores as required\n");
+    GEL_TextOut("*********************************************************\n");
+}
+*/
+

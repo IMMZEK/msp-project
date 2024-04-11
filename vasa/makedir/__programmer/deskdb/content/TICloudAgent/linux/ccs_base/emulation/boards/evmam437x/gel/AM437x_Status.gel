@@ -1,0 +1,666 @@
+//********************************************************************************
+//				AM43xx Global Functions, Status, and CLKOUT2 functions
+//08/25/14:  Updated PLL status functions
+//********************************************************************************
+
+//Watchdog is disabled to eliminate warm resets during debug
+hotmenu Disable_Watchdog()
+{
+    WR_MEM_32(WDT1_WSPR,0x0000AAAA);
+    WR_MEM_32(WDT1_WSPR,0x00005555);
+}
+
+//Set the processor to ARM mode and Supervisor mode after a file is loaded, on a 
+//restart or on a reset
+//This will facilitate code loading and debug by putting the processor in a known
+//state
+
+//this function changes certain states of the processor to 
+//allow proper access from CCS.  May not be needed in all situations
+hotmenu AM43xxStartState()
+{
+  CPSR &= ~0x20;				 //set to ARM mode
+  CPSR = (CPSR & ~0x1F) | 0x13;  //set to privledged mode
+  REG_CTXA9_CP15_C1_SCTLR &= ~0x1; //disable MMU
+}
+
+
+DisableOnFileLoaded()
+{
+   AM43xxStartState();
+}
+
+DisableOnRestart()
+{
+   AM43xxStartState();     
+}
+
+DisableOnReset()
+{
+   AM43xxStartState();
+   Disable_Watchdog();
+}
+
+DisableOnTargetConnect()
+{
+ //   AM43xxStartState();
+    //AM43xx_GP_EVM_Initialization();
+    Disable_Watchdog();
+}
+
+//##############################################################################
+//##############################################################################
+//                       Status Section
+//##############################################################################
+//##############################################################################
+
+menuitem "Status"
+
+hotmenu Get_MAC_ID()
+{
+	unsigned int temp;
+	unsigned int temp2;
+	unsigned char byte0,byte1,byte2,byte3,byte4,byte5;
+	temp = RD_MEM_32(MAC_ID0_LO);
+	temp2 = RD_MEM_32(MAC_ID0_HI);
+	byte0 = (unsigned char)((temp & 0xFF00)>>8);
+	byte1 = temp & 0xFF;
+	byte2 = (temp2 & 0xFF000000) >> 24;
+	byte3 = (temp2 & 0xFF0000) >> 16;
+	byte4 = (temp2 & 0xFF00) >> 8;
+	byte5 = temp2 & 0xFF;
+	GEL_TextOut("\tMAC_ID0 = %x:%x:%x:%x:%x:%x\n",,,,,byte5,byte4,byte3,byte2,byte1,byte0);
+	
+	temp = RD_MEM_32(MAC_ID1_LO);
+	temp2 = RD_MEM_32(MAC_ID1_HI);
+	byte0 = (unsigned char)((temp & 0xFF00)>>8);
+	byte1 = temp & 0xFF;
+	byte2 = (temp2 & 0xFF000000) >> 24;
+	byte3 = (temp2 & 0xFF0000) >> 16;
+	byte4 = (temp2 & 0xFF00) >> 8;
+	byte5 = temp2 & 0xFF;
+	GEL_TextOut("\tMAC_ID1 = %x:%x:%x:%x:%x:%x\n",,,,,byte5,byte4,byte3,byte2,byte1,byte0);
+
+}
+
+menuitem "Device Identification"
+
+hotmenu Device_Type()
+{
+unsigned int temp;
+temp = RD_MEM_32(CONTROL_STATUS);
+temp = (temp & 0x700) >> 8;
+if (temp == 3)
+  GEL_TextOut(" **** Device Type: GP\n","Output",1,1,1);
+else 
+  GEL_TextOut(" **** Device Type: INVALID\n","Output",1,1,1);
+return temp;
+}
+
+hotmenu USB_VID_PID_Read()
+{
+	GEL_TextOut("USB_PID = %x\n",,,,,(RD_MEM_32(USB_VID_PID) & 0xFFFF));
+	GEL_TextOut("USB_VID = %x\n",,,,,( (RD_MEM_32(USB_VID_PID) & 0xFFFF0000) >> 16));
+}
+
+hotmenu Device_ID_Read()
+{
+	unsigned int rev = (((RD_MEM_32(DEVICE_ID)) & 0xF0000000) >> 28);
+	if (rev==1)
+		GEL_TextOut("Device Revision   = v1.1 Silicon\n",,,,,);
+	else if (rev==2)
+		GEL_TextOut("Device Revision   = v1.2 Silicon\n",,,,,);
+	else
+		GEL_TextOut("Silicon revision NOT RECOGNIZED\n",,,,,);
+	GEL_TextOut("JTAG_ID (PartNum) = %x\n",,,,,(((RD_MEM_32(DEVICE_ID)) & 0x0FFFF000) >> 12));
+	GEL_TextOut("mfgr              = %x\n",,,,,(((RD_MEM_32(DEVICE_ID)) & 0x00000FFE) >> 1));
+}
+
+hotmenu Device_Features_Read()
+{
+	unsigned int temp;
+	temp = RD_MEM_32(DEV_FEATURE);
+	if(temp & 0x20000000)
+	 GEL_TextOut("SGX is ENABLED\n",,,,,);
+	else
+	 GEL_TextOut("SGX is DISABLED\n",,,,,);
+	if(temp & 0x02000000)
+	 GEL_TextOut("DSS is ENABLED\n",,,,,);
+	else
+	 GEL_TextOut("DSS is DISABLED\n",,,,,);
+	if(temp & 0x00020000)
+	 GEL_TextOut("PRU TX_AUTO_SEQUENCE is ENABLED\n",,,,,);
+	else
+	 GEL_TextOut("PRU TX_AUTO_SEQUENCE is DISABLED\n",,,,,); 
+	if(temp & 0x00010000)
+	 GEL_TextOut("PRU EtherCAT functionality enabled, ODD_NIBBLE enabled\n",,,,,);
+	else
+	 GEL_TextOut("PRU EtherCAT functionality enabled, ODD_NIBBLE disabled\n",,,,,); 
+	if(temp & 0x00000080)
+	 GEL_TextOut("DCAN is ENABLED\n",,,,,);
+	else
+	 GEL_TextOut("DCAN is DISABLED\n",,,,,);
+	if(temp & 0x00000002)
+	 GEL_TextOut("CPSW is ENABLED\n",,,,,);
+	else
+	 GEL_TextOut("CPSW is DISABLED\n",,,,,);
+	if(temp & 0x00000001)
+	 GEL_TextOut("PRU_ICSS is ENABLED\n",,,,,);
+	else
+	 GEL_TextOut("PRU_ICSS is DISABLED\n",,,,,);
+
+}
+
+GetInputClockFrequency()
+{
+	unsigned int freq,clkin;
+	
+	if(Device_Type() == 3)
+	{
+	 freq = (RD_MEM_32(CONTROL_STATUS) & 0x00C00000) >> 22;
+	 if(freq == 0)
+	 {
+		 clkin = 96; //return an integer instead of 19.2
+		 GEL_TextOut("System input clock is 19.2MHz\n",,,,,);
+	 }
+	 if(freq == 1)
+	 {
+		 clkin = 24;
+		 GEL_TextOut("System input clock is 24MHz\n",,,,,);
+	 }
+	 if(freq == 2)
+	 {
+		 clkin = 25;
+		 GEL_TextOut("System input clock is 25MHz\n",,,,,);
+	 }
+	 if(freq == 3)
+	 {
+		 clkin = 26;
+		 GEL_TextOut("System input clock is 26MHz\n",,,,,);
+	 }
+	}
+	else
+    {
+        GEL_TextOut("Invalid Device Type\n");
+
+    }
+	return clkin;
+
+}
+hotmenu System_Clock()
+{
+	unsigned int sysclk;
+
+	sysclk = GetInputClockFrequency();
+		
+	 if(sysclk == 96)
+		 GEL_TextOut("\tSystem Clock Frequency set to 19.2MHz\n",,,,,);
+	 if(sysclk == 24)
+		 GEL_TextOut("\tSystem Clock Frequency set to 24MHz\n",,,,,);
+	 if(sysclk == 25)
+		 GEL_TextOut("\tSystem Clock Frequency set to 25MHz\n",,,,,);
+	 if(sysclk == 26)
+		 GEL_TextOut("\tSystem Clock Frequency set to 26MHz\n",,,,,);
+
+}
+
+menuitem "PLL settings"
+hotmenu ALL_PLL_settings()
+{
+	CORE_PLL_settings();
+	MPU_PLL_settings();
+	PER_PLL_settings();
+	DDR_PLL_settings();
+	EXT_PLL_settings();
+
+}
+hotmenu CORE_PLL_settings()
+{
+	unsigned int core_pll_m,core_pll_n,core_pll_m4,core_pll_m5,core_pll_m6,L3,core_idlest;
+	unsigned int clkin;
+	
+	core_pll_m = ((RD_MEM_32(CM_CLKSEL_DPLL_CORE) & 0x7ff00) >> 8);
+	core_pll_n = (RD_MEM_32(CM_CLKSEL_DPLL_CORE) & 0xFF);
+	core_pll_m4 = (RD_MEM_32(CM_DIV_M4_DPLL_CORE) & 0x1F);
+	core_pll_m5 = (RD_MEM_32(CM_DIV_M5_DPLL_CORE) & 0x1F);
+	core_pll_m6 = (RD_MEM_32(CM_DIV_M6_DPLL_CORE) & 0x1F);
+	core_idlest = (RD_MEM_32(CM_IDLEST_DPLL_CORE));
+
+	clkin = GetInputClockFrequency();
+	if(core_idlest==1)
+	{
+		GEL_TextOut("Core PLL:  M=%d, N=%d M4=%d M5=%d, M6=%d\n",,,,,core_pll_m,core_pll_n,core_pll_m4,core_pll_m5,core_pll_m6);
+		L3 = (2 * core_pll_m * clkin)/((core_pll_n+1) * core_pll_m4);
+		if(clkin==96)
+			L3 = L3/5; //using int 96 for 19.2 clock freq, so div by 5
+		GEL_TextOut("L3=%dMHz\n",,,,,L3);
+	}
+	else
+		GEL_TextOut("CORE PLL is not LOCKED\n",,,,,);
+}
+
+hotmenu MPU_PLL_settings()
+{
+	unsigned int mpu_pll_m,mpu_pll_n,mpu_pll_m2,mpu_freq,clkin,mpu_idlest;
+	unsigned int clkin;
+	
+	mpu_pll_m = ((RD_MEM_32(CM_CLKSEL_DPLL_MPU) & 0x7ff00) >> 8);
+	mpu_pll_n = (RD_MEM_32(CM_CLKSEL_DPLL_MPU) & 0x7F);
+	mpu_pll_m2 = (RD_MEM_32(CM_DIV_M2_DPLL_MPU) & 0x1F);
+	mpu_idlest = (RD_MEM_32(CM_IDLEST_DPLL_MPU));
+	
+	clkin = GetInputClockFrequency();
+	if(mpu_idlest==1)
+		{
+			GEL_TextOut("MPU PLL:  M=%d, N=%d M2=%d\n",,,,,mpu_pll_m,mpu_pll_n,mpu_pll_m2);
+			mpu_freq = (mpu_pll_m * clkin)/((mpu_pll_n+1) * mpu_pll_m2);
+			if(clkin==96)
+				mpu_freq = mpu_freq/5; //using int 96 for 19.2 clock freq, so div by 5
+			GEL_TextOut("MPU Freq = %dMHz\n",,,,,mpu_freq);
+		}
+	else
+		GEL_TextOut("MPU PLL is not LOCKED\n",,,,,);
+}
+
+hotmenu PER_PLL_settings()
+{
+	unsigned int per_pll_m,per_pll_n,per_pll_m2,per_pll_sd,per_clkout,per_idlest;	
+	unsigned int clkin;
+	
+	per_pll_m = ((RD_MEM_32(CM_CLKSEL_DPLL_PER) & 0xFFF00) >> 8);
+	per_pll_n = (RD_MEM_32(CM_CLKSEL_DPLL_PER) & 0xFF);
+	per_pll_m2 = (RD_MEM_32(CM_DIV_M2_DPLL_PER) & 0x1F);
+	per_pll_sd = ((RD_MEM_32(CM_CLKSEL_DPLL_PER) >> 24) & 0xFF);
+	per_idlest = (RD_MEM_32(CM_IDLEST_DPLL_PER));
+	
+	clkin = GetInputClockFrequency();
+	if(per_idlest==1)
+		{
+			GEL_TextOut("PER PLL:  M=%d, N=%d M2=%d SD=%d\n",,,,,per_pll_m,per_pll_n,per_pll_m2,per_pll_sd);
+			per_clkout = (per_pll_m * clkin)/((per_pll_n+1) * per_pll_m2);
+			if(clkin==96)
+				per_clkout = per_clkout/5; //using int 96 for 19.2 clock freq, so div by 5
+			GEL_TextOut("PER Clkout = %dMHz\n",,,,,per_clkout);
+			GEL_TextOut("MMC_CLK    = %dMHz\n",,,,,per_clkout/2);
+			GEL_TextOut("CLK_48     = %dMHz\n",,,,,per_clkout/4);
+			GEL_TextOut("CLK_24     = %dMHz\n",,,,,per_clkout/8);
+		}
+	else
+		GEL_TextOut("PER PLL is not LOCKED\n",,,,,);
+}
+
+hotmenu DDR_PLL_settings()
+{
+	unsigned int ddr_pll_m,ddr_pll_n=0,ddr_pll_m2=0,ddr_pll_m4=0,dco_freq,ddr_freq,dll_freq,ddr_idlest;
+	unsigned int clkin,HD_mode;
+	
+	ddr_pll_m = (((RD_MEM_32(CM_CLKSEL_DPLL_DDR)) & 0x7ff00) >> 8);
+	ddr_pll_n = (RD_MEM_32(CM_CLKSEL_DPLL_DDR) & 0x7F);
+	ddr_pll_m2 = (RD_MEM_32(CM_DIV_M2_DPLL_DDR) & 0x1F);
+	ddr_pll_m4 = (RD_MEM_32(CM_DIV_M4_DPLL_DDR) & 0x1F);
+	ddr_idlest = (RD_MEM_32(CM_IDLEST_DPLL_DDR));
+	
+	clkin = GetInputClockFrequency();
+	if(ddr_idlest==1)
+		{
+			GEL_TextOut("DDR PLL:  M=%d, N=%d M2=%d M4=%d\n",,,,,ddr_pll_m,ddr_pll_n,ddr_pll_m2,ddr_pll_m4);
+			dco_freq = (2 * clkin * ddr_pll_m)/(ddr_pll_n+1);
+			ddr_freq = (dco_freq/ddr_pll_m2)/2;
+			if(clkin==96)
+				ddr_freq = ddr_freq/5; //using int 96 for 19.2 clock freq, so div by 5
+			dll_freq = dco_freq/ddr_pll_m4;
+			if(clkin==96)
+				dll_freq = dll_freq/5; //using int 96 for 19.2 clock freq, so div by 5
+			GEL_TextOut("DDR Freq (DFI Clock) = %dMHz\n",,,,,ddr_freq);
+			GEL_TextOut("DDR DLL Freq = %dMHz\n",,,,,dll_freq);
+			
+			//check for correct configuration of half delay mode
+			if((dll_freq*2) == ddr_freq)
+			{
+				GEL_TextOut("Half Delay Mode should be enabled (DFI clock = 2*DLL clock)\n");
+				HD_mode = ((RD_MEM_32(EMIF_DDR_PHY_CTRL_1)) & 0x200000) >> 21;
+				if(HD_mode == 1)
+				{
+					GEL_TextOut("Half Delay Mode is enabled!! DDR Clock Configuration is correct!\n");
+				}
+				else
+				{
+					GEL_TextOut("\n\n********HALF DELAY MODE IS NOT ENABLED.  DDR CLOCK CONFIGURATION IS NOT CORRECT!******\n\n");
+				}
+			}
+			else if (dll_freq == ddr_freq)
+			{
+				GEL_TextOut("Half Delay Mode should be disabled (DFI clock = DLL clock)\n");
+				HD_mode = ((RD_MEM_32(EMIF_DDR_PHY_CTRL_1)) & 0x200000) >> 21;
+				if(HD_mode == 0)
+				{
+					GEL_TextOut("Half Delay Mode is disabled!!  DDR Clock Configuration is correct!\n");
+				}
+				else
+				{
+					GEL_TextOut("\n\n********HALF DELAY MODE IS NOT DISABLED.  DDR CLOCK CONFIGURATION IS NOT CORRECT!******\n\n");
+				}
+				
+			}
+			else
+				GEL_TextOut("DFI clock to DLL clock ratio is incorrect!!!!!\n\n");
+		}
+	else
+		GEL_TextOut("DDR PLL is not LOCKED\n",,,,,);
+}
+
+hotmenu EXT_PLL_settings()
+{
+	unsigned int ext_pll_m,ext_pll_n,ext_pll_m2,ext_clk,ext_idlest,ext_pll_sd;
+	unsigned int clkin;
+	unsigned int divfactor,div_total;
+	
+	ext_pll_m = ((RD_MEM_32(CM_CLKSEL_DPLL_EXTDEV) & 0xFFF00) >> 8);
+	ext_pll_n = (RD_MEM_32(CM_CLKSEL_DPLL_EXTDEV) & 0xFF);
+	ext_pll_m2 = (RD_MEM_32(CM_DIV_M2_DPLL_EXTDEV) & 0x7F);
+	ext_idlest = (RD_MEM_32(CM_IDLEST_DPLL_EXTDEV));
+	ext_pll_sd = ((RD_MEM_32(CM_CLKSEL_DPLL_EXTDEV) >> 24) & 0xFF);
+	
+	clkin = GetInputClockFrequency();
+	if(ext_idlest==1)
+		{
+			GEL_TextOut("EXT PLL:  M=%d, N=%d M2=%d SD=%d\n",,,,,ext_pll_m,ext_pll_n,ext_pll_m2,ext_pll_sd);
+			ext_clk = (ext_pll_m * clkin)/((ext_pll_n+1) * ext_pll_m2);
+			if(clkin==96)
+				ext_clk = ext_clk/5; //using int 96 for 19.2 clock freq, so div by 5
+			GEL_TextOut("EXT Clock = %dMHz\n",,,,,ext_clk);
+			//Display CLKOUT2 freq if it is setup with this clock
+			if ((RD_MEM_32(CM_CLKOUT2_CTRL) & 0x10000) == 0x10000)
+			{
+				//CLKOUT2 is enabled
+				if ((RD_MEM_32(CM_CLKOUT2_CTRL) & 0x7) == 0x6)
+				{
+					//EXTDEV is selected as the source
+					div_total = ((RD_MEM_32(CM_CLKOUT2_CTRL) & 0x70) >> 4) + 1;  //from CLKOUT2DIV
+					divfactor = (RD_MEM_32(CM_CLKOUT2_CTRL) >> 8) & 0x7; //from CLKOUT2POSTDIV
+					if(divfactor != 0)
+						div_total = div_total << divfactor;
+					GEL_TextOut("CLKOUT2 divide value = %d\n",,,,,div_total);
+					GEL_TextOut("Actual Clock on CLKOUT2 pin = %dMHz\n",,,,,(ext_clk/div_total));
+				}
+				else
+				    GEL_TextOut("EXTDEV is not selected as CLKOUT2 source\n",,,,,);
+				
+			}
+			else
+			    GEL_TextOut("CLKOUT2 is not enabled\n",,,,,);
+				
+			
+		}
+	else
+		GEL_TextOut("EXT PLL is not LOCKED\n",,,,,);
+}
+
+
+//##############################################################################
+//##############################################################################
+//                       SYS_CLKOUT2 Configuration Section
+//##############################################################################
+//##############################################################################
+
+menuitem "SYS_CLKOUT2"
+
+hotmenu CLKOUT2_RTC_32KHz()
+{
+set_CLKOUT2(0);
+temp = RD_MEM_32(CM_CLKOUT1_CTRL);
+temp |= 0x01000000; 
+WR_MEM_32(CM_CLKOUT1_CTRL,temp);
+
+} 
+
+hotmenu L3_CLK()
+{
+set_CLKOUT2(1);
+} 
+
+//DDR needs to be enabled
+hotmenu DDR_PHY_Clock()
+{
+EMIF_PRCM_CLK_ENABLE();
+set_CLKOUT2(2);
+} 
+
+hotmenu PER_Clock()
+{
+set_CLKOUT2(3);
+} 
+
+hotmenu LCD_Clock()
+{
+set_CLKOUT2(4);
+} 
+
+hotmenu MPU_Clock()
+{
+set_CLKOUT2(5);
+} 
+
+hotmenu EXT_Clock()
+{
+set_CLKOUT2(6);
+} 
+      
+set_CLKOUT2(UWORD32 mode)
+{
+unsigned int temp;
+unsigned int divider = 2; //change here if you want to pick a different divider
+
+WR_MEM_32(CONTROL_CONF_XDMA_EVENT_INTR1,0x3); // Set Pinmux to mode 3 (and rest to zero)
+WR_MEM_32(CM_CLKOUT2_CTRL, (divider-1) << 4); //Set divider (which is set above)
+
+temp = RD_MEM_32(CM_CLKOUT2_CTRL);
+temp = (temp & ~(0x7) ) | mode;
+WR_MEM_32(CM_CLKOUT2_CTRL,temp);
+
+enable_SYS_CLKOUT2();
+
+if(mode == 0)
+    GEL_TextOut(" **** SYS_CLKOUT2 = 32khz Crystal (divided by %d)\n",,,,,(unsigned int *)(divider));
+else if (mode == 1)
+    GEL_TextOut(" **** SYS_CLKOUT2 = L3 (From Core PLL) (divided by %d)\n",,,,,(unsigned int *)(divider));
+else if (mode == 2)
+    GEL_TextOut(" **** SYS_CLKOUT2 = DDR PHY CLK (divided by %d)\n",,,,,(unsigned int *)(divider));
+else if (mode == 3)
+    GEL_TextOut(" **** SYS_CLKOUT2 = Per PLL Clock (192 Mhz)(divided by %d)\n",,,,,(unsigned int *)(divider));
+else if (mode == 4)
+    GEL_TextOut(" **** SYS_CLKOUT2 = LCD Pixel Clock (divided by %d)\n",,,,,(unsigned int *)(divider));
+else if (mode == 5)
+    GEL_TextOut(" **** SYS_CLKOUT2 = MPU PLL Clock (divided by %d)\n",,,,,(unsigned int *)(divider));
+else if (mode == 6)
+    GEL_TextOut(" **** SYS_CLKOUT2 = EXTCLK_PLL_CLKOUT (divided by %d)\n",,,,,(unsigned int *)(divider));
+
+}
+
+enable_SYS_CLKOUT2()
+{
+unsigned int temp;
+temp = RD_MEM_32(CM_CLKOUT2_CTRL);
+temp = temp | 0x10000;
+WR_MEM_32(CM_CLKOUT2_CTRL,temp);
+}
+
+
+menuitem "SYS_CLKOUT1"
+
+hotmenu CLKOUT1_RTC_32KHz()
+{
+set_CLKOUT1(0);
+} 
+
+hotmenu CLKOUT1_L3F_CLK()
+{
+set_CLKOUT1(1);
+} 
+
+//DDR needs to be enabled
+hotmenu CLKOUT1_DDR_PHY_Clock()
+{
+EMIF_PRCM_CLK_ENABLE();
+set_CLKOUT1(2);
+} 
+
+hotmenu CLKOUT1_PER_Clock()
+{
+set_CLKOUT1(3);
+} 
+
+hotmenu CLKOUT1_LCD_Clock()
+{
+set_CLKOUT1(4);
+} 
+
+hotmenu CLKOUT1_MPU_Clock()
+{
+set_CLKOUT1(5);
+} 
+
+hotmenu CLKOUT1_Master_OSC()
+{
+set_CLKOUT1(7);
+} 
+
+hotmenu CLKOUT1_DPLL_EXT()
+{
+set_CLKOUT1(8);
+} 
+
+set_CLKOUT1(UWORD32 mode)
+{
+unsigned int temp;
+
+WR_MEM_32(CONTROL_CONF_XDMA_EVENT_INTR0,0x3); // Set Pinmux to mode 3 (and rest to zero)
+
+if(mode == 0)  //32KHz RTC
+{
+	temp = 0x10000;  //select source from 32KHz sources
+	temp |= 0x1000000;  //select RTC 32KHz;
+						//no divide
+	WR_MEM_32(CM_CLKOUT1_CTRL,temp);
+    GEL_TextOut(" **** SYS_CLKOUT1 = 32KHz RTC Crystal\n");
+}
+else if (mode == 1) //L3F
+{
+	temp = 0x20000;  //select source based on other bits
+	temp |= 0x1;  	//select L3F;
+	temp |= 0x10;	//divide by 2
+	WR_MEM_32(CM_CLKOUT1_CTRL,temp);
+    GEL_TextOut(" **** SYS_CLKOUT1 = L3F clock (divided by 2)\n");
+}
+	
+else if (mode == 2) //DDR PHY
+{
+	temp = 0x20000;  //select source based on other bits
+	temp |= 0x2;  	//select DDR PHY;
+	temp |= 0x10;	//divide by 2
+	WR_MEM_32(CM_CLKOUT1_CTRL,temp);
+    GEL_TextOut(" **** SYS_CLKOUT1 = DDR PHY clock (divided by 2)\n");
+}
+
+else if (mode == 3)  //PER PLL
+{
+	temp = 0x20000;  //select source based on other bits
+	temp |= 0x3;  	//select PER PLL;
+	temp |= 0x10;	//divide by 2
+	WR_MEM_32(CM_CLKOUT1_CTRL,temp);
+    GEL_TextOut(" **** SYS_CLKOUT1 = PER PLL clock (divided by 2)\n");
+}
+
+else if (mode == 4) //LCD
+{
+	temp = 0x20000;  //select source based on other bits
+	temp |= 0x4;  	//select LCD Pixel clock;
+	temp |= 0x10;	//divide by 2
+	WR_MEM_32(CM_CLKOUT1_CTRL,temp);
+    GEL_TextOut(" **** SYS_CLKOUT1 = LCD Pixel clock (divided by 2)\n");
+}
+else if (mode == 5)
+{
+	temp = 0x20000;  //select source based on other bits
+	temp |= 0x5;  	//select MPU_PLL_CLKOUT;
+	temp |= 0x10;	//divide by 2
+	WR_MEM_32(CM_CLKOUT1_CTRL,temp);
+    GEL_TextOut(" **** SYS_CLKOUT1 = MPU_PLL clock (divided by 2)\n");
+}
+else if (mode == 7)
+{
+	temp = 0x00000;  //select source as Master OSC
+	temp |= 0x100000;  //divide by 2
+	WR_MEM_32(CM_CLKOUT1_CTRL,temp);
+    GEL_TextOut(" **** SYS_CLKOUT1 = Master OSC (divided by 2)\n");
+}
+
+else if (mode == 8) //EXT PLL
+{
+	temp = 0x30000;  //select source based on other bits
+					//no divide
+	WR_MEM_32(CM_CLKOUT1_CTRL,temp);
+	GEL_TextOut(" **** SYS_CLKOUT1 = EXT PLL\n");
+}
+
+enable_SYS_CLKOUT1();
+
+}
+
+enable_SYS_CLKOUT1()
+{
+unsigned int temp;
+temp = RD_MEM_32(CM_CLKOUT1_CTRL);
+temp = temp | 0x800000;
+WR_MEM_32(CM_CLKOUT1_CTRL,temp);
+}
+
+menuitem "QSPI"
+hotmenu Enable_QSPI()
+{
+  UWORD32 temp;
+  
+  	GEL_TextOut("Enabling QSPI... \n");
+
+    /*QSPI_EN - GPIO1_16 PINMUX Setup*/ 
+    WR_MEM_32(CONTROL_CONF_GPMC_A0, 0x20007);
+
+    WR_MEM_32(CM_PER_GPIO1_CLKCTRL,0x2);
+    /* Poll if module is functional */
+    while(RD_MEM_32(CM_PER_GPIO1_CLKCTRL) & 0x30000 != 0x0);
+
+    //enable module
+    WR_MEM_32(GPIO1_CTRL,0x0); 
+        
+    /*enable output for GPIO1_16*/
+     WR_MEM_32((GPIO1_SETDATAOUT),(1<<16));
+     temp = RD_MEM_32(GPIO1_OE);
+     temp = temp & ~(1 << 16);
+     WR_MEM_32(GPIO1_OE,temp);
+
+     GEL_TextOut("QSPI enabled\n");
+
+}
+
+hotmenu Disable_QSPI()
+{
+  UWORD32 temp;
+  
+    /*QSPI_EN - GPIO1_16 PINMUX Setup*/ 
+    WR_MEM_32(CONTROL_CONF_GPMC_A0, 0x20007);
+
+    WR_MEM_32(CM_PER_GPIO1_CLKCTRL,0x2);
+    /* Poll if module is functional */
+    while(RD_MEM_32(CM_PER_GPIO1_CLKCTRL) & 0x30000 != 0x0);
+       
+    //enable module
+    WR_MEM_32(GPIO1_CTRL,0x0); 
+    
+    /*enable output for GPIO1_16*/
+     WR_MEM_32((GPIO1_CLEARDATAOUT),(1<<16));
+     temp = RD_MEM_32(GPIO1_OE);
+     temp = temp & ~(1 << 16);
+     WR_MEM_32(GPIO1_OE,temp);
+}
+
+

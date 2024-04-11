@@ -1,0 +1,896 @@
+<module name="FDIF" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="FDIF_REVISION" acronym="FDIF_REVISION" offset="0x0" width="32" description="IP Revision Identifier (X.Y.R) Used by software to track features, bugs, and compatibility">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="0x---- ---- TI Internal Data" description="IP Revision number" range="" rwaccess="R"/>
+  </register>
+  <register id="FDIF_HWINFO" acronym="FDIF_HWINFO" offset="0x4" width="32" description="Information about the IP module's hardware configuration, that is, typically the module's HDL generics (if any). Actual field format and encoding is up to the module's designer to decide.">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FDIF_TAGS" width="4" begin="3" end="0" resetval="0xF" description="Hardware design value. This bit field reflects the value of the FDIF_TAG generic parameter. 0x0: 1 tag supported 0x1: 2 tags supported [...] 0xF: 16 tags supported" range="" rwaccess="R"/>
+  </register>
+  <register id="FDIF_SYSCONFIG" acronym="FDIF_SYSCONFIG" offset="0x10" width="32" description="Clock management configuration">
+    <bitfield id="RESERVED" width="26" begin="31" end="6" resetval="0x0000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="STANDBYMODE" width="2" begin="5" end="4" resetval="0x2" description="Configuration of the local initiator state management mode. By definition, initiator may generate read/write transaction as long as it is out of STANDBY state." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="STANDBYMODE_0" description="Force-standby mode: local initiator is unconditionally placed in standby state. Backup mode, for debug only."/>
+      <bitenum value="1" id="1" token="STANDBYMODE_1" description="No-standby mode: local initiator is unconditionally placed out of standby state. Backup mode, for debug only."/>
+      <bitenum value="2" id="2" token="STANDBYMODE_2" description="Smart-standby mode: local initiator standby status depends on local conditions, that is, the module's functional requirement from the initiator. IP module shall not generate (initiator-related) wake-up events."/>
+      <bitenum value="3" id="3" token="STANDBYMODE_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="IDLEMODE" width="2" begin="3" end="2" resetval="0x2" description="Configuration of the local target state management mode. By definition, target can handle read/write transaction as long as it is out of IDLE state." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="IDLEMODE_0" description="Force-idle mode: local target's idle state follows (acknowledges) the system's idle requests unconditionally, that is, regardless of the IP module's internal requirements. Backup mode, for debug only."/>
+      <bitenum value="1" id="1" token="IDLEMODE_1" description="No-idle mode: local target never enters idle state. Backup mode, for debug only."/>
+      <bitenum value="2" id="2" token="IDLEMODE_2" description="Smart-idle mode: local target's idle state eventually follows (acknowledges) the system's idle requests, depending on the IP module's internal requirements. IP module shall not generate (IRQ- or DMA-request-related) wake-up events."/>
+      <bitenum value="3" id="3" token="IDLEMODE_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="1" end="1" resetval="0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SOFTRESET" width="1" begin="0" end="0" resetval="0" description="Software reset." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="SOFTRESET_0_r" description="Reset done, no pending action"/>
+      <bitenum value="0" id="0" token="SOFTRESET_0_w" description="No action"/>
+      <bitenum value="1" id="1" token="SOFTRESET_1_w" description="Initiate software reset"/>
+      <bitenum value="1" id="1" token="SOFTRESET_1_r" description="Reset (software or other) ongoing"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_IRQSTATUS_RAW_j_0" acronym="FDIF_IRQSTATUS_RAW_j_0" offset="0x24" width="32" description="Per-event raw interrupt status vector, line #n. Raw status is set even if event is not enabled. Write 1 to set the (raw) status, mostly for debug.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH_IRQ" width="1" begin="8" end="8" resetval="0" description="Face detection processing done." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_r" description="No event pending"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_r" description="Event pending"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_w" description="Set event (debug)"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_IRQ" width="1" begin="0" end="0" resetval="0" description="Error received by the L3 port." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="0" token="ERR_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="ERR_IRQ_0_r" description="No event pending"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_r" description="Event pending"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_w" description="Set event (debug)"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_IRQSTATUS_RAW_j_1" acronym="FDIF_IRQSTATUS_RAW_j_1" offset="0x34" width="32" description="Per-event raw interrupt status vector, line #n. Raw status is set even if event is not enabled. Write 1 to set the (raw) status, mostly for debug.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH_IRQ" width="1" begin="8" end="8" resetval="0" description="Face detection processing done." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_r" description="No event pending"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_r" description="Event pending"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_w" description="Set event (debug)"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_IRQ" width="1" begin="0" end="0" resetval="0" description="Error received by the L3 port." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="0" token="ERR_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="ERR_IRQ_0_r" description="No event pending"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_r" description="Event pending"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_w" description="Set event (debug)"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_IRQSTATUS_RAW_j_2" acronym="FDIF_IRQSTATUS_RAW_j_2" offset="0x44" width="32" description="Per-event raw interrupt status vector, line #n. Raw status is set even if event is not enabled. Write 1 to set the (raw) status, mostly for debug.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH_IRQ" width="1" begin="8" end="8" resetval="0" description="Face detection processing done." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_r" description="No event pending"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_r" description="Event pending"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_w" description="Set event (debug)"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_IRQ" width="1" begin="0" end="0" resetval="0" description="Error received by the L3 port." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="0" token="ERR_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="ERR_IRQ_0_r" description="No event pending"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_r" description="Event pending"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_w" description="Set event (debug)"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_IRQSTATUS_j_0" acronym="FDIF_IRQSTATUS_j_0" offset="0x28" width="32" description="Per-event 'enabled' interrupt status vector, line #n. Enabled status is not set unless event is enabled. Write 1 to clear the status after interrupt has been serviced (raw status gets cleared, that is, even if not enabled).">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH_IRQ" width="1" begin="8" end="8" resetval="0" description="Face detection processing done." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_r" description="No (enabled) event pending"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_r" description="Event pending"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_w" description="Clear (raw) event"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_IRQ" width="1" begin="0" end="0" resetval="0" description="Error received by the L3 port." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="0" token="ERR_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="ERR_IRQ_0_r" description="No (enabled) event pending"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_r" description="Event pending"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_w" description="Clear (raw) event"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_IRQSTATUS_j_1" acronym="FDIF_IRQSTATUS_j_1" offset="0x38" width="32" description="Per-event 'enabled' interrupt status vector, line #n. Enabled status is not set unless event is enabled. Write 1 to clear the status after interrupt has been serviced (raw status gets cleared, that is, even if not enabled).">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH_IRQ" width="1" begin="8" end="8" resetval="0" description="Face detection processing done." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_r" description="No (enabled) event pending"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_r" description="Event pending"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_w" description="Clear (raw) event"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_IRQ" width="1" begin="0" end="0" resetval="0" description="Error received by the L3 port." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="0" token="ERR_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="ERR_IRQ_0_r" description="No (enabled) event pending"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_r" description="Event pending"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_w" description="Clear (raw) event"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_IRQSTATUS_j_2" acronym="FDIF_IRQSTATUS_j_2" offset="0x48" width="32" description="Per-event 'enabled' interrupt status vector, line #n. Enabled status is not set unless event is enabled. Write 1 to clear the status after interrupt has been serviced (raw status gets cleared, that is, even if not enabled).">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH_IRQ" width="1" begin="8" end="8" resetval="0" description="Face detection processing done." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_r" description="No (enabled) event pending"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_r" description="Event pending"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_w" description="Clear (raw) event"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_IRQ" width="1" begin="0" end="0" resetval="0" description="Error received by the L3 port." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="0" token="ERR_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="ERR_IRQ_0_r" description="No (enabled) event pending"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_r" description="Event pending"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_w" description="Clear (raw) event"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_IRQENABLE_SET_j_0" acronym="FDIF_IRQENABLE_SET_j_0" offset="0x2C" width="32" description="Per-event interrupt enable bit vector, line #n. Write 1 to set (enable interrupt). Readout equal to corresponding _CLR register.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH_IRQ" width="1" begin="8" end="8" resetval="0" description="Face detection processing done." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_r" description="Interrupt disabled (masked)"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_r" description="Interrupt enabled"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_w" description="Enable interrupt"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_IRQ" width="1" begin="0" end="0" resetval="0" description="Error received by the L3 port." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="0" token="ERR_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="ERR_IRQ_0_r" description="Interrupt disabled (masked)"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_r" description="Interrupt enabled"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_w" description="Enable interrupt"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_IRQENABLE_SET_j_1" acronym="FDIF_IRQENABLE_SET_j_1" offset="0x3C" width="32" description="Per-event interrupt enable bit vector, line #n. Write 1 to set (enable interrupt). Readout equal to corresponding _CLR register.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH_IRQ" width="1" begin="8" end="8" resetval="0" description="Face detection processing done." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_r" description="Interrupt disabled (masked)"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_r" description="Interrupt enabled"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_w" description="Enable interrupt"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_IRQ" width="1" begin="0" end="0" resetval="0" description="Error received by the L3 port." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="0" token="ERR_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="ERR_IRQ_0_r" description="Interrupt disabled (masked)"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_r" description="Interrupt enabled"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_w" description="Enable interrupt"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_IRQENABLE_SET_j_2" acronym="FDIF_IRQENABLE_SET_j_2" offset="0x4C" width="32" description="Per-event interrupt enable bit vector, line #n. Write 1 to set (enable interrupt). Readout equal to corresponding _CLR register.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH_IRQ" width="1" begin="8" end="8" resetval="0" description="Face detection processing done." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_r" description="Interrupt disabled (masked)"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_r" description="Interrupt enabled"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_w" description="Enable interrupt"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_IRQ" width="1" begin="0" end="0" resetval="0" description="Error received by the L3 port." range="" rwaccess="RW W1toSet">
+      <bitenum value="0" id="0" token="ERR_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="ERR_IRQ_0_r" description="Interrupt disabled (masked)"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_r" description="Interrupt enabled"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_w" description="Enable interrupt"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_IRQENABLE_CLR_j_0" acronym="FDIF_IRQENABLE_CLR_j_0" offset="0x30" width="32" description="Per-event interrupt enable bit vector, line #n. Write 1 to clear (disable interrupt). Readout equal to corresponding _SET register.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH_IRQ" width="1" begin="8" end="8" resetval="0" description="Face detection processing done." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_r" description="Interrupt disabled (masked)"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_r" description="Interrupt enabled"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_w" description="Disable interrupt"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_IRQ" width="1" begin="0" end="0" resetval="0" description="Error received by the L3 port." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="0" token="ERR_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="ERR_IRQ_0_r" description="Interrupt disabled (masked)"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_r" description="Interrupt enabled"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_w" description="Disable interrupt"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_IRQENABLE_CLR_j_1" acronym="FDIF_IRQENABLE_CLR_j_1" offset="0x40" width="32" description="Per-event interrupt enable bit vector, line #n. Write 1 to clear (disable interrupt). Readout equal to corresponding _SET register.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH_IRQ" width="1" begin="8" end="8" resetval="0" description="Face detection processing done." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_r" description="Interrupt disabled (masked)"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_r" description="Interrupt enabled"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_w" description="Disable interrupt"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_IRQ" width="1" begin="0" end="0" resetval="0" description="Error received by the L3 port." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="0" token="ERR_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="ERR_IRQ_0_r" description="Interrupt disabled (masked)"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_r" description="Interrupt enabled"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_w" description="Disable interrupt"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_IRQENABLE_CLR_j_2" acronym="FDIF_IRQENABLE_CLR_j_2" offset="0x50" width="32" description="Per-event interrupt enable bit vector, line #n. Write 1 to clear (disable interrupt). Readout equal to corresponding _SET register.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH_IRQ" width="1" begin="8" end="8" resetval="0" description="Face detection processing done." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="FINISH_IRQ_0_r" description="Interrupt disabled (masked)"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_r" description="Interrupt enabled"/>
+      <bitenum value="1" id="1" token="FINISH_IRQ_1_w" description="Disable interrupt"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ERR_IRQ" width="1" begin="0" end="0" resetval="0" description="Error received by the L3 port." range="" rwaccess="RW W1toClr">
+      <bitenum value="0" id="0" token="ERR_IRQ_0_w" description="No action"/>
+      <bitenum value="0" id="0" token="ERR_IRQ_0_r" description="Interrupt disabled (masked)"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_r" description="Interrupt enabled"/>
+      <bitenum value="1" id="1" token="ERR_IRQ_1_w" description="Disable interrupt"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_PICADDR" acronym="FDIF_PICADDR" offset="0x60" width="32" description="Picture data store address">
+    <bitfield id="ADDR" width="27" begin="31" end="5" resetval="0x0000000" description="Picture data store address. The 5 least significant bits are forced to 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="4" end="0" resetval="0x00" description="Read returns 0." range="" rwaccess="R"/>
+  </register>
+  <register id="FDIF_CTRL" acronym="FDIF_CTRL" offset="0x64" width="32" description="">
+    <bitfield id="RESERVED" width="25" begin="31" end="7" resetval="0x0000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="MSTANDBY_HDSHK" width="1" begin="6" end="6" resetval="0" description="MStandby / Wait power management handshaking status bit The power management framework of the FDIF module is based on the handshaking of the MSTANDBY and WAIT signals. When going from a idle to normal power management transition, the software polls for FDIF_CTRL.MSTANDBY_HDSHK = 1 before starting the face detection processing." range="" rwaccess="R">
+      <bitenum value="0" id="0" token="MSTANDBY_HDSHK_0_r" description="Handshaking not completed. Do not initiate traffic on L3."/>
+      <bitenum value="1" id="1" token="MSTANDBY_HDSHK_1_r" description="Handshaking completed. Can safely use the FDIF module."/>
+    </bitfield>
+    <bitfield id="MSTANDBY" width="1" begin="5" end="5" resetval="1" description="MStandby signal generation. This bit shall be set to initiate a power management transition from NORMAL to IDLE or IDLE to NORMAL." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="MSTANDBY_0" description="Write: Clear MStandby signal. One polls.MSTANDBY_HDSHK = 1 after writing this bit to ensure that the power management handshaking is completed."/>
+      <bitenum value="1" id="1" token="MSTANDBY_1" description="Write: Asserts MStandby signal"/>
+    </bitfield>
+    <bitfield id="MAX_TAGS" width="4" begin="4" end="1" resetval="0xF" description="Max interconnect tags. This bit field sets the maximum number of interconnect tags that the module shall use. This number is programmable between 1 (MAX_TAGS = 0) and FDIF_TAGS (MAX_TAGS = FDIF_TAGS - 1). The value of MAX_TAGS is reflected in the FIDIF_HWINFO register setting. This register setting is expected to have impact on performance. It shall be set once at initialization. Higher value will give more bandwidth to the initiator. Lower value will give less bandwidth to the initiator. This value shall be set as low as possible such that other system initiators are not penalized." range="" rwaccess="RW"/>
+    <bitfield id="WRNP" width="1" begin="0" end="0" resetval="0" description="L3 port non-posted write control. Dynamic usage of this feature is not supported. This bit shall be set at initialization and not modified hereafter until the processing is completed. When non-posted writes are used, tags shall be used for best performance (MAX_TAGS &amp;amp;gt; 1)." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="WRNP_0" description="All writes are non posted"/>
+      <bitenum value="1" id="1" token="WRNP_1" description="All writes are posted"/>
+    </bitfield>
+  </register>
+  <register id="FDIF_WKADDR" acronym="FDIF_WKADDR" offset="0x68" width="32" description="">
+    <bitfield id="ADDR" width="27" begin="31" end="5" resetval="0x0000000" description="Work area address The 5 least significant bits are forced to 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="4" end="0" resetval="0x00" description="Read returns 0." range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CTRL" acronym="FD_CTRL" offset="0x80" width="32" description="Control register Don't set more than 2 bits to '1' at the same time. Otherwise, operations cannot be guaranteed.">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0000 0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="FINISH" width="1" begin="2" end="2" resetval="0" description="Process Completion Flag Clear" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="FINISH_0" description="Write: Disable Read: Process incomplete"/>
+      <bitenum value="1" id="1" token="FINISH_1" description="Write: Process complete flag clear Read: Process complete"/>
+    </bitfield>
+    <bitfield id="RUN" width="1" begin="1" end="1" resetval="0" description="Process Start Request" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="RUN_0" description="Write: Disable Read: No processing"/>
+      <bitenum value="1" id="1" token="RUN_1" description="Write: Process start request Read: Processing data"/>
+    </bitfield>
+    <bitfield id="SRST" width="1" begin="0" end="0" resetval="0" description="Software Reset This bit shall not be used to reset the FDIF module. Instead, the FDIF_SYSCONFIG[0] SOFTRESET bit shall be used for complete soft reset." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="SRST_0" description="Write: Disable Read: Reset cancel"/>
+      <bitenum value="1" id="1" token="SRST_1" description="Write: Reset Read: Under reset"/>
+    </bitfield>
+  </register>
+  <register id="FD_DNUM" acronym="FD_DNUM" offset="0x84" width="32" description="Face Detection Result Count Register">
+    <bitfield id="RESERVED" width="26" begin="31" end="6" resetval="0x0000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="DNUM" width="6" begin="5" end="0" resetval="0x00" description="Face detection result count. Up to 35 faces can be detected. Number of face(s) detected: 0x0: 0 face detected 0x1: 1 face detected 0x2: 2 faces detected [...] 0x23: 35 faces detected 0x24 to 0x3F: unused" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_DCOND" acronym="FD_DCOND" offset="0x88" width="32" description="Detection Condition Setting Register">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="DIR" width="2" begin="3" end="2" resetval="0x0" description="Detection direction setting" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="DIR_0" description="Executes only for UP"/>
+      <bitenum value="1" id="1" token="DIR_1" description="Executes only for RIGHT"/>
+      <bitenum value="2" id="2" token="DIR_2" description="Executes only for LEFT"/>
+      <bitenum value="3" id="3" token="DIR_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="MIN" width="2" begin="1" end="0" resetval="0x0" description="Reserved" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="MIN_0" description="Set the min face size to 20 pixels"/>
+      <bitenum value="1" id="1" token="MIN_1" description="Set the min face size to 25 pixels"/>
+      <bitenum value="2" id="2" token="MIN_2" description="Set the min face size to 32 pixels"/>
+      <bitenum value="3" id="3" token="MIN_3" description="Set the min face size to 40 pixels"/>
+    </bitfield>
+  </register>
+  <register id="FD_STARTX" acronym="FD_STARTX" offset="0x8C" width="32" description="Detection Area Setting Register: X Start Coordinate.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="STARTX" width="8" begin="7" end="0" resetval="0x00" description="Starting X coordinates Permitted values are 0&amp;amp;lt;=STARTX&amp;amp;lt;=160" range="" rwaccess="RW"/>
+  </register>
+  <register id="FD_STARTY" acronym="FD_STARTY" offset="0x90" width="32" description="Detection Area Setting Register: Y Start Coordinate.">
+    <bitfield id="RESERVED" width="25" begin="31" end="7" resetval="0x0000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="STARTY" width="7" begin="6" end="0" resetval="0x00" description="Starting Y coordinates Permitted values are 0&amp;amp;lt;=STARTY&amp;amp;lt;=120" range="" rwaccess="RW"/>
+  </register>
+  <register id="FD_SIZEX" acronym="FD_SIZEX" offset="0x94" width="32" description="Detection Area Setting Register: X Direction Size">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SIZEX" width="9" begin="8" end="0" resetval="0x140" description="X Direction Size" range="" rwaccess="RW"/>
+  </register>
+  <register id="FD_SIZEY" acronym="FD_SIZEY" offset="0x98" width="32" description="Detection Area Setting Register: Y Direction Size">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SIZEY" width="8" begin="7" end="0" resetval="0xF0" description="Y Direction Size" range="" rwaccess="RW"/>
+  </register>
+  <register id="FD_LHIT" acronym="FD_LHIT" offset="0x9C" width="32" description="Threshold Setting Register">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="LHIT" width="4" begin="3" end="0" resetval="0x5" description="Threshold Permitted values are 0x0 to 0x9" range="" rwaccess="RW"/>
+  </register>
+  <register id="FD_CENTERX_i_0" acronym="FD_CENTERX_i_0" offset="0x160" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_1" acronym="FD_CENTERX_i_1" offset="0x170" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_2" acronym="FD_CENTERX_i_2" offset="0x180" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_3" acronym="FD_CENTERX_i_3" offset="0x190" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_4" acronym="FD_CENTERX_i_4" offset="0x1A0" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_5" acronym="FD_CENTERX_i_5" offset="0x1B0" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_6" acronym="FD_CENTERX_i_6" offset="0x1C0" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_7" acronym="FD_CENTERX_i_7" offset="0x1D0" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_8" acronym="FD_CENTERX_i_8" offset="0x1E0" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_9" acronym="FD_CENTERX_i_9" offset="0x1F0" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_10" acronym="FD_CENTERX_i_10" offset="0x200" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_11" acronym="FD_CENTERX_i_11" offset="0x210" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_12" acronym="FD_CENTERX_i_12" offset="0x220" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_13" acronym="FD_CENTERX_i_13" offset="0x230" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_14" acronym="FD_CENTERX_i_14" offset="0x240" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_15" acronym="FD_CENTERX_i_15" offset="0x250" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_16" acronym="FD_CENTERX_i_16" offset="0x260" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_17" acronym="FD_CENTERX_i_17" offset="0x270" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_18" acronym="FD_CENTERX_i_18" offset="0x280" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_19" acronym="FD_CENTERX_i_19" offset="0x290" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_20" acronym="FD_CENTERX_i_20" offset="0x2A0" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_21" acronym="FD_CENTERX_i_21" offset="0x2B0" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_22" acronym="FD_CENTERX_i_22" offset="0x2C0" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_23" acronym="FD_CENTERX_i_23" offset="0x2D0" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_24" acronym="FD_CENTERX_i_24" offset="0x2E0" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_25" acronym="FD_CENTERX_i_25" offset="0x2F0" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_26" acronym="FD_CENTERX_i_26" offset="0x300" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_27" acronym="FD_CENTERX_i_27" offset="0x310" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_28" acronym="FD_CENTERX_i_28" offset="0x320" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_29" acronym="FD_CENTERX_i_29" offset="0x330" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_30" acronym="FD_CENTERX_i_30" offset="0x340" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_31" acronym="FD_CENTERX_i_31" offset="0x350" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_32" acronym="FD_CENTERX_i_32" offset="0x360" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_33" acronym="FD_CENTERX_i_33" offset="0x370" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERX_i_34" acronym="FD_CENTERX_i_34" offset="0x380" width="32" description="Detection Result: X Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERX" width="9" begin="8" end="0" resetval="0x&#8211;" description="Face position: center X coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0x13F" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_0" acronym="FD_CENTERY_i_0" offset="0x164" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_1" acronym="FD_CENTERY_i_1" offset="0x174" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_2" acronym="FD_CENTERY_i_2" offset="0x184" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_3" acronym="FD_CENTERY_i_3" offset="0x194" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_4" acronym="FD_CENTERY_i_4" offset="0x1A4" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_5" acronym="FD_CENTERY_i_5" offset="0x1B4" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_6" acronym="FD_CENTERY_i_6" offset="0x1C4" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_7" acronym="FD_CENTERY_i_7" offset="0x1D4" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_8" acronym="FD_CENTERY_i_8" offset="0x1E4" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_9" acronym="FD_CENTERY_i_9" offset="0x1F4" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_10" acronym="FD_CENTERY_i_10" offset="0x204" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_11" acronym="FD_CENTERY_i_11" offset="0x214" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_12" acronym="FD_CENTERY_i_12" offset="0x224" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_13" acronym="FD_CENTERY_i_13" offset="0x234" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_14" acronym="FD_CENTERY_i_14" offset="0x244" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_15" acronym="FD_CENTERY_i_15" offset="0x254" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_16" acronym="FD_CENTERY_i_16" offset="0x264" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_17" acronym="FD_CENTERY_i_17" offset="0x274" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_18" acronym="FD_CENTERY_i_18" offset="0x284" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_19" acronym="FD_CENTERY_i_19" offset="0x294" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_20" acronym="FD_CENTERY_i_20" offset="0x2A4" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_21" acronym="FD_CENTERY_i_21" offset="0x2B4" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_22" acronym="FD_CENTERY_i_22" offset="0x2C4" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_23" acronym="FD_CENTERY_i_23" offset="0x2D4" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_24" acronym="FD_CENTERY_i_24" offset="0x2E4" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_25" acronym="FD_CENTERY_i_25" offset="0x2F4" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_26" acronym="FD_CENTERY_i_26" offset="0x304" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_27" acronym="FD_CENTERY_i_27" offset="0x314" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_28" acronym="FD_CENTERY_i_28" offset="0x324" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_29" acronym="FD_CENTERY_i_29" offset="0x334" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_30" acronym="FD_CENTERY_i_30" offset="0x344" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_31" acronym="FD_CENTERY_i_31" offset="0x354" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_32" acronym="FD_CENTERY_i_32" offset="0x364" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_33" acronym="FD_CENTERY_i_33" offset="0x374" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CENTERY_i_34" acronym="FD_CENTERY_i_34" offset="0x384" width="32" description="Detection Result: Y Coordinate. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x&#8211;" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CENTERY" width="8" begin="7" end="0" resetval="0x&#8211;" description="Face position: center Y coordinate The coordinates given by (FD_CENTERX_i, FD_CENTERY_i) give the central coordinates of the face position. Permitted values are 0x0 to 0xEF" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_0" acronym="FD_CONFSIZE_i_0" offset="0x168" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_1" acronym="FD_CONFSIZE_i_1" offset="0x178" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_2" acronym="FD_CONFSIZE_i_2" offset="0x188" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_3" acronym="FD_CONFSIZE_i_3" offset="0x198" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_4" acronym="FD_CONFSIZE_i_4" offset="0x1A8" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_5" acronym="FD_CONFSIZE_i_5" offset="0x1B8" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_6" acronym="FD_CONFSIZE_i_6" offset="0x1C8" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_7" acronym="FD_CONFSIZE_i_7" offset="0x1D8" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_8" acronym="FD_CONFSIZE_i_8" offset="0x1E8" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_9" acronym="FD_CONFSIZE_i_9" offset="0x1F8" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_10" acronym="FD_CONFSIZE_i_10" offset="0x208" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_11" acronym="FD_CONFSIZE_i_11" offset="0x218" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_12" acronym="FD_CONFSIZE_i_12" offset="0x228" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_13" acronym="FD_CONFSIZE_i_13" offset="0x238" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_14" acronym="FD_CONFSIZE_i_14" offset="0x248" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_15" acronym="FD_CONFSIZE_i_15" offset="0x258" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_16" acronym="FD_CONFSIZE_i_16" offset="0x268" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_17" acronym="FD_CONFSIZE_i_17" offset="0x278" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_18" acronym="FD_CONFSIZE_i_18" offset="0x288" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_19" acronym="FD_CONFSIZE_i_19" offset="0x298" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_20" acronym="FD_CONFSIZE_i_20" offset="0x2A8" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_21" acronym="FD_CONFSIZE_i_21" offset="0x2B8" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_22" acronym="FD_CONFSIZE_i_22" offset="0x2C8" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_23" acronym="FD_CONFSIZE_i_23" offset="0x2D8" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_24" acronym="FD_CONFSIZE_i_24" offset="0x2E8" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_25" acronym="FD_CONFSIZE_i_25" offset="0x2F8" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_26" acronym="FD_CONFSIZE_i_26" offset="0x308" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_27" acronym="FD_CONFSIZE_i_27" offset="0x318" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_28" acronym="FD_CONFSIZE_i_28" offset="0x328" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_29" acronym="FD_CONFSIZE_i_29" offset="0x338" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_30" acronym="FD_CONFSIZE_i_30" offset="0x348" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_31" acronym="FD_CONFSIZE_i_31" offset="0x358" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_32" acronym="FD_CONFSIZE_i_32" offset="0x368" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_33" acronym="FD_CONFSIZE_i_33" offset="0x378" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_CONFSIZE_i_34" acronym="FD_CONFSIZE_i_34" offset="0x388" width="32" description="Detection Result: Confidence Level and Size. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="CONF" width="4" begin="11" end="8" resetval="0x-" description="Confidence level Permitted values are 0x0 (high) to 0x9 (low)" range="" rwaccess="R"/>
+    <bitfield id="SIZE" width="8" begin="7" end="0" resetval="0x&#8211;" description="Detection result face size Permitted values 0x14 to 0xF0" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_0" acronym="FD_ANGLE_i_0" offset="0x16C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_1" acronym="FD_ANGLE_i_1" offset="0x17C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_2" acronym="FD_ANGLE_i_2" offset="0x18C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_3" acronym="FD_ANGLE_i_3" offset="0x19C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_4" acronym="FD_ANGLE_i_4" offset="0x1AC" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_5" acronym="FD_ANGLE_i_5" offset="0x1BC" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_6" acronym="FD_ANGLE_i_6" offset="0x1CC" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_7" acronym="FD_ANGLE_i_7" offset="0x1DC" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_8" acronym="FD_ANGLE_i_8" offset="0x1EC" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_9" acronym="FD_ANGLE_i_9" offset="0x1FC" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_10" acronym="FD_ANGLE_i_10" offset="0x20C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_11" acronym="FD_ANGLE_i_11" offset="0x21C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_12" acronym="FD_ANGLE_i_12" offset="0x22C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_13" acronym="FD_ANGLE_i_13" offset="0x23C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_14" acronym="FD_ANGLE_i_14" offset="0x24C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_15" acronym="FD_ANGLE_i_15" offset="0x25C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_16" acronym="FD_ANGLE_i_16" offset="0x26C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_17" acronym="FD_ANGLE_i_17" offset="0x27C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_18" acronym="FD_ANGLE_i_18" offset="0x28C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_19" acronym="FD_ANGLE_i_19" offset="0x29C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_20" acronym="FD_ANGLE_i_20" offset="0x2AC" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_21" acronym="FD_ANGLE_i_21" offset="0x2BC" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_22" acronym="FD_ANGLE_i_22" offset="0x2CC" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_23" acronym="FD_ANGLE_i_23" offset="0x2DC" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_24" acronym="FD_ANGLE_i_24" offset="0x2EC" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_25" acronym="FD_ANGLE_i_25" offset="0x2FC" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_26" acronym="FD_ANGLE_i_26" offset="0x30C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_27" acronym="FD_ANGLE_i_27" offset="0x31C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_28" acronym="FD_ANGLE_i_28" offset="0x32C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_29" acronym="FD_ANGLE_i_29" offset="0x33C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_30" acronym="FD_ANGLE_i_30" offset="0x34C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_31" acronym="FD_ANGLE_i_31" offset="0x35C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_32" acronym="FD_ANGLE_i_32" offset="0x36C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_33" acronym="FD_ANGLE_i_33" offset="0x37C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+  <register id="FD_ANGLE_i_34" acronym="FD_ANGLE_i_34" offset="0x38C" width="32" description="Detection Result: Angle. Its value is undefined after reset.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x-" description="Reserved. Read returns reset value." range="" rwaccess="R"/>
+    <bitfield id="ANGLE" width="9" begin="8" end="0" resetval="0x&#8211;" description="Detection result face angle Permitted values: When DIR = 0: 0x0 (0 deg) to 0x1E (30 deg) and 0x14A (330 deg) to 0x167 (359 deg) When DIR = 1: 0x03C (60 deg) to 0x078 (120 deg) When DIR = 2: 0x0F0 (240 deg) to 0x12C (300 deg)" range="" rwaccess="R"/>
+  </register>
+</module>

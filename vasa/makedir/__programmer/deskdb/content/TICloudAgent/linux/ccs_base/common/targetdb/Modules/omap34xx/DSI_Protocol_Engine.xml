@@ -1,0 +1,1512 @@
+<module name="DSI Protocol Engine" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="DSI_REVISION" acronym="DSI_REVISION" offset="0x0" width="32" description="MODULE REVISION This register contains the IP revision code in binary coded digital. For example, we have: 0x01 = revision 0.1 and 0x21 = revision 2.1">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="R"/>
+    <bitfield id="REV" width="8" begin="7" end="0" resetval="TI internal data" description="IP revision [7:4] Major revision[3:0] Minor revision" range="" rwaccess="R"/>
+  </register>
+  <register id="DSI_SYSCONFIG" acronym="DSI_SYSCONFIG" offset="0x10" width="32" description="SYSTEM CONFIGURATION REGISTER This register is the system configuration register.">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="13" end="10" resetval="0x0" description="Write 0s for future compatibility." range="" rwaccess="RW"/>
+    <bitfield id="CLOCKACTIVITY" width="2" begin="9" end="8" resetval="0x0" description="Clocks activity during wake up mode period" range="" rwaccess="RW">
+      <bitenum value="0" token="CLOCKACTIVITY_0" description="Interface and Functional clocks can be switched off"/>
+      <bitenum value="1" token="CLOCKACTIVITY_1" description="Functional clocks can be switched off and Interface clocks are maintained during wake up period"/>
+      <bitenum value="2" token="CLOCKACTIVITY_2" description="Interface clocks can be switched off and Functional clocks are maintained during wake up period"/>
+      <bitenum value="3" token="CLOCKACTIVITY_3" description="Interface and Functional clocks are maintained during wake up period"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="7" end="5" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="SIDLEMODE" width="2" begin="4" end="3" resetval="0x2" description="Slave interface power management, Idle req/ack control" range="" rwaccess="RW">
+      <bitenum value="0" token="SIDLEMODE_0" description="Force-idle. An idle request is acknowledged unconditionally"/>
+      <bitenum value="1" token="SIDLEMODE_1" description="No-idle. An idle request is never acknowledged"/>
+      <bitenum value="2" token="SIDLEMODE_2" description="Smart-idle. Acknowledgement to an idle request is given based on the internal activity of the module."/>
+      <bitenum value="3" token="SIDLEMODE_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="ENWAKEUP" width="1" begin="2" end="2" resetval="0x0" description="Wake-up mode enable bit" range="" rwaccess="RW">
+      <bitenum value="0" token="ENWAKEUP_0" description="Wakeup is disabled."/>
+      <bitenum value="1" token="ENWAKEUP_1" description="Wakeup is enabled,"/>
+    </bitfield>
+    <bitfield id="SOFT_RESET" width="1" begin="1" end="1" resetval="0x0" description="Software reset. Set the bit to 1 to trigger a module reset. The bit is automatically reset by the hw. During reads return 0." range="" rwaccess="RW">
+      <bitenum value="0" token="SOFT_RESET_0" description="Normal mode."/>
+      <bitenum value="1" token="SOFT_RESET_1" description="The module is reset"/>
+    </bitfield>
+    <bitfield id="AUTO_IDLE" width="1" begin="0" end="0" resetval="0x1" description="Internal interface clock gating strategy" range="" rwaccess="RW">
+      <bitenum value="0" token="AUTO_IDLE_0" description="Interface clock is free-running."/>
+      <bitenum value="1" token="AUTO_IDLE_1" description="Automatic Interface clock gating strategy is applied based on the module interface activity."/>
+    </bitfield>
+  </register>
+  <register id="DSI_SYSSTATUS" acronym="DSI_SYSSTATUS" offset="0x14" width="32" description="SYSTEM STATUS REGISTER This register provides status information about the module, excluding the interrupt status register.">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x00000000" description="Reads returns 0." range="" rwaccess="R"/>
+    <bitfield id="RESET_DONE" width="1" begin="0" end="0" resetval="0x1" description="Internal reset monitoring" range="" rwaccess="R">
+      <bitenum value="0" token="RESET_DONE_0" description="Internal module reset is on going."/>
+      <bitenum value="1" token="RESET_DONE_1" description="Reset completed."/>
+    </bitfield>
+  </register>
+  <register id="DSI_IRQSTATUS" acronym="DSI_IRQSTATUS" offset="0x18" width="32" description="INTERRUPT STATUS REGISTER - All VCs + complex I/O + PLL This register associates one bit for each VC to determine which VC has generated the interrupt. The VC should be enabled for events to be generated on that VC. If the VC is disabled, the interrupt is not generated.">
+    <bitfield id="RESERVED" width="11" begin="31" end="21" resetval="0x000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="TA_TO_IRQ" width="1" begin="20" end="20" resetval="0x0" description="Turn-around Time out." range="" rwaccess="RW">
+      <bitenum value="0" token="TA_TO_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="TA_TO_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="LDO_POWER_GOOD_IRQ" width="1" begin="19" end="19" resetval="0x0" description="Transition of the status signal LDOPWRGOOD from the DSI_PHY indicating a state change for the supply VDDALDODSIPLL from up to down or down to up." range="" rwaccess="RW">
+      <bitenum value="0" token="LDO_POWER_GOOD_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="LDO_POWER_GOOD_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="SYNC_LOST_IRQ" width="1" begin="18" end="18" resetval="0x0" description="Synchronization with Video port is lost (Video mode only)" range="" rwaccess="RW">
+      <bitenum value="0" token="SYNC_LOST_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="SYNC_LOST_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ACK_TRIGGER_IRQ" width="1" begin="17" end="17" resetval="0x0" description="Acknowledge Trigger" range="" rwaccess="RW">
+      <bitenum value="0" token="ACK_TRIGGER_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ACK_TRIGGER_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="TE_TRIGGER_IRQ" width="1" begin="16" end="16" resetval="0x0" description="Tearing Effect Trigger" range="" rwaccess="RW">
+      <bitenum value="0" token="TE_TRIGGER_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="TE_TRIGGER_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="LP_RX_TO_IRQ" width="1" begin="15" end="15" resetval="0x0" description="Interrupt for Low Power Rx Time out" range="" rwaccess="RW">
+      <bitenum value="0" token="LP_RX_TO_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="LP_RX_TO_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="HS_TX_TO_IRQ" width="1" begin="14" end="14" resetval="0x0" description="Interrupt for high-speed Tx Time out." range="" rwaccess="RW">
+      <bitenum value="0" token="HS_TX_TO_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="HS_TX_TO_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="13" end="13" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="12" end="11" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="COMPLEXIO_ERR_IRQ" width="1" begin="10" end="10" resetval="0x0" description="Error signaling from complex I/O: status of the complex I/O errors received from the complex I/O(events are defined inDSI_COMPLEXIO_IRQSTATUS)." range="" rwaccess="R">
+      <bitenum value="0" token="COMPLEXIO_ERR_IRQ_0" description="READS: Event is false."/>
+      <bitenum value="1" token="COMPLEXIO_ERR_IRQ_1" description="READS: Event is true (pending)."/>
+    </bitfield>
+    <bitfield id="PLL_RECAL_IRQ" width="1" begin="9" end="9" resetval="0x0" description="PLL recalibration event (assertion of recalibration signal from the DSI PLL Control module)" range="" rwaccess="RW">
+      <bitenum value="0" token="PLL_RECAL_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="PLL_RECAL_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="PLL_UNLOCK_IRQ" width="1" begin="8" end="8" resetval="0x0" description="PLL un-lock event (deassertion of lock signal from the DSI PLL Control module)" range="" rwaccess="RW">
+      <bitenum value="0" token="PLL_UNLOCK_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="PLL_UNLOCK_IRQ_1" description="READS: Event is true (pending). WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="PLL_LOCK_IRQ" width="1" begin="7" end="7" resetval="0x0" description="PLL lock event (assertion of lock signal from the DSI PLL Control module)" range="" rwaccess="RW">
+      <bitenum value="0" token="PLL_LOCK_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="PLL_LOCK_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="6" end="6" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESYNCHRONIZATION_IRQ" width="1" begin="5" end="5" resetval="0x0" description="Video mode resynchronizationIndicates that the video port works but the configuration of the timings for the display controller (DISPC) and for DSI protocol engine may have to be modified to avoid the resynchronization to occur. ." range="" rwaccess="RW">
+      <bitenum value="0" token="RESYNCHRONIZATION_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="RESYNCHRONIZATION_IRQ_1" description="READS: Event is true (pending). WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="WAKEUP_IRQ" width="1" begin="4" end="4" resetval="0x0" description="Wakeup" range="" rwaccess="RW">
+      <bitenum value="0" token="WAKEUP_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="WAKEUP_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="VIRTUAL_CHANNEL3_IRQ" width="1" begin="3" end="3" resetval="0x0" description="Virtual channel #3Error signaling from DSI Virtual Channel3: Status of DSI Virtual Channel3 errors received from DSI Virtual Channel3 (events are defined in DSI_VC3_IRQSTATUS). ." range="" rwaccess="R">
+      <bitenum value="0" token="VIRTUAL_CHANNEL3_IRQ_0" description="READS: Event is false."/>
+      <bitenum value="1" token="VIRTUAL_CHANNEL3_IRQ_1" description="READS: Event is true (pending)."/>
+    </bitfield>
+    <bitfield id="VIRTUAL_CHANNEL2_IRQ" width="1" begin="2" end="2" resetval="0x0" description="Virtual channel #2Error signaling from DSI Virtual Channel2: Status of DSI Virtual Channel2 errors received from DSI Virtual Channel2 (events are defined in DSI_VC2_IRQSTATUS). ." range="" rwaccess="R">
+      <bitenum value="0" token="VIRTUAL_CHANNEL2_IRQ_0" description="READS: Event is false."/>
+      <bitenum value="1" token="VIRTUAL_CHANNEL2_IRQ_1" description="READS: Event is true (pending)."/>
+    </bitfield>
+    <bitfield id="VIRTUAL_CHANNEL1_IRQ" width="1" begin="1" end="1" resetval="0x0" description="Virtual channel #1Error signaling from DSI Virtual Channel1: Status of DSI Virtual Channel1 errors received from DSI Virtual Channel1 (events are defined in DSI_VC1_IRQSTATUS). ." range="" rwaccess="R">
+      <bitenum value="0" token="VIRTUAL_CHANNEL1_IRQ_0" description="READS: Event is false."/>
+      <bitenum value="1" token="VIRTUAL_CHANNEL1_IRQ_1" description="READS: Event is true (pending)."/>
+    </bitfield>
+    <bitfield id="VIRTUAL_CHANNEL0_IRQ" width="1" begin="0" end="0" resetval="0x0" description="Virtual channel #0Error signaling from DSI Virtual Channel0: Status of the DSI Virtual Channel0 errors received from DSI Virtual Channel0 (events are defined in DSI_VC0_IRQSTATUS). ." range="" rwaccess="R">
+      <bitenum value="0" token="VIRTUAL_CHANNEL0_IRQ_0" description="READS: Event is false."/>
+      <bitenum value="1" token="VIRTUAL_CHANNEL0_IRQ_1" description="READS: Event is true (pending)."/>
+    </bitfield>
+  </register>
+  <register id="DSI_IRQENABLE" acronym="DSI_IRQENABLE" offset="0x1C" width="32" description="INTERRUPT ENABLE REGISTER - This register associates one bit for each VC to enable/disable each VC individually.">
+    <bitfield id="RESERVED" width="11" begin="31" end="21" resetval="0x000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="TA_TO_IRQ_EN" width="1" begin="20" end="20" resetval="0x0" description="Turn-around Time out." range="" rwaccess="RW">
+      <bitenum value="0" token="TA_TO_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="TA_TO_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="LDO_POWER_GOOD_IRQ_EN" width="1" begin="19" end="19" resetval="0x0" description="Transition of the status signal LDOPWRGOOD from the DSI_PHY indicating a state change for the supply VDDALDODSIPLL from up to down or down to up." range="" rwaccess="RW">
+      <bitenum value="0" token="LDO_POWER_GOOD_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="LDO_POWER_GOOD_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="SYNC_LOST_IRQ_EN" width="1" begin="18" end="18" resetval="0x0" description="Synchronization with Video port is lost (Video mode only)" range="" rwaccess="RW">
+      <bitenum value="0" token="SYNC_LOST_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="SYNC_LOST_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ACK_TRIGGER_IRQ_EN" width="1" begin="17" end="17" resetval="0x0" description="Acknowledge trigger" range="" rwaccess="RW">
+      <bitenum value="0" token="ACK_TRIGGER_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ACK_TRIGGER_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="TE_TRIGGER_IRQ_EN" width="1" begin="16" end="16" resetval="0x0" description="Tearing Effect trigger" range="" rwaccess="RW">
+      <bitenum value="0" token="TE_TRIGGER_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="TE_TRIGGER_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="LP_RX_TO_IRQ_EN" width="1" begin="15" end="15" resetval="0x0" description="Interrupt for Low Power Rx Time out." range="" rwaccess="RW">
+      <bitenum value="0" token="LP_RX_TO_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="LP_RX_TO_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="HS_TX_TO_IRQ_EN" width="1" begin="14" end="14" resetval="0x0" description="Interrupt for high-speed Tx Time out." range="" rwaccess="RW">
+      <bitenum value="0" token="HS_TX_TO_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="HS_TX_TO_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="13" end="13" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="12" end="11" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="10" end="10" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="PLL_RECAL_IRQ_EN" width="1" begin="9" end="9" resetval="0x0" description="PLL recalibration event (assertion of recalibration signal from the DSI PLL Control module)" range="" rwaccess="RW">
+      <bitenum value="0" token="PLL_RECAL_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="PLL_RECAL_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="PLL_UNLOCK_IRQ_EN" width="1" begin="8" end="8" resetval="0x0" description="PLL un-lock event (deassertion of lock signal from the DSI PLL Control module)" range="" rwaccess="RW">
+      <bitenum value="0" token="PLL_UNLOCK_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="PLL_UNLOCK_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="PLL_LOCK_IRQ_EN" width="1" begin="7" end="7" resetval="0x0" description="PLL lock event (assertion of lock signal from the DSI PLL Control module)" range="" rwaccess="RW">
+      <bitenum value="0" token="PLL_LOCK_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="PLL_LOCK_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="6" end="6" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESYNCHRONIZATION_IRQ_EN" width="1" begin="5" end="5" resetval="0x0" description="Resynchronization" range="" rwaccess="RW">
+      <bitenum value="0" token="RESYNCHRONIZATION_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="RESYNCHRONIZATION_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="WAKEUP_IRQ_EN" width="1" begin="4" end="4" resetval="0x0" description="Wakeup" range="" rwaccess="RW">
+      <bitenum value="0" token="WAKEUP_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="WAKEUP_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="3" end="0" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_CTRL" acronym="DSI_CTRL" offset="0x40" width="32" description="GLOBAL CONTROL REGISTER This register controls the DSI Protocol Engine module. This register should not be modified dynamically (except IF_EN bit field).">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RGB565_ORDER" width="1" begin="26" end="26" resetval="0" description="Byte order for RBG565 command mode from video port" range="" rwaccess="RW">
+      <bitenum value="0" token="RGB565_ORDER_0" description="Unused"/>
+      <bitenum value="1" token="RGB565_ORDER_1" description="Byte order as for video mode"/>
+    </bitfield>
+    <bitfield id="DCS_CMD_CODE" width="1" begin="25" end="25" resetval="0" description="DCS command code value to insert between header and video port data when enabled by DCS_CMD_ENABLE" range="" rwaccess="RW">
+      <bitenum value="0" token="DCS_CMD_CODE_0" description="DCS write memory continue code is inserted."/>
+      <bitenum value="1" token="DCS_CMD_CODE_1" description="DCS write memory start code is inserted."/>
+    </bitfield>
+    <bitfield id="DCS_CMD_ENABLE" width="1" begin="24" end="24" resetval="0" description="Enables automatic insertion of DCS command codes when data is sourced by the video port." range="" rwaccess="RW">
+      <bitenum value="0" token="DCS_CMD_ENABLE_0" description="DCS command code is not inserted when command mode traffic is coming from the Video Port."/>
+      <bitenum value="1" token="DCS_CMD_ENABLE_1" description="DCS command code is inserted automatically when command mode traffic is coming from the Video Port."/>
+    </bitfield>
+    <bitfield id="HSA_BLANKING_MODE" width="1" begin="23" end="23" resetval="0x0" description="Blanking mode" range="" rwaccess="RW">
+      <bitenum value="0" token="HSA_BLANKING_MODE_0" description="Packets in TX FIFO are sent during HSA blanking period of video mode or LPS is used."/>
+      <bitenum value="1" token="HSA_BLANKING_MODE_1" description="LONG BLANKING PACKETS only are used during HSA blanking period of video mode."/>
+    </bitfield>
+    <bitfield id="HBP_BLANKING_MODE" width="1" begin="22" end="22" resetval="0x0" description="Blanking mode" range="" rwaccess="RW">
+      <bitenum value="0" token="HBP_BLANKING_MODE_0" description="Packets in TX FIFO are sent during HBP blanking period of video mode or LPS is used."/>
+      <bitenum value="1" token="HBP_BLANKING_MODE_1" description="LONG BLANKING PACKETS only are used during HBP blanking period of video mode."/>
+    </bitfield>
+    <bitfield id="HFP_BLANKING_MODE" width="1" begin="21" end="21" resetval="0x0" description="Blanking mode" range="" rwaccess="RW">
+      <bitenum value="0" token="HFP_BLANKING_MODE_0" description="Packets in TX FIFO are sent during HFP blanking period of video mode or LPS is used."/>
+      <bitenum value="1" token="HFP_BLANKING_MODE_1" description="LONG BLANKING PACKETS only are used during HFP blanking period of video mode."/>
+    </bitfield>
+    <bitfield id="BLANKING_MODE" width="1" begin="20" end="20" resetval="0x0" description="Blanking mode" range="" rwaccess="RW">
+      <bitenum value="0" token="BLANKING_MODE_0" description="LPS is used during blanking periods of video mode (except HSA, HBP, HFP defined in HSA_BLANKING_MODE, HBP_BLANKING_MODE and HFP_BLANKING_MODE bit fields respectively) when there is no command mode data in TX FIFO ready to be sent. So blanking periods can be different during the frame depending on the TX FIFO."/>
+      <bitenum value="1" token="BLANKING_MODE_1" description="LONG BLANKING PACKETS are used during blanking periods of video mode (except HSA, HBP, HFP defined in HSA_BLANKING_MODE, HBP_BLANKING_MODE and HFP_BLANKING_MODE bit fields respectively) regardless of the packets present in the TX FIFO ready to be sent"/>
+    </bitfield>
+    <bitfield id="EOT_ENABLE" width="1" begin="19" end="19" resetval="0" description="Enable EOT packets at the end of HS transmission." range="" rwaccess="RW">
+      <bitenum value="0" token="EOT_ENABLE_0" description="No EOT packets"/>
+      <bitenum value="1" token="EOT_ENABLE_1" description="EOT packet is sent at all HS to LP transitions"/>
+    </bitfield>
+    <bitfield id="VP_HSYNC_END" width="1" begin="18" end="18" resetval="0x0" description="HSYNC end pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="VP_HSYNC_END_0" description="Disabled. No HSYNC END short packet is generated."/>
+      <bitenum value="1" token="VP_HSYNC_END_1" description="Enabled. While the HSYNC END pulse is detected, the associated short packet HSYNC END is generated."/>
+    </bitfield>
+    <bitfield id="VP_HSYNC_START" width="1" begin="17" end="17" resetval="0x0" description="HSYNC start pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="VP_HSYNC_START_0" description="Disabled. No HSYNC START short packet is generated."/>
+      <bitenum value="1" token="VP_HSYNC_START_1" description="Enabled. While the HSYNC start pulse is detected, the associated short packet HSYNC START is generated."/>
+    </bitfield>
+    <bitfield id="VP_VSYNC_END" width="1" begin="16" end="16" resetval="0x0" description="VSYNC end pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="VP_VSYNC_END_0" description="Disabled. No VSYNC END short packet is generated."/>
+      <bitenum value="1" token="VP_VSYNC_END_1" description="Enabled. While the VSYNC END pulse is detected, the associated short packet VSYNC END is generated."/>
+    </bitfield>
+    <bitfield id="VP_VSYNC_START" width="1" begin="15" end="15" resetval="0x0" description="VSYNC start pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="VP_VSYNC_START_0" description="Disabled. No VSYNC START short packet is generated."/>
+      <bitenum value="1" token="VP_VSYNC_START_1" description="Enabled. While the VSYNC START pulse is detected, the associated short packet VSYNC START is generated."/>
+    </bitfield>
+    <bitfield id="TRIGGER_RESET_MODE" width="1" begin="14" end="14" resetval="0x0" description="Selection of the trigger reset mode" range="" rwaccess="RW">
+      <bitenum value="0" token="TRIGGER_RESET_MODE_0" description="Synchronized: the mode is only valid if there is VC using the video mode and it is active. The principle is to wait for the current video frame to be transferred on the link. Any data received after the VSYNC are ignored."/>
+      <bitenum value="1" token="TRIGGER_RESET_MODE_1" description="Immediate: all pending requests in TX FIFO are taken into account for transfer scheduling, the RX FIFO is ignored, and the data from video port are ignored as soon as possible. Only the current transfer on DSI link and already scheduled ones are transmitted. All the other transfers are discarded."/>
+    </bitfield>
+    <bitfield id="LINE_BUFFER" width="2" begin="13" end="12" resetval="0x0" description="Number of line buffers to be used while receiving data on the video port." range="" rwaccess="RW">
+      <bitenum value="0" token="LINE_BUFFER_0" description="No line buffer"/>
+      <bitenum value="1" token="LINE_BUFFER_1" description="1 line buffer"/>
+      <bitenum value="2" token="LINE_BUFFER_2" description="2 line buffers"/>
+    </bitfield>
+    <bitfield id="VP_VSYNC_POL" width="1" begin="11" end="11" resetval="0x0" description="VP vertical synchronization signal polarity" range="" rwaccess="RW">
+      <bitenum value="0" token="VP_VSYNC_POL_0" description="VSYNC signal on the video port is active low."/>
+      <bitenum value="1" token="VP_VSYNC_POL_1" description="VSYNC signal on the video port is active high."/>
+    </bitfield>
+    <bitfield id="VP_HSYNC_POL" width="1" begin="10" end="10" resetval="0x0" description="VP horizontal synchronization signal polarity" range="" rwaccess="RW">
+      <bitenum value="0" token="VP_HSYNC_POL_0" description="HSYNC signal on the video port is active low."/>
+      <bitenum value="1" token="VP_HSYNC_POL_1" description="HSYNC signal on the video port is active high."/>
+    </bitfield>
+    <bitfield id="VP_DE_POL" width="1" begin="9" end="9" resetval="0x0" description="VP data enable signal polarity" range="" rwaccess="RW">
+      <bitenum value="0" token="VP_DE_POL_0" description="DE signal on the video port is active low."/>
+      <bitenum value="1" token="VP_DE_POL_1" description="DE signal on the video port is active high."/>
+    </bitfield>
+    <bitfield id="VP_CLK_POL" width="1" begin="8" end="8" resetval="0x1" description="VP pixel clock polarity" range="" rwaccess="RW">
+      <bitenum value="0" token="VP_CLK_POL_0" description="The DSI Protocol Engine module captures the data on the VP on the pixel clock falling edge. The module connected to the VP must drive the data on the pixel clock rising edge."/>
+      <bitenum value="1" token="VP_CLK_POL_1" description="The DSI Protocol Engine module captures the data on the VP on the pixel clock raising edge. The module connected to the VP must drive the data on the pixel clock falling edge."/>
+    </bitfield>
+    <bitfield id="VP_DATA_BUS_WIDTH" width="2" begin="7" end="6" resetval="0x0" description="Defines the size of the video port data bus" range="" rwaccess="RW">
+      <bitenum value="0" token="VP_DATA_BUS_WIDTH_0" description="16-bits data width (LSB of the 24-bit video port data bus)"/>
+      <bitenum value="1" token="VP_DATA_BUS_WIDTH_1" description="18-bits data width (LSB of the 24-bit video port data bus)"/>
+      <bitenum value="2" token="VP_DATA_BUS_WIDTH_2" description="24-bits data width (LSB of the 24-bit video port data bus)"/>
+    </bitfield>
+    <bitfield id="TRIGGER_RESET" width="1" begin="5" end="5" resetval="0x0" description="Send the reset trigger to the peripheral." range="" rwaccess="RW">
+      <bitenum value="0" token="TRIGGER_RESET_0" description="READS: Reset trigger generation is completed. It is reset by HW when it is completed.WRITES: Cancellation of the request for Reset trigger generation (maybe too late since it is already on going)"/>
+      <bitenum value="1" token="TRIGGER_RESET_1" description="READS: Generation of the reset trigger has been requested by user (could be on going but not completed yet).WRITES: Request for Reset trigger to be sent to the peripheral."/>
+    </bitfield>
+    <bitfield id="VP_CLK_RATIO" width="1" begin="4" end="4" resetval="0x0" description="This bit indicates the clock ratio between VP_CLK and VP_PCLK. The clock VP_PCLK is generated from VP_CLK. It is divided down.The information is only used when the video port is used to provide data in command mode. In the case of video mode, it is not used." range="" rwaccess="RW">
+      <bitenum value="0" token="VP_CLK_RATIO_0" description="The clock VP_PCLK is the clock VP_CLK divided by 2. The duty cycle of VP_PCLK is 50/50."/>
+      <bitenum value="1" token="VP_CLK_RATIO_1" description="The clock VP_PCLK is the clock VP_CLK divided by 3 or more. The duty cycle of VP_PCLK is not 50/50 for odd ratio numbers (3,5,7,...)."/>
+    </bitfield>
+    <bitfield id="TX_FIFO_ARBITRATION" width="1" begin="3" end="3" resetval="0x0" description="Defines the arbitration scheme for granting the VC pending ready requests in the TX FIFO" range="" rwaccess="RW">
+      <bitenum value="0" token="TX_FIFO_ARBITRATION_0" description="Round-Robin Scheme is used"/>
+      <bitenum value="1" token="TX_FIFO_ARBITRATION_1" description="Sequential Scheme is used"/>
+    </bitfield>
+    <bitfield id="ECC_RX_EN" width="1" begin="2" end="2" resetval="0x0" description="Enables the ECC check for the received header (short and long packets for all VC IDs)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_RX_EN_0" description="Disabled"/>
+      <bitenum value="1" token="ECC_RX_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CS_RX_EN" width="1" begin="1" end="1" resetval="0x0" description="Enables the checksum check for the received payload (long packet only for all VC IDs)." range="" rwaccess="RW">
+      <bitenum value="0" token="CS_RX_EN_0" description="Disabled"/>
+      <bitenum value="1" token="CS_RX_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="IF_EN" width="1" begin="0" end="0" resetval="0x0" description="Enables the module. When the module is disabled the signals from the complex I/O are gated (no updates of the interrupt status register).It is not possible to change the bit fields in the DSI_CTRL register, except IF_EN when it is enabled. All the other registers can be changed except the ones that require DSI_VCn_CTRL[0] VC_EN to be equal to 0 to be modified." range="" rwaccess="RW">
+      <bitenum value="0" token="IF_EN_0" description="The interface is disabled. If one of the VC uses the video mode with the video port to receive the data, the DSI protocol engines is disabled when the next VSYNC is received and all the data in the FIFO for the other VCs in command mode are sent to the peripherals (if BTA_EN bit is enabled, the DSI protocol engine needs to wait for the response and BTA from the peripheral before disabling all the internal logic since an acknowledge is requested)."/>
+      <bitenum value="1" token="IF_EN_1" description="The interface is enabled immediately, the data acquisition on the video port starts on the next VSYNC (video mode) or first data received in the Slave port FIFO (command mode)."/>
+    </bitfield>
+  </register>
+  <register id="DSI_COMPLEXIO_CFG1" acronym="DSI_COMPLEXIO_CFG1" offset="0x48" width="32" description="COMPLEXIO CONFIGURATION REGISTER for the complex I/O This register contains the lane configuration for the order and position of the lanes (clock and data) and the polarity order for the control of the PHY differential signals in addition to the control bit for the power FSM.">
+    <bitfield id="SHADOWING" width="1" begin="31" end="31" resetval="0x0" description="Shadowing configuration." range="" rwaccess="RW">
+      <bitenum value="0" token="SHADOWING_0" description="Disabled. The writes to the DSIPHY_CFG0 and DSIPHY_CFG1 registers are done like the other SCP registers."/>
+      <bitenum value="1" token="SHADOWING_1" description="Enabled. The writes to the DSIPHY_CFG0 and DSIPHY_CFG1 registers are done only when the GO bit is set and when the signal DISPC_UPDATE_SYNC from the display controller module is active."/>
+    </bitfield>
+    <bitfield id="GOBIT" width="1" begin="30" end="30" resetval="0" description="Allows the synchronized update of the shadow registers when the signal DISPC_UPDATE_SYNC is active." range="" rwaccess="RW">
+      <bitenum value="0" token="GOBIT_0" description="Resets the Gobit. The hardware has finished the update of the shadow SCP registers. The bit is reset by Hardware. The software can reset the bit in case users decide to abort it. There is no guarantee that the software reset is done before the transfer of the values to the complex I/O."/>
+      <bitenum value="1" token="GOBIT_1" description="Set the Gobit. Only when the transfer of the new values for the two first registers is completed (2, 1, or 0 transfers are performed based on the number of registers to update), the GObit is reset. The DISPC_UPDATE_SYNC signal is used to synchronize the update. The bit must be set only when it is in reset state."/>
+    </bitfield>
+    <bitfield id="RESET_DONE" width="1" begin="29" end="29" resetval="1" description="Internal reset monitoring of the power domain using TxByteClkHS from the complex I/O" range="" rwaccess="R">
+      <bitenum value="0" token="RESET_DONE_0" description="Internal module reset is on going."/>
+      <bitenum value="1" token="RESET_DONE_1" description="Reset completed."/>
+    </bitfield>
+    <bitfield id="PWR_CMD" width="2" begin="28" end="27" resetval="0x0" description="Command for power control of the complex I/O" range="" rwaccess="RW">
+      <bitenum value="0" token="PWR_CMD_0" description="Command to change to OFF state"/>
+      <bitenum value="1" token="PWR_CMD_1" description="Command to change to ON state"/>
+      <bitenum value="2" token="PWR_CMD_2" description="Command to change to ultralow-power state"/>
+    </bitfield>
+    <bitfield id="PWR_STATUS" width="2" begin="26" end="25" resetval="0x0" description="Status of the power control of the complex I/O" range="" rwaccess="R">
+      <bitenum value="0" token="PWR_STATUS_0" description="complex I/O in OFF state"/>
+      <bitenum value="1" token="PWR_STATUS_1" description="complex I/O in ON state"/>
+      <bitenum value="2" token="PWR_STATUS_2" description="complex I/O in ultralow-power state"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="24" end="22" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LDO_POWER_GOOD_STATE" width="1" begin="21" end="21" resetval="0x0" description="Indicates the state of the signal LDOPWRGOOD. VDDALDODSIPLL: 1.2-V power supply for the PLL. The voltage is supplied by the internal or external LDO. The interrupt LDO_POWER_GOOD_IRQ is generated when a transition is detected on the signal LDOPWRGOOD from the DSI_PHY." range="" rwaccess="R">
+      <bitenum value="0" token="LDO_POWER_GOOD_STATE_0" description="VDDALDODSIPLL power supply is down"/>
+      <bitenum value="1" token="LDO_POWER_GOOD_STATE_1" description="VDDALDODSIPLL power supply is up"/>
+    </bitfield>
+    <bitfield id="USE_LDO_EXTERNAL" width="1" begin="20" end="20" resetval="0x0" description="Select the external LDO for the DSI_PHY." range="" rwaccess="RW">
+      <bitenum value="0" token="USE_LDO_EXTERNAL_0" description="DSI_PHY internal LDO is used."/>
+      <bitenum value="1" token="USE_LDO_EXTERNAL_1" description="External LDO is used. DSI_PHY LDO is tri-stated."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="19" end="19" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="18" end="16" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="14" end="12" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="DATA2_POL" width="1" begin="11" end="11" resetval="0x0" description="+/- differential pin order of DATA lane 2." range="" rwaccess="RW">
+      <bitenum value="0" token="DATA2_POL_0" description="+/- pin order (dsi_dx=+ and dsi_dy=-)"/>
+      <bitenum value="1" token="DATA2_POL_1" description="-/+ pin order (dsi_dx=- and dsi_dy=+)"/>
+    </bitfield>
+    <bitfield id="DATA2_POSITION" width="3" begin="10" end="8" resetval="0x0" description="Position and order of the DATA lane 2.Other values: reserved ." range="" rwaccess="RW">
+      <bitenum value="0" token="DATA2_POSITION_0" description="Not used/connected"/>
+      <bitenum value="1" token="DATA2_POSITION_1" description="Data lane 2 is at the position 1 (line 1)."/>
+      <bitenum value="2" token="DATA2_POSITION_2" description="Data lane 2 is at the position 2 (line 2)."/>
+      <bitenum value="3" token="DATA2_POSITION_3" description="Data lane 2 is at the position 3 (line 3)."/>
+    </bitfield>
+    <bitfield id="DATA1_POL" width="1" begin="7" end="7" resetval="0x0" description="+/- differential pin order of DATA lane 1" range="" rwaccess="RW">
+      <bitenum value="0" token="DATA1_POL_0" description="+/- pin order (dsi_dx=+ and dsi_dy=-)"/>
+      <bitenum value="1" token="DATA1_POL_1" description="-/+ pin order (dsi_dx=- and dsi_dy=+)"/>
+    </bitfield>
+    <bitfield id="DATA1_POSITION" width="3" begin="6" end="4" resetval="0x0" description="Position and order of the DATA lane 1.Other values: reserved ." range="" rwaccess="RW">
+      <bitenum value="1" token="DATA1_POSITION_1" description="Data lane 1 is at the position 1 (line 1)."/>
+      <bitenum value="2" token="DATA1_POSITION_2" description="Data lane 1 is at the position 2 (line 2)."/>
+      <bitenum value="3" token="DATA1_POSITION_3" description="Data lane 1 is at the position 3 (line 3)."/>
+    </bitfield>
+    <bitfield id="CLOCK_POL" width="1" begin="3" end="3" resetval="0x0" description="+/- differential pin order of CLOCK lane." range="" rwaccess="RW">
+      <bitenum value="0" token="CLOCK_POL_0" description="+/- pin order (dsi_dx=+ and dsi_dy=-)"/>
+      <bitenum value="1" token="CLOCK_POL_1" description="-/+ pin order (dsi_dx=- and dsi_dy=+)"/>
+    </bitfield>
+    <bitfield id="CLOCK_POSITION" width="3" begin="2" end="0" resetval="0x0" description="Position and order of the CLOCK lane.The clock lane is always present.Other values: reserved ." range="" rwaccess="RW">
+      <bitenum value="1" token="CLOCK_POSITION_1" description="Clock lane is at the position 1 (line 1)."/>
+      <bitenum value="2" token="CLOCK_POSITION_2" description="Clock lane is at the position 2 (line 2)."/>
+      <bitenum value="3" token="CLOCK_POSITION_3" description="Clock lane is at the position 3 (line 3)."/>
+    </bitfield>
+  </register>
+  <register id="DSI_COMPLEXIO_IRQSTATUS" acronym="DSI_COMPLEXIO_IRQSTATUS" offset="0x4C" width="32" description="INTERRUPT STATUS REGISTER - All errors from complex I/O">
+    <bitfield id="ULPSACTIVENOT_ALL1_IRQ" width="1" begin="31" end="31" resetval="0x0" description="All the ULPSActiveNOT signals corresponding to the lanes with TXULPSExit being high are high." range="" rwaccess="RW">
+      <bitenum value="0" token="ULPSACTIVENOT_ALL1_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ULPSACTIVENOT_ALL1_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ULPSACTIVENOT_ALL0_IRQ" width="1" begin="30" end="30" resetval="0x0" description="All signals ULPSActiveNOT are 0" range="" rwaccess="RW">
+      <bitenum value="0" token="ULPSACTIVENOT_ALL0_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ULPSACTIVENOT_ALL0_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="29" end="29" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="28" end="28" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="27" end="27" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="26" end="26" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ERRCONTENTIONLP1_3_IRQ" width="1" begin="25" end="25" resetval="0x0" description="Contention LP1 error for lane #3" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTENTIONLP1_3_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRCONTENTIONLP1_3_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ERRCONTENTIONLP0_3_IRQ" width="1" begin="24" end="24" resetval="0x0" description="Contention LP0 error for lane #3" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTENTIONLP0_3_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRCONTENTIONLP0_3_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ERRCONTENTIONLP1_2_IRQ" width="1" begin="23" end="23" resetval="0x0" description="Contention LP1 error for lane #2" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTENTIONLP1_2_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRCONTENTIONLP1_2_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ERRCONTENTIONLP0_2_IRQ" width="1" begin="22" end="22" resetval="0x0" description="Contention LP0 error for lane #2" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTENTIONLP0_2_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRCONTENTIONLP0_2_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ERRCONTENTIONLP1_1_IRQ" width="1" begin="21" end="21" resetval="0x0" description="Contention LP1 error for lane #1" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTENTIONLP1_1_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRCONTENTIONLP1_1_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ERRCONTENTIONLP0_1_IRQ" width="1" begin="20" end="20" resetval="0x0" description="Contention LP0 error for lane #1" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTENTIONLP0_1_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRCONTENTIONLP0_1_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="19" end="19" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="18" end="18" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="STATEULPS3_IRQ" width="1" begin="17" end="17" resetval="0x0" description="Lane #3 in ultralow-power state" range="" rwaccess="RW">
+      <bitenum value="0" token="STATEULPS3_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="STATEULPS3_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="STATEULPS2_IRQ" width="1" begin="16" end="16" resetval="0x0" description="Lane #2 in ultralow-power state" range="" rwaccess="RW">
+      <bitenum value="0" token="STATEULPS2_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="STATEULPS2_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="STATEULPS1_IRQ" width="1" begin="15" end="15" resetval="0x0" description="Lane #1 in ultralow-power state" range="" rwaccess="RW">
+      <bitenum value="0" token="STATEULPS1_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="STATEULPS1_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="14" end="14" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="13" end="13" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ERRCONTROL3_IRQ" width="1" begin="12" end="12" resetval="0x0" description="Control error for lane #3" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTROL3_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRCONTROL3_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ERRCONTROL2_IRQ" width="1" begin="11" end="11" resetval="0x0" description="Control error for lane #2" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTROL2_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRCONTROL2_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ERRCONTROL1_IRQ" width="1" begin="10" end="10" resetval="0x0" description="Control error for lane #1" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTROL1_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRCONTROL1_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="9" end="9" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ERRESC3_IRQ" width="1" begin="7" end="7" resetval="0x0" description="Escape entry error for lane #3" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRESC3_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRESC3_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ERRESC2_IRQ" width="1" begin="6" end="6" resetval="0x0" description="Escape entry error for lane #2" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRESC2_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRESC2_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ERRESC1_IRQ" width="1" begin="5" end="5" resetval="0x0" description="Escape entry error for lane #1" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRESC1_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRESC1_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="4" end="4" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ERRSYNCESC3_IRQ" width="1" begin="2" end="2" resetval="0x0" description="Low power Data transmission synchronization error for lane #3" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRSYNCESC3_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRSYNCESC3_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ERRSYNCESC2_IRQ" width="1" begin="1" end="1" resetval="0x0" description="Low power Data transmission synchronization error for lane #2" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRSYNCESC2_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRSYNCESC2_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ERRSYNCESC1_IRQ" width="1" begin="0" end="0" resetval="0x0" description="Low power Data transmission synchronization error for lane #1" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRSYNCESC1_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ERRSYNCESC1_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+  </register>
+  <register id="DSI_COMPLEXIO_IRQENABLE" acronym="DSI_COMPLEXIO_IRQENABLE" offset="0x50" width="32" description="INTERRUPT ENABLE REGISTER - All errors from complex I/O">
+    <bitfield id="ULPSACTIVENOT_ALL1_IRQ_EN" width="1" begin="31" end="31" resetval="0x0" description="All the ULPSActiveNOT signals corresponding to the lanes with TXULPSExit being high are high." range="" rwaccess="RW">
+      <bitenum value="0" token="ULPSACTIVENOT_ALL1_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ULPSACTIVENOT_ALL1_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ULPSACTIVENOT_ALL0_IRQ_EN" width="1" begin="30" end="30" resetval="0x0" description="All signals ULPSActiveNOT are 0" range="" rwaccess="RW">
+      <bitenum value="0" token="ULPSACTIVENOT_ALL0_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ULPSACTIVENOT_ALL0_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="29" end="29" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="28" end="28" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="27" end="27" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="26" end="26" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ERRCONTENTIONLP1_3_IRQ_EN" width="1" begin="25" end="25" resetval="0x0" description="Contention LP1 error for lane #3" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTENTIONLP1_3_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRCONTENTIONLP1_3_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ERRCONTENTIONLP0_3_IRQ_EN" width="1" begin="24" end="24" resetval="0x0" description="Contention LP0 error for lane #3" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTENTIONLP0_3_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRCONTENTIONLP0_3_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ERRCONTENTIONLP1_2_IRQ_EN" width="1" begin="23" end="23" resetval="0x0" description="Contention LP1 error for lane #2" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTENTIONLP1_2_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRCONTENTIONLP1_2_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ERRCONTENTIONLP0_2_IRQ_EN" width="1" begin="22" end="22" resetval="0x0" description="Contention LP0 error for lane #2" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTENTIONLP0_2_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRCONTENTIONLP0_2_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ERRCONTENTIONLP1_1_IRQ_EN" width="1" begin="21" end="21" resetval="0x0" description="Contention LP1 error for lane #1" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTENTIONLP1_1_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRCONTENTIONLP1_1_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ERRCONTENTIONLP0_1_IRQ_EN" width="1" begin="20" end="20" resetval="0x0" description="Contention LP0 error for lane #1" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTENTIONLP0_1_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRCONTENTIONLP0_1_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="19" end="19" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="18" end="18" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="STATEULPS3_IRQ_EN" width="1" begin="17" end="17" resetval="0x0" description="Lane #3 in ultralow-power state" range="" rwaccess="RW">
+      <bitenum value="0" token="STATEULPS3_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="STATEULPS3_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="STATEULPS2_IRQ_EN" width="1" begin="16" end="16" resetval="0x0" description="Lane #2 in ultralow-power state" range="" rwaccess="RW">
+      <bitenum value="0" token="STATEULPS2_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="STATEULPS2_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="STATEULPS1_IRQ_EN" width="1" begin="15" end="15" resetval="0x0" description="Lane #1 in ultralow-power state" range="" rwaccess="RW">
+      <bitenum value="0" token="STATEULPS1_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="STATEULPS1_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="14" end="14" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="13" end="13" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ERRCONTROL3_IRQ_EN" width="1" begin="12" end="12" resetval="0x0" description="Control error for lane #3" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTROL3_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRCONTROL3_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ERRCONTROL2_IRQ_EN" width="1" begin="11" end="11" resetval="0x0" description="Control error for lane #2" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTROL2_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRCONTROL2_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ERRCONTROL1_IRQ_EN" width="1" begin="10" end="10" resetval="0x0" description="Control error for lane #1" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRCONTROL1_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRCONTROL1_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="9" end="9" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ERRESC3_IRQ_EN" width="1" begin="7" end="7" resetval="0x0" description="Escape entry error for lane #3" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRESC3_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRESC3_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ERRESC2_IRQ_EN" width="1" begin="6" end="6" resetval="0x0" description="Escape entry error for lane #2" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRESC2_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRESC2_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ERRESC1_IRQ_EN" width="1" begin="5" end="5" resetval="0x0" description="Escape entry error for lane #1" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRESC1_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRESC1_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="4" end="4" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ERRSYNCESC3_IRQ_EN" width="1" begin="2" end="2" resetval="0x0" description="Low power Data transmission synchronization error for lane #3" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRSYNCESC3_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRSYNCESC3_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ERRSYNCESC2_IRQ_EN" width="1" begin="1" end="1" resetval="0x0" description="Low power Data transmission synchronization error for lane #2" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRSYNCESC2_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRSYNCESC2_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ERRSYNCESC1_IRQ_EN" width="1" begin="0" end="0" resetval="0x0" description="Low power Data transmission synchronization error for lane #1" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRSYNCESC1_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ERRSYNCESC1_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+  </register>
+  <register id="DSI_CLK_CTRL" acronym="DSI_CLK_CTRL" offset="0x54" width="32" description="CLOCK CONTROL This register controls the CLOCK GENERATION. The register can be modified only when IF_EN is reset.">
+    <bitfield id="PLL_PWR_CMD" width="2" begin="31" end="30" resetval="0x0" description="Command for power control of the DSI PLL Control module" range="" rwaccess="RW">
+      <bitenum value="0" token="PLL_PWR_CMD_0" description="Command to change to OFF state"/>
+      <bitenum value="1" token="PLL_PWR_CMD_1" description="Command to change to ON state for PLL only (HSDIVISER is OFF)"/>
+      <bitenum value="2" token="PLL_PWR_CMD_2" description="Command to change to ON state for both PLL and HSDIVISER"/>
+      <bitenum value="3" token="PLL_PWR_CMD_3" description="Command to change to ON state for both PLL and HSDIVISER (no clock output to the DSI complex I/O)"/>
+    </bitfield>
+    <bitfield id="PLL_PWR_STATUS" width="2" begin="29" end="28" resetval="0x0" description="Status of the power control of the DSI PLL Control module" range="" rwaccess="R">
+      <bitenum value="0" token="PLL_PWR_STATUS_0" description="DSI PLL Control module in OFF state"/>
+      <bitenum value="1" token="PLL_PWR_STATUS_1" description="DSI PLL Control module in ON state for PLL only (HSDIVISER is OFF)"/>
+      <bitenum value="2" token="PLL_PWR_STATUS_2" description="DSI PLL Control module in ON state for both PLL and HSDIVISER"/>
+      <bitenum value="3" token="PLL_PWR_STATUS_3" description="DSI PLL Control module in ON state for both PLL and HSDIVISER (no clock output to the DSI complex I/O)"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="27" end="22" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LP_RX_SYNCHRO_ENABLE" width="1" begin="21" end="21" resetval="0x0" description="Defines if the DSI functional clock is higher or lower than 30 MHz. The information is used to define synchronization to be used for RxValidEsc." range="" rwaccess="RW">
+      <bitenum value="0" token="LP_RX_SYNCHRO_ENABLE_0" description="The DSI functional clock is equal or slower than 30 MHz. The synchronization is falling/rising."/>
+      <bitenum value="1" token="LP_RX_SYNCHRO_ENABLE_1" description="The DSI functional clock is higher than 30 MHz. The synchronization is rising/rising."/>
+    </bitfield>
+    <bitfield id="LP_CLK_ENABLE" width="1" begin="20" end="20" resetval="0x0" description="Controls the gating of the TXCLKESC clock." range="" rwaccess="RW">
+      <bitenum value="0" token="LP_CLK_ENABLE_0" description="Disabled. The clock is not generated. The value of LP_CLK_DIVISOR[12:0] bit field is not used and does not have to be programmed."/>
+      <bitenum value="1" token="LP_CLK_ENABLE_1" description="Enabled. The clock is generated. The value of LP_CLK_DIVISOR[12:0] bit field is used and must be programmed."/>
+    </bitfield>
+    <bitfield id="HS_MANUAL_STOP_CTRL" width="1" begin="19" end="19" resetval="0x0" description="In case HS_AUTO_STOP_ENABLE bit is set to 0 (reset value), the bit field allows manual control of the assertion/deassertion of the signal DSIStopClk by users." range="" rwaccess="RW">
+      <bitenum value="0" token="HS_MANUAL_STOP_CTRL_0" description="DSIStopClk deassertion unconditionally."/>
+      <bitenum value="1" token="HS_MANUAL_STOP_CTRL_1" description="DSIStopClk assertion unconditionally."/>
+    </bitfield>
+    <bitfield id="HS_AUTO_STOP_ENABLE" width="1" begin="18" end="18" resetval="0x0" description="Enables the automatic assertion/deassertion of DSIStopClk signal." range="" rwaccess="RW">
+      <bitenum value="0" token="HS_AUTO_STOP_ENABLE_0" description="Auto mode disabled."/>
+      <bitenum value="1" token="HS_AUTO_STOP_ENABLE_1" description="Auto mode enabled."/>
+    </bitfield>
+    <bitfield id="LP_CLK_NULL_PACKET_SIZE" width="2" begin="17" end="16" resetval="0x0" description="Indicates the size of LP NULL Packets to be sent automatically when after the last LP packet transfer. It is used by the receiver to drain its internal pipeline. The valid values are from 0 to 3 bytes for the payload size." range="" rwaccess="RW"/>
+    <bitfield id="LP_CLK_NULL_PACKET_ENABLE" width="1" begin="15" end="15" resetval="0x0" description="Enables the generation of NULL packet in low speed." range="" rwaccess="RW">
+      <bitenum value="0" token="LP_CLK_NULL_PACKET_ENABLE_0" description="Disabled. The NULL packet is not sent in LP mode after the last LP packet."/>
+      <bitenum value="1" token="LP_CLK_NULL_PACKET_ENABLE_1" description="Enabled. The NULL packet is sent in LP mode after the last LP packet."/>
+    </bitfield>
+    <bitfield id="CIO_CLK_ICG" width="1" begin="14" end="14" resetval="0x0" description="Controls the signal for gating the L3_ICLK clock provided to the complex I/O" range="" rwaccess="RW">
+      <bitenum value="0" token="CIO_CLK_ICG_0" description="Disabled. The L3_ICLK clock to the DSI complex I/O is gated."/>
+      <bitenum value="1" token="CIO_CLK_ICG_1" description="Enabled. The L3_ICLK clock to the DSI complex I/O is not gated."/>
+    </bitfield>
+    <bitfield id="DDR_CLK_ALWAYS_ON" width="1" begin="13" end="13" resetval="0x0" description="Defines if the DDR clock is also sent when there is no HS packets sent to the peripheral (low power mode). So TXRequest for the clock lane is not de-asserted." range="" rwaccess="RW">
+      <bitenum value="0" token="DDR_CLK_ALWAYS_ON_0" description="Disabled. The DDR clock is only provided when HS packets are sent."/>
+      <bitenum value="1" token="DDR_CLK_ALWAYS_ON_1" description="Enabled. The DDR clock is always sent to the peripheral regardless of the state of the data lanes (HS or LP mode)."/>
+    </bitfield>
+    <bitfield id="LP_CLK_DIVISOR" width="13" begin="12" end="0" resetval="0x0001" description="Defines the ratio to be used for the generation of the low-power mode clock from DSI functional clock.The supported values are from 1 to 8191(the value 0 is invalid). The output frequency must be in the range between 20 MHz and 32 kHz." range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_TIMING1" acronym="DSI_TIMING1" offset="0x58" width="32" description="TIMING1 REGISTER This register controls the DSI Protocol Engine module timers. Any bit field can be modified while.IF_EN is set to 1. It is used to indicate the number of DSI_FCLK clock cycles for the timers FORCE_TX_STOP_TIMER and TA_TO_TIMER">
+    <bitfield id="TA_TO" width="1" begin="31" end="31" resetval="0x0" description="Enables the turn-around timer" range="" rwaccess="RW">
+      <bitenum value="0" token="TA_TO_0" description="Turn-around counter is disabled."/>
+      <bitenum value="1" token="TA_TO_1" description="Turn-around counter is enabled (required to receive TA interrupt in case the turn-around procedure is not successful)."/>
+    </bitfield>
+    <bitfield id="TA_TO_X16" width="1" begin="30" end="30" resetval="0x1" description="Multiplication factor for the number of DSI_FCLK clock cycles defined in TA_TO_COUNTER bit field" range="" rwaccess="RW">
+      <bitenum value="0" token="TA_TO_X16_0" description="The number of DSI_FCLK clock cycles defined in TA_TO_COUNTER is multiplied by 1x"/>
+      <bitenum value="1" token="TA_TO_X16_1" description="The number of DSI_FCLK clock cycles defined in TA_TO_COUNTER is multiplied by 16x"/>
+    </bitfield>
+    <bitfield id="TA_TO_X8" width="1" begin="29" end="29" resetval="0x1" description="Multiplication factor for the number of DSI_FCLK clock cycles defined in TA_TO_COUNTER bit field" range="" rwaccess="RW">
+      <bitenum value="0" token="TA_TO_X8_0" description="The number of DSI_FCLK clock cycles defined in TA_TO_COUNTER is multiplied by 1x"/>
+      <bitenum value="1" token="TA_TO_X8_1" description="The number of DSI_FCLK clock cycles defined in TA_TO_COUNTER is multiplied by 8x"/>
+    </bitfield>
+    <bitfield id="TA_TO_COUNTER" width="13" begin="28" end="16" resetval="0x1FFF" description="Turn around counter. It indicates the number of DSI_FCLK clock cycles to wait for the change of the Direction PPI signal according to the TurnRequest signalThe value is from 0 to 8191." range="" rwaccess="RW"/>
+    <bitfield id="FORCE_TX_STOP_MODE_IO" width="1" begin="15" end="15" resetval="0x0" description="Control of ForceTxStopMode signal" range="" rwaccess="RW">
+      <bitenum value="0" token="FORCE_TX_STOP_MODE_IO_0" description="Deassertion of ForceTxStopMode. The hardware reset the bit at the end of the ForceTXStopMode assertion. The SW can reset the bit to stop the assertion of the ForceTXStopMode signal prior to the completion of the period."/>
+      <bitenum value="1" token="FORCE_TX_STOP_MODE_IO_1" description="Assertion of ForceTxStopMode"/>
+    </bitfield>
+    <bitfield id="STOP_STATE_X16_IO" width="1" begin="14" end="14" resetval="0x1" description="Multiplication factor for the number of DSI_FCLK clock cycles defined in STOP_STATE_COUNTER_IO bit field" range="" rwaccess="RW">
+      <bitenum value="0" token="STOP_STATE_X16_IO_0" description="The number of DSI_FCLK clock cycles defined in STOP_STATE _COUNTER_IO is multiplied by 1x"/>
+      <bitenum value="1" token="STOP_STATE_X16_IO_1" description="The number of DSI_FCLK clock cycles defined in STOP_STATE _COUNTER_IO is multiplied by 16x"/>
+    </bitfield>
+    <bitfield id="STOP_STATE_X4_IO" width="1" begin="13" end="13" resetval="0x1" description="Multiplication factor for the number of DSI_FCLK clock cycles defined in STOP_STATE_COUNTER_IO bit field" range="" rwaccess="RW">
+      <bitenum value="0" token="STOP_STATE_X4_IO_0" description="The number of DSI_FCLK clock cycles defined in STOP_STATE _COUNTER_IO is multiplied by 1x"/>
+      <bitenum value="1" token="STOP_STATE_X4_IO_1" description="The number of DSI_FCLK clock cycles defined in STOP_STATE _COUNTER_IO is multiplied by 4x"/>
+    </bitfield>
+    <bitfield id="STOP_STATE_COUNTER_IO" width="13" begin="12" end="0" resetval="0x1FFF" description="Stop state counter. It indicates the number of DSI_FCLK clock cycles to assert ForceTXStopMode signal. The value is from 0 to 8191." range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_TIMING2" acronym="DSI_TIMING2" offset="0x5C" width="32" description="TIMING2 REGISTER This register controls the DSI Protocol Engine module timers. Any bit field can be modified while.IF_EN is set to 1. It is used to indicate the number of TxByteClkHS clock cycles for the timers HS_TX_TIMER and LP_RX_TIMER">
+    <bitfield id="HS_TX_TO" width="1" begin="31" end="31" resetval="0x0" description="Enables the HS TX timer." range="" rwaccess="RW">
+      <bitenum value="0" token="HS_TX_TO_0" description="Turn-around counter is disabled."/>
+      <bitenum value="1" token="HS_TX_TO_1" description="Turn-around counter is enabled (required to receive TA interrupt in case the turn-around procedure is not successful)."/>
+    </bitfield>
+    <bitfield id="HS_TX_TO_X16" width="1" begin="30" end="30" resetval="0x1" description="Multiplication factor for the number of TxByteClkHS functional clock cycles defined in HS_TX_COUNTER bit field" range="" rwaccess="RW">
+      <bitenum value="0" token="HS_TX_TO_X16_0" description="The number of TxByteClkHS functional clock cycles defined in HS_TX_TO_COUNTER is multiplied by 1x"/>
+      <bitenum value="1" token="HS_TX_TO_X16_1" description="The number of TxByteClkHS functional clock cycles defined in HS_TX_TO_COUNTER is multiplied by 16x"/>
+    </bitfield>
+    <bitfield id="HS_TX_TO_X8" width="1" begin="29" end="29" resetval="0x1" description="Multiplication factor for the number of TxByteClkHS functional clock cycles defined in HS_TX_COUNTER bit" range="" rwaccess="RW">
+      <bitenum value="0" token="HS_TX_TO_X8_0" description="The number of TxByteClkHS functional clock cycles defined in HS_TX_TO_COUNTER is multiplied by 1x"/>
+      <bitenum value="1" token="HS_TX_TO_X8_1" description="The number of TxByteClkHS functional clock cycles defined in HS_TX_TO_COUNTER is multiplied by 8x"/>
+    </bitfield>
+    <bitfield id="HS_TX_TO_COUNTER" width="13" begin="28" end="16" resetval="0x1FFF" description="HS_TX_TIMER counter. It indicates the number of TxByteClkHS function clock cycles for the HS TX timer.The value is from 0 to 8191." range="" rwaccess="RW"/>
+    <bitfield id="LP_RX_TO" width="1" begin="15" end="15" resetval="0x0" description="Enables the LP RX timer." range="" rwaccess="RW">
+      <bitenum value="0" token="LP_RX_TO_0" description="Turn-around counter is disabled."/>
+      <bitenum value="1" token="LP_RX_TO_1" description="Turn-around counter is enabled (required to receive TA interrupt in case the turn-around procedure is not successful)."/>
+    </bitfield>
+    <bitfield id="LP_RX_TO_X16" width="1" begin="14" end="14" resetval="0x1" description="Multiplication factor for the number of DSI_FCLK clock cycles defined in LP_RX_COUNTER bit field" range="" rwaccess="RW">
+      <bitenum value="0" token="LP_RX_TO_X16_0" description="The number of DSI_FCLK clock cycles defined in LP_RX_TO_COUNTER is multiplied by 1x"/>
+      <bitenum value="1" token="LP_RX_TO_X16_1" description="The number of DSI_FCLK clock cycles defined in LP_RX_TO_COUNTER is multiplied by 16x"/>
+    </bitfield>
+    <bitfield id="LP_RX_TO_X4" width="1" begin="13" end="13" resetval="0x1" description="Multiplication factor for the number of DSI_FCLK clock cycles defined in LP_RX_COUNTER bit" range="" rwaccess="RW">
+      <bitenum value="0" token="LP_RX_TO_X4_0" description="The number of DSI_FCLK clock cycles defined in LP_RX_TO_COUNTER is multiplied by 1x"/>
+      <bitenum value="1" token="LP_RX_TO_X4_1" description="The number of DSI_FCLK clock cycles defined in LP_RX_TO_COUNTER is multiplied by 4x"/>
+    </bitfield>
+    <bitfield id="LP_RX_TO_COUNTER" width="13" begin="12" end="0" resetval="0x1FFF" description="LP_RX_TIMER counter. It indicates the number of DSI_FCLK clock cycles for the LP RX timer.The value is from 0 to 8191." range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VM_TIMING1" acronym="DSI_VM_TIMING1" offset="0x60" width="32" description="VIDEO MODE TIMING REGISTER This register defines the video mode timing.">
+    <bitfield id="HSA" width="8" begin="31" end="24" resetval="0x00" description="Defines the horizontal Sync active period used in video mode in number of byte clock cycles (TxByteClkHS)The supported values are from 0 to 255." range="" rwaccess="RW"/>
+    <bitfield id="HFP" width="12" begin="23" end="12" resetval="0x000" description="Defines the horizontal front porch used in video mode in number of byte clock cycles (TxByteClkHS)The supported values are from 0 to 255" range="" rwaccess="RW"/>
+    <bitfield id="HBP" width="12" begin="11" end="0" resetval="0x000" description="Defines the horizontal back porch used in video mode in number of byte clock cycles (TxByteClkHS)The supported values are from 0 to 255" range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VM_TIMING2" acronym="DSI_VM_TIMING2" offset="0x64" width="32" description="VIDEO MODE TIMING REGISTER This register defines the video mode timing.">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="WINDOW_SYNC" width="4" begin="27" end="24" resetval="0x0" description="Number of TxByteClkHS clock cycles for the synchronization window. An interrupt for synchronization lost is generated when the received synchronization on video port is not inside the window. The DSI protocol engine does not change its own timings if the synch is inside the window. The valid values are from 0 to 15." range="" rwaccess="RW"/>
+    <bitfield id="VSA" width="8" begin="23" end="16" resetval="0x00" description="Defines the vertical Sync active period used in video mode in number of lines.The supported values are from 0 to 255 It is used to generate the short packet for End of Vertical synchronization." range="" rwaccess="RW"/>
+    <bitfield id="VFP" width="8" begin="15" end="8" resetval="0x00" description="Defines the vertical front porch used in video mode in number of lines.The supported values are from 0 to 255" range="" rwaccess="RW"/>
+    <bitfield id="VBP" width="8" begin="7" end="0" resetval="0x00" description="Defines the vertical back porch used in video mode in number of lines.The supported values are from 0 to 255" range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VM_TIMING3" acronym="DSI_VM_TIMING3" offset="0x68" width="32" description="VIDEO MODE TIMING REGISTER This register defines the video mode timing.">
+    <bitfield id="TL" width="16" begin="31" end="16" resetval="0x0000" description="Defines the number of length of the line in video mode in number of byte clock cycles (TxByteClkHS)The supported values are from 0 to 8192. The values from 8193 to 65535 are not supported." range="" rwaccess="RW"/>
+    <bitfield id="VACT" width="16" begin="15" end="0" resetval="0x0000" description="Defines the number of active lines used in video mode.The supported values are from 0 to 65535" range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_CLK_TIMING" acronym="DSI_CLK_TIMING" offset="0x6C" width="32" description="CLOCK TIMING REGISTER This register controls the DSI Protocol Engine module timers. This register should not be modified while.IF_EN is set to 1.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="DDR_CLK_PRE" width="8" begin="15" end="8" resetval="0x01" description="Indicates the number of TxByteClkHS cycles between the start of the DDR clock and the assertion of the data request signal. The values from 1 to 255 are valid. The value 0 is reserved. The value is not used ifDSI_CLK_CTRL[13] DDR_CLK_ALWAYS_ON is set to 1 since the DDR clock is always present." range="" rwaccess="RW"/>
+    <bitfield id="DDR_CLK_POST" width="8" begin="7" end="0" resetval="0x01" description="Indicates the number of TxByteClkHS cycles after the deassertion of the data request signal and the stop of the DDR clock. The values from 1 to 255 are valid. The value 0 is reserved. The value is not used ifDSI_CLK_CTRL[13] DDR_CLK_ALWAYS_ON is set to 1 since the DDR clock is always present." range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_TX_FIFO_VC_SIZE" acronym="DSI_TX_FIFO_VC_SIZE" offset="0x70" width="32" description="Defines the corresponding memory entries allocated for each VC. The VC must be disabled to allocate/un-allocate some entries in the TX FIFO.">
+    <bitfield id="VC3_FIFO_SIZE" width="4" begin="31" end="28" resetval="0x0" description="Size of the FIFO allocated for VC 3. For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="27" end="27" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VC3_FIFO_ADD" width="3" begin="26" end="24" resetval="0x0" description="Address of the space allocated in the FIFO for VC 3. For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="VC2_FIFO_SIZE" width="4" begin="23" end="20" resetval="0x0" description="Size of the FIFO allocated for VC 2. For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="19" end="19" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VC2_FIFO_ADD" width="3" begin="18" end="16" resetval="0x0" description="Address of the space allocated in the FIFO for VC 2. For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="VC1_FIFO_SIZE" width="4" begin="15" end="12" resetval="0x0" description="Size of the FIFO allocated for VC 1. For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VC1_FIFO_ADD" width="3" begin="10" end="8" resetval="0x0" description="Address of the space allocated in the FIFO for VC 1.For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="VC0_FIFO_SIZE" width="4" begin="7" end="4" resetval="0x0" description="Size of the FIFO allocated for VC 0. For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VC0_FIFO_ADD" width="3" begin="2" end="0" resetval="0x0" description="Address of the space allocated in the FIFO for VC 0. For a complete description, refer to." range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_RX_FIFO_VC_SIZE" acronym="DSI_RX_FIFO_VC_SIZE" offset="0x74" width="32" description="Defines the corresponding memory entries allocated for each VC and the addresses. The VC must be disabled to allocate/un-allocate some entries in the RX FIFO.">
+    <bitfield id="VC3_FIFO_SIZE" width="4" begin="31" end="28" resetval="0x0" description="Size of the FIFO allocated for VC 3. For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="27" end="27" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VC3_FIFO_ADD" width="3" begin="26" end="24" resetval="0x0" description="Address of the space allocated in the FIFO for VC 3.For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="VC2_FIFO_SIZE" width="4" begin="23" end="20" resetval="0x0" description="Size of the FIFO allocated for VC 2. For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="19" end="19" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VC2_FIFO_ADD" width="3" begin="18" end="16" resetval="0x0" description="Address of the space allocated in the FIFO for VC 2. For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="VC1_FIFO_SIZE" width="4" begin="15" end="12" resetval="0x0" description="Size of the FIFO allocated for VC 1. For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VC1_FIFO_ADD" width="3" begin="10" end="8" resetval="0x0" description="Address of the space allocated in the FIFO for VC 1. For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="VC0_FIFO_SIZE" width="4" begin="7" end="4" resetval="0x0" description="Size of the FIFO allocated for VC 0. For a complete description, refer to." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VC0_FIFO_ADD" width="3" begin="2" end="0" resetval="0x0" description="Address of the space allocated in the FIFO for VC 0. For a complete description, refer to." range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_COMPLEXIO_CFG2" acronym="DSI_COMPLEXIO_CFG2" offset="0x78" width="32" description="COMPLEXIO CONFIGURATION REGISTER for the complex I/O This register contains the lane configuration for the ULPS for each lane.">
+    <bitfield id="RESERVED" width="14" begin="31" end="18" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LP_BUSY" width="1" begin="17" end="17" resetval="0x0" description="Indicates when there are still pending operations for VCs configured for LP mode. Forced to 1 when at least one VC is enabled and configured for LP mode." range="" rwaccess="R">
+      <bitenum value="0" token="LP_BUSY_0_r" description="LP logic is idle"/>
+      <bitenum value="1" token="LP_BUSY_1_r" description="LP logic is active"/>
+    </bitfield>
+    <bitfield id="HS_BUSY" width="1" begin="16" end="16" resetval="0x0" description="Indicates when there are still pending operations for VCs configured for HS mode. Forced to 1 when at least one VC is enabled and configured for HS mode" range="" rwaccess="R">
+      <bitenum value="0" token="HS_BUSY_0_r" description="HS logic is idle"/>
+      <bitenum value="1" token="HS_BUSY_1_r" description="HS logic is active"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="15" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="9" end="9" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LANE3_ULPS_SIG2" width="1" begin="7" end="7" resetval="0x0" description="Enables the ULPS for the lane #3. The HW should change the state of the lane to ULPS only when it is in stop state and there is no data pending inside the DSI protocol engine and the DSI protocol engine has control of the bus (BTA has not been sent).The state of the signal TxRequestEsc is change if lane #3 is a data lane.The state of the signal TxUlpsClk is change if lane #3 is a clock lane.There will be a latency depending on the frequency of TxClkExc. This bit should be read back to confirm a write has been effective." range="" rwaccess="RW">
+      <bitenum value="0" token="LANE3_ULPS_SIG2_0" description="READ: Inactive state effectiveWRITE: Request to change to inactive state"/>
+      <bitenum value="1" token="LANE3_ULPS_SIG2_1" description="READ: Active state effectiveWRITE: Change request to active. If the lane is a data lane, TxRequestEsc is asserted and synchronously TxUlpsEsc is asserted for one period of TxClkEsc."/>
+    </bitfield>
+    <bitfield id="LANE2_ULPS_SIG2" width="1" begin="6" end="6" resetval="0x0" description="Enables the ULPS for the lane #2. The HW should change the state of the lane to ULPS only when it is in stop state and there is no data pending inside the DSI protocol engine and the DSI protocol engine has control of the bus (BTA has not been sent).The state of the signal TxRequestEsc is change if lane #2 is a data lane.The state of the signal TxUlpsClk is change if lane #2 is a clock lane.There will be a latency depending on the frequency of TxClkExc. This bit should be read back to confirm a write has been effective." range="" rwaccess="RW">
+      <bitenum value="0" token="LANE2_ULPS_SIG2_0" description="READ: Inactive state effective WRITE: Request to change to inactive state"/>
+      <bitenum value="1" token="LANE2_ULPS_SIG2_1" description="READ: ACTIVE state effective WRITE: Change request to active. If the lane is a data lane, TxRequestEsc is asserted and synchronously TxUlpsEsc is asserted for one period of TxClkEsc."/>
+    </bitfield>
+    <bitfield id="LANE1_ULPS_SIG2" width="1" begin="5" end="5" resetval="0x0" description="Enables the ULPS for the lane #1. The HW should change the state of the lane to ULPS only when it is in stop state and there is no data pending inside the DSI protocol engine and the DSI protocol engine has control of the bus (BTA has not been sent).The state of the signal TxRequestEsc is change if lane #1 is a data lane.The state of the signal TxUlpsClk is change if lane #1 is a clock lane. There will be a latency depending on the frequency of TxClkExc. This bit should be read back to confirm a write has been effective." range="" rwaccess="RW">
+      <bitenum value="0" token="LANE1_ULPS_SIG2_0" description="READ: Inactive state effective WRITE: Request to change to inactive state"/>
+      <bitenum value="1" token="LANE1_ULPS_SIG2_1" description="READ: ACTIVE state effective WRITE: Change request to active. If the lane is a data lane, TxRequestEsc is asserted and synchronously TxUlpsEsc is asserted for one period of TxClkEsc."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="4" end="4" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LANE3_ULPS_SIG1" width="1" begin="2" end="2" resetval="0x0" description="Enables the ULPS for the lane #3. The HW should change the state of the lane to ULPS only when it is in stop state and there is no data pending inside the DSI protocol engine and the DSI protocol engine has control of the bus (BTA has not been sent).The state of the signal TxULPSExit is changed if lane #3 is a clock lane. There will be a latency depending on the frequency of TxClkExc. This bit should be read back to confirm a write has been effective." range="" rwaccess="RW">
+      <bitenum value="0" token="LANE3_ULPS_SIG1_0" description="READ: Inactive state effective WRITE: Request to change to inactive state"/>
+      <bitenum value="1" token="LANE3_ULPS_SIG1_1" description="READ: ACTIVE state effective WRITE: Change request to active. If the lane is a data lane, TxRequestEsc is asserted and synchronously TxUlpsEsc is asserted for one period of TxClkEsc."/>
+    </bitfield>
+    <bitfield id="LANE2_ULPS_SIG1" width="1" begin="1" end="1" resetval="0x0" description="Enables the ULPS for the lane #2. The HW must change the state of the lane to ULPS only when it is in stop state and there is no data pending inside the DSI protocol engine and the DSI protocol engine has control of the bus (BTA has not been sent).The state of the signal TxULPSExit is changed if lane #3 is a clock lane. There will be a latency depending on the frequency of TxClkExc. This bit should be read back to confirm a write has been effective." range="" rwaccess="RW">
+      <bitenum value="0" token="LANE2_ULPS_SIG1_0" description="READ: Inactive state effective WRITE: Request to change to inactive state"/>
+      <bitenum value="1" token="LANE2_ULPS_SIG1_1" description="READ: ACTIVE state effective WRITE: Change request to active. If the lane is a data lane, TxRequestEsc is asserted and synchronously TxUlpsEsc is asserted for one period of TxClkEsc."/>
+    </bitfield>
+    <bitfield id="LANE1_ULPS_SIG1" width="1" begin="0" end="0" resetval="0x0" description="Enables the ULPS for the lane #1. The HW must change the state of the lane to ULPS only when it is in stop state and there is no data pending inside the DSI protocol engine and the DSI protocol engine has control of the bus (BTA has not been sent).The state of the signal TxULPSExit is changed if lane #3 is a clock lane.There will be a latency depending on the frequency of TxClkExc. This bit should be read back to confirm a write has been effective." range="" rwaccess="RW">
+      <bitenum value="0" token="LANE1_ULPS_SIG1_0" description="READ: Inactive state effective WRITE: Request to change to inactive state"/>
+      <bitenum value="1" token="LANE1_ULPS_SIG1_1" description="READ: ACTIVE state effective WRITE: Change request to active. If the lane is a data lane, TxRequestEsc is asserted and synchronously TxUlpsEsc is asserted for one period of TxClkEsc."/>
+    </bitfield>
+  </register>
+  <register id="DSI_RX_FIFO_VC_FULLNESS" acronym="DSI_RX_FIFO_VC_FULLNESS" offset="0x7C" width="32" description="Defines the fullness of each space allocated for each VC.">
+    <bitfield id="VC3_FIFO_FULLNESS" width="8" begin="31" end="24" resetval="0x00" description="Fullness of the FIFO allocated for VC 3.The valid values are from 0 to 127 corresponding to 1x33-bit,...up to 128x33-bit." range="" rwaccess="R"/>
+    <bitfield id="VC2_FIFO_FULLNESS" width="8" begin="23" end="16" resetval="0x00" description="Fullness of the FIFO allocated for VC 2.The valid values are from 0 to 127 corresponding to 1x33-bit,...up to 128x33-bit." range="" rwaccess="R"/>
+    <bitfield id="VC1_FIFO_FULLNESS" width="8" begin="15" end="8" resetval="0x00" description="Fullness of the FIFO allocated for VC 1.The valid values are from 0 to 127 corresponding to 1x33-bit,...up to 128x33-bit." range="" rwaccess="R"/>
+    <bitfield id="VC0_FIFO_FULLNESS" width="8" begin="7" end="0" resetval="0x00" description="Fullness of the FIFO allocated for VC 0.The valid values are from 0 to 127 corresponding to 1x33-bit,...up to 128x33-bit." range="" rwaccess="R"/>
+  </register>
+  <register id="DSI_VM_TIMING4" acronym="DSI_VM_TIMING4" offset="0x80" width="32" description="VIDEO MODE TIMING REGISTER This register defines the video mode timing.">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="HSA_HS_INTERLEAVING" width="8" begin="23" end="16" resetval="0x00" description="Defines the number of TxByteClkHS cycles that can be used for interleaving high-speed command mode packet into Video Mode stream during HSA blanking period.The supported values are from 0 to 255." range="" rwaccess="RW"/>
+    <bitfield id="HFP_HS_INTERLEAVING" width="8" begin="15" end="8" resetval="0x00" description="Defines the number of TxByteClkHS cycles that can be used for interleaving high-speed command mode packet into Video Mode stream during HFP blanking period.The supported values are from 0 to 255" range="" rwaccess="RW"/>
+    <bitfield id="HBP_HS_INTERLEAVING" width="8" begin="7" end="0" resetval="0x00" description="Defines the number of TxByteClkHS cycles that can be used for interleaving high-speed command mode packet into Video Mode stream during HBP blanking period.The supported values are from 0 to 255" range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_TX_FIFO_VC_EMPTINESS" acronym="DSI_TX_FIFO_VC_EMPTINESS" offset="0x84" width="32" description="Defines the emptiness of each space allocated for each VC.">
+    <bitfield id="VC3_FIFO_EMPTINESS" width="8" begin="31" end="24" resetval="0x00" description="Emptiness of the FIFO allocated for VC 3.The valid values are from 0 to 127 corresponding to 1x33-bit,...up to128x33-bit." range="" rwaccess="R"/>
+    <bitfield id="VC2_FIFO_EMPTINESS" width="8" begin="23" end="16" resetval="0x00" description="Emptiness of the FIFO allocated for VC 2.The valid values are from 0 to 127 corresponding to 1x33-bit,...up to128x33-bit." range="" rwaccess="R"/>
+    <bitfield id="VC1_FIFO_EMPTINESS" width="8" begin="15" end="8" resetval="0x00" description="Emptiness of the FIFO allocated for VC 1.The valid values are from 0 to 127 corresponding to 1x33-bit,...up to128x33-bit." range="" rwaccess="R"/>
+    <bitfield id="VC0_FIFO_EMPTINESS" width="8" begin="7" end="0" resetval="0x00" description="Emptiness of the FIFO allocated for VC 0.The valid values are from 0 to 127 corresponding to 1x33-bit,...up to128x33-bit." range="" rwaccess="R"/>
+  </register>
+  <register id="DSI_VM_TIMING5" acronym="DSI_VM_TIMING5" offset="0x88" width="32" description="VIDEO MODE TIMING REGISTER This register defines the video mode timing.">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="HSA_LP_INTERLEAVING" width="8" begin="23" end="16" resetval="0x00" description="Defines the number of bytes for Low Power command mode packets that can be sent on PPI link during HSA blanking period.The supported values are from 0 to 255." range="" rwaccess="RW"/>
+    <bitfield id="HFP_LP_INTERLEAVING" width="8" begin="15" end="8" resetval="0x00" description="Defines the number of bytes for Low Power command mode packets that can be sent on PPI link during HFP blanking period.The supported values are from 0 to 255" range="" rwaccess="RW"/>
+    <bitfield id="HBP_LP_INTERLEAVING" width="8" begin="7" end="0" resetval="0x00" description="Defines the number of bytes for Low Power command mode packets that can be sent on PPI link during HBP blanking period.The supported values are from 0 to 255" range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VM_TIMING6" acronym="DSI_VM_TIMING6" offset="0x8C" width="32" description="VIDEO MODE TIMING REGISTER This register defines the video mode timing.">
+    <bitfield id="BL_HS_INTERLEAVING" width="16" begin="31" end="16" resetval="0x0000" description="Defines the number of TxByteClkHS clock cycles that can be used for interleaving high-speed command mode packet into Video Mode stream during blanking periods during VSA, VBP, VFP periods inside one video frame on PPI link.The supported values are from 0 to 65535." range="" rwaccess="RW"/>
+    <bitfield id="BL_LP_INTERLEAVING" width="16" begin="15" end="0" resetval="0x0000" description="Defines the maximum number of bytes for Low Power command mode packets that can be sent on PPI link during blanking periods during VSA, VBP or VFP periods inside one video frame on PPI link.The supported values are from 0 to 65535" range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VM_TIMING7" acronym="DSI_VM_TIMING7" offset="0x90" width="32" description="Defines the maximum number of bytes of Low Power command mode packets that can be sent on PPI link during blanking periods during VSA, VBP or VFP periods inside one video frame on PPI link. The supported values are from 0 to 65535">
+    <bitfield id="ENTER_HS_MODE_LATENCY" width="16" begin="31" end="16" resetval="0x0000" description="Defines the number of TxByteClkHS clock cycles necessary for entering to HS mode. It corresponds to the delay in number of HS clock cycles from assertion of TxRequestHS signal to 1 until assertion of TxReadyHS signal to 1.The supported values are from 0 to 65535 ." range="" rwaccess="RW"/>
+    <bitfield id="EXIT_HS_MODE_LATENCY" width="16" begin="15" end="0" resetval="0x0000" description="Defines the number of TxByteClkHS clock cycles necessary for exiting from HS mode. It corresponds to the maximum delay in number of TxByteClkHS clock cycles from deassertion of TxRequestHS signal until PPI link is in LP-11 state from which a new entrance to HS mode can be initiated which does not take more than ENTER_HS_MODE_LATENCY clock cycles.The supported values are from 0 to 65535" range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_STOPCLK_TIMING" acronym="DSI_STOPCLK_TIMING" offset="0x94" width="32" description="Number of functional clock cycles to wait for TxByteClock to stop/start after change in DSIStopClk signal">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="Write 0s for future compatibility. Reads returns 0." range="" rwaccess="R"/>
+    <bitfield id="DSI_STOPCLK_LATENCY" width="8" begin="7" end="0" resetval="0x80" description="Clock gating latency from DSI Protocol engine to TxByteClkHS" range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VCn_CTRL_0" acronym="DSI_VCn_CTRL_0" offset="0x100" width="32" description="CONTROL REGISTER - Virtual channel This register controls the VC.">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="DMA_RX_REQ_NB" width="3" begin="29" end="27" resetval="0x0" description="Selection of the use of the DMA request (associated to the RX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_RX_REQ_NB_0" description="DSI_DMA_REQ0 is selected"/>
+      <bitenum value="1" token="DMA_RX_REQ_NB_1" description="DSI_DMA_REQ1 is selected"/>
+      <bitenum value="2" token="DMA_RX_REQ_NB_2" description="DSI_DMA_REQ2 is selected"/>
+      <bitenum value="3" token="DMA_RX_REQ_NB_3" description="DSI_DMA_REQ3 is selected"/>
+      <bitenum value="4" token="DMA_RX_REQ_NB_4" description="No DMA req selected"/>
+    </bitfield>
+    <bitfield id="DMA_RX_THRESHOLD" width="3" begin="26" end="24" resetval="0x0" description="Defines the threshold value for the DMA request (associated to the RX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_RX_THRESHOLD_0" description="1x 32 bits"/>
+      <bitenum value="1" token="DMA_RX_THRESHOLD_1" description="2 x 32 bits"/>
+      <bitenum value="2" token="DMA_RX_THRESHOLD_2" description="4 x 32 bits"/>
+      <bitenum value="3" token="DMA_RX_THRESHOLD_3" description="8 x 32 bits"/>
+      <bitenum value="4" token="DMA_RX_THRESHOLD_4" description="16 x 32 bits"/>
+      <bitenum value="5" token="DMA_RX_THRESHOLD_5" description="32 x 32 bits"/>
+    </bitfield>
+    <bitfield id="DMA_TX_REQ_NB" width="3" begin="23" end="21" resetval="0x0" description="Selection of the use of the DMA request (associated to the TX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_TX_REQ_NB_0" description="DSI_DMA_REQ0 is selected"/>
+      <bitenum value="1" token="DMA_TX_REQ_NB_1" description="DSI_DMA_REQ1 is selected"/>
+      <bitenum value="2" token="DMA_TX_REQ_NB_2" description="DSI_DMA_REQ2 is selected"/>
+      <bitenum value="3" token="DMA_TX_REQ_NB_3" description="DSI_DMA_REQ3 is selected"/>
+      <bitenum value="4" token="DMA_TX_REQ_NB_4" description="No DMA req selected"/>
+    </bitfield>
+    <bitfield id="RX_FIFO_NOT_EMPTY" width="1" begin="20" end="20" resetval="0x0" description="FIFO status in command mode. Otherwise, this bit can be ignored." range="" rwaccess="R">
+      <bitenum value="0" token="RX_FIFO_NOT_EMPTY_0" description="The RX FIFO is empty (the FIFO does not contain any data for the VC)"/>
+      <bitenum value="1" token="RX_FIFO_NOT_EMPTY_1" description="The RX FIFO is not empty (the FIFO contains at least one byte for the VC)"/>
+    </bitfield>
+    <bitfield id="DMA_TX_THRESHOLD" width="3" begin="19" end="17" resetval="0x0" description="Defines the threshold value for the DMA request (associated to the TX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_TX_THRESHOLD_0" description="1x 32 bits"/>
+      <bitenum value="1" token="DMA_TX_THRESHOLD_1" description="2 x 32 bits"/>
+      <bitenum value="2" token="DMA_TX_THRESHOLD_2" description="4 x 32 bits"/>
+      <bitenum value="3" token="DMA_TX_THRESHOLD_3" description="8 x 32 bits"/>
+      <bitenum value="4" token="DMA_TX_THRESHOLD_4" description="16 x 32 bits"/>
+      <bitenum value="5" token="DMA_TX_THRESHOLD_5" description="32 x 32 bits"/>
+    </bitfield>
+    <bitfield id="TX_FIFO_FULL" width="1" begin="16" end="16" resetval="0x0" description="FIFO status in command mode. Otherwise, this bit can be ignored." range="" rwaccess="R">
+      <bitenum value="0" token="TX_FIFO_FULL_0" description="The TX FIFO is not full (the FIFO can accept at least one more 32-bit value)"/>
+      <bitenum value="1" token="TX_FIFO_FULL_1" description="The TX FIFO is full"/>
+    </bitfield>
+    <bitfield id="VC_BUSY" width="1" begin="15" end="15" resetval="0x0" description="Indicates if previously scheduled activities (packets, BTA) are still being processed. Forced to 1 by hardware if VC is enabled. Software should check this bit is 0 before changing channel configuration." range="" rwaccess="R">
+      <bitenum value="0" token="VC_BUSY_0" description="No pending operations for this VC"/>
+      <bitenum value="1" token="VC_BUSY_1" description="Pending operations for this VC"/>
+    </bitfield>
+    <bitfield id="PP_BUSY" width="1" begin="14" end="14" resetval="0" description="Line buffer busy status." range="" rwaccess="R">
+      <bitenum value="0" token="PP_BUSY_0" description="Software is permitted to write a new header for VP command mode traffic."/>
+      <bitenum value="1" token="PP_BUSY_1" description="Software is NOT permitted to write a new header for VP command mode traffic."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="13" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="MODE_SPEED" width="1" begin="9" end="9" resetval="0x0" description="Selection of the mode. This bit is ignored by hardware when video mode is selected." range="" rwaccess="RW">
+      <bitenum value="0" token="MODE_SPEED_0" description="Low-power mode (CMOS) is used to send short and long packets to the peripheral."/>
+      <bitenum value="1" token="MODE_SPEED_1" description="High speed mode (SLVS) is used to send short and long packets to the peripheral."/>
+    </bitfield>
+    <bitfield id="ECC_TX_EN" width="1" begin="8" end="8" resetval="0x0" description="Enables the ECC generation for the transmit header (short and long packets)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_TX_EN_0" description="Disabled"/>
+      <bitenum value="1" token="ECC_TX_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CS_TX_EN" width="1" begin="7" end="7" resetval="0x0" description="Enables the checksum generation for the transmit payload (long packet only)." range="" rwaccess="RW">
+      <bitenum value="0" token="CS_TX_EN_0" description="Disabled. The value 0x00 is used."/>
+      <bitenum value="1" token="CS_TX_EN_1" description="Enabled. The Check-sum value is calculated by HW."/>
+    </bitfield>
+    <bitfield id="BTA_EN" width="1" begin="6" end="6" resetval="0x0" description="Send the bus turn around to the peripheral. It can be used when the automatic mode is enabled (BTA_SHORT_EN=1 or/and BTA_LONG_EN=1). In that case only one BTA is sent to the peripheral. The manual mode allows users to define for which packets, the turn around is required for example getting acknowledge from the peripheral." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_EN_0" description="READS: BTA generation is completed. It is reset by HW when it is completed.WRITES: Cancellation of the BTA generation (not guarantee since it could already on going, must not be used)."/>
+      <bitenum value="1" token="BTA_EN_1" description="READS: BTA generation has been requested by user (it could be on going but not completed). WRITES: Request for BTA generation."/>
+    </bitfield>
+    <bitfield id="TX_FIFO_NOT_EMPTY" width="1" begin="5" end="5" resetval="0x0" description="FIFO status" range="" rwaccess="R">
+      <bitenum value="0" token="TX_FIFO_NOT_EMPTY_0" description="The TX FIFO is empty (the FIFO does not contain any data for the VC)"/>
+      <bitenum value="1" token="TX_FIFO_NOT_EMPTY_1" description="The TX FIFO is not empty (the FIFO contains at least one byte for the VC)"/>
+    </bitfield>
+    <bitfield id="MODE" width="1" begin="4" end="4" resetval="0x0" description="Selection of the mode" range="" rwaccess="RW">
+      <bitenum value="0" token="MODE_0" description="Command mode."/>
+      <bitenum value="1" token="MODE_1" description="Video mode."/>
+    </bitfield>
+    <bitfield id="BTA_LONG_EN" width="1" begin="3" end="3" resetval="0x0" description="Enables the automatic bus turn-around after completion of each long packet transmission." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_LONG_EN_0" description="Disabled"/>
+      <bitenum value="1" token="BTA_LONG_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="BTA_SHORT_EN" width="1" begin="2" end="2" resetval="0x0" description="Enables the automatic bus turn-around after completion of each short packet transmission." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_SHORT_EN_0" description="Disabled"/>
+      <bitenum value="1" token="BTA_SHORT_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="SOURCE" width="1" begin="1" end="1" resetval="0x0" description="Selection of the source between L4 interconnect slave port and video port. This bit is ignored by hardware when video mode is selected." range="" rwaccess="RW">
+      <bitenum value="0" token="SOURCE_0" description="All the data are provided by the L4 interconnect slave port. Any transfer on the video port is ignored for this VC."/>
+      <bitenum value="1" token="SOURCE_1" description="If MODE=VIDEO_MODE. any data received on the video port (pixels and enabled synchronization events using[17] VP_HSYNC_START, [18] VP_HSYNC_END, [15] VP_VSYNC_START, [16] VP_VSYNC_END,) are sent on the VC (only one VC can be associated with the video port, the software must ensure that no more than one VC is enabled with the video port as the main source for data). If MODE=COMMAND_MODE, the VP_STALL signal is used by the protocol engine to indicate when new data are required. The synchronization signals are not generated by the display controller. Regardless of the MODE, no data can be provided on the L4 interconnect slave port."/>
+    </bitfield>
+    <bitfield id="VC_EN" width="1" begin="0" end="0" resetval="0x0" description="Enables the VC." range="" rwaccess="RW">
+      <bitenum value="0" token="VC_EN_0" description="Disabled. The VC must be disabled for any register change in the DSI_VCn_XXX registers the corresponding VC ID."/>
+      <bitenum value="1" token="VC_EN_1" description="Enabled. No change is allowed to the VC registers (except for setting the bit fields/registers:[6] BTA_EN, [15:0] TE_SIZE, [31] TE_START, DSI_VCn_LONG_XXX, DSI_VCn_SHORT_XXX, DSI_VCn_IRQXXX registers)."/>
+    </bitfield>
+  </register>
+  <register id="DSI_VCn_CTRL_1" acronym="DSI_VCn_CTRL_1" offset="0x120" width="32" description="CONTROL REGISTER - Virtual channel This register controls the VC.">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="DMA_RX_REQ_NB" width="3" begin="29" end="27" resetval="0x0" description="Selection of the use of the DMA request (associated to the RX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_RX_REQ_NB_0" description="DSI_DMA_REQ0 is selected"/>
+      <bitenum value="1" token="DMA_RX_REQ_NB_1" description="DSI_DMA_REQ1 is selected"/>
+      <bitenum value="2" token="DMA_RX_REQ_NB_2" description="DSI_DMA_REQ2 is selected"/>
+      <bitenum value="3" token="DMA_RX_REQ_NB_3" description="DSI_DMA_REQ3 is selected"/>
+      <bitenum value="4" token="DMA_RX_REQ_NB_4" description="No DMA req selected"/>
+    </bitfield>
+    <bitfield id="DMA_RX_THRESHOLD" width="3" begin="26" end="24" resetval="0x0" description="Defines the threshold value for the DMA request (associated to the RX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_RX_THRESHOLD_0" description="1x 32 bits"/>
+      <bitenum value="1" token="DMA_RX_THRESHOLD_1" description="2 x 32 bits"/>
+      <bitenum value="2" token="DMA_RX_THRESHOLD_2" description="4 x 32 bits"/>
+      <bitenum value="3" token="DMA_RX_THRESHOLD_3" description="8 x 32 bits"/>
+      <bitenum value="4" token="DMA_RX_THRESHOLD_4" description="16 x 32 bits"/>
+      <bitenum value="5" token="DMA_RX_THRESHOLD_5" description="32 x 32 bits"/>
+    </bitfield>
+    <bitfield id="DMA_TX_REQ_NB" width="3" begin="23" end="21" resetval="0x0" description="Selection of the use of the DMA request (associated to the TX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_TX_REQ_NB_0" description="DSI_DMA_REQ0 is selected"/>
+      <bitenum value="1" token="DMA_TX_REQ_NB_1" description="DSI_DMA_REQ1 is selected"/>
+      <bitenum value="2" token="DMA_TX_REQ_NB_2" description="DSI_DMA_REQ2 is selected"/>
+      <bitenum value="3" token="DMA_TX_REQ_NB_3" description="DSI_DMA_REQ3 is selected"/>
+      <bitenum value="4" token="DMA_TX_REQ_NB_4" description="No DMA req selected"/>
+    </bitfield>
+    <bitfield id="RX_FIFO_NOT_EMPTY" width="1" begin="20" end="20" resetval="0x0" description="FIFO status in command mode. Otherwise, this bit can be ignored." range="" rwaccess="R">
+      <bitenum value="0" token="RX_FIFO_NOT_EMPTY_0" description="The RX FIFO is empty (the FIFO does not contain any data for the VC)"/>
+      <bitenum value="1" token="RX_FIFO_NOT_EMPTY_1" description="The RX FIFO is not empty (the FIFO contains at least one byte for the VC)"/>
+    </bitfield>
+    <bitfield id="DMA_TX_THRESHOLD" width="3" begin="19" end="17" resetval="0x0" description="Defines the threshold value for the DMA request (associated to the TX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_TX_THRESHOLD_0" description="1x 32 bits"/>
+      <bitenum value="1" token="DMA_TX_THRESHOLD_1" description="2 x 32 bits"/>
+      <bitenum value="2" token="DMA_TX_THRESHOLD_2" description="4 x 32 bits"/>
+      <bitenum value="3" token="DMA_TX_THRESHOLD_3" description="8 x 32 bits"/>
+      <bitenum value="4" token="DMA_TX_THRESHOLD_4" description="16 x 32 bits"/>
+      <bitenum value="5" token="DMA_TX_THRESHOLD_5" description="32 x 32 bits"/>
+    </bitfield>
+    <bitfield id="TX_FIFO_FULL" width="1" begin="16" end="16" resetval="0x0" description="FIFO status in command mode. Otherwise, this bit can be ignored." range="" rwaccess="R">
+      <bitenum value="0" token="TX_FIFO_FULL_0" description="The TX FIFO is not full (the FIFO can accept at least one more 32-bit value)"/>
+      <bitenum value="1" token="TX_FIFO_FULL_1" description="The TX FIFO is full"/>
+    </bitfield>
+    <bitfield id="VC_BUSY" width="1" begin="15" end="15" resetval="0x0" description="Indicates if previously scheduled activities (packets, BTA) are still being processed. Forced to 1 by hardware if VC is enabled. Software should check this bit is 0 before changing channel configuration." range="" rwaccess="R">
+      <bitenum value="0" token="VC_BUSY_0" description="No pending operations for this VC"/>
+      <bitenum value="1" token="VC_BUSY_1" description="Pending operations for this VC"/>
+    </bitfield>
+    <bitfield id="PP_BUSY" width="1" begin="14" end="14" resetval="0" description="Line buffer busy status." range="" rwaccess="R">
+      <bitenum value="0" token="PP_BUSY_0" description="Software is permitted to write a new header for VP command mode traffic."/>
+      <bitenum value="1" token="PP_BUSY_1" description="Software is NOT permitted to write a new header for VP command mode traffic."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="13" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="MODE_SPEED" width="1" begin="9" end="9" resetval="0x0" description="Selection of the mode. This bit is ignored by hardware when video mode is selected." range="" rwaccess="RW">
+      <bitenum value="0" token="MODE_SPEED_0" description="Low-power mode (CMOS) is used to send short and long packets to the peripheral."/>
+      <bitenum value="1" token="MODE_SPEED_1" description="High speed mode (SLVS) is used to send short and long packets to the peripheral."/>
+    </bitfield>
+    <bitfield id="ECC_TX_EN" width="1" begin="8" end="8" resetval="0x0" description="Enables the ECC generation for the transmit header (short and long packets)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_TX_EN_0" description="Disabled"/>
+      <bitenum value="1" token="ECC_TX_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CS_TX_EN" width="1" begin="7" end="7" resetval="0x0" description="Enables the checksum generation for the transmit payload (long packet only)." range="" rwaccess="RW">
+      <bitenum value="0" token="CS_TX_EN_0" description="Disabled. The value 0x00 is used."/>
+      <bitenum value="1" token="CS_TX_EN_1" description="Enabled. The Check-sum value is calculated by HW."/>
+    </bitfield>
+    <bitfield id="BTA_EN" width="1" begin="6" end="6" resetval="0x0" description="Send the bus turn around to the peripheral. It can be used when the automatic mode is enabled (BTA_SHORT_EN=1 or/and BTA_LONG_EN=1). In that case only one BTA is sent to the peripheral. The manual mode allows users to define for which packets, the turn around is required for example getting acknowledge from the peripheral." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_EN_0" description="READS: BTA generation is completed. It is reset by HW when it is completed.WRITES: Cancellation of the BTA generation (not guarantee since it could already on going, must not be used)."/>
+      <bitenum value="1" token="BTA_EN_1" description="READS: BTA generation has been requested by user (it could be on going but not completed). WRITES: Request for BTA generation."/>
+    </bitfield>
+    <bitfield id="TX_FIFO_NOT_EMPTY" width="1" begin="5" end="5" resetval="0x0" description="FIFO status" range="" rwaccess="R">
+      <bitenum value="0" token="TX_FIFO_NOT_EMPTY_0" description="The TX FIFO is empty (the FIFO does not contain any data for the VC)"/>
+      <bitenum value="1" token="TX_FIFO_NOT_EMPTY_1" description="The TX FIFO is not empty (the FIFO contains at least one byte for the VC)"/>
+    </bitfield>
+    <bitfield id="MODE" width="1" begin="4" end="4" resetval="0x0" description="Selection of the mode" range="" rwaccess="RW">
+      <bitenum value="0" token="MODE_0" description="Command mode."/>
+      <bitenum value="1" token="MODE_1" description="Video mode."/>
+    </bitfield>
+    <bitfield id="BTA_LONG_EN" width="1" begin="3" end="3" resetval="0x0" description="Enables the automatic bus turn-around after completion of each long packet transmission." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_LONG_EN_0" description="Disabled"/>
+      <bitenum value="1" token="BTA_LONG_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="BTA_SHORT_EN" width="1" begin="2" end="2" resetval="0x0" description="Enables the automatic bus turn-around after completion of each short packet transmission." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_SHORT_EN_0" description="Disabled"/>
+      <bitenum value="1" token="BTA_SHORT_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="SOURCE" width="1" begin="1" end="1" resetval="0x0" description="Selection of the source between L4 interconnect slave port and video port. This bit is ignored by hardware when video mode is selected." range="" rwaccess="RW">
+      <bitenum value="0" token="SOURCE_0" description="All the data are provided by the L4 interconnect slave port. Any transfer on the video port is ignored for this VC."/>
+      <bitenum value="1" token="SOURCE_1" description="If MODE=VIDEO_MODE. any data received on the video port (pixels and enabled synchronization events using[17] VP_HSYNC_START, [18] VP_HSYNC_END, [15] VP_VSYNC_START, [16] VP_VSYNC_END,) are sent on the VC (only one VC can be associated with the video port, the software must ensure that no more than one VC is enabled with the video port as the main source for data). If MODE=COMMAND_MODE, the VP_STALL signal is used by the protocol engine to indicate when new data are required. The synchronization signals are not generated by the display controller. Regardless of the MODE, no data can be provided on the L4 interconnect slave port."/>
+    </bitfield>
+    <bitfield id="VC_EN" width="1" begin="0" end="0" resetval="0x0" description="Enables the VC." range="" rwaccess="RW">
+      <bitenum value="0" token="VC_EN_0" description="Disabled. The VC must be disabled for any register change in the DSI_VCn_XXX registers the corresponding VC ID."/>
+      <bitenum value="1" token="VC_EN_1" description="Enabled. No change is allowed to the VC registers (except for setting the bit fields/registers:[6] BTA_EN, [15:0] TE_SIZE, [31] TE_START, DSI_VCn_LONG_XXX, DSI_VCn_SHORT_XXX, DSI_VCn_IRQXXX registers)."/>
+    </bitfield>
+  </register>
+  <register id="DSI_VCn_CTRL_2" acronym="DSI_VCn_CTRL_2" offset="0x140" width="32" description="CONTROL REGISTER - Virtual channel This register controls the VC.">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="DMA_RX_REQ_NB" width="3" begin="29" end="27" resetval="0x0" description="Selection of the use of the DMA request (associated to the RX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_RX_REQ_NB_0" description="DSI_DMA_REQ0 is selected"/>
+      <bitenum value="1" token="DMA_RX_REQ_NB_1" description="DSI_DMA_REQ1 is selected"/>
+      <bitenum value="2" token="DMA_RX_REQ_NB_2" description="DSI_DMA_REQ2 is selected"/>
+      <bitenum value="3" token="DMA_RX_REQ_NB_3" description="DSI_DMA_REQ3 is selected"/>
+      <bitenum value="4" token="DMA_RX_REQ_NB_4" description="No DMA req selected"/>
+    </bitfield>
+    <bitfield id="DMA_RX_THRESHOLD" width="3" begin="26" end="24" resetval="0x0" description="Defines the threshold value for the DMA request (associated to the RX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_RX_THRESHOLD_0" description="1x 32 bits"/>
+      <bitenum value="1" token="DMA_RX_THRESHOLD_1" description="2 x 32 bits"/>
+      <bitenum value="2" token="DMA_RX_THRESHOLD_2" description="4 x 32 bits"/>
+      <bitenum value="3" token="DMA_RX_THRESHOLD_3" description="8 x 32 bits"/>
+      <bitenum value="4" token="DMA_RX_THRESHOLD_4" description="16 x 32 bits"/>
+      <bitenum value="5" token="DMA_RX_THRESHOLD_5" description="32 x 32 bits"/>
+    </bitfield>
+    <bitfield id="DMA_TX_REQ_NB" width="3" begin="23" end="21" resetval="0x0" description="Selection of the use of the DMA request (associated to the TX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_TX_REQ_NB_0" description="DSI_DMA_REQ0 is selected"/>
+      <bitenum value="1" token="DMA_TX_REQ_NB_1" description="DSI_DMA_REQ1 is selected"/>
+      <bitenum value="2" token="DMA_TX_REQ_NB_2" description="DSI_DMA_REQ2 is selected"/>
+      <bitenum value="3" token="DMA_TX_REQ_NB_3" description="DSI_DMA_REQ3 is selected"/>
+      <bitenum value="4" token="DMA_TX_REQ_NB_4" description="No DMA req selected"/>
+    </bitfield>
+    <bitfield id="RX_FIFO_NOT_EMPTY" width="1" begin="20" end="20" resetval="0x0" description="FIFO status in command mode. Otherwise, this bit can be ignored." range="" rwaccess="R">
+      <bitenum value="0" token="RX_FIFO_NOT_EMPTY_0" description="The RX FIFO is empty (the FIFO does not contain any data for the VC)"/>
+      <bitenum value="1" token="RX_FIFO_NOT_EMPTY_1" description="The RX FIFO is not empty (the FIFO contains at least one byte for the VC)"/>
+    </bitfield>
+    <bitfield id="DMA_TX_THRESHOLD" width="3" begin="19" end="17" resetval="0x0" description="Defines the threshold value for the DMA request (associated to the TX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_TX_THRESHOLD_0" description="1x 32 bits"/>
+      <bitenum value="1" token="DMA_TX_THRESHOLD_1" description="2 x 32 bits"/>
+      <bitenum value="2" token="DMA_TX_THRESHOLD_2" description="4 x 32 bits"/>
+      <bitenum value="3" token="DMA_TX_THRESHOLD_3" description="8 x 32 bits"/>
+      <bitenum value="4" token="DMA_TX_THRESHOLD_4" description="16 x 32 bits"/>
+      <bitenum value="5" token="DMA_TX_THRESHOLD_5" description="32 x 32 bits"/>
+    </bitfield>
+    <bitfield id="TX_FIFO_FULL" width="1" begin="16" end="16" resetval="0x0" description="FIFO status in command mode. Otherwise, this bit can be ignored." range="" rwaccess="R">
+      <bitenum value="0" token="TX_FIFO_FULL_0" description="The TX FIFO is not full (the FIFO can accept at least one more 32-bit value)"/>
+      <bitenum value="1" token="TX_FIFO_FULL_1" description="The TX FIFO is full"/>
+    </bitfield>
+    <bitfield id="VC_BUSY" width="1" begin="15" end="15" resetval="0x0" description="Indicates if previously scheduled activities (packets, BTA) are still being processed. Forced to 1 by hardware if VC is enabled. Software should check this bit is 0 before changing channel configuration." range="" rwaccess="R">
+      <bitenum value="0" token="VC_BUSY_0" description="No pending operations for this VC"/>
+      <bitenum value="1" token="VC_BUSY_1" description="Pending operations for this VC"/>
+    </bitfield>
+    <bitfield id="PP_BUSY" width="1" begin="14" end="14" resetval="0" description="Line buffer busy status." range="" rwaccess="R">
+      <bitenum value="0" token="PP_BUSY_0" description="Software is permitted to write a new header for VP command mode traffic."/>
+      <bitenum value="1" token="PP_BUSY_1" description="Software is NOT permitted to write a new header for VP command mode traffic."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="13" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="MODE_SPEED" width="1" begin="9" end="9" resetval="0x0" description="Selection of the mode. This bit is ignored by hardware when video mode is selected." range="" rwaccess="RW">
+      <bitenum value="0" token="MODE_SPEED_0" description="Low-power mode (CMOS) is used to send short and long packets to the peripheral."/>
+      <bitenum value="1" token="MODE_SPEED_1" description="High speed mode (SLVS) is used to send short and long packets to the peripheral."/>
+    </bitfield>
+    <bitfield id="ECC_TX_EN" width="1" begin="8" end="8" resetval="0x0" description="Enables the ECC generation for the transmit header (short and long packets)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_TX_EN_0" description="Disabled"/>
+      <bitenum value="1" token="ECC_TX_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CS_TX_EN" width="1" begin="7" end="7" resetval="0x0" description="Enables the checksum generation for the transmit payload (long packet only)." range="" rwaccess="RW">
+      <bitenum value="0" token="CS_TX_EN_0" description="Disabled. The value 0x00 is used."/>
+      <bitenum value="1" token="CS_TX_EN_1" description="Enabled. The Check-sum value is calculated by HW."/>
+    </bitfield>
+    <bitfield id="BTA_EN" width="1" begin="6" end="6" resetval="0x0" description="Send the bus turn around to the peripheral. It can be used when the automatic mode is enabled (BTA_SHORT_EN=1 or/and BTA_LONG_EN=1). In that case only one BTA is sent to the peripheral. The manual mode allows users to define for which packets, the turn around is required for example getting acknowledge from the peripheral." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_EN_0" description="READS: BTA generation is completed. It is reset by HW when it is completed.WRITES: Cancellation of the BTA generation (not guarantee since it could already on going, must not be used)."/>
+      <bitenum value="1" token="BTA_EN_1" description="READS: BTA generation has been requested by user (it could be on going but not completed). WRITES: Request for BTA generation."/>
+    </bitfield>
+    <bitfield id="TX_FIFO_NOT_EMPTY" width="1" begin="5" end="5" resetval="0x0" description="FIFO status" range="" rwaccess="R">
+      <bitenum value="0" token="TX_FIFO_NOT_EMPTY_0" description="The TX FIFO is empty (the FIFO does not contain any data for the VC)"/>
+      <bitenum value="1" token="TX_FIFO_NOT_EMPTY_1" description="The TX FIFO is not empty (the FIFO contains at least one byte for the VC)"/>
+    </bitfield>
+    <bitfield id="MODE" width="1" begin="4" end="4" resetval="0x0" description="Selection of the mode" range="" rwaccess="RW">
+      <bitenum value="0" token="MODE_0" description="Command mode."/>
+      <bitenum value="1" token="MODE_1" description="Video mode."/>
+    </bitfield>
+    <bitfield id="BTA_LONG_EN" width="1" begin="3" end="3" resetval="0x0" description="Enables the automatic bus turn-around after completion of each long packet transmission." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_LONG_EN_0" description="Disabled"/>
+      <bitenum value="1" token="BTA_LONG_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="BTA_SHORT_EN" width="1" begin="2" end="2" resetval="0x0" description="Enables the automatic bus turn-around after completion of each short packet transmission." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_SHORT_EN_0" description="Disabled"/>
+      <bitenum value="1" token="BTA_SHORT_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="SOURCE" width="1" begin="1" end="1" resetval="0x0" description="Selection of the source between L4 interconnect slave port and video port. This bit is ignored by hardware when video mode is selected." range="" rwaccess="RW">
+      <bitenum value="0" token="SOURCE_0" description="All the data are provided by the L4 interconnect slave port. Any transfer on the video port is ignored for this VC."/>
+      <bitenum value="1" token="SOURCE_1" description="If MODE=VIDEO_MODE. any data received on the video port (pixels and enabled synchronization events using[17] VP_HSYNC_START, [18] VP_HSYNC_END, [15] VP_VSYNC_START, [16] VP_VSYNC_END,) are sent on the VC (only one VC can be associated with the video port, the software must ensure that no more than one VC is enabled with the video port as the main source for data). If MODE=COMMAND_MODE, the VP_STALL signal is used by the protocol engine to indicate when new data are required. The synchronization signals are not generated by the display controller. Regardless of the MODE, no data can be provided on the L4 interconnect slave port."/>
+    </bitfield>
+    <bitfield id="VC_EN" width="1" begin="0" end="0" resetval="0x0" description="Enables the VC." range="" rwaccess="RW">
+      <bitenum value="0" token="VC_EN_0" description="Disabled. The VC must be disabled for any register change in the DSI_VCn_XXX registers the corresponding VC ID."/>
+      <bitenum value="1" token="VC_EN_1" description="Enabled. No change is allowed to the VC registers (except for setting the bit fields/registers:[6] BTA_EN, [15:0] TE_SIZE, [31] TE_START, DSI_VCn_LONG_XXX, DSI_VCn_SHORT_XXX, DSI_VCn_IRQXXX registers)."/>
+    </bitfield>
+  </register>
+  <register id="DSI_VCn_CTRL_3" acronym="DSI_VCn_CTRL_3" offset="0x160" width="32" description="CONTROL REGISTER - Virtual channel This register controls the VC.">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="DMA_RX_REQ_NB" width="3" begin="29" end="27" resetval="0x0" description="Selection of the use of the DMA request (associated to the RX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_RX_REQ_NB_0" description="DSI_DMA_REQ0 is selected"/>
+      <bitenum value="1" token="DMA_RX_REQ_NB_1" description="DSI_DMA_REQ1 is selected"/>
+      <bitenum value="2" token="DMA_RX_REQ_NB_2" description="DSI_DMA_REQ2 is selected"/>
+      <bitenum value="3" token="DMA_RX_REQ_NB_3" description="DSI_DMA_REQ3 is selected"/>
+      <bitenum value="4" token="DMA_RX_REQ_NB_4" description="No DMA req selected"/>
+    </bitfield>
+    <bitfield id="DMA_RX_THRESHOLD" width="3" begin="26" end="24" resetval="0x0" description="Defines the threshold value for the DMA request (associated to the RX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_RX_THRESHOLD_0" description="1x 32 bits"/>
+      <bitenum value="1" token="DMA_RX_THRESHOLD_1" description="2 x 32 bits"/>
+      <bitenum value="2" token="DMA_RX_THRESHOLD_2" description="4 x 32 bits"/>
+      <bitenum value="3" token="DMA_RX_THRESHOLD_3" description="8 x 32 bits"/>
+      <bitenum value="4" token="DMA_RX_THRESHOLD_4" description="16 x 32 bits"/>
+      <bitenum value="5" token="DMA_RX_THRESHOLD_5" description="32 x 32 bits"/>
+    </bitfield>
+    <bitfield id="DMA_TX_REQ_NB" width="3" begin="23" end="21" resetval="0x0" description="Selection of the use of the DMA request (associated to the TX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_TX_REQ_NB_0" description="DSI_DMA_REQ0 is selected"/>
+      <bitenum value="1" token="DMA_TX_REQ_NB_1" description="DSI_DMA_REQ1 is selected"/>
+      <bitenum value="2" token="DMA_TX_REQ_NB_2" description="DSI_DMA_REQ2 is selected"/>
+      <bitenum value="3" token="DMA_TX_REQ_NB_3" description="DSI_DMA_REQ3 is selected"/>
+      <bitenum value="4" token="DMA_TX_REQ_NB_4" description="No DMA req selected"/>
+    </bitfield>
+    <bitfield id="RX_FIFO_NOT_EMPTY" width="1" begin="20" end="20" resetval="0x0" description="FIFO status in command mode. Otherwise, this bit can be ignored." range="" rwaccess="R">
+      <bitenum value="0" token="RX_FIFO_NOT_EMPTY_0" description="The RX FIFO is empty (the FIFO does not contain any data for the VC)"/>
+      <bitenum value="1" token="RX_FIFO_NOT_EMPTY_1" description="The RX FIFO is not empty (the FIFO contains at least one byte for the VC)"/>
+    </bitfield>
+    <bitfield id="DMA_TX_THRESHOLD" width="3" begin="19" end="17" resetval="0x0" description="Defines the threshold value for the DMA request (associated to the TX FIFO)" range="" rwaccess="RW">
+      <bitenum value="0" token="DMA_TX_THRESHOLD_0" description="1x 32 bits"/>
+      <bitenum value="1" token="DMA_TX_THRESHOLD_1" description="2 x 32 bits"/>
+      <bitenum value="2" token="DMA_TX_THRESHOLD_2" description="4 x 32 bits"/>
+      <bitenum value="3" token="DMA_TX_THRESHOLD_3" description="8 x 32 bits"/>
+      <bitenum value="4" token="DMA_TX_THRESHOLD_4" description="16 x 32 bits"/>
+      <bitenum value="5" token="DMA_TX_THRESHOLD_5" description="32 x 32 bits"/>
+    </bitfield>
+    <bitfield id="TX_FIFO_FULL" width="1" begin="16" end="16" resetval="0x0" description="FIFO status in command mode. Otherwise, this bit can be ignored." range="" rwaccess="R">
+      <bitenum value="0" token="TX_FIFO_FULL_0" description="The TX FIFO is not full (the FIFO can accept at least one more 32-bit value)"/>
+      <bitenum value="1" token="TX_FIFO_FULL_1" description="The TX FIFO is full"/>
+    </bitfield>
+    <bitfield id="VC_BUSY" width="1" begin="15" end="15" resetval="0x0" description="Indicates if previously scheduled activities (packets, BTA) are still being processed. Forced to 1 by hardware if VC is enabled. Software should check this bit is 0 before changing channel configuration." range="" rwaccess="R">
+      <bitenum value="0" token="VC_BUSY_0" description="No pending operations for this VC"/>
+      <bitenum value="1" token="VC_BUSY_1" description="Pending operations for this VC"/>
+    </bitfield>
+    <bitfield id="PP_BUSY" width="1" begin="14" end="14" resetval="0" description="Line buffer busy status." range="" rwaccess="R">
+      <bitenum value="0" token="PP_BUSY_0" description="Software is permitted to write a new header for VP command mode traffic."/>
+      <bitenum value="1" token="PP_BUSY_1" description="Software is NOT permitted to write a new header for VP command mode traffic."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="13" end="10" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="MODE_SPEED" width="1" begin="9" end="9" resetval="0x0" description="Selection of the mode. This bit is ignored by hardware when video mode is selected." range="" rwaccess="RW">
+      <bitenum value="0" token="MODE_SPEED_0" description="Low-power mode (CMOS) is used to send short and long packets to the peripheral."/>
+      <bitenum value="1" token="MODE_SPEED_1" description="High speed mode (SLVS) is used to send short and long packets to the peripheral."/>
+    </bitfield>
+    <bitfield id="ECC_TX_EN" width="1" begin="8" end="8" resetval="0x0" description="Enables the ECC generation for the transmit header (short and long packets)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_TX_EN_0" description="Disabled"/>
+      <bitenum value="1" token="ECC_TX_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CS_TX_EN" width="1" begin="7" end="7" resetval="0x0" description="Enables the checksum generation for the transmit payload (long packet only)." range="" rwaccess="RW">
+      <bitenum value="0" token="CS_TX_EN_0" description="Disabled. The value 0x00 is used."/>
+      <bitenum value="1" token="CS_TX_EN_1" description="Enabled. The Check-sum value is calculated by HW."/>
+    </bitfield>
+    <bitfield id="BTA_EN" width="1" begin="6" end="6" resetval="0x0" description="Send the bus turn around to the peripheral. It can be used when the automatic mode is enabled (BTA_SHORT_EN=1 or/and BTA_LONG_EN=1). In that case only one BTA is sent to the peripheral. The manual mode allows users to define for which packets, the turn around is required for example getting acknowledge from the peripheral." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_EN_0" description="READS: BTA generation is completed. It is reset by HW when it is completed.WRITES: Cancellation of the BTA generation (not guarantee since it could already on going, must not be used)."/>
+      <bitenum value="1" token="BTA_EN_1" description="READS: BTA generation has been requested by user (it could be on going but not completed). WRITES: Request for BTA generation."/>
+    </bitfield>
+    <bitfield id="TX_FIFO_NOT_EMPTY" width="1" begin="5" end="5" resetval="0x0" description="FIFO status" range="" rwaccess="R">
+      <bitenum value="0" token="TX_FIFO_NOT_EMPTY_0" description="The TX FIFO is empty (the FIFO does not contain any data for the VC)"/>
+      <bitenum value="1" token="TX_FIFO_NOT_EMPTY_1" description="The TX FIFO is not empty (the FIFO contains at least one byte for the VC)"/>
+    </bitfield>
+    <bitfield id="MODE" width="1" begin="4" end="4" resetval="0x0" description="Selection of the mode" range="" rwaccess="RW">
+      <bitenum value="0" token="MODE_0" description="Command mode."/>
+      <bitenum value="1" token="MODE_1" description="Video mode."/>
+    </bitfield>
+    <bitfield id="BTA_LONG_EN" width="1" begin="3" end="3" resetval="0x0" description="Enables the automatic bus turn-around after completion of each long packet transmission." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_LONG_EN_0" description="Disabled"/>
+      <bitenum value="1" token="BTA_LONG_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="BTA_SHORT_EN" width="1" begin="2" end="2" resetval="0x0" description="Enables the automatic bus turn-around after completion of each short packet transmission." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_SHORT_EN_0" description="Disabled"/>
+      <bitenum value="1" token="BTA_SHORT_EN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="SOURCE" width="1" begin="1" end="1" resetval="0x0" description="Selection of the source between L4 interconnect slave port and video port. This bit is ignored by hardware when video mode is selected." range="" rwaccess="RW">
+      <bitenum value="0" token="SOURCE_0" description="All the data are provided by the L4 interconnect slave port. Any transfer on the video port is ignored for this VC."/>
+      <bitenum value="1" token="SOURCE_1" description="If MODE=VIDEO_MODE. any data received on the video port (pixels and enabled synchronization events using[17] VP_HSYNC_START, [18] VP_HSYNC_END, [15] VP_VSYNC_START, [16] VP_VSYNC_END,) are sent on the VC (only one VC can be associated with the video port, the software must ensure that no more than one VC is enabled with the video port as the main source for data). If MODE=COMMAND_MODE, the VP_STALL signal is used by the protocol engine to indicate when new data are required. The synchronization signals are not generated by the display controller. Regardless of the MODE, no data can be provided on the L4 interconnect slave port."/>
+    </bitfield>
+    <bitfield id="VC_EN" width="1" begin="0" end="0" resetval="0x0" description="Enables the VC." range="" rwaccess="RW">
+      <bitenum value="0" token="VC_EN_0" description="Disabled. The VC must be disabled for any register change in the DSI_VCn_XXX registers the corresponding VC ID."/>
+      <bitenum value="1" token="VC_EN_1" description="Enabled. No change is allowed to the VC registers (except for setting the bit fields/registers:[6] BTA_EN, [15:0] TE_SIZE, [31] TE_START, DSI_VCn_LONG_XXX, DSI_VCn_SHORT_XXX, DSI_VCn_IRQXXX registers)."/>
+    </bitfield>
+  </register>
+  <register id="DSI_VCn_TE_0" acronym="DSI_VCn_TE_0" offset="0x104" width="32" description="CONTROL REGISTER - Virtual channel This register controls the tearing effect logic. It defines the size of the transfer when TE occurs and enables the automatic TE mode.">
+    <bitfield id="TE_START" width="1" begin="31" end="31" resetval="0" description="Manual control of the start of the transfer. Users can use the TE interrupt to determine that the TE trigger has been received before setting the TE_START bit field. It is not mandatory to use the TE interrupt." range="" rwaccess="RW">
+      <bitenum value="0" token="TE_START_0" description="Indicates the end of the transfer. The bit can be used to cancel the transfer if not already started. The FIFO must be flushed by software to ensure it contains no remaining data."/>
+      <bitenum value="1" token="TE_START_1" description="Starts the transfer of the data. The size is defined in TE_SIZE. The bit field is set until the transfer completes. It is reset by hardware when the transfer completes."/>
+    </bitfield>
+    <bitfield id="TE_EN" width="1" begin="30" end="30" resetval="0" description="Tearing effect control" range="" rwaccess="RW">
+      <bitenum value="0" token="TE_EN_0" description="Disables the automatic transfer of the data using the TE trigger as a synchronization event. The interruption is used to know when the TE trigger is received. The hardware resets the bit field when the transfer completes(TE_SIZE=0)."/>
+      <bitenum value="1" token="TE_EN_1" description="Enables the automatic transfer of the data using the TE trigger as a synchronization event."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="29" end="24" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="TE_SIZE" width="24" begin="23" end="0" resetval="0x000000" description="Defines the number of bytes (payload data excluding the check-sum) to be sent. Users must perform the write into theDSI_VCn_LONG_PACKET_HEADER register before sending data from the DSI_VCn_LONG_PACKET_PAYLOAD register. The register value is decremented for every byte of the DSI link that is sent. At the end of the transfer (TE_SIZE = 0), the TE_EN bit field is reset by hardware. The DMA_request is asserted when the trigger is received in order to receive data in the TX FIFO. It must not be used until all data (TE_SIZE) have been received in the FIFO." range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VCn_TE_1" acronym="DSI_VCn_TE_1" offset="0x124" width="32" description="CONTROL REGISTER - Virtual channel This register controls the tearing effect logic. It defines the size of the transfer when TE occurs and enables the automatic TE mode.">
+    <bitfield id="TE_START" width="1" begin="31" end="31" resetval="0" description="Manual control of the start of the transfer. Users can use the TE interrupt to determine that the TE trigger has been received before setting the TE_START bit field. It is not mandatory to use the TE interrupt." range="" rwaccess="RW">
+      <bitenum value="0" token="TE_START_0" description="Indicates the end of the transfer. The bit can be used to cancel the transfer if not already started. The FIFO must be flushed by software to ensure it contains no remaining data."/>
+      <bitenum value="1" token="TE_START_1" description="Starts the transfer of the data. The size is defined in TE_SIZE. The bit field is set until the transfer completes. It is reset by hardware when the transfer completes."/>
+    </bitfield>
+    <bitfield id="TE_EN" width="1" begin="30" end="30" resetval="0" description="Tearing effect control" range="" rwaccess="RW">
+      <bitenum value="0" token="TE_EN_0" description="Disables the automatic transfer of the data using the TE trigger as a synchronization event. The interruption is used to know when the TE trigger is received. The hardware resets the bit field when the transfer completes(TE_SIZE=0)."/>
+      <bitenum value="1" token="TE_EN_1" description="Enables the automatic transfer of the data using the TE trigger as a synchronization event."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="29" end="24" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="TE_SIZE" width="24" begin="23" end="0" resetval="0x000000" description="Defines the number of bytes (payload data excluding the check-sum) to be sent. Users must perform the write into theDSI_VCn_LONG_PACKET_HEADER register before sending data from the DSI_VCn_LONG_PACKET_PAYLOAD register. The register value is decremented for every byte of the DSI link that is sent. At the end of the transfer (TE_SIZE = 0), the TE_EN bit field is reset by hardware. The DMA_request is asserted when the trigger is received in order to receive data in the TX FIFO. It must not be used until all data (TE_SIZE) have been received in the FIFO." range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VCn_TE_2" acronym="DSI_VCn_TE_2" offset="0x144" width="32" description="CONTROL REGISTER - Virtual channel This register controls the tearing effect logic. It defines the size of the transfer when TE occurs and enables the automatic TE mode.">
+    <bitfield id="TE_START" width="1" begin="31" end="31" resetval="0" description="Manual control of the start of the transfer. Users can use the TE interrupt to determine that the TE trigger has been received before setting the TE_START bit field. It is not mandatory to use the TE interrupt." range="" rwaccess="RW">
+      <bitenum value="0" token="TE_START_0" description="Indicates the end of the transfer. The bit can be used to cancel the transfer if not already started. The FIFO must be flushed by software to ensure it contains no remaining data."/>
+      <bitenum value="1" token="TE_START_1" description="Starts the transfer of the data. The size is defined in TE_SIZE. The bit field is set until the transfer completes. It is reset by hardware when the transfer completes."/>
+    </bitfield>
+    <bitfield id="TE_EN" width="1" begin="30" end="30" resetval="0" description="Tearing effect control" range="" rwaccess="RW">
+      <bitenum value="0" token="TE_EN_0" description="Disables the automatic transfer of the data using the TE trigger as a synchronization event. The interruption is used to know when the TE trigger is received. The hardware resets the bit field when the transfer completes(TE_SIZE=0)."/>
+      <bitenum value="1" token="TE_EN_1" description="Enables the automatic transfer of the data using the TE trigger as a synchronization event."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="29" end="24" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="TE_SIZE" width="24" begin="23" end="0" resetval="0x000000" description="Defines the number of bytes (payload data excluding the check-sum) to be sent. Users must perform the write into theDSI_VCn_LONG_PACKET_HEADER register before sending data from the DSI_VCn_LONG_PACKET_PAYLOAD register. The register value is decremented for every byte of the DSI link that is sent. At the end of the transfer (TE_SIZE = 0), the TE_EN bit field is reset by hardware. The DMA_request is asserted when the trigger is received in order to receive data in the TX FIFO. It must not be used until all data (TE_SIZE) have been received in the FIFO." range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VCn_TE_3" acronym="DSI_VCn_TE_3" offset="0x164" width="32" description="CONTROL REGISTER - Virtual channel This register controls the tearing effect logic. It defines the size of the transfer when TE occurs and enables the automatic TE mode.">
+    <bitfield id="TE_START" width="1" begin="31" end="31" resetval="0" description="Manual control of the start of the transfer. Users can use the TE interrupt to determine that the TE trigger has been received before setting the TE_START bit field. It is not mandatory to use the TE interrupt." range="" rwaccess="RW">
+      <bitenum value="0" token="TE_START_0" description="Indicates the end of the transfer. The bit can be used to cancel the transfer if not already started. The FIFO must be flushed by software to ensure it contains no remaining data."/>
+      <bitenum value="1" token="TE_START_1" description="Starts the transfer of the data. The size is defined in TE_SIZE. The bit field is set until the transfer completes. It is reset by hardware when the transfer completes."/>
+    </bitfield>
+    <bitfield id="TE_EN" width="1" begin="30" end="30" resetval="0" description="Tearing effect control" range="" rwaccess="RW">
+      <bitenum value="0" token="TE_EN_0" description="Disables the automatic transfer of the data using the TE trigger as a synchronization event. The interruption is used to know when the TE trigger is received. The hardware resets the bit field when the transfer completes(TE_SIZE=0)."/>
+      <bitenum value="1" token="TE_EN_1" description="Enables the automatic transfer of the data using the TE trigger as a synchronization event."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="29" end="24" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="TE_SIZE" width="24" begin="23" end="0" resetval="0x000000" description="Defines the number of bytes (payload data excluding the check-sum) to be sent. Users must perform the write into theDSI_VCn_LONG_PACKET_HEADER register before sending data from the DSI_VCn_LONG_PACKET_PAYLOAD register. The register value is decremented for every byte of the DSI link that is sent. At the end of the transfer (TE_SIZE = 0), the TE_EN bit field is reset by hardware. The DMA_request is asserted when the trigger is received in order to receive data in the TX FIFO. It must not be used until all data (TE_SIZE) have been received in the FIFO." range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VCn_LONG_PACKET_HEADER_0" acronym="DSI_VCn_LONG_PACKET_HEADER_0" offset="0x108" width="32" description="LONG PACKET HEADER INFORMATION&#8211;virtual channel. This register sets the 32-bit DATA_ID + Word count + ECC. The ECC is computed if ECC_TX_EN is set to 1.">
+    <bitfield id="HEADER" width="32" begin="31" end="0" resetval="0x00000000" description="Packet header information: DATA ID + DATA FIELD +ECC" range="" rwaccess="W"/>
+  </register>
+  <register id="DSI_VCn_LONG_PACKET_HEADER_1" acronym="DSI_VCn_LONG_PACKET_HEADER_1" offset="0x128" width="32" description="LONG PACKET HEADER INFORMATION&#8211;virtual channel. This register sets the 32-bit DATA_ID + Word count + ECC. The ECC is computed if ECC_TX_EN is set to 1.">
+    <bitfield id="HEADER" width="32" begin="31" end="0" resetval="0x00000000" description="Packet header information: DATA ID + DATA FIELD +ECC" range="" rwaccess="W"/>
+  </register>
+  <register id="DSI_VCn_LONG_PACKET_HEADER_2" acronym="DSI_VCn_LONG_PACKET_HEADER_2" offset="0x148" width="32" description="LONG PACKET HEADER INFORMATION&#8211;virtual channel. This register sets the 32-bit DATA_ID + Word count + ECC. The ECC is computed if ECC_TX_EN is set to 1.">
+    <bitfield id="HEADER" width="32" begin="31" end="0" resetval="0x00000000" description="Packet header information: DATA ID + DATA FIELD +ECC" range="" rwaccess="W"/>
+  </register>
+  <register id="DSI_VCn_LONG_PACKET_HEADER_3" acronym="DSI_VCn_LONG_PACKET_HEADER_3" offset="0x168" width="32" description="LONG PACKET HEADER INFORMATION&#8211;virtual channel. This register sets the 32-bit DATA_ID + Word count + ECC. The ECC is computed if ECC_TX_EN is set to 1.">
+    <bitfield id="HEADER" width="32" begin="31" end="0" resetval="0x00000000" description="Packet header information: DATA ID + DATA FIELD +ECC" range="" rwaccess="W"/>
+  </register>
+  <register id="DSI_VCn_LONG_PACKET_PAYLOAD_0" acronym="DSI_VCn_LONG_PACKET_PAYLOAD_0" offset="0x10C" width="32" description="LONG PACKET PAYLOAD INFORMATION&#8211;virtual channel. This register sets the payload information (excluding Check-sum). Hardware must capture the word count in the packet header (in register) to determine the last valid data (the VC ID can be different from VC). Byte1 is bit[7:0]; Byte2 is bit[15:8]; Byte3 is bit[23:16]; Byte4 is bit[31:24]; and Byten is sent before Byten+1 (least-significant byte first and least significant bit first).">
+    <bitfield id="PAYLOAD" width="32" begin="31" end="0" resetval="0x00000000" description="Packet payload information (excluding check-sum)" range="" rwaccess="W"/>
+  </register>
+  <register id="DSI_VCn_LONG_PACKET_PAYLOAD_1" acronym="DSI_VCn_LONG_PACKET_PAYLOAD_1" offset="0x12C" width="32" description="LONG PACKET PAYLOAD INFORMATION&#8211;virtual channel. This register sets the payload information (excluding Check-sum). Hardware must capture the word count in the packet header (in register) to determine the last valid data (the VC ID can be different from VC). Byte1 is bit[7:0]; Byte2 is bit[15:8]; Byte3 is bit[23:16]; Byte4 is bit[31:24]; and Byten is sent before Byten+1 (least-significant byte first and least significant bit first).">
+    <bitfield id="PAYLOAD" width="32" begin="31" end="0" resetval="0x00000000" description="Packet payload information (excluding check-sum)" range="" rwaccess="W"/>
+  </register>
+  <register id="DSI_VCn_LONG_PACKET_PAYLOAD_2" acronym="DSI_VCn_LONG_PACKET_PAYLOAD_2" offset="0x14C" width="32" description="LONG PACKET PAYLOAD INFORMATION&#8211;virtual channel. This register sets the payload information (excluding Check-sum). Hardware must capture the word count in the packet header (in register) to determine the last valid data (the VC ID can be different from VC). Byte1 is bit[7:0]; Byte2 is bit[15:8]; Byte3 is bit[23:16]; Byte4 is bit[31:24]; and Byten is sent before Byten+1 (least-significant byte first and least significant bit first).">
+    <bitfield id="PAYLOAD" width="32" begin="31" end="0" resetval="0x00000000" description="Packet payload information (excluding check-sum)" range="" rwaccess="W"/>
+  </register>
+  <register id="DSI_VCn_LONG_PACKET_PAYLOAD_3" acronym="DSI_VCn_LONG_PACKET_PAYLOAD_3" offset="0x16C" width="32" description="LONG PACKET PAYLOAD INFORMATION&#8211;virtual channel. This register sets the payload information (excluding Check-sum). Hardware must capture the word count in the packet header (in register) to determine the last valid data (the VC ID can be different from VC). Byte1 is bit[7:0]; Byte2 is bit[15:8]; Byte3 is bit[23:16]; Byte4 is bit[31:24]; and Byten is sent before Byten+1 (least-significant byte first and least significant bit first).">
+    <bitfield id="PAYLOAD" width="32" begin="31" end="0" resetval="0x00000000" description="Packet payload information (excluding check-sum)" range="" rwaccess="W"/>
+  </register>
+  <register id="DSI_VCn_SHORT_PACKET_HEADER_0" acronym="DSI_VCn_SHORT_PACKET_HEADER_0" offset="0x110" width="32" description="SHORT PACKET HEADER INFORMATION -Virtual channel This register sets the 24-bit DATA_ID + Short packet data field + ECC (the VC ID can be different than VC) DATA_ID is located at bit[7:0] short packet data field is located at bit[23:8] ECC is located at bit[31:24] (least-significant byte first and least significant bit first)">
+    <bitfield id="HEADER" width="32" begin="31" end="0" resetval="0x00000000" description="WRITES: Packet header information: DATA ID + DATA FIELD +ECC written into the TX FIFOREADS: 32-bit values read from the RX FIFO" range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VCn_SHORT_PACKET_HEADER_1" acronym="DSI_VCn_SHORT_PACKET_HEADER_1" offset="0x130" width="32" description="SHORT PACKET HEADER INFORMATION -Virtual channel This register sets the 24-bit DATA_ID + Short packet data field + ECC (the VC ID can be different than VC) DATA_ID is located at bit[7:0] short packet data field is located at bit[23:8] ECC is located at bit[31:24] (least-significant byte first and least significant bit first)">
+    <bitfield id="HEADER" width="32" begin="31" end="0" resetval="0x00000000" description="WRITES: Packet header information: DATA ID + DATA FIELD +ECC written into the TX FIFOREADS: 32-bit values read from the RX FIFO" range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VCn_SHORT_PACKET_HEADER_2" acronym="DSI_VCn_SHORT_PACKET_HEADER_2" offset="0x150" width="32" description="SHORT PACKET HEADER INFORMATION -Virtual channel This register sets the 24-bit DATA_ID + Short packet data field + ECC (the VC ID can be different than VC) DATA_ID is located at bit[7:0] short packet data field is located at bit[23:8] ECC is located at bit[31:24] (least-significant byte first and least significant bit first)">
+    <bitfield id="HEADER" width="32" begin="31" end="0" resetval="0x00000000" description="WRITES: Packet header information: DATA ID + DATA FIELD +ECC written into the TX FIFOREADS: 32-bit values read from the RX FIFO" range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VCn_SHORT_PACKET_HEADER_3" acronym="DSI_VCn_SHORT_PACKET_HEADER_3" offset="0x170" width="32" description="SHORT PACKET HEADER INFORMATION -Virtual channel This register sets the 24-bit DATA_ID + Short packet data field + ECC (the VC ID can be different than VC) DATA_ID is located at bit[7:0] short packet data field is located at bit[23:8] ECC is located at bit[31:24] (least-significant byte first and least significant bit first)">
+    <bitfield id="HEADER" width="32" begin="31" end="0" resetval="0x00000000" description="WRITES: Packet header information: DATA ID + DATA FIELD +ECC written into the TX FIFOREADS: 32-bit values read from the RX FIFO" range="" rwaccess="RW"/>
+  </register>
+  <register id="DSI_VCn_IRQSTATUS_0" acronym="DSI_VCn_IRQSTATUS_0" offset="0x118" width="32" description="INTERRUPT STATUS REGISTER - Virtual channel This register regroups all the events related to the VC.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="PP_BUSY_CHANGE_IRQ" width="1" begin="8" end="8" resetval="0" description="Video port ping-pong buffer busy status." range="" rwaccess="RW">
+      <bitenum value="0" token="PP_BUSY_CHANGE_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="PP_BUSY_CHANGE_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="FIFO_TX_UDF_IRQ" width="1" begin="7" end="7" resetval="0x0" description="FIFO underflow status. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has underflowed which means that the data for the current packet have not been received in time since the transfer of the packet are already started (transfer started since the packet size is bigger than space allocated in the FIFO)." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_UDF_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="FIFO_TX_UDF_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ECC_NO_CORRECTION_IRQ" width="1" begin="6" end="6" resetval="0x0" description="ECC error status (short and long packets). No correction of the header because of more than 1-bit error." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_NO_CORRECTION_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ECC_NO_CORRECTION_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="BTA_IRQ" width="1" begin="5" end="5" resetval="0x0" description="Virtual channel - BTA status." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="BTA_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="FIFO_RX_OVF_IRQ" width="1" begin="4" end="4" resetval="0x0" description="FIFO overflow error status. The FIFO used on the slave port for buffering the data received on the DSI link for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_RX_OVF_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="FIFO_RX_OVF_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="FIFO_TX_OVF_IRQ" width="1" begin="3" end="3" resetval="0x0" description="FIFO overflow error status. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_OVF_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="FIFO_TX_OVF_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="PACKET_SENT_IRQ" width="1" begin="2" end="2" resetval="0x0" description="Indicates that a packet has been sent. It is used when BTA manual mode is used." range="" rwaccess="RW">
+      <bitenum value="0" token="PACKET_SENT_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="PACKET_SENT_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ECC_CORRECTION_IRQ" width="1" begin="1" end="1" resetval="0x0" description="Virtual channel - ECC has been used to do the correction of the only 1-bit error status (short and long packet only)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_CORRECTION_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ECC_CORRECTION_IRQ_1" description="READS: Event is true (pending). WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="CS_IRQ" width="1" begin="0" end="0" resetval="0x0" description="Virtual channel - Check-Sum mismatch status." range="" rwaccess="RW">
+      <bitenum value="0" token="CS_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="CS_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+  </register>
+  <register id="DSI_VCn_IRQSTATUS_1" acronym="DSI_VCn_IRQSTATUS_1" offset="0x138" width="32" description="INTERRUPT STATUS REGISTER - Virtual channel This register regroups all the events related to the VC.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="PP_BUSY_CHANGE_IRQ" width="1" begin="8" end="8" resetval="0" description="Video port ping-pong buffer busy status." range="" rwaccess="RW">
+      <bitenum value="0" token="PP_BUSY_CHANGE_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="PP_BUSY_CHANGE_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="FIFO_TX_UDF_IRQ" width="1" begin="7" end="7" resetval="0x0" description="FIFO underflow status. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has underflowed which means that the data for the current packet have not been received in time since the transfer of the packet are already started (transfer started since the packet size is bigger than space allocated in the FIFO)." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_UDF_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="FIFO_TX_UDF_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ECC_NO_CORRECTION_IRQ" width="1" begin="6" end="6" resetval="0x0" description="ECC error status (short and long packets). No correction of the header because of more than 1-bit error." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_NO_CORRECTION_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ECC_NO_CORRECTION_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="BTA_IRQ" width="1" begin="5" end="5" resetval="0x0" description="Virtual channel - BTA status." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="BTA_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="FIFO_RX_OVF_IRQ" width="1" begin="4" end="4" resetval="0x0" description="FIFO overflow error status. The FIFO used on the slave port for buffering the data received on the DSI link for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_RX_OVF_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="FIFO_RX_OVF_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="FIFO_TX_OVF_IRQ" width="1" begin="3" end="3" resetval="0x0" description="FIFO overflow error status. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_OVF_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="FIFO_TX_OVF_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="PACKET_SENT_IRQ" width="1" begin="2" end="2" resetval="0x0" description="Indicates that a packet has been sent. It is used when BTA manual mode is used." range="" rwaccess="RW">
+      <bitenum value="0" token="PACKET_SENT_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="PACKET_SENT_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ECC_CORRECTION_IRQ" width="1" begin="1" end="1" resetval="0x0" description="Virtual channel - ECC has been used to do the correction of the only 1-bit error status (short and long packet only)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_CORRECTION_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ECC_CORRECTION_IRQ_1" description="READS: Event is true (pending). WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="CS_IRQ" width="1" begin="0" end="0" resetval="0x0" description="Virtual channel - Check-Sum mismatch status." range="" rwaccess="RW">
+      <bitenum value="0" token="CS_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="CS_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+  </register>
+  <register id="DSI_VCn_IRQSTATUS_2" acronym="DSI_VCn_IRQSTATUS_2" offset="0x158" width="32" description="INTERRUPT STATUS REGISTER - Virtual channel This register regroups all the events related to the VC.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="PP_BUSY_CHANGE_IRQ" width="1" begin="8" end="8" resetval="0" description="Video port ping-pong buffer busy status." range="" rwaccess="RW">
+      <bitenum value="0" token="PP_BUSY_CHANGE_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="PP_BUSY_CHANGE_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="FIFO_TX_UDF_IRQ" width="1" begin="7" end="7" resetval="0x0" description="FIFO underflow status. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has underflowed which means that the data for the current packet have not been received in time since the transfer of the packet are already started (transfer started since the packet size is bigger than space allocated in the FIFO)." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_UDF_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="FIFO_TX_UDF_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ECC_NO_CORRECTION_IRQ" width="1" begin="6" end="6" resetval="0x0" description="ECC error status (short and long packets). No correction of the header because of more than 1-bit error." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_NO_CORRECTION_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ECC_NO_CORRECTION_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="BTA_IRQ" width="1" begin="5" end="5" resetval="0x0" description="Virtual channel - BTA status." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="BTA_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="FIFO_RX_OVF_IRQ" width="1" begin="4" end="4" resetval="0x0" description="FIFO overflow error status. The FIFO used on the slave port for buffering the data received on the DSI link for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_RX_OVF_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="FIFO_RX_OVF_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="FIFO_TX_OVF_IRQ" width="1" begin="3" end="3" resetval="0x0" description="FIFO overflow error status. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_OVF_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="FIFO_TX_OVF_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="PACKET_SENT_IRQ" width="1" begin="2" end="2" resetval="0x0" description="Indicates that a packet has been sent. It is used when BTA manual mode is used." range="" rwaccess="RW">
+      <bitenum value="0" token="PACKET_SENT_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="PACKET_SENT_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ECC_CORRECTION_IRQ" width="1" begin="1" end="1" resetval="0x0" description="Virtual channel - ECC has been used to do the correction of the only 1-bit error status (short and long packet only)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_CORRECTION_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ECC_CORRECTION_IRQ_1" description="READS: Event is true (pending). WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="CS_IRQ" width="1" begin="0" end="0" resetval="0x0" description="Virtual channel - Check-Sum mismatch status." range="" rwaccess="RW">
+      <bitenum value="0" token="CS_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="CS_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+  </register>
+  <register id="DSI_VCn_IRQSTATUS_3" acronym="DSI_VCn_IRQSTATUS_3" offset="0x178" width="32" description="INTERRUPT STATUS REGISTER - Virtual channel This register regroups all the events related to the VC.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="PP_BUSY_CHANGE_IRQ" width="1" begin="8" end="8" resetval="0" description="Video port ping-pong buffer busy status." range="" rwaccess="RW">
+      <bitenum value="0" token="PP_BUSY_CHANGE_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="PP_BUSY_CHANGE_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="FIFO_TX_UDF_IRQ" width="1" begin="7" end="7" resetval="0x0" description="FIFO underflow status. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has underflowed which means that the data for the current packet have not been received in time since the transfer of the packet are already started (transfer started since the packet size is bigger than space allocated in the FIFO)." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_UDF_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="FIFO_TX_UDF_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ECC_NO_CORRECTION_IRQ" width="1" begin="6" end="6" resetval="0x0" description="ECC error status (short and long packets). No correction of the header because of more than 1-bit error." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_NO_CORRECTION_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ECC_NO_CORRECTION_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="BTA_IRQ" width="1" begin="5" end="5" resetval="0x0" description="Virtual channel - BTA status." range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="BTA_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="FIFO_RX_OVF_IRQ" width="1" begin="4" end="4" resetval="0x0" description="FIFO overflow error status. The FIFO used on the slave port for buffering the data received on the DSI link for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_RX_OVF_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="FIFO_RX_OVF_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="FIFO_TX_OVF_IRQ" width="1" begin="3" end="3" resetval="0x0" description="FIFO overflow error status. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_OVF_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="FIFO_TX_OVF_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="PACKET_SENT_IRQ" width="1" begin="2" end="2" resetval="0x0" description="Indicates that a packet has been sent. It is used when BTA manual mode is used." range="" rwaccess="RW">
+      <bitenum value="0" token="PACKET_SENT_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="PACKET_SENT_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="ECC_CORRECTION_IRQ" width="1" begin="1" end="1" resetval="0x0" description="Virtual channel - ECC has been used to do the correction of the only 1-bit error status (short and long packet only)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_CORRECTION_IRQ_0" description="READS: Event is false. WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="ECC_CORRECTION_IRQ_1" description="READS: Event is true (pending). WRITES: Status bit is reset."/>
+    </bitfield>
+    <bitfield id="CS_IRQ" width="1" begin="0" end="0" resetval="0x0" description="Virtual channel - Check-Sum mismatch status." range="" rwaccess="RW">
+      <bitenum value="0" token="CS_IRQ_0" description="READS: Event is false.WRITES: Status bit unchanged."/>
+      <bitenum value="1" token="CS_IRQ_1" description="READS: Event is true (pending).WRITES: Status bit is reset."/>
+    </bitfield>
+  </register>
+  <register id="DSI_VCn_IRQENABLE_0" acronym="DSI_VCn_IRQENABLE_0" offset="0x11C" width="32" description="INTERRUPT ENABLE REGISTER - Virtual channel This register regroups all the events related to VC.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="PP_BUSY_CHANGE_IRQ_EN" width="1" begin="8" end="8" resetval="0" description="Video port ping-pong buffer busy." range="" rwaccess="RW">
+      <bitenum value="0" token="PP_BUSY_CHANGE_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="PP_BUSY_CHANGE_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="FIFO_TX_UDF_IRQ_EN" width="1" begin="7" end="7" resetval="0x0" description="FIFO underflow enable. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has underflowed which means that the data for the current packet have not been received in time since the transfer of the packet are already started (transfer started since the packet size is bigger than space allocated in the FIFO)." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_UDF_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="FIFO_TX_UDF_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ECC_NO_CORRECTION_IRQ_EN" width="1" begin="6" end="6" resetval="0x0" description="ECC error (short and long packets). No correction of the header because of more than 1-bit error." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_NO_CORRECTION_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ECC_NO_CORRECTION_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="BTA_IRQ_EN" width="1" begin="5" end="5" resetval="0x0" description="Virtual channel -Bus turn around reception" range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="BTA_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="FIFO_RX_OVF_IRQ_EN" width="1" begin="4" end="4" resetval="0x0" description="FIFO overflow enable. The FIFO used on the slave port for buffering the data received on the DSI link for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_RX_OVF_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="FIFO_RX_OVF_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="FIFO_TX_OVF_IRQ_EN" width="1" begin="3" end="3" resetval="0x0" description="FIFO overflow enable. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_OVF_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="FIFO_TX_OVF_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="PACKET_SENT_IRQ_EN" width="1" begin="2" end="2" resetval="0x0" description="Indicates that a packet has been sent. It is used when BTA manual mode is used." range="" rwaccess="RW">
+      <bitenum value="0" token="PACKET_SENT_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="PACKET_SENT_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ECC_CORRECTION_IRQ_EN" width="1" begin="1" end="1" resetval="0x0" description="Virtual channel - ECC has been used to correct the only 1-bit error (short and long packet)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_CORRECTION_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ECC_CORRECTION_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="CS_IRQ_EN" width="1" begin="0" end="0" resetval="0x0" description="Virtual channel - Check-Sum of the payload mismatch detection" range="" rwaccess="RW">
+      <bitenum value="0" token="CS_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="CS_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+  </register>
+  <register id="DSI_VCn_IRQENABLE_1" acronym="DSI_VCn_IRQENABLE_1" offset="0x13C" width="32" description="INTERRUPT ENABLE REGISTER - Virtual channel This register regroups all the events related to VC.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="PP_BUSY_CHANGE_IRQ_EN" width="1" begin="8" end="8" resetval="0" description="Video port ping-pong buffer busy." range="" rwaccess="RW">
+      <bitenum value="0" token="PP_BUSY_CHANGE_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="PP_BUSY_CHANGE_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="FIFO_TX_UDF_IRQ_EN" width="1" begin="7" end="7" resetval="0x0" description="FIFO underflow enable. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has underflowed which means that the data for the current packet have not been received in time since the transfer of the packet are already started (transfer started since the packet size is bigger than space allocated in the FIFO)." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_UDF_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="FIFO_TX_UDF_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ECC_NO_CORRECTION_IRQ_EN" width="1" begin="6" end="6" resetval="0x0" description="ECC error (short and long packets). No correction of the header because of more than 1-bit error." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_NO_CORRECTION_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ECC_NO_CORRECTION_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="BTA_IRQ_EN" width="1" begin="5" end="5" resetval="0x0" description="Virtual channel -Bus turn around reception" range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="BTA_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="FIFO_RX_OVF_IRQ_EN" width="1" begin="4" end="4" resetval="0x0" description="FIFO overflow enable. The FIFO used on the slave port for buffering the data received on the DSI link for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_RX_OVF_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="FIFO_RX_OVF_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="FIFO_TX_OVF_IRQ_EN" width="1" begin="3" end="3" resetval="0x0" description="FIFO overflow enable. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_OVF_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="FIFO_TX_OVF_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="PACKET_SENT_IRQ_EN" width="1" begin="2" end="2" resetval="0x0" description="Indicates that a packet has been sent. It is used when BTA manual mode is used." range="" rwaccess="RW">
+      <bitenum value="0" token="PACKET_SENT_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="PACKET_SENT_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ECC_CORRECTION_IRQ_EN" width="1" begin="1" end="1" resetval="0x0" description="Virtual channel - ECC has been used to correct the only 1-bit error (short and long packet)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_CORRECTION_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ECC_CORRECTION_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="CS_IRQ_EN" width="1" begin="0" end="0" resetval="0x0" description="Virtual channel - Check-Sum of the payload mismatch detection" range="" rwaccess="RW">
+      <bitenum value="0" token="CS_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="CS_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+  </register>
+  <register id="DSI_VCn_IRQENABLE_2" acronym="DSI_VCn_IRQENABLE_2" offset="0x15C" width="32" description="INTERRUPT ENABLE REGISTER - Virtual channel This register regroups all the events related to VC.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="PP_BUSY_CHANGE_IRQ_EN" width="1" begin="8" end="8" resetval="0" description="Video port ping-pong buffer busy." range="" rwaccess="RW">
+      <bitenum value="0" token="PP_BUSY_CHANGE_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="PP_BUSY_CHANGE_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="FIFO_TX_UDF_IRQ_EN" width="1" begin="7" end="7" resetval="0x0" description="FIFO underflow enable. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has underflowed which means that the data for the current packet have not been received in time since the transfer of the packet are already started (transfer started since the packet size is bigger than space allocated in the FIFO)." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_UDF_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="FIFO_TX_UDF_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ECC_NO_CORRECTION_IRQ_EN" width="1" begin="6" end="6" resetval="0x0" description="ECC error (short and long packets). No correction of the header because of more than 1-bit error." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_NO_CORRECTION_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ECC_NO_CORRECTION_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="BTA_IRQ_EN" width="1" begin="5" end="5" resetval="0x0" description="Virtual channel -Bus turn around reception" range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="BTA_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="FIFO_RX_OVF_IRQ_EN" width="1" begin="4" end="4" resetval="0x0" description="FIFO overflow enable. The FIFO used on the slave port for buffering the data received on the DSI link for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_RX_OVF_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="FIFO_RX_OVF_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="FIFO_TX_OVF_IRQ_EN" width="1" begin="3" end="3" resetval="0x0" description="FIFO overflow enable. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_OVF_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="FIFO_TX_OVF_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="PACKET_SENT_IRQ_EN" width="1" begin="2" end="2" resetval="0x0" description="Indicates that a packet has been sent. It is used when BTA manual mode is used." range="" rwaccess="RW">
+      <bitenum value="0" token="PACKET_SENT_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="PACKET_SENT_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ECC_CORRECTION_IRQ_EN" width="1" begin="1" end="1" resetval="0x0" description="Virtual channel - ECC has been used to correct the only 1-bit error (short and long packet)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_CORRECTION_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ECC_CORRECTION_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="CS_IRQ_EN" width="1" begin="0" end="0" resetval="0x0" description="Virtual channel - Check-Sum of the payload mismatch detection" range="" rwaccess="RW">
+      <bitenum value="0" token="CS_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="CS_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+  </register>
+  <register id="DSI_VCn_IRQENABLE_3" acronym="DSI_VCn_IRQENABLE_3" offset="0x17C" width="32" description="INTERRUPT ENABLE REGISTER - Virtual channel This register regroups all the events related to VC.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="PP_BUSY_CHANGE_IRQ_EN" width="1" begin="8" end="8" resetval="0" description="Video port ping-pong buffer busy." range="" rwaccess="RW">
+      <bitenum value="0" token="PP_BUSY_CHANGE_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="PP_BUSY_CHANGE_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="FIFO_TX_UDF_IRQ_EN" width="1" begin="7" end="7" resetval="0x0" description="FIFO underflow enable. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has underflowed which means that the data for the current packet have not been received in time since the transfer of the packet are already started (transfer started since the packet size is bigger than space allocated in the FIFO)." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_UDF_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="FIFO_TX_UDF_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ECC_NO_CORRECTION_IRQ_EN" width="1" begin="6" end="6" resetval="0x0" description="ECC error (short and long packets). No correction of the header because of more than 1-bit error." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_NO_CORRECTION_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ECC_NO_CORRECTION_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="BTA_IRQ_EN" width="1" begin="5" end="5" resetval="0x0" description="Virtual channel -Bus turn around reception" range="" rwaccess="RW">
+      <bitenum value="0" token="BTA_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="BTA_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="FIFO_RX_OVF_IRQ_EN" width="1" begin="4" end="4" resetval="0x0" description="FIFO overflow enable. The FIFO used on the slave port for buffering the data received on the DSI link for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_RX_OVF_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="FIFO_RX_OVF_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="FIFO_TX_OVF_IRQ_EN" width="1" begin="3" end="3" resetval="0x0" description="FIFO overflow enable. The FIFO used on the slave port for buffering the data received on the OCP slave port for the VC has overflowed." range="" rwaccess="RW">
+      <bitenum value="0" token="FIFO_TX_OVF_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="FIFO_TX_OVF_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="PACKET_SENT_IRQ_EN" width="1" begin="2" end="2" resetval="0x0" description="Indicates that a packet has been sent. It is used when BTA manual mode is used." range="" rwaccess="RW">
+      <bitenum value="0" token="PACKET_SENT_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="PACKET_SENT_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="ECC_CORRECTION_IRQ_EN" width="1" begin="1" end="1" resetval="0x0" description="Virtual channel - ECC has been used to correct the only 1-bit error (short and long packet)." range="" rwaccess="RW">
+      <bitenum value="0" token="ECC_CORRECTION_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="ECC_CORRECTION_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+    <bitfield id="CS_IRQ_EN" width="1" begin="0" end="0" resetval="0x0" description="Virtual channel - Check-Sum of the payload mismatch detection" range="" rwaccess="RW">
+      <bitenum value="0" token="CS_IRQ_EN_0" description="Event is masked"/>
+      <bitenum value="1" token="CS_IRQ_EN_1" description="Event generates an interrupt when it occurs"/>
+    </bitfield>
+  </register>
+</module>

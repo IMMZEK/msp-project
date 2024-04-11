@@ -1,0 +1,166 @@
+/*******************************************************************/
+/* This GEL file is loaded on the command line of Code Composer    */
+/* The StartUp() function is called every time you start           */
+/* Code Composer.  You can customize this function to              */
+/* initialize wait states or to perform other initialization.      */
+/*                                                                 */
+/* AM571x startup common                                           */
+/*                                                                 */
+/*                                                                 */
+/*******************************************************************/
+
+
+#define WR_MEM_32(addr, data)   *(unsigned int*)(addr) =(unsigned int)(data)
+#define RD_MEM_32(addr)         *(unsigned int*)(addr)
+#define uint32_t                unsigned int
+
+#define DEBUG_PRINT     (1)
+
+menuitem "AM571x Misc Module configurations"
+hotmenu OnTargetConnect_API()
+{
+    OnTargetConnect();
+}
+
+OnPreFileLoaded()
+{
+    AM57xxStartState();
+}
+
+OnTargetConnect()
+{
+    GEL_TextOut("--->>> AM571x Target Connect Sequence Begins ... <<<---\n");
+    AM571x_target_connect_sequence();
+
+    /* Choose based on DEVICE and OPP */
+    AM571x_PRCM_Clock_Config_OPPNOM();
+
+    AM571x_PRCM_Module_AllEnable_Config();
+
+    AM571x_DDR3_666MHz_Config();
+
+    AM571x_MULTICORE_EnableAllCores();  //MULTICORE Initialization
+   
+    GEL_TextOut("--->>> AM571x Target Connect Sequence DONE !!!!!  <<<---\n");
+}
+
+OnResetDetected()
+{
+    GEL_TextOut( "Core Reset has occurred.\n\n" );
+}
+
+OnReset()
+{
+    int device_type;
+
+    device_type = (RD_MEM_32(0x4A002134) & 0x1C0) >> 6;
+
+    GEL_TextOut("--->>> Reset occurs <<<---\n");
+
+    AM571x_show_device_info();
+
+    if (device_type == 0x3)
+    {
+        PC=0x30000;
+        CPSR=0x193;
+    }   
+}
+
+AM571x_target_connect_sequence()
+{
+    int reg;
+
+    AM571x_show_device_info();
+
+    /* Disable Watchdog timer WDT2 */
+    Watchdog_disable(1);
+}
+
+AM571x_show_device_info()
+{
+    int silicon_type;
+    int silicon_rev_major, silicon_rev_minor;
+    int device_type;
+
+    silicon_type = (RD_MEM_32(0x4AE0C204) & 0xF0000000) >> 28;
+
+    device_type = (RD_MEM_32(0x4A002134) & 0x1C0) >> 6;
+
+    if (silicon_type == 0)
+    {
+        silicon_rev_major = 1;
+        silicon_rev_minor = 0;
+    }
+	else if (silicon_type == 1)
+    	{
+    	    silicon_rev_major = 2;
+    	    silicon_rev_minor = 0;
+    	}    
+		else
+		{
+			GEL_TextOut("--->>> WARNING: UNKNOWN DEVICE ID (%x), PLEASE UPDATE GEL FILES !!!! <<<---\n",,,,,silicon_type);
+		}
+
+    if (device_type == 0x3)
+    {
+        GEL_TextOut("\t--->>> AM571x PG%d.%d GP device <<<---\n",,,,, silicon_rev_major, silicon_rev_minor);
+    }   
+    else
+    {
+        GEL_TextOut("\t--->>> ERROR!!! UNKNOWN device type! <<<---\n");
+    }
+
+}
+
+hotmenu Watchdog_disable(int print_off)
+{
+    if (print_off == 0)
+    {
+        if (DEBUG_PRINT)
+        {
+            GEL_TextOut("--->>> Start WDT2 Watchdog Timer is disabled <<<---\n");
+        }
+    }
+
+    /* Enable clock */
+    WR_MEM_32(0x4AE07830, 0x02);
+
+    /* Check that module is Idle */
+    while (((*(int *)0x4AE07830) & 0x20000));
+
+    /* Disable  watchdog 2 */
+    /* Wait until reset complete */
+    while (!((*(int *)0x4AE14014) & 0x01));
+
+    /* Disable watchdog timer */
+    WR_MEM_32(0x4AE14048, 0x0000AAAA);
+
+    while (((*(int *)0x4AE14034) & 0x10));
+
+    /* Disable 32Khz watchdog timer */
+    WR_MEM_32(0x4AE14048, 0x00005555);
+
+    while (((*(int *)0x4AE14034) & 0x10));
+
+    if (print_off == 0)
+    {
+        if (DEBUG_PRINT)
+        {
+            GEL_TextOut("--->>> End WDT2 Watchdog Timer is disabled <<<---\n");
+        }
+    }
+}
+
+//Set the processor to ARM mode and Supervisor mode after a file is loaded, on a 
+//restart or on a reset
+//This will facilitate code loading and debug by putting the processor in a known
+//state
+
+//this function changes certain states of the processor to 
+//allow proper access from CCS.  May not be needed in all situations
+hotmenu AM57xxStartState()
+{
+  CPSR &= ~0x20;				 //set to ARM mode
+  CPSR = (CPSR & ~0x1F) | 0x13;  //set to privledged mode
+  REG_CTXA15_CP15_C1_SCTLR  &= ~0x1; //disable MMU
+}

@@ -1,0 +1,462 @@
+/* Copyright (c) 2022, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+
+        //FSP MAIN_CTRL_MMR register offsets
+        #define CHNG_DDR4_FSP_REQ 		0x14000	// Change LPDDR4 FSP Request Register - initiate a LPDDR4 frequency set point change to the DDR Controller (r/w)
+        #define CHNG_DDR4_FSP_ACK		0x14004 // Change LPDDR4 FSP Acknowledge Register - DDR Controller to acknowledge the LPDDR4 frequency set point shange request (read only)
+        #define DDR4_FSP_CLKCHNG_REQ	0x14080 // LPDDR4 FSP Clock Change Request Register - DDR Controller to request the DDR PLL clock frequency change (read only)
+        #define DDR4_FSP_CLKCHNG_ACK	0x140C0 // LPDDR4 FSP Clock Change Acknowledge Register - acknowledge a DDR PLL clock frequency change to the DDR Controller (r/w)
+
+#define static
+#define void
+#define uint32_t                  unsigned int
+#define HW_WR_REG32(addr, data)   *(uint32_t *) (addr) = (uint32_t) (data)
+#define HW_RD_REG32(addr)         *(uint32_t *) (addr)
+#define CLR_BITS(input,mask,shift) 		(input & ~(mask<<shift))
+#define SET_BITS(input,mask,shift) 		(input | (mask<<shift))
+#define PUT_BITS(input,val,mask,shift)	((input & ~(mask<<shift)) | (val<<shift))
+#define min(a,b) ((a<b)?a:b)
+#define max(a,b) ((a>b)?a:b)
+//#define AUTO_TEMP_RANGE 1 //not implemented - need to manually uncomment the section in the DDR controller configuration gel file.
+#define R5FSS_VIM_PID 	(0x2FFF0000)
+#define VIM_PID_VALUE	(0x60900001)
+
+
+
+DDR_Init()
+{
+	unsigned int read_pid;
+	//Determine base addresses depending on which core is initializing the DDR
+	//Check for running from SMS or R5 or A53
+	
+	//Set default values for base addresses to R5/A53 base addresses in case read_pid doesn't work
+	AM62_DDRSS_SS_BASE = 0x0F300000;    
+	AM62_DDRSS_CTL_BASE = 0x0F308000;   
+    WKUP_CTRL_MMR0_CFG0_BASE = 0x43000000;
+
+	
+	read_pid = *((unsigned int *)(WKUP_CTRL_MMR0_CFG0_BASE+CTRLMMR_PID_OFFSET)); 
+	if (read_pid != CTRLMMR_PID_VAL)
+	{
+		GEL_TextOut("Running from SMS\n",,,,,);
+		AM62_DDRSS_SS_BASE += 0x80000000;  //add RAT offset	
+		AM62_DDRSS_CTL_BASE += 0x80000000; //add RAT offset
+        WKUP_CTRL_MMR0_CFG0_BASE  += 0x20000000; //add offset for RAT
+
+	}
+	else //R5 or A53
+	{
+		AM62_DDRSS_SS_BASE = 0x0F300000;	
+		AM62_DDRSS_CTL_BASE = 0x0F308000;	
+        WKUP_CTRL_MMR0_CFG0_BASE  = 0x43000000;
+	
+		//check which core we are running from
+		//only run the DDR init from the A53.  DDR init from R5 has to be run manually
+    
+		//read R5FSS_VIM_PID to determine if running from R5 or A53
+		if ((Read_MMR(R5FSS_VIM_PID)) == VIM_PID_VALUE)
+		{//R5
+			GEL_TextOut("Running from R5\n",,,,,);
+			GEL_TextOut("\n\nDDR not initialized with R5 connect.\n\nGo to menu Scripts --> AM62 DDR Initialization -> AM62_DDR_Initialization_ECC_Disabled to initialize DDR.\n\n====\n\n");
+		}
+		else
+		{//A53
+            GEL_TextOut("Running from A53\n",,,,,);
+			AM62_DDR_Initialization_ECC_Disabled();
+		}
+	}
+}
+
+menuitem "AM62 DDR Initialization"
+hotmenu AM62_DDR_Initialization_ECC_Disabled() {
+	if( (HW_RD_REG32(AM62_DDRSS_CTL_BASE + DDRSS_CTL_0__SFR_OFFS)&0x0000FFFF) != 0x0000)
+	{
+			printf("\n");
+			printf("DDR programming has already been attempted. \n");
+			printf("DDR Initialization GEL script is being skipped...\n");
+			printf("\n");
+	}
+
+	else
+	{
+		TI_disable_ECC(); 
+
+        if(DDR_MODE == DDR4)
+            printf("--->>> DDR4 Initialization is in progress ... <<<---\n");
+        else if(DDR_MODE == LPDDR4)
+            printf("--->>> LPDDR4 Initialization is in progress ... <<<---\n");
+
+        //Write to TI regs for sizing
+		//VBUSM2AXI Control Register sdram_idx, region_idx 
+		//log2(connected SDRAM size) - 16 = 0xF (for 2GB DDR)
+		//log2(connected SDRAM size) - 16 = 0x11 (for 8GB DDR)
+		
+
+        //TI_set_DDR_size(0x000001AF);  //for 512MB DDR
+        //TI_set_DDR_size(0x000001EF);  //for 2GB DDR
+        TI_set_DDR_size(0x00000210);  //for 4GB DDR
+		//TI_set_DDR_size(0x00000231);  //for 8GB DDR
+		
+
+		copy_regconfigs();
+
+		if(DDR_MODE == LPDDR4){
+			DDRSS_Set_DDR_PLL(25000000);
+			printf("--->>> Set DDR to 25MHz for FSP F0... <<<---\n");
+		}
+		else{ //DDR_MODE == DDR4
+			DDRSS_Set_DDR_PLL(DDRSS_PLL_FREQUENCY_2); //set DDR4 frequency based on frequency from EMIF tool output
+			us_delay(5000);
+		}
+		
+		//unlock MMR reg 5
+	    //Partition5 lockkey0
+	    HW_WR_REG32((WKUP_CTRL_MMR0_CFG0_BASE + 0x15008), 0x68EF3490); //0x80115008
+	    //Partition5 lockkey1
+	    HW_WR_REG32(( WKUP_CTRL_MMR0_CFG0_BASE + 0x1500C), 0xD172BC5A);
+
+		init_start();
+		
+		if(DDR_MODE == LPDDR4){
+			//DDR_Change_freq_ack();	//Wait for 2 Freq change req/ack handshakes (LPDDR4)
+			DDR_Change_freq_ack();
+			//DDR_Change_freq_ack_no_change_PLL(); // 1.1 Experimental change
+			us_delay(500);
+		}
+
+		if (wait_init_done() == 1)
+		{
+			if(DDR_MODE == DDR4)
+				printf("--->>> DDR4 Initialization is DONE! <<<---\n");
+			else if(DDR_MODE == LPDDR4)
+				printf("--->>> LPDDR4 Initialization is DONE! <<<---\n");
+		}
+		else
+		{
+			if(DDR_MODE == DDR4)
+				printf("--->>> ERROR:  DDR4 initialization failed!!! <<<---\n");
+			else if (DDR_MODE == LPDDR4)
+				printf("--->>> ERROR:  LPDDR4 initialization failed!!! <<<---\n");
+		}
+	}
+
+}
+
+
+menuitem "DDR/Memory Config/Frequency Set Points"
+
+DDRSS_Set_DDR_PLL(unsigned int frequency)
+{	DDR_PLL_Disable_Bypass();
+    if(frequency == 400000000){
+		Set_MAIN_PLL12_HSDIV0_CLKOUT_400MHz();
+	}else if(frequency == 333350000){
+		Set_MAIN_PLL12_HSDIV0_CLKOUT_333MHz();
+	}else if(frequency == 266500000){
+		Set_MAIN_PLL12_HSDIV0_CLKOUT_267MHz();
+	}else if(frequency == 200000000){
+		Set_MAIN_PLL12_HSDIV0_CLKOUT_200MHz();
+	}else if(frequency == 150000000){
+		Set_MAIN_PLL12_HSDIV0_CLKOUT_150MHz();
+	}else if(frequency == 100000000){
+		Set_MAIN_PLL12_HSDIV0_CLKOUT_100MHz();
+	}else if(frequency == 50000000){
+		Set_MAIN_PLL12_HSDIV0_CLKOUT_50MHz();
+    }else if(frequency == 25000000){	//BYPASS
+        //Replace with true bypass for Silicon
+		//Set_MAIN_PLL12_HSDIV0_CLKOUT_25MHz();
+		DDR_PLL_Bypass();
+    }else{
+        printf("Frequency not supported by GEL\n");
+    }
+}
+
+DDR_Change_freq_ack()
+{
+    unsigned int req, req_type, counter;
+
+    printf("--->>> Inside DDR_Change_freq_ack function ... <<<---\n");
+    
+	//us_delay(500);
+
+    printf("--->>> Waiting for first frequency change request ... <<<---\n");
+
+   for(counter = 0; counter < DDRSS_PLL_FHS_CNT; counter++)
+      {
+		req = (HW_RD_REG32(WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_REQ) & 0x80);
+		while((req ) == 0x0){
+			req = (HW_RD_REG32(WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_REQ) & 0x80);
+		}
+
+		req_type = HW_RD_REG32(WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_REQ) & 0x03;
+        GEL_TextOut("Iter %d: Frequency change request type %d received from controller \n",,,,, (counter + 1) ,req_type);
+
+		if(req_type == 1){
+              DDRSS_Set_DDR_PLL(DDRSS_PLL_FREQUENCY_1);
+          }else if(req_type == 2){
+              DDRSS_Set_DDR_PLL(DDRSS_PLL_FREQUENCY_2);
+          }else if(req_type == 0){
+			  DDRSS_Set_DDR_PLL(25000000);	//Replace with true bypass for Silicon
+          }else{
+              GEL_TextOut("error in DDR_Change_freq_ack\n",,,,,);
+          }
+
+		HW_WR_REG32((WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_ACK), 0x1); //set the ack bit
+		while(((HW_RD_REG32((WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_REQ))) & 0x80) == 0x80);
+		HW_WR_REG32((WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_ACK), 0x0); //clear the ack bit
+	  }
+
+	printf("--->>> Frequency Change request handshake is completed... <<<---\n");
+}
+
+DDR_Change_freq_ack_no_change_PLL()
+{
+    unsigned int req, req_type, counter;
+
+    printf("--->>> EXPERIMENTAL CONFIG CHANGE FOR UC 1.1. OVERCLOCKING DDR PLL ... <<<---\n");
+
+	//unlock MMR reg 5
+	//Partition5 lockkey0
+	HW_WR_REG32((WKUP_CTRL_MMR0_CFG0_BASE + 0x15008), 0x68EF3490); //0x80115008
+	//Partition5 lockkey1
+	HW_WR_REG32(( WKUP_CTRL_MMR0_CFG0_BASE + 0x1500C), 0xD172BC5A);
+
+	us_delay(500);
+
+    printf("--->>> Waiting for first frequency change request ... <<<---\n");
+
+   for(counter = 0; counter < DDRSS_PLL_FHS_CNT; counter++)
+      {
+		req = (HW_RD_REG32(WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_REQ) & 0x80);
+		while((req ) == 0x0){
+			req = (HW_RD_REG32(WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_REQ) & 0x80);
+		}
+
+		req_type = HW_RD_REG32(WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_REQ) & 0x03;
+        GEL_TextOut("Iter %d: Frequency change request type %d received from controller \n",,,,, (counter + 1) ,req_type);
+
+		if(req_type == 1){
+              //DDRSS_Set_DDR_PLL(DDRSS_PLL_FREQUENCY_1);
+          }else if(req_type == 2){
+              //DDRSS_Set_DDR_PLL(DDRSS_PLL_FREQUENCY_2);
+          }else if(req_type == 0){
+			  //DDRSS_Set_DDR_PLL(25000000);
+          }else{
+              GEL_TextOut("error in DDR_Change_freq_ack\n",,,,,);
+          }
+
+		HW_WR_REG32((WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_ACK), 0x1); //set the ack bit
+		while(((HW_RD_REG32((WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_REQ))) & 0x80) == 0x80);
+		HW_WR_REG32((WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_ACK), 0x0); //clear the ack bit
+	  }
+
+	printf("--->>> Frequency Change request handshake is completed... <<<---\n");
+}
+
+Request_DDR_Change_freq(unsigned int req_type)
+{
+	unsigned int req, req_type_from_ddr, ack, error;
+	unsigned int debug_info = 0;
+
+	printf("--->>> Inside Request_DDR_Change_freq function ... <<<---\n");
+	//unlock MMR reg 5
+	//Partition5 lockkey0
+	//HW_WR_REG32((WKUP_CTRL_MMR0_CFG0_BASE + 0x15008), 0x68EF3490); //0x63015008
+	//Partition5 lockkey1
+	//HW_WR_REG32(( WKUP_CTRL_MMR0_CFG0_BASE + 0x1500C), 0xD172BC5A);
+
+	//us_delay(500);
+
+	if(!(req_type >=0 && req_type <=2)){
+		GEL_TextOut("error invalid FSP req_type: %d\n",,,,,req_type);
+	}else{
+		GEL_TextOut("Setting the req_type and initiating FSP frequency change\n");
+		HW_WR_REG32((WKUP_CTRL_MMR0_CFG0_BASE + CHNG_DDR4_FSP_REQ), req_type & 0x3);
+
+		HW_WR_REG32((WKUP_CTRL_MMR0_CFG0_BASE + CHNG_DDR4_FSP_REQ), (req_type & 0x3) + 0x100);
+
+		GEL_TextOut("request sent to DDR, wait for request to come from DDR\n");
+		req = (HW_RD_REG32(WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_REQ) & 0x80);
+		while(req == 0){
+			req = (HW_RD_REG32(WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_REQ) & 0x80);
+		}
+
+		req_type_from_ddr = HW_RD_REG32(WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_REQ) & 0x03;
+        GEL_TextOut("Frequency change request type %d received from controller \n",,,,, req_type_from_ddr);
+
+		if(req_type_from_ddr == 1){
+			DDRSS_Set_DDR_PLL(DDRSS_PLL_FREQUENCY_1);
+		}else if(req_type_from_ddr == 2){
+			DDRSS_Set_DDR_PLL(DDRSS_PLL_FREQUENCY_2);
+		}else if(req_type_from_ddr == 0){
+			DDRSS_Set_DDR_PLL(25000000);
+		}else{
+			GEL_TextOut("error\n",,,,,);
+		}
+
+		HW_WR_REG32((WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_ACK), 0x1); //set the ack bit
+		while(((HW_RD_REG32((WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_REQ))) & 0x80) == 0x80);
+		HW_WR_REG32((WKUP_CTRL_MMR0_CFG0_BASE + DDR4_FSP_CLKCHNG_ACK), 0x0); //clear the ack bit
+
+		// wait for DDR to ack original request, and check error
+		ack = HW_RD_REG32((WKUP_CTRL_MMR0_CFG0_BASE + CHNG_DDR4_FSP_ACK) & 0x100);
+		while(ack == 0){
+			ack = HW_RD_REG32((WKUP_CTRL_MMR0_CFG0_BASE + CHNG_DDR4_FSP_ACK) & 0x100);
+		}
+		error = HW_RD_REG32((WKUP_CTRL_MMR0_CFG0_BASE + CHNG_DDR4_FSP_ACK) & 0x1);
+		if(error ==0){
+			GEL_TextOut("FSP change was sucessful\n");
+		}else{
+			GEL_TextOut("FSP change was not sucessful\n");
+		}
+	}
+}
+
+DDR_PLL_Disable_Bypass()
+{
+    unsigned int debug_info = 0;
+    unsigned int Base_Address = AdjustBaseAddr(0x00680000);  //0x80680000 for M3,   0x680000 for R5/A53
+    unsigned int address_offset = 0;
+    unsigned int PLL_index = 12;
+    unsigned int CONTROL_REG = 0x20;
+    
+    //Unlock the PLL
+    //Unlock_PLL_MMR(Base_Address, address_offset, PLL_index);  // M3 base address
+    //if(debug_info){
+    //    GEL_TextOut("Unlocked PLL MMRs.\n");
+    //}
+
+    Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL_REG), 0, 1, 31);
+    if(debug_info){
+        //GEL_TextOut("DDR PLL Bypass Disabled\n");
+    }
+
+   // Lock_PLL_MMR(Base_Address, address_offset, PLL_index);  // M3 base address
+   // if(debug_info){
+   //     GEL_TextOut("Locked PLL MMRs.\n");
+   // }
+}
+
+DDR_PLL_Bypass()
+{
+    unsigned int debug_info = 0;
+    unsigned int Base_Address = AdjustBaseAddr(0x00680000);  //0x80680000 for M3,   0x680000 for R5/A53
+    unsigned int address_offset = 0;
+    unsigned int PLL_index = 12;
+    unsigned int CONTROL_REG = 0x20;
+
+
+    //Unlock the PLL
+    //Unlock_PLL_MMR(Base_Address, address_offset, PLL_index);  // M3 base address
+    //if(debug_info){
+    //    GEL_TextOut("Unlocked PLL MMRs.\n");
+    //}
+
+	Base_Address = AdjustBaseAddr(0x00680000);
+	Write_MMR_Field((Base_Address + address_offset + (PLL_index * 0x1000) + CONTROL_REG), 1, 1, 31);
+    if(debug_info){
+        GEL_TextOut("DDR PLL Bypassed\n");
+    }
+
+   // Lock_PLL_MMR(Base_Address, address_offset, PLL_index);  // M3 base address
+   // if(debug_info){
+   //     GEL_TextOut("Locked PLL MMRs.\n");
+   // }
+}
+
+DDR4_PLL_800MHz()
+{
+	DDRSS_Set_DDR_PLL(400000000);
+}
+
+DDR4_PLL_666MHz()
+{
+	DDRSS_Set_DDR_PLL(333350000);
+}
+
+DDR4_PLL_533MHz()
+{
+	DDRSS_Set_DDR_PLL(266500000);
+}
+
+DDR4_PLL_400MHz()
+{
+    DDRSS_Set_DDR_PLL(200000000);
+}
+
+Request_FSP_0()
+{
+	Request_DDR_Change_freq(0);
+}
+
+Request_FSP_1()
+{
+	Request_DDR_Change_freq(1);
+}
+
+Request_FSP_2()
+{
+	Request_DDR_Change_freq(2);
+}
+
+
+/* This is dummy function - GEL does not work real-time.
+ * If GELs are imported to C code, this function must be implemented a loop of
+ * "delay" microseconds
+ */
+static void us_delay(uint32_t delay)
+{
+    uint32_t loop;
+    for (loop = 0; loop < delay * 100; loop++)
+    {
+        loop = loop;
+    }
+}
+
+/* Wrapper function to simplify importing GEL file to a C code */
+printf(char *temp)
+{
+    GEL_TextOut(temp);
+}
+
+menuitem "ResetInNoBootMode"
+
+hotmenu ResetInNoBootMode()
+{
+    GEL_TextOut("Run this script from R5 core\n");
+    CTRL_Unlock(0x43000030);
+    Write_MMR(0x43000030,0xFB);
+    GEL_TextOut("Changing bootmode to NoBoot\n");
+    CTRL_Unlock(0x04518170);
+    GEL_TextOut("Performing warm reset...\n");
+    GEL_TextOut("Ignore errors beyond this point...\n");
+    Write_MMR(0x04518170,(Read_MMR(0x04518170) & ~0xF00) | 0x600); //CTRLMMR_MCU_RST_CTRL[11:8] = 0x6 for MCU warm reset
+
+}        

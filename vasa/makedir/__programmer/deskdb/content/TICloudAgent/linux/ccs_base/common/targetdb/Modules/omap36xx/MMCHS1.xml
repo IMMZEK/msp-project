@@ -1,0 +1,811 @@
+<module name="MMCHS1" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="MMCHS_SYSCONFIG" acronym="MMCHS_SYSCONFIG" offset="0x10" width="32" description="System Configuration RegisterThis register allows controlling various parameters of the Interconnect interface.">
+    <bitfield id="Reserved" width="22" begin="31" end="10" resetval="0x00000" description="These bits are initialized to zero, and writes to them are ignored." range="" rwaccess="R"/>
+    <bitfield id="CLOCKACTIVITY" width="2" begin="9" end="8" resetval="0x0" description="Clocks activity during wake up mode period.Bit8: Interface clockBit9: Functional clock" range="" rwaccess="RW">
+      <bitenum value="0" token="CLOCKACTIVITY_0" description="Interface and Functional clock may be switched off."/>
+      <bitenum value="1" token="CLOCKACTIVITY_1" description="Interface clock is maintained. Functional clock may be switched-off."/>
+      <bitenum value="2" token="CLOCKACTIVITY_2" description="Functional clock is maintained. Interface clock may be switched-off."/>
+      <bitenum value="3" token="CLOCKACTIVITY_3" description="Interface and Functional clocks are maintained."/>
+    </bitfield>
+    <bitfield id="Reserved" width="3" begin="7" end="5" resetval="0" description="These bits are initialized to zero, and writes to them are ignored." range="" rwaccess="R"/>
+    <bitfield id="SIDLEMODE" width="2" begin="4" end="3" resetval="0x2" description="Power management" range="" rwaccess="RW">
+      <bitenum value="0" token="SIDLEMODE_0" description="If an idle request is detected, the MMC/SD/SDIO host controller acknowledges it unconditionally and goes in Inactive mode. Interrupt and DMA requests are unconditionally deasserted."/>
+      <bitenum value="1" token="SIDLEMODE_1" description="If an idle request is detected, the request is ignored and the module keeps on behaving normally."/>
+      <bitenum value="2" token="SIDLEMODE_2" description="If an idle request is detected, the module will switch to wake up mode based on its internal activity, and the wake up capability can be used if the wake up capability is enabled (bit MMCi.[2] ENAWAKEUP bit is set to 1)."/>
+      <bitenum value="3" token="SIDLEMODE_3" description="Reserved - do not use"/>
+    </bitfield>
+    <bitfield id="ENAWAKEUP" width="1" begin="2" end="2" resetval="1" description="Wake-up feature control" range="" rwaccess="RW">
+      <bitenum value="0" token="ENAWAKEUP_0" description="Wake-up capability is disabled"/>
+      <bitenum value="1" token="ENAWAKEUP_1" description="Wake-up capability is enabled"/>
+    </bitfield>
+    <bitfield id="SOFTRESET" width="1" begin="1" end="1" resetval="0" description="Software reset. The bit is automatically reset by the hardware. During reset, it always returns 0." range="" rwaccess="RW">
+      <bitenum value="0" token="SOFTRESET_0_r" description="Normal mode"/>
+      <bitenum value="0" token="SOFTRESET_0_w" description="No effect."/>
+      <bitenum value="1" token="SOFTRESET_1_r" description="The module is reset."/>
+      <bitenum value="1" token="SOFTRESET_1_w" description="Trigger a module reset."/>
+    </bitfield>
+    <bitfield id="AUTOIDLE" width="1" begin="0" end="0" resetval="1" description="Internal Clock gating strategy" range="" rwaccess="RW">
+      <bitenum value="0" token="AUTOIDLE_0" description="Clocks are free-running"/>
+      <bitenum value="1" token="AUTOIDLE_1" description="Automatic clock gating strategy is applied, based on the interconnect and MMC interface activity"/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_SYSSTATUS" acronym="MMCHS_SYSSTATUS" offset="0x14" width="32" description="System Status Register This register provides status information about the module excluding the interrupt status information">
+    <bitfield id="Reserved" width="31" begin="31" end="1" resetval="0x00000000" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="RESETDONE" width="1" begin="0" end="0" resetval="0" description="Internal Reset Monitoring Note: the debounce clock , the interface clock and the functional clock shall be provided to the MMC/SD/SDIO host controller to allow the internal reset monitoring." range="" rwaccess="R">
+      <bitenum value="0" token="RESETDONE_0_r" description="Internal module reset is on-going"/>
+      <bitenum value="1" token="RESETDONE_1_r" description="Reset completed."/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_CSRE" acronym="MMCHS_CSRE" offset="0x24" width="32" description="Card status response errorThis register enables the host controller to detect card status errors of response type R1, R1b for all cards and of R5, R5b and R6 response for cards types SD or SDIO. When a bit MMCi.[I] is set to 1, if the corresponding bit at the same position in the response MMCi.[I] is set to 1, the host controller indicates a card error (MMCi.[28] CERR bit) interrupt status to avoid the host driver reading the response register (MMCi.).Note: No automatic card error detection for autoCMD12 is implemented; the host system has to check autoCMD12 response register (MMCi.) for possible card errors.">
+    <bitfield id="CSRE" width="32" begin="31" end="0" resetval="0x00000000" description="Card status response error" range="" rwaccess="RW"/>
+  </register>
+  <register id="MMCHS_SYSTEST" acronym="MMCHS_SYSTEST" offset="0x28" width="32" description="System Test register This register is used to control the signals that connect to I/O pins when the module is configured in system test (SYSTEST) mode for boundary connectivity verification. Note: In SYSTEST mode, a write into MMCi. register will not start a transfer. The buffer behaves as a stack accessible only by the local host (push and pop operations). In this mode, the Transfer Block Size (MMCi.[10:0] BLEN bits) and the Blocks count for current transfer (MMCi.[31:16] NBLK bits) are needed to generate a Buffer write ready interrupt (MMCi.[4] BWR bit) or a Buffer read ready interrupt (MMCi.[5] BRR bit) and DMA requests if enabled.">
+    <bitfield id="Reserved" width="15" begin="31" end="17" resetval="0x00000" description="Reserved bit field. Do not write any value. Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="OBI" width="1" begin="16" end="16" resetval="0" description="Out-Of-Band Interrupt (OBI) data value." range="" rwaccess="RW">
+      <bitenum value="0" token="OBI_0" description="The Out-of-Band Interrupt pin is driven low."/>
+      <bitenum value="1" token="OBI_1" description="The Out-of-Band Interrupt pin is driven high."/>
+    </bitfield>
+    <bitfield id="SDCD" width="1" begin="15" end="15" resetval="0" description="Card detect input signal (SDCD) data value" range="" rwaccess="R">
+      <bitenum value="0" token="SDCD_0" description="The card detect pin is driven low."/>
+      <bitenum value="1" token="SDCD_1" description="The card detect pin is driven high."/>
+    </bitfield>
+    <bitfield id="SDWP" width="1" begin="14" end="14" resetval="0" description="Write protect input signal (SDWP) data value." range="" rwaccess="R">
+      <bitenum value="0" token="SDWP_0" description="The write protect pin SDWP is driven low."/>
+      <bitenum value="1" token="SDWP_1" description="The write protect pin SDWP is driven high."/>
+    </bitfield>
+    <bitfield id="WAKD" width="1" begin="13" end="13" resetval="0" description="Wake request output signal data value." range="" rwaccess="RW">
+      <bitenum value="0" token="WAKD_0_r" description="No action. Returns 0."/>
+      <bitenum value="0" token="WAKD_0_w" description="The pin SWAKEUP is driven low."/>
+      <bitenum value="1" token="WAKD_1_r" description="No action. Returns 1."/>
+      <bitenum value="1" token="WAKD_1_w" description="The pin SWAKEUP is driven high."/>
+    </bitfield>
+    <bitfield id="SSB" width="1" begin="12" end="12" resetval="0" description="Set status bit This bit must be cleared prior attempting to clear a status bit of the interrupt status register (MMCi.MMCHS_STAT)." range="" rwaccess="RW">
+      <bitenum value="0" token="SSB_0_r" description="No action. Returns 0."/>
+      <bitenum value="0" token="SSB_0_w" description="Clear this SSB bit field. Writing 0 does not clear already set status bits."/>
+      <bitenum value="1" token="SSB_1_r" description="No action. Returns 1."/>
+      <bitenum value="1" token="SSB_1_w" description="Force to 1 all status bits of the interrupt status register (MMCi.) only if the corresponding bit field in the Interrupt signal enable register (MMCi.) is set."/>
+    </bitfield>
+    <bitfield id="D7D" width="1" begin="11" end="11" resetval="0" description="DAT7 input/output signal data value." range="" rwaccess="RW">
+      <bitenum value="0" token="D7D_0_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT7 line (low).If MMCi.[3] DDIR bit = 0 (output mode direction), returns 0."/>
+      <bitenum value="0" token="D7D_0_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT7 line is driven low.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+      <bitenum value="1" token="D7D_1_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT7 line (high)If MMCi.[3] DDIR bit = 0 (output mode direction), returns 1."/>
+      <bitenum value="1" token="D7D_1_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT7 line is driven high.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+    </bitfield>
+    <bitfield id="D6D" width="1" begin="10" end="10" resetval="0" description="DAT6 input/output signal data value." range="" rwaccess="RW">
+      <bitenum value="0" token="D6D_0_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT6 line (low).If MMCi.[3] DDIR bit = 0 (output mode direction), returns 0."/>
+      <bitenum value="0" token="D6D_0_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT6 line is driven low.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+      <bitenum value="1" token="D6D_1_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT6 line (high)If MMCi.[3] DDIR bit = 0 (output mode direction), returns 1."/>
+      <bitenum value="1" token="D6D_1_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT6 line is driven high.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+    </bitfield>
+    <bitfield id="D5D" width="1" begin="9" end="9" resetval="0" description="DAT5 input/output signal data value." range="" rwaccess="RW">
+      <bitenum value="0" token="D5D_0_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT5 line (low).If MMCi.[3] DDIR bit = 0 (output mode direction), returns 0."/>
+      <bitenum value="0" token="D5D_0_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT5 line is driven low.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+      <bitenum value="1" token="D5D_1_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT5 line (high)If MMCi.[3] DDIR bit = 0 (output mode direction), returns 1."/>
+      <bitenum value="1" token="D5D_1_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT5 line is driven high.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+    </bitfield>
+    <bitfield id="D4D" width="1" begin="8" end="8" resetval="0" description="DAT4 input/output signal data value." range="" rwaccess="RW">
+      <bitenum value="0" token="D4D_0_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT4 line (low).If MMCi.[3] DDIR bit = 0 (output mode direction), returns 0."/>
+      <bitenum value="0" token="D4D_0_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT4 line is driven low.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+      <bitenum value="1" token="D4D_1_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT4 line (high)If MMCi.[3] DDIR bit = 0 (output mode direction), returns 1."/>
+      <bitenum value="1" token="D4D_1_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT4 line is driven high.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+    </bitfield>
+    <bitfield id="D3D" width="1" begin="7" end="7" resetval="0" description="DAT3 input/output signal data value." range="" rwaccess="RW">
+      <bitenum value="0" token="D3D_0_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT3 line (low).If MMCi.[3] DDIR bit = 0 (output mode direction), returns 0."/>
+      <bitenum value="0" token="D3D_0_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT3 line is driven low.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+      <bitenum value="1" token="D3D_1_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT3 line (high)If MMCi.[3] DDIR bit = 0 (output mode direction), returns 1."/>
+      <bitenum value="1" token="D3D_1_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT3 line is driven high.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+    </bitfield>
+    <bitfield id="D2D" width="1" begin="6" end="6" resetval="0" description="DAT2 input/output signal data value." range="" rwaccess="RW">
+      <bitenum value="0" token="D2D_0_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT2 line (low).If MMCi.[3] DDIR bit = 0 (output mode direction), returns 0."/>
+      <bitenum value="0" token="D2D_0_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT2 line is driven low.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+      <bitenum value="1" token="D2D_1_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT2 line (high)If MMCi.[3] DDIR bit = 0 (output mode direction), returns 1."/>
+      <bitenum value="1" token="D2D_1_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT2 line is driven high.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+    </bitfield>
+    <bitfield id="D1D" width="1" begin="5" end="5" resetval="0" description="DAT1 input/output signal data value." range="" rwaccess="RW">
+      <bitenum value="0" token="D1D_0_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT1 line (low).If MMCi.[3] DDIR bit = 0 (output mode direction), returns 0."/>
+      <bitenum value="0" token="D1D_0_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT1 line is driven low.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+      <bitenum value="1" token="D1D_1_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT1 line (high)If MMCi.[3] DDIR bit = 0 (output mode direction), returns 1."/>
+      <bitenum value="1" token="D1D_1_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT1 line is driven high.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+    </bitfield>
+    <bitfield id="D0D" width="1" begin="4" end="4" resetval="0" description="DAT0 input/output signal data value." range="" rwaccess="RW">
+      <bitenum value="0" token="D0D_0_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT0 line (low).If MMCi.[3] DDIR bit = 0 (output mode direction), returns 0."/>
+      <bitenum value="0" token="D0D_0_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT0 line is driven low.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+      <bitenum value="1" token="D0D_1_r" description="If MMCi.[3] DDIR bit = 1 (input mode direction), returns the value on the DAT0 line (high)If MMCi.[3] DDIR bit = 0 (output mode direction), returns 1."/>
+      <bitenum value="1" token="D0D_1_w" description="If MMCi.[3] DDIR bit = 0 (output mode direction), the DAT0 line is driven high.If MMCi.[3] DDIR bit = 1 (input mode direction), no effect."/>
+    </bitfield>
+    <bitfield id="DDIR" width="1" begin="3" end="3" resetval="0" description="Control of the DAT[7:0] pins direction." range="" rwaccess="RW">
+      <bitenum value="0" token="DDIR_0_r" description="No action. Returns 0."/>
+      <bitenum value="0" token="DDIR_0_w" description="The DAT lines are outputs (host to card)."/>
+      <bitenum value="1" token="DDIR_1_r" description="No action. Returns 1."/>
+      <bitenum value="1" token="DDIR_1_w" description="The DAT lines are inputs (card to host)."/>
+    </bitfield>
+    <bitfield id="CDAT" width="1" begin="2" end="2" resetval="0" description="CMD input/output signal data value." range="" rwaccess="RW">
+      <bitenum value="0" token="CDAT_0_r" description="If MMCi.[1] CDIR bit = 1 (input mode direction), returns the value on the CMD line (low).If MMCi.[1] CDIR bit = 0 (output mode direction), returns 0 ."/>
+      <bitenum value="0" token="CDAT_0_w" description="If MMCi.[1] CDIR bit = 0 (output mode direction), the CMD line is driven low.If MMCi.[1] CDIR bit = 1 (input mode direction), no effect."/>
+      <bitenum value="1" token="CDAT_1_r" description="If MMCi.[1] CDIR bit = 1 (input mode direction), returns the value on the CMD line (high)If MMCi.[1] CDIR bit = 0 (output mode direction), returns 1 ."/>
+      <bitenum value="1" token="CDAT_1_w" description="If MMCi.[1] CDIR bit = 0 (output mode direction), the CMD line is driven high.If MMCi.[1] CDIR bit = 1 (input mode direction), no effect."/>
+    </bitfield>
+    <bitfield id="CDIR" width="1" begin="1" end="1" resetval="0" description="Control of the CMD pin direction." range="" rwaccess="RW">
+      <bitenum value="0" token="CDIR_0_r" description="No action. Returns 0."/>
+      <bitenum value="0" token="CDIR_0_w" description="The CMD line is an output (host to card)."/>
+      <bitenum value="1" token="CDIR_1_r" description="No action. Returns 1."/>
+      <bitenum value="1" token="CDIR_1_w" description="The CMD line is an input (card to host) ."/>
+    </bitfield>
+    <bitfield id="MCKD" width="1" begin="0" end="0" resetval="0" description="MMC clock output signal data value." range="" rwaccess="RW">
+      <bitenum value="0" token="MCKD_0_r" description="No action. Returns 0."/>
+      <bitenum value="0" token="MCKD_0_w" description="The output clock is driven low."/>
+      <bitenum value="1" token="MCKD_1_r" description="No action. Returns 1."/>
+      <bitenum value="1" token="MCKD_1_w" description="The output clock is driven high."/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_CON" acronym="MMCHS_CON" offset="0x2C" width="32" description="Configuration register This register is used:- to select the functional mode for any card.- to send an initialization sequence to any card.- to enable the detection on the mmci_dat[1] signal of a card interrupt for SDIO cards only.And also to configure:- specific data and command transfers for MMC cards only.- the parameters related to the card detect and write protect input signals.">
+    <bitfield id="Reserved" width="15" begin="31" end="17" resetval="0x00000" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="CLKEXTFREE" width="1" begin="16" end="16" resetval="0" description="External clock free running. This register is used to maintain card clock out of transfer transaction to enable slave module (for example to generate a synchronous interrupt on mmci_dat[1]). The Clock will be maintain only if MMCi.MMCHS_SYSCTL[2] CEN bit is set." range="" rwaccess="RW">
+      <bitenum value="0" token="CLKEXTFREE_0" description="External card clock is cut off outside active transaction period."/>
+      <bitenum value="1" token="CLKEXTFREE_1" description="External card clock is maintain even out of active transaction period only if MMCi.[2] CEN bit is set."/>
+    </bitfield>
+    <bitfield id="PADEN" width="1" begin="15" end="15" resetval="0" description="Control Power for MMC Lines. This register is only useful when MMC PADs contain power saving mechanism to minimize its leakage power. It works as a GPIO that directly control the ACTIVE pin of PADs. Excepted for mmci_dat[1], the signal is also combine outside the module with the dedicated power control MMCi.MMCHS_CON[11] CTPL bit." range="" rwaccess="RW">
+      <bitenum value="0" token="PADEN_0" description="ADPIDLE module pin is not forced, it is automatically generated by the MMC fsms."/>
+      <bitenum value="1" token="PADEN_1" description="ADPIDLE module pin is forced to active state."/>
+    </bitfield>
+    <bitfield id="OBIE" width="1" begin="14" end="14" resetval="0" description="Out-of-Band Interrupt Enable (MMC cards only). This bit enables the detection of Out-of-Band Interrupt on MMCOBI input pin. The usage of the Out-of-Band signal (OBI) is optional and depends on the system integration." range="" rwaccess="RW">
+      <bitenum value="0" token="OBIE_0" description="Out-of-Band interrupt detection disabled."/>
+      <bitenum value="1" token="OBIE_1" description="Out-of-Band interrupt detection enabled."/>
+    </bitfield>
+    <bitfield id="OBIP" width="1" begin="13" end="13" resetval="0" description="Out-of-Band Interrupt Polarity (MMC cards only). This bit selects the active level of the out-of-band interrupt coming from MMC cards. The usage of the Out-of-Band signal (OBI) is optional and depends on the system integration." range="" rwaccess="RW">
+      <bitenum value="0" token="OBIP_0" description="active high level."/>
+      <bitenum value="1" token="OBIP_1" description="active low level."/>
+    </bitfield>
+    <bitfield id="CEATA" width="1" begin="12" end="12" resetval="0" description="CE-ATA control mode (MMC cards compliant with CE-ATA):By default, this bit is set to 0. It is use to indicate that next commands are considered as specific CE-ATA commands that potentially use 'command completion' features." range="" rwaccess="RW">
+      <bitenum value="0" token="CEATA_0" description="Standard MMC/SD/SDIO mode."/>
+      <bitenum value="1" token="CEATA_1" description="CE-ATA mode.Next commands are considered as CE-ATA commands."/>
+    </bitfield>
+    <bitfield id="CTPL" width="1" begin="11" end="11" resetval="0" description="Control Power for mmci_dat[1] line (MMC and SD cards):By default, this bit is set to 0 and the host controller automatically disables all the input buffers outside of a transaction to minimize the leakage current. SDIO cards: When this bit is set to 1, the host controller automatically disables all the input buffers except the buffer of mmci_dat[1] outside of a transaction in order to detect asynchronous card interrupt on mmci_dat[1] line and minimize the leakage current of the buffers." range="" rwaccess="RW">
+      <bitenum value="0" token="CTPL_0" description="Disable all the input buffers outside of a transaction."/>
+      <bitenum value="1" token="CTPL_1" description="Disable all the input buffers except the buffer of mmci_dat[1]outside of a transaction."/>
+    </bitfield>
+    <bitfield id="DVAL" width="2" begin="10" end="9" resetval="0x3" description="Debounce filter value (All cards) This register is used to define a debounce period to filter the card detect input signal (SDCD). The usage of the card detect input signal (SDCD) is optional and depends on the system integration and the type of the connector housing that accommodates the card." range="" rwaccess="RW">
+      <bitenum value="0" token="DVAL_0" description="33 us debounce period."/>
+      <bitenum value="1" token="DVAL_1" description="231 us debounce period."/>
+      <bitenum value="2" token="DVAL_2" description="1 ms debounce period."/>
+      <bitenum value="3" token="DVAL_3" description="8.4 ms debounce period."/>
+    </bitfield>
+    <bitfield id="WPP" width="1" begin="8" end="8" resetval="0" description="Write protect polarity (SD and SDIO cards only) This bit selects the active level of the write protect input signal (SDWP). The usage of the write protect input signal (SDWP) is optional and depends on the system integration and the type of the connector housing that accommodates the card." range="" rwaccess="RW">
+      <bitenum value="0" token="WPP_0" description="Active high level."/>
+      <bitenum value="1" token="WPP_1" description="Active low level."/>
+    </bitfield>
+    <bitfield id="CDP" width="1" begin="7" end="7" resetval="0" description="Card detect polarity (All cards) This bit selects the active level of the card detect input signal (SDCD). The usage of the card detect input signal (SDCD) is optional and depends on the system integration and the type of the connector housing that accommodates the card." range="" rwaccess="RW">
+      <bitenum value="0" token="CDP_0" description="Active high level."/>
+      <bitenum value="1" token="CDP_1" description="Active low level."/>
+    </bitfield>
+    <bitfield id="MIT" width="1" begin="6" end="6" resetval="0" description="MMC interrupt command (Only for MMC cards.) This bit must be set to 1, when the next write access to the command register (MMCi.MMCHS_CMD) is for writing a MMC interrupt command (CMD40) requiring the command timeout detection to be disabled for the command response." range="" rwaccess="RW">
+      <bitenum value="0" token="MIT_0" description="Command timeout enabled"/>
+      <bitenum value="1" token="MIT_1" description="Command timeout disabled"/>
+    </bitfield>
+    <bitfield id="DW8" width="1" begin="5" end="5" resetval="0" description="8-bit mode MMC select For SD/SDIO cards, this bit must be set to 0. For MMC card, this bit must be set following a valid SWITCH command (CMD6) with the correct value and extend CSD index written in the argument. Prior to this command, the MMC card configuration register (CSD and EXT_CSD) must be verified for compliancy with MMC standard specification." range="" rwaccess="RW">
+      <bitenum value="0" token="DW8_0" description="1-bit or 4-bit Data width (mmci_dat[0] or mmci_dat[3:0] used, MMC, SD cards)"/>
+      <bitenum value="1" token="DW8_1" description="8-bit Data width (mmci_dat[7:0] used, MMC cards)"/>
+    </bitfield>
+    <bitfield id="MODE" width="1" begin="4" end="4" resetval="0" description="Mode select (All cards) These bits select the functional mode." range="" rwaccess="RW">
+      <bitenum value="0" token="MODE_0" description="Functional mode.Transfers to the MMC/SD/SDIO cards follow the card protocol. MMC clock is enabled. MMC/SD transfers are operated under the control of the MMCi. register."/>
+      <bitenum value="1" token="MODE_1" description="SYSTEST mode."/>
+    </bitfield>
+    <bitfield id="STR" width="1" begin="3" end="3" resetval="0" description="Stream command (Only for MMC cards). This bit must be set to 1 only for the stream data transfers (read or write) of the adtc commands. Stream read is a class 1 command (CMD11: READ_DAT_UNTIL_STOP). Stream write is a class 3 command (CMD20: WRITE_DAT_UNTIL_STOP)." range="" rwaccess="RW">
+      <bitenum value="0" token="STR_0" description="Block oriented data transfer."/>
+      <bitenum value="1" token="STR_1" description="Stream oriented data transfer."/>
+    </bitfield>
+    <bitfield id="HR" width="1" begin="2" end="2" resetval="0" description="Broadcast host response (Only for MMC cards).This register is used to force the host to generate a 48-bit response for bc command type.It can be used to terminate the interrupt mode by generating a CMD40 response by the core. To have the host response to be generated in open drain mode, the register MMCHS_CON[OD] must be set to 1.When MMCi.MMCHS_CON[12] CEATA bit is set to 1 and MMCi.MMCHS_ARG set to 0x00000000, when writing 0x00000000 into MMCi.MMCHS_CMD register, the host controller performs a 'command completion signal disable' token (i.e. mmci_cmd line held to '0' during 47 cycles followed by a 1)." range="" rwaccess="RW">
+      <bitenum value="0" token="HR_0" description="The host does not generate a 48-bit response instead of a command."/>
+      <bitenum value="1" token="HR_1" description="The host generates a 48-bit response instead of a command or a command completion signal disable token."/>
+    </bitfield>
+    <bitfield id="INIT" width="1" begin="1" end="1" resetval="0" description="Send initialization stream (All cards). When this bit is set to 1, and the card is idle, an initialization sequence is sent to the card. An initialization sequence consists of setting the mmci_cmd line to 1 during 80 clock cycles. The initialization sequence is mandatory - but it is not required to do it through this bit - this bit makes it easier. Clock divider (MMCi.MMCHS_SYSCTL[15:6] CLKD bits) should be set to ensure that 80 clock periods are greater than 1ms. Note: in this mode, there is no command sent to the card and no response is expected. A command complete interrupt will be generated once the initialization sequence is completed. MMCi.MMCHS_STAT[0] CC bit can be polled." range="" rwaccess="RW">
+      <bitenum value="0" token="INIT_0" description="The host does not send an initialization sequence."/>
+      <bitenum value="1" token="INIT_1" description="The host sends an initialization sequence."/>
+    </bitfield>
+    <bitfield id="OD" width="1" begin="0" end="0" resetval="0" description="Card open drain mode (Only for MMC cards). This bit must be set to 1 for MMC card commands 1, 2, 3 and 40, and if the MMC card bus is operating in open-drain mode during the response phase to the command sent. Typically, during card identification mode when the card is either in idle, ready or ident state.It is also necessary to set this bit to 1, for a broadcast host response (see Broadcast host response register MMCi.MMCHS_CON[2] HR bit)" range="" rwaccess="RW">
+      <bitenum value="0" token="OD_0" description="No Open Drain"/>
+      <bitenum value="1" token="OD_1" description="Open Drain or Broadcast host response"/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_PWCNT" acronym="MMCHS_PWCNT" offset="0x30" width="32" description="Power counter register This register is used to program a mmc counter to delay command transfers after activating the PAD power, this value depends on PAD characteristics and voltage.">
+    <bitfield id="Reserved" width="16" begin="31" end="16" resetval="0x00" description="These bits are initialized to zero, and writes to them are ignored. Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="PWRCNT" width="16" begin="15" end="0" resetval="0x0000" description="Power counter register.This register is used to introduce a delay between the PAD ACTIVE pin assertion and the command issued." range="" rwaccess="RW">
+      <bitenum value="0" token="PWRCNT_0" description="No additional delay added."/>
+      <bitenum value="1" token="PWRCNT_1" description="TCF delay (card clock period)."/>
+      <bitenum value="2" token="PWRCNT_2" description="TCF x 2 delay (card clock period)."/>
+      <bitenum value="65534" token="PWRCNT_65534" description="TCF x 65534 delay (card clock period)."/>
+      <bitenum value="65535" token="PWRCNT_65535" description="TCF x 65535 delay (card clock period)."/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_BLK" acronym="MMCHS_BLK" offset="0x104" width="32" description="Transfer Length Configuration registerThis register shall be used for any card.">
+    <bitfield id="NBLK" width="16" begin="31" end="16" resetval="0x0000" description="Blocks count for current transfer.This register is enabled when Block count Enable (MMCi.MMCHS_CMD[1] BCE bit) is set to 1 and is valid only for multiple block transfers. Setting the block count to 0 results no data blocks being transferred. Note: The host controller decrements the block count after each block transfer and stops when the count reaches zero. This register can be accessed only if no transaction is executing (i.e., after a transaction has stopped). Read operations during transfers may return an invalid value and write operation will be ignored. In suspend context, the number of blocks yet to be transferred can be determined by reading this register. When restoring transfer context prior to issuing a Resume command, The local host shall restore the previously saved block count." range="" rwaccess="RW">
+      <bitenum value="0" token="NBLK_0" description="Stop count"/>
+      <bitenum value="1" token="NBLK_1" description="1 block"/>
+      <bitenum value="2" token="NBLK_2" description="2 blocks"/>
+      <bitenum value="65535" token="NBLK_65535" description="65535 blocks"/>
+    </bitfield>
+    <bitfield id="Reserved" width="5" begin="15" end="11" resetval="0x00" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="BLEN" width="11" begin="10" end="0" resetval="0x000" description="Transfer Block Size. This register specifies the block size for block data transfers. Read operations during transfers may return an invalid value, and write operations are ignored. When a CMD12 command is issued to stop the transfer, a read of the BLEN field after transfer completion (MMCi.MMCHS_STAT[1] TC bit set to 1) will not return the true byte number of data length while the stop occurs but the value written in this register before transfer is launched." range="" rwaccess="RW">
+      <bitenum value="0" token="BLEN_0" description="No data transfer"/>
+      <bitenum value="1" token="BLEN_1" description="1 byte block length"/>
+      <bitenum value="2" token="BLEN_2" description="2 bytes block length"/>
+      <bitenum value="3" token="BLEN_3" description="3 bytes block length"/>
+      <bitenum value="511" token="BLEN_511" description="511 bytes block length"/>
+      <bitenum value="512" token="BLEN_512" description="512 bytes block length"/>
+      <bitenum value="1023" token="BLEN_1023" description="1023 bytes block length"/>
+      <bitenum value="1024" token="BLEN_1024" description="1024 bytes block length"/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_ARG" acronym="MMCHS_ARG" offset="0x108" width="32" description="Command argument Register This register contains command argument specified as bit 39-8 of Command-Format These registers must be initialized prior to sending the command itself to the card (write action into the register MMCi. register). Only exception is for a command index specifying stuff bits in arguments, making a write unnecessary.">
+    <bitfield id="ARG" width="32" begin="31" end="0" resetval="0x00000000" description="Command argument bits [31:0]" range="" rwaccess="RW"/>
+  </register>
+  <register id="MMCHS_CMD" acronym="MMCHS_CMD" offset="0x10C" width="32" description="Command and transfer mode registerMMCi.[31:16] = the command registerMMCi.[15:0] = the transfer mode. This register configures the data and command transfers. A write into the most significant byte send the command. A write into MMCi.[15:0] registers during data transfer has no effect. This register shall be used for any card.">
+    <bitfield id="Reserved" width="2" begin="31" end="30" resetval="0x0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="INDX" width="6" begin="29" end="24" resetval="0x00" description="Command index Binary encoded value from 0 to 63 specifying the command number send to card" range="" rwaccess="RW">
+      <bitenum value="0" token="INDX_0" description="CMD0 or ACMD0"/>
+      <bitenum value="1" token="INDX_1" description="CMD1 or ACMD1"/>
+      <bitenum value="63" token="INDX_63" description="CMD63 or ACMD63"/>
+    </bitfield>
+    <bitfield id="CMD_TYPE" width="2" begin="23" end="22" resetval="0x0" description="Command type. This register specifies three types of special command: Suspend, Resume and Abort. These bits shall be set to 0b00 for all other commands." range="" rwaccess="RW">
+      <bitenum value="0" token="CMD_TYPE_0" description="Others Commands"/>
+      <bitenum value="1" token="CMD_TYPE_1" description="Upon CMD52 'Bus Suspend' operation"/>
+      <bitenum value="2" token="CMD_TYPE_2" description="Upon CMD52 'Function Select' operation"/>
+      <bitenum value="3" token="CMD_TYPE_3" description="Upon CMD12 or CMD52 'I/O Abort' command"/>
+    </bitfield>
+    <bitfield id="DP" width="1" begin="21" end="21" resetval="0" description="Data present select. This register indicates that data is present and mmci_dat line shall be used. It must be set to 0 in the following conditions:- Command using only mmci_cmd line-Command with no data transfer but using busy signal on mmci_dat[0]-Resume command" range="" rwaccess="RW">
+      <bitenum value="0" token="DP_0" description="Command with no data transfer"/>
+      <bitenum value="1" token="DP_1" description="Command with data transfer"/>
+    </bitfield>
+    <bitfield id="CICE" width="1" begin="20" end="20" resetval="0" description="Command Index check enable. This bit must be set to 1 to enable index check on command response to compare the index field in the response against the index of the command. If the index is not the same in the response as in the command, it is reported as a command index error (MMCi.MMCHS_STAT[19] CIE bit set to1) Note: The CICE bit cannot be configured for an Auto CMD12, then index check is automatically checked when this command is issued." range="" rwaccess="RW">
+      <bitenum value="0" token="CICE_0" description="Index check disable"/>
+      <bitenum value="1" token="CICE_1" description="Index check enable"/>
+    </bitfield>
+    <bitfield id="CCCE" width="1" begin="19" end="19" resetval="0" description="Command CRC check enable. This bit must be set to 1 to enable CRC7 check on command response to protect the response against transmission errors on the bus. If an error is detected, it is reported as a command CRC error (MMCi.MMCHS_STAT[17] CCRC bit set to 1). Note: The CCCE bit cannot be configured for an Auto CMD12, and then CRC check is automatically checked when this command is issued." range="" rwaccess="RW">
+      <bitenum value="0" token="CCCE_0" description="CRC7 check disable"/>
+      <bitenum value="1" token="CCCE_1" description="CRC7 check enable"/>
+    </bitfield>
+    <bitfield id="Reserved" width="1" begin="18" end="18" resetval="0" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="RSP_TYPE" width="2" begin="17" end="16" resetval="0x0" description="Response type. This bits defines the response type of the command." range="" rwaccess="RW">
+      <bitenum value="0" token="RSP_TYPE_0" description="No response"/>
+      <bitenum value="1" token="RSP_TYPE_1" description="Response Length 136 bits"/>
+      <bitenum value="2" token="RSP_TYPE_2" description="Response Length 48 bits"/>
+      <bitenum value="3" token="RSP_TYPE_3" description="Response Length 48 bits with busy after response"/>
+    </bitfield>
+    <bitfield id="Reserved" width="10" begin="15" end="6" resetval="0x000" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="MSBS" width="1" begin="5" end="5" resetval="0" description="Multi/Single block select. This bit must be set to 1 for data transfer in case of multi block command. For any others command this bit shall be set to 0." range="" rwaccess="RW">
+      <bitenum value="0" token="MSBS_0" description="Single block. If this bit is 0, it is not necessary to set the register MMCi.[31:16] NBLK bits."/>
+      <bitenum value="1" token="MSBS_1" description="Multi block. When Block Count is disabled (MMCi.[1] BCE bit is set to 0) in Multiple block transfers (MMCi.[5] MSBS bit is set to 1), the module can perform infinite transfer."/>
+    </bitfield>
+    <bitfield id="DDIR" width="1" begin="4" end="4" resetval="0" description="Data transfer Direction. Select This bit defines either data transfer will be a read or a write." range="" rwaccess="RW">
+      <bitenum value="0" token="DDIR_0" description="Data Write (host to card)"/>
+      <bitenum value="1" token="DDIR_1" description="Data Read (card to host)"/>
+    </bitfield>
+    <bitfield id="Reserved" width="1" begin="3" end="3" resetval="0" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="ACEN" width="1" begin="2" end="2" resetval="0" description="Auto CMD12 Enable. (SD cards only). When this bit is set to 1, the host controller issues a CMD12 automatically after the transfer completion of the last block. The Host Driver shall not set this bit to issue commands that do not require CMD12 to stop data transfer.For CE-ATA commands (MMCi.MMCHS_CON[12] CEATA bit set to 1), auto CMD12 is useless; therefore when this bit is set the mechanism to detect command completion signal, named CCS, interrupt is activated." range="" rwaccess="RW">
+      <bitenum value="0" token="ACEN_0" description="Auto CMD12 disable"/>
+      <bitenum value="1" token="ACEN_1" description="Auto CMD12 enable or CCS detection enabled."/>
+    </bitfield>
+    <bitfield id="BCE" width="1" begin="1" end="1" resetval="0" description="Block Count Enable (Multiple block transfers only). This bit is used to enable the block count register (MMCHS_BLK[31:16] NBLK bits). When Block Count is disabled (MMCHS_CMD[1] BCE bit is set to 0) in Multiple block transfers (MMCHS_CMD[5] MSBS bits is set to 1), the module can perform infinite transfer." range="" rwaccess="RW">
+      <bitenum value="0" token="BCE_0" description="Block count disabled for infinite transfer."/>
+      <bitenum value="1" token="BCE_1" description="Block count enabled for multiple block transfer with known number of blocks"/>
+    </bitfield>
+    <bitfield id="DE" width="1" begin="0" end="0" resetval="0" description="DMA Enable. This bit is used to enable DMA mode for host data access." range="" rwaccess="RW">
+      <bitenum value="0" token="DE_0" description="DMA mode disable"/>
+      <bitenum value="1" token="DE_1" description="DMA mode enable"/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_RSP10" acronym="MMCHS_RSP10" offset="0x110" width="32" description="Command response[31:0] Register This 32-bit register holds bits positions [31:0] of command response type R1/R1b/R2/R3/R4/R5/R5b/R6">
+    <bitfield id="RSP1" width="16" begin="31" end="16" resetval="0x0000" description="R1/R1b (normal response) /R3/R4/R5/R5b/R6 : Command Response [39:24]R2: Command Response [31:16]" range="" rwaccess="R"/>
+    <bitfield id="RSP0" width="16" begin="15" end="0" resetval="0x0000" description="R1/R1b (normal response) /R3/R4/R5/R5b/R6 : Command Response [23:8]R2: Command Response [15:0]" range="" rwaccess="R"/>
+  </register>
+  <register id="MMCHS_RSP32" acronym="MMCHS_RSP32" offset="0x114" width="32" description="Command response[63:32] Register This 32-bit register holds bits positions [63:32] of command response type R2">
+    <bitfield id="RSP3" width="16" begin="31" end="16" resetval="0x0000" description="R2: Command Response [63:48]" range="" rwaccess="R"/>
+    <bitfield id="RSP2" width="16" begin="15" end="0" resetval="0x0000" description="R2: Command Response [47:32]" range="" rwaccess="R"/>
+  </register>
+  <register id="MMCHS_RSP54" acronym="MMCHS_RSP54" offset="0x118" width="32" description="Command response[95:64] Register This 32-bit register holds bits positions [95:64] of command response type R2">
+    <bitfield id="RSP5" width="16" begin="31" end="16" resetval="0x0000" description="R2: Command Response [95:80]" range="" rwaccess="R"/>
+    <bitfield id="RSP4" width="16" begin="15" end="0" resetval="0x0000" description="R2: Command Response [79:64]" range="" rwaccess="R"/>
+  </register>
+  <register id="MMCHS_RSP76" acronym="MMCHS_RSP76" offset="0x11C" width="32" description="Command response[127:96] RegisterThis 32-bit register holds bits positions [127:96] of command response type R2">
+    <bitfield id="RSP7" width="16" begin="31" end="16" resetval="0x0000" description="R1b (Auto CMD12 response): Command Response [39:24]R2: Command Response [127:112]" range="" rwaccess="R"/>
+    <bitfield id="RSP6" width="16" begin="15" end="0" resetval="0x0000" description="R1b (Auto CMD12 response): Command Response [23:8]R2: Command Response [111:96]" range="" rwaccess="R"/>
+  </register>
+  <register id="MMCHS_DATA" acronym="MMCHS_DATA" offset="0x120" width="32" description="Data Register This register is the 32-bit entry point of the buffer for read or write data transfers. The buffer size is 32bits x256(1024 bytes). Bytes within a word are stored and read in little endian format. This buffer can be used as two 512 byte buffers to transfer data efficiently without reducing the throughput. Sequential and contiguous access is necessary to increment the pointer correctly. Random or skipped access is not allowed. In little endian, if the local host accesses this register byte-wise or 16bit-wise, the least significant byte (bits [7:0]) must always be written/read first. The update of the buffer address is done on the most significant byte write for full 32-bit DATA register or on the most significant byte of the last word of block transfer. Example 1: Byte or 16-bit access Mbyteen[3:0]=0001 (1-byte) =&amp;gt; Mbyteen[3:0]=0010 (1-byte) =&amp;gt; Mbyteen[3:0]=1100 (2-bytes) OK Mbyteen[3:0]=0001 (1-byte) =&amp;gt; Mbyteen[3:0]=0010 (1-byte) =&amp;gt; Mbyteen[3:0]=0100 (1-byte) OK Mbyteen[3:0]=0001 (1-byte) =&amp;gt; Mbyteen[3:0]=0010 (1-byte) =&amp;gt; Mbyteen[3:0]=1000 (1-byte) Bad">
+    <bitfield id="DATA" width="32" begin="31" end="0" resetval="0x00000000" description="Data Register [31:0] In functional mode (MMCI.MMCHS_CON[4] MODE bit set to the default value 0): A read access to this register is allowed only when the buffer read enable status is set to 1 (MMCi.MMCHS_PSTATE[11] BRE bit), otherwise a bad access (MMCi.MMCHS_STAT[29] BADA bit) is signaled. A write access to this register is allowed only when the buffer write enable status is set to 1 (MMCi.MMCHS_PSTATE[10] BWE bit), otherwise a bad access (MMCi.MMCHS_STAT[29] BADA bit) is signaled and the data is not written." range="" rwaccess="RW"/>
+  </register>
+  <register id="MMCHS_PSTATE" acronym="MMCHS_PSTATE" offset="0x124" width="32" description="Present state register. The Host can get status of the Host Controller from this 32-bit read only register.">
+    <bitfield id="Reserved" width="7" begin="31" end="25" resetval="0x00" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="CLEV" width="1" begin="24" end="24" resetval="-" description="mmci_cmd line signal level.This status is used to check the mmci_cmd line level to recover from errors, and for debugging.The value of this register after reset depends on the mmci_cmd line level at that time." range="" rwaccess="R">
+      <bitenum value="0" token="CLEV_0_r" description="The mmci_cmd line level is 0."/>
+      <bitenum value="1" token="CLEV_1_r" description="The mmci_cmd line level is 1."/>
+    </bitfield>
+    <bitfield id="DLEV" width="4" begin="23" end="20" resetval="0x-" description="mmci_dat[3:0] line signal levelmmci_dat[3] =&amp;amp;gt; bit 23mmci_dat[2] =&amp;amp;gt; bit 22mmci_dat[1] =&amp;amp;gt; bit 21mmci_dat[0] =&amp;amp;gt; bit 20This status is used to check mmci_dat line level to recover from errors, and for debugging. This is especially useful in detecting the busy signal level from mmci_dat[0].The value of these registers after reset depends on the mmci_dat lines level at that time." range="" rwaccess="R"/>
+    <bitfield id="Reserved" width="1" begin="19" end="19" resetval="0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="Reserved" width="1" begin="18" end="18" resetval="1" description="Reserved bit field. Do not write any value This bit is not affected by soft reset." range="" rwaccess="R"/>
+    <bitfield id="Reserved" width="2" begin="17" end="16" resetval="00" description="Reserved bit field. Do not write any value The value of these bits after soft reset is 0x0. These bits will be automatically set to 0x3 after debounce time. Debounce time is fixed to 256 x32 kHz clock cycles." range="" rwaccess="R"/>
+    <bitfield id="Reserved" width="4" begin="15" end="12" resetval="0x0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="BRE" width="1" begin="11" end="11" resetval="0" description="Buffer read enable.This bit is used for non-DMA read transfers. It indicates that a complete block specified by MMCi.MMCHS_BLK[10:0] BLEN bits has been written in the buffer and is ready to be read.It is set to 0 when the entire block is read from the buffer. It is set to 1 when a block data is ready in the buffer and generates the Buffer read ready status of interrupt (MMCi.MMCHS_STAT[5] BRR bit)." range="" rwaccess="R">
+      <bitenum value="0" token="BRE_0_r" description="Read BLEN bytes disable"/>
+      <bitenum value="1" token="BRE_1_r" description="Read BLEN bytes enable. Readable data exists in the buffer."/>
+    </bitfield>
+    <bitfield id="BWE" width="1" begin="10" end="10" resetval="0" description="Buffer Write enable.This status is used for non-DMA write transfers. It indicates if space is available for write data." range="" rwaccess="R">
+      <bitenum value="0" token="BWE_0_r" description="There is no room left in the buffer to write BLEN bytes of data."/>
+      <bitenum value="1" token="BWE_1_r" description="There is enough space in the buffer to write BLEN bytes of data."/>
+    </bitfield>
+    <bitfield id="RTA" width="1" begin="9" end="9" resetval="0" description="Read transfer active.This status is used for detecting completion of a read transfer. It is set to 1 after the end bit of read command or by activating a continue request (MMCi.MMCHS_HCTL[17] CR bit) following a stop at block gap request. This bit is set to 0 when all data have been read by the local host after last block or after a stop at block gap request." range="" rwaccess="R">
+      <bitenum value="0" token="RTA_0_r" description="No valid data on the mmci_dat lines."/>
+      <bitenum value="1" token="RTA_1_r" description="Read data transfer on going."/>
+    </bitfield>
+    <bitfield id="WTA" width="1" begin="8" end="8" resetval="0" description="Write transfer active.This status indicates a write transfer active. It is set to 1 after the end bit of write command or by activating a continue request (MMCi.MMCHS_HCTL[17] CR bit) following a stop at block gap request. This bit is set to 0 when CRC status has been received after last block or after a stop at block gap request." range="" rwaccess="R">
+      <bitenum value="0" token="WTA_0_r" description="No valid data on the mmci_dat lines."/>
+      <bitenum value="1" token="WTA_1_r" description="Write data transfer on going."/>
+    </bitfield>
+    <bitfield id="Reserved" width="5" begin="7" end="3" resetval="0x00" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="DLA" width="1" begin="2" end="2" resetval="0" description="mmci_dat line active.This status bit indicates whether one of the mmci_dat line is in use. In the case of read transactions (card to host):This bit is set to 1 after the end bit of read command or by activating continue request MMCi.MMCHS_HCTL[17] CR bit. This bit is set to 0 when the host controller received the end bit of the last data block or at the beginning of the read wait mode. In the case of write transactions (host to card):This bit is set to 1 after the end bit of write command or by activating continue request MMCi.MMCHS_HCTL[17] CR bit.This bit is set to 0 on the end of busy event for the last block; host controller must wait 8 clock cycles with line not busy to really consider not 'busy state' or after the busy block as a result of a stop at gap request." range="" rwaccess="R">
+      <bitenum value="0" token="DLA_0_r" description="mmci_dat Line inactive"/>
+      <bitenum value="1" token="DLA_1_r" description="mmci_dat Line active"/>
+    </bitfield>
+    <bitfield id="DATI" width="1" begin="1" end="1" resetval="0" description="Command inhibit (mmci_dat).This status bit is generated if either mmci_dat line is active (MMCi.MMCHS_PSTATE[2] DLA bit) or Read transfer is active (MMCi.MMCHS_PSTATE[9] RTA bit) or when a command with busy is issued. This bit prevents the local host to issue a command.A change of this bit from 1 to 0 generates a transfer complete interrupt (MMCi.MMCHS_STAT[1] TC bit)." range="" rwaccess="R">
+      <bitenum value="0" token="DATI_0_r" description="Issuing of command using the mmci_dat lines is allowed"/>
+      <bitenum value="1" token="DATI_1_r" description="Issuing of command using mmci_dat lines is not allowed"/>
+    </bitfield>
+    <bitfield id="CMDI" width="1" begin="0" end="0" resetval="0" description="Command inhibit(mmci_cmd).This status bit indicates that the mmci_cmd line is in use.This bit is set to 0 when the most significant byte is written into the command register. This bit is not set when Auto CMD12 is transmitted. This bit is set to 0 in either the following cases: - After the end bit of the command response, excepted if there is a command conflict error (MMCi.MMCHS_STAT[17] CCRC bit or MMCi.MMCHS_STAT[18] CEB bit set to 1) or a Auto CMD12 is not executed (MMCi.MMCHS_AC12[0] ACNE bit). - After the end bit of the command without response (MMCi.MMCHS_CMD[17:16] RSP_TYPE bits set to '00'). In case of a command data error is detected (MMCi.MMCHS_STAT[19] CTO bit set to 1), this register is not automatically cleared." range="" rwaccess="R">
+      <bitenum value="0" token="CMDI_0_r" description="Issuing of command using mmci_cmd line is allowed"/>
+      <bitenum value="1" token="CMDI_1_r" description="Issuing of command using mmci_cmd line is not allowed"/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_HCTL" acronym="MMCHS_HCTL" offset="0x128" width="32" description="Control register. This register defines the host controls to set power, wake up and transfer parameters. MMCi.[31:24] = Wake-up control MMCi.[23:16] = Block gap control MMCi.[15:8] = Power control MMCi.[7:0] = Host control">
+    <bitfield id="Reserved" width="4" begin="31" end="28" resetval="0x00" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="OBWE" width="1" begin="27" end="27" resetval="0" description="Wake-up event enable for 'Out-of-Band' Interrupt.This bit enables wake-up events for 'Out-of-Band' assertion. Wakeup is generated if the wake-up feature is enabled (MMCi.MMCHS_SYSCONFIG[2] ENAWAKEUP bit). The write to this register is ignored when MMCi.MMCHS_CON[14] OBIE bit is not set." range="" rwaccess="RW">
+      <bitenum value="0" token="OBWE_0" description="Disable wakeup on 'Out-of-Band' Interrupt."/>
+      <bitenum value="1" token="OBWE_1" description="Enable wakeup on 'Out-of-Band' Interrupt."/>
+    </bitfield>
+    <bitfield id="REM" width="1" begin="26" end="26" resetval="0" description="Wake-up event enable on SD card removal.This bit enables wake-up events for card removal assertion. Wakeup is generated if the wake-up feature is enabled (MMCi.MMCHS_SYSCONFIG[2] ENAWAKEUP bit)." range="" rwaccess="RW">
+      <bitenum value="0" token="REM_0" description="Disable wakeup on card removal."/>
+      <bitenum value="1" token="REM_1" description="Enable wakeup on card removal."/>
+    </bitfield>
+    <bitfield id="INS" width="1" begin="25" end="25" resetval="0" description="Wake-up event enable on SD card insertionThis bit enables wake-up events for card insertion assertion. Wakeup is generated if the wake-up feature is enabled (MMCi.MMCHS_SYSCONFIG[2] ENAWAKEUP bit)." range="" rwaccess="RW">
+      <bitenum value="0" token="INS_0" description="Disable wakeup on card insertion."/>
+      <bitenum value="1" token="INS_1" description="Enable wakeup on card insertion."/>
+    </bitfield>
+    <bitfield id="IWE" width="1" begin="24" end="24" resetval="0" description="Wake-up event enable on SD card interrupt.This bit enables wake-up events for card interrupt assertion. Wakeup is generated if the wake-up feature is enabled (MMCi.MMCHS_SYSCONFIG[2] ENAWAKEUP bit) and enable status bit is set (MMCi.MMCHS_IE[8] CIRQ_ENABLE bit)." range="" rwaccess="RW">
+      <bitenum value="0" token="IWE_0" description="Disable wakeup on card interrupt"/>
+      <bitenum value="1" token="IWE_1" description="Enable wakeup on card interrupt"/>
+    </bitfield>
+    <bitfield id="Reserved" width="4" begin="23" end="20" resetval="0x0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="IBG" width="1" begin="19" end="19" resetval="0" description="Interrupt block at gap.This bit is valid only in 4-bit mode of SDIO card to enable interrupt detection in the interrupt cycle at block gap for a multiple block transfer. For MMC cards and for SD card this bit should be set to 0." range="" rwaccess="RW">
+      <bitenum value="0" token="IBG_0" description="Disable interrupt detection at the block gap in 4-bit mode"/>
+      <bitenum value="1" token="IBG_1" description="Enable interrupt detection at the block gap in 4-bit mode"/>
+    </bitfield>
+    <bitfield id="RWC" width="1" begin="18" end="18" resetval="0" description="Read wait control.The read wait function is optional only for SDIO cards. If the card supports read wait, this bit must be enabled, then requesting a stop at block gap (MMCi.MMCHS_HCTL[16] SBGR bit) generates a read wait period after the current end of block. Be careful, if read wait is not supported it may cause a conflict on mmci_dat line." range="" rwaccess="RW">
+      <bitenum value="0" token="RWC_0" description="Disable Read Wait Control. Suspend/Resume cannot be supported."/>
+      <bitenum value="1" token="RWC_1" description="Enable Read Wait Control"/>
+    </bitfield>
+    <bitfield id="CR" width="1" begin="17" end="17" resetval="0" description="Continue request.This bit is used to restart a transaction that was stopped by requesting a stop at block gap (MMCi.MMCHS_HCTL[16] SBGR bit). Set this bit to 1 restarts the transfer. The bit is automatically set to 0 by the host controller when transfer has restarted i.e. mmci_dat line is active (MMCi.MMCHS_PSTATE[2] DLA bit) or transferring data (MMCi.MMCHS_PSTATE[8] WTA bit).The Stop at block gap request must be disabled (MMCi.MMCHS_HCTL[16] SBGR bit =0) before setting this bit." range="" rwaccess="RW">
+      <bitenum value="0" token="CR_0" description="No affect"/>
+      <bitenum value="1" token="CR_1" description="transfer restart"/>
+    </bitfield>
+    <bitfield id="SBGR" width="1" begin="16" end="16" resetval="0" description="Stop at block gap request. This bit is used to stop executing a transaction at the next block gap. The transfer can restart with a continue request (MMCi.MMCHS_HCTL[17] CR bit) or during a suspend/resume sequence. In case of read transfer, the card must support read wait control. In case of write transfer, the host driver shall set this bit after all block data written. Until the transfer completion (MMCi.MMCHS_STAT[1] TC bit set to 1), the host driver shall leave this bit set to 1.If this bit is set, the local host shall not write to the data register (MMCi.MMCHS_DATA)." range="" rwaccess="RW">
+      <bitenum value="0" token="SBGR_0" description="Transfer mode"/>
+      <bitenum value="1" token="SBGR_1" description="Stop at block gap"/>
+    </bitfield>
+    <bitfield id="Reserved" width="4" begin="15" end="12" resetval="0x0" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="SDVS" width="3" begin="11" end="9" resetval="0x0" description="SD bus voltage select (All cards).The host driver should set these bits to select the voltage level for the card according to the voltage supported by the system (MMCi.MMCHS_CAPA[26] VS18 bit, MMCi.MMCHS_CAPA[25] VS30 bit, MMCi.MMCHS_CAPA[24] VS33 bit) before starting a transfer.MMCHS2: This field must be set to 0x5. . MMCHS3: This field must be set to 0x5. ." range="" rwaccess="RW">
+      <bitenum value="5" token="SDVS_5" description="1.8V (Typical)"/>
+      <bitenum value="6" token="SDVS_6" description="3.0V (Typical)"/>
+      <bitenum value="7" token="SDVS_7" description="3.3V (Typical)"/>
+    </bitfield>
+    <bitfield id="SDBP" width="1" begin="8" end="8" resetval="0" description="SD bus power.Before setting this bit, the host driver shall select the SD bus voltage (MMCi.MMCHS_HCTL[11:9] SDVS bits). If the host controller detects the No card state, this bit is automatically set to 0. If the module is power off, a write in the command register (MMCi.MMCHS_CMD) will not start the transfer. A write to this bit has no effect if the selected SD bus voltage is not supported according to capability register (MMCi.MMCHS_CAPA[VS*])." range="" rwaccess="RW">
+      <bitenum value="0" token="SDBP_0" description="Power off"/>
+      <bitenum value="1" token="SDBP_1" description="Power on"/>
+    </bitfield>
+    <bitfield id="Reserved" width="6" begin="7" end="2" resetval="0x00" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="DTW" width="1" begin="1" end="1" resetval="0" description="Data transfer width.For MMC card, this bit must be set following a valid SWITCH command (CMD6) with the correct value and extend CSD index written in the argument. Prior to this command, the MMC card configuration register (CSD and EXT_CSD) must be verified for compliance with This register has no effect when the MMC 8-bit mode is selected (MMCi.MMCHS_CON[5] DW8 bit set to 1)For SD/SDIO cards, this bit must be set following a valid SET_BUS_WIDTH command (ACMD6) with the value written in bit 1 of the argument. Prior to this command, the SD card configuration register (SCR) must be verified for the supported bus width by the SD card." range="" rwaccess="RW">
+      <bitenum value="0" token="DTW_0" description="1-bit Data width (mmci_dat[0] used)"/>
+      <bitenum value="1" token="DTW_1" description="4-bit Data width (mmci_dat[3:0] used)"/>
+    </bitfield>
+    <bitfield id="Reserved" width="1" begin="0" end="0" resetval="0" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+  </register>
+  <register id="MMCHS_SYSCTL" acronym="MMCHS_SYSCTL" offset="0x12C" width="32" description="SD system control register. This register defines the system controls to set software resets, clock frequency management and data timeout. [31:24] = Software resets [23:16] = Timeout control [15:0] = Clock control">
+    <bitfield id="Reserved" width="5" begin="31" end="27" resetval="0x00" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="SRD" width="1" begin="26" end="26" resetval="0" description="Software reset for mmci_dat line. This bit is set to 1 for reset and released to 0 when completed .mmci_dat finite state machine in both clock domain are also reset. Here below are the registers cleared by the MMCHS_SYSCTL[26] SRD bit: MMCi.MMCHS_DATA MMCi.MMCHS_PSTATE: BRE, BWE, RTA, WTA, DLA and DATI MMCi.MMCHS_HCTL: SBGR and CR MMCi.MMCHS_STAT: BRR, BWR, BGE and TC Interconnect and MMC buffer data management is reinitialized." range="" rwaccess="RW">
+      <bitenum value="0" token="SRD_0" description="Reset completed"/>
+      <bitenum value="1" token="SRD_1" description="Software reset for mmci_dat line"/>
+    </bitfield>
+    <bitfield id="SRC" width="1" begin="25" end="25" resetval="0" description="Software reset for mmci_cmd line. This bit is set to 1 for reset and released to 0 when completed. mmci_cmd finite state machine in both clock domain are also reset. Here below the registers cleared by the MMCi.MMCHS_SYSCTL[25] SRC bit: MMCi.MMCHS_PSTATE: CMDI MMCi.MMCHS_STAT: CC Interconnect and MMC command status management is reinitialized." range="" rwaccess="RW">
+      <bitenum value="0" token="SRC_0" description="Reset completed"/>
+      <bitenum value="1" token="SRC_1" description="Software reset for mmci_cmd line"/>
+    </bitfield>
+    <bitfield id="SRA" width="1" begin="24" end="24" resetval="0" description="Software reset for all. This bit is set to 1 for reset , and released to 0 when completed. This reset affects the entire host controller except for the card detection circuit and capabilities registers." range="" rwaccess="RW">
+      <bitenum value="0" token="SRA_0" description="Reset completed"/>
+      <bitenum value="1" token="SRA_1" description="Software reset for all the design"/>
+    </bitfield>
+    <bitfield id="Reserved" width="4" begin="23" end="20" resetval="0x0" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="DTO" width="4" begin="19" end="16" resetval="0x0" description="Data timeout counter value and busy timeout. This value determines the interval by which mmci_dat lines timeouts are detected.The host driver needs to set this bit field based on - the maximum read access time (NAC) (See the SD Specification Part1 Physical Layer), - the data read access time values (TAAC and NSAC) in the card specific data register (CSD) of the card, - the timeout clock base frequency (MMCi.MMCHS_CAPA[5:0] TCF bits). If the card does not respond within the specified number of cycles, a data timeout error occurs (MMCi.MMCHS_STAT[20] DTO bit). The MMCi.MMCHS_SYSCTL[19,16] DTO bit field is also used to check busy duration, to generate busy timeout for commands with busy response or for busy programming during a write command. Timeout on CRC status is generated if no CRC token is present after a block write." range="" rwaccess="RW">
+      <bitenum value="0" token="DTO_0" description="TCF x 2^13"/>
+      <bitenum value="1" token="DTO_1" description="TCF x 2^14"/>
+      <bitenum value="14" token="DTO_14" description="TCF x 2^27"/>
+      <bitenum value="15" token="DTO_15" description="Reserved"/>
+    </bitfield>
+    <bitfield id="CLKD" width="10" begin="15" end="6" resetval="0x000" description="Clock frequency select These bits define the ratio between a reference clock frequency (system dependant) and the output clock frequency on the mmci_clk pin of either the memory card (MMC, SD or SDIO)." range="" rwaccess="RW">
+      <bitenum value="0" token="CLKD_0" description="Clock Ref bypass"/>
+      <bitenum value="1" token="CLKD_1" description="Clock Ref bypass"/>
+      <bitenum value="2" token="CLKD_2" description="Clock Ref / 2"/>
+      <bitenum value="3" token="CLKD_3" description="Clock Ref / 3"/>
+      <bitenum value="1023" token="CLKD_1023" description="Clock Ref / 1023"/>
+    </bitfield>
+    <bitfield id="Reserved" width="3" begin="5" end="3" resetval="0x0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="CEN" width="1" begin="2" end="2" resetval="0" description="Clock enable. This bit controls if the clock is provided to the card or not." range="" rwaccess="RW">
+      <bitenum value="0" token="CEN_0" description="The clock is not provided to the card . Clock frequency can be changed ."/>
+      <bitenum value="1" token="CEN_1" description="The clock is provided to the card and can be automatically gated when MMCi.[0] AUTOIDLE bit is set to 1 (default value) .The host driver shall wait to set this bit to 1 until the Internal clock is stable (MMCi.[1] ICS bit)."/>
+    </bitfield>
+    <bitfield id="ICS" width="1" begin="1" end="1" resetval="0" description="Internal clock stable (status)This bit indicates either the internal clock is stable or not." range="" rwaccess="R">
+      <bitenum value="0" token="ICS_0_r" description="The internal clock is not stable."/>
+      <bitenum value="1" token="ICS_1_r" description="The internal clock is stable after enabling the clock (MMCi.[0] ICE bit) or after changing the clock ratio (MMCi.[15:6] CLKD bits)."/>
+    </bitfield>
+    <bitfield id="ICE" width="1" begin="0" end="0" resetval="0" description="Internal clock enable. This register controls the internal clock activity.In very low power state, the internal clock is stopped. Note: The activity of the debounce clock (used for wake-up events) and the interface clock (used for reads and writes to the module register map) are not affected by this register." range="" rwaccess="RW">
+      <bitenum value="0" token="ICE_0" description="The internal clock is stopped (very low power state)."/>
+      <bitenum value="1" token="ICE_1" description="The internal clock oscillates and can be automatically gated when MMCi.[0] AUTOIDLE bit is set to 1 (default value) ."/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_STAT" acronym="MMCHS_STAT" offset="0x130" width="32" description="Interrupt status register The interrupt status regroups all the status of the module internal events that can generate an interrupt. [31:16] = Error Interrupt Status [15:0] = Normal Interrupt Status">
+    <bitfield id="Reserved" width="2" begin="31" end="30" resetval="0x0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="BADA" width="1" begin="29" end="29" resetval="0" description="Bad access to data space.This bit is set automatically to indicate a bad access to buffer when not allowed:- During a read access to the data register (MMCi.MMCHS_DATA) while buffer reads are not allowed (MMCi.MMCHS_PSTATE[11] BRE bit =0)- During a write access to the data register (MMCi.MMCHS_DATA) while buffer writes are not allowed (MMCi.MMCHS_PSTATE[10] BWE bit=0)" range="" rwaccess="RW">
+      <bitenum value="0" token="BADA_0_r" description="No Interrupt."/>
+      <bitenum value="0" token="BADA_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="BADA_1_r" description="Bad Access"/>
+      <bitenum value="1" token="BADA_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="CERR" width="1" begin="28" end="28" resetval="0" description="Card error.This bit is set automatically when there is at least one error in a response of type R1, R1b, R6, R5 or R5b. Only bits referenced as type E (error) in status field in the response can set a card status error. An error bit in the response is flagged only if corresponding bit in card status response error MMCi.MMCHS_CSRE in set.There is no card error detection for autoCMD12 command. The host driver shall read MMCi.MMCHS_RSP76 register to detect error bits in the command response." range="" rwaccess="RW">
+      <bitenum value="0" token="CERR_0_r" description="No Error"/>
+      <bitenum value="0" token="CERR_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="CERR_1_r" description="Card error"/>
+      <bitenum value="1" token="CERR_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="Reserved" width="3" begin="27" end="25" resetval="0x0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="ACE" width="1" begin="24" end="24" resetval="0" description="Auto CMD12 error.This bit is set automatically when one of the bits in Auto CMD12 Error status register has changed from 0 to 1." range="" rwaccess="RW">
+      <bitenum value="0" token="ACE_0_r" description="No Error"/>
+      <bitenum value="0" token="ACE_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="ACE_1_r" description="AutoCMD12 error"/>
+      <bitenum value="1" token="ACE_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="Reserved" width="1" begin="23" end="23" resetval="0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="DEB" width="1" begin="22" end="22" resetval="0" description="Data End Bit error.This bit is set automatically when detecting a 0 at the end bit position of read data on mmci_dat line or at the end position of the CRC status in write mode." range="" rwaccess="RW">
+      <bitenum value="0" token="DEB_0_r" description="No Error"/>
+      <bitenum value="0" token="DEB_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="DEB_1_r" description="Data end bit error"/>
+      <bitenum value="1" token="DEB_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="DCRC" width="1" begin="21" end="21" resetval="0" description="Data CRC Error.This bit is set automatically when there is a CRC16 error in the data phase response following a block read command or if there is a 3-bit CRC status different of a position '010' token during a block write command." range="" rwaccess="RW">
+      <bitenum value="0" token="DCRC_0_r" description="No Error."/>
+      <bitenum value="0" token="DCRC_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="DCRC_1_r" description="Data CRC error"/>
+      <bitenum value="1" token="DCRC_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="DTO" width="1" begin="20" end="20" resetval="0" description="Data timeout error. This bit is set automatically according to the following conditions:- Busy timeout for R1b, R5b response type. - Busy timeout after write CRC status.- Write CRC status timeout.- Read data timeout." range="" rwaccess="RW">
+      <bitenum value="0" token="DTO_0_r" description="No error"/>
+      <bitenum value="0" token="DTO_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="DTO_1_r" description="Time out"/>
+      <bitenum value="1" token="DTO_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="CIE" width="1" begin="19" end="19" resetval="0" description="Command index error.This bit is set automatically when response index differs from corresponding command index previously emitted. It depends on the enable bit (MMCi.MMCHS_CMD[20] CICE)." range="" rwaccess="RW">
+      <bitenum value="0" token="CIE_0_r" description="No error"/>
+      <bitenum value="0" token="CIE_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="CIE_1_r" description="Command index error"/>
+      <bitenum value="1" token="CIE_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="CEB" width="1" begin="18" end="18" resetval="0" description="Command end bit error.This bit is set automatically when detecting a 0 at the end bit position of a command response." range="" rwaccess="RW">
+      <bitenum value="0" token="CEB_0_r" description="No error"/>
+      <bitenum value="0" token="CEB_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="CEB_1_r" description="Command end bit error"/>
+      <bitenum value="1" token="CEB_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="CCRC" width="1" begin="17" end="17" resetval="0" description="Command CRC Error.This bit is set automatically when there is a CRC7 error in the command response depending on the enable bit (MMCi.MMCHS_CMD[19] CCCE)." range="" rwaccess="RW">
+      <bitenum value="0" token="CCRC_0_r" description="No Error"/>
+      <bitenum value="0" token="CCRC_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="CCRC_1_r" description="Command CRC error"/>
+      <bitenum value="1" token="CCRC_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="CTO" width="1" begin="16" end="16" resetval="0" description="Command Timeout Error. This bit is set automatically when no response is received within 64 clock cycles from the end bit of the command.For commands that reply within 5 clock cycles - the timeout is still detected at 64 clock cycles." range="" rwaccess="RW">
+      <bitenum value="0" token="CTO_0_r" description="No error"/>
+      <bitenum value="0" token="CTO_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="CTO_1_r" description="Time Out"/>
+      <bitenum value="1" token="CTO_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="ERRI" width="1" begin="15" end="15" resetval="0" description="Error Interrupt.If any of the bits in the Error Interrupt Status register (MMCi.MMCHS_STAT[31:16]) are set, then this bit is set to 1. Therefore the host driver can efficiently test for an error by checking this bit first.Writes to this bit are ignored." range="" rwaccess="R">
+      <bitenum value="0" token="ERRI_0_r" description="No Interrupt"/>
+      <bitenum value="1" token="ERRI_1_r" description="Error interrupt event(s) occurred"/>
+    </bitfield>
+    <bitfield id="Reserved" width="5" begin="14" end="10" resetval="0x00" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="OBI" width="1" begin="9" end="9" resetval="0" description="Out-Of-Band interrupt (This interrupt is only useful for MMC card).This bit is set automatically when MMCi.MMCHS_CON[14] OBIE bit is set and an Out-of-Band interrupt occurs on OBI pin.The interrupt detection depends on polarity controlled by MMCi.MMCHS_CON[13] OBIP bit.The Out-of-Band interrupt signal is a system specific feature for future use, this signal is not required for existing specification implementation." range="" rwaccess="R">
+      <bitenum value="0" token="OBI_0_r" description="No Out-Of-Band interrupt."/>
+      <bitenum value="0" token="OBI_0_w" description="Status bit unchanged."/>
+      <bitenum value="1" token="OBI_1_r" description="Interrupt Out-Of-Band occurs."/>
+      <bitenum value="1" token="OBI_1_w" description="Status is cleared."/>
+    </bitfield>
+    <bitfield id="CIRQ" width="1" begin="8" end="8" resetval="0" description="Card interrupt.This bit is only used for SD and SDIO cards.In 1-bit mode, interrupt source is asynchronous (can be a source of asynchronous wakeup).In 4-bit mode, interrupt source is sampled during the interrupt cycle.In CE-ATA mode, interrupt source is detected when the card drives mmci_cmd line to zero during one cycle after data transmission end.All modes above are fully exclusive.The controller interrupt must be clear by setting MMCi.MMCHS_IE[8] CIRQ_ENABLE to 0, then the host driver must start the interrupt service with card (clearing card interrupt status) to remove card interrupt source. Otherwise the Controller interrupt will be reasserted as soon as MMCi.MMCHS_IE[8] CIRQ_ENABLE is set to 1.Writes to this bit are ignored." range="" rwaccess="R">
+      <bitenum value="0" token="CIRQ_0_r" description="No card interrupt"/>
+      <bitenum value="1" token="CIRQ_1_r" description="Generate card interrupt"/>
+    </bitfield>
+    <bitfield id="Reserved" width="2" begin="7" end="6" resetval="00" description="Reserved bit field. Do not write any value." range="" rwaccess="RW"/>
+    <bitfield id="BRR" width="1" begin="5" end="5" resetval="0" description="Buffer read ready.This bit is set automatically during a read operation to the card (see class 2 - block oriented read commands) when one block specified by the MMCi.MMCHS_BLK[10:0] BLEN bit field is completely written in the buffer. It indicates that the memory card has filled out the buffer and that the local host needs to empty the buffer by reading it.Note: If the DMA receive-mode is enabled, this bit is never set; instead a DMA receive request to the main DMA controller of the system is generated." range="" rwaccess="RW">
+      <bitenum value="0" token="BRR_0_r" description="Not Ready to read buffer"/>
+      <bitenum value="0" token="BRR_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="BRR_1_r" description="Ready to read buffer"/>
+      <bitenum value="1" token="BRR_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="BWR" width="1" begin="4" end="4" resetval="0" description="Buffer write ready.This bit is set automatically during a write operation to the card (see class 4 - block oriented write command) when the host can write a complete block as specified by MMCi.MMCHS_BLK[10:0] BLEN. It indicates that the memory card has emptied one block from the buffer and that the local host is able to write one block of data into the buffer.Note: If the DMA transmit mode is enabled, this bit is never set; instead, a DMA transmit request to the main DMA controller of the system is generated." range="" rwaccess="RW">
+      <bitenum value="0" token="BWR_0_r" description="Not Ready to write buffer"/>
+      <bitenum value="0" token="BWR_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="BWR_1_r" description="Ready to write buffer"/>
+      <bitenum value="1" token="BWR_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="Reserved" width="1" begin="3" end="3" resetval="0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="BGE" width="1" begin="2" end="2" resetval="0" description="Block gap event.When a stop at block gap is requested (MMCi.MMCHS_HCTL[16] SBGR bit), this bit is automatically set when transaction is stopped at the block gap during a read or write operation.This event does not occur when the stop at block gap is requested on the last block.In read mode, a 1-to-0 transition of the mmci_dat line active status (MMCi.MMCHS_PSTATE[2] DLA bit) between data blocks generates a Block gap event interrupt." range="" rwaccess="RW">
+      <bitenum value="0" token="BGE_0_r" description="No block gap event"/>
+      <bitenum value="0" token="BGE_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="BGE_1_r" description="Transaction stopped at block gap"/>
+      <bitenum value="1" token="BGE_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="TC" width="1" begin="1" end="1" resetval="0" description="Transfer completed.This bit is always set when a read/write transfer is completed or between two blocks when the transfer is stopped due to a stop at block gap request (MMCi.MMCHS_HCTL[16] SBGR bit).This bit is also set when exiting a command in a busy state (if the command has a busy notification capability).In Read mode: This bit is automatically set on completion of a read transfer (MMCi.MMCHS_PSTATE[9] RTA bit).In write mode: This bit is set automatically on completion of the mmci_dat line use (MMCi.MMCHS_PSTATE[2] DLA bit)." range="" rwaccess="RW">
+      <bitenum value="0" token="TC_0_r" description="No transfer complete"/>
+      <bitenum value="0" token="TC_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="TC_1_r" description="Data transfer complete"/>
+      <bitenum value="1" token="TC_1_w" description="Status is cleared"/>
+    </bitfield>
+    <bitfield id="CC" width="1" begin="0" end="0" resetval="0" description="Command complete.This bit is set when a 1-to-0 transition occurs in the register command inhibit (MMCi.MMCHS_PSTATE[0] CMDI bit)If the command is a type for which no response is expected, then the command complete interrupt is generated at the end of the command. A command timeout error (MMCi.MMCHS_STAT[16] CTO bit) has higher priority than command complete (MMCi.MMCHS_STAT[0] CC bit).If a response is expected but none is received, then a command timeout error is detected and signaled instead of the command complete interrupt." range="" rwaccess="RW">
+      <bitenum value="0" token="CC_0_r" description="No Command complete"/>
+      <bitenum value="0" token="CC_0_w" description="Status bit unchanged"/>
+      <bitenum value="1" token="CC_1_r" description="Command complete"/>
+      <bitenum value="1" token="CC_1_w" description="Status is cleared"/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_IE" acronym="MMCHS_IE" offset="0x134" width="32" description="Interrupt SD enable registerThis register allows to enable/disable the module to set status bits, on an event-by-event basis. [31:16] = Error Interrupt Status Enable [15:0] = Normal Interrupt Status Enable">
+    <bitfield id="Reserved" width="2" begin="31" end="30" resetval="0" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="BADA_ENABLE" width="1" begin="29" end="29" resetval="0" description="Bad access to data space Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="BADA_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="BADA_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CERR_ENABLE" width="1" begin="28" end="28" resetval="0" description="Card error interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CERR_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="CERR_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="Reserved" width="3" begin="27" end="25" resetval="0x0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="ACE_ENABLE" width="1" begin="24" end="24" resetval="0" description="Auto CMD12 error Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="ACE_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="ACE_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="Reserved" width="1" begin="23" end="23" resetval="0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="DEB_ENABLE" width="1" begin="22" end="22" resetval="0" description="Data end bit error Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="DEB_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="DEB_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="DCRC_ENABLE" width="1" begin="21" end="21" resetval="0" description="Data CRC error Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="DCRC_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="DCRC_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="DTO_ENABLE" width="1" begin="20" end="20" resetval="0" description="Data timeout error Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="DTO_ENABLE_0" description="The data timeout detection is deactivated.The host controller provides the clock to the card until the card sends the data or the transfer is aborted."/>
+      <bitenum value="1" token="DTO_ENABLE_1" description="The data timeout detection is enabled."/>
+    </bitfield>
+    <bitfield id="CIE_ENABLE" width="1" begin="19" end="19" resetval="0" description="Command index error Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CIE_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="CIE_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CEB_ENABLE" width="1" begin="18" end="18" resetval="0" description="Command end bit error Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CEB_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="CEB_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CCRC_ENABLE" width="1" begin="17" end="17" resetval="0" description="Command CRC error Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CCRC_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="CCRC_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CTO_ENABLE" width="1" begin="16" end="16" resetval="0" description="Command timeout error Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CTO_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="CTO_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="NULL" width="1" begin="15" end="15" resetval="0" description="Fixed to 0 The host driver shall control error interrupts using the Error Interrupt Signal Enable register. Writes to this bit are ignored." range="" rwaccess="R"/>
+    <bitfield id="Reserved" width="5" begin="14" end="10" resetval="0x00" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="OBI_ENABLE" width="1" begin="9" end="9" resetval="0" description="Out-of-Band interrupt Enable A write to this register when MMCi.MMCHS_CON[14] OBIE is set to '0' is ignored." range="" rwaccess="RW">
+      <bitenum value="0" token="OBI_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="OBI_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CIRQ_ENABLE" width="1" begin="8" end="8" resetval="0" description="Card interrupt Enable A clear of this bit also clears the corresponding status bit.During 1-bit mode, if the interrupt routine does not remove the source of a card interrupt in the SDIO card, the status bit is reasserted when this bit is set to 1.This bit must be set to 1 when entering in smart idle mode to enable system to identity wakeup event and to allow controller to clear internal wakeup source." range="" rwaccess="RW">
+      <bitenum value="0" token="CIRQ_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="CIRQ_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="Reserved" width="2" begin="7" end="6" resetval="00" description="Reserved bit field. Do not write any value" range="" rwaccess="RW"/>
+    <bitfield id="BRR_ENABLE" width="1" begin="5" end="5" resetval="0" description="Buffer Read Ready Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="BRR_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="BRR_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="BWR_ENABLE" width="1" begin="4" end="4" resetval="0" description="Buffer Write Ready Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="BWR_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="BWR_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="Reserved" width="1" begin="3" end="3" resetval="0" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="BGE_ENABLE" width="1" begin="2" end="2" resetval="0" description="Block Gap Event Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="BGE_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="BGE_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="TC_ENABLE" width="1" begin="1" end="1" resetval="0" description="Transfer completed Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="TC_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="TC_ENABLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CC_ENABLE" width="1" begin="0" end="0" resetval="0" description="Command completed Interrupt Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CC_ENABLE_0" description="Masked"/>
+      <bitenum value="1" token="CC_ENABLE_1" description="Enabled"/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_ISE" acronym="MMCHS_ISE" offset="0x138" width="32" description="Interrupt signal enable registerThis register allows to enable/disable the module internal sources of status, on an event-by-event basis. [31:16] = Error Interrupt Signal Enable [15:0] = Normal Interrupt Signal Enable">
+    <bitfield id="Reserved" width="2" begin="31" end="30" resetval="0" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="BADA_SIGEN" width="1" begin="29" end="29" resetval="0" description="Bad access to data space signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="BADA_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="BADA_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CERR_SIGEN" width="1" begin="28" end="28" resetval="0" description="Card error interrupt signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CERR_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="CERR_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="Reserved" width="3" begin="27" end="25" resetval="0x0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="ACE_SIGEN" width="1" begin="24" end="24" resetval="0" description="Auto CMD12 error signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="ACE_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="ACE_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="Reserved" width="1" begin="23" end="23" resetval="0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="DEB_SIGEN" width="1" begin="22" end="22" resetval="0" description="Data end bit error signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="DEB_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="DEB_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="DCRC_SIGEN" width="1" begin="21" end="21" resetval="0" description="Data CRC error signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="DCRC_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="DCRC_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="DTO_SIGEN" width="1" begin="20" end="20" resetval="0" description="Data timeout error signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="DTO_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="DTO_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CIE_SIGEN" width="1" begin="19" end="19" resetval="0" description="Command index error signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CIE_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="CIE_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CEB_SIGEN" width="1" begin="18" end="18" resetval="0" description="Command end bit error signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CEB_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="CEB_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CCRC_SIGEN" width="1" begin="17" end="17" resetval="0" description="Command CRC error signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CCRC_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="CCRC_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CTO_SIGEN" width="1" begin="16" end="16" resetval="0" description="Command timeout error signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CTO_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="CTO_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="NULL" width="1" begin="15" end="15" resetval="0" description="Fixed to 0 The host driver shall control error interrupts using the Error Interrupt Signal Enable register. Writes to this bit are ignored" range="" rwaccess="R"/>
+    <bitfield id="Reserved" width="5" begin="14" end="10" resetval="0x00" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="OBI_SIGEN" width="1" begin="9" end="9" resetval="0" description="Out-Of-Band Interrupt signal status Enable.A write to this register when MMCHS_CON[14] OBIE bit is set to '0' is ignored." range="" rwaccess="RW">
+      <bitenum value="0" token="OBI_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="OBI_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CIRQ_SIGEN" width="1" begin="8" end="8" resetval="0" description="Card interrupt signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CIRQ_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="CIRQ_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="Reserved" width="1" begin="7" end="7" resetval="0" description="Reserved bit field. Do not write any value" range="" rwaccess="RW"/>
+    <bitfield id="Reserved" width="1" begin="6" end="6" resetval="0" description="Reserved bit field. Do not write any value" range="" rwaccess="RW"/>
+    <bitfield id="BRR_SIGEN" width="1" begin="5" end="5" resetval="0" description="Buffer Read Ready signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="BRR_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="BRR_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="BWR_SIGEN" width="1" begin="4" end="4" resetval="0" description="Buffer Write Ready signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="BWR_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="BWR_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="Reserved" width="1" begin="3" end="3" resetval="0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="BGE_SIGEN" width="1" begin="2" end="2" resetval="0" description="Black Gap Event signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="BGE_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="BGE_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="TC_SIGEN" width="1" begin="1" end="1" resetval="0" description="Transfer completed signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="TC_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="TC_SIGEN_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="CC_SIGEN" width="1" begin="0" end="0" resetval="0" description="Command completed signal status Enable" range="" rwaccess="RW">
+      <bitenum value="0" token="CC_SIGEN_0" description="Masked"/>
+      <bitenum value="1" token="CC_SIGEN_1" description="Enabled"/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_AC12" acronym="MMCHS_AC12" offset="0x13C" width="32" description="Auto CMD12 Error Status Register. The host driver may determine which of the errors cases related to Auto CMD12 has occurred by checking this MMCi. register when an Auto CMD12 Error interrupt occurs.This register is valid only when Auto CMD12 is enabled (MMCi.[2] ACEN bit) and Auto CMD12Error (MMCi.[24] ACE bit) is set to 1.Note: These bits are automatically reset when starting a new adtc command with data.">
+    <bitfield id="Reserved" width="24" begin="31" end="8" resetval="0x0" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="CNI" width="1" begin="7" end="7" resetval="0" description="Command not issue by Auto CMD12 error. If this bit is set to 1, it means that pending command is not executed due to Auto CMD12 error: ACEB, ACCE, ACTO or ACNE." range="" rwaccess="R">
+      <bitenum value="0" token="CNI_0_r" description="Not error"/>
+      <bitenum value="1" token="CNI_1_r" description="Command not issued"/>
+    </bitfield>
+    <bitfield id="Reserved" width="2" begin="6" end="5" resetval="0x0" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="ACIE" width="1" begin="4" end="4" resetval="0" description="Auto CMD12 index error. This bit is a set to 1 when response index differs from corresponding command auto CMD12 index previously emitted.This bit depends on the command index check enable (MMCi.MMCHS_CMD[20] CICE bit)." range="" rwaccess="R">
+      <bitenum value="0" token="ACIE_0_r" description="No error"/>
+      <bitenum value="1" token="ACIE_1_r" description="Auto CMD12 Index Error"/>
+    </bitfield>
+    <bitfield id="ACEB" width="1" begin="3" end="3" resetval="0" description="Auto CMD12 end bit error. This bit is set to 1 when detecting a 0 at the end bit position of auto CMD12 command response." range="" rwaccess="R">
+      <bitenum value="0" token="ACEB_0_r" description="No error"/>
+      <bitenum value="1" token="ACEB_1_r" description="AutoCMD12 End bit Error"/>
+    </bitfield>
+    <bitfield id="ACCE" width="1" begin="2" end="2" resetval="0" description="Auto CMD12 CRC error. This bit is automatically set to 1 when a CRC7 error is detected in the auto CMD12 command response depending on the enable in the MMCi.MMCHS_CMD[19] CCCE bit." range="" rwaccess="R">
+      <bitenum value="0" token="ACCE_0_r" description="No error"/>
+      <bitenum value="1" token="ACCE_1_r" description="Auto CMD12 CRC Error"/>
+    </bitfield>
+    <bitfield id="ACTO" width="1" begin="1" end="1" resetval="0" description="Auto CMD12 timeout error. This bit is set to 1 if no response is received within 64 clock cycles from the end bit of the auto CMD12 command." range="" rwaccess="R">
+      <bitenum value="0" token="ACTO_0_r" description="No error"/>
+      <bitenum value="1" token="ACTO_1_r" description="Auto CMD12 Time Out"/>
+    </bitfield>
+    <bitfield id="ACNE" width="1" begin="0" end="0" resetval="0" description="Auto CMD12 not executed. This bit is set to 1 if multiple block data transfer command has started and if an error occurs in command before Auto CMD12 starts." range="" rwaccess="R">
+      <bitenum value="0" token="ACNE_0_r" description="Auto CMD12 Executed"/>
+      <bitenum value="1" token="ACNE_1_r" description="Auto CMD12 Not Executed"/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_CAPA" acronym="MMCHS_CAPA" offset="0x140" width="32" description="Capabilities register. This register lists the capabilities of the MMC/SD/SDIO host controller.">
+    <bitfield id="Reserved" width="5" begin="31" end="27" resetval="0x00" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="VS18" width="1" begin="26" end="26" resetval="0" description="Voltage support 1.8V Initialization of this register (via a write access to this register) depends on the system capabilities. The host driver shall not modify this register after the initialization. This register is only reinitialized by a hard reset (via MMCi_RESET signal).MMCHS1, 2 and 3: This bit must be set to 1. ." range="" rwaccess="RW">
+      <bitenum value="0" token="VS18_0_r" description="1.8 V Not Supported"/>
+      <bitenum value="0" token="VS18_0_w" description="1.8 V Not supported"/>
+      <bitenum value="1" token="VS18_1_r" description="1.8 V Supported"/>
+      <bitenum value="1" token="VS18_1_w" description="1.8 V Supported"/>
+    </bitfield>
+    <bitfield id="VS30" width="1" begin="25" end="25" resetval="0" description="Voltage support 3.0V Initialization of this register (via a write access to this register) depends on the system capabilities. The host driver shall not modify this register after the initialization. This register is only reinitialized by a hard reset (via MMCi_RESET signal)MMCHS1: This bit must be set to 1. . MMCHS2 and 3: This bit must be left to 0. ." range="" rwaccess="RW">
+      <bitenum value="0" token="VS30_0_r" description="3.0 V Not Supported"/>
+      <bitenum value="0" token="VS30_0_w" description="3.0 V Not supported"/>
+      <bitenum value="1" token="VS30_1_r" description="3.0 V Supported"/>
+      <bitenum value="1" token="VS30_1_w" description="3.0 V Supported"/>
+    </bitfield>
+    <bitfield id="VS33" width="1" begin="24" end="24" resetval="0" description="Voltage support 3.3V Initialization of this register (via a write access to this register) depends on the system capabilities. The host driver shall not modify this register after the initialization. This register is only reinitialized by a hard reset (via MMCi_RESET signal)MMCHS1, 2 and 3: This bit must be left to 0. ." range="" rwaccess="RW">
+      <bitenum value="0" token="VS33_0_r" description="3.3 V Not Supported"/>
+      <bitenum value="0" token="VS33_0_w" description="3.3 V Not supported"/>
+      <bitenum value="1" token="VS33_1_r" description="3.3 V Supported"/>
+      <bitenum value="1" token="VS33_1_w" description="3.3 V Supported"/>
+    </bitfield>
+    <bitfield id="SRS" width="1" begin="23" end="23" resetval="1" description="Suspend/Resume support (SDIO cards only)This bit indicates whether the host controller supports Suspend/Resume functionality." range="" rwaccess="R">
+      <bitenum value="0" token="SRS_0_r" description="The Host controller does not Suspend/Resume functionality."/>
+      <bitenum value="1" token="SRS_1_r" description="The Host controller supports Suspend/Resume functionality."/>
+    </bitfield>
+    <bitfield id="DS" width="1" begin="22" end="22" resetval="1" description="DMA support. This bit indicates that the Host Controller is able to use DMA to transfer data between system memory and the Host Controller directly." range="" rwaccess="R">
+      <bitenum value="0" token="DS_0_r" description="DMA Not Supported"/>
+      <bitenum value="1" token="DS_1_r" description="DMA Supported"/>
+    </bitfield>
+    <bitfield id="HSS" width="1" begin="21" end="21" resetval="1" description="High speed support. This bit indicates that the host controller supports high speed operations and can supply an up-to-52 MHz clock to the card." range="" rwaccess="R">
+      <bitenum value="0" token="HSS_0_r" description="High Speed Not Supported"/>
+      <bitenum value="1" token="HSS_1_r" description="High Speed Supported"/>
+    </bitfield>
+    <bitfield id="Reserved" width="3" begin="20" end="18" resetval="0x0" description="Reserved bit field. Do not write any value." range="" rwaccess="R"/>
+    <bitfield id="MBL" width="2" begin="17" end="16" resetval="0x1" description="Maximum block length. This value indicates the maximum block size that the host driver can read and write to the buffer in the host controller.The host controller supports 512 bytes and 1024 bytes block transfers." range="" rwaccess="R">
+      <bitenum value="0" token="MBL_0_r" description="512 bytes"/>
+      <bitenum value="1" token="MBL_1_r" description="1024 bytes"/>
+      <bitenum value="2" token="MBL_2_r" description="2048 bytes"/>
+    </bitfield>
+    <bitfield id="Reserved" width="2" begin="15" end="14" resetval="0x0" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="BCF" width="6" begin="13" end="8" resetval="0x00" description="Base clock frequency for clock provided to the card." range="" rwaccess="R">
+      <bitenum value="0" token="BCF_0_r" description="The value indicating the base (maximum) frequency for the output clock provided to the card is system dependent and is not available in this register. Get the information via another method. See, Power, Reset, and Clock Management, for more information on the value of FUNC_96M_CLK clock signal."/>
+    </bitfield>
+    <bitfield id="TCU" width="1" begin="7" end="7" resetval="1" description="Timeout clock unit. This bit shows the unit of base clock frequency used to detect Data Timeout Error (MMCi.MMCHS_STAT[20] DTO bit)." range="" rwaccess="R">
+      <bitenum value="0" token="TCU_0_r" description="kHz"/>
+      <bitenum value="1" token="TCU_1_r" description="MHz"/>
+    </bitfield>
+    <bitfield id="Reserved" width="1" begin="6" end="6" resetval="0" description="Reserved. This bit is initialized to zero, and writes to it are ignored." range="" rwaccess="R"/>
+    <bitfield id="TCF" width="6" begin="5" end="0" resetval="0x00" description="Timeout clock frequency. The timeout clock frequency is used to detect Data Timeout Error (MMCi.MMCHS_STAT[20] DTO bit)." range="" rwaccess="R">
+      <bitenum value="0" token="TCF_0_r" description="The timeout clock frequency depends on the frequency of the clock provided to the card. The value of the timeout clock frequency is not available in this register. Note:You can have the timeout clock frequency by dividing FUNC_96M_CLK by the value of the MMCi.[15:6] CLKD bit field."/>
+    </bitfield>
+  </register>
+  <register id="MMCHS_CUR_CAPA" acronym="MMCHS_CUR_CAPA" offset="0x148" width="32" description="Maximum current capabilities Register. This register indicates the maximum current capability for each voltage. The value is meaningful if the voltage support is set in the capabilities register (MMCi.). Initialization of this register (via a write access to this register) depends on the system capabilities. The host driver shall not modify this register after the initialization. This register is only reinitialized by a hard reset (via MMCi_RESET signal)">
+    <bitfield id="Reserved" width="8" begin="31" end="24" resetval="0x0" description="Reserved. This bit is initialized to zero, and writes to it are ignored." range="" rwaccess="R"/>
+    <bitfield id="CUR_1V8" width="8" begin="23" end="16" resetval="0x0" description="Maximum current for 1.8 V" range="" rwaccess="RW"/>
+    <bitfield id="CUR_3V0" width="8" begin="15" end="8" resetval="0x0" description="Maximum current for 3.0 V" range="" rwaccess="RW"/>
+    <bitfield id="CUR_3V3" width="8" begin="7" end="0" resetval="0x0" description="Maximum current for 3.3 V" range="" rwaccess="RW"/>
+  </register>
+  <register id="MMCHS_REV" acronym="MMCHS_REV" offset="0x1FC" width="32" description="Versions Register. This register contains the hard coded RTL vendor revision number, the version number of SD specification compliancy and a slot status bit.MMCi.[31:16] = Host controller versionMMCi.[15:0] = Slot Interrupt Status">
+    <bitfield id="VREV" width="8" begin="31" end="24" resetval="See" description="Vendor Version Number: IP revision[31:28] Major revision[27:24] Minor revision Examples: 0x10 for 1.0 0x21 for 2.1" range="" rwaccess="R"/>
+    <bitfield id="SREV" width="8" begin="23" end="16" resetval="0x00" description="Specification Version Number. This status indicates the Standard SD Host Controller Specification Version. The upper and lower 4-bits indicate the version." range="" rwaccess="R">
+      <bitenum value="0" token="SREV_0_r" description="SD Host Specification Version 1.0"/>
+    </bitfield>
+    <bitfield id="Reserved" width="15" begin="15" end="1" resetval="0x0000" description="Reserved bit field. Do not write any value" range="" rwaccess="R"/>
+    <bitfield id="SIS" width="1" begin="0" end="0" resetval="0" description="Slot Interrupt Status. This status bit indicates the inverted state of interrupt signal for the module.By a power on reset or by setting a software reset for all (MMCi.MMCHS_SYSCTL[24] SRA), the interrupt signal shall be deasserted and this status shall read 0." range="" rwaccess="R"/>
+  </register>
+</module>

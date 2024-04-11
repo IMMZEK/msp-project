@@ -1,0 +1,133 @@
+
+/**
+ * \file  M4_PADCONFIG.gel
+ *
+ * \brief GEL File to set the pinmux 
+ */
+
+/* Copyright (c) 2017, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+/*
+ * macro definitions
+*/
+
+// Register Definitions
+
+#define M3_CID_BASE     (0xE000EFF0)
+
+#define M3_CID_7_0      (0x0000000D)
+#define M3_CID_15_8     (0x000000E0)
+#define M3_CID_23_16    (0x00000005)
+#define M3_CID_31_24    (0x000000B1)
+
+#define MAIN_MMR_BASE   (0x80100000)
+#define WKUP_MMR_BASE   (0x63000000)
+
+#define PAD0OFFSET      (0x0001C000)
+
+#define KICK0           (0x68EF3490)
+#define KICK1           (0xD172BC5A)
+ 
+unlockMainPads(){
+    *((unsigned int*)(MAIN_MMR_BASE + 0x9008)) = KICK0;
+    *((unsigned int*)(MAIN_MMR_BASE + 0x900C)) = KICK1;
+    *((unsigned int*)(MAIN_MMR_BASE + 0x1D008)) = KICK0;
+    *((unsigned int*)(MAIN_MMR_BASE + 0x1D00C)) = KICK1;
+}
+
+unlockWkupPads(){
+    *((unsigned int*)(WKUP_MMR_BASE + 0x9008)) = KICK0;
+    *((unsigned int*)(WKUP_MMR_BASE + 0x900C)) = KICK1;
+    *((unsigned int*)(WKUP_MMR_BASE + 0x1D008)) = KICK0;
+    *((unsigned int*)(WKUP_MMR_BASE + 0x1D00C)) = KICK1;
+}
+
+
+menuitem "Padconfig"
+
+dialog setPadConfig(domain "WKUP (0) Main (1): ", pindex "Pad index: ", muxmode "Mux mode: ", iomode "Input (0) Output (1) IO (2)"  )
+{
+    unsigned int padoffset;
+    unsigned int regval;
+    
+    regval = 0x00000000;
+    
+    if(domain == 0)
+    {
+        unlockWkupPads();
+        padoffset = WKUP_MMR_BASE + PAD0OFFSET;
+    }
+    else if (domain == 1)
+    {
+        unlockMainPads();
+        padoffset = MAIN_MMR_BASE + PAD0OFFSET;
+    }
+    
+    padoffset = pindex * 4 + padoffset;
+    
+    regval = muxmode;
+    if (iomode == 0)
+    {
+        regval = 0x09270000 + regval;
+    }
+    else if (iomode == 1)
+    {
+        regval = 0x08010000 + regval;
+    }
+    else if (iomode == 2)
+    {
+        regval = 0x08030000 + regval;
+    }
+    
+    
+    GEL_TextOut("writing %x to address: %x\n",,,,,
+        regval,
+        padoffset) ;
+    *((unsigned int*)(padoffset)) = regval;
+    
+}
+
+dialog setMCUObsClk(muxmode "Mux mode: ")
+{
+    unsigned int regval;
+    unsigned int address;
+    regval = 0;
+    address = WKUP_MMR_BASE + 0x8000;
+    unlockWkupPads();
+    
+    regval = regval + muxmode;
+    
+    GEL_TextOut("writing %x to address: %x\n",,,,,
+        regval,
+        address) ;
+    *((unsigned int*)(address)) = regval;
+    
+}

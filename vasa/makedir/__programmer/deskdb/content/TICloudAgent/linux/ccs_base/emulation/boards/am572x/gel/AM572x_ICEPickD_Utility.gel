@@ -1,0 +1,154 @@
+/*******************************************************************/ 
+/* This GEL file is loaded on the command line of Code Composer    */
+/* The StartUp() function is called every time you start           */
+/* Code Composer.  You can customize this function to              */
+/* initialize wait states or to perform other initialization.      */
+/*                                                                 */
+/* AM572x ICEPickD_Utility                                         */
+/*                                                                 */
+/*  This gel file is to provide utility functions to program       */
+/*  and configure ICEPickD module                                  */
+/*                                                                 */
+/*                                                                 */
+/*******************************************************************/
+
+menuitem "ICEPickD_Utility";
+
+//----------------------------------------------------------------
+#define SDTR_IPU_RTOS           IP_TAP_CNTL_4
+#define SDTR_IPU_SIMCOP         IP_TAP_CNTL_5
+#define SDTR_IVAHD_C66          IP_TAP_CNTL_1
+#define SDTR_IVAHD_ICONT1       IP_TAP_CNTL_2
+#define SDTR_IVAHD_ICONT2       IP_TAP_CNTL_3
+
+/* Masks and values for the SDTR register */
+#define POWERLOSSDETECTED       (unsigned int)(0x1 << 21)
+#define RELEASEFROMWIR          (unsigned int)(0x1 << 17)
+#define RESETCONTROL_MASK       (unsigned int)(0x3 << 14)
+#define EXECUTEACTION           (unsigned int)(0x1 << 10)
+
+#define RESETCNTL_NORMAL        (unsigned int)(0x0 << 14)
+#define RESETCNTL_WIR           (unsigned int)(0x1 << 14)
+#define RESETCNTL_BLOCK         (unsigned int)(0x2 << 14)
+#define RESETCNTL_ASSERT        (unsigned int)(0x3 << 14)
+
+#define DBGEN                   (unsigned int)(0x1 << 13)
+
+
+OnTargetConnect()
+{
+    //SystemReset();
+
+    ReleaseWIR_Ipu_RTOS();
+    ReleaseWIR_Ipu_SIMCOP();
+    ReleaseWIR_IVAHD_C66();
+    ReleaseWIR_IVAHD_ICONT1();
+    ReleaseWIR_IVAHD_ICONT2();      
+}
+
+hotmenu SystemReset()
+{
+    IP_CNTL |= 0x1;            
+
+    GEL_TextOut("Perform an ICEPick System Reset. \n");
+} 
+
+hotmenu ReleaseWIR_Ipu_RTOS()
+{
+    int SDTR_temp;
+    int writeBackValue;
+
+    SDTR_temp = SDTR_IPU_RTOS;  /* Read the SDTR value */
+
+    /* Do a read/modify write such that we write zero to following bits */
+    /* EXECUTEACTION bit */
+    /* RELEASEFROMWIR bit */
+    /* POWERLOSSDETECTED bit */
+    /* Reset Control bits */
+    writeBackValue = 
+        SDTR_temp & (~( POWERLOSSDETECTED | RELEASEFROMWIR | EXECUTEACTION | RESETCONTROL_MASK ) );
+
+    SDTR_IPU_RTOS = writeBackValue;            
+
+    GEL_TextOut("Ipu RTOS is released from Wait-In-Reset. \n");
+} 
+
+hotmenu ReleaseWIR_Ipu_SIMCOP()
+{
+    int SDTR_temp;
+    int writeBackValue;
+
+    SDTR_temp = SDTR_IPU_SIMCOP;  /* Read the SDTR value */
+
+    /* Do a read/modify write such that we write zero to following bits */
+    /* EXECUTEACTION bit */
+    /* RELEASEFROMWIR bit */
+    /* POWERLOSSDETECTED bit */
+    /* Reset Control bits */
+    writeBackValue = 
+        SDTR_temp & (~( POWERLOSSDETECTED | RELEASEFROMWIR | EXECUTEACTION | RESETCONTROL_MASK ) );
+
+    SDTR_IPU_SIMCOP = writeBackValue;            
+
+    GEL_TextOut("Ipu SIMCOP is released from Wait-In-Reset. \n");
+}
+   
+hotmenu ReleaseWIR_IVAHD_C66()
+{
+    int SDTR_temp;
+    int writeBackValue;
+
+    SDTR_temp = SDTR_IVAHD_C66;  /* Read the SDTR value */
+
+    /* Do a read/modify write such that we write zero to following bits */
+    /* EXECUTEACTION bit */
+    /* RELEASEFROMWIR bit */
+    /* POWERLOSSDETECTED bit */
+    /* Reset Control bits */
+    writeBackValue = 
+        SDTR_temp & (~( POWERLOSSDETECTED | RELEASEFROMWIR | EXECUTEACTION | RESETCONTROL_MASK ) );
+
+    SDTR_IVAHD_C66 = writeBackValue;            
+
+    GEL_TextOut("IVAHD C66 is released from Wait-In-Reset. \n");
+}
+
+hotmenu ReleaseWIR_IVAHD_ICONT1()
+{
+    int SDTR_temp;
+    int writeBackValue;
+
+    SDTR_temp = SDTR_IVAHD_ICONT1;  /* Read the SDTR value */
+
+    /* Do a read/modify write such that we write zero to following bits */
+    /* EXECUTEACTION bit */
+    /* RELEASEFROMWIR bit */
+    /* POWERLOSSDETECTED bit */
+    /* Reset Control bits */
+    writeBackValue = 
+        SDTR_temp & (~( POWERLOSSDETECTED | RELEASEFROMWIR | EXECUTEACTION | RESETCONTROL_MASK ) );
+
+    SDTR_IVAHD_ICONT1 = writeBackValue;            
+
+    GEL_TextOut("IVAHD ICONT1 is released from Wait-In-Reset. \n");
+}
+   
+hotmenu ReleaseWIR_IVAHD_ICONT2()
+{
+    int SDTR_temp;
+    int writeBackValue;
+
+    SDTR_temp = SDTR_IVAHD_ICONT2;  /* Read the SDTR value */
+
+    /* Do a read/modify write such that we write zero to following bits */
+    /* EXECUTEACTION bit */
+    /* RELEASEFROMWIR bit */
+    /* POWERLOSSDETECTED bit */
+    /* Reset Control bits */
+    writeBackValue = 
+        SDTR_temp & (~( POWERLOSSDETECTED | RELEASEFROMWIR | EXECUTEACTION | RESETCONTROL_MASK ) );
+
+    SDTR_IVAHD_ICONT2 = writeBackValue;            
+
+    GEL_TextOut("IVAHD ICONT2 is released from Wait-In-Reset. \n");
+}

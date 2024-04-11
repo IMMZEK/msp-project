@@ -1,0 +1,199 @@
+//####################################################
+//AM572x GP EVM GEL
+
+
+StartUp()
+{ 
+    GEL_TextOut("--->>> AM572x Cortex A15 Startup Sequence In Progress... <<<---\n");
+
+    /*------------------ Load Common Gel Files -------------------*/
+    // Common Startup (Has OnTargetConnect)
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_startup_common.gel");
+
+    // PRCM config (no OnTargetConnect)
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_prcm_config.gel");
+
+    // Padconf (no OnTargetConnect)
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_pad_config.gel");
+
+    // Reset config (no OnTargetConnect)
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_multicore_reset.gel");
+    
+    // DDR config (no OnTargetConnect)
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_emif_macros.gel");
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_ddr_config.gel");
+
+    // PRCM Gel Config (no OnTargetConnect)
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_PRCM_Get_Config.gel");
+
+    // Tracing
+    // GEL_LoadGel("$(GEL_file_dir)//AM572x_stm.gel"); 
+    // GEL_LoadGel("$(GEL_file_dir)//AM572x_tpiu.gel");
+
+    /*------------------ Memory Map Config -------------------*/
+    GEL_MapOff();
+    GEL_MapReset();
+    memorymap_init();
+    GEL_MapOn();
+    
+    GEL_TextOut("--->>> AM572x Cortex A15 Startup Sequence DONE! <<<---\n");
+} 
+
+hotmenu OnTargetConnect_API()
+{
+    OnTargetConnect();
+}
+
+OnPreFileLoaded()
+{
+    AM57xxStartState();
+}
+
+OnTargetConnect()
+{
+    AM57xx_EVM_Initialization(0);  //EVM=0 for GP EVM and 1 for IDK EVM
+	AM572x_MULTICORE_EnableAllCores(); //MULTICORE Initialization
+}
+
+memorymap_init()
+{
+    GEL_MapAddStr(0x00000000, 0, 0x20000000, "R|W|AS4", 0);     /* GPMC */
+    GEL_MapAddStr(0x20000000, 0, 0x10000000, "R|W|AS4", 0);     /* PCIe */
+
+    GEL_MapAddStr(0x40038000, 0, 0x0000C000, "R|AS4", 0);       /* Public ROM - 48KBytes */
+       
+    GEL_MapAddStr(0x402F0000, 0, 0x00010000, "R|W|AS4", 0);     /* MPU RAM - 48KBytes */
+    GEL_MapAddStr(0x40300000, 0, 0x00080000, "R|W|AS4", 0);     /* OCMRAM1 -  */
+    GEL_MapAddStr(0x40400000, 0, 0x00200000, "R|W|AS4", 0);     /* OCMRAM 2+3  */
+
+    // DSP1/2
+    GEL_MapAddStr(0x40800000, 0, 0x00808000, "R|W|AS4", 0);     /* FULL DSP1  */
+    GEL_MapAddStr(0x41000000, 0, 0x00808000, "R|W|AS4", 0);     /* FULL DSP2  */
+    
+    // OCMRAM CBUF
+    GEL_MapAddStr(0x41800000, 0, 0x02000000, "R|W|AS4", 0);     /* CBUF  */
+    
+    //edma, tpcc, ...
+    GEL_MapAddStr(0x43300000, 0, 0x00300000, "R|W|AS4", 0);     /* EDMA */   
+    GEL_MapAddStr(0x43a00000, 0, 0x00040000, "R|W|AS4", 0);     /* OCMCROM */   
+    
+    // L3MAIN, L4s
+    GEL_MapAddStr(0x44000000, 0, 0x01800000, "R|W|AS4", 0);     /* L3 main1 */
+    GEL_MapAddStr(0x45800000, 0, 0x00040000, "R|W|AS4", 0);     /* MCASP1 */
+    GEL_MapAddStr(0x47000000, 0, 0x01000000, "R|AS4", 0);       /* STM - 16MBytes */
+    
+    GEL_MapAddStr(0x48000000, 0, 0x00200000, "R|W|AS4", 0);     /* L4PER1 */
+    GEL_MapAddStr(0x48210000, 0, 0x00040000, "R|W|AS4", 0);     /* MPU  */
+    GEL_MapAddStr(0x48250000, 0, 0x000A0000, "R|W|AS4", 0);     /* MPU  */
+    GEL_MapAddStr(0x48970000, 0, 0x00040000, "R|W|AS4", 0);     /* MPU  */
+    GEL_MapAddStr(0x48400000, 0, 0x00C00000, "R|W|AS4", 0);     /* L4PER2+3 */
+    GEL_MapAddStr(0x49000000, 0, 0x01000000, "R|W|AS4", 0);     /* OCMCRAM CBUF 2 + 3 */
+    GEL_MapAddStr(0x4A000000, 0, 0x00E00000, "R|W|AS4", 0);     /* L4CFG */
+    GEL_MapAddStr(0x4AE00000, 0, 0x00200000, "R|W|AS4", 0);     /* L4WKUP */
+    
+    GEL_MapAddStr(0x4B200000, 0, 0x00080000, "R|W|AS4", 0);     /* PRUSS 1*/
+    GEL_MapAddStr(0x4B280000, 0, 0x00080000, "R|W|AS4", 0);     /* PRUSS 2*/
+    GEL_MapAddStr(0x4B300000, 0, 0x00100000, "R|W|AS4", 0);     /* QSPI */
+    
+    //emif/DMM, ...
+    GEL_MapAddStr(0x4C000000, 0, 0x03000000, "R|W|AS4", 0);     /* EMIF1/2, DMM */
+    GEL_MapAddStr(0x50000000, 0, 0x01000000, "R|W|AS4", 0);     /* GPMC */
+    GEL_MapAddStr(0x51000000, 0, 0x00800000, "R|W|AS4", 0);     /* PCIESS1 */
+    GEL_MapAddStr(0x54000000, 0, 0x00800000, "R|W|AS4", 0);     /* L3INSTR */
+    GEL_MapAddStr(0x54800000, 0, 0x00800000, "R|W|AS4", 0);     /* DEBUGSS */
+    GEL_MapAddStr(0x54140000, 0, 0x00800000, "R|W|AS4", 0);     /* DEBUGSS CONFIG*/
+    GEL_MapAddStr(0x56000000, 0, 0x02000000, "R|W|AS4", 0);     /* GPU */
+    GEL_MapAddStr(0x55000000, 0, 0x00800000, "R|W|AS4", 0);     /* IPU2 */
+    GEL_MapAddStr(0x58000000, 0, 0x00800000, "R|W|AS4", 0);     /* DSS */
+    GEL_MapAddStr(0x58800000, 0, 0x00800000, "R|W|AS4", 0);     /* IPU1 */
+    GEL_MapAddStr(0x5a000000, 0, 0x01400000, "R|W|AS4", 0);     /* IVA Global */
+    
+    // Space addressing - big memories here
+    GEL_MapAddStr(0x5c000000, 0, 0x04000000, "R|W|AS4", 0);     /* QSPI */
+    GEL_MapAddStr(0x60000000, 0, 0x20000000, "R|W|AS4", 0);     /* DMM, tiled area */
+    GEL_MapAddStr(0x80000000, 0, 0x80000000, "R|W|AS4", 0);     /* DDR Area */
+}
+
+menuitem "Memory Config"
+
+hotmenu Clear_Memory()
+{
+    GEL_MapOff();
+    GEL_MapReset();
+}
+
+hotmenu Default_Config()
+{
+    GEL_MapOff();
+    GEL_MapReset();
+    memorymap_init();
+    GEL_MapOn();
+}
+
+hotmenu SMP_Config()
+{
+    GEL_MapOff();
+    GEL_MapReset();
+    memorymap_init_SMP();
+    GEL_MapOn();
+}
+
+memorymap_init_SMP()
+{
+    GEL_MapAddStr(0x00000000, 0, 0x20000000, "R|W|AS4", 0);     /* GPMC */
+    GEL_MapAddStr(0x20000000, 0, 0x10000000, "R|W|AS4", 0);     /* PCIe */
+
+    GEL_MapAddStr(0x40038000, 0, 0x0000C000, "R|AS4", 0);       /* Public ROM - 48KBytes */
+
+    GEL_MapAddStr(0x402F0000, 0, 0x00010000, "R|W|AS4", 0);     /* MPU RAM - 48KBytes */
+    GEL_MapAddStr(0x40300000, 0, 0x00080000, "R|W|AS4", 0);     /* OCMRAM1 -  */
+    GEL_MapAddStr(0x40400000, 0, 0x00200000, "R|W|AS4", 0);     /* OCMRAM 2+3  */
+
+    // DSP1/2
+    GEL_MapAddStr(0x40800000, 0, 0x00808000, "R|W|AS4", 0);     /* FULL DSP1  */
+    GEL_MapAddStr(0x41000000, 0, 0x00808000, "R|W|AS4", 0);     /* FULL DSP2  */
+
+    // OCMRAM CBUF
+    GEL_MapAddStr(0x41800000, 0, 0x02000000, "R|W|AS4", 0);     /* CBUF  */
+
+    //edma, tpcc, ...
+    GEL_MapAddStr(0x43300000, 0, 0x00300000, "R|W|AS4", 0);     /* EDMA */
+    GEL_MapAddStr(0x43a00000, 0, 0x00040000, "R|W|AS4", 0);     /* OCMCROM */
+
+    // L3MAIN, L4s
+    GEL_MapAddStr(0x44000000, 0, 0x01800000, "R|W|AS4", 0);     /* L3 main1 */
+    GEL_MapAddStr(0x45800000, 0, 0x00040000, "R|W|AS4", 0);     /* MCASP1 */
+    GEL_MapAddStr(0x47000000, 0, 0x01000000, "R|AS4", 0);       /* STM - 16MBytes */
+
+    GEL_MapAddStr(0x48000000, 0, 0x00200000, "R|W|AS4", 0);     /* L4PER1 */
+    GEL_MapAddStr(0x48210000, 0, 0x00040000, "R|W|AS4", 0);     /* MPU  */
+    GEL_MapAddStr(0x48250000, 0, 0x000A0000, "R|W|AS4", 0);     /* MPU  */
+    GEL_MapAddStr(0x48970000, 0, 0x00040000, "R|W|AS4", 0);     /* MPU  */
+    GEL_MapAddStr(0x48400000, 0, 0x00C00000, "R|W|AS4", 0);     /* L4PER2+3 */
+    GEL_MapAddStr(0x49000000, 0, 0x01000000, "R|W|AS4", 0);     /* OCMCRAM CBUF 2 + 3 */
+    GEL_MapAddStr(0x4A000000, 0, 0x00E00000, "R|W|AS4", 0);     /* L4CFG */
+    GEL_MapAddStr(0x4AE00000, 0, 0x00200000, "R|W|AS4", 0);     /* L4WKUP */
+
+    GEL_MapAddStr(0x4B200000, 0, 0x00080000, "R|W|AS4", 0);     /* PRUSS 1*/
+    GEL_MapAddStr(0x4B280000, 0, 0x00080000, "R|W|AS4", 0);     /* PRUSS 2*/
+    GEL_MapAddStr(0x4B300000, 0, 0x00100000, "R|W|AS4", 0);     /* QSPI */
+
+    //emif/DMM, ...
+    GEL_MapAddStr(0x4C000000, 0, 0x03000000, "R|W|AS4", 0);     /* EMIF1/2, DMM */
+    GEL_MapAddStr(0x50000000, 0, 0x01000000, "R|W|AS4", 0);     /* GPMC */
+    GEL_MapAddStr(0x51000000, 0, 0x00800000, "R|W|AS4", 0);     /* PCIESS1 */
+    GEL_MapAddStr(0x54000000, 0, 0x00800000, "R|W|AS4", 0);     /* L3INSTR */
+    GEL_MapAddStr(0x54800000, 0, 0x00800000, "R|W|AS4", 0);     /* DEBUGSS */
+    GEL_MapAddStr(0x54140000, 0, 0x00800000, "R|W|AS4", 0);     /* DEBUGSS CONFIG*/
+    GEL_MapAddStr(0x56000000, 0, 0x02000000, "R|W|AS4", 0);     /* GPU */
+    GEL_MapAddStr(0x55000000, 0, 0x00800000, "R|W|AS4", 0);     /* IPU2 */
+    GEL_MapAddStr(0x58000000, 0, 0x00800000, "R|W|AS4", 0);     /* DSS */
+    GEL_MapAddStr(0x58800000, 0, 0x00800000, "R|W|AS4", 0);     /* IPU1 */
+    GEL_MapAddStr(0x5a000000, 0, 0x01400000, "R|W|AS4", 0);     /* IVA Global */
+
+    // Space addressing - big memories here
+    GEL_MapAddStr(0x5c000000, 0, 0x04000000, "R|W|AS4", 0);     /* QSPI */
+    GEL_MapAddStr(0x60000000, 0, 0x20000000, "R|W|AS4", 0);     /* DMM, tiled area */
+    GEL_MapAddStr(0x80000000, 0, 0x80000000, "R|W|SH1C", 0);     /* Shared DDR Area */
+}
+

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+
+<module description="MSS_PKA" id="MSS_PKA">
+  
+  
+  <register acronym="PKA_STATUS" id="PKA_STATUS" offset="0x80" width="32">
+    
+  <bitfield begin="31" description="reserved" end="3" id="RESERVED" rwaccess="R" width="29"></bitfield>
+    
+  <bitfield begin="2" description="Set to ‘1’ by pkaeip29t when trying to start multiple operations in one command automatically cleared to ‘0’ by hardware on start of any (legal) operation." end="2" id="CMDERROR" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Set to ‘1’ by pkaeip29t when the LNME executes an MMM MMMNEXT MMM3A or MMEXP operation (cannot be written to ‘0’ during execution of this operation). Automatically cleared to ‘0’ by pkaeip29t on finish of an operation. The interrupt output is the complement of this bit and can be controlled directly for testing purposes when no actual operation is busy." end="1" id="MMMBUSY" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Set to ‘1’ by pkaeip29t when the result of MMM MMMNEXT MMM3A or MMEXP operation is equal or greater than the modulus N. Updated at the end of an operation automatically cleared to ‘0’ by pkaeip29t on start of any operation." end="0" id="OVERFLOW" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_CONTROL" id="PKA_CONTROL" offset="0x84" width="32">
+    
+  <bitfield begin="31" description="reserved" end="6" id="RESERVED" rwaccess="R" width="26"></bitfield>
+    
+  <bitfield begin="5" description="Set to ‘1’ the pkaeip29t is reset and all internal storage locations are flushed within 200 clock cycles is cleared to ‘0’ by hardware at the end of the operation. This command has priority over the MMM MMMNEXT MMM3A and MMEXP commands and can abort those in mid-execution. 0 No operation 1 abort" end="5" id="ABORT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="reserved" end="3" id="RESERVED1" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="2" description="The pkaeip29t starts an MMEXP operation bit is cleared to ‘0’ by pkaeip29t at the end of the operation or when executing an ABORT command. 0 No operation. 1 Starts an MMEXP operation." end="2" id="MMEXP" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="When set to a non-zero value the pkaeip29t starts an MMM operation cleared to ‘00’ by hardware at the end of the operation or when executing an ABORT command: 0x0 No operation 0x1 Starts a basic MMM operation (result written over the Y operand vector) 0x2 Starts an MMMNEXT operation (result written following the Y operand) 0x3 Starts an MMM3A operation (result written at the B operand address)" end="0" id="MMMOP" rwaccess="RW" width="2"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_NBASE" id="PKA_NBASE" offset="0xA0" width="32">
+    
+  <bitfield begin="31" description="reserved" end="24" id="RESERVED" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Y-Operand and N-Operand 32-bit Digits. Also used for X-operand length in an MMEXP operation. Minimum value is 0 (for 32-bit operands) maximum value is 66 (for 2112-bit operands actually 2112 ‘real’ data bits plus 32 bits to handle inputs and results higher than the 2112 bits modulus value)." end="16" id="NYDIGITS" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="15" description="reserved" end="10" id="RESERVED2" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="9" description="N-Operand Base Address. Bit [0] is forced to ‘0’ to locate the first 32-bit word at a 64-bit word boundary." end="0" id="NBASE" rwaccess="RW" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_XBASE" id="PKA_XBASE" offset="0xA4" width="32">
+    
+  <bitfield begin="31" description="reserved" end="24" id="RESERVED" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="X-Operand 32-bit Digits used for MMM MMMNEXT and MMM3A operations only. Minimum value is 0 (for 32-bit X operands) maximum value is 66 (for 2114-bit X operands actually 2112 ‘real’ data bits plus 2 extra bits to handle X inputs up to four times the 2112-bit modulus value plus 30 dummy data bits to fill out the last word which should all be 0)." end="16" id="XDIGITS" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="15" description="reserved" end="10" id="RESERVED1" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="9" description="X-Operand Base Address. Bit [0] is forced to ‘0’ to locate the first 32-bit word at a 64-bit word boundary." end="0" id="XBASE" rwaccess="RW" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_YBASE" id="PKA_YBASE" offset="0xA8" width="32">
+    
+  <bitfield begin="31" description="reserved" end="24" id="RESERVED" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="MMM Passes. Minimum value is 0 (for ONE pass) maximum value is 255 for 256 passes." end="16" id="NPASSES" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="15" description="reserved" end="10" id="RESERVED2" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="9" description="Y-Operand Base Address. Bit [0] is forced to ‘0’ to locate the first 32-bit word at a 64-bit word boundary." end="0" id="YBASE" rwaccess="RW" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_BBASE" id="PKA_BBASE" offset="0xAC" width="32">
+    
+  <bitfield begin="31" description="reserved" end="29" id="RESERVED" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="28" description="B-Operand Bit Count. Minimum value is 0 for an exponent length of 2 bits; maximum value is 2111 for an exponent of 2113 bits (to allow exponent blinding). If no exponent blinding is used the exponent would normally be smaller than the modulus. Note that the most significant B operand bit need not be stored in memory and is always assumed to be ‘1’." end="16" id="BCNTR" rwaccess="RW" width="13"></bitfield>
+    
+  <bitfield begin="15" description="reserved" end="11" id="RESERVED1" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="10" description="B-Operand BASE Address. Bit [0] is forced to ‘0’ to locate the first 32-bit word at a 64-bit word boundary." end="0" id="BBASE" rwaccess="RW" width="11"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_NACC" id="PKA_NACC" offset="0xB0" width="32">
+    
+  <bitfield begin="31" description="reserved" end="21" id="RESERVED" rwaccess="R" width="11"></bitfield>
+    
+  <bitfield begin="20" description="Exponent Array size (used for MMEXP operations only). A minimum (default) value of 0 indicates that there is only one &quot;odd power&quot;: AR mod N. This is the value of EXPARRAY when exponent re-coding is not used. A maximum value of 31 indicates 32 odd powers can be used for exponent recoding; this includes A1R mod N as the first “odd power”." end="16" id="EXPARRAY" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="15" description="reserved" end="9" id="RESERVED1" rwaccess="R" width="7"></bitfield>
+    
+  <bitfield begin="8" description="NACC Calculation Busy set high during 8 clock cycles after writing NZERO in PKA_NZERO while NACC is being calculated. During this time operation starts are stalled. Writing this bit with ‘0’ aborts the calculation but can leave NACC in an unknown state (writing NACC while resetting NACC_BUSY prevents this)." end="8" id="NACCBUSY" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="N Accent. Any odd8 bits value (bit [0] is ‘1’) can be loaded here (result of calculation). Automatically loaded with calculated value after writing NZERO in PKA_NZERO register." end="0" id="NACC" rwaccess="RW" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_NZERO" id="PKA_NZERO" offset="0xB4" width="32">
+    
+  <bitfield begin="31" description="reserved" end="8" id="RESERVED" rwaccess="R" width="24"></bitfield>
+    
+  <bitfield begin="7" description="N vector byte 0. Any odd 8 bit value (bit [0] is ‘1’) can be loaded here. Writing starts the NACC calculation automatically." end="0" id="NZERO" rwaccess="RW" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_OPTIONS" id="PKA_OPTIONS" offset="0xF8" width="32">
+    
+  <bitfield begin="31" description="Number of words in the LNME unit’s FIFO RAM. Default is value 70." end="24" id="FIFO" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="reserved" end="22" id="RESERVED" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="21" description="Number of Processing Elements in the pipeline of the LNME unit. Default is value 6." end="16" id="PENUM" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="15" description="reserved" end="13" id="RESERVED1" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="12" description="Value ‘1’ indicates the 3-address MMM3A function is implemented." end="12" id="MMM3A" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="11" description="reserved" end="5" id="RESERVED2" rwaccess="R" width="7"></bitfield>
+    
+  <bitfield begin="4" description="Value 1 indicates one standard LNME unit (with alpha = 32 beta = 8) other values reserved." end="2" id="CONF" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="1" description="reserved" end="0" id="RESERVED3" rwaccess="R" width="2"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_REVSFT" id="PKA_REVSFT" offset="0xFC" width="32">
+    
+  <bitfield begin="31" description="reserved" end="28" id="RESERVED" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="27" description="4-bit binary encoding of the major hardware revision number." end="24" id="REVMAX" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="23" description="4-bit binary encoding of the minor hardware revision number." end="20" id="REVMIN" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="19" description="4-bit binary encoding of the hardware patch level." end="16" id="PATCH" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="15" description="Bit-by-bit logic complement of bits [7:0]." end="8" id="EIPNUM1" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="7" description="8 bits binary encoding of the EIP number." end="0" id="EIPNUM" rwaccess="R" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_REVISION" id="PKA_REVISION" offset="0x1FE0" width="32">
+    
+  <bitfield begin="31" description="Used to distinguish between old scheme and current. Read�0x0 Legacy ASP or WTBU scheme Read�0x1 Highlander 0.8 scheme" end="30" id="SCHEME" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="29" description="reserved" end="28" id="RESERVED" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="27" description="Function indicates a software compatible module family. If there is no level of software compatibility a new Func number (and hence REVISION) should be assigned." end="16" id="FUNC" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="14" description="RTL Version (R) maintained by IP design owner. RTL follows a numbering such as X.Y.R.Z which are explained in this table. R changes ONLY when: (1) PDS uploads occur which may have been due to spec changes (2) Bug fixes occur (3) Resets to '0' when X or Y changes. Design team has an internal 'Z' (customer invisible) number which increments on every drop that happens due to DV and RTL updates. Z resets to 0 when R increments." end="11" id="R_RTL" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="10" description="Major Revision (X) maintained by IP specification owner. X changes ONLY when: (1) There is a major feature addition. An example would be adding Master Mode to Utopia Level2. The Func field (or Class/Type in old PID format) will remain the same. X does NOT change due to: (1) Bug fixes (2) Change in feature parameters." end="8" id="X_MAJOR" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="7" description="Indicates a special version for a particular device. Consequence of use may avoid use of standard Chip Support Library (CSL) / Drivers. Read�0x0 Non custom (standard) revision" end="6" id="CUSTOM" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="5" description="Minor Revision (Y) maintained by IP specification owner. Y changes ONLY when: (1) Features are scaled (up or down). Flexibility exists in that this feature scalability may either be represented in the Y change or a specific register in the IP that indicates which features are exactly available. (2) When feature creeps from Is-Not list to Is list. But this may not be the case once it sees silicon; in which case X will change. Y does NOT change due to: (1) Bug fixes (2) Typos or clarifications (3) major functional/feature change/addition/deletion. Instead these changes may be reflected via R S X as applicable. Spec owner maintains a customer-invisible number 'S' which changes due to: (1) Typos/clarifications (2) Bug documentation. Note that this bug is not due to a spec change but due to implementation. Nevertheless the spec tracks the IP bugs. An RTL release (say for silicon PG1.1) that occurs due to bug fix should document the corresponding spec number (X.Y.S) in its release notes." end="0" id="Y_MINOR" rwaccess="R" width="6"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_SYSCONFIG" id="PKA_SYSCONFIG" offset="0x1FF0" width="32">
+    
+  <bitfield begin="31" description="reserved" end="6" id="RESERVED" rwaccess="R" width="26"></bitfield>
+    
+  <bitfield begin="5" description="sidle mode 0x0 Force Idle mode. 0x1 No idle 0x2 Smart Idle mode 0x3 reserved" end="4" id="SIDLE" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="3" description="reserved" end="2" id="RESERVED1" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="1" description="softreset 0 No operation. 1 When '1' starts softreset sequnce." end="1" id="SOFTRESET" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="autoidle 0 When '0' internal clocks are running. 1 When '1' internal clocks are cut." end="0" id="AUTOIDLE" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_SYSSTATUS" id="PKA_SYSSTATUS" offset="0x1FF4" width="32">
+    
+  <bitfield begin="31" description="reserved" end="1" id="RESERVED" rwaccess="R" width="31"></bitfield>
+    
+  <bitfield begin="0" description="resetdone" end="0" id="RESETDONE" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_IRQSTATUS" id="PKA_IRQSTATUS" offset="0x1FF8" width="32">
+    
+  <bitfield begin="31" description="reserved" end="1" id="RESERVED" rwaccess="R" width="31"></bitfield>
+    
+  <bitfield begin="0" description="Interrupt flag" end="0" id="PKAIRQSTAT" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_IRQENABLE" id="PKA_IRQENABLE" offset="0x1FFC" width="32">
+    
+  <bitfield begin="31" description="reserved" end="1" id="RESERVED" rwaccess="R" width="31"></bitfield>
+    
+  <bitfield begin="0" description="data 0 Disable the interrupt 1 Enable the interrupt" end="0" id="PKAIRQEN" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_RAM_START" id="PKA_RAM_START" offset="0x2000" width="32">
+    
+  <bitfield begin="31" description="data" end="0" id="DATARAM" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="PKA_RAM_END" id="PKA_RAM_END" offset="0x2FFC" width="32">
+    
+  <bitfield begin="31" description="data" end="0" id="DATARAM" rwaccess="RW" width="32"></bitfield>
+  </register>
+</module>

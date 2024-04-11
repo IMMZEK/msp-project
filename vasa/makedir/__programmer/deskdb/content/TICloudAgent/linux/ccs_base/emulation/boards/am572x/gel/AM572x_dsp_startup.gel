@@ -1,0 +1,195 @@
+/*******************************************************************/ 
+/* This GEL file is loaded on the command line of Code Composer    */
+/* The StartUp() function is called every time you start           */
+/* Code Composer.  You can customize this function to              */
+/* initialize wait states or to perform other initialization.      */
+/*                                                                 */
+/* AM572x C66x DSP                                                 */
+/*                                                                 */
+/*                                                                 */
+/*******************************************************************/
+
+
+#define WR_MEM_32(addr, data)   *(unsigned int*)(addr) =(unsigned int)(data)
+#define RD_MEM_32(addr)         *(unsigned int*)(addr)
+#define uint32_t                unsigned int
+
+
+
+StartUp()
+{
+    GEL_TextOut("--->>> AM572x C66x DSP Startup Sequence In Progress... <<<---\n");
+
+    /*------------------ Memory Map Config -------------------*/
+    GEL_MapOff();
+    GEL_MapReset();
+    memorymap_init();
+    GEL_MapOn();
+
+    /*------------------ Load Common Gel Files -------------------*/
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_dsp_basic_emulation.gel");
+    GEL_LoadGel("$(GEL_file_dir)//AM572x_dsp_cross_triggering.gel");
+
+    GEL_TextOut("--->>> AM572x C66x DSP Startup Sequence DONE! <<<---\n");
+}
+
+memorymap_init()
+{
+    GEL_MapAddStr(0x00800000, 0, 0x00800000, "R|W|AS4", 0);     /* DSP RAM  Access 288K (L2 RAM) + 32K (L1P SRAM) + 32K (L1D SRAM)*/
+    GEL_MapAddStr(0x01BC0000, 0, 0x00001000, "R|W|AS4", 0);     /* DSP EDM register - 4KBytes */
+    GEL_MapAddStr(0x01C20000, 0, 0x00001000, "R|W|AS4", 0);     /* SYSC- CONFIG - 4KBytes */
+    GEL_MapAddStr(0x01C21000, 0, 0x00001000, "R|W|AS4", 0);     /* WUGEN - 4KBytes */
+    GEL_MapAddStr(0x01C30000, 0, 0x00000100, "R|W|AS4", 0);     /* L1 config register - 256Bytes */
+    GEL_MapAddStr(0x01C30200, 0, 0x00000100, "R|W|AS4", 0);     /* L2 config register - 256Bytes */
+    GEL_MapAddStr(0x01C30400, 0, 0x00000200, "R|W|AS4", 0);     /* Unicache debug - 512Bytes */
+    GEL_MapAddStr(0x01C30800, 0, 0x00000800, "R|W|AS4", 0);     /* Attr MMU - 2KBytes */
+    GEL_MapAddStr(0x01D10000, 0, 0x00010000, "R|W|AS4", 0);     /* 3PCC CONFIG - 64KBytes */
+    GEL_MapAddStr(0x01D05000, 0, 0x00000400, "R|W|AS4", 0);     /* 3PTC0- CONFIG - 1KBytes */
+    GEL_MapAddStr(0x01D06000, 0, 0x00000400, "R|W|AS4", 0);     /* 3PTC1- CONFIG - 1KBytes */
+    GEL_MapAddStr(0x01800000, 0, 0x00010000, "R|W|AS4", 0);     /* Interrupt controller - 64KBytes */
+    GEL_MapAddStr(0x01810000, 0, 0x00001000, "R|W|AS4", 0);     /* DSP Securty ID - 4KBytes */
+    GEL_MapAddStr(0x01812000, 0, 0x00001000, "R|W|AS4", 0);     /* DSP Revision ID - 4KBytes */
+    GEL_MapAddStr(0x01840000, 0, 0x00010000, "R|W|AS4", 0);     /* DSP Cache CFG and MAR registers */
+    GEL_MapAddStr(0x01D00000, 0, 0x00020000, "R|W|AS4", 0);     /* ABE NC L4 S3220 */
+    GEL_MapAddStr(0x01D22000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC McBSPLP1 - module */
+    GEL_MapAddStr(0x01D23000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC McBSPLP1 - L4 interconnect */
+    GEL_MapAddStr(0x01D24000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC McBSPLP2 - module */
+    GEL_MapAddStr(0x01D25000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC McBSPLP2 - L4 interconnect */
+    GEL_MapAddStr(0x01D26000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC McBSPLP3 - module */
+    GEL_MapAddStr(0x01D27000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC McBSPLP3 - L4 interconnect */
+    GEL_MapAddStr(0x01D28000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC McASP1 CFG Port */
+    GEL_MapAddStr(0x01D29000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC McASP1 CFG - L4 interconnect */
+    GEL_MapAddStr(0x01D2A000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC McASP1 DATA Port  */
+    GEL_MapAddStr(0x01D2B000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC McASP1 DATA - L4 interconnect */
+    GEL_MapAddStr(0x01D2C000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC SLIMBUS1 - module */
+    GEL_MapAddStr(0x01D2D000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC SLIMBUS1 - L4 interconnect */
+    GEL_MapAddStr(0x01D2E000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC DMIC - module */
+    GEL_MapAddStr(0x01D2F000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC DMIC - L4 interconnect */
+    GEL_MapAddStr(0x01D30000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC WDT3 - module */
+    GEL_MapAddStr(0x01D31000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC WDT3 - L4 interconnect */
+    GEL_MapAddStr(0x01D32000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC McPDM - module */
+    GEL_MapAddStr(0x01D33000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC McPDM - L4 interconnect */
+    GEL_MapAddStr(0x01D38000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC GPTIMER5 - module */
+    GEL_MapAddStr(0x01D39000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC GPTIMER5 - L4 interconnect */
+    GEL_MapAddStr(0x01D3A000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC GPTIMER6 - module */
+    GEL_MapAddStr(0x01D3B000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC GPTIMER6 - L4 interconnect */
+    GEL_MapAddStr(0x01D3C000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC GPTIMER7 - module */
+    GEL_MapAddStr(0x01D3D000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC GPTIMER7 - L4 interconnect */
+    GEL_MapAddStr(0x01D3E000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC GPTIMER8 - module */
+    GEL_MapAddStr(0x01D3F000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC GPTIMER8 - L4 interconnect */
+    GEL_MapAddStr(0x01D80000, 0, 0x00010000, "R|W|AS4", 0);     /* ABE NC DMEM - module */
+    GEL_MapAddStr(0x01D90000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC DMEM - L4 interconnect */
+    GEL_MapAddStr(0x01DA0000, 0, 0x00010000, "R|W|AS4", 0);     /* ABE NC CMEM - module */
+    GEL_MapAddStr(0x01DB0000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC CMEM - L4 interconnect */
+    GEL_MapAddStr(0x01DC0000, 0, 0x00010000, "R|W|AS4", 0);     /* ABE NC SMEM - module */
+    GEL_MapAddStr(0x01DD0000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC SMEM - L4 interconnect */
+    GEL_MapAddStr(0x01DE0000, 0, 0x00010000, "R|W|AS4", 0);     /* ABE NC PMEM - module */
+    GEL_MapAddStr(0x01DF0000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC PMEM - L4 interconnect */
+    GEL_MapAddStr(0x01DF1000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC AESS - module */
+    GEL_MapAddStr(0x01DF2000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE NC AESS - L4 interconnect */    
+    GEL_MapAddStr(0x01E00000, 0, 0x00100000, "R|W|AS4", 0);     /* IVA-HD - 1MBytes */
+    GEL_MapAddStr(0x01F00000, 0, 0x00100000, "R|W|AS4", 0);     /* OCP Interconnect Registers - 1MBytes */
+    GEL_MapAddStr(0x10800000, 0, 0x00020000, "R|W|AS4", 0);     /* SL2->L1 - 128KBytes */
+    GEL_MapAddStr(0x10820000, 0, 0x00020000, "R|W|AS4", 0);     /* SL2->L2 - 128KBytes */
+    GEL_MapAddStr(0x10900000, 0, 0x00040000, "R|W|AS4", 0);     /* SL2 locked Region  - 256KBytes */
+    
+    GEL_MapAddStr(0x10D00000, 0, 0x00004000, "R|W|AS4", 0);     /* ABE  L4 S3220 */
+    GEL_MapAddStr(0x10D22000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  McBSPLP1 - module */
+    GEL_MapAddStr(0x10D23000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  McBSPLP1 - L4 interconnect */
+    GEL_MapAddStr(0x10D24000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  McBSPLP2 - module */
+    GEL_MapAddStr(0x10D25000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  McBSPLP2 - L4 interconnect */
+    GEL_MapAddStr(0x10D26000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  McBSPLP3 - module */
+    GEL_MapAddStr(0x10D27000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  McBSPLP3 - L4 interconnect */
+    GEL_MapAddStr(0x10D28000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  McASP1 CFG Port */
+    GEL_MapAddStr(0x10D29000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  McASP1 CFG - L4 interconnect */
+    GEL_MapAddStr(0x10D2A000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  McASP1 DATA Port  */
+    GEL_MapAddStr(0x10D2B000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  McASP1 DATA - L4 interconnect */
+    GEL_MapAddStr(0x10D2C000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  SLIMBUS1 - module */
+    GEL_MapAddStr(0x10D2D000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  SLIMBUS1 - L4 interconnect */
+    GEL_MapAddStr(0x10D2E000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  DMIC - module */
+    GEL_MapAddStr(0x10D2F000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  DMIC - L4 interconnect */
+    GEL_MapAddStr(0x10D30000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  WDT3 - module */
+    GEL_MapAddStr(0x10D31000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  WDT3 - L4 interconnect */
+    GEL_MapAddStr(0x10D32000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  McPDM - module */
+    GEL_MapAddStr(0x10D33000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  McPDM - L4 interconnect */
+    GEL_MapAddStr(0x10D38000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  GPTIMER5 - module */
+    GEL_MapAddStr(0x10D39000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  GPTIMER5 - L4 interconnect */
+    GEL_MapAddStr(0x10D3A000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  GPTIMER6 - module */
+    GEL_MapAddStr(0x10D3B000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  GPTIMER6 - L4 interconnect */
+    GEL_MapAddStr(0x10D3C000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  GPTIMER7 - module */
+    GEL_MapAddStr(0x10D3D000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  GPTIMER7 - L4 interconnect */
+    GEL_MapAddStr(0x10D3E000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  GPTIMER8 - module */
+    GEL_MapAddStr(0x10D3F000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  GPTIMER8 - L4 interconnect */
+    GEL_MapAddStr(0x10D80000, 0, 0x00010000, "R|W|AS4", 0);     /* ABE  DMEM - module */
+    GEL_MapAddStr(0x10D90000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  DMEM - L4 interconnect */
+    GEL_MapAddStr(0x10DA0000, 0, 0x00010000, "R|W|AS4", 0);     /* ABE  CMEM - module */
+    GEL_MapAddStr(0x10DB0000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  CMEM - L4 interconnect */
+    GEL_MapAddStr(0x10DC0000, 0, 0x00010000, "R|W|AS4", 0);     /* ABE  SMEM - module */
+    GEL_MapAddStr(0x10DD0000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  SMEM - L4 interconnect */
+    GEL_MapAddStr(0x10DE0000, 0, 0x00010000, "R|W|AS4", 0);     /* ABE  PMEM - module */
+    GEL_MapAddStr(0x10DF0000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  PMEM - L4 interconnect */
+    GEL_MapAddStr(0x10DF1000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  AESS - module */
+    GEL_MapAddStr(0x10DF2000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE  AESS - L4 interconnect */
+    
+    GEL_MapAddStr(0x10E00000, 0, 0x00004000, "R|W|AS4", 0);     /* ABE Locked Region  L4 S3220 */
+    GEL_MapAddStr(0x10E22000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  McBSPLP1 - module */
+    GEL_MapAddStr(0x10E23000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  McBSPLP1 - L4 interconnect */
+    GEL_MapAddStr(0x10E24000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  McBSPLP2 - module */
+    GEL_MapAddStr(0x10E25000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  McBSPLP2 - L4 interconnect */
+    GEL_MapAddStr(0x10E26000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  McBSPLP3 - module */
+    GEL_MapAddStr(0x10E27000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  McBSPLP3 - L4 interconnect */
+    GEL_MapAddStr(0x10E28000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  McASP1 CFG Port */
+    GEL_MapAddStr(0x10E29000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  McASP1 CFG - L4 interconnect */
+    GEL_MapAddStr(0x10E2A000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  McASP1 DATA Port  */
+    GEL_MapAddStr(0x10E2B000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  McASP1 DATA - L4 interconnect */
+    GEL_MapAddStr(0x10E2C000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  SLIMBUS1 - module */
+    GEL_MapAddStr(0x10E2D000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  SLIMBUS1 - L4 interconnect */
+    GEL_MapAddStr(0x10E2E000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  DMIC - module */
+    GEL_MapAddStr(0x10E2F000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  DMIC - L4 interconnect */
+    GEL_MapAddStr(0x10E30000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  WDT3 - module */
+    GEL_MapAddStr(0x10E31000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  WDT3 - L4 interconnect */
+    GEL_MapAddStr(0x10E32000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  McPDM - module */
+    GEL_MapAddStr(0x10E33000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  McPDM - L4 interconnect */
+    GEL_MapAddStr(0x10E38000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  GPTIMER5 - module */
+    GEL_MapAddStr(0x10E39000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  GPTIMER5 - L4 interconnect */
+    GEL_MapAddStr(0x10E3A000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  GPTIMER6 - module */
+    GEL_MapAddStr(0x10E3B000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  GPTIMER6 - L4 interconnect */
+    GEL_MapAddStr(0x10E3C000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  GPTIMER7 - module */
+    GEL_MapAddStr(0x10E3D000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  GPTIMER7 - L4 interconnect */
+    GEL_MapAddStr(0x10E3E000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  GPTIMER8 - module */
+    GEL_MapAddStr(0x10E3F000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  GPTIMER8 - L4 interconnect */
+    GEL_MapAddStr(0x10E80000, 0, 0x00010000, "R|W|AS4", 0);     /* ABE Locked Region  DMEM - module */
+    GEL_MapAddStr(0x10E90000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  DMEM - L4 interconnect */
+    GEL_MapAddStr(0x10EA0000, 0, 0x00010000, "R|W|AS4", 0);     /* ABE Locked Region  CMEM - module */
+    GEL_MapAddStr(0x10EB0000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  CMEM - L4 interconnect */
+    GEL_MapAddStr(0x10EC0000, 0, 0x00010000, "R|W|AS4", 0);     /* ABE Locked Region  SMEM - module */
+    GEL_MapAddStr(0x10ED0000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  SMEM - L4 interconnect */
+    GEL_MapAddStr(0x10EE0000, 0, 0x00010000, "R|W|AS4", 0);     /* ABE Locked Region  PMEM - module */
+    GEL_MapAddStr(0x10EF0000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  PMEM - L4 interconnect */
+    GEL_MapAddStr(0x10EF1000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  AESS - module */
+    GEL_MapAddStr(0x10EF2000, 0, 0x00001000, "R|W|AS4", 0);     /* ABE Locked Region  AESS - L4 interconnect */
+       
+    GEL_MapAddStr(0x20000000, 0, 0xE0000000, "R|W|AS4", 0);     /* External - SOC Mems andPeripherals - 3.5GBytes */
+    
+    GEL_MapAddStr(0x80000000, 0, 0x40000000, "R|W|AS4", 0);     /* External - EMIF1 - 1GBytes */
+    GEL_MapAddStr(0xC0000000, 0, 0x40000000, "R|W|AS4", 0);     /* External - EMIF2 - 1GBytes */
+}
+    
+OnReset()
+{ 
+
+}
+
+OnResetDetected()
+{
+
+    GEL_TextOut( "Core Reset has occurred.\n\n" );
+}
+
+OnTargetConnect()
+{    
+
+} 
+ 
+    
+    

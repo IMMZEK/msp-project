@@ -1,0 +1,296 @@
+/* \file        cc23xx_xds.gel
+ * \brief       GEL script for CC2340R5 device family + XDS debuggers.
+ *
+ * \revision    $Revision$
+ */
+
+
+#define HWREG(x)                    (*(unsigned int)(x))
+
+int _BoardResetMenuDefined = 0;
+int _SuppressClockIssueWarning = 0;
+
+
+/**
+ * \brief   OnTargetConnect() is called every time the CPU is connected.
+ *          Its execution will finish before anything else occurs.
+ *          Note: If you connect to the target in real-time mode,
+ *          you can connect unobtrusively and leave the target in a running state.
+ *          Issuing a command in OnTargetConnect() that modifies the target state (such as GEL_Reset),
+ *          will halt the target and defeat the ability to connect unobtrusively.
+ */
+OnTargetConnect()
+{
+    int * pVectorTable;
+    int entryPoint;
+    int stackPointer;
+
+
+    'GEL'::_deviceId = -1; // Make sure device ID is read after connect (another device could potentially has been connected)
+
+    /* Initialize memory map */
+    memorymap_init();
+
+    DefineResets(1);
+
+    // Check if target is in "debug probe loop"
+    if(('REG'::PMCTL_BOOTSTA == 0x81) || ('REG'::PMCTL_BOOTSTA == 0xC1))
+    {
+
+        GEL_Halt();
+
+        // Read vector table info
+        pVectorTable = ((int *) (*(unsigned int)(0xE000ED08)));
+        stackPointer = *(pVectorTable);   // Read stack pointer for application/boot loader
+        entryPoint = *(pVectorTable + 1); // Read entry point for application/boot loader
+
+        'REG'::R4 = stackPointer;
+        'REG'::R5 = entryPoint;
+
+        ReadDeviceId();
+        if ('GEL'::_deviceId == 0x0BB8402F) 'REG'::PMCTL_BOOTSTA = 0x00;
+
+        'REG'::R3 = 0;
+
+        GEL_Go(entryPoint);
+    }
+}
+
+
+
+
+/**
+ * \brief   This is called just before the debugger connects to the CPU.
+ *          This function will put the device in a connectable state by providing debug authentication if necessary and if possible.
+ *          If the target is in SACI mode, it will be exited.
+ */
+OnPreTargetConnect()
+{
+    if (((GEL_EvalOnTarget("<parent>", "'REG'::CFGAP_DEVICESTATUS") >> 24) & 1) != 1)
+    {
+        // Ensure authentication and exit SACI mode
+        EnsureAuthentication(1); // Implemented in flash DsLL
+    }
+
+    // Disconnect the SEC_AP core
+    if(GEL_EvalOnTarget("SEC_AP", "GEL_IsConnected()")) GEL_EvalOnTarget("SEC_AP", "GEL_Disconnect()");
+}
+
+/**
+ * \brief GEL callback function called by CCS when the program is restarted.
+ *
+ */
+OnRestart()
+{
+    int * pVectorTable;
+    int entryPoint;
+    int trimState;
+    int bootState;
+
+
+    // Check if boot status indicates that the target is at the start of the boot loader
+    bootState = (GEL_EvalOnTarget("<parent>", "'REG'::CFGAP_DEVICESTATUS") >> 8) & 0xFF;
+
+    if ((bootState == 0x80) || (bootState == 0x82))
+    {
+        // Read vector table info
+        pVectorTable = ((int *) 'REG'::SCB_VTOR);
+        entryPoint = *(pVectorTable + 1); // Read entry point for application
+
+        // Set PC to entry of boot loader
+        'REG'::PC = entryPoint;
+    }
+}
+
+
+
+OnPreFileLoaded()
+{
+}
+
+/**
+ * \brief   This function defines custom resets and filters the list of
+ *          available resets.
+ * \param   neverAgain  Input argument to signal that resets should not be
+ *                      defined again.
+ */
+DefineResets(int neverAgain)
+{
+    if(!'GEL'::_BoardResetMenuDefined)
+    {
+        // Remove all resets from the supplied index and up.
+        // 0: Removes all resets
+        DEBUG_RemoveResets(0);
+
+        /*For DEBUG_DefineReset(), it takes four parameters:
+            1) The name of the reset which is what appears in the menu or as a parameter when calling GEL_AdvancedReset()
+            2)  A tooltip which isn't used anywhere (it was used in legacy CCS, but not eclipse)
+            3)  A number which is a bitmask of the following attributes:
+                a.  0x1 - core must be halted to issue the reset
+                b.  0x2 - core must be connected to issue this reset
+                c.  0x4 - core must be disconnected to issue this reset
+                d.  0x8 - all cores on the device must be disconnected to issue this reset
+            4)  The gel function to evaluate when the reset is later issued.
+        */
+
+        // Define resets
+        DefineDeviceResetWithoutHib();
+        DefineDeviceReset();
+
+
+        if (GEL_IsConnected())
+        {
+
+            DEBUG_RemoveResets(0);
+            DefineDeviceReset();
+            DefineDeviceResetWithoutHib();
+
+            if(IsCC23x0R5_rev_A_trim_state_A_or_B())
+            {
+                DEBUG_RemoveResets(0);
+                DefineDeviceResetWithoutHib();
+                DefineDeviceReset();
+            }
+        }
+
+    }
+
+    if(neverAgain)
+    {
+        'GEL'::_BoardResetMenuDefined = 1;
+    }
+}
+
+/**
+ * \brief   Defines the device reset with HIB.
+ */
+DefineDeviceReset()
+{
+    DEBUG_DefineReset("Device reset (automatic connect/disconnect)", "This will issue a device reset through SWD, and the target will halt in boot. The boot code will automatically be exited, and the target will be halted at the first instruction of the application or boot loader. The device will be left in the same connection state as before the reset, if possible.", 0, "SecApReset()");
+}
+
+/**
+ * \brief   Defines the device reset without HIB.
+ */
+DefineDeviceResetWithoutHib()
+{
+    DEBUG_DefineReset("Device reset without HIB (automatic connect/disconnect)", "This will issue a device reset through SWD, and the target will not halt in boot. The device will be left in the same connection state as before the reset, if possible. Note: This reset cannot be used with devices that require debug authentication.", 0, "ResetWithoutEnteringSaci()");
+}
+
+/**
+ * \brief   Function to reset device using the SECAP_RSTCTL register in SEC-AP.
+ */
+SecApReset()
+{
+    ConnectStateStore();
+    GEL_EvalOnTarget("<parent>", "ConnectStateStore()");
+    DisconnectIfConnected();
+
+    if(GEL_EvalOnTarget("SEC_AP", "GEL_IsConnected()")) GEL_EvalOnTarget("SEC_AP", "GEL_Disconnect()");
+
+    GEL_EvalOnTarget("<parent>", "DisconnectIfConnected()");
+    // Enter SACI mode
+    EnterSaci();    // Implemented in flash DLL
+    // Ensure authentication and exit SACI mode
+    EnsureAuthentication(1); // Implemented in flash DLL
+
+    // Disconnect the SEC_AP core (It might have been connected during EnsureAuthentication(1))
+    if(GEL_EvalOnTarget("SEC_AP", "GEL_IsConnected()")) GEL_EvalOnTarget("SEC_AP", "GEL_Disconnect()");
+
+    GEL_EvalOnTarget("<parent>", "ConnectStateRestore()");
+
+    // Only try to connect to CPU, if the DAP is connected.
+    if(GEL_EvalOnTarget("<parent>", "GEL_IsConnected()"))
+    {
+        // Only try to connect to the CPU, if it is possible
+        if(IsAhbApEnabled())
+        {
+            ConnectStateRestore();
+            if(GEL_IsConnected())
+            {
+                // Re-activate breakpoints
+                // The debug state is automatically stored and removed from the device when disconnecting (which is done in the beginning of this function)
+                GEL_RestoreDebugState();
+
+                // Update GUI (Debug view not always updated)
+                GEL_RefreshWindows();
+            }
+        }
+        else
+        {
+            // If it is not possible to connect to the CPU, disconnect from the DAP
+            GEL_EvalOnTarget("<parent>", "DisconnectIfConnected()");
+        }
+    }
+
+}
+
+
+ResetWithoutEnteringSaci()
+{
+    ConnectStateStore();
+    GEL_EvalOnTarget("<parent>", "ConnectStateStore()");
+    DisconnectIfConnected();
+
+    if(GEL_EvalOnTarget("SEC_AP", "GEL_IsConnected()")) GEL_EvalOnTarget("SEC_AP", "GEL_Disconnect()");
+
+    GEL_EvalOnTarget("<parent>", "DisconnectIfConnected()");
+    EnterSaci(); // Will cause connect to the DAP and is implemented in flash DLL
+    SaciAppResetDevice(1); // Reset device after SWD disconnect. Implemented in flash DLL
+    GEL_EvalOnTarget("<parent>", "DisconnectIfConnected()"); // Disconnect from DAP triggering reset
+
+    GEL_EvalOnTarget("<parent>", "ConnectStateRestore()");
+
+    // Only try to connect to CPU, if the DAP is connected.
+    if(GEL_EvalOnTarget("<parent>", "GEL_IsConnected()"))
+    {
+        // Only try to connect to the CPU, if it is possible
+        if(IsAhbApEnabled())
+        {
+            ConnectStateRestore();
+            if(GEL_IsConnected())
+            {
+                // Re-activate breakpoints
+                // The debug state is automatically stored and removed from the device when disconnecting (which is done in the beginning of this function)
+                GEL_RestoreDebugState();
+
+                // Update GUI (Debug view not always updated)
+                GEL_RefreshWindows();
+            }
+
+        }
+        else
+        {
+            // If it is not possible to connect to the CPU, disconnect from the DAP
+            GEL_EvalOnTarget("<parent>", "DisconnectIfConnected()");
+        }
+    }
+}
+
+/**
+ *   Calling the ChipErase() function defined in the cc23xx_dap.gel file
+ *
+ *   This function have been added to enable calling ChipErase from the dsls script
+ */
+ChipErase()
+{
+    GEL_EvalOnTarget("<parent>", "ChipErase()", 1); // DAP (Cortex' parent)
+}
+
+/**
+ * \return  1: Debug access to the M0+ Core via the AHB-AP DAP bus isolation.
+ *          0: DAPBUS firewall will isolate the AP and prevent access to the AHB-AP.
+ */
+IsAhbApEnabled()
+{
+    return GEL_EvalOnTarget("<parent>", "( ('REG'::CFGAP_DEVICESTATUS>>24) &  1 )");
+}
+
+/** \brief This function is called when using Uniflash CLI argument --list-device-cmd */
+GEL_CLI_ListCommands()
+{
+    GEL_TextOut("\n-------------------------------------------------
+ COMMAND    DESCRIPTION
+ N/A        No commands available
+-------------------------------------------------\n");
+}

@@ -1,0 +1,483 @@
+<module name="ISP" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="ISP_REVISION" acronym="ISP_REVISION" offset="0x0" width="32" description="Camera ISP Revision registerThis register contains the IP revision code in binary coded digital. For example, 0x01 = revision 0.1 and 0x21 = revision 2.1">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="REV" width="8" begin="7" end="0" resetval="TI internal data" description="IP revision.[7:4] major revision[3:0] minor revision" range="" rwaccess="R"/>
+  </register>
+  <register id="ISP_SYSCONFIG" acronym="ISP_SYSCONFIG" offset="0x4" width="32" description="ISP system configuration register">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="MIDLE_MODE" width="2" begin="13" end="12" resetval="0x0" description="Master interface power management, MSTANDBY / WAIT protocol." range="" rwaccess="RW">
+      <bitenum value="0" token="MIDLE_MODE_0" description="Force-standby: the MSTANBY signal is only asserted to the power and reset clock manager when the module is disabled."/>
+      <bitenum value="1" token="MIDLE_MODE_1" description="No-standby: the MSTANDBY signal is never asserted to the power and reset clock manager."/>
+      <bitenum value="2" token="MIDLE_MODE_2" description="Smart-standby: the MSTANDBY signal is asserted to the power and reset clock manager based on the internal activity of the module. The ISP clocks are not disabled during smart standby."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="10" begin="11" end="2" resetval="0x000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="SOFT_RESET" width="1" begin="1" end="1" resetval="0" description="Software reset. Set the bit to 1 to trigger the module reset. The bit is automatically reset be the hw. During reads return 0." range="" rwaccess="RW">
+      <bitenum value="0" token="SOFT_RESET_0" description="Normal mode."/>
+      <bitenum value="1" token="SOFT_RESET_1" description="The module is reset."/>
+    </bitfield>
+    <bitfield id="AUTO_IDLE" width="1" begin="0" end="0" resetval="1" description="Internal Interconnect functional clock gating strategy" range="" rwaccess="RW">
+      <bitenum value="0" token="AUTO_IDLE_0" description="Interconnect functional clocks are free-running"/>
+      <bitenum value="1" token="AUTO_IDLE_1" description="Automatic clock gating strategy is applied, based on the Interconnect interface activity for interface clock and on the functional activity for functional Clocks."/>
+    </bitfield>
+  </register>
+  <register id="ISP_SYSSTATUS" acronym="ISP_SYSSTATUS" offset="0x8" width="32" description="ISP system status register">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0000 0000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="RESET_DONE" width="1" begin="0" end="0" resetval="1" description="Internal reset monitoring" range="" rwaccess="R">
+      <bitenum value="0" token="RESET_DONE_0_r" description="Internal module reset is ongoing."/>
+      <bitenum value="1" token="RESET_DONE_1_r" description="Reset completed."/>
+    </bitfield>
+  </register>
+  <register id="ISP_IRQ0ENABLE" acronym="ISP_IRQ0ENABLE" offset="0xC" width="32" description="INTERRUPT ENABLE REGISTER TO MCU. IRQ0 STATUS LINE. The same events are mapped in IRQ1. However, one event shall be mapped to only one target.">
+    <bitfield id="HS_VS_IRQ" width="1" begin="31" end="31" resetval="0" description="HS or VS synchro event This event is triggered if a rising or falling edge is detected on the HS or VS signal. The rising or falling edge and the HS or VS signal selection is chosen with the ISP_CTRL.SYNC_DTECT bit field." range="" rwaccess="RW">
+      <bitenum value="0" token="HS_VS_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="HS_VS_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="30" end="30" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="OCP_ERR_IRQ" width="1" begin="29" end="29" resetval="0" description="ISP interconnect error." range="" rwaccess="RW">
+      <bitenum value="0" token="OCP_ERR_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="OCP_ERR_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="MMU_ERR_IRQ" width="1" begin="28" end="28" resetval="0" description="MMU error." range="" rwaccess="RW">
+      <bitenum value="0" token="MMU_ERR_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="MMU_ERR_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="27" end="26" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="OVF_IRQ" width="1" begin="25" end="25" resetval="0" description="Central Resource SBL overflow This event is triggered when one of the buffer in the central resource SBL overflows." range="" rwaccess="RW">
+      <bitenum value="0" token="OVF_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="OVF_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="RSZ_DONE_IRQ" width="1" begin="24" end="24" resetval="0" description="RESIZER module - resizer processing done event. This event is triggered at the end of the frame when the processing is completed for the current frame." range="" rwaccess="RW">
+      <bitenum value="0" token="RSZ_DONE_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="RSZ_DONE_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="23" end="22" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="CBUFF_IRQ" width="1" begin="21" end="21" resetval="0" description="Circular buffer interrupt" range="" rwaccess="RW">
+      <bitenum value="0" token="CBUFF_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CBUFF_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="PRV_DONE_IRQ" width="1" begin="20" end="20" resetval="0" description="PREVIEW module - processing done event. This event is triggered at the end of the frame when the processing is completed for the current frame." range="" rwaccess="RW">
+      <bitenum value="0" token="PRV_DONE_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="PRV_DONE_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_LSC_PREFETCH_ERROR" width="1" begin="19" end="19" resetval="0" description="The prefetch error indicates when the gain table was read to slowly from SDRAM. When this event is pending the module goes into transparent mode (output=input). Normal operation can be resumed at the start of the next frame after1) clearing this event2) disabling the LSC module3) enabling it" range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_LSC_PREFETCH_ERROR_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_LSC_PREFETCH_ERROR_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_LSC_PREFETCH_COMPLETED" width="1" begin="18" end="18" resetval="0" description="Indicates current state of the prefetch buffer. Could be used to start sending the data once the buffer is full to minimize the risk of an underflow. This event is triggered when the buffer contains 3 full paxel rows. It could be used to minimize buffer underflow risks." range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_LSC_PREFETCH_COMPLETED_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_LSC_PREFETCH_COMPLETED_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_LSC_DONE" width="1" begin="17" end="17" resetval="0" description="The event is triggered when the internal state of LSCtoggles from BUSY to IDLE." range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_LSC_DONE_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_LSC_DONE_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="HIST_DONE_IRQ" width="1" begin="16" end="16" resetval="0" description="HIST module - processing done event. This event is triggered at the end of the frame when the processing is completed for the current frame." range="" rwaccess="RW">
+      <bitenum value="0" token="HIST_DONE_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="HIST_DONE_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="14" end="14" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="H3A_AWB_DONE_IRQ" width="1" begin="13" end="13" resetval="0" description="H3A module - auto exposure and auto white balance processing done event. This event is triggered at the end of the frame when the processing is completed for the current frame." range="" rwaccess="RW">
+      <bitenum value="0" token="H3A_AWB_DONE_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="H3A_AWB_DONE_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="H3A_AF_DONE_IRQ" width="1" begin="12" end="12" resetval="0" description="H3A module - autofocus processing done event. This event is triggered at the end of the frame when the processing is completed for the current frame." range="" rwaccess="RW">
+      <bitenum value="0" token="H3A_AF_DONE_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="H3A_AF_DONE_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_ERR_IRQ" width="1" begin="11" end="11" resetval="0" description="CCDC module - faulty pixel correction memory underflow" range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_ERR_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_ERR_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_VD2_IRQ" width="1" begin="10" end="10" resetval="0" description="CCDC module - programmable event 2" range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_VD2_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_VD2_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_VD1_IRQ" width="1" begin="9" end="9" resetval="0" description="CCDC module - programmable event 1." range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_VD1_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_VD1_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_VD0_IRQ" width="1" begin="8" end="8" resetval="0" description="CCDC module - programmable event 0." range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_VD0_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_VD0_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CSIB_LC3_IRQ" width="1" begin="7" end="7" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 3." range="" rwaccess="RW">
+      <bitenum value="0" token="CSIB_LC3_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSIB_LC3_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CSIB_LC2_IRQ" width="1" begin="6" end="6" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 2." range="" rwaccess="RW">
+      <bitenum value="0" token="CSIB_LC2_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSIB_LC2_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CSIB_LC1_IRQ" width="1" begin="5" end="5" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 1." range="" rwaccess="RW">
+      <bitenum value="0" token="CSIB_LC1_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSIB_LC1_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CSIB_LC0_IRQ" width="1" begin="4" end="4" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 0." range="" rwaccess="RW">
+      <bitenum value="0" token="CSIB_LC0_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSIB_LC0_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CSIB_LCM_IRQ" width="1" begin="3" end="3" resetval="0" description="CSI1/CCP2B receiver module - event on memory channel." range="" rwaccess="RW">
+      <bitenum value="0" token="CSIB_LCM_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSIB_LCM_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="CSI2C_IRQ" width="1" begin="1" end="1" resetval="0" description="CSI2C module event." range="" rwaccess="RW">
+      <bitenum value="0" token="CSI2C_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSI2C_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CSI2A_IRQ" width="1" begin="0" end="0" resetval="0" description="CSI2A module event." range="" rwaccess="RW">
+      <bitenum value="0" token="CSI2A_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSI2A_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+  </register>
+  <register id="ISP_IRQ0STATUS" acronym="ISP_IRQ0STATUS" offset="0x10" width="32" description="INTERRUPT STATUS REGISTER TO MCU. IRQ0 STATUS LINE.">
+    <bitfield id="HS_VS_IRQ" width="1" begin="31" end="31" resetval="0" description="HS or VS synchro event READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="RESERVED" width="1" begin="30" end="30" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="OCP_ERR_IRQ" width="1" begin="29" end="29" resetval="0" description="ISP interconnect error. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="MMU_ERR_IRQ" width="1" begin="28" end="28" resetval="0" description="MMU error. If event is true, one needs to read the MMU_IRQSTATUS register to know the event source. Write in MMU_IRQSTATUS to clear the bit. READS:0: Event is false1: Event is true" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="RESERVED" width="2" begin="27" end="26" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="OVF_IRQ" width="1" begin="25" end="25" resetval="0" description="Central Resource SBL overflow If event is true, one needs to check the SBL_PCR register to know the source. One needs to clear the SBL_PCR register first before clearing this bit. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="RSZ_DONE_IRQ" width="1" begin="24" end="24" resetval="0" description="RESIZER module - resizer processing done event. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="RESERVED" width="2" begin="23" end="22" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CBUFF_IRQ" width="1" begin="21" end="21" resetval="0" description="A circular buffer event is pending. Check submodule's interrupt status register. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="PRV_DONE_IRQ" width="1" begin="20" end="20" resetval="0" description="PREVIEW module - processing done event. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_LSC_PREFETCH_ERROR" width="1" begin="19" end="19" resetval="0" description="The prefetch error indicates when the gain table was read to slowly from SDRAM. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_LSC_PREFETCH_COMPLETED" width="1" begin="18" end="18" resetval="0" description="Indicates current state of the prefetch buffer. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_LSC_DONE" width="1" begin="17" end="17" resetval="0" description="The event is triggered when the internal state of LSC toggles from BUSY to IDLE. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="HIST_DONE_IRQ" width="1" begin="16" end="16" resetval="0" description="HIST module - processing done event.READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="RESERVED" width="2" begin="15" end="14" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="H3A_AWB_DONE_IRQ" width="1" begin="13" end="13" resetval="0" description="H3A module - auto exposure and auto white balance processing done event. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="H3A_AF_DONE_IRQ" width="1" begin="12" end="12" resetval="0" description="H3A module - autofocus processing done event. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_ERR_IRQ" width="1" begin="11" end="11" resetval="0" description="CCDC module - faulty pixel correction memory underflow If event is true, one needs to clear the CCDC_FPC.FPERR bit first before clearing this bit. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_VD2_IRQ" width="1" begin="10" end="10" resetval="0" description="CCDC module - programmable event 2 READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_VD1_IRQ" width="1" begin="9" end="9" resetval="0" description="CCDC module - programmable event 1. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_VD0_IRQ" width="1" begin="8" end="8" resetval="0" description="CCDC module - programmable event 0. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSIB_LC3_IRQ" width="1" begin="7" end="7" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 3. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSIB_LC2_IRQ" width="1" begin="6" end="6" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 2. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSIB_LC1_IRQ" width="1" begin="5" end="5" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 1. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSIB_LC0_IRQ" width="1" begin="4" end="4" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 0. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSIB_LCM_IRQ" width="1" begin="3" end="3" resetval="0" description="CSI1/CCP2B receiver module - event on memory channel. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSI2C_IRQ" width="1" begin="1" end="1" resetval="0" description="CSI2C module event. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSI2A_IRQ" width="1" begin="0" end="0" resetval="0" description="CSI2A receiver module event. READS:0: Event is false1: Event is true WRITES0: Status bit unchanged1: Status bit reset" range="" rwaccess="R/W/1to Clr"/>
+  </register>
+  <register id="ISP_IRQ1ENABLE" acronym="ISP_IRQ1ENABLE" offset="0x14" width="32" description="INTERRUPT ENABLE REGISTER TO DSP. IRQ1 STATUS LINE. The same events are mapped in IRQ0. However, one event shall be mapped to only one target.">
+    <bitfield id="HS_VS_IRQ" width="1" begin="31" end="31" resetval="0" description="HS or VS synchro event This event is triggered if a rising or falling edge is detected on the HS or VS signal. The rising or falling edge and the HS or VS signal selection is chosen with the ISP_CTRL.SYNC_DTECT bit field." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="30" end="30" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="OCP_ERR_IRQ" width="1" begin="29" end="29" resetval="0" description="ISP interconnect error." range="" rwaccess="RW">
+      <bitenum value="0" token="OCP_ERR_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="OCP_ERR_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="MMU_ERR_IRQ" width="1" begin="28" end="28" resetval="0" description="MMU error." range="" rwaccess="RW">
+      <bitenum value="0" token="MMU_ERR_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="MMU_ERR_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="27" end="26" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="OVF_IRQ" width="1" begin="25" end="25" resetval="0" description="Central Resource SBL overflow This event is triggered when one of the buffer in the central resource SBL overflows." range="" rwaccess="RW">
+      <bitenum value="0" token="OVF_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="OVF_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="RSZ_DONE_IRQ" width="1" begin="24" end="24" resetval="0" description="RESIZER module - resizer processing done event. This event is triggered at the end of the frame when the processing is completed for the current frame." range="" rwaccess="RW">
+      <bitenum value="0" token="RSZ_DONE_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="RSZ_DONE_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="23" end="22" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="CBUFF_IRQ" width="1" begin="21" end="21" resetval="0" description="Circular buffer interrupt" range="" rwaccess="RW">
+      <bitenum value="0" token="CBUFF_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CBUFF_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="PRV_DONE_IRQ" width="1" begin="20" end="20" resetval="0" description="PREVIEW module - processing done event. This event is triggered at the end of the frame when the processing is completed for the current frame." range="" rwaccess="RW">
+      <bitenum value="0" token="PRV_DONE_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="PRV_DONE_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_LSC_PREFETCH_ERROR" width="1" begin="19" end="19" resetval="0" description="The prefetch error indicates when the gain table was read to slowly from SDRAM. When this event is pending the module goes into transparent mode (output=input). Normal operation can be resumed at the start of the next frame after1) clearing this event2) disabling the LSC module3) enabling it" range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_LSC_PREFETCH_ERROR_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_LSC_PREFETCH_ERROR_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_LSC_PREFETCH_COMPLETED" width="1" begin="18" end="18" resetval="0" description="Indicates current state of the prefetch buffer. Could be used to start sending the data once the buffer is full to minimize the risk of an underflow. This event is triggered when the buffer contains 3 full paxel rows. It could be used to minimize buffer underflow risks." range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_LSC_PREFETCH_COMPLETED_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_LSC_PREFETCH_COMPLETED_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_LSC_DONE" width="1" begin="17" end="17" resetval="0" description="The event is triggered when the internal state of LSCtoggles from BUSY to IDLE." range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_LSC_DONE_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_LSC_DONE_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="HIST_DONE_IRQ" width="1" begin="16" end="16" resetval="0" description="HIST module - processing done event. This event is triggered at the end of the frame when the processing is completed for the current frame." range="" rwaccess="RW">
+      <bitenum value="0" token="HIST_DONE_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="HIST_DONE_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="14" end="14" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="H3A_AWB_DONE_IRQ" width="1" begin="13" end="13" resetval="0" description="H3A module - auto exposure and auto white balance processing done event. This event is triggered at the end of the frame when the processing is completed for the current frame." range="" rwaccess="RW">
+      <bitenum value="0" token="H3A_AWB_DONE_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="H3A_AWB_DONE_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="H3A_AF_DONE_IRQ" width="1" begin="12" end="12" resetval="0" description="H3A module - autofocus processing done event. This event is triggered at the end of the frame when the processing is completed for the current frame." range="" rwaccess="RW">
+      <bitenum value="0" token="H3A_AF_DONE_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="H3A_AF_DONE_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_ERR_IRQ" width="1" begin="11" end="11" resetval="0" description="Write 0's for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="CCDC_VD2_IRQ" width="1" begin="10" end="10" resetval="0" description="CCDC module - programmable event 2" range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_VD2_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_VD2_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_VD1_IRQ" width="1" begin="9" end="9" resetval="0" description="CCDC module - programmable event 1." range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_VD1_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_VD1_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CCDC_VD0_IRQ" width="1" begin="8" end="8" resetval="0" description="CCDC module - programmable event 0." range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_VD0_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CCDC_VD0_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CSIB_LC3_IRQ" width="1" begin="7" end="7" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 3." range="" rwaccess="RW">
+      <bitenum value="0" token="CSIB_LC3_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSIB_LC3_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CSIB_LC2_IRQ" width="1" begin="6" end="6" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 2." range="" rwaccess="RW">
+      <bitenum value="0" token="CSIB_LC2_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSIB_LC2_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CSIB_LC1_IRQ" width="1" begin="5" end="5" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 1." range="" rwaccess="RW">
+      <bitenum value="0" token="CSIB_LC1_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSIB_LC1_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CSIB_LC0_IRQ" width="1" begin="4" end="4" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 0." range="" rwaccess="RW">
+      <bitenum value="0" token="CSIB_LC0_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSIB_LC0_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CSIB_LCM_IRQ" width="1" begin="3" end="3" resetval="0" description="CSI1/CCP2B receiver module - event on memory channel." range="" rwaccess="RW">
+      <bitenum value="0" token="CSIB_LCM_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSIB_LCM_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="CSI2C_IRQ" width="1" begin="1" end="1" resetval="0" description="CSI2C module event." range="" rwaccess="RW">
+      <bitenum value="0" token="CSI2C_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSI2C_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+    <bitfield id="CSI2A_IRQ" width="1" begin="0" end="0" resetval="0" description="CSI2A module event." range="" rwaccess="RW">
+      <bitenum value="0" token="CSI2A_IRQ_0" description="Event is masked"/>
+      <bitenum value="1" token="CSI2A_IRQ_1" description="Event generates an interrupt when it occurs."/>
+    </bitfield>
+  </register>
+  <register id="ISP_IRQ1STATUS" acronym="ISP_IRQ1STATUS" offset="0x18" width="32" description="INTERRUPT STATUS REGISTER TO DSP. IRQ1 STATUS LINE.">
+    <bitfield id="HS_VS_IRQ" width="1" begin="31" end="31" resetval="0" description="HS or VS synchro event READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="RESERVED" width="1" begin="30" end="30" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="OCP_ERR_IRQ" width="1" begin="29" end="29" resetval="0" description="ISP interconnect error. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="MMU_ERR_IRQ" width="1" begin="28" end="28" resetval="0" description="MMU error. If event is true, one needs to read the MMU_IRQSTATUS register to know the event source. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="RESERVED" width="2" begin="27" end="26" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="OVF_IRQ" width="1" begin="25" end="25" resetval="0" description="Central Resource SBL overflow If event is true, one needs to check the SBL_PCR register to know the source. One needs to clear the SBL_PCR register first before clearing this bit. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="RSZ_DONE_IRQ" width="1" begin="24" end="24" resetval="0" description="RESIZER module - resizer processing done event. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="RESERVED" width="2" begin="23" end="22" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CBUFF_IRQ" width="1" begin="21" end="21" resetval="0" description="A circular buffer event is pending. Check submodule's interrupt status register. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PRV_DONE_IRQ" width="1" begin="20" end="20" resetval="0" description="PREVIEW module - processing done event. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_LSC_PREFETCH_ERROR" width="1" begin="19" end="19" resetval="0" description="The prefetch error indicates when the gain table was read to slowly from SDRAM. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_LSC_PREFETCH_COMPLETED" width="1" begin="18" end="18" resetval="0" description="Indicates current state of the prefetch buffer. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_LSC_DONE" width="1" begin="17" end="17" resetval="0" description="The event is triggered when the internal state of LSC toggles from BUSY to IDLE. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="HIST_DONE_IRQ" width="1" begin="16" end="16" resetval="0" description="HIST module - processing done event.READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="RESERVED" width="2" begin="15" end="14" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="H3A_AWB_DONE_IRQ" width="1" begin="13" end="13" resetval="0" description="H3A module - auto exposure and auto white balance processing done event. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="H3A_AF_DONE_IRQ" width="1" begin="12" end="12" resetval="0" description="H3A module - autofocus processing done event. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_ERR_IRQ" width="1" begin="11" end="11" resetval="0" description="CCDC module - faulty pixel correction memory underflow If event is true, one needs to clear the CCDC_FPC.FPERR bit first before clearing this bit. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_VD2_IRQ" width="1" begin="10" end="10" resetval="0" description="CCDC module - programmable event 2 READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_VD1_IRQ" width="1" begin="9" end="9" resetval="0" description="CCDC module - programmable event 1. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CCDC_VD0_IRQ" width="1" begin="8" end="8" resetval="0" description="CCDC module - programmable event 0. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSIB_LC3_IRQ" width="1" begin="7" end="7" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 3. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSIB_LC2_IRQ" width="1" begin="6" end="6" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 2. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSIB_LC1_IRQ" width="1" begin="5" end="5" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 1. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSIB_LC0_IRQ" width="1" begin="4" end="4" resetval="0" description="CSI1/CCP2B receiver module - event on logical channel 0. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSIB_LCM_IRQ" width="1" begin="3" end="3" resetval="0" description="CSI1/CCP2B receiver module - event on memory channel. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSI2C_IRQ" width="1" begin="1" end="1" resetval="0" description="CSI2C module event. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+    <bitfield id="CSI2A_IRQ" width="1" begin="0" end="0" resetval="0" description="CSI2A module event. READS:0: event is false1: event is true WRITES0: status bit unchanged1: status bit reset" range="" rwaccess="R/W/1to Clr"/>
+  </register>
+  <register id="TCTRL_GRESET_LENGTH" acronym="TCTRL_GRESET_LENGTH" offset="0x30" width="32" description="TIMING CONTROL - GLOBAL SHUTTER LENGTH REGISTER This register is used by the TIMING CTRL module to generate the CAM.GRESET signal.">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="LENGTH" width="24" begin="23" end="0" resetval="0x000000" description="Sets the length of the CAM.GLOBAL_RESET signal assertion in cycles of the CNTCLK clock. The CNTCLK frequency is generated with the TCTRL_CTRL.DIVC bit field. After signal assertion, the TCTRL_CTRL.GRESETEN bit is automatically cleared. The possible values are 0 to 2^24-1 cycles. The polarity of the CAM.GLOBAL_RESET signal is set by the TCTRL_CTRL.GRESETPOL bit." range="" rwaccess="RW"/>
+  </register>
+  <register id="TCTRL_PSTRB_REPLAY" acronym="TCTRL_PSTRB_REPLAY" offset="0x34" width="32" description="TIMING CONTROL - PRESTROBE REPLAY REGISTER This register is used by the TIMING CTRL module to generate the prestrobe signal.">
+    <bitfield id="COUNTER" width="7" begin="31" end="25" resetval="0x00" description="Sets the number of PRESTROBE pulses after the original pulse. If this bit is set to 0, the PRESTROBE signal behavior is only controlled by TCTRL_FRAME.STRB, TCTRL_PSTRB_DELAY and TCTRL_PSTRB_LENGTH. If TCTRL_PSTRB_LENGTH=0, there is no replay. This bit is useful when one wants to enable red-eye removal." range="" rwaccess="RW"/>
+    <bitfield id="DELAY" width="25" begin="24" end="0" resetval="0x0000000" description="Sets the delay for the PRESTROBE signal re-assertion in cycles of the CNTCLK clock. The CNTCLK frequency is generated with theTCTRL_CTRL.DIVC bit field. The possible values are 0 to 2^25-1 cycles. If TCTRL_PSTRB_LENGTH=0, there is no replay. This bit field shall not be set to 0 if the COUNTER is set to a value different of 0. This bit is useful when one wants to enable red-eye removal." range="" rwaccess="RW"/>
+  </register>
+  <register id="ISP_CTRL" acronym="ISP_CTRL" offset="0x40" width="32" description="CONTROL REGISTER">
+    <bitfield id="FLUSH" width="1" begin="31" end="31" resetval="0" description="CCDC memory flush Writing '1' in this bit flushes the CCDC memories in the central resource SBL. The SBL memories are always flushed by the end of frame. However, there are cases where the end of frame cannot be detected." range="" rwaccess="RW"/>
+    <bitfield id="JPEG_FLUSH" width="1" begin="30" end="30" resetval="0" description="JPEG flush When a camera module outputs a JPEG bit stream, this bit needs to be set because the bitstream length may not be a multiple of 32 bits. Enabling this bit ensures that no data stay in the design internal FIFOS." range="" rwaccess="RW"/>
+    <bitfield id="CCDC_WEN_POL" width="1" begin="29" end="29" resetval="0" description="Sets the polarity of the CCDC WEN bit." range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_WEN_POL_0" description="Active low"/>
+      <bitenum value="1" token="CCDC_WEN_POL_1" description="Active high"/>
+    </bitfield>
+    <bitfield id="SBL_SHARED_RPORTB" width="1" begin="28" end="28" resetval="0" description="Controls SBL shared read port B access" range="" rwaccess="RW">
+      <bitenum value="0" token="SBL_SHARED_RPORTB_0" description="Read port used by preview module dark frame read"/>
+      <bitenum value="1" token="SBL_SHARED_RPORTB_1" description="Read port used by CCDC module lens shading compensation data read"/>
+    </bitfield>
+    <bitfield id="SBL_SHARED_RPORTA" width="1" begin="27" end="27" resetval="0" description="Controls SBL shared read port A access" range="" rwaccess="RW">
+      <bitenum value="0" token="SBL_SHARED_RPORTA_0" description="Read port used by preview module data read"/>
+      <bitenum value="1" token="SBL_SHARED_RPORTA_1" description="Read port used by CSI1 module data read"/>
+    </bitfield>
+    <bitfield id="SBL_SHARED_WPORTC" width="1" begin="26" end="26" resetval="0" description="Controls SBL shared write port C access" range="" rwaccess="RW">
+      <bitenum value="0" token="SBL_SHARED_WPORTC_0" description="CSI1/CCP2B : CCP2 protocol engine"/>
+      <bitenum value="1" token="SBL_SHARED_WPORTC_1" description="CSI2C : CSI2C protocol engine"/>
+    </bitfield>
+    <bitfield id="CBUFF1_BCF_CTRL" width="2" begin="25" end="24" resetval="0x0" description="Bandwidth control feedback loop configuration register" range="" rwaccess="RW">
+      <bitenum value="0" token="CBUFF1_BCF_CTRL_0" description="Disabled."/>
+      <bitenum value="1" token="CBUFF1_BCF_CTRL_1" description="The BCF signal of CBUFF1 stalls the response phase of the CSI1/CCP2B Interconnect read master port."/>
+      <bitenum value="2" token="CBUFF1_BCF_CTRL_2" description="The BCF signal of CBUFF1 stalls the request phase of the CSI1/CCP2B Interconnect read master port."/>
+      <bitenum value="3" token="CBUFF1_BCF_CTRL_3" description="The BCF signal of CBUFF1 stalls the request and response phase of the CSI1/CCP2B Interconnect read master port."/>
+    </bitfield>
+    <bitfield id="CBUFF0_BCF_CTRL" width="2" begin="23" end="22" resetval="0x0" description="Bandwidth control feedback loop configuration register" range="" rwaccess="RW">
+      <bitenum value="0" token="CBUFF0_BCF_CTRL_0" description="Disabled."/>
+      <bitenum value="1" token="CBUFF0_BCF_CTRL_1" description="The BCF signal of CBUFF0 stalls the response phase of the CSI1/CCP2B Interconnect read master port."/>
+      <bitenum value="2" token="CBUFF0_BCF_CTRL_2" description="The BCF signal of CBUFF0 stalls the request phase of the CSI1/CCP2B Interconnect read master port."/>
+      <bitenum value="3" token="CBUFF0_BCF_CTRL_3" description="The BCF signal of CBUFF0 stalls the request and response phase of the CSI1/CCP2B Interconnect read master port."/>
+    </bitfield>
+    <bitfield id="SBL_AUTOIDLE" width="1" begin="21" end="21" resetval="1" description="Sets the SBL autoidle mode" range="" rwaccess="RW">
+      <bitenum value="0" token="SBL_AUTOIDLE_0" description="Disabled"/>
+      <bitenum value="1" token="SBL_AUTOIDLE_1" description="Enabled"/>
+    </bitfield>
+    <bitfield id="SBL_WR0_RAM_EN" width="1" begin="20" end="20" resetval="0" description="This bit controls the SBL module WRITE0 RAM used by the RESIZER module. If the RESIZER module is disabled, this bit shall be set to '0' to save power." range="" rwaccess="RW">
+      <bitenum value="0" token="SBL_WR0_RAM_EN_0" description="RAM is disabled"/>
+      <bitenum value="1" token="SBL_WR0_RAM_EN_1" description="RAM is enabled"/>
+    </bitfield>
+    <bitfield id="SBL_WR1_RAM_EN" width="1" begin="19" end="19" resetval="0" description="This bit controls the SBL module WRITE1 RAM. If the RESIZER module is the only module enabled to perform memory to memory resize operations, this bit shall be set to '0' to save power." range="" rwaccess="RW">
+      <bitenum value="0" token="SBL_WR1_RAM_EN_0" description="RAM is disabled"/>
+      <bitenum value="1" token="SBL_WR1_RAM_EN_1" description="RAM is enabled"/>
+    </bitfield>
+    <bitfield id="SBL_RD_RAM_EN" width="1" begin="18" end="18" resetval="0" description="This bit controls the SBL module READ RAM. If no read requests are generated, this bit shall be set to '0' to save power." range="" rwaccess="RW">
+      <bitenum value="0" token="SBL_RD_RAM_EN_0" description="RAM is disabled"/>
+      <bitenum value="1" token="SBL_RD_RAM_EN_1" description="RAM is enabled"/>
+    </bitfield>
+    <bitfield id="PREV_RAM_EN" width="1" begin="17" end="17" resetval="0" description="This bit controls the PREVIEW module RAM. If the PREVIEW module is not used, this bit shall be set to 0 to save power." range="" rwaccess="RW">
+      <bitenum value="0" token="PREV_RAM_EN_0" description="RAM is disabled"/>
+      <bitenum value="1" token="PREV_RAM_EN_1" description="RAM is enabled"/>
+    </bitfield>
+    <bitfield id="CCDC_RAM_EN" width="1" begin="16" end="16" resetval="0" description="This bit controls the CCDC module RAM. If the CCDC module is not used, the bit shall be set to 0 to save power." range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_RAM_EN_0" description="RAM is disabled"/>
+      <bitenum value="1" token="CCDC_RAM_EN_1" description="RAM is enabled"/>
+    </bitfield>
+    <bitfield id="SYNC_DETECT" width="2" begin="15" end="14" resetval="0x0" description="HS or VS synchronization signal detection It is sometimes necessary to detect the rising or falling edge of the horizontal and vertical synchro signals. When such event is detected, an interrutt will be triggered if ISP_IRQ0ENABLE.HS_VS_IRQ = 1 or ISP_IRQ0ENABLE.HS_VS_IRQ = 1." range="" rwaccess="RW">
+      <bitenum value="0" token="SYNC_DETECT_0" description="HS falling edge"/>
+      <bitenum value="1" token="SYNC_DETECT_1" description="HS rising edge"/>
+      <bitenum value="2" token="SYNC_DETECT_2" description="VS falling edge"/>
+      <bitenum value="3" token="SYNC_DETECT_3" description="VS rising edge"/>
+    </bitfield>
+    <bitfield id="RSZ_CLK_EN" width="1" begin="13" end="13" resetval="0" description="RSZ module clock enable. This bit controls the clock distribution to the RSZ module." range="" rwaccess="RW">
+      <bitenum value="0" token="RSZ_CLK_EN_0" description="Disable clock. The module is not active. However, accesses on the module slave port to configure it are still possible."/>
+      <bitenum value="1" token="RSZ_CLK_EN_1" description="Enable clock. The module is fully functional."/>
+    </bitfield>
+    <bitfield id="PRV_CLK_EN" width="1" begin="12" end="12" resetval="0" description="PRV module clock enable. This bit controls the clock distribution to the PRV module." range="" rwaccess="RW">
+      <bitenum value="0" token="PRV_CLK_EN_0" description="Disable clock. The module is not active. However, accesses on the module slave port to configure it are still possible."/>
+      <bitenum value="1" token="PRV_CLK_EN_1" description="Enable clock. The module is fully functional."/>
+    </bitfield>
+    <bitfield id="HIST_CLK_EN" width="1" begin="11" end="11" resetval="0" description="HIST module clock enable. This bit controls the clock distribution to the HIST module." range="" rwaccess="RW">
+      <bitenum value="0" token="HIST_CLK_EN_0" description="Disable clock. The module is not active. However, accesses on the module slave port to configure it are still possible."/>
+      <bitenum value="1" token="HIST_CLK_EN_1" description="Enable clock. The module is fully functional."/>
+    </bitfield>
+    <bitfield id="H3A_CLK_EN" width="1" begin="10" end="10" resetval="0" description="H3A module clock enable. This bit controls the clock distribution to the H3A module." range="" rwaccess="RW">
+      <bitenum value="0" token="H3A_CLK_EN_0" description="Disable clock. The module is not active. However, accesses on the module slave port to configure it are still possible."/>
+      <bitenum value="1" token="H3A_CLK_EN_1" description="Enable clock. The module is fully functional."/>
+    </bitfield>
+    <bitfield id="CBUFF_AUTOGATING" width="1" begin="9" end="9" resetval="1" description="CBUFF module autogating feature control" range="" rwaccess="RW">
+      <bitenum value="0" token="CBUFF_AUTOGATING_0" description="CBUFF autogating feature is disabled.The CBUFF internal clock is free running."/>
+      <bitenum value="1" token="CBUFF_AUTOGATING_1" description="CBUFF autogating feature is enabled.The CBUFF internal clock is only enabled when it is requested by the CBUFF module."/>
+    </bitfield>
+    <bitfield id="CCDC_CLK_EN" width="1" begin="8" end="8" resetval="0" description="CCDC module clock enable. This bit controls the clock distribution to the CCDC module." range="" rwaccess="RW">
+      <bitenum value="0" token="CCDC_CLK_EN_0" description="Disable clock. The module is not active. However, accesses on the module slave port to configure it are still possible."/>
+      <bitenum value="1" token="CCDC_CLK_EN_1" description="Enable clock. The module is fully functional."/>
+    </bitfield>
+    <bitfield id="SHIFT" width="2" begin="7" end="6" resetval="0x0" description="Data lane shifter The parallel interface is a 12-bit interface, The video port of CSI1/CCP2B is a 12-bit interface,The video port of CSI2A or CSI2C is a 14-bit interface. The CAMERA ISP has 14 data lanes but the full imaging pipeline only supports 10 bits. There are 2 main utilizations of the data lane shifter1) Dynamic reduction: For example data from a 12 bit sensor could be converted into 10bit.2) When a camera module as fewer than 12 data lanes, the ISP requires the pins to be connected on the least significant lanes. An issue occurs when a n-bit camera parallel interface can work in a m-bit mode with mn. The ISP expects the m bits to be on the least significant data lanes whereas it is not correct. The data lane shifter takes place before the CCDC module" range="" rwaccess="RW">
+      <bitenum value="0" token="SHIFT_0" description="No shift.CAMEXT[13:0] - CAM [13:0]"/>
+      <bitenum value="1" token="SHIFT_1" description="Shift by 2.CAMEXT[13:2] - CAM [11:0]"/>
+      <bitenum value="2" token="SHIFT_2" description="Shift by 4CAMEXT[13:4] - CAM [9:0]"/>
+      <bitenum value="3" token="SHIFT_3" description="Shift by 6CAMEXT[13:6] - CAM [7:0]"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="5" end="5" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="PAR_CLK_POL" width="1" begin="4" end="4" resetval="0" description="This bit sets the pixel clock polarity on the parallel interface. The pixel clock is used for latching the pixel data into the CCDC module." range="" rwaccess="RW">
+      <bitenum value="0" token="PAR_CLK_POL_0" description="Clock not inverted. The data are sampled on the rising edge of the clock."/>
+      <bitenum value="1" token="PAR_CLK_POL_1" description="Clock inverted. The data are sampled on the falling edge of the clock."/>
+    </bitfield>
+    <bitfield id="PAR_BRIDGE" width="2" begin="3" end="2" resetval="0x0" description="This bit field controls the 8 to 16-bit bridge at the input of the CCDC module." range="" rwaccess="RW">
+      <bitenum value="0" token="PAR_BRIDGE_0" description="The bridge is disabled: no conversion."/>
+      <bitenum value="1" token="PAR_BRIDGE_1" description="Reserved"/>
+      <bitenum value="2" token="PAR_BRIDGE_2" description="The bridge is enabled. The first byte is written to CAM.DATA[7:0], the second byte is written to CAM.DATA[15:8]"/>
+      <bitenum value="3" token="PAR_BRIDGE_3" description="The bridge is enabled. The first byte is written to CAM.DATA[15:8], the second byte is written to CAM.DATA[7:0]"/>
+    </bitfield>
+    <bitfield id="PAR_SER_CLK_SEL" width="2" begin="1" end="0" resetval="0x0" description="Selects the serial or parallel interface as the input to the preview hardware." range="" rwaccess="RW">
+      <bitenum value="0" token="PAR_SER_CLK_SEL_0" description="Selects the 12-bit parallel interface as the input to the CCDC module."/>
+      <bitenum value="1" token="PAR_SER_CLK_SEL_1" description="Selects the CSI2A as the input to the CCDC module."/>
+      <bitenum value="2" token="PAR_SER_CLK_SEL_2" description="Selects the CSI1/CCP2B serial interface as the input to the CCDC module."/>
+      <bitenum value="3" token="PAR_SER_CLK_SEL_3" description="Selects the CSI2C as the input to the CCDC module."/>
+    </bitfield>
+  </register>
+  <register id="TCTRL_CTRL" acronym="TCTRL_CTRL" offset="0x50" width="32" description="TIMING CONTROL - CONTROL REGISTER">
+    <bitfield id="GRESETDIR" width="1" begin="31" end="31" resetval="0" description="Sets the direction of the GLOBAL_RESET signal. 0x0: INPUT. GLOBAL_RESET is an input to the TIMING CONTROL module. GLOBAL_RESET is externally generated. 0x1: OUTPUT. GLOBAL_RESET is an output of the TIMING CONTROL module. GLOBAL_RESET is internally generated. If GRESETEN is set to 1, the internally generated GLOBAL_RESET will trigger the generation of the PRESTROBE, STROBE and SHUTTER signals. The frame counters are ignored." range="" rwaccess="RW"/>
+    <bitfield id="GRESETPOL" width="1" begin="30" end="30" resetval="0" description="Sets the polarity of the global reset signal: CAM.GLOBAL_RESET. It applies whatever the direction of the GLOBAL_RESET signal: input or output.0x0: active high0x1: active low" range="" rwaccess="RW"/>
+    <bitfield id="GRESETEN" width="1" begin="29" end="29" resetval="0" description="Triggers the generation of the CAM.GLOBAL_RESET signal. The signal is asserted immediately. If enabled, the CAM.GLOBAL_RESET signal will be asserted forTCTRL_GRESET_LENGTH cycles. After the signal assertion, the enable bit is automatically cleared to 0. The polarity of the GLOBAL_RESET signal is set with TCTRL_CTRL.GRESETPOL. Enabling this bit triggers the generation of the CAM.SHUTTER and CAM.STROBE signals (if previously enabled). The frame counters shall be set to 0 when this bit is set to 1 and GRESETDIR is set a OUTPUT." range="" rwaccess="RW"/>
+    <bitfield id="INSEL" width="2" begin="28" end="27" resetval="0x0" description="Sets the mode that will trigger the SHUTTER, PRESTROBE and STROBE signals." range="" rwaccess="RW">
+      <bitenum value="0" token="INSEL_0" description="Video port.The VS sync pulse at the input of the CCDC module is used to count the frames.The source of the VS pulse is selected by the [1:0] PAR_SER_CLK_SEL register."/>
+      <bitenum value="1" token="INSEL_1" description="CSI2A interface. The frame start code (FSC) and frame end code (FEC) sync codes are used to count the frames."/>
+      <bitenum value="2" token="INSEL_2" description="CSI1/CCP2B or CSI2C interface. The frame start code (FSC) and frame end code (FEC) sync codes are used to count the frames."/>
+      <bitenum value="3" token="INSEL_3" description="GRESET. The CAM.GLOBAL_RESET input signal will trigger the SHUTTER, PRESTROBE and STROBE signals. In this mode, there are no frame counters. The delay counters start decrementing as soon as the GLOBAL_RESET signal is asserted. The polarity of the GLOBAL_RESET signal is set with .GRESETPOL."/>
+    </bitfield>
+    <bitfield id="STRBPSTRBPOL" width="1" begin="26" end="26" resetval="0" description="Sets the polarity of the strobe and prestrobe signals." range="" rwaccess="RW">
+      <bitenum value="0" token="STRBPSTRBPOL_0" description="Active high"/>
+      <bitenum value="1" token="STRBPSTRBPOL_1" description="Active low"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="25" end="25" resetval="0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="SHUTPOL" width="1" begin="24" end="24" resetval="0" description="Sets the polarity of the mechanical shutter signal: CAM.SHUTTER" range="" rwaccess="RW">
+      <bitenum value="0" token="SHUTPOL_0" description="Active high"/>
+      <bitenum value="1" token="SHUTPOL_1" description="Active low"/>
+    </bitfield>
+    <bitfield id="STRBEN" width="1" begin="23" end="23" resetval="0" description="Flash strobe signal enable. If enabled, the STROBE signal will be asserted afterTCTRL_FRAME.STRB frames have been received and a delay of TCTRL_STRB_DELAY cycles have passed. The STROBE signal is asserted for TCTRL_STRB_LENGTH cycles. After the signal assertion, the enable bit is automatically cleared to 0. This signal shall not be disabled by software." range="" rwaccess="RW"/>
+    <bitfield id="PSTRBEN" width="1" begin="22" end="22" resetval="0" description="Flash prestrobe signal enable. If enabled, the PRESTROBE signal will be asserted afterTCTRL_FRAME.PSTRB frames have been received and a delay of TCTRL_PSTRB_DELAY cycles have passed. The PRESTROBE signal is asserted for TCTRL_PSTRB_LENGTH cycles. After the signal assertion, the enable bit is automatically cleared to 0. This signal shall not be disabled by software." range="" rwaccess="RW"/>
+    <bitfield id="SHUTEN" width="1" begin="21" end="21" resetval="0" description="Mechanical shutter signal enable. If enabled, the SHUTTER signal will be asserted afterTCTRL_FRAME.SHUT frames have been received and a delay of TCTRL_SHUT_DELAY cycles have passed. The SHUTTER signal is asserted for TCTRL_SHUT_LENGTH cycles. After the signal assertion, the enable bit is automatically cleared to 0. This signal shall not be disabled by software." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="20" end="19" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DIVC" width="9" begin="18" end="10" resetval="0x000" description="Sets the clock divisor value for the CNTCLK clock generation based on the CAM.MCLK input clock. CNTCLK is an internal clock used by the TIMING CTRL module counters. Usually, CNTCLK = CAM.MCLK / DIVC, except for some particular values shown hereafter." range="" rwaccess="RW">
+      <bitenum value="0" token="DIVC_0" description="No clock. CNTCLK is gated."/>
+    </bitfield>
+    <bitfield id="DIVB" width="5" begin="9" end="5" resetval="0x00" description="Sets the clock divisor value for the CAM.XCLKB clock generation based on the CAM.MCLK input clock. Usually, CAM.XCLKB = CAM.MCLK / DIVB, except for some particular values shown hereafter. This bit field is not reset by a soft reset; a hard reset is required. It enables to keep the clock configuration stable through a soft reset." range="" rwaccess="RW">
+      <bitenum value="0" token="DIVB_0" description="CAM.XCLKB = stable low level. Divider disabled."/>
+      <bitenum value="1" token="DIVB_1" description="CAM.XCLKB = stable high level. Divider disabled."/>
+      <bitenum value="31" token="DIVB_31" description="CAM.XCLKB = CAM.XCLK. Bypass."/>
+    </bitfield>
+    <bitfield id="DIVA" width="5" begin="4" end="0" resetval="0x00" description="Sets the clock divisor value for the CAM.XCLKA clock generation based on the CAM.MCLK input clock. Usually, CAM.XCLKA = CAM.MCLK / DIVA, except for some particular values shown hereafter. This bit field is not reset by a soft reset; a hard reset is required. It enables to keep the clock configuration stable through a soft reset." range="" rwaccess="RW">
+      <bitenum value="0" token="DIVA_0" description="CAM.XCLKA = stable low level. Divider disabled."/>
+      <bitenum value="1" token="DIVA_1" description="CAM.XCLKA = stable high level. Divider disabled."/>
+      <bitenum value="31" token="DIVA_31" description="CAM.XCLKA = CAM.XCLK. Bypass."/>
+    </bitfield>
+  </register>
+  <register id="TCTRL_FRAME" acronym="TCTRL_FRAME" offset="0x54" width="32" description="TIMING CONTROL - FRAME REGISTER This register is used by the TIMING CTRL module to generate the SHUTTER, PRESTROBE and STROBE signals.">
+    <bitfield id="RESERVED" width="12" begin="31" end="20" resetval="0x000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="CCP2B_EOL_ENABLE" width="1" begin="19" end="19" resetval="1" description="Don't flush SBL between lines when this bit is cleared.Used to 32-byte overcome alignment constraints when data is send continuously by CCP2.EOF generation isn't affected." range="" rwaccess="RW">
+      <bitenum value="0" token="CCP2B_EOL_ENABLE_0" description="Disable EOL generation"/>
+      <bitenum value="1" token="CCP2B_EOL_ENABLE_1" description="Enable EOL generation"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="18" end="18" resetval="1" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="STRB" width="6" begin="17" end="12" resetval="0x00" description="Frame counter for the STROBE signal generation. From 0 to 63 frames. This bit field is ignored if TCTRL.INSEL=GRESET." range="" rwaccess="RW"/>
+    <bitfield id="PSTRB" width="6" begin="11" end="6" resetval="0x00" description="Frame counter for the PRESTROBE signal generation. From 0 to 63 frames. This bit field is ignored if TCTRL.INSEL=GRESET." range="" rwaccess="RW"/>
+    <bitfield id="SHUT" width="6" begin="5" end="0" resetval="0x00" description="Frame counter for the SHUTTER signal generation. From 0 to 63 frames. This bit field is ignored if TCTRL.INSEL=GRESET." range="" rwaccess="RW"/>
+  </register>
+  <register id="TCTRL_PSTRB_DELAY" acronym="TCTRL_PSTRB_DELAY" offset="0x58" width="32" description="TIMING CONTROL - PRE STROBE DELAY REGISTER This register is used by the TIMING CTRL module to generate the PRESTROBE signal.">
+    <bitfield id="RESERVED" width="7" begin="31" end="25" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DELAY" width="25" begin="24" end="0" resetval="0x0000000" description="Sets the delay for the CAM.PSTROBE signal assertion in cycles of the CNTCLK clock. The CNTCLK frequency is generated with theTCTRL_CTRL.DIVC bit field. The possible values are 0 to 2^25-1 cycles." range="" rwaccess="RW"/>
+  </register>
+  <register id="TCTRL_STRB_DELAY" acronym="TCTRL_STRB_DELAY" offset="0x5C" width="32" description="TIMING CONTROL - STROBE DELAY REGISTER This register is used by the TIMING CTRL module to generate the STROBE signal.">
+    <bitfield id="RESERVED" width="7" begin="31" end="25" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DELAY" width="25" begin="24" end="0" resetval="0x0000000" description="Sets the delay for the CAM.STROBE signal assertion in cycles of the CNTCLK clock. The CNTCLK frequency is generated with theTCTRL_CTRL.DIVC bit field. The possible values are 0 to 2^25-1 cycles." range="" rwaccess="RW"/>
+  </register>
+  <register id="TCTRL_SHUT_DELAY" acronym="TCTRL_SHUT_DELAY" offset="0x60" width="32" description="TIMING CONTROL - SHUTTER DELAY REGISTER This register is used by the TIMING CTRL module to generate the SHUTTER signal.">
+    <bitfield id="RESERVED" width="7" begin="31" end="25" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DELAY" width="25" begin="24" end="0" resetval="0x0000000" description="Sets the delay for the CAM.SHUTTER signal assertion in cycles of the CNTCLK clock. The CNTCLK frequency is generated with theTCTRL_CTRL.DIVC bit field. The possible values are 0 to 2^25-1 cycles." range="" rwaccess="RW"/>
+  </register>
+  <register id="TCTRL_PSTRB_LENGTH" acronym="TCTRL_PSTRB_LENGTH" offset="0x64" width="32" description="TIMING CONTROL - PRESTROBE LENGTH REGISTER This register is used by the TIMING CTRL module to generate the PRESTROBE signal.">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="LENGTH" width="24" begin="23" end="0" resetval="0x000000" description="Sets the length of the CAM.PRESTROBE signal assertion in cycles of the CNTCLK clock. The CNTCLK frequency is generated with theTCTRL_CTRL.DIVC bit field. After signal assertion, the TCTRL_CTRL.PSTRBEN bit is automatically cleared. The possible values are 0 to 2^24-1 cycles." range="" rwaccess="RW"/>
+  </register>
+  <register id="TCTRL_STRB_LENGTH" acronym="TCTRL_STRB_LENGTH" offset="0x68" width="32" description="TIMING CONTROL - STROBE LENGTH REGISTER This register is used by the TIMING CTRL module to generate the STROBE signal.">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="LENGTH" width="24" begin="23" end="0" resetval="0x000000" description="Sets the length of the CAM.STROBE signal assertion in cycles of the CNTCLK clock. The CNTCLK frequency is generated with theTCTRL_CTRL.DIVC bit field. After signal assertion, the TCTRL_CTRL.STRBEN bit is automatically cleared. The possible values are 0 to 2^24-1 cycles." range="" rwaccess="RW"/>
+  </register>
+  <register id="TCTRL_SHUT_LENGTH" acronym="TCTRL_SHUT_LENGTH" offset="0x6C" width="32" description="TIMING CONTROL - SHUTTER LENGTH REGISTER This register is used by the TIMING CTRL module to generate the SHUTTER signal.">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="LENGTH" width="24" begin="23" end="0" resetval="0x000000" description="Sets the length of the CAM.SHUTTER signal assertion in cycles of the CNTCLK clock. The CNTCLK frequency is generated with theTCTRL_CTRL.DIVC bit field. After signal assertion, the TCTRL_CTRL.SHUTEN bit is automatically cleared. The possible values are 0 to 2^24-1 cycles." range="" rwaccess="RW"/>
+  </register>
+</module>

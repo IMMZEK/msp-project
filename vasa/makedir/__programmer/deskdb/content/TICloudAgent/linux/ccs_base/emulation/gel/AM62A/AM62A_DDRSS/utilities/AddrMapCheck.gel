@@ -1,0 +1,186 @@
+/* Copyright (c) 2022, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+
+
+pow(unsigned int x,unsigned int y)
+{
+	unsigned int result = 1;
+	unsigned int exponent = y;
+	unsigned int base = x;
+	while (exponent != 0)
+	{
+        result *= base;
+        --exponent;
+    }
+	return(result);
+}
+
+codeWordArray(unsigned int i)
+{
+    if(i==0)  return 0x12345678ACED0123;   // 0x80000000
+    if(i==1)  return 0x12345678BEEF4567;   // 0x80000004
+    if(i==2)  return 0x12345678F00D89AB;   // 0x80000008
+    if(i==3)  return 0x12345678DEADCDEF;   // 0x80000010
+    if(i==4)  return 0x12345678BABE1234;   // 0x80000020
+    if(i==5)  return 0x12345678B00B5678;   // 0x80000040
+    if(i==6)  return 0x12345678CAFE9ABC;   // 0x80000080
+    if(i==7)  return 0x12345678EA5EDEF0;   // 0x80000100
+    if(i==8)  return 0x12345678D0652345;   // 0x80000200
+    if(i==9)  return 0x123456782BAD6789;   // 0x80000400
+    if(i==10) return 0x12345678C0DEABCD;  // 0x80000800
+    if(i==11) return 0x12345678FA11EF01;  // 0x80001000
+    if(i==12) return 0x12345678FEED3456;  // 0x80002000
+    if(i==13) return 0x12345678D00D789A;  // 0x80004000
+    if(i==14) return 0x12345678FACEBCDE;  // 0x80008000
+    if(i==15) return 0x12345678CACAF012;  // 0x80010000
+    if(i==16) return 0x123456781337FEDC;  // 0x80020000
+    if(i==17) return 0x123456785EEDBA98;  // 0x80040000
+    if(i==18) return 0x12345678C0DA7654;  // 0x80080000
+    if(i==19) return 0x123456781A553210;  // 0x80100000
+    if(i==20) return 0x123456785ADDEDCB;  // 0x80200000
+    if(i==21) return 0x12345678D0D0A987;  // 0x80400000
+    if(i==22) return 0x12345678CA5E6543;  // 0x80800000
+    if(i==23) return 0x12345678BE11210F;  // 0x81000000
+    if(i==24) return 0x1234567850FADCBA;  // 0x82000000
+    if(i==25) return 0x12345678F1D09876;  // 0x84000000
+    if(i==26) return 0x12345678B01D5432;  // 0x88000000
+    if(i==27) return 0x12345678BA1110FE;  // 0x90000000
+    if(i==28) return 0x12345678B10BCBA9;  // 0xA0000000
+    if(i==29) return 0x12345678AC1D8765;  // 0xC0000000
+    if(i==30) return 0x1234567887654321;
+    if(i==31) return 0x1234567809876543;
+    return 0;
+}
+
+menuitem "AM62A DDRSS Memory debug"; 
+hotmenu AddrMapCheck()
+{
+	unsigned int DDR_32B_ADDR_EN;
+	unsigned long DDR_START_ADDR = 0x80000000;	//2GB range
+	unsigned long *i;
+	unsigned int status, index;
+	unsigned long long offset, start_offset,end_offset, index;
+	unsigned long startAddr;
+	unsigned int count;
+
+
+	GEL_TextOut("Running Address Map Check...\n");
+
+	startAddr = (unsigned long *)DDR_START_ADDR;
+    GEL_TextOut("startAddr = %x\n",,,,,startAddr);
+	i = (unsigned long *)DDR_START_ADDR;
+	start_offset = 4;
+	end_offset = 8;
+	*startAddr = codeWordArray(0);
+	//offset = start_offset;
+	do
+	{
+		offset = start_offset;
+		index=1;
+		do{
+			i = DDR_START_ADDR + offset;
+			*i = (unsigned long)codeWordArray(index);
+			if(DEBUG) GEL_TextOut("*%x = %x\n",,,,,i,*i);
+			offset = offset<<1;
+            index++;
+		}
+		while (offset < end_offset);
+		
+		//verify
+		offset = start_offset;
+		index=1;
+	    if((unsigned long)*startAddr != (unsigned long) codeWordArray(0))
+	    {
+	        GEL_TextOut("*startAddr != %x...  *%x = %x\n",,,,,codeWordArray(0),startAddr,(unsigned long) *startAddr);
+	        end_offset = (unsigned long long) end_offset<<1;
+	        break;
+	    }
+		do{
+			i = DDR_START_ADDR + offset;
+			if(DEBUG) GEL_TextOut("Verify *%x = %x\n",,,,,i,*i);
+			if(*i != codeWordArray(index))
+			{
+				GEL_TextOut("Failed *%x != %x\n",,,,,i,*i);
+				status = 0;
+			}
+			else
+			{
+				if(DEBUG) GEL_TextOut("Pass\n",,,,,);
+				status = 1;
+			}
+			offset = offset<<1;
+			index ++;
+		}
+		while ((offset < end_offset) && (status == 1));
+
+
+		end_offset = (unsigned long long) end_offset<<1;
+	    GEL_TextOut("end_offset = %x\n",,,,,(unsigned long long)end_offset);
+	}
+	while(status==1);
+	end_offset = end_offset>>2;
+    GEL_TextOut("end_offset = %x\n",,,,,end_offset);
+	count=0;
+	index = 1;
+    GEL_TextOut("index = %x end_offset = %x\n",,,,,index,end_offset);
+	while(index < end_offset)
+	{
+		GEL_TextOut("index = %x, count=%d\n",,,,,index,count);
+		index = index<<1;
+	    count++;
+	}
+	
+	count = count - 1; 
+	
+	if(count>39) 
+	{
+		GEL_TextOut("Total DDR capacity detected = %dTBytes\n",,,,,pow(2,count-40));
+	}
+	else if (count>29)
+	{
+		GEL_TextOut("Total DDR capacity detected = %dGBytes\n",,,,,pow(2,count-30));
+	}
+	else if (count>19)
+	{	
+		GEL_TextOut("Total DDR capacity detected = %dMBytes\n",,,,,pow(2,count-20));
+	}
+	else if (count>9)
+	{
+		GEL_TextOut("Total DDR capacity detected = %dKBytes\n",,,,,pow(2,count-10));
+	}
+	else
+		GEL_TextOut("Total DDR capacity detected = %dBytes\n",,,,,pow(2,count));
+	
+//	CTRL_Unlock(0x40F04030);
+//	Write_MMR(0x40F04030,DDR_32B_ADDR_EN); 
+//	CTRL_Relock(0x40F04030);
+}
+

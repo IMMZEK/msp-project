@@ -1,0 +1,153 @@
+<module name="SYNCBOX_ILF3_ICONT" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="SYNCBOX_REVISION" acronym="SYNCBOX_REVISION" offset="0x0" width="32" description="IP revision identifier">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="0x-------- TI Internal Data" description="IP revision" range="" rwaccess="R"/>
+  </register>
+  <register id="SYNCBOX_SYSCONFIG" acronym="SYNCBOX_SYSCONFIG" offset="0x10" width="32" description="This register allows controlling various parameters of the OCP interface.">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0000 0000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="CLEARSTATUS" width="1" begin="1" end="1" resetval="0" description="Set to 1 to clear dynamic registers" range="" rwaccess="RW">
+      <bitenum value="0" id="Clear_status_done,_no_pending_action" token="CLEARSTATUS_0_r" description="Clear status done, no pending action"/>
+      <bitenum value="0" id="No_action" token="CLEARSTATUS_0_w" description="No action"/>
+      <bitenum value="1" id="Initiate_Clear_status" token="CLEARSTATUS_1_w" description="Initiate Clear status"/>
+      <bitenum value="1" id="Clear_status_ongoing" token="CLEARSTATUS_1_r" description="Clear status ongoing"/>
+    </bitfield>
+    <bitfield id="AUTOIDLE" width="1" begin="0" end="0" resetval="1" description="Internal OCP clock gating strategy:" range="" rwaccess="RW">
+      <bitenum value="0" id="OCP_clock_is_free-running." token="AUTOIDLE_0" description="OCP clock is free-running."/>
+      <bitenum value="1" id="OCP_OCP_1" token="AUTOIDLE_1" description="Automatic OCP clock-gating strategy is applied based on the OCP interface activity."/>
+    </bitfield>
+  </register>
+  <register id="SYNCBOX_RXMESSAGE" acronym="SYNCBOX_RXMESSAGE" offset="0x40" width="32" description="Register containing the received message, from the CTL_IN interface or MSG_IN interface">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="RECONFIG" width="1" begin="15" end="15" resetval="0" description="Bit to allow dynamic reconfiguration &#8211; not used" range="" rwaccess="W"/>
+    <bitfield id="ACK_REQ" width="1" begin="14" end="14" resetval="0" description="Bit set to 1 in input message if an acknowledge message must be returned." range="" rwaccess="W"/>
+    <bitfield id="MSG_TYPE" width="1" begin="13" end="13" resetval="0" description="Message type 0: Acknowledge message 1: Activation message" range="" rwaccess="W"/>
+    <bitfield id="SYNCMODE" width="1" begin="12" end="12" resetval="0" description="Synchronous message type: 0 Synchronous 1: Asynchronous" range="" rwaccess="W"/>
+    <bitfield id="DESTTASKID" width="4" begin="11" end="8" resetval="0x0" description="Task identifier of the destination node" range="" rwaccess="W"/>
+    <bitfield id="SOURCETASKID" width="4" begin="7" end="4" resetval="0x0" description="Task identifier of the message sender" range="" rwaccess="W"/>
+    <bitfield id="SOURCENODEID" width="4" begin="3" end="0" resetval="0x0" description="Node identifier of the message sender" range="" rwaccess="W"/>
+  </register>
+  <register id="SYNCBOX_NODEIDENTIFIER" acronym="SYNCBOX_NODEIDENTIFIER" offset="0x44" width="32" description="Contains the node identifier. Initialized by default to the tie-off value.">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x-------" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VALUE" width="4" begin="3" end="0" resetval="" description="Node identifier value" range="" rwaccess="R"/>
+  </register>
+  <register id="SYNCBOX_ERRORMSGDEST" acronym="SYNCBOX_ERRORMSGDEST" offset="0x48" width="32" description="Register containing the node and task identifier to send an activation message when an error is detected">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x------" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VALID_BIT" width="1" begin="8" end="8" resetval="0" description="Validity bit use to send or not the error message to a CPU based node" range="" rwaccess="RW"/>
+    <bitfield id="TASK_ID" width="4" begin="7" end="4" resetval="0x0" description="Identifier for the task in charge of recovering error" range="" rwaccess="RW"/>
+    <bitfield id="NODE_ID" width="4" begin="3" end="0" resetval="0x0" description="Identifier for the node in charge of recovering error" range="" rwaccess="RW"/>
+  </register>
+  <register id="SYNCBOX_ERRORLOG" acronym="SYNCBOX_ERRORLOG" offset="0x4C" width="32" description="Contains the different errors latched during message decoding. Any write to the register resets the current value.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x------" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="TASK_ID" width="4" begin="7" end="4" resetval="0x0" description="Identifier of the task (or event line) to which error is attached." range="" rwaccess="RW"/>
+    <bitfield id="ERR_CODE" width="4" begin="3" end="0" resetval="0x0" description="4 bits coding the error code" range="" rwaccess="RW"/>
+  </register>
+  <register id="SYNCBOX_ASYNCEVENTACKREQ" acronym="SYNCBOX_ASYNCEVENTACKREQ" offset="0x50" width="32" description="Each bit in this register defines whether the corresponding asynchronous line event need an acknowledge upon task completion or directly when the line is raised.">
+    <bitfield id="RESERVED" width="26" begin="31" end="6" resetval="0x0000000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ACKTASK5" width="1" begin="5" end="5" resetval="0" description="" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="ACKTASK5_0" description="No acknowledge message expected on this line."/>
+      <bitenum value="1" id="1" token="ACKTASK5_1" description="Acknowledge message expected on this line."/>
+    </bitfield>
+    <bitfield id="ACKTASK4" width="1" begin="4" end="4" resetval="0" description="" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="ACKTASK4_0" description="No acknowledge message expected on this line."/>
+      <bitenum value="1" id="1" token="ACKTASK4_1" description="Acknowledge message expected on this line."/>
+    </bitfield>
+    <bitfield id="ACKTASK3" width="1" begin="3" end="3" resetval="0" description="" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="ACKTASK3_0" description="No acknowledge message expected on this line."/>
+      <bitenum value="1" id="1" token="ACKTASK3_1" description="Acknowledge message expected on this line."/>
+    </bitfield>
+    <bitfield id="ACKTASK2" width="1" begin="2" end="2" resetval="0" description="" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="ACKTASK2_0" description="No acknowledge message expected on this line."/>
+      <bitenum value="1" id="1" token="ACKTASK2_1" description="Acknowledge message expected on this line."/>
+    </bitfield>
+    <bitfield id="ACKTASK1" width="1" begin="1" end="1" resetval="0" description="" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="ACKTASK1_0" description="No acknowledge message expected on this line."/>
+      <bitenum value="1" id="1" token="ACKTASK1_1" description="Acknowledge message expected on this line."/>
+    </bitfield>
+    <bitfield id="ACKTASK0" width="1" begin="0" end="0" resetval="0" description="" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="ACKTASK0_0" description="No acknowledge message expected on this line."/>
+      <bitenum value="1" id="1" token="ACKTASK0_1" description="Acknowledge message expected on this line."/>
+    </bitfield>
+  </register>
+  <register id="SYNCBOX_PARAMADDR_MOD" acronym="SYNCBOX_PARAMADDR_MOD" offset="0x54" width="32" description="Modulo value for the configuration parameter pointer computed by SYNCBOX">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x------" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VALUE" width="8" begin="7" end="0" resetval="0x00" description="Number of macroblock configuration arrays in pipeline" range="" rwaccess="RW"/>
+  </register>
+  <register id="SYNCBOX_STATUS" acronym="SYNCBOX_STATUS" offset="0x60" width="32" description="">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="EOTFIFO_5" width="1" begin="11" end="11" resetval="0" description="EndOfTask FIFO empty (0) or not empty (1)" range="" rwaccess="R"/>
+    <bitfield id="COREFSM_5" width="1" begin="10" end="10" resetval="0" description="Status bit for task 5" range="" rwaccess="R"/>
+    <bitfield id="EOTFIFO_4" width="1" begin="9" end="9" resetval="0" description="EndOfTask FIFO empty (0) or not empty (1)" range="" rwaccess="R"/>
+    <bitfield id="COREFSM_4" width="1" begin="8" end="8" resetval="0" description="Status bit for task 4" range="" rwaccess="R"/>
+    <bitfield id="EOTFIFO_3" width="1" begin="7" end="7" resetval="0" description="EndOfTask FIFO empty (0) or not empty (1)" range="" rwaccess="R"/>
+    <bitfield id="COREFSM_3" width="1" begin="6" end="6" resetval="0" description="Status bit for task 3" range="" rwaccess="R"/>
+    <bitfield id="EOTFIFO_2" width="1" begin="5" end="5" resetval="0" description="EndOfTask FIFO empty (0) or not empty (1)" range="" rwaccess="R"/>
+    <bitfield id="COREFSM_2" width="1" begin="4" end="4" resetval="0" description="Status bit for task 2" range="" rwaccess="R"/>
+    <bitfield id="EOTFIFO_1" width="1" begin="3" end="3" resetval="0" description="EndOfTask FIFO empty (0) or not empty (1)" range="" rwaccess="R"/>
+    <bitfield id="COREFSM_1" width="1" begin="2" end="2" resetval="0" description="Status bit for task 1" range="" rwaccess="R"/>
+    <bitfield id="EOTFIFO_0" width="1" begin="1" end="1" resetval="0" description="EndOfTask FIFO empty (0) or not empty (1)" range="" rwaccess="R"/>
+    <bitfield id="COREFSM_0" width="1" begin="0" end="0" resetval="0" description="Status bit for task 0" range="" rwaccess="R"/>
+  </register>
+  <register id="SYNCBOX_REMOTEASYNCACTMSG_j" acronym="SYNCBOX_REMOTEASYNCACTMSG_j" offset="0xC0" width="32" description="Contains the task and node identifier to send the activation message to, upon detection of an asynchronous event">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0b0000xxxxxxxxxxxxxxxxxxx" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VALID_BIT" width="1" begin="8" end="8" resetval="0" description="Validity bit of current register content: If set to 0, the two fields dest_node_id and dest_task_id can be ignored; if set to 1, the two fields dest_node_id and dest_task_id are used to send activation message." range="" rwaccess="RW"/>
+    <bitfield id="DEST_TASK_ID" width="4" begin="7" end="4" resetval="0x0" description="Destination task identifier telling at which task in the destination node the activation message must be sent upon task completion" range="" rwaccess="RW"/>
+    <bitfield id="DEST_NODE_ID" width="4" begin="3" end="0" resetval="0x0" description="Destination node identifier" range="" rwaccess="RW"/>
+  </register>
+  <register id="SYNCBOX_REMOTESYNCACTMSGREG1_i" acronym="SYNCBOX_REMOTESYNCACTMSGREG1_i" offset="0x100" width="32" description="Contains destination task identifier and destination node identifier for activation messages to be sent upon task completion. Valid bit is used to loop on all registers of the bundle.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0bxxxxxxxxxxxxxxxxxxxxxxx" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VALID_BIT" width="1" begin="8" end="8" resetval="0" description="Validity bit of current register content: If set to 0, the two fields dest_node_id and dest_task_id can be ignored; if set to 1, the two fields dest_node_id and dest_task_id are used to send activation message." range="" rwaccess="RW"/>
+    <bitfield id="DEST_TASK_ID" width="4" begin="7" end="4" resetval="0x0" description="Destination task identifier telling at which task in the destination node the activation message must be sent upon task completion" range="" rwaccess="RW"/>
+    <bitfield id="DEST_NODE_ID" width="4" begin="3" end="0" resetval="0x0" description="Destination node identifier" range="" rwaccess="RW"/>
+  </register>
+  <register id="SYNCBOX_REMOTESYNCACTMSGREG2_i" acronym="SYNCBOX_REMOTESYNCACTMSGREG2_i" offset="0x104" width="32" description="Contains destination task identifier and destination node identifier for activation messages to be sent upon task completion. Valid bit is used to loop on all registers of the bundle.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0bxxxxxxxxxxxxxxxxxxxxxxx" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VALID_BIT" width="1" begin="8" end="8" resetval="0" description="Validity bit of current register content: If set to 0, the two fields dest_node_id and dest_task_id can be ignored; if f set to 1, the two fields dest_node_id and dest_task_id are used to send activation message." range="" rwaccess="RW"/>
+    <bitfield id="DEST_TASK_ID" width="4" begin="7" end="4" resetval="0x0" description="Destination task identifier telling at which task in the destination node the activation message must be sent upon task completion" range="" rwaccess="RW"/>
+    <bitfield id="DEST_NODE_ID" width="4" begin="3" end="0" resetval="0x0" description="Destination node identifier" range="" rwaccess="RW"/>
+  </register>
+  <register id="SYNCBOX_REMOTESYNCACTMSGREG3_i" acronym="SYNCBOX_REMOTESYNCACTMSGREG3_i" offset="0x108" width="32" description="Contains destination task identifier and destination node identifier for activation messages to be sent upon task completion. Valid bit is used to loop on all registers of the bundle.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0bxxxxxxxxxxxxxxxxxxxxxxx" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VALID_BIT" width="1" begin="8" end="8" resetval="0" description="Validity bit of current register content: If set to 0, the two fields dest_node_id and dest_task_id can be ignored; if set to 1, the two fields dest_node_id and dest_task_id are used to send activation message" range="" rwaccess="RW"/>
+    <bitfield id="DEST_TASK_ID" width="4" begin="7" end="4" resetval="0x0" description="Destination task identifier telling at which task in destination node the activation message must be sent upon task completion" range="" rwaccess="RW"/>
+    <bitfield id="DEST_NODE_ID" width="4" begin="3" end="0" resetval="0x0" description="Destination node identifier" range="" rwaccess="RW"/>
+  </register>
+  <register id="SYNCBOX_REMOTESYNCACTMSGREG4_i" acronym="SYNCBOX_REMOTESYNCACTMSGREG4_i" offset="0x10C" width="32" description="Contains destination task identifier and destination node identifier for activation messages to be sent upon task completion. Valid bit is used to loop on all registers of the bundle">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0bxxxxxxxxxxxxxxxxxxxxxxx" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VALID_BIT" width="1" begin="8" end="8" resetval="0" description="Validity bit of current register content: If set to 0, the two fields dest_node_id and dest_task_id can be ignored; if set to 1, the two fields dest_node_id and dest_task_id are used to send activation message." range="" rwaccess="RW"/>
+    <bitfield id="DEST_TASK_ID" width="4" begin="7" end="4" resetval="0x0" description="Destination task identifier telling at which task in the destination node the activation message must be sent upon task completion" range="" rwaccess="RW"/>
+    <bitfield id="DEST_NODE_ID" width="4" begin="3" end="0" resetval="0x0" description="Destination node identifier" range="" rwaccess="RW"/>
+  </register>
+  <register id="SYNCBOX_ACTIVATIONMASK_i" acronym="SYNCBOX_ACTIVATIONMASK_i" offset="0x110" width="32" description="Applies for synchronous task description of bit fields given below. For asynchronous task, only the 16 LSBs are used. Each of the 16 LSBs corresponds to a 1 hot encoding value for the node identifier. 16 MSBs write access is protected by the corresponding bit in the register.">
+    <bitfield id="TASK_ID3" width="4" begin="31" end="28" resetval="0x0" description="For synchronous message: Each quad bit contains the task ID of a potential activator for asynchronous message. This quad bit contains the task ID to which the ack message must be sent at end of processing." range="" rwaccess="RW"/>
+    <bitfield id="TASK_ID2" width="4" begin="27" end="24" resetval="0x0" description="For synchronous message: Each quad bit contains the task ID of a potential activator for asynchronous message. This quad bit contains the node ID to which the ack message must be sent at end of processing." range="" rwaccess="RW"/>
+    <bitfield id="TASK_ID1" width="4" begin="23" end="20" resetval="0x0" description="For synchronous message: Each quad bit contains the task ID of a potential activator for asynchronous message. This quad bit contains the task ID to which the ack message must be sent at end of processing." range="" rwaccess="RW"/>
+    <bitfield id="TASK_ID0" width="4" begin="19" end="16" resetval="0x0" description="For synchronous message: Each quad bit contains the task ID of a potential activator for asynchronous message. This quad bit contains the node ID to which the ack message must be sent at end of processing." range="" rwaccess="RW"/>
+    <bitfield id="NODE_ID3" width="4" begin="15" end="12" resetval="0xF" description="For synchronous message: Each quad bit contains the node ID of a potential activator for asynchronous message. Bit i set to 1 means an activation message is awaited from node i." range="" rwaccess="RW"/>
+    <bitfield id="NODE_ID2" width="4" begin="11" end="8" resetval="0xF" description="For synchronous message: Each quad bit contains the node ID of a potential activator for asynchronous message. Bit i set to 1 means an activation message is awaited from node i." range="" rwaccess="RW"/>
+    <bitfield id="NODE_ID1" width="4" begin="7" end="4" resetval="0xF" description="For synchronous message: Each quad bit contains the node ID of a potential activator for asynchronous message. Bit i set to 1 means an activation message is awaited from node i." range="" rwaccess="RW"/>
+    <bitfield id="NODE_ID0" width="4" begin="3" end="0" resetval="0xF" description="For synchronous message: Each quad bit contains the node ID of a potential activator for asynchronous message. Bit i set to 1 means an activation message is awaited from node i." range="" rwaccess="RW"/>
+  </register>
+  <register id="SYNCBOX_ACTIVATIONCONTROL_i" acronym="SYNCBOX_ACTIVATIONCONTROL_i" offset="0x114" width="32" description="Contains the four activation counters">
+    <bitfield id="RESERVED" width="11" begin="31" end="21" resetval="0bxxxxxxxxxxx" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="MATCHFLAG" width="1" begin="20" end="20" resetval="0" description="Bit set to 1 when all activation messages received" range="" rwaccess="R"/>
+    <bitfield id="COUNTER3" width="5" begin="19" end="15" resetval="0x00" description="Associated counter with the fourth activator" range="" rwaccess="R"/>
+    <bitfield id="COUNTER2" width="5" begin="14" end="10" resetval="0x00" description="Associated counter with the third activator" range="" rwaccess="R"/>
+    <bitfield id="COUNTER1" width="5" begin="9" end="5" resetval="0x00" description="Associated counter with the second activator" range="" rwaccess="R"/>
+    <bitfield id="COUNTER0" width="5" begin="4" end="0" resetval="0x00" description="Associated counter with the first activator" range="" rwaccess="R"/>
+  </register>
+  <register id="SYNCBOX_NEWTASKCOUNTER_i" acronym="SYNCBOX_NEWTASKCOUNTER_i" offset="0x118" width="32" description="NewTask counter">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0bxxxxxxxxxxxxxxxxxxx" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VALUE" width="13" begin="12" end="0" resetval="0x0000" description="Counter of the number of times the NewTask signal has been activated. This is not a macroblock counter because N MB can be processed every call." range="" rwaccess="R"/>
+  </register>
+  <register id="SYNCBOX_PARAMADDR_BASE_i" acronym="SYNCBOX_PARAMADDR_BASE_i" offset="0x120" width="32" description="Base address for the node configuration parameters">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x----" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VALUE" width="16" begin="15" end="0" resetval="0x0000" description="128-bit address" range="" rwaccess="RW"/>
+  </register>
+  <register id="SYNCBOX_PARAMADDR_INC_i" acronym="SYNCBOX_PARAMADDR_INC_i" offset="0x124" width="32" description="Contains the parameter address increment to be added to the current parameter address pointer">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x----" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VALUE" width="16" begin="15" end="0" resetval="0x0000" description="Value of the increment" range="" rwaccess="RW"/>
+  </register>
+  <register id="SYNCBOX_PARAMADDR_IF_i" acronym="SYNCBOX_PARAMADDR_IF_i" offset="0x128" width="32" description="Interface register containing the current value of the MB configuration parameters. This register is read by the node core.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x----" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="VALUE" width="16" begin="15" end="0" resetval="0x----" description="16-bit value containing a 128-bit pointer" range="" rwaccess="R"/>
+  </register>
+</module>

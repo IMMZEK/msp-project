@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<device id="AWR6443" partnum="AWR6443" HW_revision="1" XML_version="1" desc="AWR6443" description="AWR6443 mmWave Radar">
+
+	<!-- Filter to list device under in project wizard -->	
+	<property Type="stringfield" Value="mmWave Sensors" id="FilterString" /> 
+	<property Type="hiddenfield" Value="4" id="ufNumImageSelection" />
+	<property Type="hiddenfield" Value="Meta Image 1" id="ufImageType0" />
+	<property Type="hiddenfield" Value=".bin" id="supportedFileExtensions" />
+	<property Type="hiddenfield" Value="Meta Image 2" id="ufImageType1" />
+	<property Type="hiddenfield" Value=".bin" id="supportedFileExtensions1" />
+	<property Type="hiddenfield" Value="Meta Image 3" id="ufImageType2" />
+	<property Type="hiddenfield" Value=".bin" id="supportedFileExtensions2" />
+	<property Type="hiddenfield" Value="Meta Image 4" id="ufImageType3" />
+	<property Type="hiddenfield" Value=".bin" id="supportedFileExtensions3" />
+	<property Type="numericfield" Value="0xFFFFFFFF" id="PRSC GlobalRun Capability Disable"/>
+	<instance XML_version="1.2" desc="DEBUGSSM_0" href="routers/debugssm.xml" id="DEBUGSSM_0" xml="debugssm.xml" xmlpath="routers"/>
+	<router HW_revision="1.0" XML_version="1.2" description="OneMCU DebugSS top level" id="DEBUGSSM_0" isa="DEBUGSSM">
+		<subpath id="subpath_2">
+			<property Type="numericfield" Value="0x1" id="Port Number"/>
+            <instance XML_version="1.2" desc="CS_DAP_0" href="routers/cs_dap.xml" id="CS_DAP_0" xml="cs_dap.xml" xmlpath="routers"/>
+            <router HW_revision="1.0" XML_version="1.2" description="CS_DAP Router" id="CS_DAP_0" isa="CS_DAP">
+			<property Type="choicelist" Value="1" id="Device Management"/>
+			<property Type="numericfield" Value="0x00000602" id="DAP AP Configuration"/>
+            <property Type="numericfield" Value="0" id="Support System Reset While Connected"/>
+			<property Type="filepathfield" Value="../../emulation/gel/xwr16xx_csdap_init.gel" id="GEL File"/>
+			<instance href="../Modules/AP/CFGAP.xml" id="" xml="CFGAP.xml" xmlpath="../Modules/AP/" HW_version="CS_DAP" description="CFGAP" baseaddr="0x00020400" endaddr="0x000204FC" size="0x100" accessnumbytes="4" permissions="p" /> 
+			<instance href="../Modules/AP/PWRAP.xml" id="" xml="PWRAP.xml" xmlpath="../Modules/AP/" HW_version="CS_DAP" description="PWRAP" baseaddr="0x00020700" endaddr="0x000207FC" size="0x100" accessnumbytes="4" permissions="p" /> 
+			<instance href="../Modules/AP/SECAP.xml" id="" xml="SECAP.xml" xmlpath="../Modules/AP/" HW_version="CS_DAP" description="SECAP" baseaddr="0x00020800" endaddr="0x000208FC" size="0x100" accessnumbytes="4" permissions="p" /> 
+				<subpath id="subpath_3">
+					<property Type="numericfield" Value="0" id="Port Number"/>
+					<property Type="choicelist" Value="Yes" id="Pseudo"/>
+					<property Type="choicelist" Value="virtual" id="Type"/>			
+					<instance XML_version="1.2" desc="CortexR4_0" href="cpus/cortex_r4.xml" id="CortexR4_0" xml="cortex_r4.xml" xmlpath="cpus"/>
+					<cpu HW_revision="1.0" XML_version="1.2" desc="Cortex_R4_0" description="Cortex_R4 CPU" deviceSim="false" id="CortexR4_0" isa="Cortex_R4">
+						<!--  Project Wizard Settings -->
+						<property Type="stringfield" Value="--silicon_version=7R4 --float_support=VFPv3D16 --abi=eabi --enum_type=packed --elf" id="CompilerBuildOptions" />
+						<property Type="stringfield" Value="--be32 --heap_size=0x800 --stack_size=0x800" id="LinkerBuildOptions"/>
+						<property Type="stringfield" Value="4.9.5" id="MinCodegenVersion" />
+						<property Type="stringfield" Value="true" id="IsElfDefault" />
+						<property Type="hiddenfield" Value="1" id="Use Software Reset Only" />
+						<property Type="stringfield" Value="xwr6843_r4f.cmd" id="LinkerCmd" />
+						 <!--  END Project Wizard Settings -->
+						<property Type="numericfield" Value="0x80010000" id="Address"/>
+						<property Type="numericfield" Value="0x02000506" id="Access Port Designator"/>
+						<property Type="numericfield" Value="0x1" id="TraceDeviceId"/>
+							
+						<!-- NEW ADDITIONS -->
+							<!-- TOPRCM -->
+							<instance href="../Modules/radar/MSS_TOPRCM.xml" id="TOPRCM" xml="MSS_TOPRCM.xml" xmlpath="../Modules/radar/" description="Top-level reset, clock management registers 16xx/14xx" baseaddr="0xFFFFE100" endaddr="0xFFFFE3FF" size="756" accessnumbytes="4" permissions="p" />
+							<!-- RCM -->
+							<instance href="../Modules/radar/MSS_RCM.xml" id="RCM" xml="MSS_RCM.xml" xmlpath="../Modules/radar/" description="MSS reset, clock management registers 16xx/14xx" baseaddr="0xFFFFFF00" endaddr="0xFFFFFFFF" size="256" accessnumbytes="4" permissions="p" />
+							<!-- GPCFG -->
+							<instance href="../Modules/radar/MSS_GPCFG_REG.xml" id="GPCFG_REG" xml="MSS_GPCFG_REG.xml" xmlpath="../Modules/radar/" description="General purpose control registers 16xx/14xx" baseaddr="0xFFFFF800" endaddr="0xFFFFFBFF" size="352" accessnumbytes="4" permissions="p" />
+
+							<!-- IOMUX -->
+							<instance href="../Modules/radar/MSS_IOMUX.xml" id="IOMUX" xml="MSS_IOMUX.xml" xmlpath="../Modules/radar/" description="MSS_IOMUX (IOMUX) module registers" baseaddr="0xFFFFEA00" endaddr="0xFFFFEBFF" size="0x200" accessnumbytes="4" permissions="p" />
+							<!-- DMM -->
+							<instance href="../Modules/radar/MSS_DMM.xml" id="DMM" xml="MSS_DMM.xml" xmlpath="../Modules/radar/" description="MSS_DMM (DMM1) module configuration registers" baseaddr="0xFCFFF700" endaddr="0xFCFFF7FF" size="0x100" accessnumbytes="4" permissions="p" />
+							<!-- DMM2 -->
+							<instance href="../Modules/radar/MSS_DMM2.xml" id="DMM2" xml="MSS_DMM2.xml" xmlpath="../Modules/radar/" description="MSS_DMM2 (DMM2) module configuration registers" baseaddr="0xFCFFF600" endaddr="0xFCFF_F6FF" size="0x100" accessnumbytes="4" permissions="p" />
+							<!-- ETPWM1 -->
+							<instance href="../Modules/radar/MSS_ETPWM1.xml" id="ETPWM1" xml="MSS_ETPWM1.xml" xmlpath="../Modules/radar/" description="MSS_ETPWM1 (ePWM1) configurationregisters" baseaddr="0xFCF78C00" endaddr="0xFCF78CFF" size="0x100" accessnumbytes="4" permissions="p" />
+							<!-- ETPWM2 -->
+							<instance href="../Modules/radar/MSS_ETPWM2.xml" id="ETPWM2" xml="MSS_ETPWM2.xml" xmlpath="../Modules/radar/" description="MSS_ETPWM2 (ePWM1) configurationregisters" baseaddr="0xFCF78D00" endaddr="0xFCF78DFF" size="0x100" accessnumbytes="4" permissions="p" />
+							<!-- ETPWM3 -->
+							<instance href="../Modules/radar/MSS_ETPWM3.xml" id="ETPWM3" xml="MSS_ETPWM3.xml" xmlpath="../Modules/radar/" description="MSS_ETPWM3 (ePWM1) configurationregisters" baseaddr="0xFCF78E00" endaddr="0xFCF80FFF" size="0x8200" accessnumbytes="4" permissions="p" />
+
+						<!-- SECURITY -->
+							<instance href="../Modules/radar/MSS_DTHE.xml" id="DTHE" xml="MSS_DTHE.xml" xmlpath="../Modules/radar/" description="Crypto Module Configuration Registers" baseaddr="0xFD000000" endaddr="0xFD003FFF" size="0x4000" accessnumbytes="4" permissions="p" />
+							<!-- AES -->
+							<instance href="../Modules/radar/MSS_AES.xml" id="AES" xml="MSS_AES.xml" xmlpath="../Modules/radar/" description="Registers for module AES" baseaddr="0xFD006000" endaddr="0xFD006FFF" size="0x1000" accessnumbytes="4" permissions="p" />
+							<!-- PKA -->
+							<instance href="../Modules/radar/MSS_PKA.xml" id="PKA" xml="MSS_PKA.xml" xmlpath="../Modules/radar/" description="Registers for module PKA" baseaddr="0xFD00C000" endaddr="0xFD017FFF" size="0xC000" accessnumbytes="4" permissions="p" />
+							<!-- SHA -->
+							<instance href="../Modules/radar/MSS_SHA.xml" id="SHA" xml="MSS_SHA.xml" xmlpath="../Modules/radar/" description="Registers for module SHA" baseaddr="0xFD004000" endaddr="0xFD004FFF" size="0x1000" accessnumbytes="4" permissions="p" />
+							<!-- TRNG -->
+							<instance href="../Modules/radar/MSS_TRNG.xml" id="TRNG" xml="TRNG.xml" xmlpath="../Modules/radar/" description="Registers for module TRNG" baseaddr="0xFD00A000" endaddr="0xFD00BBFF" size="0x1C00" accessnumbytes="4" permissions="p" />
+
+						<!-- GIO -->
+						<instance href="../Modules/radar/MSS_GIO.xml" id="GIO" xml="MSS_GIO.xml" xmlpath="../Modules/radar/" description="GIO Configuration Registers" baseaddr="0xFFF7BC00" endaddr="0xFFF7BDFF" size="180" accessnumbytes="4" permissions="p" />
+
+						<!-- DMA -->
+							<!-- DMA 1 -->
+							<instance href="../Modules/radar/MSS_DMA_REG.xml" id="DMA1" xml="MSS_DMA_REG.xml" xmlpath="../Modules/radar/" description="DMA-1 Configuration Registers" baseaddr="0xFFFFF000" endaddr="0xFFFFF3FF" size="0x400" accessnumbytes="4" permissions="p" />
+							<!-- DMA 2 -->
+							<instance href="../Modules/radar/MSS_DMA_REG.xml" id="DMA2" xml="MSS_DMA_REG.xml" xmlpath="../Modules/radar/" description="DMA-2 Configuration Registers" baseaddr="0xFCFFF800" endaddr="0xFCFFFBFF" size="0x400" accessnumbytes="4" permissions="p" />
+
+						<!-- VIM -->
+						<instance href="../Modules/radar/MSS_VIM.xml" id="VIM" xml="MSS_VIM.xml" xmlpath="../Modules/radar/" description="VIM Configuration Registers" baseaddr="0xFFFFFE00" endaddr="0xFFFFFEFF" size="0x100" accessnumbytes="4" permissions="p" />
+
+						<!-- RTA -->
+							<!-- RTI-A -->
+							<instance href="../Modules/radar/MSS_RTIA.xml" id="RTIA" xml="MSS_RTIA.xml" xmlpath="../Modules/radar/" description="RTI-A Configuration Registers" baseaddr="0xFFFFFC00" endaddr="0xFFFFFCFF" size="0x100" accessnumbytes="4" permissions="p" />
+							<!-- RTI-B -->
+							<instance href="../Modules/radar/MSS_RTIB.xml" id="RTIB" xml="MSS_RTIB.xml" xmlpath="../Modules/radar/" description="RTI-B Configuration Registers" baseaddr="0xFFFFEE00" endaddr="0xFFFFEEFF" size="0x100" accessnumbytes="4" permissions="p" />
+
+						<!-- QSPI -->
+						<instance href="../Modules/radar/MSS_QSPI.xml" id="QSPI" xml="MSS_QSPI.xml" xmlpath="../Modules/radar/" description="QSPI Configuration Registers" baseaddr="0xC0800000" endaddr="0xC0FFFFFF" size="116" accessnumbytes="4" permissions="p" />
+
+						<!-- SPI -->
+							<!-- MIBSPI-A -->
+							<instance href="../Modules/radar/MSS_MIBSPIA.xml" id="MIBSPIA" xml="MSS_MIBSPIA.xml" xmlpath="../Modules/radar/" description="MIBSPI-A Configuration Registers" baseaddr="0xFFF7F400" endaddr="0xFFF7F5FF" size="0x200" accessnumbytes="4" permissions="p" />
+							<!-- MIBSPI-B -->
+							<instance href="../Modules/radar/MSS_MIBSPIB.xml" id="MIBSPIB" xml="MSS_MIBSPIB.xml" xmlpath="../Modules/radar/" description="MIBSPI-B Configuration Registers" baseaddr="0xFFF7F600" endaddr="0xFFF7F7FF" size="0x200" accessnumbytes="4" permissions="p" />
+
+						<!-- SCI -->
+							<!-- SCI-A -->
+							<instance href="../Modules/radar/MSS_SCIA.xml" id="SCIA" xml="MSS_SCIA.xml" xmlpath="../Modules/radar/" description="SCI-A Configuration Registers" baseaddr="0xFFF7E500" endaddr="0xFFF7E5FF" size="148" accessnumbytes="4" permissions="p" />
+							<!-- SCI-B -->
+							<instance href="../Modules/radar/MSS_SCIB.xml" id="SCIB" xml="MSS_SCIB.xml" xmlpath="../Modules/radar/" description="SCI-B Configuration Registers" baseaddr="0xFFF7E700" endaddr="0xFFF7E7FF" size="148" accessnumbytes="4" permissions="p" />
+
+						<!-- I2C -->
+						<instance href="../Modules/radar/MSS_I2C.xml" id="I2C" xml="I2C.xml" xmlpath="../Modules/radar/" description="I2C Configuration Registers" baseaddr="0xFFF7D400" endaddr="0xFFF7D4FF" size="112" accessnumbytes="4" permissions="p" />
+
+						<!-- TPTC -->
+							<!-- TPTC0 -->
+							<instance href="../Modules/radar/TPTC.xml" id="TPTC0" xml="TPTC.xml" xmlpath="../Modules/radar/" description="TPTC-0 Configuration Registers" baseaddr="0x50000000" endaddr="0x50000317" size="792" accessnumbytes="4" permissions="p" />
+							<!-- TPTC1 -->
+							<instance href="../Modules/radar/TPTC.xml" id="TPTC1" xml="TPTC.xml" xmlpath="../Modules/radar/" description="TPTC-1 Configuration Registers" baseaddr="0x50000800" endaddr="0x50000B17" size="792" accessnumbytes="4" permissions="p" />
+							<!-- TPTC2 -->
+							<instance href="../Modules/radar/TPTC.xml" id="TPTC2" xml="TPTC.xml" xmlpath="../Modules/radar/" description="TPTC-2 Configuration Registers" baseaddr="0x50090000" endaddr="0x50090317" size="792" accessnumbytes="4" permissions="p" />
+							<!-- TPTC3 -->
+							<instance href="../Modules/radar/TPTC.xml" id="TPTC3" xml="TPTC.xml" xmlpath="../Modules/radar/" description="TPTC-3 Configuration Registers" baseaddr="0x50090400" endaddr="0x50090717" size="792" accessnumbytes="4" permissions="p" />
+
+						<!-- TPCC -->
+							<!-- TPCC0 -->
+							<instance href="../Modules/radar/TPCC.xml" id="TPCC0" xml="TPCC.xml" xmlpath="../Modules/radar/" description="TPCC-0 Configuration Registers" baseaddr="0x50010000" endaddr="0x50012098" size="0x2098" accessnumbytes="4" permissions="p" />
+							<!-- TPCC1 -->
+							<instance href="../Modules/radar/TPCC.xml" id="TPCC1" xml="TPCC.xml" xmlpath="../Modules/radar/" description="TPCC-1 Configuration Registers" baseaddr="0x500A0000" endaddr="0x500A2098" size="0x2098" accessnumbytes="4" permissions="p" />
+
+						<!-- CRC -->
+						<instance href="../Modules/radar/xwr16xx/MSS_MCRC.xml" id="CRC" xml="MSS_MCRC.xml" xmlpath="../Modules/radar/" description="CRC Configuration Registers" baseaddr="0xFE000000" endaddr="0xFE0003FF" size="0x400" accessnumbytes="4" permissions="p" />
+
+						<!-- DCC-A -->
+						<instance href="../Modules/radar/MSS_DCCA.xml" id="DCCA" xml="MSS_DCCA.xml" xmlpath="../Modules/radar/" description="DCC-A Configuration Registers" baseaddr="0xFFFFEC00" endaddr="0xFFFFEC2C" size="0x2C" accessnumbytes="4" permissions="p" />
+
+						<!-- DCC-B -->
+						<instance href="../Modules/radar/MSS_DCCB.xml" id="DCCB" xml="MSS_DCCB.xml" xmlpath="../Modules/radar/" description="DCC-B Configuration Registers" baseaddr="0xFFFFF400" endaddr="0xFFFFF42C" size="0x2C" accessnumbytes="4" permissions="p" />
+
+						<!-- ESM -->
+						<instance href="../Modules/radar/MSS_ESM.xml" id="ESM" xml="MSS_ESM.xml" xmlpath="../Modules/radar/" description="ESM Configuration Registers" baseaddr="0xFFFFF500" endaddr="0xFFFFF5FF" size="0x100" accessnumbytes="4" permissions="p" />
+
+						<!-- MAILBOX -->
+							<!-- ARM to RADARSS MAILBOX -->
+							<instance href="../Modules/radar/MAILBOX.xml" id="MBX_MSS2RSS" xml="MAILBOX.xml" xmlpath="../Modules/radar/" description="MSS to RSS MBX Configuration Registers" baseaddr="0xF0608000" endaddr="0xF060803C" size="0x3C" accessnumbytes="4" permissions="p" />
+
+							<!-- RADARSS to ARM MAILBOX -->
+							<instance href="../Modules/radar/MAILBOX.xml" id="MBX_RSS2MSS" xml="MAILBOX.xml" xmlpath="../Modules/radar/" description="RSS to MSS MBX Configuration Registers" baseaddr="0xF0608600" endaddr="0xF060863C" size="0x3C" accessnumbytes="4" permissions="p" />
+
+					</cpu>
+					<instance XML_version="1.2" desc="ETM_0" href="cpus/cs_child.xml" id="ETM_0" xml="cs_child.xml" xmlpath="cpus"/>
+					<cpu HW_revision="1.0" XML_version="1.2" description="cs_child" deviceSim="false" id="ETM_0" isa="cs_child">
+						<property Type="numericfield" Value="0xFFA18000" id="Address"/>
+						<property Type="numericfield" Value="0x6E400" id="Identity"/>
+					</cpu>
+				</subpath>
+				<subpath desc="Trace" id="subpath_4">
+					<property Type="numericfield" Value="2" id="Port Number"/>
+					<property Type="choicelist" Value="Yes" id="Pseudo"/>
+					<property Type="choicelist" Value="debug" id="Type"/>			
+					<instance XML_version="1.2" desc="CSETB_00" href="cpus/csetb.xml" id="CSETB_00" xml="csetb.xml" xmlpath="cpus"/>
+					<cpu HW_revision="1.0" XML_version="1.2" desc="CSETB_0" description="Embedded Trace Buffer" deviceSim="false" id="CSETB_00" isa="CS_ETB">
+						<property Type="numericfield" Value="0xFFA3C000" id="Address"/>
+						<property Type="numericfield" Value="0x6" id="Access Port Number"/>
+						<property Type="numericfield" Value="0x6" id="Access Port Designator"/>
+					</cpu>
+				</subpath>
+			</router>
+		</subpath>
+	</router>
+</device>
+<!--End Of File -->

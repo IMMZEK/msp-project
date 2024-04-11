@@ -1,0 +1,633 @@
+<module name="ISP_CCDC" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="CCDC_PID" acronym="CCDC_PID" offset="0x0" width="32" description="PERIPHERAL ID REGISTER">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="R"/>
+    <bitfield id="TID" width="8" begin="23" end="16" resetval="0x01" description="Peripheral identification: CCDC module" range="" rwaccess="R"/>
+    <bitfield id="CID" width="8" begin="15" end="8" resetval="0xFE" description="Class identification:Camera ISP" range="" rwaccess="R"/>
+    <bitfield id="PREV" width="8" begin="7" end="0" resetval="TI internal data" description="Peripheral revision number" range="" rwaccess="R"/>
+  </register>
+  <register id="CCDC_PCR" acronym="CCDC_PCR" offset="0x4" width="32" description="PERIPHERAL CONTROL REGISTER">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0x0" description="Reserved bit field. Write the reset value." range="" rwaccess="RW"/>
+    <bitfield id="BUSY" width="1" begin="1" end="1" resetval="0x0" description="CCDC module busy." range="" rwaccess="R">
+      <bitenum value="0" token="BUSY_0" description="Module is not busy."/>
+      <bitenum value="1" token="BUSY_1" description="Module is busy."/>
+    </bitfield>
+    <bitfield id="ENABLE" width="1" begin="0" end="0" resetval="0x0" description="CCDC module enable.This bit is latched by VD (start of frame)" range="" rwaccess="RW">
+      <bitenum value="0" token="ENABLE_0" description="Disable module."/>
+      <bitenum value="1" token="ENABLE_1" description="Enable module."/>
+    </bitfield>
+  </register>
+  <register id="CCDC_SYN_MODE" acronym="CCDC_SYN_MODE" offset="0x8" width="32" description="SYNC and mode set register">
+    <bitfield id="RESERVED" width="12" begin="31" end="20" resetval="0x000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="SDR2RSZ" width="1" begin="19" end="19" resetval="0x0" description="Memory port output into the RESIZER input. Controls whether or not the memory port output data are forwarded to the RESIZER module input port. This does not depend on the state of the CCDC_SYN_MODE.WEN bit. This bit must only be set if the CCDC module receives directly YUV422 data. The input frame size to the RESIZER module is the same as the output frame size to the memory port. The data are simultaneously written to memory if the WEN bit is set while sending the same data to the RESIZER module. The PREVIEW module can also write to the RESIZER module: this bit takes precedence over the PREVIEW module settings. This bit is latched by the VS sync pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="SDR2RSZ_0" description="Disable"/>
+      <bitenum value="1" token="SDR2RSZ_1" description="Enable"/>
+    </bitfield>
+    <bitfield id="VP2SDR" width="1" begin="18" end="18" resetval="0x0" description="Video port output enable to the output formatter.. Controls whether the video port data is forwarded to the output formatter or not. If CCDC_SYN_MODE .WEN= 1, the video port data is written to memory. Note that if field is set, then SDRAM line (VERT_START.SLVx) and pixel start (HORZ_INFO.SPH) are with respect to the video port output (and not the original input) This bit field is latched by the VS sync pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="VP2SDR_0" description="Disable"/>
+      <bitenum value="1" token="VP2SDR_1" description="Enable"/>
+    </bitfield>
+    <bitfield id="WEN" width="1" begin="17" end="17" resetval="0x0" description="Data write enable. Controls whether the CCDC module output data are written to memory or not. This bit field is latched by the VS sync pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="WEN_0" description="Disable"/>
+      <bitenum value="1" token="WEN_1" description="Enable"/>
+    </bitfield>
+    <bitfield id="VDHDEN" width="1" begin="16" end="16" resetval="0x0" description="Timing generator enable. If HS/VS sync pulses are defined as output signals, activates the internal timing generator. If HS/VS sync pulses are defined as input signals, activates internal timing generator to synchronize with HS/VS. This bit must be set to 1 when HS and VS signals are used." range="" rwaccess="RW">
+      <bitenum value="0" token="VDHDEN_0" description="Disable"/>
+      <bitenum value="1" token="VDHDEN_1" description="Enable"/>
+    </bitfield>
+    <bitfield id="FLDSTAT" width="1" begin="15" end="15" resetval="0x0" description="cam_fld signal status. This bit field applies only if the CCDC module is configured to work in interlaced mode: CCDC_SYN_MODE.FLDMODE = 'interlaced'. It indicates the status of the current field." range="" rwaccess="R">
+      <bitenum value="0" token="FLDSTAT_0" description="Odd field"/>
+      <bitenum value="1" token="FLDSTAT_1" description="Even field"/>
+    </bitfield>
+    <bitfield id="LPF" width="1" begin="14" end="14" resetval="0x0" description="Three-tap low pass (antialiasing) filter enable. This bit field is latched by the VS sync pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="LPF_0" description="Filter is disabled."/>
+      <bitenum value="1" token="LPF_1" description="Filter is enabled."/>
+    </bitfield>
+    <bitfield id="INPMOD" width="2" begin="13" end="12" resetval="0x0" description="cam_d format in SYNC mode. Sets the data input format." range="" rwaccess="RW">
+      <bitenum value="0" token="INPMOD_0" description="Raw data"/>
+      <bitenum value="1" token="INPMOD_1" description="YCbCr data on 16 bits. It is required to enable the 8 to 16-bit bridge in the register."/>
+      <bitenum value="2" token="INPMOD_2" description="YCbCr data on 8 bits."/>
+    </bitfield>
+    <bitfield id="PACK8" width="1" begin="11" end="11" resetval="0x0" description="Data packing. Sets the data packing configuration when the data is written to memory." range="" rwaccess="RW">
+      <bitenum value="0" token="PACK8_0" description="Normal mode: 16 bits/pixel."/>
+      <bitenum value="1" token="PACK8_1" description="Pack mode: 8 bits/pixel."/>
+    </bitfield>
+    <bitfield id="DATSIZ" width="3" begin="10" end="8" resetval="0x0" description="cam_d signal width in SYNC mode. Valid only when CCDC_SYN_MODE.INPMOD = 'raw data'." range="" rwaccess="RW">
+      <bitenum value="0" token="DATSIZ_0" description="cam_d is 8 bits but the 8 to 16-bit bridge is enabled in the register."/>
+      <bitenum value="4" token="DATSIZ_4" description="cam_d is 12 bits"/>
+      <bitenum value="5" token="DATSIZ_5" description="cam_d is 11 bits"/>
+      <bitenum value="6" token="DATSIZ_6" description="cam_d is 10 bits"/>
+      <bitenum value="7" token="DATSIZ_7" description="cam_d is 8 bits"/>
+    </bitfield>
+    <bitfield id="FLDMODE" width="1" begin="7" end="7" resetval="0x0" description="cam_fld signal mode." range="" rwaccess="RW">
+      <bitenum value="0" token="FLDMODE_0" description="Progressive mode. cam_fld not used."/>
+      <bitenum value="1" token="FLDMODE_1" description="Interlaced mode. cam_fld used."/>
+    </bitfield>
+    <bitfield id="DATAPOL" width="1" begin="6" end="6" resetval="0x0" description="cam_d signal polarity." range="" rwaccess="RW">
+      <bitenum value="0" token="DATAPOL_0" description="Normal"/>
+      <bitenum value="1" token="DATAPOL_1" description="One's complement"/>
+    </bitfield>
+    <bitfield id="EXWEN" width="1" begin="5" end="5" resetval="0x0" description="External write enable selection. The cam_wen signal can be used as an external memory write-enable signal. The data is stored to memory only if cam_hs, cam_vs and cam_wen signals are asserted." range="" rwaccess="RW">
+      <bitenum value="0" token="EXWEN_0" description="cam_wen is not used."/>
+      <bitenum value="1" token="EXWEN_1" description="cam_wen is used"/>
+    </bitfield>
+    <bitfield id="FLDPOL" width="1" begin="4" end="4" resetval="0x0" description="cam_fld signal polarity." range="" rwaccess="RW">
+      <bitenum value="0" token="FLDPOL_0" description="Positive"/>
+      <bitenum value="1" token="FLDPOL_1" description="Negative"/>
+    </bitfield>
+    <bitfield id="HDPOL" width="1" begin="3" end="3" resetval="0x0" description="Sets the cam_hs signal polarity." range="" rwaccess="RW">
+      <bitenum value="0" token="HDPOL_0" description="Positive"/>
+      <bitenum value="1" token="HDPOL_1" description="Negative"/>
+    </bitfield>
+    <bitfield id="VDPOL" width="1" begin="2" end="2" resetval="0x0" description="cam_vs signal polarity" range="" rwaccess="RW">
+      <bitenum value="0" token="VDPOL_0" description="Positive"/>
+      <bitenum value="1" token="VDPOL_1" description="Negative"/>
+    </bitfield>
+    <bitfield id="FLDOUT" width="1" begin="1" end="1" resetval="0x0" description="cam_fld signal direction." range="" rwaccess="RW">
+      <bitenum value="0" token="FLDOUT_0" description="Input"/>
+      <bitenum value="1" token="FLDOUT_1" description="Output"/>
+    </bitfield>
+    <bitfield id="VDHDOUT" width="1" begin="0" end="0" resetval="0x0" description="cam_hs and cam_vs signal directions." range="" rwaccess="RW">
+      <bitenum value="0" token="VDHDOUT_0" description="Input"/>
+      <bitenum value="1" token="VDHDOUT_1" description="Output"/>
+    </bitfield>
+  </register>
+  <register id="CCDC_HD_VD_WID" acronym="CCDC_HD_VD_WID" offset="0xC" width="32" description="SYNC WIDTH CONTROL REGISTER">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="HDW" width="12" begin="27" end="16" resetval="0x000" description="Sets the width of the HS sync pulse if set as output. The width of the pulse is (HDW+1) pixel clocks. Not used when HS/VS sync pulses are input signals (CCDC_SYN_MODE.VDHDOUT = 0). This bit field is latched by the VS sync pulse." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VDW" width="12" begin="11" end="0" resetval="0x000" description="Sets the width of the VS sync pulse is set as output. The width of the pulse is (VDW+1) lines. Not used when HS/VS sync pulses are input signals (CCDC_SYN_MODE.VDHDOUT = 0). This bit field is latched by the VS sync pulse." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_PIX_LINES" acronym="CCDC_PIX_LINES" offset="0x10" width="32" description="SIZE CONTROL REGISTER">
+    <bitfield id="PPLN" width="16" begin="31" end="16" resetval="0x0000" description="Pixels per line Sets the number of pixel clock periods in one line. HD period = (PPLN + 1) pixel clocks. Not used when HS/VS sync pulses are input signals (CCDC_SYN_MODE.VDHDOUT = 0). This bit field is latched by the VS sync pulse" range="" rwaccess="RW"/>
+    <bitfield id="HLPRF" width="16" begin="15" end="0" resetval="0x0000" description="Half line per field or frame Sets the number of half lines per frame or field. VD period = (HLPFR + 1)/2 lines. Not used when HS/VS sync pulses are input signals (CCDC_SYN_MODE.VDHDOUT = 0). Sets the internal timing generator to generate the correct number of HS pulses in between two VS pulses. If the sensor is interlaced, with a total of N lines, then this field must be set to N. This means that N half lines are written for each field. If the sensor is progressive, then this register must be set to be twice the number of lines to be written. For example, if sensor outputs N lines, this field must be set to 2N. This bit field is latched by the VS sync pulse." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_HORZ_INFO" acronym="CCDC_HORZ_INFO" offset="0x14" width="32" description="HORIZONTAL PIXEL INFO REGISTER">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="SPH" width="15" begin="30" end="16" resetval="0x0000" description="Start pixel horizontal Sets the pixel clock position at which data output to memory begins. It is measured from the start of HS. This bit field is latched by the VS sync pulse." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="NPH" width="15" begin="14" end="0" resetval="0x0100" description="Number of pixels horizontal Sets the number of horizontal pixels output to memory. The number of pixels output is (NPH + 1). This bit field is latched by the VS sync pulse." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_VERT_START" acronym="CCDC_VERT_START" offset="0x18" width="32" description="VERTICAL LINE START REGISTER">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="SLV0" width="15" begin="30" end="16" resetval="0x0000" description="Start line vertical - field0 Sets the line at which data output to memory begins. It is measured from the start of the VS sync pulse. This bit field is latched by the VS sync pulse." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="SLV1" width="15" begin="14" end="0" resetval="0x0000" description="Start line vertical - field1 Sets the line at which data output to memory begins. It is measured from the start of the VS sync pulse. For a progressive sensor, this bit field is ignored. This bit field is latched by the VS sync pulse." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_VERT_LINES" acronym="CCDC_VERT_LINES" offset="0x1C" width="32" description="VERTICAL LINE NUMBER REGISTER">
+    <bitfield id="RESERVED" width="17" begin="31" end="15" resetval="0x00000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="NLV" width="15" begin="14" end="0" resetval="0x0000" description="Number of lines - vertical direction Sets the number of vertical lines output to memory. The number of lines output is (NLV + 1). This bit is latched by the VS sync pulse." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_CULLING" acronym="CCDC_CULLING" offset="0x20" width="32" description="CULL CONTROL REGISTER">
+    <bitfield id="CULHEVN" width="8" begin="31" end="24" resetval="0xFF" description="Horizontal culling patterns for even lines. Sets an 8-bit mask (0:cull, 1:retain). The LSB is the 1st pixel and the MSB is the 8th pixel. Then, the pattern repeats. This bit field is latched by the VS sync pulse." range="" rwaccess="RW"/>
+    <bitfield id="CULHODD" width="8" begin="23" end="16" resetval="0xFF" description="Horizontal culling patterns for odd lines. Sets an 8-bit mask (0:cull, 1:retain). The LSB is the 1st pixel and the MSB is the 8th pixel. Then, the pattern repeats. This bit field is latched by the VS sync pulse." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="8" begin="15" end="8" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="CULV" width="8" begin="7" end="0" resetval="0xFF" description="Vertical culling pattern. Sets an 8-bit mask (0:cull, 1:retain). The LSB is the 1st line and the MSB is the 8th line. Then, the pattern repeats. This bit field is latched by the VS sync pulse." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_HSIZE_OFF" acronym="CCDC_HSIZE_OFF" offset="0x24" width="32" description="HORIZONTAL SIZE REGISTER">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LNOFST" width="16" begin="15" end="0" resetval="0x0000" description="Line offset. Sets the offset for each output line to memory. The offset must be a multiple of 32 bytes: the 5 least significant bits are ignored. Usually the line offset is equal to the line length in bytes, that is, the line length must be a multiple of 32 bytes. If LNOFST = 0, the data is written again and again over the same line. For optimal performance in the system, the address offset must be on a 256-byte boundary. This bit field is latched by the VS sync pulse." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_SDOFST" acronym="CCDC_SDOFST" offset="0x28" width="32" description="MEMORY OFFSET REGISTER">
+    <bitfield id="RESERVED" width="17" begin="31" end="15" resetval="0x00000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="FIINV" width="1" begin="14" end="14" resetval="0x0" description="Field identification signal inverse This bit field is latched by the VS sync pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="FIINV_0" description="Non inverse"/>
+      <bitenum value="1" token="FIINV_1" description="Inverse"/>
+    </bitfield>
+    <bitfield id="FOFST" width="2" begin="13" end="12" resetval="0x0" description="Line offset value This bit field is latched by the VS sync pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="FOFST_0" description="+1 line"/>
+      <bitenum value="1" token="FOFST_1" description="+2 lines"/>
+      <bitenum value="2" token="FOFST_2" description="+3 lines"/>
+      <bitenum value="3" token="FOFST_3" description="+4 lines"/>
+    </bitfield>
+    <bitfield id="LOFST0" width="3" begin="11" end="9" resetval="0x0" description="Line offset values of even lines and even fields(field id = 0). This bit field is latched by the VS sync pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="LOFST0_0" description="+1 line"/>
+      <bitenum value="1" token="LOFST0_1" description="+2 lines"/>
+      <bitenum value="2" token="LOFST0_2" description="+3 lines"/>
+      <bitenum value="3" token="LOFST0_3" description="+4 lines"/>
+      <bitenum value="4" token="LOFST0_4" description="-1 line"/>
+      <bitenum value="5" token="LOFST0_5" description="-2 lines"/>
+      <bitenum value="6" token="LOFST0_6" description="-3 lines"/>
+      <bitenum value="7" token="LOFST0_7" description="-4 lines"/>
+    </bitfield>
+    <bitfield id="LOFST1" width="3" begin="8" end="6" resetval="0x0" description="Line offset values of odd lines and even fields(field id = 0). This bit field is latched by the VS sync pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="LOFST1_0" description="+1 line"/>
+      <bitenum value="1" token="LOFST1_1" description="+2 lines"/>
+      <bitenum value="2" token="LOFST1_2" description="+3 lines"/>
+      <bitenum value="3" token="LOFST1_3" description="+4 lines"/>
+      <bitenum value="4" token="LOFST1_4" description="-1 line"/>
+      <bitenum value="5" token="LOFST1_5" description="-2 lines"/>
+      <bitenum value="6" token="LOFST1_6" description="-3 lines"/>
+      <bitenum value="7" token="LOFST1_7" description="-4 lines"/>
+    </bitfield>
+    <bitfield id="LOFST2" width="3" begin="5" end="3" resetval="0x0" description="Line offset values of even lines and odd fields(field id = 1). This bit field is latched by the VS sync pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="LOFST2_0" description="+1 line"/>
+      <bitenum value="1" token="LOFST2_1" description="+2 lines"/>
+      <bitenum value="2" token="LOFST2_2" description="+3 lines"/>
+      <bitenum value="3" token="LOFST2_3" description="+4 lines"/>
+      <bitenum value="4" token="LOFST2_4" description="-1 line"/>
+      <bitenum value="5" token="LOFST2_5" description="-2 lines"/>
+      <bitenum value="6" token="LOFST2_6" description="-3 lines"/>
+      <bitenum value="7" token="LOFST2_7" description="-4 lines"/>
+    </bitfield>
+    <bitfield id="LOFST3" width="3" begin="2" end="0" resetval="0x0" description="Line offset values of odd lines and odd fields(field id = 1). This bit field is latched by the VS sync pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="LOFST3_0" description="+1 line"/>
+      <bitenum value="1" token="LOFST3_1" description="+2 lines"/>
+      <bitenum value="2" token="LOFST3_2" description="+3 lines"/>
+      <bitenum value="3" token="LOFST3_3" description="+4 lines"/>
+      <bitenum value="4" token="LOFST3_4" description="-1 line"/>
+      <bitenum value="5" token="LOFST3_5" description="-2 lines"/>
+      <bitenum value="6" token="LOFST3_6" description="-3 lines"/>
+      <bitenum value="7" token="LOFST3_7" description="-4 lines"/>
+    </bitfield>
+  </register>
+  <register id="CCDC_SDR_ADDR" acronym="CCDC_SDR_ADDR" offset="0x2C" width="32" description="MEMORY ADDRESS REGISTER">
+    <bitfield id="ADDR" width="32" begin="31" end="0" resetval="0x00000000" description="Memory address Sets the CCDC module output address. The address should be aligned on a 32-byte boundary: the 5 least significant bits are ignored. For optimal performance in the system, the address must be on a 256-byte boundary. This bit field is latched by the VS sync pulse." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_CLAMP" acronym="CCDC_CLAMP" offset="0x30" width="32" description="CLAMP CONTROL REGISTER">
+    <bitfield id="CLAMPEN" width="1" begin="31" end="31" resetval="0x0" description="Clamp enable Enables clamping based on the calculated average of optical black sample. This bit is latched by the VS sync pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="CLAMPEN_0" description="Disable"/>
+      <bitenum value="1" token="CLAMPEN_1" description="Enable"/>
+    </bitfield>
+    <bitfield id="OBSLEN" width="3" begin="30" end="28" resetval="0x0" description="Optical black sample length Sets the number of optical black sample pixels per line to include in the average calculation." range="" rwaccess="RW">
+      <bitenum value="0" token="OBSLEN_0" description="1 pixel"/>
+      <bitenum value="1" token="OBSLEN_1" description="2 pixels"/>
+      <bitenum value="2" token="OBSLEN_2" description="4 pixels"/>
+      <bitenum value="3" token="OBSLEN_3" description="8 pixels"/>
+      <bitenum value="4" token="OBSLEN_4" description="16 pixels"/>
+    </bitfield>
+    <bitfield id="OBSLN" width="3" begin="27" end="25" resetval="0x0" description="Optical black sample lines Sets the number of optical black sample lines to include in the average calculation." range="" rwaccess="RW">
+      <bitenum value="0" token="OBSLN_0" description="1 line"/>
+      <bitenum value="1" token="OBSLN_1" description="2 lines"/>
+      <bitenum value="2" token="OBSLN_2" description="4 lines"/>
+      <bitenum value="3" token="OBSLN_3" description="8 lines"/>
+      <bitenum value="4" token="OBSLN_4" description="16 lines"/>
+    </bitfield>
+    <bitfield id="OBST" width="15" begin="24" end="10" resetval="0x0000" description="Start pixel of optical black samples Start pixel position of optical black samples specified from the start of HS in pixel clocks." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="9" end="5" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="OBGAIN" width="5" begin="4" end="0" resetval="0x10" description="Gain to apply to the optical black average The gain value is in U5Q4 fixed point representation (0 to 1.9375)." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_DCSUB" acronym="CCDC_DCSUB" offset="0x34" width="32" description="DC CLAMP REGISTER">
+    <bitfield id="RESERVED" width="18" begin="31" end="14" resetval="0x00000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="DCSUB" width="14" begin="13" end="0" resetval="0x0000" description="DC value to subtract from the data. Sets the DC value to be subtracted from the data when optical black sampling is disabled: CCDC_CLAMP.CLAMPEN = 0 NOTE: In OMAP3430, this function does not clip negative results to 0 for YUV 8 bit input or REC656 input modes (SYN_ MODE.INPMOD == 2 || REC656IF.REC656ON == 1)." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_COLPTN" acronym="CCDC_COLPTN" offset="0x38" width="32" description="COLOR PATTERN REGISTER">
+    <bitfield id="CP3LPC3" width="2" begin="31" end="30" resetval="0x0" description="Color pattern, 3rd line, pixel counter = 0" range="" rwaccess="RW">
+      <bitenum value="0" token="CP3LPC3_0" description="R/Ye"/>
+      <bitenum value="1" token="CP3LPC3_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP3LPC3_2" description="Gb/G"/>
+      <bitenum value="3" token="CP3LPC3_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP3LPC2" width="2" begin="29" end="28" resetval="0x0" description="Color pattern, 3rd line, pixel counter = 2" range="" rwaccess="RW">
+      <bitenum value="0" token="CP3LPC2_0" description="R/Ye"/>
+      <bitenum value="1" token="CP3LPC2_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP3LPC2_2" description="Gb/G"/>
+      <bitenum value="3" token="CP3LPC2_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP3LPC1" width="2" begin="27" end="26" resetval="0x0" description="Color pattern, 3rd line, pixel counter = 1" range="" rwaccess="RW">
+      <bitenum value="0" token="CP3LPC1_0" description="R/Ye"/>
+      <bitenum value="1" token="CP3LPC1_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP3LPC1_2" description="Gb/G"/>
+      <bitenum value="3" token="CP3LPC1_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP3LPC0" width="2" begin="25" end="24" resetval="0x0" description="Color pattern, 3rd line, pixel counter = 0" range="" rwaccess="RW">
+      <bitenum value="0" token="CP3LPC0_0" description="R/Ye"/>
+      <bitenum value="1" token="CP3LPC0_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP3LPC0_2" description="Gb/G"/>
+      <bitenum value="3" token="CP3LPC0_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP2PLC3" width="2" begin="23" end="22" resetval="0x0" description="Color pattern, 2nd line, pixel counter = 3" range="" rwaccess="RW">
+      <bitenum value="0" token="CP2PLC3_0" description="R/Ye"/>
+      <bitenum value="1" token="CP2PLC3_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP2PLC3_2" description="Gb/G"/>
+      <bitenum value="3" token="CP2PLC3_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP2PLC2" width="2" begin="21" end="20" resetval="0x0" description="Color pattern, 2nd line, pixel counter = 2" range="" rwaccess="RW">
+      <bitenum value="0" token="CP2PLC2_0" description="R/Ye"/>
+      <bitenum value="1" token="CP2PLC2_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP2PLC2_2" description="Gb/G"/>
+      <bitenum value="3" token="CP2PLC2_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP2PLC1" width="2" begin="19" end="18" resetval="0x0" description="Color pattern, 2nd line, pixel counter = 1" range="" rwaccess="RW">
+      <bitenum value="0" token="CP2PLC1_0" description="R/Ye"/>
+      <bitenum value="1" token="CP2PLC1_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP2PLC1_2" description="Gb/G"/>
+      <bitenum value="3" token="CP2PLC1_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP2PLC0" width="2" begin="17" end="16" resetval="0x0" description="Color pattern, 2nd line, pixel counter = 0" range="" rwaccess="RW">
+      <bitenum value="0" token="CP2PLC0_0" description="R/Ye"/>
+      <bitenum value="1" token="CP2PLC0_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP2PLC0_2" description="Gb/G"/>
+      <bitenum value="3" token="CP2PLC0_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP1PLC3" width="2" begin="15" end="14" resetval="0x0" description="Color pattern, 1st line, pixel counter = 3" range="" rwaccess="RW">
+      <bitenum value="0" token="CP1PLC3_0" description="R/Ye"/>
+      <bitenum value="1" token="CP1PLC3_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP1PLC3_2" description="Gb/G"/>
+      <bitenum value="3" token="CP1PLC3_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP1PLC2" width="2" begin="13" end="12" resetval="0x0" description="Color pattern, 1st line, pixel counter = 2" range="" rwaccess="RW">
+      <bitenum value="0" token="CP1PLC2_0" description="R/Ye"/>
+      <bitenum value="1" token="CP1PLC2_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP1PLC2_2" description="Gb/G"/>
+      <bitenum value="3" token="CP1PLC2_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP1PLC1" width="2" begin="11" end="10" resetval="0x0" description="Color pattern, 1st line, pixel counter = 1" range="" rwaccess="RW">
+      <bitenum value="0" token="CP1PLC1_0" description="R/Ye"/>
+      <bitenum value="1" token="CP1PLC1_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP1PLC1_2" description="Gb/G"/>
+      <bitenum value="3" token="CP1PLC1_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP1PLC0" width="2" begin="9" end="8" resetval="0x0" description="Color pattern, 1st line, pixel counter = 0" range="" rwaccess="RW">
+      <bitenum value="0" token="CP1PLC0_0" description="R/Ye"/>
+      <bitenum value="1" token="CP1PLC0_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP1PLC0_2" description="Gb/G"/>
+      <bitenum value="3" token="CP1PLC0_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP0PLC3" width="2" begin="7" end="6" resetval="0x0" description="Color pattern, 0th line, pixel counter = 3" range="" rwaccess="RW">
+      <bitenum value="0" token="CP0PLC3_0" description="R/Ye"/>
+      <bitenum value="1" token="CP0PLC3_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP0PLC3_2" description="Gb/G"/>
+      <bitenum value="3" token="CP0PLC3_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP0PLC2" width="2" begin="5" end="4" resetval="0x0" description="Color pattern, 0th line, pixel counter = 2" range="" rwaccess="RW">
+      <bitenum value="0" token="CP0PLC2_0" description="R/Ye"/>
+      <bitenum value="1" token="CP0PLC2_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP0PLC2_2" description="Gb/G"/>
+      <bitenum value="3" token="CP0PLC2_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP0PLC1" width="2" begin="3" end="2" resetval="0x0" description="Color pattern, 0th line, pixel counter = 1" range="" rwaccess="RW">
+      <bitenum value="0" token="CP0PLC1_0" description="R/Ye"/>
+      <bitenum value="1" token="CP0PLC1_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP0PLC1_2" description="Gb/G"/>
+      <bitenum value="3" token="CP0PLC1_3" description="B/Mg"/>
+    </bitfield>
+    <bitfield id="CP0PLC0" width="2" begin="1" end="0" resetval="0x0" description="Color pattern, 0th line, pixel counter = 0" range="" rwaccess="RW">
+      <bitenum value="0" token="CP0PLC0_0" description="R/Ye"/>
+      <bitenum value="1" token="CP0PLC0_1" description="Gr/Cy"/>
+      <bitenum value="2" token="CP0PLC0_2" description="Gb/G"/>
+      <bitenum value="3" token="CP0PLC0_3" description="B/Mg"/>
+    </bitfield>
+  </register>
+  <register id="CCDC_BLKCMP" acronym="CCDC_BLKCMP" offset="0x3C" width="32" description="BLACK COMPENSATION REGISTER">
+    <bitfield id="R_YE" width="8" begin="31" end="24" resetval="0x00" description="Black-level compensation, R/Ye pixels. 2's complement, MSB is sign bit. The range is -128 to +127." range="" rwaccess="RW"/>
+    <bitfield id="GR_CY" width="8" begin="23" end="16" resetval="0x00" description="Black-level compensation, Gr/Cy pixels. 2's complement, MSB is sign bit. The range is -128 to +127." range="" rwaccess="RW"/>
+    <bitfield id="GB_G" width="8" begin="15" end="8" resetval="0x00" description="Black-level compensation, Gb/G pixels. 2's complement, MSB is sign bit. The range is -128 to +127." range="" rwaccess="RW"/>
+    <bitfield id="B_MG" width="8" begin="7" end="0" resetval="0x00" description="Black-level compensation, B/Mg pixels. 2's complement, MSB is sign bit. The range is -128 to +127." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_FPC" acronym="CCDC_FPC" offset="0x40" width="32" description="FAULT PIXEL CORRECTION REGISTER">
+    <bitfield id="RESERVED" width="15" begin="31" end="17" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="FPERR" width="1" begin="16" end="16" resetval="0x0" description="Fault pixel correction error This bit is set when the CCDC module is unable to fetch the required fault pixel table entry in time. Write 1 to clear the error or end_of_frame clears it automatically for the next frame. For example, the current pixel being processed has coordinates of 256/512 (256th line and 512th pixel in that line) and it must be corrected. If the entry in the fault pixel table that must be used has coordinates 256/256, then the current pixel cannot be corrected since the correct entry is not loaded in time. Note that there is no error recovery mechanism in the CCDC; if this bit is set at anytime in a frame, there are no more fault pixels corrected in that frame. Firmware is responsible for making sure that there is enough bandwidth in the system to allow for loading of the fault pixel table. Alternately, decreasing the frequency of the fault pixels to be corrected enhances the chances of this bit not being set." range="" rwaccess="RW">
+      <bitenum value="0" token="FPERR_0" description="No error"/>
+      <bitenum value="1" token="FPERR_1" description="Error"/>
+    </bitfield>
+    <bitfield id="FPCEN" width="1" begin="15" end="15" resetval="0x0" description="Fault pixel correction enable. Upon setting this bit, and as long as it remains enabled, the fault pixel logic continues to request data and just start over for next frame once the last data of current frame has been received. As soon as the register is set the data are fetched. To disable fault pixel correction, users can write a 0 at any time. However, the disabling only applies after the current frame is processed (busy bit for current frame is 0) This bit should only be written after the FPC_ADDR register below has been set. Also, the other fields in this register have to be set prior to enabling this bit. The required process is: Write(FPC_ADDR)Write(FPC) with this bit (FPC.FPCEN) turned offWrite(FPC) with this bit (FPC.FPCEN) turned on while other fields are same as previous write" range="" rwaccess="RW">
+      <bitenum value="0" token="FPCEN_0" description="Disable"/>
+      <bitenum value="1" token="FPCEN_1" description="Enable"/>
+    </bitfield>
+    <bitfield id="FPNUM" width="15" begin="14" end="0" resetval="0x0000" description="Number of fault pixels to be corrected in the frame This field should not be changed when the FPCEN is enabled at any time" range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_FPC_ADDR" acronym="CCDC_FPC_ADDR" offset="0x44" width="32" description="FAULT PIXEL CORRECTION MEMORY ADDRESS">
+    <bitfield id="ADDR" width="32" begin="31" end="0" resetval="0x00000000" description="Memory address Set the memory address of the fault pixel correction table. The address should be aligned to a 64-byte boundary: the 6 LSBs are ignored. Each of the 32-bit table entry contains a 13-bit vertical position, a 14-bit horizontal position and a 5-bit operation field." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_VDINT" acronym="CCDC_VDINT" offset="0x48" width="32" description="VD INTERRUPT REGISTER">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VDINT0" width="15" begin="30" end="16" resetval="0x0000" description="VD0 interrupt timing Specified VDINT0 in units of horizontal lines from the start of the VS sync pulse. The resulting value is VDINT0+1. Note that if the rising edge (or falling edge if programmed) of the HS sync pulse lines up with the rising edge (or falling edge if programmed) of VS sync pulse, the first HS sync pulse is not counted." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VDINT1" width="15" begin="14" end="0" resetval="0x0000" description="VD1 interrupt timing Specifies VDINT1 in units of horizontal lines from the start of the VS sync pulse. The resulting value is VDINT1+1. Note that if the rising edge (or falling edge if programmed) of the HS sync pulse lines up with the rising edge (or falling edge if programmed) of VS sync pulse, the first HS sync pulse is not counted." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_ALAW" acronym="CCDC_ALAW" offset="0x4C" width="32" description="ALAW SETTINGS REGISTER">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="CCDTBL" width="1" begin="3" end="3" resetval="0x0" description="Apply A-Law compression to data saved to memory." range="" rwaccess="RW">
+      <bitenum value="0" token="CCDTBL_0" description="Disable"/>
+      <bitenum value="1" token="CCDTBL_1" description="Enable"/>
+    </bitfield>
+    <bitfield id="GWDI" width="3" begin="2" end="0" resetval="0x4" description="A-Law input width" range="" rwaccess="RW">
+      <bitenum value="3" token="GWDI_3" description="Bits 12 to 3"/>
+      <bitenum value="4" token="GWDI_4" description="Bits 11 to 2"/>
+      <bitenum value="5" token="GWDI_5" description="Bits 10 to 1"/>
+      <bitenum value="6" token="GWDI_6" description="Bits 9 to 0"/>
+    </bitfield>
+  </register>
+  <register id="CCDC_REC656IF" acronym="CCDC_REC656IF" offset="0x50" width="32" description="ITU-R BT.656 CONFIGURATION REGISTER">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x00000000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ECCFVH" width="1" begin="1" end="1" resetval="0x0" description="FVH error correction enable" range="" rwaccess="RW">
+      <bitenum value="0" token="ECCFVH_0" description="Disable"/>
+      <bitenum value="1" token="ECCFVH_1" description="Enable"/>
+    </bitfield>
+    <bitfield id="R656ON" width="1" begin="0" end="0" resetval="0x0" description="ITU-R BT656 interface enable" range="" rwaccess="RW">
+      <bitenum value="0" token="R656ON_0" description="Disable"/>
+      <bitenum value="1" token="R656ON_1" description="Enable"/>
+    </bitfield>
+  </register>
+  <register id="CCDC_CFG" acronym="CCDC_CFG" offset="0x54" width="32" description="CONFIGURATION REGISTER">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VDLC" width="1" begin="15" end="15" resetval="0x0" description="Enable latching function registers on the internal VS sync pulse. If this bit is set, all the register fields that are VS pulse latched take on new values immediately. Care should be taken not to alter fields that can cause undesired behavior to the output data NOTE: In OMAP3430, this bit must be set to 1 by software if the CCDC is to be used. If CCDCFG.VDLC remains set to 0 (default), indeterminate results may occur for ANY register access in the CCDC. For details, see" range="" rwaccess="RW">
+      <bitenum value="0" token="VDLC_0" description="Latched on VS"/>
+      <bitenum value="1" token="VDLC_1" description="Not latched on VS"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="14" end="14" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="MSBINVI" width="1" begin="13" end="13" resetval="0x0" description="MSB of chroma input signal stored to memory inverted." range="" rwaccess="RW">
+      <bitenum value="0" token="MSBINVI_0" description="Normal"/>
+      <bitenum value="1" token="MSBINVI_1" description="MSB inverted"/>
+    </bitfield>
+    <bitfield id="BSWD" width="1" begin="12" end="12" resetval="0x0" description="Byte swap data stored to memory." range="" rwaccess="RW">
+      <bitenum value="0" token="BSWD_0" description="Normal"/>
+      <bitenum value="1" token="BSWD_1" description="Swap bytes"/>
+    </bitfield>
+    <bitfield id="Y8POS" width="1" begin="11" end="11" resetval="0x0" description="Location of Y color component when YCbCr 8-bit data is input." range="" rwaccess="RW">
+      <bitenum value="0" token="Y8POS_0" description="Even pixel"/>
+      <bitenum value="1" token="Y8POS_1" description="Odd pixel"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="10" end="9" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="WENLOG" width="1" begin="8" end="8" resetval="0x0" description="Valid area settings" range="" rwaccess="RW">
+      <bitenum value="0" token="WENLOG_0" description="Internal valid signal and WEN signal are ANDed logically."/>
+      <bitenum value="1" token="WENLOG_1" description="Internal valid signal and WEN signal are ORed logically."/>
+    </bitfield>
+    <bitfield id="FIDMD" width="2" begin="7" end="6" resetval="0x0" description="Settings of field identification detection function." range="" rwaccess="RW">
+      <bitenum value="0" token="FIDMD_0" description="FLD signal is latched at the VS timing. The external Field signal is latched when the VD is active and the active edge of the HD signal"/>
+      <bitenum value="1" token="FIDMD_1" description="FLD signal is not latched. The field signal is not latched at all"/>
+      <bitenum value="2" token="FIDMD_2" description="FLD signal is latched at edge of VS. The field signal is latched on the active edge of the VD signal"/>
+      <bitenum value="3" token="FIDMD_3" description="FLD signal is latched on phase of VS and HS. The field signal is latched when the VD signal is active and the HD signal is inactive (opposite phase)"/>
+    </bitfield>
+    <bitfield id="BW656" width="1" begin="5" end="5" resetval="0x0" description="The data width in ITU-R BT656 input mode. This bit field takes precedence over the CCDC_SYN_MODE.INPMOD and CCDC_DATSIZ bit fields if the ITU mode is enabled with CCDC_REC656IF.R656ON = 1." range="" rwaccess="RW">
+      <bitenum value="0" token="BW656_0" description="8 bits"/>
+      <bitenum value="1" token="BW656_1" description="10 bits"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="4" end="4" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0x0" description="Reserved. Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="1" end="0" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_FMTCFG" acronym="CCDC_FMTCFG" offset="0x58" width="32" description="DATA REFORMATTER/VIDEO IF CONFIG REGISTER">
+    <bitfield id="RESERVED" width="13" begin="31" end="19" resetval="0x0000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VPIF_FRQ" width="3" begin="18" end="16" resetval="0x0" description="Video port data ready frequency.This field allows the firmware to control the rate at which the video port delivers new data to the other modules (PREVIEW, H3A, and HIST modules). . In effect, this register controls the raw output bandwidth of the PREVIEW, H3A, and HIST. Depending on the input sensor clock, users can set this field appropriately and balance the bandwidth requirements to memory. . Given a pixel clock, one must set this bit field with the higher divisor value to lower the memory bandwidth requirement. . The video port clock is interconnect/ (VPIF_FRQ+2) .The valid range for VPIF FRQ is 0..6 ." range="" rwaccess="RW"/>
+    <bitfield id="VPEN" width="1" begin="15" end="15" resetval="0" description="Video port enable. This bit must be enabled to send data to the PREVIEW, H3A and HIST modules." range="" rwaccess="RW">
+      <bitenum value="0" token="VPEN_0" description="Disable"/>
+      <bitenum value="1" token="VPEN_1" description="Enable"/>
+    </bitfield>
+    <bitfield id="VPIN" width="3" begin="14" end="12" resetval="0x4" description="10-bit input select for video port." range="" rwaccess="RW">
+      <bitenum value="3" token="VPIN_3" description="bits 12-3"/>
+      <bitenum value="4" token="VPIN_4" description="bits 11-2"/>
+      <bitenum value="5" token="VPIN_5" description="bits 10-1"/>
+      <bitenum value="6" token="VPIN_6" description="bits 9-0"/>
+    </bitfield>
+    <bitfield id="PLEN_EVEN" width="4" begin="11" end="8" resetval="0x0" description="Number of program entries in even line minus 1. If the desired number of program entries is 8, then the value must be set to 7." range="" rwaccess="RW"/>
+    <bitfield id="PLEN_ODD" width="4" begin="7" end="4" resetval="0x0" description="Number of program entries in odd line minus 1. If the desired number of program entries is 8, then the value must be set to 7." range="" rwaccess="RW"/>
+    <bitfield id="LNUM" width="2" begin="3" end="2" resetval="0x0" description="Number of output lines from 1 input line" range="" rwaccess="RW">
+      <bitenum value="0" token="LNUM_0" description="1 line"/>
+      <bitenum value="1" token="LNUM_1" description="2 lines"/>
+      <bitenum value="2" token="LNUM_2" description="3 lines"/>
+      <bitenum value="3" token="LNUM_3" description="4 lines"/>
+    </bitfield>
+    <bitfield id="LNALT" width="1" begin="1" end="1" resetval="0x0" description="Line alternating mode enable.In Line Alternating Mode, even and odd lines are swapped. 0th line output as 1st line and 1st line output as 0th line, and so on. If this bit field is set, the start and number of lines for the formatter (FMTVERT below) must be even. The FMTEN field below must be set in addition for this field to function" range="" rwaccess="RW">
+      <bitenum value="0" token="LNALT_0" description="Enable. Normal mode"/>
+      <bitenum value="1" token="LNALT_1" description="Disable. Line alternating mode"/>
+    </bitfield>
+    <bitfield id="FMTEN" width="1" begin="0" end="0" resetval="0x0" description="Formatter enable. This bit is latched by the VS sync pulse." range="" rwaccess="RW">
+      <bitenum value="0" token="FMTEN_0" description="Disable"/>
+      <bitenum value="1" token="FMTEN_1" description="Enable"/>
+    </bitfield>
+  </register>
+  <register id="CCDC_FMT_HORZ" acronym="CCDC_FMT_HORZ" offset="0x5C" width="32" description="DATA REFORMATTER HORIZ INFO REGISTER">
+    <bitfield id="RESERVED" width="3" begin="31" end="29" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="FMTSPH" width="13" begin="28" end="16" resetval="0x0000" description="Start pixel horizontal from start of the HS sync pulse." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="15" end="13" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="FMTLNH" width="13" begin="12" end="0" resetval="0x0000" description="Number of pixels in horizontal direction to use for the data reformatter (minimum is 2 pixels)." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_FMT_VERT" acronym="CCDC_FMT_VERT" offset="0x60" width="32" description="DATA REFORMATTER VERT INFO REGISTER">
+    <bitfield id="RESERVED" width="3" begin="31" end="29" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="FMTSLV" width="13" begin="28" end="16" resetval="0x0000" description="Start line from start of VS sync pulse for the data reformatter." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="15" end="13" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="FMTLNV" width="13" begin="12" end="0" resetval="0x0000" description="Number of lines in vertical direction for the data reformatter" range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_FMT_ADDR_i_0" acronym="CCDC_FMT_ADDR_i_0" offset="0x64" width="32" description="DATA REFORMATTER ADDR PTR x SETUP REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LINE" width="2" begin="25" end="24" resetval="0x0" description="The output line the address belongs to is the 1st, 2nd, 3rd or 4th line." range="" rwaccess="RW">
+      <bitenum value="0" token="LINE_0" description="1st line"/>
+      <bitenum value="1" token="LINE_1" description="2nd line"/>
+      <bitenum value="2" token="LINE_2" description="3rd line"/>
+      <bitenum value="3" token="LINE_3" description="4th line"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="11" begin="23" end="13" resetval="0x000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="INIT" width="13" begin="12" end="0" resetval="0x0000" description="Initial address value If CCDC_FMTCFG.FMTCFG.LNUM = 0 (1 line), the max value of the address must not exceed (4x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.FMTCFG.LNUM = 1 (2 lines), the max value of the address must not exceed (3x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 2 (3 lines), the max value of the address must not exceed (2x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 3 (4 lines), the max value of the address must not exceed (1x1376 - 1) including the updates on it during processing. The address must always be a positive number during the updates." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_FMT_ADDR_i_1" acronym="CCDC_FMT_ADDR_i_1" offset="0x68" width="32" description="DATA REFORMATTER ADDR PTR x SETUP REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LINE" width="2" begin="25" end="24" resetval="0x0" description="The output line the address belongs to is the 1st, 2nd, 3rd or 4th line." range="" rwaccess="RW">
+      <bitenum value="0" token="LINE_0" description="1st line"/>
+      <bitenum value="1" token="LINE_1" description="2nd line"/>
+      <bitenum value="2" token="LINE_2" description="3rd line"/>
+      <bitenum value="3" token="LINE_3" description="4th line"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="11" begin="23" end="13" resetval="0x000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="INIT" width="13" begin="12" end="0" resetval="0x0000" description="Initial address value If CCDC_FMTCFG.FMTCFG.LNUM = 0 (1 line), the max value of the address must not exceed (4x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.FMTCFG.LNUM = 1 (2 lines), the max value of the address must not exceed (3x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 2 (3 lines), the max value of the address must not exceed (2x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 3 (4 lines), the max value of the address must not exceed (1x1376 - 1) including the updates on it during processing. The address must always be a positive number during the updates." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_FMT_ADDR_i_2" acronym="CCDC_FMT_ADDR_i_2" offset="0x6C" width="32" description="DATA REFORMATTER ADDR PTR x SETUP REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LINE" width="2" begin="25" end="24" resetval="0x0" description="The output line the address belongs to is the 1st, 2nd, 3rd or 4th line." range="" rwaccess="RW">
+      <bitenum value="0" token="LINE_0" description="1st line"/>
+      <bitenum value="1" token="LINE_1" description="2nd line"/>
+      <bitenum value="2" token="LINE_2" description="3rd line"/>
+      <bitenum value="3" token="LINE_3" description="4th line"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="11" begin="23" end="13" resetval="0x000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="INIT" width="13" begin="12" end="0" resetval="0x0000" description="Initial address value If CCDC_FMTCFG.FMTCFG.LNUM = 0 (1 line), the max value of the address must not exceed (4x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.FMTCFG.LNUM = 1 (2 lines), the max value of the address must not exceed (3x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 2 (3 lines), the max value of the address must not exceed (2x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 3 (4 lines), the max value of the address must not exceed (1x1376 - 1) including the updates on it during processing. The address must always be a positive number during the updates." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_FMT_ADDR_i_3" acronym="CCDC_FMT_ADDR_i_3" offset="0x70" width="32" description="DATA REFORMATTER ADDR PTR x SETUP REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LINE" width="2" begin="25" end="24" resetval="0x0" description="The output line the address belongs to is the 1st, 2nd, 3rd or 4th line." range="" rwaccess="RW">
+      <bitenum value="0" token="LINE_0" description="1st line"/>
+      <bitenum value="1" token="LINE_1" description="2nd line"/>
+      <bitenum value="2" token="LINE_2" description="3rd line"/>
+      <bitenum value="3" token="LINE_3" description="4th line"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="11" begin="23" end="13" resetval="0x000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="INIT" width="13" begin="12" end="0" resetval="0x0000" description="Initial address value If CCDC_FMTCFG.FMTCFG.LNUM = 0 (1 line), the max value of the address must not exceed (4x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.FMTCFG.LNUM = 1 (2 lines), the max value of the address must not exceed (3x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 2 (3 lines), the max value of the address must not exceed (2x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 3 (4 lines), the max value of the address must not exceed (1x1376 - 1) including the updates on it during processing. The address must always be a positive number during the updates." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_FMT_ADDR_i_4" acronym="CCDC_FMT_ADDR_i_4" offset="0x74" width="32" description="DATA REFORMATTER ADDR PTR x SETUP REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LINE" width="2" begin="25" end="24" resetval="0x0" description="The output line the address belongs to is the 1st, 2nd, 3rd or 4th line." range="" rwaccess="RW">
+      <bitenum value="0" token="LINE_0" description="1st line"/>
+      <bitenum value="1" token="LINE_1" description="2nd line"/>
+      <bitenum value="2" token="LINE_2" description="3rd line"/>
+      <bitenum value="3" token="LINE_3" description="4th line"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="11" begin="23" end="13" resetval="0x000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="INIT" width="13" begin="12" end="0" resetval="0x0000" description="Initial address value If CCDC_FMTCFG.FMTCFG.LNUM = 0 (1 line), the max value of the address must not exceed (4x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.FMTCFG.LNUM = 1 (2 lines), the max value of the address must not exceed (3x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 2 (3 lines), the max value of the address must not exceed (2x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 3 (4 lines), the max value of the address must not exceed (1x1376 - 1) including the updates on it during processing. The address must always be a positive number during the updates." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_FMT_ADDR_i_5" acronym="CCDC_FMT_ADDR_i_5" offset="0x78" width="32" description="DATA REFORMATTER ADDR PTR x SETUP REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LINE" width="2" begin="25" end="24" resetval="0x0" description="The output line the address belongs to is the 1st, 2nd, 3rd or 4th line." range="" rwaccess="RW">
+      <bitenum value="0" token="LINE_0" description="1st line"/>
+      <bitenum value="1" token="LINE_1" description="2nd line"/>
+      <bitenum value="2" token="LINE_2" description="3rd line"/>
+      <bitenum value="3" token="LINE_3" description="4th line"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="11" begin="23" end="13" resetval="0x000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="INIT" width="13" begin="12" end="0" resetval="0x0000" description="Initial address value If CCDC_FMTCFG.FMTCFG.LNUM = 0 (1 line), the max value of the address must not exceed (4x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.FMTCFG.LNUM = 1 (2 lines), the max value of the address must not exceed (3x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 2 (3 lines), the max value of the address must not exceed (2x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 3 (4 lines), the max value of the address must not exceed (1x1376 - 1) including the updates on it during processing. The address must always be a positive number during the updates." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_FMT_ADDR_i_6" acronym="CCDC_FMT_ADDR_i_6" offset="0x7C" width="32" description="DATA REFORMATTER ADDR PTR x SETUP REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LINE" width="2" begin="25" end="24" resetval="0x0" description="The output line the address belongs to is the 1st, 2nd, 3rd or 4th line." range="" rwaccess="RW">
+      <bitenum value="0" token="LINE_0" description="1st line"/>
+      <bitenum value="1" token="LINE_1" description="2nd line"/>
+      <bitenum value="2" token="LINE_2" description="3rd line"/>
+      <bitenum value="3" token="LINE_3" description="4th line"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="11" begin="23" end="13" resetval="0x000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="INIT" width="13" begin="12" end="0" resetval="0x0000" description="Initial address value If CCDC_FMTCFG.FMTCFG.LNUM = 0 (1 line), the max value of the address must not exceed (4x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.FMTCFG.LNUM = 1 (2 lines), the max value of the address must not exceed (3x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 2 (3 lines), the max value of the address must not exceed (2x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 3 (4 lines), the max value of the address must not exceed (1x1376 - 1) including the updates on it during processing. The address must always be a positive number during the updates." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_FMT_ADDR_i_7" acronym="CCDC_FMT_ADDR_i_7" offset="0x80" width="32" description="DATA REFORMATTER ADDR PTR x SETUP REGISTER">
+    <bitfield id="RESERVED" width="6" begin="31" end="26" resetval="0x00" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LINE" width="2" begin="25" end="24" resetval="0x0" description="The output line the address belongs to is the 1st, 2nd, 3rd or 4th line." range="" rwaccess="RW">
+      <bitenum value="0" token="LINE_0" description="1st line"/>
+      <bitenum value="1" token="LINE_1" description="2nd line"/>
+      <bitenum value="2" token="LINE_2" description="3rd line"/>
+      <bitenum value="3" token="LINE_3" description="4th line"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="11" begin="23" end="13" resetval="0x000" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="INIT" width="13" begin="12" end="0" resetval="0x0000" description="Initial address value If CCDC_FMTCFG.FMTCFG.LNUM = 0 (1 line), the max value of the address must not exceed (4x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.FMTCFG.LNUM = 1 (2 lines), the max value of the address must not exceed (3x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 2 (3 lines), the max value of the address must not exceed (2x1376 - 1) including the updates on it during processing. If CCDC_FMTCFG.LNUM = 3 (4 lines), the max value of the address must not exceed (1x1376 - 1) including the updates on it during processing. The address must always be a positive number during the updates." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_PRGEVEN0" acronym="CCDC_PRGEVEN0" offset="0x84" width="32" description="PROGRAM ENTRIES 0-7 FOR EVEN LINES REGISTER Each bit field in this register is programmed in the same way. The following definition applies, where n ranges from 0 to 8. Bits [4*n+3:4*n+1] 000: ADDR0 001: ADDR1 010: ADDR2 011: ADDR3 100: ADDR4 101: ADDR5 110: ADDR6 111: ADDR7 Bit [4*n]: 0: Auto increment 1: Auto decrement">
+    <bitfield id="EVEN7" width="4" begin="31" end="28" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN6" width="4" begin="27" end="24" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN5" width="4" begin="23" end="20" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN4" width="4" begin="19" end="16" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN3" width="4" begin="15" end="12" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN2" width="4" begin="11" end="8" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN1" width="4" begin="7" end="4" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN0" width="4" begin="3" end="0" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_PRGEVEN1" acronym="CCDC_PRGEVEN1" offset="0x88" width="32" description="PROGRAM ENTRIES 8-15 FOR EVEN LINES REGISTER Each bit field in this register is programmed in the same way. The following definition applies, where n ranges from 0 to 8. Bits [4*n+3:4*n+1] 000: ADDR0 001: ADDR1 010: ADDR2 011: ADDR3 100: ADDR4 101: ADDR5 110: ADDR6 111: ADDR7 Bit [4*n]: 0: Auto increment 1: Auto decrement">
+    <bitfield id="EVEN15" width="4" begin="31" end="28" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN14" width="4" begin="27" end="24" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN13" width="4" begin="23" end="20" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN12" width="4" begin="19" end="16" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN11" width="4" begin="15" end="12" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN10" width="4" begin="11" end="8" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN9" width="4" begin="7" end="4" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="EVEN8" width="4" begin="3" end="0" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_PRGODD0" acronym="CCDC_PRGODD0" offset="0x8C" width="32" description="PROGRAM ENTRIES 0-7 FOR ODD LINES REGISTER Each bit field in this register is programmed in the same way. The following definition applies, where n ranges from 0 to 8. Bits [4*n+3:4*n+1] 000: ADDR0 001: ADDR1 010: ADDR2 011: ADDR3 100: ADDR4 101: ADDR5 110: ADDR6 111: ADDR7 Bit [4*n]: 0: Auto increment 1: Auto decrement">
+    <bitfield id="ODD7" width="4" begin="31" end="28" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD6" width="4" begin="27" end="24" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD5" width="4" begin="23" end="20" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD4" width="4" begin="19" end="16" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD3" width="4" begin="15" end="12" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD2" width="4" begin="11" end="8" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD1" width="4" begin="7" end="4" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD0" width="4" begin="3" end="0" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_PRGODD1" acronym="CCDC_PRGODD1" offset="0x90" width="32" description="PROGRAM ENTRIES 8-15 FOR ODD LINES REGISTER Each bit field in this register is programmed in the same way. The following definition applies, where n ranges from 0 to 8. Bits [4*n+3:4*n+1] 000: ADDR0 001: ADDR1 010: ADDR2 011: ADDR3 100: ADDR4 101: ADDR5 110: ADDR6 111: ADDR7 Bit [4*n]: 0: Auto increment 1: Auto decrement">
+    <bitfield id="ODD15" width="4" begin="31" end="28" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD14" width="4" begin="27" end="24" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD13" width="4" begin="23" end="20" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD12" width="4" begin="19" end="16" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD11" width="4" begin="15" end="12" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD10" width="4" begin="11" end="8" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD9" width="4" begin="7" end="4" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+    <bitfield id="ODD8" width="4" begin="3" end="0" resetval="0x0" description="Address update. See register description." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_VP_OUT" acronym="CCDC_VP_OUT" offset="0x94" width="32" description="VIDEO PORT OUTPUT REGISTER">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0x0" description="Write 0s for future compatibility.Reads returns 0." range="" rwaccess="RW"/>
+    <bitfield id="VERT_NUM" width="14" begin="30" end="17" resetval="0x0000" description="Number of vertical lines to clock out the video. If the data reformatter is turned off, then the number of lines that can be clocked out of the video port must be at least 1 line less than the number of lines input from the sensor. If the data reformatter is turned on, then the number of lines that can be clocked out of the video port must be less than(CCDC_FMT_VERT.FMTLNV - 1) * (CCDC_FMTCFG.LNUM + 1) The video port output VS pulse is generated right from the first video port input VS itself." range="" rwaccess="RW"/>
+    <bitfield id="HORZ_NUM" width="13" begin="16" end="4" resetval="0x0000" description="Number of horizontal pixel to clock out the video port. The minimum value allowed is 2 pixels. The maximum offset allowed is 1376 if original input is broken down to 4 lines. The maximum offset allowed is 1376 if original input is broken down to 3 lines. The maximum offset allowed is 2*1376 if original input is broken down to 2 lines. The maximum offset allowed is 4*1376 if original input is broken down to 1 line." range="" rwaccess="RW"/>
+    <bitfield id="HORZ_ST" width="4" begin="3" end="0" resetval="0x0" description="Horizontal start pixel in each output line. The maximum value allowed is 15. The video port output HSYNC pulse is generated from this position on for each line. To be able to select an offset higher than 15, the input settings to the data reformatter must be configured appropriately. The purpose of this parameter is to allow for sensors that can read out a parallelogram image rather than a rectangular image." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_LSC_CONFIG" acronym="CCDC_LSC_CONFIG" offset="0x98" width="32" description="LENS SHADING COMPENSATION CONTROL AND STATUS REGISTER">
+    <bitfield id="RESERVED" width="17" begin="31" end="15" resetval="0x00000" description="Write 0s for future compatibility. Read returns zero." range="" rwaccess="RW"/>
+    <bitfield id="GAIN_MODE_M" width="3" begin="14" end="12" resetval="0x6" description="Define the horizontal dimension of a paxel. Possiblevalues are listed below" range="" rwaccess="RW">
+      <bitenum value="2" token="GAIN_MODE_M_2" description="Paxel is 4 pixels tall (M=4)"/>
+      <bitenum value="3" token="GAIN_MODE_M_3" description="Paxel is 8 pixels tall (M=8)"/>
+      <bitenum value="4" token="GAIN_MODE_M_4" description="Paxel is 16 pixels tall (M=16)"/>
+      <bitenum value="5" token="GAIN_MODE_M_5" description="Paxel is 32 pixels tall (M=32)"/>
+      <bitenum value="6" token="GAIN_MODE_M_6" description="Paxel is 64 pixels tall (M=64)"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0x0" description="Write 0s for future compatibility. Read returns zero." range="" rwaccess="R"/>
+    <bitfield id="GAIN_MODE_N" width="3" begin="10" end="8" resetval="0x6" description="Define the vertical dimension of a paxel. Possible values are listed below" range="" rwaccess="RW">
+      <bitenum value="2" token="GAIN_MODE_N_2" description="Paxel is 4 pixels tall (N=4)"/>
+      <bitenum value="3" token="GAIN_MODE_N_3" description="Paxel is 8 pixels tall (N=8)"/>
+      <bitenum value="4" token="GAIN_MODE_N_4" description="Paxel is 16 pixels tall (N=16)"/>
+      <bitenum value="5" token="GAIN_MODE_N_5" description="Paxel is 32 pixels tall (N=32)"/>
+      <bitenum value="6" token="GAIN_MODE_N_6" description="Paxel is 64 pixels tall (N=64)"/>
+    </bitfield>
+    <bitfield id="BUSY" width="1" begin="7" end="7" resetval="0x0" description="Module busy or idle" range="" rwaccess="R">
+      <bitenum value="0" token="BUSY_0" description="The module is idle"/>
+      <bitenum value="1" token="BUSY_1" description="The module is busy"/>
+    </bitfield>
+    <bitfield id="AFTER_REFORMATTER" width="1" begin="6" end="6" resetval="0x0" description="Chooses if lens-shading compensation is done before or after data reformatting" range="" rwaccess="RW">
+      <bitenum value="0" token="AFTER_REFORMATTER_0" description="Lens-shading is done before data reformatting. H3A, HIST and PREVIEW receives shading compensated data"/>
+      <bitenum value="1" token="AFTER_REFORMATTER_1" description="Data received by H3A isn't compensated. Data received by PREVIEW and HIST is compensated."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="5" end="4" resetval="0x0" description="Write 0s for future compatibility. Reads return zero." range="" rwaccess="RW"/>
+    <bitfield id="GAIN_FORMAT" width="3" begin="3" end="1" resetval="0x0" description="Sets gain table format" range="" rwaccess="RW">
+      <bitenum value="0" token="GAIN_FORMAT_0" description="Coded as 8-bit fraction Range from 0 to 255/256"/>
+      <bitenum value="1" token="GAIN_FORMAT_1" description="Coded as 8-bit fraction + 1.0 of base. Range from 1 to 1+255/256"/>
+      <bitenum value="2" token="GAIN_FORMAT_2" description="Coded as 1-bit integer, 7-bit fraction. Range from 0 to 1+127/128"/>
+      <bitenum value="3" token="GAIN_FORMAT_3" description="Coded as 1-bit integer, 7-bit fraction + 1.0 Range from 1 to 2+127/128"/>
+      <bitenum value="4" token="GAIN_FORMAT_4" description="Coded as 2-bit integer, 6-bit fraction Range from 0 to 3+63/64"/>
+      <bitenum value="5" token="GAIN_FORMAT_5" description="Coded as 2-bit integer, 6-bit fraction + 1.0 Range from 1 to 4+63/64"/>
+      <bitenum value="6" token="GAIN_FORMAT_6" description="Coded as 3-bit integer, 5-bit fraction Range from 0 to 7+31/32"/>
+      <bitenum value="7" token="GAIN_FORMAT_7" description="Coded as 3-bit integer, 5-bit fraction + 1.0 Range from 1 to 8+31/32"/>
+    </bitfield>
+    <bitfield id="ENABLE" width="1" begin="0" end="0" resetval="0x0" description="Enables/disables LSC" range="" rwaccess="RW">
+      <bitenum value="0" token="ENABLE_0" description="Disables the module at the end of the current frame. Video data is transmitted without modification when LSC is disabled. The BUSY bit can be used to poll when access to SBL buffer can be used by the preview module."/>
+      <bitenum value="1" token="ENABLE_1" description="Enables the module. Module starts fetching the gain table as soon it is started. Firmware has to make sure it has been correctly initialized before starting the module. Data processing is only effective at the start of the next frame. Note that preview module dark frame subtract must be disabled because there is only one shared read port."/>
+    </bitfield>
+  </register>
+  <register id="CCDC_LSC_INITIAL" acronym="CCDC_LSC_INITIAL" offset="0x9C" width="32" description="LENS SHADING COMPENSATION INITIAL X/Y REGISTER">
+    <bitfield id="RESERVED" width="10" begin="31" end="22" resetval="0x000" description="Write 0s for future compatibility. Reads return zero." range="" rwaccess="RW"/>
+    <bitfield id="Y" width="6" begin="21" end="16" resetval="0x00" description="Y position, in pixels, of the first active pixel in referenceto the first active paxel. Must be an even number." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="10" begin="15" end="6" resetval="0x000" description="Write 0s for future compatibility. Reads return zero." range="" rwaccess="RW"/>
+    <bitfield id="X" width="6" begin="5" end="0" resetval="0x00" description="X position, in pixels, of the first active pixel in referenceto the first active paxel. Must be an even number." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_LSC_TABLE_BASE" acronym="CCDC_LSC_TABLE_BASE" offset="0xA0" width="32" description="LENS SHADING COMPENSATION TABLE BASE ADDRESS REGISTER">
+    <bitfield id="BASE" width="32" begin="31" end="0" resetval="0x00000000" description="Table address in bytes. Table is 32-bit aligned so this register must be a multiple of 4.This bit field sets the address of the gain table in memory." range="" rwaccess="RW"/>
+  </register>
+  <register id="CCDC_LSC_TABLE_OFFSET" acronym="CCDC_LSC_TABLE_OFFSET" offset="0xA4" width="32" description="LENS SHADING COMPENSATION TABLE OFFSET REGISTER">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="OFFSET" width="16" begin="15" end="0" resetval="0x0000" description="Defines the length, in bytes, of one row of the gain table. Gain table is 32-bit aligned, so this value must be a multiple of 4.Note that the row in memory must be longer or equal to what LSC uses." range="" rwaccess="RW"/>
+  </register>
+</module>

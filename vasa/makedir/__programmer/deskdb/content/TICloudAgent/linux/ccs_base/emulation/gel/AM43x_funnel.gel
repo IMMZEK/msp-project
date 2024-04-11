@@ -1,0 +1,130 @@
+#define CS_FUNNEL_CTL        0x4B164000
+#define CS_FUNNEL_LOCK       0x4B164FB0
+#define UNLOCK_VALUE         0xC5ACCE55
+
+hotmenu Enable_ETB_STM_Trace()
+{
+	*(int*)CS_FUNNEL_LOCK  = UNLOCK_VALUE;
+	*(int*)CS_FUNNEL_CTL = 0x3FF;
+}
+
+hotmenu Enable_ETB_CortexA9_Trace()
+{
+	*(int*)CS_FUNNEL_LOCK  = UNLOCK_VALUE;
+	*(int*)CS_FUNNEL_CTL = 0x3FF;
+}
+
+#define L3_DBGSS_BADDR     (unsigned int)(0x4B000000)    // debugSS Subsystem (16MB)
+#define DBGSS_SLV_DRM      (L3_DBGSS_BADDR+0x160000)     // 4 kbyte
+
+ // DRM registers of DebugSS
+#define DRM_ID            *(unsigned int *)(DBGSS_SLV_DRM+0x000)  // Peri ID
+#define DRM_CFG           *(unsigned int *)(DBGSS_SLV_DRM+0x010)
+                          //  Cfg - b1-SoftReset(reset DRM module)
+                          //  b0-rsvd for OCPAutoIdle
+#define DRM_SYSSTATUS     *(unsigned int *)(DBGSS_SLV_DRM+0x014)
+                          //  system sts - b0-ResetDone (RO)
+#define DRM_CAPABILITIES  *(unsigned int *)(DBGSS_SLV_DRM+0x018)
+                          // capabilities - b6:0-numPeri,
+                          //  b10:7-numSusp
+                          //  b15:11-numCSTraceData_Pin,
+                          //  b20:16-numDSPTraceData_Pin
+                          //  b21-HAS_CSTrace, b22-Has_STMTrace,
+                          //  b26:23-numDSP, b31:27-numDevPin
+#define DRM_CLKGEN_CFG    *(unsigned int *)(DBGSS_SLV_DRM+0x020)
+                          //  b0 -select PDLO/PMD clk (0-PDLO,1-PMD)
+#define DRM_PDLO_TRC_CTL  *(unsigned int *)(DBGSS_SLV_DRM+0x024)
+                          //  b20:16-DLY_B (0=1delay else, 1=32delay)
+                          //  b15:13-DIV_SEL (0-CLK/1, 7-CLK/16)
+                          //  b12:8 -DLY_A, b6:5-REFSEL (gate width sel)
+                          //  b4-EXECMEAS, b3-DLO_SEL, b2-CLK_EN
+                          //  b1-OSC_EN, b0-AUTO
+#define DRM_PDLO_TRC_LMT  *(unsigned int *)(DBGSS_SLV_DRM+0x028)
+                          //  b11:0-LOW_LIMIT, b26:16-HI_LIMIT
+#define DRM_PDLO_TRC_STS  *(unsigned int *)(DBGSS_SLV_DRM+0x02C)
+                          //  b11:0-COUNT, b12-ABOVE, b13-BELOW, b14-complete,
+                          //  b15-check, b16-SW_DONE, b17-MEAS_SEL
+#define DRM_PDLO_STM_CTL  *(unsigned int *)(DBGSS_SLV_DRM+0x030)  // 
+#define DRM_PDLO_STM_LMT  *(unsigned int *)(DBGSS_SLV_DRM+0x034)
+                          //  b11:0-LOW_LIMIT, b26:16-HI_LIMIT 
+#define DRM_PDLO_STM_STS  *(unsigned int *)(DBGSS_SLV_DRM+0x038)
+                          //  b11:0-COUNT, b12-ABOVE,
+                          //  b13-BELOW, b14-complete,
+                          //  b15-check, b16-SW_DONE, b17-MEAS_SEL
+
+#define DRM_CS_TRACE_CFG  *(unsigned int *)(DBGSS_SLV_DRM+0x040)
+                          //  CS trace cfg -
+                          //  b0-clk_sel (0-edge sampling, 1-center) 
+#define DRM_CLAIM         *(unsigned int *)(DBGSS_SLV_DRM+0x050)
+                          //  b31:30-ownership(1-clim,2-enable),
+                          //  b29-dbgOverride, b28-owner(0-dbg own pins,1-app)
+#define DRM_DSP_DECODE    *(unsigned int *)(DBGSS_SLV_DRM+0x064)
+                          //  b3:0-which DSP is assigned to the DPs.
+#define DRM_CTL(n)        *(unsigned int *)(DBGSS_SLV_DRM+0x080+4*n)
+                          //  b7:0-PM_Ctrl, b25-DP_Oen(RW) (total 0-24)
+                          //  b26-DP_Out(RW), b27-DP_In(R),
+                          //  b28-BitIO_En(W), b29-App_own(R)
+                          //  b30-Dbg_only(R), b31-override(RW)
+#define DRM_DEMUX_CTL(n)  *(unsigned int *)(DBGSS_SLV_DRM+0x100+4*n)
+                          //  d1:0,3:2,5:4,7:6-Demux-EMU<0-3> (total 0-14)
+                          //  00-Xtrig, 01-HS-RTDX, 10-Trace, 11-rsvd.
+#define DRM_SUSP_CTL(n)   *(unsigned int *)(DBGSS_SLV_DRM+0x200+4*n)
+                          //  b0-sensCtrl, b3-suspend_default (total 0-127)
+                          //  b7:4-suspend_sel
+#define DRM_DAP_SEC_CTL   *(unsigned int *)(DBGSS_SLV_DRM+0x400)
+                          //  b0-ForceDAPPubUserDebugEn (MreqSup=0)
+                          //  b3:1-ForceDAPPubDomainEn (000-dm0, .. 111-dm7).
+                          //  b4-ForceDAPSecPublicDebugEn (MreqSec=0)
+                          //  b5-ForceDAPSecUserDebugEn (MreqSup=0)
+                          //  b17:6-DOM[11:0] - debug operating mode.
+
+
+ // DPM control mode definition - the DRM_CFG register
+#define DPM_MODE_TRI_STAT        (0x0)
+#define DPM_MODE_TRIG            (0x1)
+#define DPM_MODE_STM_DATA0       (0x2)
+#define DPM_MODE_STM_DATA1       (0x3)
+#define DPM_MODE_STM_DATA2       (0x4)
+#define DPM_MODE_STM_DATA3       (0x5)
+#define DPM_MODE_STM_CLK         (0x6)
+#define DPM_MODE_CS_DATAA        (0x7)
+#define DPM_MODE_CS_DATAB        (0x8)
+#define DPM_MODE_CS_CTRL         (0x9)
+#define DPM_MODE_CS_CLK          (0xA)
+#define DPM_MODE_DSP_DATAA       (0xB)
+#define DPM_MODE_DSP_DATAB       (0xC)
+#define DPM_MODE_DSP_CLK         (0xD)
+
+#define DPM_BITIOMODE_ENABLE     (0x10000000)
+#define DPM_BITIOMODE_OUT_ZERO   (0x00000000)
+#define DPM_BITIOMODE_OUT_ONE    (0x04000000)
+#define DPM_BITIOMODE_OEN_LOW    (0x00000000)
+#define DPM_BITIOMODE_OEN_HIGH   (0x02000000)
+
+hotmenu Enable_STM_4PinMode_Trace()
+{
+    GEL_TextOut( "INFO: set DP[4:0] for STM trace (DP0=d0, DP1=d1, DP2=clk, DP3=d2, DP4=d4\n" ,,,,,);
+    DRM_CLAIM = OWNERSHIP_CMD_CLAIM;                 // claim
+    DRM_CLAIM = OWNERSHIP_CMD_ENABLE;                // Enable
+    DRM_CTL(0) = (0x80000000 | DPM_MODE_STM_DATA0);  // set DP0 as STM trace data0
+    DRM_CTL(1) = (0x80000000 | DPM_MODE_STM_DATA1);  // set DP0 as STM trace data1
+    DRM_CTL(2) = (0x80000000 | DPM_MODE_STM_CLK  );  // set DP0 as STM trace clock
+    DRM_CTL(3) = (0x80000000 | DPM_MODE_STM_DATA2);  // set DP0 as STM trace data2
+    DRM_CTL(4) = (0x80000000 | DPM_MODE_STM_DATA3);  // set DP0 as STM trace data3
+    GEL_TextOut( "Configure STM to 4 pin mode on DRM is done");
+}
+
+hotmenu Enable_STM_1PinMode_Trace()
+{
+    DRM_CLAIM = OWNERSHIP_CMD_CLAIM;                 // claim
+    DRM_CLAIM = OWNERSHIP_CMD_ENABLE;                // Enable
+    DRM_CTL(0) = (0x80000000 | DPM_MODE_STM_DATA0);  // set DP0 as STM trace data0
+    DRM_CTL(1) = (0x80000000 | DPM_MODE_STM_CLK  );   // set DP1 as STM trace clock
+    DRM_CTL(2) = (0x80000000 | 0);  // clear the remaining pin to set it to tri-state
+    DRM_CTL(3) = (0x80000000 | 0);  // clear the remaining pin to set it to tri-state
+    DRM_CTL(4) = (0x80000000 | 0);  // clear the remaining pin to set it to tri-state
+    GEL_TextOut( "Configure STM to 1 pin mode on DRM is done");
+}
+
+
+

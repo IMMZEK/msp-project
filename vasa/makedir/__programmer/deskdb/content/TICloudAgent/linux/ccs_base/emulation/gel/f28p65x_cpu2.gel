@@ -1,0 +1,430 @@
+/********************************************************************/
+/* f28p65x_cpu2.gel                                                 */
+/* Version 1.00.00.00                                               */
+/*                                                                  */
+/* This GEL file is to be used with the TMS320f28P65x DSP.          */
+/* Changes may be required to support specific hardware designs.    */
+/*                                                                  */
+/* Code Composer Studio supports six reserved GEL functions that    */
+/* automatically get executed if they are defined. They are:        */
+/*                                                                  */
+/* StartUp()              - Executed whenever CCS is invoked        */
+/* OnReset()              - Executed after Debug->Reset CPU         */
+/* OnRestart()            - Executed after Debug->Restart           */
+/* OnPreFileLoaded()      - Executed before File->Load Program      */
+/* OnFileLoaded()         - Executed after File->Load Program       */
+/* OnTargetConnect()      - Executed after Debug->Connect           */
+/*                                                                  */
+/********************************************************************/
+
+#define FLASH_ECC_ENABLE            0x5FB00
+#define WATCHDOG_CNTRL              0x7029
+#define WATCHDOG_KEY                0x7025
+#define NMI_CFG                     0x7060
+
+
+#define GPIO_CTRL_BASE              0x7C00
+#define GPIO_O_GPAMUX2              0x8         // GPIO A Mux 2 Register (GPIO16 to 31)
+#define GPIO_O_GPAGMUX2             0x22        // GPIO A Peripheral Group Mux (GPIO16 to 31)
+#define GPIO_O_GPALOCK              0x3C        // GPIO A Lock Configuration Register (GPIO0 to 31)
+#define GPIO_O_GPAPUD               0xC
+#define GPIO_O_GPBPUD               0x4C
+#define GPIO_O_GPCPUD               0x8C
+#define GPIO_O_GPDPUD               0xCC
+#define GPIO_O_GPEPUD               0x10C
+#define GPIO_O_GPFPUD               0x14C
+#define GPIO_O_GPGPUD               0x18C
+#define GPIO_O_GPHPUD               0x1CC
+
+#define DEVCFG_BASE                 0x0005D000
+#define PKG_TYPE_KEY                0x5A
+
+#define MEMCFG_BASE                 0x0005F400
+#define MEMCFG_O_DXINIT             0x12
+#define MEMCFG_O_DXINITDONE         0x14
+#define MEMCFG_O_LSXINIT            0x32
+#define MEMCFG_O_LSXINITDONE        0x34
+#define MEMCFG_O_GSXINIT            0x52
+#define MEMCFG_O_GSXINITDONE        0x54
+
+#define CPUSYS_BASE         0x0005D300U
+#define SYSCTL_O_PCLKCR0    0x10U   // Peripheral Clock Gating Registers
+
+#define PACKAGE_100_Pin_QFP                                10U
+#define PACKAGE_176_Pin_QFP                                13U
+#define PACKAGE_169_Pin_BGA                                14U
+#define PACKAGE_256_Pin_BGA                                15U
+
+
+StartUp()
+{
+
+}
+
+OnReset(int nErrorCode)
+{
+
+    *(int *)FLASH_ECC_ENABLE = 0;       /* Disable Flash ECC */
+    *(int *)WATCHDOG_CNTRL = 0x68;      /* Disable WD */
+
+    *(unsigned long *)NMI_CFG = 0x0001;  /* Enable NMI */
+
+    CLA_Clock_Enable();
+
+    ERAD_Clock_Enable();
+
+
+    if (GEL_IsInRealtimeMode())     /* If in real-time-mode */
+    {
+    }
+    else                            /* Put device into C28x Mode */
+    {
+      C28x_Mode();
+    }
+
+}
+
+OnRestart(int nErrorCode)
+{
+/* CCS will call OnRestart() when you do a Debug->Restart and   */
+/* after you load a new file*/
+    if (GEL_IsInRealtimeMode())     /* If in real-time-mode */
+    {
+    }
+    else                            /* Put device into C28x Mode */
+    {
+      C28x_Mode();
+    }
+     IER = 0;
+     IFR = 0;
+}
+
+OnPreFileLoaded()
+{
+    GEL_Reset();
+}
+
+OnFileLoaded(int nErrorCode, int bSymbolsOnly)
+{
+
+}
+
+OnTargetConnect()
+{
+
+    *(int *)(MEMCFG_BASE + MEMCFG_O_DXINIT)  = 0x0003;                /* RAM INIT FOR Mx Memory      */
+    while(!(*(int *) (MEMCFG_BASE + MEMCFG_O_DXINITDONE) == 0x03));   /* Wait for InitDone Status       */
+
+    GEL_TextOut("\n\nRAM initialization done\n\n");
+
+    if (GEL_IsInRealtimeMode())     /* If in real-time-mode */
+    {
+    }
+    else                            /* Put device into C28x Mode */
+    {
+        C28x_Mode();
+    }
+
+    f28p65_Memory_Map();        /* Initialize the CCS memory map */
+
+    /* Check to see if CCS has been started-up with the DSP already */
+    /* running in real-time mode.  The user can add whatever        */
+    /* custom initialization stuff they want to each case.          */
+
+    if (GEL_IsInRealtimeMode())     /* Do real-time mode target initialization */
+    {
+
+    }
+    else                            /* Do stop-mode target initialization */
+    {
+        GEL_Reset();                /* Reset DSP */
+    }
+}
+
+
+/********************************************************************/
+/* These functions are useful to engage/disengage realtime          */
+/* emulation mode during debug.  They save the user from having to  */
+/* manually perform these steps in CCS.                             */
+/********************************************************************/
+menuitem "Realtime Emulation Control";
+
+hotmenu Run_Realtime_with_Reset()
+{
+    GEL_Reset();                /* Reset the DSP */
+    ST1 = ST1 & 0xFFFD;         /* clear DBGM bit in ST1 */
+    GEL_EnableRealtime();       /* Enable Realtime mode */
+    GEL_Run();                  /* Run the DSP */
+}
+hotmenu Run_Realtime_with_Restart()
+{
+    GEL_Restart();              /* Reset the DSP */
+    ST1 = ST1 & 0xFFFD;         /* clear DBGM bit in ST1 */
+    GEL_EnableRealtime();       /* Enable Realtime mode */
+    GEL_Run();                  /* Run the DSP */
+}
+hotmenu Full_Halt()
+{
+    GEL_DisableRealtime();      /* Disable Realtime mode */
+    GEL_Halt();                 /* Halt the DSP */
+}
+hotmenu Full_Halt_with_Reset()
+{
+    GEL_DisableRealtime();      /* Disable Realtime mode */
+    GEL_Halt();                 /* Halt the DSP */
+    GEL_Reset();                /* Reset the DSP */
+}
+
+/*********************************************************************/
+/*                         f28p65x Memory Map                        */
+/*                                                                   */
+/*********************************************************************/
+menuitem "Initialize Memory Map";
+
+hotmenu f28p65_Memory_Map()
+{
+    /* GEL_MapReset(); */
+    GEL_MapOn();
+
+    /* Program memory maps */
+    GEL_MapAddStr(0x00000000,0, 0x400, "R|W|AS2",0);                     /*   M0 RAM  */
+    GEL_MapAddStr(0x00000400,0, 0x400, "R|W|AS2",0);                     /*   M1 RAM  */
+    GEL_MapAddStr(0x00008000,0, 0x2000, "R|W|AS2",0);                    /*   D2 RAM  */
+    GEL_MapAddStr(0x0000A000,0, 0x2000, "R|W|AS2",0);                    /*   D3 RAM  */
+    GEL_MapAddStr(0x0000C000,0, 0x2000, "R|W|AS2",0);                    /*   D4 RAM  */
+    GEL_MapAddStr(0x0000E000,0, 0x2000, "R|W|AS2",0);                    /*   D5 RAM  */
+    GEL_MapAddStr(0x00010000,0, 0x2000, "R|W|AS2",0);                    /*   GS0 RAM  */
+    GEL_MapAddStr(0x00012000,0, 0x2000, "R|W|AS2",0);                    /*   GS1 RAM  */
+    GEL_MapAddStr(0x00014000,0, 0x2000, "R|W|AS2",0);                    /*   GS2 RAM  */
+    GEL_MapAddStr(0x00016000,0, 0x2000, "R|W|AS2",0);                    /*   GS3 RAM  */
+    GEL_MapAddStr(0x00018000,0, 0x2000, "R|W|AS2",0);                    /*   GS4 RAM  */
+    GEL_MapAddStr(0x00072000,0, 0x600, "R|AS2",0);                       /*   TI OTP BANK0  */
+    GEL_MapAddStr(0x00073000,0, 0x600, "R|AS2",0);                       /*   TI OTP BANK1  */
+    GEL_MapAddStr(0x00074000,0, 0x600, "R|AS2",0);                       /*   TI OTP BANK2  */
+    GEL_MapAddStr(0x00075000,0, 0x600, "R|AS2",0);                       /*   TI OTP BANK3  */
+    GEL_MapAddStr(0x00076000,0, 0x600, "R|AS2",0);                       /*   TI OTP BANK4  */
+    GEL_MapAddStr(0x00078000,0, 0x400, "R|AS2",0);                       /*   USER OTP BANK0 */
+    GEL_MapAddStr(0x00078800,0, 0x400, "R|AS2",0);                       /*   USER OTP BANK1 */
+    GEL_MapAddStr(0x00079000,0, 0x400, "R|AS2",0);                       /*   USER OTP BANK2 */
+    GEL_MapAddStr(0x00079800,0, 0x400, "R|AS2",0);                       /*   USER OTP BANK3 */
+    GEL_MapAddStr(0x0007A000,0, 0x400, "R|AS2",0);                       /*   USER OTP BANK4 */
+    GEL_MapAddStr(0x00080000,0, 0x20000, "R|AS2",0);                     /*   FLASH BANK0  */
+    GEL_MapAddStr(0x000A0000,0, 0x20000, "R|AS2",0);                     /*   FLASH BANK1  */
+    GEL_MapAddStr(0x000C0000,0, 0x20000, "R|AS2",0);                     /*   FLASH BANK2  */
+    GEL_MapAddStr(0x000E0000,0, 0x20000, "R|AS2",0);                     /*   FLASH BANK3  */
+    GEL_MapAddStr(0x00100000,0, 0x20000, "R|AS2",0);                     /*   FLASH BANK4  */
+
+    GEL_MapAddStr(0x003F5000,0, 0xB000, "R|AS2",0);                     /*   Boot ROM   */
+
+    /* Data memory maps */
+    GEL_MapAddStr(0x00000000,1, 0x400, "R|W|AS2",0);                     /*   M0 RAM  */
+    GEL_MapAddStr(0x00000400,1, 0x400, "R|W|AS2",0);                     /*   M1 RAM  */
+    GEL_MapAddStr(0x00008000,1, 0x2000, "R|W|AS2",0);                    /*   D2 RAM  */
+    GEL_MapAddStr(0x0000A000,1, 0x2000, "R|W|AS2",0);                    /*   D3 RAM  */
+    GEL_MapAddStr(0x0000C000,1, 0x2000, "R|W|AS2",0);                    /*   D4 RAM  */
+    GEL_MapAddStr(0x0000E000,1, 0x2000, "R|W|AS2",0);                    /*   D5 RAM  */
+    GEL_MapAddStr(0x00010000,1, 0x2000, "R|W|AS2",0);                    /*   GS0 RAM  */
+    GEL_MapAddStr(0x00012000,1, 0x2000, "R|W|AS2",0);                    /*   GS1 RAM  */
+    GEL_MapAddStr(0x00014000,1, 0x2000, "R|W|AS2",0);                    /*   GS2 RAM  */
+    GEL_MapAddStr(0x00016000,1, 0x2000, "R|W|AS2",0);                    /*   GS3 RAM  */
+    GEL_MapAddStr(0x00018000,1, 0x2000, "R|W|AS2",0);                    /*   GS4 RAM  */
+    GEL_MapAddStr(0x00072000,1, 0x600, "R|AS2",0);                       /*   TI OTP BANK0  */
+    GEL_MapAddStr(0x00073000,1, 0x600, "R|AS2",0);                       /*   TI OTP BANK1  */
+    GEL_MapAddStr(0x00074000,1, 0x600, "R|AS2",0);                       /*   TI OTP BANK2  */
+    GEL_MapAddStr(0x00075000,1, 0x600, "R|AS2",0);                       /*   TI OTP BANK3  */
+    GEL_MapAddStr(0x00076000,1, 0x600, "R|AS2",0);                       /*   TI OTP BANK4  */
+    GEL_MapAddStr(0x00078000,1, 0x400, "R|AS2",0);                       /*   USER OTP BANK0 */
+    GEL_MapAddStr(0x00078800,1, 0x400, "R|AS2",0);                       /*   USER OTP BANK1 */
+    GEL_MapAddStr(0x00079000,1, 0x400, "R|AS2",0);                       /*   USER OTP BANK2 */
+    GEL_MapAddStr(0x00079800,1, 0x400, "R|AS2",0);                       /*   USER OTP BANK3 */
+    GEL_MapAddStr(0x0007A000,1, 0x400, "R|AS2",0);                       /*   USER OTP BANK4 */
+    GEL_MapAddStr(0x00080000,1, 0x20000, "R|AS2",0);                     /*   FLASH BANK0  */
+    GEL_MapAddStr(0x000A0000,1, 0x20000, "R|AS2",0);                     /*   FLASH BANK1  */
+    GEL_MapAddStr(0x000C0000,1, 0x20000, "R|AS2",0);                     /*   FLASH BANK2  */
+    GEL_MapAddStr(0x000E0000,1, 0x20000, "R|AS2",0);                     /*   FLASH BANK3  */
+    GEL_MapAddStr(0x00100000,1, 0x20000, "R|AS2",0);                     /*   FLASH BANK4  */
+	
+	GEL_MapAddStr(0x80000000,1, 0x10000000, "R|W|AS2",0);                /*   EMIF-1 (Data) CS0n - SDRAM  */
+	GEL_MapAddStr(0x00280000,0, 0x100000, "R|W|AS2",0);                  /*   EMIF-1 (Prog + Data) CS0n   */
+	GEL_MapAddStr(0x00300000,0, 0x40000, "R|W|AS2",0);                   /*   EMIF-1 (Prog + Data) CS2n	  */
+	GEL_MapAddStr(0x00340000,0, 0x40000, "R|W|AS2",0);                   /*   EMIF-1 (Prog + Data) CS3n	  */
+	GEL_MapAddStr(0x00380000,1, 0x60000, "R|W|AS2",0);                   /*   EMIF-1 (Prog + Data) CS4n	  */
+	
+
+    GEL_MapAddStr(0x00000800,1, 0x200, "R|W|AS2",0);                     /*   Peripheral Space (512 Bytes) */
+    GEL_MapAddStr(0x00000A00,1, 0x80, "R|AS2",0);                        /*   ADCA Result Registers  */
+    GEL_MapAddStr(0x00000A80,1, 0x80, "R|AS2",0);                        /*   ADCB Result Registers  */
+    GEL_MapAddStr(0x00000B00,1, 0x80, "R|AS2",0);                        /*   ADCC Result Registers  */
+    GEL_MapAddStr(0x00000C00,1, 0x18, "R|W|AS2",0);                      /*   CPU Timer Registers  */
+    GEL_MapAddStr(0x00000CE0,1, 0x20, "R|AS2",0);                        /*   PIE Registers  */
+    GEL_MapAddStr(0x00000D00,1, 0x200, "R|W|AS2",0);                     /*   PIE Vectors */
+    GEL_MapAddStr(0x00000F00,1, 0x100, "R|W|AS2",0);                     /*   FPU Registers  */
+    GEL_MapAddStr(0x00001000,1, 0x200, "R|W|AS2",0);                     /*   DMA Registers  */
+    GEL_MapAddStr(0x00001400,1, 0x80, "R|W|AS2",0);                      /*   CLA1 Registers */
+    GEL_MapAddStr(0x00001480,1, 0x80, "R|W|AS2",0);                      /*   CLA1toCPU1 MSG RAM (with PARITY) (256 bytes) */
+    GEL_MapAddStr(0x00001500,1, 0x80, "R|W|AS2",0);                      /*   CPU1toCLA1 MSG RAM (with PARITY) (256 bytes) */
+    GEL_MapAddStr(0x00001680,1, 0x80, "R|W|AS2",0);                      /*   CPUtoDMA MSG RAM (with PARITY) (256 bytes)   */
+    GEL_MapAddStr(0x00001700,1, 0x80, "R|W|AS2",0);                      /*   DMAtoCPU MSG RAM (with PARITY) (256 bytes)   */
+    GEL_MapAddStr(0x0003A000,1, 0x400, "R|W|AS2",0);                     /*   CPU1-CPU2MSGRAM  */
+    GEL_MapAddStr(0x0003B000,1, 0x400, "R|W|AS2",0);                     /*   CPU2-CPU1MSGRAM  */
+    GEL_MapAddStr(0x00002000,1, 0xC00, "R|W|AS2",0);                     /*   Configurable Logic Registers  */
+    GEL_MapAddStr(0x00002C00,1, 0x2B00, "R|W|AS2",0);                    /*   EPWM, EQEP, ECAP Peripheral Space  */
+    GEL_MapAddStr(0x00005900,1, 0x2C0, "R|W|AS2",0);                     /*   CMPSS Peripheral Space  */
+    GEL_MapAddStr(0x00005C00,1, 0x30, "R|W|AS2",0);                      /*   DAC Peripheral Space    */
+    GEL_MapAddStr(0x00005E00,1, 0x200, "R|W|AS2",0);                     /*   SDFM Registers */
+    GEL_MapAddStr(0x00006100,1, 0x40, "R|W|AS2",0);                      /*   SPI Registers */
+    GEL_MapAddStr(0x00006340,1, 0x80, "R|W|AS2",0);                      /*   BGCRC Registers */
+    GEL_MapAddStr(0x00006400,1, 0x20, "R|W|AS2",0);                      /*   PMBUS Registers */
+    GEL_MapAddStr(0x00006600,1, 0x400, "R|W|AS2",0);                     /*   FSI Registers */
+    GEL_MapAddStr(0x00006E00,1, 0x200, "R|W|AS2",0);                     /*   LIN Registers */
+    GEL_MapAddStr(0x00007000,1, 0x40, "R|W|AS2",0);                      /*   Watchdog Registers */
+    GEL_MapAddStr(0x00007060,1, 0x20, "R|W|AS2",0);                      /*   NMI,Interrupt Registers */
+    GEL_MapAddStr(0x00007200,1, 0x20, "R|W|AS2",0);                      /*   SCI Registers */
+    GEL_MapAddStr(0x00007300,1, 0x80, "R|W|AS2",0);                      /*   I2C Registers */
+    GEL_MapAddStr(0x00007400,1, 0x100, "R|W|AS2",0);                     /*   ADCA Config Registers  */
+    GEL_MapAddStr(0x00007500,1, 0x100, "R|W|AS2",0);                     /*   ADCB Config Registers  */
+    GEL_MapAddStr(0x00007600,1, 0x100, "R|W|AS2",0);                     /*   ADCC Config Registers  */
+    GEL_MapAddStr(0x00007900,1, 0x700, "R|W|AS2",0);                     /*   XBAR, GPIO Mux Select Registers */
+    GEL_MapAddStr(0x00040000,1, 0x1800, "R|W|AS2",0);                    /*   USB Registers */
+    GEL_MapAddStr(0x00042000,1, 0x1000, "R|W|AS4",0);                    /*   AES Registers */
+    GEL_MapAddStr(0x00047000,1, 0x80, "R|W|AS4",0);                      /*   EMIF Registers */
+    GEL_MapAddStr(0x00048000,1, 0x800, "R|W|AS4",0);                     /*   CANA Registers */
+    GEL_MapAddStr(0x00050000,1, 0x8C00, "R|W|AS4",0);                    /*   ECAT,Flash Registers */
+    GEL_MapAddStr(0x00059000,1, 0x3C00, "R|W|AS4",0);                    /*   MCAN Registers */
+    GEL_MapAddStr(0x0005CE00,1, 0x40, "R|W|AS4",0);                      /*   IPC Registers */
+    GEL_MapAddStr(0x0005D000,1, 0x900, "R|W|AS4",0);                     /*   Device Config Registers */
+    GEL_MapAddStr(0x0005E000,1, 0x400, "R|W|AS2",0);                     /*   System Diagnostics Registers */
+    GEL_MapAddStr(0x0005E700,1, 0xC0,  "R|W|AS4",0);                     /*   DCC0,1,2 Registers */
+    GEL_MapAddStr(0x0005E800,1, 0x800, "R|W|AS2",0);                     /*   Enhanced Debug Registers */
+    GEL_MapAddStr(0x0005F000,1, 0x100, "R|W|AS2",0);                     /*   Security Registers */
+    GEL_MapAddStr(0x0005F400,1, 0x400, "R|W|AS2",0);                     /*   RAM Config Registers */
+    GEL_MapAddStr(0x0005F800,1, 0x300, "R|W|AS2",0);                     /*   Flash Wrapper Registers */
+    GEL_MapAddStr(0x0005FB00,1, 0x40, "R|W|AS2",0);                      /*   Flash Wrapper ECC Registers */
+    GEL_MapAddStr(0x0006A000,1, 0x1000, "R|W|AS2",0);                    /*   UART Registers */
+
+     /* Peripheral memory maps */
+    GEL_MapAddStr(0x00006A00,3, 0x200, "R|W|AS2",0);                     /*   LIN Registers */
+    GEL_MapAddStr(0x00048000,3, 0x800, "R|W|AS4",0);                     /*   CANA Registers */
+    GEL_MapAddStr(0x0005E700,3, 0xC0,  "R|W|AS4",0);                     /*   DCC0,1,2 Registers */
+    GEL_MapAddStr(0x0006A000,3, 0x1000, "R|W|AS2",0);                    /*   UART Registers */
+    GEL_MapAddStr(0x0005FE00,1, 0x200, "R|W|AS2",0);                       /*   ERAD PC TRACE BUFFER */
+
+    GEL_TextOut("\nMemory Map Initialization Complete\n");
+}
+
+/********************************************************************/
+/* The ESTOP0 fill functions are useful for debug.  They fill the   */
+/* RAM with software breakpoints that will trap runaway code.       */
+/********************************************************************/
+hotmenu Fill_f28p65_RAM_with_ESTOP0()
+{
+    GEL_MemoryFill(0x000000,1,0x000800,0x7625);      /* Fill M0/M1  */
+
+    GEL_MemoryFill(0x008000,1,0x000800,0x7625);      /* Fill L0  */
+    GEL_MemoryFill(0x008800,1,0x000800,0x7625);      /* Fill L1  */
+    GEL_MemoryFill(0x009000,1,0x000800,0x7625);      /* Fill L2  */
+    GEL_MemoryFill(0x009800,1,0x000800,0x7625);      /* Fill L3  */
+    GEL_MemoryFill(0x00A000,1,0x000800,0x7625);      /* Fill L4  */
+    GEL_MemoryFill(0x00A800,1,0x000800,0x7625);      /* Fill L5  */
+    GEL_MemoryFill(0x00B000,1,0x000800,0x7625);      /* Fill L6  */
+    GEL_MemoryFill(0x00B800,1,0x000800,0x7625);      /* Fill L7  */
+    GEL_MemoryFill(0x022000,1,0x002000,0x7625);      /* Fill L8  */
+    GEL_MemoryFill(0x024000,1,0x002000,0x7625);      /* Fill L9  */
+
+    GEL_MemoryFill(0x010000,1,0x002000,0x7625);      /* Fill G0  */
+    GEL_MemoryFill(0x012000,1,0x002000,0x7625);      /* Fill G1  */
+    GEL_MemoryFill(0x014000,1,0x002000,0x7625);      /* Fill G2  */
+    GEL_MemoryFill(0x016000,1,0x002000,0x7625);      /* Fill G3  */
+    GEL_MemoryFill(0x018000,1,0x002000,0x7625);      /* Fill G4  */
+}
+
+/********************************************************************/
+/*              TI OTP and USER OTP Memory Dump                     */
+/********************************************************************/
+menuitem "OTP Dump";
+hotmenu OTP_Dump()
+{
+    GEL_MemorySave(0x00072000,1, 0x600, "TI_OTP_Bank0.dat");
+    GEL_MemorySave(0x00078000,1, 0x400, "USER_OTP_Bank0.dat");
+
+    GEL_TextOut("\n**********************************************************************
+                 \nTI OTP and USER OTP Memory Dump Complete!
+                 \nFile Output Directory: <CCS Install Directory>\\ccs<version>\\eclipse
+                 \n                       (e.g. C:\ti\ccs910\ccs\eclipse)
+
+                 \n**********************************************************************\n");
+}
+
+/********************************************************************/
+menuitem "Watchdog";
+hotmenu Disable_WD()
+{
+    *WATCHDOG_CNTRL = *WATCHDOG_CNTRL | 0x0068;      /* Set the WDDIS bit */
+    *WATCHDOG_KEY = 0x0055;                          /* Service the WD    */
+    *WATCHDOG_KEY = 0x00AA;                          /*  once to be safe. */
+    GEL_TextOut("\nWatchdog Timer Disabled");
+}
+
+
+
+/********************************************************************/
+menuitem "Addressing Modes";
+
+hotmenu C28x_Mode()
+{
+    ST1 = ST1 & (~0x0100);      /*   AMODE = 0  */
+    ST1 = ST1 | 0x0200;         /* OBJMODE = 1  */
+}
+
+hotmenu C24x_Mode()
+{
+    ST1 = ST1 | 0x0100;         /*   AMODE = 1  */
+    ST1 = ST1 | 0x0200;         /* OBJMODE = 1  */
+}
+
+hotmenu C27x_Mode()
+{
+    ST1 = ST1 & (~0x0100);      /*   AMODE = 0  */
+    ST1 = ST1 & (~0x0200);      /* OBJMODE = 0  */
+}
+
+
+
+/********************************************************************/
+/* EMU Boot Mode - Set Boot Mode During Debug                       */
+/********************************************************************/
+menuitem "EMU Boot Mode Select"
+hotmenu EMU_BOOT_RAM()
+{
+    *(unsigned long *)0xD00 = 0x5AFFFFFF;
+    *0xD04 = 0x0005;
+}
+hotmenu EMU_BOOT_FLASH()
+{
+    *(unsigned long *)0xD00 = 0x5AFFFFFF;
+    *0xD04 = 0x0003;
+}
+
+
+/********************************************************************/
+/* CLA Clock Enable                                                 */
+/* Allows debugger to enable CLA breakpoints (esp. after Reset)     */
+/********************************************************************/
+menuitem "CLA Clock Enable"
+hotmenu CLA_Clock_Enable()
+{
+	*(unsigned long *)(CPUSYS_BASE + SYSCTL_O_PCLKCR0) |= 0x1;   /* Set PCLKCR0 bit 0 */
+}
+
+/********************************************************************/
+/* ERAD Clock Enable                                                 */
+/* Allows debugger to enable HW breakpoints                          */
+/********************************************************************/
+menuitem "ERAD Clock Enable"
+hotmenu ERAD_Clock_Enable()
+{
+	*(unsigned long *)(CPUSYS_BASE + SYSCTL_O_PCLKCR0) |= 0x01000000;   /* Set PCLKCR0 bit 24 */
+}
+
+
+/*** End of file ***/

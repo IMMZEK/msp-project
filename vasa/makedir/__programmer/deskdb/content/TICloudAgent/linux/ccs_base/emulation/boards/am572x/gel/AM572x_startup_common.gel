@@ -1,0 +1,266 @@
+/*******************************************************************/
+/* This GEL file is loaded on the command line of Code Composer    */
+/* The StartUp() function is called every time you start           */
+/* Code Composer.  You can customize this function to              */
+/* initialize wait states or to perform other initialization.      */
+/*                                                                 */
+/* AM572x startup common                                           */
+/*                                                                 */
+/*                                                                 */
+/*******************************************************************/
+
+#define WR_MEM_32(addr, data)   *(unsigned int*)(addr) =(unsigned int)(data)
+#define RD_MEM_32(addr)         *(unsigned int*)(addr)
+#define uint32_t                unsigned int
+
+/* Instance Base Addresses */
+#define L4PER_CM_CORE               0x4A009700
+
+#define CM_L4PER_I2C1_CLKCTRL       (RD_MEM_32(L4PER_CM_CORE + 0x00A0))
+#define CM_CLKSEL_CLKOUT2           (RD_MEM_32(0x4AE06160))
+
+/* I2C Definitions */
+#define I2C_1_BASE                  0x48070000
+#define I2C_SYSC(I2C_BASE)          RD_MEM_32(I2C_BASE + 0x0010)
+#define I2C_IRQ_RAW(I2C_BASE)       RD_MEM_32(I2C_BASE + 0x0024)
+#define I2C_IRQ_STATUS(I2C_BASE)    RD_MEM_32(I2C_BASE + 0x0028)
+#define I2C_IRQE_SET(I2C_BASE)      RD_MEM_32(I2C_BASE + 0x002C)
+#define I2C_BUF(I2C_BASE)           RD_MEM_32(I2C_BASE + 0x0094)
+#define I2C_CNT(I2C_BASE)           RD_MEM_32(I2C_BASE + 0x0098)
+#define I2C_DATA(I2C_BASE)          RD_MEM_32(I2C_BASE + 0x009C)
+#define I2C_CON(I2C_BASE)           RD_MEM_32(I2C_BASE + 0x00A4)
+#define I2C_0A(I2C_BASE)            RD_MEM_32(I2C_BASE + 0x00A8)
+#define I2C_SA(I2C_BASE)            RD_MEM_32(I2C_BASE + 0x00AC)
+#define I2C_PSC(I2C_BASE)           RD_MEM_32(I2C_BASE + 0x00B0)
+#define I2C_SCLL(I2C_BASE)          RD_MEM_32(I2C_BASE + 0x00B4)
+#define I2C_SCLH(I2C_BASE)          RD_MEM_32(I2C_BASE + 0x00B8)
+#define I2C_SYSTEST(I2C_BASE)       RD_MEM_32(I2C_BASE + 0x00BC)
+
+/* PMIC Definitions */
+#define PMIC_PR_SLAVE_ADDR          0x58    //PMIC Slave Address
+#define PMIC_DEV_CTRL				0xA0     
+#define SMPS6_VOLTAGE				0x2F
+#define SMPS7_VOLTAGE				0x33
+
+#define DEBUG_PRINT     (1)
+
+menuitem "AM572x Misc Module configurations"
+
+int silicon_type;
+
+AM57xx_EVM_Initialization(int EVM)
+{
+	int avs_voltage;
+    int smps_vsel;
+
+	if(EVM==0)	
+		GEL_TextOut("--->>> AM572x GP EVM <<<---\n");
+	else
+		GEL_TextOut("--->>> AM572x IDK EVM <<<---\n");
+
+	
+    GEL_TextOut("--->>> AM572x Target Connect Sequence Begins ... <<<---\n");
+	
+	/* AVS core setting 
+	 * AVS Class 0 voltage value
+	 * STD_FUSE_OPP_VMIN_CORE_NOM @ 0x4A0025F4
+	 * For Example if STD_FUSE_OPP_VMIN_CORE_2 = 0x3CA (Decimal 970mA)
+	 * PMIC VSEL = 26+(970-700)/10 = 53 */
+	avs_voltage = RD_MEM_32(0x4A0025F4) & 0xFFF;	
+	smps_vsel= (26 + ((avs_voltage-700)/10)) & 0x7F;		
+	
+	if(EVM==0) /*GP EVM*/
+	{
+		/*PMIC DEV_CTRL.DEV_ON should be set to 1 to prevent the 
+		PMIC shuts off in 8 seconds for AM572x GP EVM*/			
+		Configure_I2C_Controller_Module();
+		Set_PMIC_Value(PMIC_DEV_CTRL,0x01);		
+		Set_PMIC_Value(SMPS6_VOLTAGE,smps_vsel);
+	}
+	else if (EVM==1) //IDK EVM
+	{
+		Set_PMIC_Value(SMPS7_VOLTAGE,smps_vsel);
+	}
+	
+	AM572x_PAD_MMC2_Config(); 	/*Workaround for PG1.1 Silicon Errata MMC2 PU/PD Contention after Reset*/
+		
+    AM572x_target_connect_sequence();	
+	
+    AM572x_PRCM_Clock_Config_OPPNOM();
+        
+    AM572x_PRCM_Module_AllEnable_Config();
+
+    AM572x_DDR3_532MHz_Config();
+
+    AM572x_MULTICORE_EnableAllCores();  /*MULTICORE Initialization*/
+
+    GEL_TextOut("--->>> AM572x Target Connect Sequence DONE !!!!!  <<<---\n");
+}
+
+OnResetDetected()
+{
+    GEL_TextOut( "Core Reset has occurred.\n\n" );
+}
+
+OnReset()
+{
+    int device_type;
+	
+    device_type = (RD_MEM_32(0x4A002134) & 0x1C0) >> 6;
+
+    GEL_TextOut("--->>> Reset occurs <<<---\n");
+
+    AM572x_show_device_info();
+
+    if (device_type == 0x3)
+    {
+        PC=0x30000;
+        CPSR=0x193;
+    }
+}
+
+AM572x_target_connect_sequence()
+{
+    int reg;	
+
+    AM572x_show_device_info();
+
+    /* Disable Watchdog timer WDT2 */
+    Watchdog_disable(1);    
+}
+
+AM572x_show_device_info()
+{
+    int silicon_rev_major, silicon_rev_minor;
+    int device_type;
+
+    silicon_type = (RD_MEM_32(0x4AE0C204) & 0xF0000000) >> 28;
+
+    device_type = (RD_MEM_32(0x4A002134) & 0x1C0) >> 6;
+
+    if (silicon_type == 1)
+    {
+        silicon_rev_major = 1;
+        silicon_rev_minor = 1;	
+		
+    }
+	else if (silicon_type == 2)
+    {
+        silicon_rev_major = 2;
+        silicon_rev_minor = 0;
+    }
+    else
+    {
+        GEL_TextOut("--->>> WARNING: UNKNOWN DEVICE ID (%x), PLEASE UPDATE GEL FILES !!!! <<<---\n",,,,,silicon_type);
+    }
+
+    if (device_type == 0x3)
+    {
+        GEL_TextOut("--->>> AM572x PG%d.%d GP device <<<---\n",,,,, silicon_rev_major, silicon_rev_minor);
+    }    
+    else
+    {
+        GEL_TextOut("--->>> ERROR!!! UNKNOWN device type! <<<---\n");
+    }
+
+}
+
+hotmenu Watchdog_disable(int print_off)
+{
+    if (print_off == 0)
+    {
+        if (DEBUG_PRINT)
+        {
+            GEL_TextOut("--->>> Start WDT2 Watchdog Timer is disabled <<<---\n");
+        }
+    }
+
+    /* Enable clock */
+    WR_MEM_32(0x4AE07830, 0x02);
+
+    /* Check that module is Idle */
+    while (((*(int *)0x4AE07830) & 0x20000));
+
+    /* Disable  watchdog 2 */
+    /* Wait until reset complete */
+    while (!((*(int *)0x4AE14014) & 0x01));
+
+    /* Disable watchdog timer */
+    WR_MEM_32(0x4AE14048, 0x0000AAAA);
+
+    while (((*(int *)0x4AE14034) & 0x10));
+
+    /* Disable 32Khz watchdog timer */
+    WR_MEM_32(0x4AE14048, 0x00005555);
+
+    while (((*(int *)0x4AE14034) & 0x10));
+
+    if (print_off == 0)
+    {
+        if (DEBUG_PRINT)
+        {
+            GEL_TextOut("--->>> End WDT2 Watchdog Timer is disabled <<<---\n");
+        }
+    }
+}
+
+//Set the processor to ARM mode and Supervisor mode after a file is loaded, on a 
+//restart or on a reset
+//This will facilitate code loading and debug by putting the processor in a known
+//state
+
+//this function changes certain states of the processor to 
+//allow proper access from CCS.  May not be needed in all situations
+hotmenu AM57xxStartState()
+{
+  CPSR &= ~0x20;				 //set to ARM mode
+  CPSR = (CPSR & ~0x1F) | 0x13;  //set to privledged mode
+  REG_CTXA15_CP15_C1_SCTLR  &= ~0x1; //disable MMU
+}
+
+/******************************************************************************
+ * Configure_I2C_Controller_Module() : Init the I2C Controller Module
+ *****************************************************************************/
+ Configure_I2C_Controller_Module()
+ {
+    if(DEBUG_PRINT)
+        GEL_TextOut("--->>> I2C Init <<<---\n");
+
+    //I2C clock management
+    I2C_SYSC(I2C_1_BASE)        = 0x0003;                           // I2C Soft Reset
+    CM_CLKSEL_CLKOUT2           = 0x0007;                           // Enabling clock into I2C Master Controller
+    CM_L4PER_I2C1_CLKCTRL       = 0x0002;
+
+    //Setting bit rates
+    I2C_PSC(I2C_1_BASE)         = 0x0009;                           // Maximum Fast Mode (400 kbps)
+    I2C_SCLL(I2C_1_BASE)        = 0x0007;
+    I2C_SCLH(I2C_1_BASE)        = 0x0005;
+    
+    //I2C configuration
+    I2C_0A(I2C_1_BASE)          = 0x00AA;                           // Setting I2C own address
+    I2C_SYSC(I2C_1_BASE)        = 0x030C;    
+    I2C_CON(I2C_1_BASE)        |= 0x8000;                           // I2C module out of reset    
+    I2C_SYSTEST(I2C_1_BASE)    |= 0x4000;                           // Set clock to free running
+    I2C_CON(I2C_1_BASE)         = 0x8600;                           // Set to master transmitter
+    
+}
+
+/******************************************************************************
+ * Set_PMIC_Value(int voltageVal) : Send the desired power outcome of PMIC
+ *****************************************************************************/
+Set_PMIC_Value(int reg, int Val)
+{
+
+    I2C_SA  (I2C_1_BASE)        = PMIC_PR_SLAVE_ADDR;               // Set to specific address to set power rails
+    I2C_CNT(I2C_1_BASE)         = 0x0002;                           // Set the Buffer Length
+    I2C_IRQ_STATUS(I2C_1_BASE)  = 0xFFFF;                           // Clear Current Interrupts
+    I2C_CON (I2C_1_BASE)        = 0x8601;                           // Send START bit 
+    
+    I2C_DATA (I2C_1_BASE) = reg;                 					// Send PMIC register value for DEV_CTRL.DEV_ON
+    
+    I2C_IRQ_STATUS(I2C_1_BASE)  = 0x0010;
+
+    I2C_CON (I2C_1_BASE)        = 0x8601;
+   
+    I2C_DATA (I2C_1_BASE)       = Val;                       		// Send PMIC output voltage (conversion table in PMIC reg. table)
+}

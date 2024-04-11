@@ -1,0 +1,102 @@
+/*******************************************************************/ 
+/* This GEL file is loaded on the command line of Code Composer    */
+/* The StartUp() function is called every time you start           */
+/* Code Composer.  You can customize this function to              */
+/* initialize wait states or to perform other initialization.      */
+/*                                                                 */
+/* Maxwell R5/A53 Common Gel                                       */
+/*                                                                 */
+/*                                                                 */
+/*******************************************************************/
+
+/*  Also defined in DDR3SS_REGS.gel  */
+#define DDRSS_DDRPHY_BASE 0x02988000U
+#define DDRSS_DDRPHY_PGSR0  (DDRSS_DDRPHY_BASE + 0x00000030U)  /* PHY General Status Register 0 */          
+
+#define VIM_CFG0_VIM_PID 0x40F80000
+#define VIM_PID_VALUE 0x60900001
+#define MCU_CTLR_P0_LOCK_KEY_0  0x68ef3490
+#define MCU_CTLR_P0_LOCK_KEY_1  0xd172bc5a
+
+#define MCUREGS 0x40f00000
+#define LOCK2KICK 0x9008
+#define TIMERCLKSEL 0x8100
+
+StartUp()
+{
+    GEL_LoadGel("$(GEL_file_dir)/DDR39SS_REGS.gel");
+    GEL_LoadGel("$(GEL_file_dir)/../M4_Common/M4_Common.gel");
+    GEL_LoadGel("$(GEL_file_dir)/../M4_Common/M4_PLL_Common.gel");
+    GEL_LoadGel("$(GEL_file_dir)/M4_DDR_Init.gel");
+    GEL_LoadGel("$(GEL_file_dir)/M4_DDR_Config.gel");
+    GEL_LoadGel("$(GEL_file_dir)/../M4_Debug/M4_OBSCLK.gel");
+    GEL_LoadGel("$(GEL_file_dir)/../M4_Debug/M4_THERMAL.gel");
+}
+
+OnTargetConnect()
+{
+	//check which core we are running from
+	//only run the DDR init from the A53.  DDR init from R5 has to be run manually using CCS Script DDR_Initialization
+    
+	//read VIM_CFG0_VIM_PID to determine if running from R5 or A53
+	if ((Read_MMR(VIM_CFG0_VIM_PID)) == VIM_PID_VALUE)
+	{//R5
+		//just perform timer cleanup if DDR was not already initialized.  
+		if((Read_MMR(DDRSS_DDRPHY_PGSR0)) & 0x80000FFF == 0x80000FFF)   
+			GEL_TextOut("\n\n====\n\nNothing to do. Board is already initialized.\n\n====\n\n");
+		else
+		{
+			timer0_cleanup();
+			GEL_TextOut("\n\nDDR not initialized with R5 connect.\n\nGo to menu Scripts --> DDR_Initialization to initialize DDR.\n\n====\n\n");
+			//DDR_Initialization();
+		}
+	}
+	else
+	{//A53
+		//initialize DDR automatically if needed
+		if((Read_MMR(DDRSS_DDRPHY_PGSR0)) & 0x80000FFF == 0x80000FFF)   
+			GEL_TextOut("\n\n====\n\nNothing to do. Board is already initialized.\n\n====\n\n");
+		else
+		{
+			timer0_cleanup();
+			DDR_Initialization();
+		}
+	}
+}
+
+timer0_cleanup()
+{
+    Write_MMR(MCUREGS + LOCK2KICK, MCU_CTLR_P0_LOCK_KEY_0);
+    Write_MMR(MCUREGS + LOCK2KICK + 4, MCU_CTLR_P0_LOCK_KEY_1);
+
+    Write_MMR(MCUREGS + TIMERCLKSEL, 0);
+
+    Write_MMR(MCUREGS + LOCK2KICK, 0);
+    Write_MMR(MCUREGS + LOCK2KICK + 4, 0);
+}
+
+#define PRU_ICSSG0_CFG_CORE_SYNC_REG 0x0B02603C
+#define PRU_ICSSG1_CFG_CORE_SYNC_REG 0x0B12603C
+#define PRU_ICSSG2_CFG_CORE_SYNC_REG 0x0B22603C
+
+menuitem "ICSS configuration"
+
+/* 
+ * Setup PRU_ICSSG in SYNC mode (250 MHz)
+ *  PRU_ICSS core clocking options
+ *             Core_clk : 0 : PER1HSDIV_CLKOUT1 (CTRLMMR_ICSSG0_CLKSEL) [Default]
+ *                        1 : CPSWHSDIV_CLKOUT2 (CTRLMMR_ICSSG0_CLKSEL)
+ *                        2 : VBUS_CLK (SYNC_Mode)  (PRU_ICSSG0_CFG_CORE_SYNC_REG)  [Module level setting to be in sync with system CBASS clock]
+ * 
+ */
+hotmenu PRU_ICSSG_SyncMode_250MHz()
+{
+    unsigned int * p_address0 = PRU_ICSSG0_CFG_CORE_SYNC_REG;
+    unsigned int * p_address1 = PRU_ICSSG1_CFG_CORE_SYNC_REG;
+    unsigned int * p_address2 = PRU_ICSSG2_CFG_CORE_SYNC_REG;
+    
+    *p_address0 = 0x1;
+    *p_address1 = 0x1;
+    *p_address2 = 0x1;
+    GEL_TextOut("\n All PRU_ICSS CLK are configured in SYNC mode (250 MHz) \n");
+}

@@ -1,0 +1,1996 @@
+{
+    "format": "1.0",
+    "version": "4.14.0",
+    "comment": "rexdb",
+    "tables": {
+        "content_sources": {
+            "comment": "discrete content sources",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "INT",
+                    "auto": true,
+                    "comment": "unique id"
+                },
+                {
+                    "name": "public_id",
+                    "type": "VARCHAR",
+                    "size": "100"
+                },
+                {
+                    "name": "version",
+                    "type": "VARCHAR",
+                    "size": "20"
+                },
+                {
+                    "name": "type",
+                    "type": "VARCHAR",
+                    "size": "50",
+                    "comment": "only one type at present: package set (pkgset)"
+                },
+                {
+                    "name": "state",
+                    "type": "VARCHAR",
+                    "size": "20"
+                },
+                {
+                    "name": "created",
+                    "type": "BIGINT",
+                    "comment": "unix time in millis of creation; immutable"
+                },
+                {
+                    "name": "state_updated",
+                    "type": "BIGINT",
+                    "comment": "unix time in millis of last state change"
+                },
+                {
+                    "name": "main_package_id",
+                    "type": "SMALLINT",
+                    "nullable": true,
+                    "comment": "id of main package, used by pkggrp rows only"
+                },
+                {
+                    "name": "devset_id",
+                    "type": "SMALLINT",
+                    "nullable": true,
+                    "comment": "id of devset, used by pkggrp rows only"
+                },
+                {
+                    "name": "priority",
+                    "type": "INT",
+                    "nullable": true,
+                    "comment": "priority of package source"
+                },
+                {
+                    "name": "packages_to_list_versions_from",
+                    "type": "VARCHAR",
+                    "nullable": true,
+                    "size": "255"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "type"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "state"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "priority"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "main_package_id"
+                        }
+                    ]
+                },
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "public_id"
+                        },
+                        {
+                            "name": "version"
+                        },
+                        {
+                            "name": "created"
+                        }
+                    ]
+                }
+            ]
+        },
+        "content_source_packages": {
+            "comment": "package set X packages",
+            "columns": [
+                {
+                    "name": "content_source_id",
+                    "type": "SMALLINT"
+                },
+                {
+                    "name": "package_id",
+                    "type": "SMALLINT"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "content_source_id"
+                        },
+                        {
+                            "name": "package_id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "package_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "nodes": {
+            "comment": "filterable tree node",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "INT",
+                    "auto": true,
+                    "comment": "unique id"
+                },
+                {
+                    "name": "parent_id",
+                    "type": "INT",
+                    "nullable": true,
+                    "comment": "unique id of parent filterable tree node"
+                },
+                {
+                    "name": "public_id_w0",
+                    "type": "BIGINT UNSIGNED",
+                    "nullable": true,
+                    "comment": "generated public id, first 64 bit word"
+                },
+                {
+                    "name": "public_id_w1",
+                    "type": "BIGINT UNSIGNED",
+                    "nullable": true,
+                    "comment": "generated public id, second 64 bit word"
+                },
+                {
+                    "name": "name",
+                    "type": "VARCHAR",
+                    "size": "255"
+                },
+                {
+                    "name": "is_foundation",
+                    "type": "BOOLEAN",
+                    "comment": "Is this a foundation node? Otherwise is a content node."
+                },
+                {
+                    "name": "is_content_subtree_head",
+                    "type": "BOOLEAN",
+                    "comment": "Is this a content subtree head?"
+                },
+                {
+                    "name": "content_source_id",
+                    "type": "SMALLINT",
+                    "nullable": true,
+                    "comment": "id of content source"
+                },
+                {
+                    "name": "resource_id",
+                    "type": "INT",
+                    "nullable": true,
+                    "comment": "id of resource; content (i.e. non-foundation) nodes only"
+                },
+                {
+                    "name": "descendant_count",
+                    "type": "MEDIUMINT",
+                    "nullable": true,
+                    "comment": "unfiltered countable descendant node count; content (i.e. non-foundation) nodes only"
+                },
+                {
+                    "name": "is_leaf",
+                    "type": "BOOLEAN"
+                },
+                {
+                    "name": "parent_sort",
+                    "type": "VARCHAR",
+                    "size": "1",
+                    "comment": "parent node's sort (on child not parent as optimization)"
+                },
+                {
+                    "name": "leaf_order",
+                    "type": "TINYINT",
+                    "comment": "order based on a) whether or not node is a leaf and b) whether its parent node resource allows leaf-based sorting of its children"
+                },
+                {
+                    "name": "custom_order",
+                    "type": "VARCHAR",
+                    "size": "30",
+                    "nullable": true,
+                    "comment": "custom explicit order provided by BU"
+                },
+                {
+                    "name": "implicit_order",
+                    "type": "MEDIUMINT",
+                    "nullable": true,
+                    "comment": "implicit order based on resource position within metadata"
+                },
+                {
+                    "name": "resource_type",
+                    "type": "VARCHAR",
+                    "size": "50",
+                    "nullable": true,
+                    "comment": "resource's type; copied from resource for performance"
+                },
+                {
+                    "name": "file_type",
+                    "type": "VARCHAR",
+                    "size": "20",
+                    "nullable": true,
+                    "comment": "resource's file_type; copied from resource for performance"
+                },
+                {
+                    "name": "package_id",
+                    "type": "SMALLINT",
+                    "nullable": true,
+                    "comment": "id of resource's source package; copied from resource for performance"
+                },
+                {
+                    "name": "link_ext",
+                    "type": "VARCHAR",
+                    "size": "15",
+                    "nullable": true,
+                    "comment": "link extension; derived from resource.link for performance"
+                },
+                {
+                    "name": "link_type",
+                    "type": "VARCHAR",
+                    "size": "1",
+                    "nullable": true,
+                    "comment": "derived from resource.link_type, 'e' for external, 'l' for local; copied for performance"
+                },
+                {
+                    "name": "icon",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "short_descr",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "view_limitations",
+                    "type": "VARCHAR",
+                    "size": "30",
+                    "nullable": true,
+                    "comment": "Array of view limitations as a comma separated string"
+                },
+                {
+                    "name": "readme_public_id_w0",
+                    "type": "BIGINT UNSIGNED",
+                    "nullable": true,
+                    "comment": "readme node's generated public id, first 64 bit word"
+                },
+                {
+                    "name": "readme_public_id_w1",
+                    "type": "BIGINT UNSIGNED",
+                    "nullable": true,
+                    "comment": "readme node's public id, second 64 bit word"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "parent_id"
+                        },
+                        {
+                            "name": "leaf_order"
+                        },
+                        {
+                            "name": "custom_order"
+                        },
+                        {
+                            "name": "implicit_order"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "resource_id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "content_source_id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "public_id_w0"
+                        },
+                        {
+                            "name": "public_id_w1"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "is_content_subtree_head"
+                        }
+                    ]
+                }
+            ]
+        },
+        "filters": {
+            "comment": "tree filters",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "MEDIUMINT",
+                    "auto": true,
+                    "comment": "unique id"
+                },
+                {
+                    "name": "package_group_id",
+                    "type": "SMALLINT"
+                },
+                {
+                    "name": "type",
+                    "type": "VARCHAR",
+                    "size": "10"
+                },
+                {
+                    "name": "name",
+                    "type": "VARCHAR",
+                    "size": "180",
+                    "comment": "shortened from 255 due to 767 byte key length limit"
+                },
+                {
+                    "name": "name_search",
+                    "type": "VARCHAR",
+                    "size": "180",
+                    "nullable": true,
+                    "comment": "for case insensitive comparison"
+                },
+                {
+                    "name": "device_id",
+                    "type": "SMALLINT",
+                    "nullable": true,
+                    "comment": "id of the filter's device, if this is a device filter"
+                },
+                {
+                    "name": "devtool_id",
+                    "type": "SMALLINT",
+                    "nullable": true,
+                    "comment": "id of the filter's devtool, if this is a devtool filter"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "id"
+                        }
+                    ]
+                },
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "device_id"
+                        },
+                        {
+                            "name": "package_group_id"
+                        }
+                    ]
+                },
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "devtool_id"
+                        },
+                        {
+                            "name": "package_group_id"
+                        }
+                    ]
+                },
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "package_group_id"
+                        },
+                        {
+                            "name": "type"
+                        },
+                        {
+                            "name": "name"
+                        }
+                    ]
+                }
+            ]
+        },
+        "chunks": {
+            "comment": "filter substrings that trees can be filtered on",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "INT",
+                    "auto": true,
+                    "comment": "unique id"
+                },
+                {
+                    "name": "package_group_id",
+                    "type": "SMALLINT"
+                },
+                {
+                    "name": "chunk",
+                    "type": "VARCHAR",
+                    "size": "191",
+                    "comment": "shortened from 255 due to 767 byte key length limit"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "id"
+                        }
+                    ]
+                },
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "package_group_id"
+                        },
+                        {
+                            "name": "chunk"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "chunk"
+                        }
+                    ]
+                }
+            ]
+        },
+        "trailing_subchunks": {
+            "comment": "trailing sub-chunks of a filter's chunk",
+            "columns": [
+                {
+                    "name": "chunk_id",
+                    "type": "INT",
+                    "comment": "id of filter chunk"
+                },
+                {
+                    "name": "subchunk",
+                    "type": "VARCHAR",
+                    "size": "191",
+                    "comment": "subchunk of the filter's chunk"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "subchunk"
+                        },
+                        {
+                            "name": "chunk_id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "chunk_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "filters_x_chunks": {
+            "comment": "filter-chunk many-to-many association",
+            "columns": [
+                {
+                    "name": "filter_id",
+                    "type": "MEDIUMINT",
+                    "comment": "id of the chunk's filter"
+                },
+                {
+                    "name": "chunk_id",
+                    "type": "INT",
+                    "comment": "id of the chunk"
+                },
+                {
+                    "name": "chunk_type",
+                    "type": "CHAR(1)",
+                    "comment": "chunk type: (s)imple, (c)omposite, (f)ull, frequent (x)"
+                },
+                {
+                    "name": "search_on_filter",
+                    "type": "BOOLEAN",
+                    "comment": "Filter is to be used when searching on chunk"
+                },
+                {
+                    "name": "filter_segment",
+                    "type": "VARCHAR(255)",
+                    "comment": "segment of filter in original case corresponding to the chunk"
+                },
+                {
+                    "name": "filter_type",
+                    "type": "CHAR(1)",
+                    "comment": "(d)evice, devtool-(b)oard, dev(t)ool-other, ta(g), (e)num, (k)eyword, freq-chunk (x)"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "chunk_id"
+                        },
+                        {
+                            "name": "search_on_filter"
+                        },
+                        {
+                            "name": "filter_id"
+                        },
+                        {
+                            "name": "chunk_type"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "chunk_id"
+                        },
+                        {
+                            "name": "filter_type"
+                        }
+                    ]
+                }
+            ]
+        },
+        "node_ancestors": {
+            "comment": "nodes' ancestors",
+            "columns": [
+                {
+                    "name": "node_id",
+                    "type": "INT",
+                    "comment": ""
+                },
+                {
+                    "name": "ancestor_node_id",
+                    "type": "INT",
+                    "comment": ""
+                },
+                {
+                    "name": "is_node_counted",
+                    "type": "BOOLEAN",
+                    "comment": "true if the node is included in the count of its ancestors' descendants; duplicate of resources.is_counted"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "ancestor_node_id"
+                        },
+                        {
+                            "name": "node_id"
+                        }
+                    ]
+                },
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "ancestor_node_id"
+                        },
+                        {
+                            "name": "is_node_counted"
+                        },
+                        {
+                            "name": "node_id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "node_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "devices": {
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "SMALLINT",
+                    "auto": true,
+                    "comment": "unique id"
+                },
+                {
+                    "name": "parent_id",
+                    "type": "SMALLINT",
+                    "nullable": true
+                },
+                {
+                    "name": "devset_id",
+                    "type": "SMALLINT",
+                    "comment": "id of devset that device belongs to"
+                },
+                {
+                    "name": "package_uid",
+                    "type": "VARCHAR",
+                    "size": 122
+                },
+                {
+                    "name": "json_id",
+                    "type": "VARCHAR",
+                    "size": "14"
+                },
+                {
+                    "name": "public_id",
+                    "type": "VARCHAR",
+                    "size": "100"
+                },
+                {
+                    "name": "type",
+                    "type": "VARCHAR",
+                    "size": "50"
+                },
+                {
+                    "name": "overview_public_id",
+                    "type": "VARCHAR",
+                    "size": "32",
+                    "nullable": true
+                },
+                {
+                    "name": "name",
+                    "type": "VARCHAR",
+                    "size": "255"
+                },
+                {
+                    "name": "descr",
+                    "type": "VARCHAR",
+                    "size": "8000",
+                    "nullable": true
+                },
+                {
+                    "name": "image",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "json",
+                    "type": "VARCHAR",
+                    "size": "1000",
+                    "nullable": true
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "parent_id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "public_id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "devset_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "devtools": {
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "SMALLINT",
+                    "auto": true,
+                    "comment": "unique id"
+                },
+                {
+                    "name": "devset_id",
+                    "type": "SMALLINT",
+                    "comment": "id of devset that devtool belongs to"
+                },
+                {
+                    "name": "package_uid",
+                    "type": "VARCHAR",
+                    "size": 122
+                },
+                {
+                    "name": "json_id",
+                    "type": "VARCHAR",
+                    "size": "14"
+                },
+                {
+                    "name": "public_id",
+                    "type": "VARCHAR",
+                    "size": "100"
+                },
+                {
+                    "name": "type",
+                    "type": "VARCHAR",
+                    "size": "50"
+                },
+                {
+                    "name": "overview_public_id",
+                    "type": "VARCHAR",
+                    "size": "32",
+                    "nullable": true
+                },
+                {
+                    "name": "name",
+                    "type": "VARCHAR",
+                    "size": "255"
+                },
+                {
+                    "name": "buy_link",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "descr",
+                    "type": "VARCHAR",
+                    "size": "8000",
+                    "nullable": true
+                },
+                {
+                    "name": "image",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "tools_page",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "json",
+                    "type": "VARCHAR",
+                    "size": "1000",
+                    "nullable": true
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "public_id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "devset_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "devtool_devices": {
+            "comment": "many-to-many associative table linking devtools with the devices that they support",
+            "columns": [
+                {
+                    "name": "devtool_id",
+                    "type": "SMALLINT"
+                },
+                {
+                    "name": "device_id",
+                    "type": "SMALLINT"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "devtool_id"
+                        },
+                        {
+                            "name": "device_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "packages": {
+            "comment": "package info",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "SMALLINT",
+                    "auto": true,
+                    "comment": "unique id"
+                },
+                {
+                    "name": "json_id",
+                    "type": "VARCHAR",
+                    "size": "14"
+                },
+                {
+                    "name": "public_id",
+                    "type": "VARCHAR",
+                    "size": "100"
+                },
+                {
+                    "name": "version",
+                    "type": "VARCHAR",
+                    "size": "20"
+                },
+                {
+                    "name": "uid",
+                    "type": "VARCHAR",
+                    "size": "122"
+                },
+                {
+                    "name": "install_path",
+                    "type": "VARCHAR",
+                    "size": "1000"
+                },
+                {
+                    "name": "install_command",
+                    "type": "VARCHAR",
+                    "size": "1000"
+                },
+                {
+                    "name": "install_size_win",
+                    "type": "BIGINT UNSIGNED",
+                    "nullable": true
+                },
+                {
+                    "name": "install_size_linux",
+                    "type": "BIGINT UNSIGNED",
+                    "nullable": true
+                },
+                {
+                    "name": "install_size_macos",
+                    "type": "BIGINT UNSIGNED",
+                    "nullable": true
+                },
+                {
+                    "name": "type",
+                    "type": "VARCHAR",
+                    "size": "50"
+                },
+                {
+                    "name": "sub_type",
+                    "type": "VARCHAR",
+                    "size": "20",
+                    "nullable": true
+                },
+                {
+                    "name": "feature_type",
+                    "type": "VARCHAR",
+                    "size": "20",
+                    "nullable": true
+                },
+                {
+                    "name": "ccs_version",
+                    "type": "VARCHAR",
+                    "size": "60",
+                    "nullable": true
+                },
+                {
+                    "name": "ccs_install_loc",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "name",
+                    "type": "VARCHAR",
+                    "size": "255"
+                },
+                {
+                    "name": "descr",
+                    "type": "VARCHAR",
+                    "size": "8000",
+                    "nullable": true
+                },
+                {
+                    "name": "path",
+                    "type": "VARCHAR",
+                    "size": "255"
+                },
+                {
+                    "name": "image",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "ordinal",
+                    "type": "INT",
+                    "nullable": true
+                },
+                {
+                    "name": "semver",
+                    "type": "VARCHAR",
+                    "size": "20"
+                },
+                {
+                    "name": "metadata_version",
+                    "type": "VARCHAR",
+                    "size": "20",
+                    "nullable": true
+                },
+                {
+                    "name": "restrictions",
+                    "type": "VARCHAR",
+                    "nullable": true,
+                    "size": "100"
+                },
+                {
+                    "name": "license",
+                    "type": "VARCHAR",
+                    "nullable": true,
+                    "size": "255"
+                },
+                {
+                    "name": "hide_node_dir_panel",
+                    "type": "BOOLEAN"
+                },
+                {
+                    "name": "module_of_package_id",
+                    "type": "VARCHAR",
+                    "nullable": true,
+                    "size": "100"
+                },
+                {
+                    "name": "module_of_version_range",
+                    "type": "VARCHAR",
+                    "nullable": true,
+                    "size": "100"
+                },
+                {
+                    "name": "hide_by_default",
+                    "type": "BOOLEAN"
+                },
+                {
+                    "name": "module_grp_core_pkg_pid",
+                    "type": "VARCHAR",
+                    "nullable": true,
+                    "size": "100"
+                },
+                {
+                    "name": "module_grp_core_pkg_vrange",
+                    "type": "VARCHAR",
+                    "nullable": true,
+                    "size": "100"
+                },
+                {
+                    "name": "module_grp_packages",
+                    "type": "VARCHAR",
+                    "nullable": true,
+                    "size": "1500"
+                },
+                {
+                    "name": "default_module_group",
+                    "type": "BOOLEAN"
+                },
+                {
+                    "name": "devices",
+                    "type": "TEXT",
+                    "nullable": true
+                },
+                {
+                    "name": "devtools",
+                    "type": "TEXT",
+                    "nullable": true
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "uid"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "public_id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "ordinal"
+                        }
+                    ]
+                }
+            ]
+        },
+        "package_depends": {
+            "comment": "package dependencies",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "MEDIUMINT",
+                    "auto": true,
+                    "comment": "unique db id"
+                },
+                {
+                    "name": "package_id",
+                    "type": "SMALLINT",
+                    "comment": "dependent package's db id"
+                },
+                {
+                    "name": "type",
+                    "type": "CHAR",
+                    "size": "1"
+                },
+                {
+                    "name": "ref_id",
+                    "type": "VARCHAR",
+                    "size": "100",
+                    "nullable": true
+                },
+                {
+                    "name": "version_range",
+                    "type": "VARCHAR",
+                    "size": "100"
+                },
+                {
+                    "name": "required",
+                    "type": "VARCHAR",
+                    "size": "9",
+                    "nullable": true
+                },
+                {
+                    "name": "message",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "package_id"
+                        },
+                        {
+                            "name": "type"
+                        },
+                        {
+                            "name": "ref_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "resources": {
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "INT",
+                    "auto": true,
+                    "comment": "unique id"
+                },
+                {
+                    "name": "parent_id",
+                    "type": "INT",
+                    "nullable": true,
+                    "comment": "id of parent resource"
+                },
+                {
+                    "name": "package_id",
+                    "type": "SMALLINT",
+                    "comment": "id of source package"
+                },
+                {
+                    "name": "json_id",
+                    "type": "VARCHAR",
+                    "size": "14"
+                },
+                {
+                    "name": "type",
+                    "type": "VARCHAR",
+                    "size": "50"
+                },
+                {
+                    "name": "name",
+                    "type": "VARCHAR",
+                    "size": "255"
+                },
+                {
+                    "name": "sort",
+                    "type": "VARCHAR",
+                    "size": "1"
+                },
+                {
+                    "name": "custom_order",
+                    "type": "VARCHAR",
+                    "size": "30",
+                    "nullable": true,
+                    "comment": "custom explicit order provided by BU"
+                },
+                {
+                    "name": "implicit_order",
+                    "type": "INT",
+                    "nullable": true,
+                    "comment": "implicit order based on resource position within metadata"
+                },
+                {
+                    "name": "descr",
+                    "type": "VARCHAR",
+                    "size": "8000",
+                    "nullable": true
+                },
+                {
+                    "name": "short_descr",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "view_limitations",
+                    "type": "VARCHAR",
+                    "size": "30",
+                    "nullable": true,
+                    "comment": "Array of view limitations as a comma separated string"
+                },
+                {
+                    "name": "proj_restriction",
+                    "type": "CHAR",
+                    "size": "1",
+                    "nullable": true,
+                    "comment": "'c' for cloud-only, 'd' for desktop-only"
+                },
+                {
+                    "name": "kernel",
+                    "type": "VARCHAR",
+                    "size": "100",
+                    "nullable": true,
+                    "comment": "Array of kernels for an example as a comma separated string"
+                },
+                {
+                    "name": "compiler",
+                    "type": "VARCHAR",
+                    "size": "100",
+                    "nullable": true,
+                    "comment": "Array of compilers for an example as a comma separated string"
+                },
+                {
+                    "name": "override_projspec_device",
+                    "type": "BOOLEAN",
+                    "nullable": true,
+                    "comment": "Used at the time of import to override the project spec deviced Id"
+                },
+                {
+                    "name": "link",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "link_type",
+                    "type": "VARCHAR",
+                    "size": "20",
+                    "nullable": true
+                },
+                {
+                    "name": "icon",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "file_type",
+                    "type": "VARCHAR",
+                    "size": "20",
+                    "nullable": true
+                },
+                {
+                    "name": "has_includes",
+                    "type": "BOOLEAN",
+                    "nullable": true
+                },
+                {
+                    "name": "is_included_file",
+                    "type": "BOOLEAN",
+                    "nullable": true
+                },
+                {
+                    "name": "image",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "root0",
+                    "type": "VARCHAR",
+                    "size": "50",
+                    "nullable": true
+                },
+                {
+                    "name": "is_counted",
+                    "type": "BOOLEAN",
+                    "comment": "true if the resource is included in the tree descendant counts"
+                },
+                {
+                    "name": "json",
+                    "type": "VARCHAR",
+                    "size": "6000",
+                    "nullable": true
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "parent_id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "package_id"
+                        },
+                        {
+                            "name": "type"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "type"
+                        }
+                    ]
+                }
+            ]
+        },
+        "resource_devices": {
+            "comment": "many-to-many associative table linking resources with their supported devices",
+            "columns": [
+                {
+                    "name": "resource_id",
+                    "type": "INT"
+                },
+                {
+                    "name": "device_id",
+                    "type": "SMALLINT"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "resource_id"
+                        },
+                        {
+                            "name": "device_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "node_public_ids": {
+            "columns": [
+                {
+                    "name": "node_id",
+                    "type": "INT"
+                },
+                {
+                    "name": "public_id_w0",
+                    "type": "BIGINT UNSIGNED",
+                    "comment": "public id, first 64 bit word"
+                },
+                {
+                    "name": "public_id_w1",
+                    "type": "BIGINT UNSIGNED",
+                    "comment": "public id, second 64 bit word"
+                },
+                {
+                    "name": "alias",
+                    "type": "BOOLEAN",
+                    "comment": "Is this public id an alias (or primary)?"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "public_id_w0"
+                        },
+                        {
+                            "name": "public_id_w1"
+                        },
+                        {
+                            "name": "node_id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "node_id"
+                        }
+                    ],
+                    "comment": "for lookup/deletion by node"
+                }
+            ]
+        },
+        "node_custom_res_ids": {
+            "columns": [
+                {
+                    "name": "node_id",
+                    "type": "INT UNSIGNED",
+                    "comment": "node's id"
+                },
+                {
+                    "name": "package_group_id",
+                    "type": "SMALLINT",
+                    "comment": "id of package group to which the node belongs"
+                },
+                {
+                    "name": "custom_resource_public_id",
+                    "type": "VARCHAR",
+                    "size": "100",
+                    "comment": "a public id (may or may not be unique) assigned to the node's resource"
+                },
+                {
+                    "name": "global",
+                    "type": "BOOLEAN",
+                    "comment": "Is the public id global or package-scoped?"
+                },
+                {
+                    "name": "alias",
+                    "type": "BOOLEAN",
+                    "comment": "Is the public id an alias?"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "custom_resource_public_id"
+                        },
+                        {
+                            "name": "package_group_id"
+                        },
+                        {
+                            "name": "global"
+                        },
+                        {
+                            "name": "node_id"
+                        }
+                    ],
+                    "comment": "primary key, optimized for lookup on custom_resource_public_id"
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "package_group_id"
+                        }
+                    ],
+                    "comment": "for lookup/deletion by package group"
+                }
+            ]
+        },
+        "device_aliases": {
+            "columns": [
+                {
+                    "name": "devset_id",
+                    "type": "SMALLINT"
+                },
+                {
+                    "name": "alias",
+                    "type": "VARCHAR",
+                    "size": "100",
+                    "comment": "a device alias"
+                },
+                {
+                    "name": "public_id",
+                    "type": "VARCHAR",
+                    "size": "100",
+                    "comment": "the device's unique public id"
+                },
+                {
+                    "name": "device_id",
+                    "type": "SMALLINT",
+                    "nullable": true
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "alias"
+                        },
+                        {
+                            "name": "devset_id"
+                        },
+                        {
+                            "name": "public_id"
+                        }
+                    ],
+                    "comment": "primary key, optimized for alias -> public id lookup w/o devset"
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "devset_id"
+                        }
+                    ],
+                    "comment": "for lookup/deletion by devset"
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "device_id"
+                        }
+                    ],
+                    "comment": "for lookup by device"
+                }
+            ]
+        },
+        "devtool_aliases": {
+            "columns": [
+                {
+                    "name": "devset_id",
+                    "type": "SMALLINT"
+                },
+                {
+                    "name": "alias",
+                    "type": "VARCHAR",
+                    "size": "100",
+                    "comment": "a devtool alias"
+                },
+                {
+                    "name": "public_id",
+                    "type": "VARCHAR",
+                    "size": "100",
+                    "comment": "the devtool's unique public id"
+                },
+                {
+                    "name": "devtool_id",
+                    "type": "SMALLINT",
+                    "nullable": true
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "alias"
+                        },
+                        {
+                            "name": "devset_id"
+                        },
+                        {
+                            "name": "public_id"
+                        }
+                    ],
+                    "comment": "primary key, optimized for alias -> public id lookup w/o devset"
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "devset_id"
+                        }
+                    ],
+                    "comment": "for lookup/deletion by devset"
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "devtool_id"
+                        }
+                    ],
+                    "comment": "for lookup by devtool"
+                }
+            ]
+        },
+        "package_aliases": {
+            "columns": [
+                {
+                    "name": "alias",
+                    "type": "VARCHAR",
+                    "size": "100",
+                    "comment": "a package alias"
+                },
+                {
+                    "name": "package_id",
+                    "type": "SMALLINT"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "alias"
+                        },
+                        {
+                            "name": "package_id"
+                        }
+                    ]
+                },
+                {
+                    "columns": [
+                        {
+                            "name": "package_id"
+                        }
+                    ],
+                    "comment": "for lookup/deletion by package"
+                }
+            ]
+        },
+        "resource_devtools": {
+            "comment": "many-to-many associative table linking resources with their supported devtools",
+            "columns": [
+                {
+                    "name": "resource_id",
+                    "type": "INT"
+                },
+                {
+                    "name": "devtool_id",
+                    "type": "SMALLINT"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "resource_id"
+                        },
+                        {
+                            "name": "devtool_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "filter_affects_node": {
+            "comment": "Content Sources X their Nodes X the Filters that apply to them (directly and indirectly)",
+            "columns": [
+                {
+                    "name": "source_id",
+                    "type": "SMALLINT",
+                    "comment": "Content Source ID; from the Content Head Node's source"
+                },
+                {
+                    "name": "filter_id",
+                    "type": "MEDIUMINT"
+                },
+                {
+                    "name": "node_id",
+                    "type": "INT"
+                },
+                {
+                    "name": "is_node_counted",
+                    "type": "BOOLEAN",
+                    "comment": "true if the node is included in count of its ancestors' child nodes; duplicate of resources.is_counted"
+                },
+                {
+                    "name": "relationship",
+                    "type": "VARCHAR",
+                    "size": "1",
+                    "comment": "'d' direct, 'a' ancestor of node, 'c' descendant of node"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "filter_id"
+                        },
+                        {
+                            "name": "node_id"
+                        }
+                    ]
+                },
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "node_id"
+                        },
+                        {
+                            "name": "filter_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "filter_affects_node_cdesc": {
+            "comment": "Content Sources X their Nodes X their countable descendant Nodes X the Filters that apply to them (directly and indirectly)",
+            "columns": [
+                {
+                    "name": "source_id",
+                    "type": "SMALLINT"
+                },
+                {
+                    "name": "ancestor_node_id",
+                    "type": "INT"
+                },
+                {
+                    "name": "node_id",
+                    "type": "INT"
+                },
+                {
+                    "name": "filter_id",
+                    "type": "MEDIUMINT"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "filter_id"
+                        },
+                        {
+                            "name": "ancestor_node_id"
+                        },
+                        {
+                            "name": "node_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "node_dev_resgrps": {
+            "comment": "Nodes X Resource Groups under node X Resource Group's Devs. For resource group lookup on node + dev.",
+            "columns": [
+                {
+                    "name": "node_id",
+                    "type": "INT"
+                },
+                {
+                    "name": "is_devtool",
+                    "type": "BOOLEAN",
+                    "comment": "devtool or device?"
+                },
+                {
+                    "name": "dev_id",
+                    "type": "SMALLINT",
+                    "comment": "polymorphic association to devices and devtools"
+                },
+                {
+                    "name": "resource_group_id",
+                    "type": "MEDIUMINT"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "node_id"
+                        },
+                        {
+                            "name": "is_devtool"
+                        },
+                        {
+                            "name": "dev_id"
+                        },
+                        {
+                            "name": "resource_group_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "res_filters": {
+            "comment": "Countable Resources X Filters that apply to them (directly or indirectly)",
+            "columns": [
+                {
+                    "name": "resource_id",
+                    "type": "INT"
+                },
+                {
+                    "name": "filter_id",
+                    "type": "MEDIUMINT"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "resource_id"
+                        },
+                        {
+                            "name": "filter_id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "resource_groups": {
+            "comment": "Table view resource groups",
+            "columns": [
+                {
+                    "name": "id",
+                    "type": "MEDIUMINT",
+                    "auto": true
+                },
+                {
+                    "name": "resource_grp",
+                    "type": "VARCHAR",
+                    "size": "500",
+                    "comment": "path from json db, for logging/debugging"
+                },
+                {
+                    "name": "cat_context",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "resource_type",
+                    "type": "VARCHAR",
+                    "size": "50"
+                },
+                {
+                    "name": "resource_subclass",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "name",
+                    "type": "VARCHAR",
+                    "size": "255"
+                },
+                {
+                    "name": "short_descr",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "file_type",
+                    "type": "VARCHAR",
+                    "size": "20",
+                    "nullable": true,
+                    "comment": "resource's file_type; copied from resource for performance"
+                },
+                {
+                    "name": "package_id",
+                    "type": "SMALLINT",
+                    "nullable": true,
+                    "comment": "id of resource's source package; copied from resource for performance"
+                },
+                {
+                    "name": "link_ext",
+                    "type": "VARCHAR",
+                    "size": "15",
+                    "nullable": true,
+                    "comment": "link extension; derived from resource.link for performance"
+                },
+                {
+                    "name": "link_type",
+                    "type": "VARCHAR",
+                    "size": "1",
+                    "nullable": true,
+                    "comment": "derived from resource.link_type, 'e' for external, 'l' for local; copied for performance"
+                },
+                {
+                    "name": "icon",
+                    "type": "VARCHAR",
+                    "size": "255",
+                    "nullable": true
+                },
+                {
+                    "name": "view_limitations",
+                    "type": "VARCHAR",
+                    "size": "30",
+                    "nullable": true,
+                    "comment": "Array of view limitations as a comma separated string"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "id"
+                        }
+                    ]
+                }
+            ]
+        },
+        "resgrp_nodes": {
+            "comment": "Table view resource groups X their nodes",
+            "columns": [
+                {
+                    "name": "resource_group_id",
+                    "type": "MEDIUMINT"
+                },
+                {
+                    "name": "is_devtool",
+                    "type": "BOOLEAN",
+                    "comment": "devtool or device?"
+                },
+                {
+                    "name": "dev_id",
+                    "type": "SMALLINT",
+                    "comment": "polymorphic association to devices and devtools"
+                },
+                {
+                    "name": "kernel",
+                    "type": "TINYINT",
+                    "nullable": true
+                },
+                {
+                    "name": "compiler",
+                    "type": "TINYINT",
+                    "nullable": true
+                },
+                {
+                    "name": "node_id",
+                    "type": "INT"
+                },
+                {
+                    "name": "resource_id",
+                    "type": "INT"
+                },
+                {
+                    "name": "has_readme",
+                    "type": "BOOLEAN",
+                    "comment": "Does node have readme?"
+                },
+                {
+                    "name": "has_children",
+                    "type": "BOOLEAN",
+                    "comment": "Does node have children?"
+                }
+            ],
+            "indexes": [
+                {
+                    "unique": true,
+                    "columns": [
+                        {
+                            "name": "resource_group_id",
+                            "type": "INT"
+                        },
+                        {
+                            "name": "is_devtool"
+                        },
+                        {
+                            "name": "dev_id"
+                        },
+                        {
+                            "name": "resource_id"
+                        },
+                        {
+                            "name": "node_id"
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

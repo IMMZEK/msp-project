@@ -1,0 +1,521 @@
+<module name="SDRC" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="SDRC_REVISION" acronym="SDRC_REVISION" offset="0x0" width="32" description="This register contains the IP revision code. This code is specified at design time.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="REV" width="8" begin="7" end="0" resetval="See" description="IP revision code[7:4]: Major revision[3:0]: Minor revisionExamples: 0x10 for 1.0, 0x21 for 2.1" range="" rwaccess="R"/>
+  </register>
+  <register id="SDRC_SYSCONFIG" acronym="SDRC_SYSCONFIG" offset="0x10" width="32" description="This register controls the various parameters of the interconnect.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Write 0s for future compatibilityRead returns 0." range="" rwaccess="RW"/>
+    <bitfield id="NOMEMORYMRS" width="1" begin="8" end="8" resetval="0x0" description="No external memory MRS command" range="" rwaccess="RW">
+      <bitenum value="0" token="NOMEMORYMRS_0" description="When set to 0, the SDRC internal and registers (both CS) are written and MR, EMR2 commands are performed to the corresponding registers of the external SDRAM."/>
+      <bitenum value="1" token="NOMEMORYMRS_1" description="When set to 1, only SDRC internal and registers (both CS) are written, no MR or EMR2 commands are performed to SDRAM."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="7" end="5" resetval="0x0" description="Write 0s for future compatibility.Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="IDLEMODE" width="2" begin="4" end="3" resetval="0x2" description="Power management Req/Ack control" range="" rwaccess="RW">
+      <bitenum value="0" token="IDLEMODE_0" description="Reserved - Do not use."/>
+      <bitenum value="1" token="IDLEMODE_1" description="Reserved - Do not use."/>
+      <bitenum value="2" token="IDLEMODE_2" description="Smart Idle - Acknowledgment to an idle request is based on the internal activity of the module. Issued when the SDRC enters self-refresh."/>
+      <bitenum value="3" token="IDLEMODE_3" description="Reserved - Do not use."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0x0" description="Write 0s for future compatibility. Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="SOFTRESET" width="1" begin="1" end="1" resetval="0x0" description="Software reset" range="" rwaccess="RW">
+      <bitenum value="0" token="SOFTRESET_0" description="Normal mode (no reset applied)"/>
+      <bitenum value="1" token="SOFTRESET_1" description="Software reset activated"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="0" end="0" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+  </register>
+  <register id="SDRC_SYSSTATUS" acronym="SDRC_SYSSTATUS" offset="0x14" width="32" description="This register provides module status, excluding interrupt status info.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="Reserved for module-specific status informationRead returns 0." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved for interconnect socket status informationRead returns 0." range="" rwaccess="R"/>
+    <bitfield id="RESETDONE" width="1" begin="0" end="0" resetval="0x-" description="Internal reset monitoring" range="" rwaccess="R">
+      <bitenum value="0" token="RESETDONE_0" description="Internal module reset is ongoing"/>
+      <bitenum value="1" token="RESETDONE_1" description="Reset completed - The module is ready to be used"/>
+    </bitfield>
+  </register>
+  <register id="SDRC_CS_CFG" acronym="SDRC_CS_CFG" offset="0x40" width="32" description="This register configures the start address of CS1 address space. Must be aligned on a boundary that is a multiple of the size of the attached memory, or of the next power of two if the memory size is not a power of two.">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x000000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="CS1STARTLOW" width="2" begin="9" end="8" resetval="0x0" description="CS1 address space start address (lower add bits a1:a0) / 32MB unit" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="7" end="4" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="CS1STARTHIGH" width="4" begin="3" end="0" resetval="0x4" description="CS1 address space start address (upper add bits a5:a4:a3:a2) / 128MB unit" range="" rwaccess="RW"/>
+  </register>
+  <register id="SDRC_SHARING" acronym="SDRC_SHARING" offset="0x44" width="32" description="This register specifies the SDRC attached memory size and position on the SDRC IOs.">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0x0" description="Write 0s for future compatibility.Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LOCK" width="1" begin="30" end="30" resetval="See" description="Read-only access lock bit" range="" rwaccess="RW">
+      <bitenum value="0" token="LOCK_0" description="This register is fully writable."/>
+      <bitenum value="1" token="LOCK_1" description="When this bit is set, the register can not be unset until next reset of the module."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="15" begin="29" end="15" resetval="See" description="Write 0s for future compatibility.Read returns 0s." range="" rwaccess="RW"/>
+    <bitfield id="CS1MUXCFG" width="3" begin="14" end="12" resetval="See" description="Identifies the SDRC pins used by CS1" range="" rwaccess="RW">
+      <bitenum value="0" token="CS1MUXCFG_0" description="32-bit SDRAM on Datalane[31:0]"/>
+      <bitenum value="1" token="CS1MUXCFG_1" description="32-bit SDRAM on Datalane[31:0]"/>
+      <bitenum value="2" token="CS1MUXCFG_2" description="16-bit SDRAM on Datalane[31:16]"/>
+      <bitenum value="3" token="CS1MUXCFG_3" description="16-bit SDRAM on Datalane[16:0]"/>
+      <bitenum value="4" token="CS1MUXCFG_4" description="Reserved"/>
+      <bitenum value="5" token="CS1MUXCFG_5" description="Reserved"/>
+      <bitenum value="6" token="CS1MUXCFG_6" description="Reserved"/>
+      <bitenum value="7" token="CS1MUXCFG_7" description="16-bit SDRAM on Datalane[31:16]"/>
+    </bitfield>
+    <bitfield id="CS0MUXCFG" width="3" begin="11" end="9" resetval="See" description="Identifies the SDRC pins used by CS0" range="" rwaccess="RW">
+      <bitenum value="0" token="CS0MUXCFG_0" description="32-bit SDRAM on Datalane[31:0]"/>
+      <bitenum value="1" token="CS0MUXCFG_1" description="32-bit SDRAM on Datalane[31:0]"/>
+      <bitenum value="2" token="CS0MUXCFG_2" description="16-bit SDRAM on Datalane[31:16]"/>
+      <bitenum value="3" token="CS0MUXCFG_3" description="16-bit SDRAM on Datalane[16:0]"/>
+      <bitenum value="4" token="CS0MUXCFG_4" description="Reserved"/>
+      <bitenum value="5" token="CS0MUXCFG_5" description="Reserved"/>
+      <bitenum value="6" token="CS0MUXCFG_6" description="Reserved"/>
+      <bitenum value="7" token="CS0MUXCFG_7" description="16-bit SDRAM on Datalane[31:16]"/>
+    </bitfield>
+    <bitfield id="SDRCTRISTATE" width="1" begin="8" end="8" resetval="See" description="Static 3-state command for the SDRC I/O pads" range="" rwaccess="RW">
+      <bitenum value="0" token="SDRCTRISTATE_0" description="All SDRC interface pins are set to hi-Z."/>
+      <bitenum value="1" token="SDRCTRISTATE_1" description="Normal mode: SDRC drives the I/O pads based on the memory traffic."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="8" begin="7" end="0" resetval="See" description="Write 0s for future compatibility. Read returns 0s." range="" rwaccess="RW"/>
+  </register>
+  <register id="SDRC_ERR_ADDR" acronym="SDRC_ERR_ADDR" offset="0x48" width="32" description="This register captures the address of the last illegal access received on the interconnect.">
+    <bitfield id="ERRORADDRESS" width="32" begin="31" end="0" resetval="0x00000000" description="Address of illegal access (Bit 31 is always 0.)" range="" rwaccess="R"/>
+  </register>
+  <register id="SDRC_ERR_TYPE" acronym="SDRC_ERR_TYPE" offset="0x4C" width="32" description="This register provides additional information about the last illegal access.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ERRORCONNID" width="4" begin="11" end="8" resetval="0x0" description="Identifies the interconnect ConnID of the illegal access initiator: Refer to the top level documentation of the device using the SDRC module." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0x0" description="Write 0 for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ERRORMCMD" width="3" begin="6" end="4" resetval="0x0" description="System command of the transaction that caused the error (3-bit field)" range="" rwaccess="RW"/>
+    <bitfield id="ERRORADD" width="2" begin="3" end="2" resetval="0x2" description="Flag that indicates access is to an illegal address" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRORADD_0_r" description="The system request was to an address outside the memory space."/>
+      <bitenum value="0" token="ERRORADD_0_w" description="Clear ErrorAdd bit field."/>
+      <bitenum value="1" token="ERRORADD_1_r" description="The system request was to an address outside the register space."/>
+      <bitenum value="1" token="ERRORADD_1_w" description="No effect"/>
+      <bitenum value="2" token="ERRORADD_2_r" description="No Err Add. Not an address error"/>
+      <bitenum value="2" token="ERRORADD_2_w" description="No effect"/>
+      <bitenum value="3" token="ERRORADD_3_r" description="No Err Add. Not an address error"/>
+      <bitenum value="3" token="ERRORADD_3_w" description="No effect"/>
+    </bitfield>
+    <bitfield id="ERRORDPD" width="1" begin="1" end="1" resetval="0x0" description="Transaction error while the memory is in deep-power-down mode" range="" rwaccess="RW">
+      <bitenum value="0" token="ERRORDPD_0_r" description="The memory was not in deep-power-down mode when the error occurred."/>
+      <bitenum value="0" token="ERRORDPD_0_w" description="No effect"/>
+      <bitenum value="1" token="ERRORDPD_1_r" description="The error is due to an unexpected access while the memory was in deep-power-down mode."/>
+      <bitenum value="1" token="ERRORDPD_1_w" description="Clear the ErrorDPD bit field."/>
+    </bitfield>
+    <bitfield id="ERRORVALID" width="1" begin="0" end="0" resetval="0x0" description="Error validity status - Must be explicitly cleared with a write 0 transaction." range="" rwaccess="RW">
+      <bitenum value="0" token="ERRORVALID_0_r" description="All error fields no longer valid"/>
+      <bitenum value="0" token="ERRORVALID_0_w" description="Clear ErrorValid bit field"/>
+      <bitenum value="1" token="ERRORVALID_1_r" description="Error detected and logged in the other error fields"/>
+      <bitenum value="1" token="ERRORVALID_1_w" description="No effect"/>
+    </bitfield>
+  </register>
+  <register id="SDRC_DLLA_CTRL" acronym="SDRC_DLLA_CTRL" offset="0x60" width="32" description="This register controls the SDRC DLL A resource used for fine timing tuning on a double-data-rate interface.">
+    <bitfield id="FIXEDDELAY" width="8" begin="31" end="24" resetval="0x00" description="Phase offset value in ModeFixedDelay mode. Maximum frequency supported in this mode is 83 MHz. FIXEDDELAY steps are defined after DLL cell characterization." range="" rwaccess="RW"/>
+    <bitfield id="MODEFIXEDDELAYINITLAT" width="8" begin="23" end="16" resetval="0x00" description="Initial latency before first request to be processed in ModeFixedDelay mode 0x0: no initial latency before first access 0x1: 2 clock cycles before first access0x2: 4 clock cycles before first access 0x3: 6 clock cycles before first access 0x4 : 8 clock cycles before first access ...0xFF: 510 clock cycles before first access" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="8" begin="15" end="8" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="WRITEDDRCLKX2DIS" width="1" begin="7" end="7" resetval="0x0" description="Disable MDDR write path using the double frequency input clock." range="" rwaccess="RW">
+      <bitenum value="0" token="WRITEDDRCLKX2DIS_0" description="MDDR write path using the double frequency clock logic"/>
+      <bitenum value="1" token="WRITEDDRCLKX2DIS_1" description="MDDR write path using the DLL/CDL write path logic"/>
+    </bitfield>
+    <bitfield id="DLLMODEONIDLEREQ" width="2" begin="6" end="5" resetval="0x0" description="Selects the DLL mode upon hardware idle request" range="" rwaccess="RW">
+      <bitenum value="0" token="DLLMODEONIDLEREQ_0" description="DLL in Power-down mode upon hardware idle request"/>
+      <bitenum value="1" token="DLLMODEONIDLEREQ_1" description="DLL in DLL idle mode upon hardware idle request"/>
+      <bitenum value="2" token="DLLMODEONIDLEREQ_2" description="No action upon hardware idle request. Input clock frequency must not be changed."/>
+      <bitenum value="3" token="DLLMODEONIDLEREQ_3" description="Reserved for future use (no action upon hardware idle request)."/>
+    </bitfield>
+    <bitfield id="DLLIDLE" width="1" begin="4" end="4" resetval="0x0" description="Enables the DLL Idle mode" range="" rwaccess="RW">
+      <bitenum value="0" token="DLLIDLE_0" description="DLL Idle mode disabled"/>
+      <bitenum value="1" token="DLLIDLE_1" description="DLL Idle mode enabled"/>
+    </bitfield>
+    <bitfield id="ENADLL" width="1" begin="3" end="3" resetval="0x0" description="Enables DLL" range="" rwaccess="RW">
+      <bitenum value="0" token="ENADLL_0" description="DLL disabled"/>
+      <bitenum value="1" token="ENADLL_1" description="DLL enabled"/>
+    </bitfield>
+    <bitfield id="LOCKDLL" width="1" begin="2" end="2" resetval="0x0" description="Selects the DLL functionality between the TrackingDelay mode (previously called lock mode) or the ModeFixedDelay mode (previously called unlock mode). The DLL mode is updated in the DLL cell after:- DLLIDLE mode- DLL power-down mode" range="" rwaccess="RW">
+      <bitenum value="0" token="LOCKDLL_0" description="LOCKDLL at 0 puts the DLL in TrackingDelay mode (tracking counter started)."/>
+      <bitenum value="1" token="LOCKDLL_1" description="LOCKDLL at 1 puts the DLL in ModeFixedDelay mode. The fixed delay defined in FIXEDDELAY bit field is used to delay DQS lines for read accesses."/>
+    </bitfield>
+    <bitfield id="DLLPHASE" width="1" begin="1" end="1" resetval="0x0" description="Nominal digitally-controlled delay when DLL is enabled" range="" rwaccess="RW">
+      <bitenum value="0" token="DLLPHASE_0" description="72 degrees (20% of the clock period)"/>
+      <bitenum value="1" token="DLLPHASE_1" description="90 degrees (25% of the clock cycle)"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="0" end="0" resetval="0x0" description="Write 0s for future compatibility. Reads return 0." range="" rwaccess="RW"/>
+  </register>
+  <register id="SDRC_DLLA_STATUS" acronym="SDRC_DLLA_STATUS" offset="0x64" width="32" description="This register reflects the current status of the DLL A.">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x00000000" description="Reads return zeros." range="" rwaccess="R"/>
+    <bitfield id="LOCKSTATUS" width="1" begin="2" end="2" resetval="0x0" description="DLL lock status" range="" rwaccess="R">
+      <bitenum value="0" token="LOCKSTATUS_0" description="The DLL is not locked."/>
+      <bitenum value="1" token="LOCKSTATUS_1" description="The DLL is locked."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="1" end="1" resetval="0x0" description="Reads return zero." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="0" end="0" resetval="0x0" description="Reads return zero." range="" rwaccess="R"/>
+  </register>
+  <register id="SDRC_POWER_REG" acronym="SDRC_POWER_REG" offset="0x70" width="32" description="This SDRC power-management register defines the global power-management policy (shared by CS0/CS1).">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x00" description="Write 0s for future compatibility.Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="WAKEUPPROC" width="1" begin="26" end="26" resetval="0x0" description="Select if after a SDRC wakeup in DDR mode (in DLL tracking-delay mode), the first request is stalled during 500 cycles latency or until the lock signal from the DLL/CDL analog cell is asserted." range="" rwaccess="RW">
+      <bitenum value="0" token="WAKEUPPROC_0" description="SDRC allows DDR access after 500 L3 clock cycles."/>
+      <bitenum value="1" token="WAKEUPPROC_1" description="SDRC allows DDR access as soon as DLL LOCKSTATUS bit is 1."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="2" begin="25" end="24" resetval="0x0" description="Write 0s for future compatibility.Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="AUTOCOUNT" width="16" begin="23" end="8" resetval="0x0000" description="16-bit programmable count value used for delayed automatic clock gating and self-refresh entry, assuming CLKCTRL field is not 0" range="" rwaccess="RW"/>
+    <bitfield id="SRFRONRESET" width="1" begin="7" end="7" resetval="0x1" description="Enter self refresh when a warm reset is applied:" range="" rwaccess="RW">
+      <bitenum value="0" token="SRFRONRESET_0" description="Feature disabled"/>
+      <bitenum value="1" token="SRFRONRESET_1" description="Feature enabled"/>
+    </bitfield>
+    <bitfield id="SRFRONIDLEREQ" width="1" begin="6" end="6" resetval="0x0" description="Enter self refresh when on hardware idle request:" range="" rwaccess="RW">
+      <bitenum value="0" token="SRFRONIDLEREQ_0" description="Feature disabled"/>
+      <bitenum value="1" token="SRFRONIDLEREQ_1" description="Feature enabled"/>
+    </bitfield>
+    <bitfield id="CLKCTRL" width="2" begin="5" end="4" resetval="0x0" description="Clock control feature defines clock gating and self refresh:" range="" rwaccess="RW">
+      <bitenum value="0" token="CLKCTRL_0" description="No auto clk feature turned on"/>
+      <bitenum value="1" token="CLKCTRL_1" description="Enable internal clock gating on timeout of Auto_cnt"/>
+      <bitenum value="2" token="CLKCTRL_2" description="Enable self-refresh on timeout of Auto_cnt"/>
+      <bitenum value="3" token="CLKCTRL_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="EXTCLKDIS" width="1" begin="3" end="3" resetval="0x0" description="Disable the clock provided to the external memories:" range="" rwaccess="RW">
+      <bitenum value="0" token="EXTCLKDIS_0" description="Enable clock"/>
+      <bitenum value="1" token="EXTCLKDIS_1" description="Disable clock- Logical 0 is applied."/>
+    </bitfield>
+    <bitfield id="PWDENA" width="1" begin="2" end="2" resetval="0x1" description="Activate the power-down mode of the target memory through CKE pin." range="" rwaccess="RW">
+      <bitenum value="0" token="PWDENA_0" description="Power-down mode feature disabled"/>
+      <bitenum value="1" token="PWDENA_1" description="Power-down mode feature enabled"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="1" end="1" resetval="0x0" description="Write 0 for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="PAGEPOLICY" width="1" begin="0" end="0" resetval="0x1" description="Page/segment closure policy with respect to power versus bandwidth trade-off - Must be set to 1" range="" rwaccess="RW">
+      <bitenum value="0" token="PAGEPOLICY_0" description="Reserved - must not be used"/>
+      <bitenum value="1" token="PAGEPOLICY_1" description="High-power/high bandwidth mode (HPHB)"/>
+    </bitfield>
+  </register>
+  <register id="SDRC_MCFG_p_0" acronym="SDRC_MCFG_p_0" offset="0x80" width="32" description="This register provides the memory configuration register.">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LOCKSTATUS" width="1" begin="30" end="30" resetval="See" description="Read-only access lock bit" range="" rwaccess="RW">
+      <bitenum value="0" token="LOCKSTATUS_0" description="This register is fully writable"/>
+      <bitenum value="1" token="LOCKSTATUS_1" description="When this bit is set, the register can not be unset until next reset of the module."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="29" end="27" resetval="See" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RASWIDTH" width="3" begin="26" end="24" resetval="See" description="RAS address width" range="" rwaccess="RW">
+      <bitenum value="0" token="RASWIDTH_0" description="RAS width = 11 bits"/>
+      <bitenum value="1" token="RASWIDTH_1" description="RAS width = 12 bits"/>
+      <bitenum value="2" token="RASWIDTH_2" description="RAS width = 13 bits"/>
+      <bitenum value="3" token="RASWIDTH_3" description="RAS width = 14 bits"/>
+      <bitenum value="4" token="RASWIDTH_4" description="RAS width = 15 bits"/>
+      <bitenum value="5" token="RASWIDTH_5" description="RAS width = 16 bits - Must not be used"/>
+      <bitenum value="6" token="RASWIDTH_6" description="RAS width = 17 bits - Must not be used"/>
+      <bitenum value="7" token="RASWIDTH_7" description="RAS width = 18 bits - Must not be used"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="23" end="23" resetval="See" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="CASWIDTH" width="3" begin="22" end="20" resetval="See" description="CAS address width" range="" rwaccess="RW">
+      <bitenum value="0" token="CASWIDTH_0" description="CAS width = 5 bits"/>
+      <bitenum value="1" token="CASWIDTH_1" description="CAS width = 6 bits"/>
+      <bitenum value="2" token="CASWIDTH_2" description="CAS width = 7 bits"/>
+      <bitenum value="3" token="CASWIDTH_3" description="CAS width = 8 bits"/>
+      <bitenum value="4" token="CASWIDTH_4" description="CAS width = 9 bits"/>
+      <bitenum value="5" token="CASWIDTH_5" description="CAS width = 10 bits"/>
+      <bitenum value="6" token="CASWIDTH_6" description="CAS width = 11 bits"/>
+      <bitenum value="7" token="CASWIDTH_7" description="CAS width = 12 bits"/>
+    </bitfield>
+    <bitfield id="ADDRMUXLEGACY" width="1" begin="19" end="19" resetval="See" description="Selects the fixed address-muxing scheme or the flexible address-muxing scheme" range="" rwaccess="RW">
+      <bitenum value="0" token="ADDRMUXLEGACY_0" description="Fixed address mux scheme"/>
+      <bitenum value="1" token="ADDRMUXLEGACY_1" description="Flexible address mux scheme"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="18" end="18" resetval="See" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RAMSIZE" width="10" begin="17" end="8" resetval="See" description="RAM address space size number of 2-MB chunks" range="" rwaccess="RW"/>
+    <bitfield id="BANKALLOCATION" width="2" begin="7" end="6" resetval="See" description="SDRAM banks mapping. Selects the position of the bank address, the row address, and the column address in the system address." range="" rwaccess="RW">
+      <bitenum value="0" token="BANKALLOCATION_0" description="Bank-row-column"/>
+      <bitenum value="1" token="BANKALLOCATION_1" description="Bank1-row-bank0-column"/>
+      <bitenum value="2" token="BANKALLOCATION_2" description="Row-bank-column"/>
+      <bitenum value="3" token="BANKALLOCATION_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="5" end="5" resetval="See" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="B32NOT16" width="1" begin="4" end="4" resetval="See" description="External SDRAM bus width" range="" rwaccess="RW">
+      <bitenum value="0" token="B32NOT16_0" description="External SDRAM device is x16 bit."/>
+      <bitenum value="1" token="B32NOT16_1" description="External SDRAM device is x32 bit."/>
+    </bitfield>
+    <bitfield id="DEEPPD" width="1" begin="3" end="3" resetval="See" description="Indicates if the memory supports deep-power-down mode" range="" rwaccess="RW">
+      <bitenum value="0" token="DEEPPD_0" description="No deep-power-down mode support"/>
+      <bitenum value="1" token="DEEPPD_1" description="The memory supports deep-power-down mode"/>
+    </bitfield>
+    <bitfield id="DDRTYPE" width="1" begin="2" end="2" resetval="See" description="DDR memory type (assuming RAMTYPE = 01)" range="" rwaccess="RW">
+      <bitenum value="0" token="DDRTYPE_0" description="Mobile DDR"/>
+      <bitenum value="1" token="DDRTYPE_1" description="Reserved for future use"/>
+    </bitfield>
+    <bitfield id="RAMTYPE" width="2" begin="1" end="0" resetval="See" description="Memory type" range="" rwaccess="RW">
+      <bitenum value="0" token="RAMTYPE_0" description="SDR-SDRAM (single data rate)"/>
+      <bitenum value="1" token="RAMTYPE_1" description="DDR-SDRAM (double data rate)"/>
+      <bitenum value="2" token="RAMTYPE_2" description="Reserved"/>
+      <bitenum value="3" token="RAMTYPE_3" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SDRC_MCFG_p_1" acronym="SDRC_MCFG_p_1" offset="0xB0" width="32" description="This register provides the memory configuration register.">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="LOCKSTATUS" width="1" begin="30" end="30" resetval="See" description="Read-only access lock bit" range="" rwaccess="RW">
+      <bitenum value="0" token="LOCKSTATUS_0" description="This register is fully writable"/>
+      <bitenum value="1" token="LOCKSTATUS_1" description="When this bit is set, the register can not be unset until next reset of the module."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="29" end="27" resetval="See" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RASWIDTH" width="3" begin="26" end="24" resetval="See" description="RAS address width" range="" rwaccess="RW">
+      <bitenum value="0" token="RASWIDTH_0" description="RAS width = 11 bits"/>
+      <bitenum value="1" token="RASWIDTH_1" description="RAS width = 12 bits"/>
+      <bitenum value="2" token="RASWIDTH_2" description="RAS width = 13 bits"/>
+      <bitenum value="3" token="RASWIDTH_3" description="RAS width = 14 bits"/>
+      <bitenum value="4" token="RASWIDTH_4" description="RAS width = 15 bits"/>
+      <bitenum value="5" token="RASWIDTH_5" description="RAS width = 16 bits - Must not be used"/>
+      <bitenum value="6" token="RASWIDTH_6" description="RAS width = 17 bits - Must not be used"/>
+      <bitenum value="7" token="RASWIDTH_7" description="RAS width = 18 bits - Must not be used"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="23" end="23" resetval="See" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="CASWIDTH" width="3" begin="22" end="20" resetval="See" description="CAS address width" range="" rwaccess="RW">
+      <bitenum value="0" token="CASWIDTH_0" description="CAS width = 5 bits"/>
+      <bitenum value="1" token="CASWIDTH_1" description="CAS width = 6 bits"/>
+      <bitenum value="2" token="CASWIDTH_2" description="CAS width = 7 bits"/>
+      <bitenum value="3" token="CASWIDTH_3" description="CAS width = 8 bits"/>
+      <bitenum value="4" token="CASWIDTH_4" description="CAS width = 9 bits"/>
+      <bitenum value="5" token="CASWIDTH_5" description="CAS width = 10 bits"/>
+      <bitenum value="6" token="CASWIDTH_6" description="CAS width = 11 bits"/>
+      <bitenum value="7" token="CASWIDTH_7" description="CAS width = 12 bits"/>
+    </bitfield>
+    <bitfield id="ADDRMUXLEGACY" width="1" begin="19" end="19" resetval="See" description="Selects the fixed address-muxing scheme or the flexible address-muxing scheme" range="" rwaccess="RW">
+      <bitenum value="0" token="ADDRMUXLEGACY_0" description="Fixed address mux scheme"/>
+      <bitenum value="1" token="ADDRMUXLEGACY_1" description="Flexible address mux scheme"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="18" end="18" resetval="See" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="RAMSIZE" width="10" begin="17" end="8" resetval="See" description="RAM address space size number of 2-MB chunks" range="" rwaccess="RW"/>
+    <bitfield id="BANKALLOCATION" width="2" begin="7" end="6" resetval="See" description="SDRAM banks mapping. Selects the position of the bank address, the row address, and the column address in the system address." range="" rwaccess="RW">
+      <bitenum value="0" token="BANKALLOCATION_0" description="Bank-row-column"/>
+      <bitenum value="1" token="BANKALLOCATION_1" description="Bank1-row-bank0-column"/>
+      <bitenum value="2" token="BANKALLOCATION_2" description="Row-bank-column"/>
+      <bitenum value="3" token="BANKALLOCATION_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="5" end="5" resetval="See" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="B32NOT16" width="1" begin="4" end="4" resetval="See" description="External SDRAM bus width" range="" rwaccess="RW">
+      <bitenum value="0" token="B32NOT16_0" description="External SDRAM device is x16 bit."/>
+      <bitenum value="1" token="B32NOT16_1" description="External SDRAM device is x32 bit."/>
+    </bitfield>
+    <bitfield id="DEEPPD" width="1" begin="3" end="3" resetval="See" description="Indicates if the memory supports deep-power-down mode" range="" rwaccess="RW">
+      <bitenum value="0" token="DEEPPD_0" description="No deep-power-down mode support"/>
+      <bitenum value="1" token="DEEPPD_1" description="The memory supports deep-power-down mode"/>
+    </bitfield>
+    <bitfield id="DDRTYPE" width="1" begin="2" end="2" resetval="See" description="DDR memory type (assuming RAMTYPE = 01)" range="" rwaccess="RW">
+      <bitenum value="0" token="DDRTYPE_0" description="Mobile DDR"/>
+      <bitenum value="1" token="DDRTYPE_1" description="Reserved for future use"/>
+    </bitfield>
+    <bitfield id="RAMTYPE" width="2" begin="1" end="0" resetval="See" description="Memory type" range="" rwaccess="RW">
+      <bitenum value="0" token="RAMTYPE_0" description="SDR-SDRAM (single data rate)"/>
+      <bitenum value="1" token="RAMTYPE_1" description="DDR-SDRAM (double data rate)"/>
+      <bitenum value="2" token="RAMTYPE_2" description="Reserved"/>
+      <bitenum value="3" token="RAMTYPE_3" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SDRC_MR_p_0" acronym="SDRC_MR_p_0" offset="0x84" width="32" description="This 12-bit register corresponds to the JEDEC SDRAM MR register, with the standard bit fields. All 12 bits are loaded into memory for future extension support. The SDRC keeps an internal copy register used internally; that is, returned when a read access is performed at that address. Load into memory on interconnect write access using MRS command with BA1,BA0 = 0,0.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="Write 0s for future compatibility. Read returns 0s." range="" rwaccess="RW"/>
+    <bitfield id="ZERO_1" width="2" begin="11" end="10" resetval="0x0" description="Write 0s, as required by memory specifications. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="WBST" width="1" begin="9" end="9" resetval="0x0" description="Write burst support must be zero." range="" rwaccess="RW">
+      <bitenum value="0" token="WBST_0" description="Write burst equals read burst"/>
+      <bitenum value="1" token="WBST_1" description="Write burst disable (single write access only)"/>
+    </bitfield>
+    <bitfield id="ZERO_0" width="2" begin="8" end="7" resetval="0x0" description="Write 0s, as required by memory specifications. Read returns 0s." range="" rwaccess="RW"/>
+    <bitfield id="CASL" width="3" begin="6" end="4" resetval="0x2" description="CAS latency as defined by clock periods" range="" rwaccess="RW">
+      <bitenum value="1" token="CASL_1" description="CAS latency = 1"/>
+      <bitenum value="2" token="CASL_2" description="CAS latency = 2"/>
+      <bitenum value="3" token="CASL_3" description="CAS latency = 3"/>
+      <bitenum value="4" token="CASL_4" description="CAS latency = 4"/>
+      <bitenum value="5" token="CASL_5" description="CAS latency = 5"/>
+    </bitfield>
+    <bitfield id="SIL" width="1" begin="3" end="3" resetval="0x0" description="Serial or interleaved mode: must be zero" range="" rwaccess="RW">
+      <bitenum value="0" token="SIL_0" description="Serial mode (always used)"/>
+      <bitenum value="1" token="SIL_1" description="interleaved mode (never used)"/>
+    </bitfield>
+    <bitfield id="BL" width="3" begin="2" end="0" resetval="0x4" description="Memory burst length" range="" rwaccess="RW">
+      <bitenum value="0" token="BL_0" description="Burst length = 1 - Not supported"/>
+      <bitenum value="1" token="BL_1" description="Burst length = 2 - SDR memory only"/>
+      <bitenum value="2" token="BL_2" description="Burst length = 4 - DDR memory only"/>
+      <bitenum value="3" token="BL_3" description="Burst length = 8 - Not supported"/>
+      <bitenum value="4" token="BL_4" description="Reserved"/>
+      <bitenum value="5" token="BL_5" description="Reserved"/>
+      <bitenum value="6" token="BL_6" description="Reserved"/>
+      <bitenum value="7" token="BL_7" description="Full page - Not supported"/>
+    </bitfield>
+  </register>
+  <register id="SDRC_MR_p_1" acronym="SDRC_MR_p_1" offset="0xB4" width="32" description="This 12-bit register corresponds to the JEDEC SDRAM MR register, with the standard bit fields. All 12 bits are loaded into memory for future extension support. The SDRC keeps an internal copy register used internally; that is, returned when a read access is performed at that address. Load into memory on interconnect write access using MRS command with BA1,BA0 = 0,0.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="Write 0s for future compatibility. Read returns 0s." range="" rwaccess="RW"/>
+    <bitfield id="ZERO_1" width="2" begin="11" end="10" resetval="0x0" description="Write 0s, as required by memory specifications. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="WBST" width="1" begin="9" end="9" resetval="0x0" description="Write burst support must be zero." range="" rwaccess="RW">
+      <bitenum value="0" token="WBST_0" description="Write burst equals read burst"/>
+      <bitenum value="1" token="WBST_1" description="Write burst disable (single write access only)"/>
+    </bitfield>
+    <bitfield id="ZERO_0" width="2" begin="8" end="7" resetval="0x0" description="Write 0s, as required by memory specifications. Read returns 0s." range="" rwaccess="RW"/>
+    <bitfield id="CASL" width="3" begin="6" end="4" resetval="0x2" description="CAS latency as defined by clock periods" range="" rwaccess="RW">
+      <bitenum value="1" token="CASL_1" description="CAS latency = 1"/>
+      <bitenum value="2" token="CASL_2" description="CAS latency = 2"/>
+      <bitenum value="3" token="CASL_3" description="CAS latency = 3"/>
+      <bitenum value="4" token="CASL_4" description="CAS latency = 4"/>
+      <bitenum value="5" token="CASL_5" description="CAS latency = 5"/>
+    </bitfield>
+    <bitfield id="SIL" width="1" begin="3" end="3" resetval="0x0" description="Serial or interleaved mode: must be zero" range="" rwaccess="RW">
+      <bitenum value="0" token="SIL_0" description="Serial mode (always used)"/>
+      <bitenum value="1" token="SIL_1" description="interleaved mode (never used)"/>
+    </bitfield>
+    <bitfield id="BL" width="3" begin="2" end="0" resetval="0x4" description="Memory burst length" range="" rwaccess="RW">
+      <bitenum value="0" token="BL_0" description="Burst length = 1 - Not supported"/>
+      <bitenum value="1" token="BL_1" description="Burst length = 2 - SDR memory only"/>
+      <bitenum value="2" token="BL_2" description="Burst length = 4 - DDR memory only"/>
+      <bitenum value="3" token="BL_3" description="Burst length = 8 - Not supported"/>
+      <bitenum value="4" token="BL_4" description="Reserved"/>
+      <bitenum value="5" token="BL_5" description="Reserved"/>
+      <bitenum value="6" token="BL_6" description="Reserved"/>
+      <bitenum value="7" token="BL_7" description="Full page - Not supported"/>
+    </bitfield>
+  </register>
+  <register id="SDRC_EMR2_p_0" acronym="SDRC_EMR2_p_0" offset="0x8C" width="32" description="This 12-bit register corresponds to the low-power EMR register, as defined in the mobile DDR JEDEC Standard. All 12 bits are loaded into the memory, thus assuring future extension support. The SDRC keeps an internal copy register used internally; that is, returned when a read access is performed at that address. Load into memory on interconnect write access using MRS command with BA1,BA0 = 1,0.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="Write 0s for future compatibility. Read returns 0s." range="" rwaccess="RW"/>
+    <bitfield id="ZERO" width="4" begin="11" end="8" resetval="0x00" description="Write 0s, as required by memory specifications. Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="DS" width="3" begin="7" end="5" resetval="0x0" description="Driver strength" range="" rwaccess="RW">
+      <bitenum value="0" token="DS_0" description="Full strength driver"/>
+      <bitenum value="1" token="DS_1" description="Half strength driver"/>
+      <bitenum value="2" token="DS_2" description="Reserved"/>
+      <bitenum value="3" token="DS_3" description="Reserved"/>
+      <bitenum value="4" token="DS_4" description="Three-fourths strength driver"/>
+      <bitenum value="5" token="DS_5" description="Reserved"/>
+      <bitenum value="6" token="DS_6" description="Optional one-fourth strength driver"/>
+      <bitenum value="7" token="DS_7" description="Optional one-eighth strength driver"/>
+    </bitfield>
+    <bitfield id="TCSR" width="2" begin="4" end="3" resetval="0x0" description="Temperature-compensated self-refresh" range="" rwaccess="RW">
+      <bitenum value="0" token="TCSR_0" description="70 degrees maximum temperature"/>
+      <bitenum value="1" token="TCSR_1" description="45 degrees maximum temperature"/>
+      <bitenum value="2" token="TCSR_2" description="15 degrees maximum temperature"/>
+      <bitenum value="3" token="TCSR_3" description="85 degrees maximum temperature"/>
+    </bitfield>
+    <bitfield id="PASR" width="3" begin="2" end="0" resetval="0x0" description="Partial array self-refresh" range="" rwaccess="RW">
+      <bitenum value="0" token="PASR_0" description="All banks."/>
+      <bitenum value="1" token="PASR_1" description="1/2 array"/>
+      <bitenum value="2" token="PASR_2" description="1/4 array"/>
+      <bitenum value="3" token="PASR_3" description="Reserved"/>
+      <bitenum value="4" token="PASR_4" description="Reserved"/>
+      <bitenum value="5" token="PASR_5" description="1/8 array"/>
+      <bitenum value="6" token="PASR_6" description="1/16 array"/>
+      <bitenum value="7" token="PASR_7" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SDRC_EMR2_p_1" acronym="SDRC_EMR2_p_1" offset="0xBC" width="32" description="This 12-bit register corresponds to the low-power EMR register, as defined in the mobile DDR JEDEC Standard. All 12 bits are loaded into the memory, thus assuring future extension support. The SDRC keeps an internal copy register used internally; that is, returned when a read access is performed at that address. Load into memory on interconnect write access using MRS command with BA1,BA0 = 1,0.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x00000" description="Write 0s for future compatibility. Read returns 0s." range="" rwaccess="RW"/>
+    <bitfield id="ZERO" width="4" begin="11" end="8" resetval="0x00" description="Write 0s, as required by memory specifications. Read returns 0" range="" rwaccess="RW"/>
+    <bitfield id="DS" width="3" begin="7" end="5" resetval="0x0" description="Driver strength" range="" rwaccess="RW">
+      <bitenum value="0" token="DS_0" description="Full strength driver"/>
+      <bitenum value="1" token="DS_1" description="Half strength driver"/>
+      <bitenum value="2" token="DS_2" description="Reserved"/>
+      <bitenum value="3" token="DS_3" description="Reserved"/>
+      <bitenum value="4" token="DS_4" description="Three-fourths strength driver"/>
+      <bitenum value="5" token="DS_5" description="Reserved"/>
+      <bitenum value="6" token="DS_6" description="Optional one-fourth strength driver"/>
+      <bitenum value="7" token="DS_7" description="Optional one-eighth strength driver"/>
+    </bitfield>
+    <bitfield id="TCSR" width="2" begin="4" end="3" resetval="0x0" description="Temperature-compensated self-refresh" range="" rwaccess="RW">
+      <bitenum value="0" token="TCSR_0" description="70 degrees maximum temperature"/>
+      <bitenum value="1" token="TCSR_1" description="45 degrees maximum temperature"/>
+      <bitenum value="2" token="TCSR_2" description="15 degrees maximum temperature"/>
+      <bitenum value="3" token="TCSR_3" description="85 degrees maximum temperature"/>
+    </bitfield>
+    <bitfield id="PASR" width="3" begin="2" end="0" resetval="0x0" description="Partial array self-refresh" range="" rwaccess="RW">
+      <bitenum value="0" token="PASR_0" description="All banks."/>
+      <bitenum value="1" token="PASR_1" description="1/2 array"/>
+      <bitenum value="2" token="PASR_2" description="1/4 array"/>
+      <bitenum value="3" token="PASR_3" description="Reserved"/>
+      <bitenum value="4" token="PASR_4" description="Reserved"/>
+      <bitenum value="5" token="PASR_5" description="1/8 array"/>
+      <bitenum value="6" token="PASR_6" description="1/16 array"/>
+      <bitenum value="7" token="PASR_7" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SDRC_ACTIM_CTRLA_p_0" acronym="SDRC_ACTIM_CTRLA_p_0" offset="0x9C" width="32" description="The ac timing control register A sets the ac parameter values in clock cycle units to best match the memory characteristics.">
+    <bitfield id="TRFC" width="5" begin="31" end="27" resetval="0x00" description="Autorefresh to active" range="" rwaccess="RW"/>
+    <bitfield id="TRC" width="5" begin="26" end="22" resetval="0x00" description="Row cycle time" range="" rwaccess="RW"/>
+    <bitfield id="TRAS" width="4" begin="21" end="18" resetval="0x0" description="Row active time" range="" rwaccess="RW"/>
+    <bitfield id="TRP" width="3" begin="17" end="15" resetval="0x0" description="Row precharge time" range="" rwaccess="RW"/>
+    <bitfield id="TRCD" width="3" begin="14" end="12" resetval="0x0" description="Row to column delay time" range="" rwaccess="RW"/>
+    <bitfield id="TRRD" width="3" begin="11" end="9" resetval="0x0" description="Active to active command period" range="" rwaccess="RW"/>
+    <bitfield id="TDPL" width="3" begin="8" end="6" resetval="0x0" description="Data-in to precharge command (write recovery time tWR)" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="5" end="5" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="TDAL" width="5" begin="4" end="0" resetval="0x00" description="Data-in to active command" range="" rwaccess="RW"/>
+  </register>
+  <register id="SDRC_ACTIM_CTRLA_p_1" acronym="SDRC_ACTIM_CTRLA_p_1" offset="0xC4" width="32" description="The ac timing control register A sets the ac parameter values in clock cycle units to best match the memory characteristics.">
+    <bitfield id="TRFC" width="5" begin="31" end="27" resetval="0x00" description="Autorefresh to active" range="" rwaccess="RW"/>
+    <bitfield id="TRC" width="5" begin="26" end="22" resetval="0x00" description="Row cycle time" range="" rwaccess="RW"/>
+    <bitfield id="TRAS" width="4" begin="21" end="18" resetval="0x0" description="Row active time" range="" rwaccess="RW"/>
+    <bitfield id="TRP" width="3" begin="17" end="15" resetval="0x0" description="Row precharge time" range="" rwaccess="RW"/>
+    <bitfield id="TRCD" width="3" begin="14" end="12" resetval="0x0" description="Row to column delay time" range="" rwaccess="RW"/>
+    <bitfield id="TRRD" width="3" begin="11" end="9" resetval="0x0" description="Active to active command period" range="" rwaccess="RW"/>
+    <bitfield id="TDPL" width="3" begin="8" end="6" resetval="0x0" description="Data-in to precharge command (write recovery time tWR)" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="5" end="5" resetval="0x0" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="TDAL" width="5" begin="4" end="0" resetval="0x00" description="Data-in to active command" range="" rwaccess="RW"/>
+  </register>
+  <register id="SDRC_ACTIM_CTRLB_p_0" acronym="SDRC_ACTIM_CTRLB_p_0" offset="0xA0" width="32" description="The ac timing control register B sets the ac parameter values in clock cycle unit, to best match the memory characteristics">
+    <bitfield id="RESERVED" width="14" begin="31" end="18" resetval="0x00000" description="Write 0s for future compatibilityReads return zeros." range="" rwaccess="RW"/>
+    <bitfield id="TWTR" width="2" begin="17" end="16" resetval="0x0" description="Internal write to read command delay.0x0: 1 minimum clock cycle before next command0x1: 1 minimum clock cycle0x2: 2 minimum clock cycles0x3: 3 minimum clock cycles" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0" description="Write 0s for future compatibilityReads return zeros." range="" rwaccess="RW"/>
+    <bitfield id="TCKE" width="3" begin="14" end="12" resetval="0x0" description="CKE minimum pulse width (high and low)0x0: 1 minimum clock cycle0x1: 1 minimum clock cycle0x2: 2 minimum clock cycles...0x7: 7 minimum clock cycles" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0" description="Write 0s for future compatibilityReads return zeros." range="" rwaccess="RW"/>
+    <bitfield id="TXP" width="3" begin="10" end="8" resetval="0x0" description="Exit power-down to next valid command delay.0x0: 1 minimum clock cycle before next command0x1: 1 minimum clock cycle0x2: 2 minimum clock cycles...0x7: 7 minimum clock cycles" range="" rwaccess="RW"/>
+    <bitfield id="TXSR" width="8" begin="7" end="0" resetval="0x00" description="Self-refresh exit to active period" range="" rwaccess="RW"/>
+  </register>
+  <register id="SDRC_ACTIM_CTRLB_p_1" acronym="SDRC_ACTIM_CTRLB_p_1" offset="0xC8" width="32" description="The ac timing control register B sets the ac parameter values in clock cycle unit, to best match the memory characteristics">
+    <bitfield id="RESERVED" width="14" begin="31" end="18" resetval="0x00000" description="Write 0s for future compatibilityReads return zeros." range="" rwaccess="RW"/>
+    <bitfield id="TWTR" width="2" begin="17" end="16" resetval="0x0" description="Internal write to read command delay.0x0: 1 minimum clock cycle before next command0x1: 1 minimum clock cycle0x2: 2 minimum clock cycles0x3: 3 minimum clock cycles" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0" description="Write 0s for future compatibilityReads return zeros." range="" rwaccess="RW"/>
+    <bitfield id="TCKE" width="3" begin="14" end="12" resetval="0x0" description="CKE minimum pulse width (high and low)0x0: 1 minimum clock cycle0x1: 1 minimum clock cycle0x2: 2 minimum clock cycles...0x7: 7 minimum clock cycles" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0" description="Write 0s for future compatibilityReads return zeros." range="" rwaccess="RW"/>
+    <bitfield id="TXP" width="3" begin="10" end="8" resetval="0x0" description="Exit power-down to next valid command delay.0x0: 1 minimum clock cycle before next command0x1: 1 minimum clock cycle0x2: 2 minimum clock cycles...0x7: 7 minimum clock cycles" range="" rwaccess="RW"/>
+    <bitfield id="TXSR" width="8" begin="7" end="0" resetval="0x00" description="Self-refresh exit to active period" range="" rwaccess="RW"/>
+  </register>
+  <register id="SDRC_RFR_CTRL_p_0" acronym="SDRC_RFR_CTRL_p_0" offset="0xA4" width="32" description="SDRAM memory autorefresh control">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ARCV" width="16" begin="23" end="8" resetval="0x0000" description="Autorefresh counter value to set the refresh period. The autorefresh counter is uploaded with the result of:(tREFI / tCK) - 50" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="7" end="2" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ARE" width="2" begin="1" end="0" resetval="0x0" description="Autorefresh enable" range="" rwaccess="RW">
+      <bitenum value="0" token="ARE_0" description="Autorefresh is disabled"/>
+      <bitenum value="1" token="ARE_1" description="Counter is loaded with ARCV: 1 autorefresh command when autorefresh counter reaches 0."/>
+      <bitenum value="2" token="ARE_2" description="Counter is loaded with 4 &#215;ARCV: Burst of 4 autorefresh commands when autorefresh counter reaches 0."/>
+      <bitenum value="3" token="ARE_3" description="Counter is loaded with 8 &#215;ARCV: Burst of 8 autorefresh commands when autorefresh counter reaches 0."/>
+    </bitfield>
+  </register>
+  <register id="SDRC_RFR_CTRL_p_1" acronym="SDRC_RFR_CTRL_p_1" offset="0xD4" width="32" description="SDRAM memory autorefresh control">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ARCV" width="16" begin="23" end="8" resetval="0x0000" description="Autorefresh counter value to set the refresh period. The autorefresh counter is uploaded with the result of:(tREFI / tCK) - 50" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="7" end="2" resetval="0x00" description="Write 0s for future compatibility. Read returns 0." range="" rwaccess="RW"/>
+    <bitfield id="ARE" width="2" begin="1" end="0" resetval="0x0" description="Autorefresh enable" range="" rwaccess="RW">
+      <bitenum value="0" token="ARE_0" description="Autorefresh is disabled"/>
+      <bitenum value="1" token="ARE_1" description="Counter is loaded with ARCV: 1 autorefresh command when autorefresh counter reaches 0."/>
+      <bitenum value="2" token="ARE_2" description="Counter is loaded with 4 &#215;ARCV: Burst of 4 autorefresh commands when autorefresh counter reaches 0."/>
+      <bitenum value="3" token="ARE_3" description="Counter is loaded with 8 &#215;ARCV: Burst of 8 autorefresh commands when autorefresh counter reaches 0."/>
+    </bitfield>
+  </register>
+  <register id="SDRC_MANUAL_p_0" acronym="SDRC_MANUAL_p_0" offset="0xA8" width="32" description="This register allows to send specific commands to the external memory devices under software control. Any write to this register generates the appropriate sequence based on the command code.">
+    <bitfield id="CMDPARAM" width="16" begin="31" end="16" resetval="0x0000" description="Manual command parameter, if any." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="12" begin="15" end="4" resetval="0x000" description="Write 0s for future compatibility. Read returns 0s." range="" rwaccess="RW"/>
+    <bitfield id="CMDCODE" width="4" begin="3" end="0" resetval="0x0" description="Memory command opcode; other values reserved for future implementations." range="" rwaccess="RW">
+      <bitenum value="0" token="CMDCODE_0" description="NOP command - no parameter"/>
+      <bitenum value="1" token="CMDCODE_1" description="Precharge all command - no parameter"/>
+      <bitenum value="2" token="CMDCODE_2" description="Autorefresh command - no parameter"/>
+      <bitenum value="3" token="CMDCODE_3" description="Enter deep-power-down - no parameter"/>
+      <bitenum value="4" token="CMDCODE_4" description="Exit deep-power-down - no parameter"/>
+      <bitenum value="5" token="CMDCODE_5" description="Enter self-refresh - no parameter"/>
+      <bitenum value="6" token="CMDCODE_6" description="Exit self-refresh - no parameter"/>
+      <bitenum value="7" token="CMDCODE_7" description="Set CKE signal high - no parameter"/>
+      <bitenum value="8" token="CMDCODE_8" description="Set CKE low - no parameter"/>
+      <bitenum value="9" token="CMDCODE_9" description="Reserved"/>
+      <bitenum value="10" token="CMDCODE_10" description="Reserved"/>
+      <bitenum value="11" token="CMDCODE_11" description="Reserved"/>
+      <bitenum value="12" token="CMDCODE_12" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SDRC_MANUAL_p_1" acronym="SDRC_MANUAL_p_1" offset="0xD8" width="32" description="This register allows to send specific commands to the external memory devices under software control. Any write to this register generates the appropriate sequence based on the command code.">
+    <bitfield id="CMDPARAM" width="16" begin="31" end="16" resetval="0x0000" description="Manual command parameter, if any." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="12" begin="15" end="4" resetval="0x000" description="Write 0s for future compatibility. Read returns 0s." range="" rwaccess="RW"/>
+    <bitfield id="CMDCODE" width="4" begin="3" end="0" resetval="0x0" description="Memory command opcode; other values reserved for future implementations." range="" rwaccess="RW">
+      <bitenum value="0" token="CMDCODE_0" description="NOP command - no parameter"/>
+      <bitenum value="1" token="CMDCODE_1" description="Precharge all command - no parameter"/>
+      <bitenum value="2" token="CMDCODE_2" description="Autorefresh command - no parameter"/>
+      <bitenum value="3" token="CMDCODE_3" description="Enter deep-power-down - no parameter"/>
+      <bitenum value="4" token="CMDCODE_4" description="Exit deep-power-down - no parameter"/>
+      <bitenum value="5" token="CMDCODE_5" description="Enter self-refresh - no parameter"/>
+      <bitenum value="6" token="CMDCODE_6" description="Exit self-refresh - no parameter"/>
+      <bitenum value="7" token="CMDCODE_7" description="Set CKE signal high - no parameter"/>
+      <bitenum value="8" token="CMDCODE_8" description="Set CKE low - no parameter"/>
+      <bitenum value="9" token="CMDCODE_9" description="Reserved"/>
+      <bitenum value="10" token="CMDCODE_10" description="Reserved"/>
+      <bitenum value="11" token="CMDCODE_11" description="Reserved"/>
+      <bitenum value="12" token="CMDCODE_12" description="Reserved"/>
+    </bitfield>
+  </register>
+</module>

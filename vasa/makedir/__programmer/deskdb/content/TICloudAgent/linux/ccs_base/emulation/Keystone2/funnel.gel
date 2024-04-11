@@ -1,0 +1,53 @@
+#define CS_FUNNEL_CTL               0x80031000
+#define CS_FUNNEL_LOCK              0x80031FB0
+#define DS_FUNNEL_CTL               0x80002000
+#define DS_FUNNEL_LOCK              0x80002FB0
+#define ATB_REP_FILT_0              0x80030000 // TPIU
+#define ATB_REP_FILT_1              0x80030004 // TBR
+#define ATB_REP_LOCK                0x80030FB0
+#define ATB_REP_DEVTYPE             0x80030FCC
+#define ATB_REP_DEVTYPE_VAL         0x00000022
+#define ATB_REP_FILT_NONE           0x00000000 // Allow all ATB IDs through to master port.
+#define ATB_REP_FILT_PTM            0x00000004 // PTM ATB IDs are in the 0x20s for legacy AET.
+#define UNLOCK_VALUE                0xC5ACCE55
+
+hotmenu Program_ATB_Replicator_TBR()
+{
+    unsigned int devtype = 0;
+    
+    // Program ATB replicator.
+    devtype = *(int*)ATB_REP_DEVTYPE@data;
+    
+    if ((devtype & ATB_REP_DEVTYPE_VAL) == ATB_REP_DEVTYPE_VAL) {
+        *(int*)ATB_REP_LOCK@data  = UNLOCK_VALUE;
+        *(int*)ATB_REP_FILT_0@data  = ATB_REP_FILT_PTM;  // Discard PTM ATB IDs for TPIU port
+        *(int*)ATB_REP_FILT_1@data  = ATB_REP_FILT_NONE; // Allow all ATB IDs for TBR port
+        
+        GEL_TextOut("ATB replicator programmed for TBR trace.\n",,,,,);
+    }
+}
+
+hotmenu Program_ATB_Replicator_TPIU()
+{
+    unsigned int devtype = 0;
+    
+    // Program ATB replicator.
+    devtype = *(int*)ATB_REP_DEVTYPE@data;
+    
+    if ((devtype & ATB_REP_DEVTYPE_VAL) == ATB_REP_DEVTYPE_VAL) {
+        *(int*)ATB_REP_LOCK@data  = UNLOCK_VALUE;
+        *(int*)ATB_REP_FILT_0@data  = ATB_REP_FILT_NONE; // Allow all ATB IDs for TPIU port
+        *(int*)ATB_REP_FILT_1@data  = ATB_REP_FILT_PTM;  // Discard PTM ATB IDs for TBR port
+        
+        GEL_TextOut("ATB replicator programmed for TPIU trace.\n",,,,,);
+    }
+}
+
+hotmenu Enable_Funnel_For_PTM()
+{
+	*(int*)CS_FUNNEL_LOCK@data  = UNLOCK_VALUE;
+	*(int*)CS_FUNNEL_CTL@data = 0x3FF;
+	*(int*)DS_FUNNEL_LOCK@data  = UNLOCK_VALUE;
+	*(int*)DS_FUNNEL_CTL@data = 0x3FF;
+}
+

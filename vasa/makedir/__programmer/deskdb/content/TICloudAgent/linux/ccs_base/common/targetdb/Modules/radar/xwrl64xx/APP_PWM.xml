@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+
+<module description="APP_PWM" id="APP_PWM">
+  
+  
+  <register acronym="TBCTL_TBSTS" description="Time-Base Control Register/ Status Register" id="TBCTL_TBSTS" offset="0x0" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="19" id="Reserved" rwaccess="R" width="13"></bitfield>
+    
+  <bitfield begin="18" description="Time-Base Counter Max Latched Status Bit 0 Read: Indicates the time-base counter never reached its maximum value. Write: No effect. 1 Read: Indicates that the time-base counter reached the maximum value 0xFFFF. Write: Clears the latched event." end="18" id="TBSTS_CTRMAX" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Input Synchronization Latched Status Bit 0 Read: Indicates no external synchronization event has occurred. Write: No effect. 1 Read: Indicates that an external synchronization event has occurred (EPWMxSYNCI). Write: Clears the latched event." end="17" id="TBSTS_SYNCI" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="16" description="Time-Base Counter Direction Status Bit. At reset, the counter is frozen; therefore, this bit has no meaning. To make this bit meaningful, you must first set the appropriate mode via TBCTL[CTRMODE]. 0 Time-Base Counter is currently counting down. 1 Time-Base Counter is currently counting up." end="16" id="TBSTS_CTRDIR" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="Emulation Mode Bits. These bits select the behavior of the ePWM time-base counter during emulation events: 0 Stop after the next time-base counter increment or decrement 1h Stop when counter completes a whole cycle: • Up-count mode: stop when the time-base counter = period (TBCTR = TBPRD) • Down-count mode: stop when the time-base counter = 0x0000 (TBCTR = 0x0000) • Up-down-count mode: stop when the time-base counter = 0x0000 (TBCTR = 0x0000) 2h-3h Free run" end="14" id="TBCTL_FREE,_SOFT" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="13" description="Phase Direction Bit. This bit is only used when the time-base counter is configured in the up-down-count mode. The PHSDIR bit indicates the direction the time-base counter (TBCTR) will count after a synchronization event occurs and a new phase value is loaded from the phase (TBPHS) register. This is irrespective of the direction of the counter before the synchronization event.. In the up-count and down-count modes this bit is ignored. 0 Count down after the synchronization event. 1 Count up after the synchronization event" end="13" id="TBCTL_PHSDIR" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="12" description="Time-base Clock Prescale Bits These bits determine part of the time-base clock prescale value. TBCLK = VCLK3 / (HSPCLKDIV � CLKDIV) 0 /1 (default on reset) 1h /2 2h /4 3h /8 4h /16 5h /32 6h /64 7h /128" end="10" id="TBCTL_CLKDIV" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="9" description="High Speed Time-base Clock Prescale Bits. These bits determine part of the time-base clock prescale value: TBCLK = VCLK3 / (HSPCLKDIV � CLKDIV) 0 /1 1h /2 (default on reset) 2h /4 3h /6 4h /8 5h /10 6h /12 7h /14" end="7" id="TBCTL_HSPCLKDIV" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="6" description="Software Forced Synchronization Pulse 0 Writing a 0 has no effect and reads always return a 0. 1 Writing a 1 forces a one-time synchronization pulse to be generated. This event is ORed with the EPWMxSYNCI input of the ePWM module. SWFSYNC is valid (operates) only when EPWMxSYNCI is selected by SYNCOSEL = 00." end="6" id="TBCTL_SWFSYNC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Synchronization Output Select. These bits select the source of the EPWMxSYNCO signal. 0 EPWMxSYNC: 1h CTR = zero: Time-base counter equal to zero (TBCTR = 0x0000) 2h CTR = CMPB : Time-base counter equal to counter-compare B (TBCTR = CMPB) 3h Disable EPWMxSYNCO signal" end="4" id="TBCTL_SYNCOSEL" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="3" description="Active Period Register Load From Shadow Register Select 0 The period register (TBPRD) is loaded from its shadow register when the time-base counter, TBCTR, is equal to zero. A write or read to the TBPRD register accesses the shadow register. 1 Load the TBPRD register immediately without using a shadow register. A write or read to the TBPRD register directly accesses the active register." end="3" id="TBCTL_PRDLD" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Counter Register Load From Phase Register Enable 0 Do not load the time-base counter (TBCTR) from the time-base phase register (TBPHS) 1 Load the time-base counter with the phase register when an EPWMxSYNCI input signal occurs or when a software synchronization is forced by the SWFSYNC bit, or when a digital compare sync event occurs." end="2" id="TBCTL_PHSEN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Counter Mode The time-base counter mode is normally configured once and not changed during normal operation. If you change the mode of the counter, the change will take effect at the next TBCLK edge and the current counter value shall increment or decrement from the value before the mode change. These bits set the time-base counter mode of operation as follows: 0 Up-count mode 1h Down-count mode 2h Up-down-count mode 3h Stop-freeze counter operation (default on reset)" end="0" id="TBCTL_CTRMODE" rwaccess="RW" width="2"></bitfield>
+  </register>
+  
+  
+  <register acronym="TBPHS" description="Time-Base Phase Register" id="TBPHS" offset="0x4" width="32">
+    
+  <bitfield begin="31" description="Time-Base Phase Register  These bits set time-base counter phase of the selected ePWM relative to the time-base that is supplying the synchronization input signal. • If TBCTL[PHSEN] = 0, then the synchronization event is ignored and the time-base counter is not loaded with the phase. • If TBCTL[PHSEN] = 1, then the time-base counter (TBCTR) will be loaded with the phase (TBPHS) when a synchronization event occurs. The synchronization event can be initiated by the input synchronization signal (EPWMxSYNCI) or by a software forced synchronization." end="16" id="TBPHS" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="0" id="Reserved" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="TBCTR_TBPRD" description="Time-Base Counter Register/ Period Register" id="TBCTR_TBPRD" offset="0x8" width="32">
+    
+  <bitfield begin="31" description="Time-Base Period Register  These bits determine the period of the time-base counter. This sets the PWM frequency. Shadowing of this register is enabled and disabled by the TBCTL[PRDLD] bit. By default this register is shadowed. • If TBCTL[PRDLD] = 0, then the shadow is enabled and any write or read will automatically go to the shadow register. In this case, the active register will be loaded from the shadow register when the timebase counter equals zero. • If TBCTL[PRDLD] = 1, then the shadow is disabled and any write or read will go directly to the active register, that is the register actively controlling the hardware. • The active and shadow registers share the same memory map address." end="16" id="TBPRD" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Time-Base Counter Register  Reading these bits gives the current time-base counter value. Writing to these bits sets the current time-base counter value. The update happens as soon as the write occurs; the write is NOT synchronized to the time-base clock (TBCLK) and the register is not shadowed." end="0" id="TBCTR" rwaccess="RW" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="CMPCTL" description="Counter-Compare Control Register" id="CMPCTL" offset="0xC" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="26" id="Reserved4" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="Counter-compare B (CMPB) Shadow Register Full Status Flag This bit self clears once a load-strobe occurs. 0 CMPB shadow FIFO not full yet 1 Indicates the CMPB shadow FIFO is full; a CPU write will overwrite current shadow value." end="25" id="SHDWBFULL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="24" description="Counter-compare A (CMPA) Shadow Register Full Status Flag The flag bit is set when a 32-bit write to CMPA:CMPAHR register or a 16-bit write to CMPA register is made. A 16-bit write to CMPAHR register will not affect the flag. This bit self clears once a load-strobe occurs. 0 CMPA shadow FIFO not full yet 1 Indicates the CMPA shadow FIFO is full, a CPU write will overwrite the current shadow value" end="24" id="SHDWAFULL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="Reserved" end="23" id="Reserved3" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="22" description="Counter-compare B (CMPB) Register Operating Mode 0 Shadow mode. Operates as a double buffer. All writes via the CPU access the shadow register. 1 Immediate mode. Only the active compare B register is used. All writes and reads directly access the active register for immediate compare action." end="22" id="SHDWBMODE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="21" description="Reserved" end="21" id="Reserved2" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="20" description="Counter-compare A (CMPA) Register Operating Mode 0 Shadow mode. Operates as a double buffer. All writes via the CPU access the shadow register. 1 Immediate mode. Only the active compare register is used. All writes and reads directly access the active register for immediate compare action" end="20" id="SHDWAMODE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="19" description="Active Counter-Compare B (CMPB) Load From Shadow Select Mode This bit has no effect in immediate mode (CMPCTL[SHDWBMODE] = 1). 0 Load on CTR = Zero: Time-base counter equal to zero (TBCTR = 0x0000) 1h Load on CTR = PRD: Time-base counter equal to period (TBCTR = TBPRD) 2h Load on either CTR = Zero or CTR = PRD 3h Freeze (no loads possible)" end="18" id="LOADBMODE" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="17" description="Active Counter-Compare A (CMPA) Load From Shadow Select Mode. This bit has no effect in immediate mode (CMPCTL[SHDWAMODE] = 1). 0 Load on CTR = Zero: Time-base counter equal to zero (TBCTR = 0x0000) 1h Load on CTR = PRD: Time-base counter equal to period (TBCTR = TBPRD) 2h Load on either CTR = Zero or CTR = PRD 3h Freeze (no loads possible)" end="16" id="LOADAMODE" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="0" id="Reserved1" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="CMPA" description="Counter-Compare A Register" id="CMPA" offset="0x10" width="32">
+    
+  <bitfield begin="31" description="Counter-Compare A Register  The value in the active CMPA register is continuously compared to the time-base counter (TBCTR). When the values are equal, the counter-compare module generates a &quot;time-base counter equal to counter compare A&quot; event. This event is sent to the action-qualifier where it is qualified and converted it into one or more actions. These actions can be applied to either the EPWMxA or the EPWMxB output depending on the configuration of the AQCTLA and AQCTLB registers. The actions that can be defined in the AQCTLA and AQCTLB registers include: • Do nothing; the event is ignored. • Clear: Pull the EPWMxA and/or EPWMxB signal low • Set: Pull the EPWMxA and/or EPWMxB signal high • Toggle the EPWMxA and/or EPWMxB signal Shadowing of this register is enabled and disabled by the CMPCTL[SHDWAMODE] bit. By default this register is shadowed. • If CMPCTL[SHDWAMODE] = 0, then the shadow is enabled and any write or read will automatically go to the shadow register. In this case, the CMPCTL[LOADAMODE] bit field determines which event will load the active register from the shadow register. • Before a write, the CMPCTL[SHDWAFULL] bit can be read to determine if the shadow register is currently full. • If CMPCTL[SHDWAMODE] = 1, then the shadow register is disabled and any write or read will go directly to the active register, that is the register actively controlling the hardware. • In either mode, the active and shadow registers share the same memory map address." end="16" id="CMPA" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="0" id="Reserved" rwaccess="R" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="CMPB_AQCTLA" description="Counter-Compare B Register/ Action-Qualifier Control Register for Output A (EPWMxA)" id="CMPB_AQCTLA" offset="0x14" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="28" id="Reserved" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="27" description="Action when the time-base counter equals the active CMPB register and the counter is decrementing. 0 Do nothing (action disabled) 1h Clear: force EPWMxA output low. 2h Set: force EPWMxA output high. 3h Toggle EPWMxA output: low output signal will be forced high, and a high signal will be forced low" end="26" id="AQCTLA_CBD" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="25" description="Action when the counter equals the active CMPB register and the counter is incrementing. 0 Do nothing (action disabled) 1h Clear: force EPWMxA output low. 2h Set: force EPWMxA output high. 3h Toggle EPWMxA output: low output signal will be forced high, and a high signal will be forced low" end="24" id="AQCTLA_CBU" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="23" description="Action when the counter equals the active CMPA register and the counter is decrementing. 0 Do nothing (action disabled) 1h Clear: force EPWMxA output low. 2h Set: force EPWMxA output high. 3h Toggle EPWMxA output: low output signal will be forced high, and a high signal will be forced low" end="22" id="AQCTLA_CAD" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="21" description="Action when the counter equals the active CMPA register and the counter is incrementing. 0 Do nothing (action disabled) 1h Clear: force EPWMxA output low. 2h Set: force EPWMxA output high. 3h Toggle EPWMxA output: low output signal will be forced high, and a high signal will be forced low" end="20" id="AQCTLA_CAU" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="19" description="Action when the counter equals the period. Note: By definition, in count up-down mode when the counter equals period the direction is defined as 0 or counting down. 0 Do nothing (action disabled) 1h Clear: force EPWMxA output low. 2h Set: force EPWMxA output high. 3h Toggle EPWMxA output: low output signal will be forced high, and a high signal will be forced low" end="18" id="AQCTLA_PRD" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="17" description="Action when counter equals zero. Note: By definition, in count up-down mode when the counter equals 0 the direction is defined as 1 or counting up. 0 Do nothing (action disabled) 1h Clear: force EPWMxA output low. 2h Set: force EPWMxA output high. 3h Toggle EPWMxA output: low output signal will be forced high, and a high signal will be forced low" end="16" id="AQCTLA_ZRO" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="15" description="The value in the active CMPB register is continuously compared to the time-base counter (TBCTR). When the values are equal, the counter-compare module generates a &quot;time-base counter equal to counter compare B&quot; event. This event is sent to the action-qualifier where it is qualified and converted it into one or more actions. These actions can be applied to either the EPWMxA or the EPWMxB output depending on the configuration of the AQCTLA and AQCTLB registers. The actions that can be defined in the AQCTLA and AQCTLB registers include: • Do nothing. event is ignored. • Clear: Pull the EPWMxA and/or EPWMxB signal low • Set: Pull the EPWMxA and/or EPWMxB signal high • Toggle the EPWMxA and/or EPWMxB signal Shadowing of this register is enabled and disabled by the CMPCTL[SHDWBMODE] bit. By default this register is shadowed. • If CMPCTL[SHDWBMODE] = 0, then the shadow is enabled and any write or read will automatically go to the shadow register. In this case, the CMPCTL[LOADBMODE] bit field determines which event will load the active register from the shadow register: • Before a write, the CMPCTL[SHDWBFULL] bit can be read to determine if the shadow register is currently full. • If CMPCTL[SHDWBMODE] = 1, then the shadow register is disabled and any write or read will go directly to the active register, that is the register actively controlling the hardware. • In either mode, the active and shadow registers share the same memory map address" end="0" id="CMPB" rwaccess="RW" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="AQCTLB_AQSFRC" description="Action-Qualifier Control Register for Output B (EPWMxB)/ Action-Qualifier Software Force Register" id="AQCTLB_AQSFRC" offset="0x18" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="24" id="Reserved1" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="AQCSFRC Active Register Reload From Shadow Options 0 Load on event counter equals zero 1h Load on event counter equals period 2h Load on event counter equals zero or counter equals period 3h Load immediately (the active register is directly accessed by the CPU and is not loaded from the shadow register)." end="22" id="AQSFRC_RLDCSF" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="21" description="One-Time Software Forced Event on Output B 0 Writing a 0 has no effect. Always reads back a 0 This bit is auto cleared once a write to this register is complete (that is, a forced event is initiated.) This is a one-shot forced event. It can be overridden by another subsequent event on output B. 1 Initiates a single s/w forced event" end="21" id="AQSFRC_OTSFB" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="20" description="Action when One-Time Software Force B Is invoked 0 Does nothing (action disabled) 1h Clear (low) 2h Set (high) 3h Toggle (Low -> High, High -> Low) Note: This action is not qualified by counter direction (CNT_dir)" end="19" id="AQSFRC_ACTSFB" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="18" description="One-Time Software Forced Event on Output A 0 Writing a 0 has no effect. Always reads back a 0. This bit is auto cleared once a write to this register is complete (that is, a forced event is initiated). 1 Initiates a single software forced event" end="18" id="AQSFRC_OTSFA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Action When One-Time Software Force A Is Invoked 0 Does nothing (action disabled) 1h Clear (low) 2h Set (high) 3h Toggle (Low → High, High → Low) Note: This action is not qualified by counter direction (CNT_dir)" end="16" id="AQSFRC_ACTSFA" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="12" id="Reserved2" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="11" description="Action when the counter equals the active CMPB register and the counter is decrementing. 0 Do nothing (action disabled) 1h Clear: force EPWMxB output low. 2h Set: force EPWMxB output high. 3h Toggle EPWMxB output: low output signal will be forced high, and a high signal will be forced low" end="10" id="AQCTLB_CBD" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="9" description="Action when the counter equals the active CMPB register and the counter is incrementing. 0 Do nothing (action disabled) 1h Clear: force EPWMxB output low. 2h Set: force EPWMxB output high. 3h Toggle EPWMxB output: low output signal will be forced high, and a high signal will be forced low" end="8" id="AQCTLB_CBU" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="7" description="Action when the counter equals the active CMPA register and the counter is decrementing. 0 Do nothing (action disabled) 1h Clear: force EPWMxB output low. 2h Set: force EPWMxB output high. 3h Toggle EPWMxB output: low output signal will be forced high, and a high signal will be forced low" end="6" id="AQCTLB_CAD" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="5" description="Action when the counter equals the active CMPA register and the counter is incrementing. 0 Do nothing (action disabled) 1h Clear: force EPWMxB output low. 2h Set: force EPWMxB output high. 3h Toggle EPWMxB output: low output signal will be forced high, and a high signal will be forced low" end="4" id="AQCTLB_CAU" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="3" description="Action when the counter equals the period. Note: By definition, in count up-down mode when the counter equals period the direction is defined as 0 or counting down. 0 Do nothing (action disabled) 1h Clear: force EPWMxB output low. 2h Set: force EPWMxB output high. 3h Toggle EPWMxB output: low output signal will be forced high, and a high signal will be forced low" end="2" id="AQCTLB_PRD" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="1" description="Action when counter equals zero. Note: By definition, in count up-down mode when the counter equals 0 the direction is defined as 1 or counting up. 0 Do nothing (action disabled) 1h Clear: force EPWMxB output low. 2h Set: force EPWMxB output high. 3h Toggle EPWMxB output: low output signal will be forced high, and a high signal will be forced low." end="0" id="AQCTLB_ZRO" rwaccess="RW" width="2"></bitfield>
+  </register>
+  
+  
+  <register acronym="AQCSFRC_DBCTL" description="Dead-Band Generator Control Register/ Action-Qualifier Continuous S/W Force Register Set" id="AQCSFRC_DBCTL" offset="0x1C" width="32">
+    
+  <bitfield begin="31" description="Half Cycle Clocking Enable Bit: 0 Full cycle clocking enabled. The dead-band counters are clocked at the TBCLK rate. 1 Half cycle clocking enabled. The dead-band counters are clocked at TBCLK � 2." end="31" id="DBCTL_HALFCYCLE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="30" description="Reserved" end="22" id="Reserved1" rwaccess="R" width="9"></bitfield>
+    
+  <bitfield begin="21" description="Dead Band Input Mode Control Bit 5 controls the S5 switch and bit 4 controls the S4 switch shown in Figure 35-28. This allows you to select the input source to the falling-edge and rising-edge delay. To produce classical dead-band waveforms the default is EPWMxA In is the source for both falling and rising-edge delays. 0 EPWMxA In (from the action-qualifier) is the source for both falling-edge and rising-edge delay. 1h EPWMxB In (from the action-qualifier) is the source for rising-edge delayed signal. EPWMxA In (from the action-qualifier) is the source for falling-edge delayed signal. 2h EPWMxA In (from the action-qualifier) is the source for rising-edge delayed signal. EPWMxB In (from the action-qualifier) is the source for falling-edge delayed signal. 3h EPWMxB In (from the action-qualifier) is the source for both rising-edge delay and falling-edge delayed signal." end="20" id="DBCTL_IN_MODE" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="19" description="Polarity Select Control Bit 3 controls the S3 switch and bit 2 controls the S2 switch shown in Figure 35-28. This allows you to selectively invert one of the delayed signals before it is sent out of the dead-band submodule. The following descriptions correspond to classical upper/lower switch control as found in one leg of a digital motor control inverter. These assume that DBCTL[OUT_MODE] = 1,1 and DBCTL[IN_MODE] = 0,0. Other enhanced modes are also possible, but not regarded as typical usage modes. 0 Active high (AH) mode. Neither EPWMxA nor EPWMxB is inverted (default). 1h Active low complementary (ALC) mode. EPWMxA is inverted. 2h Active high complementary (AHC). EPWMxB is inverted. 3h Active low (AL) mode. Both EPWMxA and EPWMxB are inverted" end="18" id="DBCTL_POLSEL" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="17" description="Dead-band Output Mode Control Bit 1 controls the S1 switch and bit 0 controls the S0 switch shown in Figure 35-28. This allows you to selectively enable or bypass the dead-band generation for the falling-edge and rising-edge delay. 0 Dead-band generation is bypassed for both output signals. In this mode, both the EPWMxA and EPWMxB output signals from the action-qualifier are passed directly to the PWM-chopper submodule. In this mode, the POLSEL and IN_MODE bits have no effect. 1h Disable rising-edge delay. The EPWMxA signal from the action-qualifier is passed straight through to the EPWMxA input of the PWM-chopper submodule. The falling-edge delayed signal is seen on output EPWMxB. The input signal for the delay is determined by DBCTL[IN_MODE]. 2h The rising-edge delayed signal is seen on output EPWMxA. The input signal for the delay is determined by DBCTL[IN_MODE]. Disable falling-edge delay. The EPWMxB signal from the action-qualifier is passed straight through to the EPWMxB input of the PWM-chopper submodule. 3h Dead-band is fully enabled for both rising-edge delay on output EPWMxA and falling-edge delay on output EPWMxB. The input signal for the delay is determined by DBCTL[IN_MODE]." end="16" id="DBCTL_OUT_MODE" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="4" id="Reserved2" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="3" description="Continuous Software Force on Output B In immediate mode, a continuous force takes effect on the next TBCLK edge. In shadow mode, a continuous force takes effect on the next TBCLK edge after a shadow load into the active register. To configure shadow mode, use AQSFRC[RLDCSF]. 0 Forcing disabled, that is, has no effect 1h Forces a continuous low on output B 2h Forces a continuous high on output B 3h Software forcing is disabled and has no effect" end="2" id="AQCSFRC_CSFB" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="1" description="Continuous Software Force on Output A In immediate mode, a continuous force takes effect on the next TBCLK edge. In shadow mode, a continuous force takes effect on the next TBCLK edge after a shadow load into the active register. 0 Forcing disabled, that is, has no effect 1h Forces a continuous low on output A 2h Forces a continuous high on output A 3h Software forcing is disabled and has no effect" end="0" id="AQCSFRC_CSFA" rwaccess="RW" width="2"></bitfield>
+  </register>
+  
+  
+  <register acronym="DBRED_DBFED" description="Dead-Band Generator Rising Edge Delay Count Register/ Dead-Band Generator Falling Edge Delay Count Register" id="DBRED_DBFED" offset="0x20" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="26" id="Reserved1" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="Falling Edge Delay Count. 10-bit counter" end="16" id="DBFED_DEL" rwaccess="RW" width="10"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="10" id="Reserved2" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="9" description="Rising Edge Delay Count. 10-bit counter" end="0" id="DBRED_DEL" rwaccess="RW" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="TZSEL_TZDCSEL" description="Trip Zone Digital Compare Select Register/ Trip-Zone Select Register" id="TZSEL_TZDCSEL" offset="0x24" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="28" id="Reserved1" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="27" description="Digital Compare Output B Event 2 Selection 0 Event disabled 1h DCBH = low, DCBL = don't care 2h DCBH = high, DCBL = don't care 3h DCBL = low, DCBH = don't care 4h DCBL = high, DCBH = don't care 5h DCBL = high, DCBH = low 6h-7h Reserved" end="25" id="TZDCSEL_DCBEVT2" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="24" description="Digital Compare Output B Event 1 Selection 0 Event disabled 1h DCBH = low, DCBL = don't care 2h DCBH = high, DCBL = don't care 3h DCBL = low, DCBH = don't care 4h DCBL = high, DCBH = don't care 5h DCBL = high, DCBH = low 6h-7h Reserved" end="22" id="TZDCSEL_DCBEVT1" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="21" description="Digital Compare Output A Event 2 Selection 0 Event disabled 1h DCAH = low, DCAL = don't care 2h DCAH = high, DCAL = don't care 3h DCAL = low, DCAH = don't care 4h DCAL = high, DCAH = don't care 5h DCAL = high, DCAH = low 6h-7h Reserved" end="19" id="TZDCSEL_DCAEVT2" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="18" description="Digital Compare Output A Event 1 Selection 0 Event disabled 1h DCAH = low, DCAL = don't care 2h DCAH = high, DCAL = don't care 3h DCAL = low, DCAH = don't care 4h DCAL = high, DCAH = don't care 5h DCAL = high, DCAH = low 6h-7h Reserved" end="16" id="TZDCSEL_DCAEVT1" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="15" description="Digital Compare Output B Event 1 Select 0 Disable DCBEVT1 as one-shot-trip source for this ePWM module. 1 Enable DCBEVT1 as one-shot-trip source for this ePWM module" end="15" id="TZSEL_DCBEVT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="14" description="Digital Compare Output A Event 1 Select 0 Disable DCAEVT1 as one-shot-trip source for this ePWM module. 1 Enable DCAEVT1 as one-shot-trip source for this ePWM module" end="14" id="TZSEL_DCAEVT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="13" description="Trip-zone 6 (TZ6) Select 0 Disable TZ6 as a one-shot trip source for this ePWM module. 1 Enable TZ6 as a one-shot trip source for this ePWM module" end="13" id="TZSEL_OSHT6" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="12" description="Trip-zone 5 (TZ5) Select 0 Disable TZ5 as a one-shot trip source for this ePWM module 1 Enable TZ5 as a one-shot trip source for this ePWM module" end="12" id="TZSEL_OSHT5" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="11" description="Trip-zone 4 (TZ4) Select 0 Disable TZ4 as a one-shot trip source for this ePWM module 1 Enable TZ4 as a one-shot trip source for this ePWM module" end="11" id="TZSEL_OSHT4" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="10" description="Trip-zone 3 (TZ3) Select 0 Disable TZ3 as a one-shot trip source for this ePWM module 1 Enable TZ3 as a one-shot trip source for this ePWM module" end="10" id="TZSEL_OSHT3" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="9" description="Trip-zone 2 (TZ2) Select 0 Disable TZ2 as a one-shot trip source for this ePWM module 1 Enable TZ2 as a one-shot trip source for this ePWM module" end="9" id="TZSEL_OSHT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Trip-zone 1 (TZ1) Select 0 Disable TZ1 as a one-shot trip source for this ePWM module 1 Enable TZ1 as a one-shot trip source for this ePWM module" end="8" id="TZSEL_OSHT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Digital Compare Output B Event 2 Select 0 Disable DCBEVT2 as a CBC trip source for this ePWM module 1 Enable DCBEVT2 as a CBC trip source for this ePWM module" end="7" id="TZSEL_DCBEVT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Digital Compare Output A Event 2 Select 0 Disable DCAEVT2 as a CBC trip source for this ePWM module 1 Enable DCAEVT2 as a CBC trip source for this ePWM module" end="6" id="TZSEL_DCAEVT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Trip-zone 6 (TZ6) Select 0 Disable TZ6 as a CBC trip source for this ePWM module 1 Enable TZ6 as a CBC trip source for this ePWM module" end="5" id="TZSEL_CBC6" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Trip-zone 5 (TZ5) Select 0 Disable TZ5 as a CBC trip source for this ePWM module 1 Enable TZ5 as a CBC trip source for this ePWM module" end="4" id="TZSEL_CBC5" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Trip-zone 4 (TZ4) Select 0 Disable TZ4 as a CBC trip source for this ePWM module 1 Enable TZ4 as a CBC trip source for this ePWM module" end="3" id="TZSEL_CBC4" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Trip-zone 3 (TZ3) Select 0 Disable TZ3 as a CBC trip source for this ePWM module 1 Enable TZ3 as a CBC trip source for this ePWM module" end="2" id="TZSEL_CBC3" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Trip-zone 2 (TZ2) Select 0 Disable TZ2 as a CBC trip source for this ePWM module 1 Enable TZ2 as a CBC trip source for this ePWM module" end="1" id="TZSEL_CBC2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Trip-zone 1 (TZ1) Select 0 Disable TZ1 as a CBC trip source for this ePWM module 1 Enable TZ1 as a CBC trip source for this ePWM module" end="0" id="TZSEL_CBC1" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="TZCTL_TZEINT" description="Trip-Zone Control Register/ Trip-Zone Enable Interrupt Register" id="TZCTL_TZEINT" offset="0x28" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="23" id="Reserved3" rwaccess="R" width="9"></bitfield>
+    
+  <bitfield begin="22" description="Digital Comparator Output B Event 2 Interrupt Enable 0 Disabled 1 Enabled" end="22" id="TZEINT_DCBEVT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="21" description="Digital Comparator Output B Event 1 Interrupt Enable 0 Disabled 1 Enabled" end="21" id="TZEINT_DCBEVT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="20" description="Digital Comparator Output A Event 2 Interrupt Enable 0 Disabled 1 Enabled" end="20" id="TZEINT_DCAEVT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="19" description="Digital Comparator Output A Event 1 Interrupt Enable 0 Disabled 1 Enabled" end="19" id="TZEINT_DCAEVT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="18" description="Trip-zone One-Shot Interrupt Enable 0 Disable one-shot interrupt generation 1 Enable Interrupt generation; a one-shot trip event will cause a EPWMx_TZINT VIM interrupt" end="18" id="TZEINT_OST" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Trip-zone Cycle-by-Cycle Interrupt Enable 0 Disable cycle-by-cycle interrupt generation. 1 Enable interrupt generation; a cycle-by-cycle trip event will cause an EPWMx_TZINT VIM interrupt" end="17" id="TZEINT_CBC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="16" description="Reserved" end="16" id="Reserved2" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="12" id="Reserved1" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="11" description="Digital Compare Output B Event 2 Action On EPWMxB: 0 High-impedance (EPWMxB = High-impedance state) 1h Force EPWMxB to a high state. 2h Force EPWMxB to a low state. 3h Do Nothing, trip action is disabled" end="10" id="TZCTL_DCBEVT2" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="9" description="Digital Compare Output B Event 1 Action On EPWMxB: 0 High-impedance (EPWMxB = High-impedance state) 1h Force EPWMxB to a high state. 2h Force EPWMxB to a low state. 3h Do Nothing, trip action is disabled" end="8" id="TZCTL_DCBEVT1" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="7" description="Digital Compare Output A Event 2 Action On EPWMxA: 0 High-impedance (EPWMxA = High-impedance state) 1h Force EPWMxA to a high state. 2h Force EPWMxA to a low state. 3h Do Nothing, trip action is disabled" end="6" id="TZCTL_DCAEVT2" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="5" description="Digital Compare Output A Event 1 Action On EPWMxA: 0 High-impedance (EPWMxA = High-impedance state) 1h Force EPWMxA to a high state. 2h Force EPWMxA to a low state. 3h Do Nothing, trip action is disabled" end="4" id="TZCTL_DCAEVT1" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="3" description="When a trip event occurs the following action is taken on output EPWMxB. Which trip-zone pins can cause an event is defined in the TZSEL register. 0 High-impedance (EPWMxB = High-impedance state) 1h Force EPWMxB to a high state 2h Force EPWMxB to a low state 3h Do nothing, no action is taken on EPWMxB." end="2" id="TZCTL_TZB" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="1" description="When a trip event occurs the following action is taken on output EPWMxA. Which trip-zone pins can cause an event is defined in the TZSEL register. 0 High-impedance (EPWMxA = High-impedance state) 1h Force EPWMxA to a high state 2h Force EPWMxA to a low state 3h Do nothing, no action is taken on EPWMxA" end="0" id="TZCTL_TZA" rwaccess="RW" width="2"></bitfield>
+  </register>
+  
+  
+  <register acronym="TZFLG_TZCLR" description="Trip-Zone Flag Register/ Trip-Zone Clear Register" id="TZFLG_TZCLR" offset="0x2C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="23" id="Reserved1" rwaccess="R" width="9"></bitfield>
+    
+  <bitfield begin="22" description="Clear Flag for Digital Compare Output B Event 2 0 Writing 0 has no effect. This bit always reads back 0. 1 Writing 1 clears the DCBEVT2 event trip condition." end="22" id="TZCLR_DCBEVT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="21" description="Clear Flag for Digital Compare Output B Event 1 0 Writing 0 has no effect. This bit always reads back 0. 1 Writing 1 clears the DCBEVT1 event trip condition" end="21" id="TZCLR_DCBEVT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="20" description="Clear Flag for Digital Compare Output A Event 2 0 Writing 0 has no effect. This bit always reads back 0. 1 Writing 1 clears the DCAEVT2 event trip condition" end="20" id="TZCLR_DCAEVT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="19" description="Clear Flag for Digital Compare Output A Event 1 0 Writing 0 has no effect. This bit always reads back 0. 1 Writing 1 clears the DCAEVT1 event trip condition." end="19" id="TZCLR_DCAEVT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="18" description="Clear Flag for One-Shot Trip (OST) Latch 0 Has no effect. Always reads back a 0. 1 Clears this Trip (set) condition." end="18" id="TZCLR_OST" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Clear Flag for Cycle-By-Cycle (CBC) Trip Latch 0 Has no effect. Always reads back a 0. 1 Clears this Trip (set) condition." end="17" id="TZCLR_CBC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="16" description="Global Interrupt Clear Flag 0 Has no effect. Always reads back a 0. 1 Clears the trip-interrupt flag for this ePWM module (TZFLG[INT]). NOTE: No further EPWMx_TZINT VIM interrupts will be generated until the flag is cleared. If the TZFLG[INT] bit is cleared and any of the other flag bits are set, then another interrupt pulse will be generated. Clearing all flag bits will prevent further interrupts." end="16" id="TZCLR_INT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="7" id="Reserved2" rwaccess="R" width="9"></bitfield>
+    
+  <bitfield begin="6" description="Latched Status Flag for Digital Compare Output B Event 2 0 Indicates no trip event has occurred on DCBEVT2 1 Indicates a trip event has occurred for the event defined for DCBEVT2" end="6" id="TZFLG_DCBEVT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Latched Status Flag for Digital Compare Output B Event 1 0 Indicates no trip event has occurred on DCBEVT1 1 Indicates a trip event has occurred for the event defined for DCBEVT1" end="5" id="TZFLG_DCBEVT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Latched Status Flag for Digital Compare Output A Event 2 0 Indicates no trip event has occurred on DCAEVT2 1 Indicates a trip event has occurred for the event defined for DCAEVT2" end="4" id="TZFLG_DCAEVT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Latched Status Flag for Digital Compare Output A Event 1 0 Indicates no trip event has occurred on DCAEVT1 1 Indicates a trip event has occurred for the event defined for DCAEVT1" end="3" id="TZFLG_DCAEVT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Latched Status Flag for A One-Shot Trip Event 0 No one-shot trip event has occurred. 1 Indicates a trip event has occurred on a pin selected as a one-shot trip source. This bit is cleared by writing the appropriate value to the TZCLR register" end="2" id="TZFLG_OST" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Latched Status Flag for Cycle-By-Cycle Trip Event 0 No cycle-by-cycle trip event has occurred. 1 Indicates a trip event has occurred on a signal selected as a cycle-by-cycle trip source. The TZFLG[CBC] bit will remain set until it is manually cleared by the user. If the cycle-by-cycle trip event is still present when the CBC bit is cleared, then CBC will be immediately set again. The specified condition on the signal is automatically cleared when the ePWM time-base counter reaches zero (TBCTR = 0x0000) if the trip condition is no longer present. The condition on the signal is only cleared when the TBCTR = 0x0000 no matter where in the cycle the CBC flag is cleared. This bit is cleared by writing the appropriate value to the TZCLR register" end="1" id="TZFLG_CBC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Latched Trip Interrupt Status Flag 0 Indicates no interrupt has been generated. 1 Indicates an EPWMx_TZINT VIM interrupt was generated because of a trip condition. No further EPWMx_TZINT VIM interrupts will be generated until this flag is cleared. If the interrupt flag is cleared when either CBC or OST is set, then another interrupt pulse will be generated. Clearing all flag bits will prevent further interrupts. This bit is cleared by writing the appropriate value to the TZCLR register" end="0" id="TZFLG_INT" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="TZFRC_ETSEL" description="Trip-Zone Force Register / Event-Trigger Selection Register" id="TZFRC_ETSEL" offset="0x30" width="32">
+    
+  <bitfield begin="31" description="Enable the ADC Start of Conversion B (EPWMxSOCB) Pulse 0 Disable EPWMxSOCB. 1 Enable EPWMxSOCB pulse" end="31" id="ETSEL_SOCBEN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="30" description="EPWMxSOCB Selection Options These bits determine when a EPWMxSOCB pulse will be generated. 0 Enable DCBEVT1.soc event 1h Enable event time-base counter equal to zero. (TBCTR = 0x0000) 2h Enable event time-base counter equal to period (TBCTR = TBPRD) 3h Enable event time-base counter equal to zero or period (TBCTR = 0x0000 or TBCTR = TBPRD). This mode is useful in up-down count mode. 4h Enable event time-base counter equal to CMPA when the timer is incrementing. 5h Enable event time-base counter equal to CMPA when the timer is decrementing. 6h Enable event: time-base counter equal to CMPB when the timer is incrementing. 7h Enable event: time-base counter equal to CMPB when the timer is decrementing" end="28" id="ETSEL_SOCBSEL" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="27" description="Enable the ADC Start of Conversion A (EPWMxSOCA) Pulse 0 Disable EPWMxSOCA. 1 Enable EPWMxSOCA pulse." end="27" id="ETSEL_SOCAEN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="26" description="EPWMxSOCA Selection Options These bits determine when a EPWMxSOCA pulse will be generated. 0 Enable DCAEVT1.soc event 1h Enable event time-base counter equal to zero. (TBCTR = 0x0000) 2h Enable event time-base counter equal to period (TBCTR = TBPRD) 3h Enable event time-base counter equal to zero or period (TBCTR = 0x0000 or TBCTR = TBPRD). This mode is useful in up-down count mode. 4h Enable event time-base counter equal to CMPA when the timer is incrementing. 5h Enable event time-base counter equal to CMPA when the timer is decrementing. 6h Enable event: time-base counter equal to CMPB when the timer is incrementing. 7h Enable event: time-base counter equal to CMPB when the timer is decrementing" end="24" id="ETSEL_SOCASEL" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="23" description="Reserved" end="20" id="Reserved1" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="19" description="Enable ePWM Interrupt (EPWMx_INT) Generation 0 Disable EPWMx_INT generation 1 Enable EPWMx_INT generation" end="19" id="ETSEL_INTEN" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="18" description="ePWM Interrupt (EPWMx_INT) Selection Options 0 Reserved 1h Enable event time-base counter equal to zero. (TBCTR = 0x0000) 2h Enable event time-base counter equal to period (TBCTR = TBPRD) 3h Enable event time-base counter equal to zero or period (TBCTR = 0x0000 or TBCTR = TBPRD). This mode is useful in up-down count mode. 4h Enable event time-base counter equal to CMPA when the timer is incrementing. 5h Enable event time-base counter equal to CMPA when the timer is decrementing. 6h Enable event: time-base counter equal to CMPB when the timer is incrementing. 7h Enable event: time-base counter equal to CMPB when the timer is decrementing." end="16" id="ETSEL_INTSEL" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="7" id="Reserved3" rwaccess="R" width="9"></bitfield>
+    
+  <bitfield begin="6" description="Force Flag for Digital Compare Output B Event 2 0 Writing 0 has no effect. This bit always reads back 0. 1 Writing 1 forces the DCBEVT2 event trip condition and sets the TZFLG[DCBEVT2] bit." end="6" id="TZFRC_DCBEVT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Force Flag for Digital Compare Output B Event 1 0 Writing 0 has no effect. This bit always reads back 0. 1 Writing 1 forces the DCBEVT1 event trip condition and sets the TZFLG[DCBEVT1] bit" end="5" id="TZFRC_DCBEVT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Force Flag for Digital Compare Output A Event 2 0 Writing 0 has no effect. This bit always reads back 0. 1 Writing 1 forces the DCAEVT2 event trip condition and sets the TZFLG[DCAEVT2] bit" end="4" id="TZFRC_DCAEVT2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Force Flag for Digital Compare Output A Event 1 0 Writing 0 has no effect. This bit always reads back 0 1 Writing 1 forces the DCAEVT1 event trip condition and sets the TZFLG[DCAEVT1] bit" end="3" id="TZFRC_DCAEVT1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Force a One-Shot Trip Event via Software 0 Writing of 0 is ignored. Always reads back a 0. 1 Forces a one-shot trip event and sets the TZFLG[OST] bit" end="2" id="TZFRC_OST" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Force a Cycle-by-Cycle Trip Event via Software 0 Writing of 0 is ignored. Always reads back a 0. 1 Forces a cycle-by-cycle trip event and sets the TZFLG[CBC] bit." end="1" id="TZFRC_CBC" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved" end="0" id="Reserved2" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="ETPS_ETFLG" description="Event-Trigger Pre-Scale Register/ Event-Trigger Flag Register" id="ETPS_ETFLG" offset="0x34" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="20" id="Reserved2" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="19" description="Latched ePWM ADC Start-of-Conversion B (EPWMxSOCB) Status Flag 0 Indicates no EPWMxSOCB event occurred 1 Indicates that a start of conversion pulse was generated on EPWMxSOCB. The EPWMxSOCB output will continue to be generated even if the flag bit is set." end="19" id="ETFLG_SOCB" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="18" description="Latched ePWM ADC Start-of-Conversion A (EPWMxSOCA) Status Flag Unlike the ETFLG[INT] flag, the EPWMxSOCA output will continue to pulse even if the flag bit is set. 0 Indicates no event occurred 1 Indicates that a start of conversion pulse was generated on EPWMxSOCA. The EPWMxSOCA output will continue to be generated even if the flag bit is set" end="18" id="ETFLG_SOCA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Reserved" end="17" id="Reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="16" description="Latched ePWM Interrupt (EPWMx_INT) Status Flag 0 Indicates no event occurred 1 Indicates that an ePWMx interrupt (EWPMx_INT) was generated. No further interrupts will be generated until the flag bit is cleared. Up to one interrupt can be pending while the ETFLG[INT] bit is still set. If an interrupt is pending, it will not be generated until after the ETFLG[INT] bit is cleared" end="16" id="ETFLG_INT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="ePWM ADC Start-of-Conversion B Event (EPWMxSOCB) Counter Register These bits indicate how many selected ETSEL[SOCBSEL] events have occurred: 0 No events have occurred. 1h 1 event has occurred. 2h 2 events have occurred. 3h 3 events have occurred" end="14" id="ETPS_SOCBCNT" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="13" description="ePWM ADC Start-of-Conversion B Event (EPWMxSOCB) Period Select These bits determine how many selected ETSEL[SOCBSEL] events need to occur before an EPWMxSOCB pulse is generated. To be generated, the pulse must be enabled (ETSEL[SOCBEN] = 1). The SOCB pulse will be generated even if the status flag is set from a previous start of conversion (ETFLG[SOCB] = 1). Once the SOCB pulse is generated, the ETPS[SOCBCNT] bits will automatically be cleared. 0 Disable the SOCB event counter. No EPWMxSOCB pulse will be generated 1h Generate the EPWMxSOCB pulse on the first event: ETPS[SOCBCNT] = 0,1 2h Generate the EPWMxSOCB pulse on the second event: ETPS[SOCBCNT] = 1,0 3h Generate the EPWMxSOCB pulse on the third event: ETPS[SOCBCNT] = 1,1" end="12" id="ETPS_SOCBPRD" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="11" description="ePWM ADC Start-of-Conversion A Event (EPWMxSOCA) Counter Register These bits indicate how many selected ETSEL[SOCASEL] events have occurred: 0 No events have occurred. 1h 1 event has occurred. 2h 2 events have occurred. 3h 3 events have occurred." end="10" id="ETPS_SOCACNT" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="9" description="ePWM ADC Start-of-Conversion A Event (EPWMxSOCA) Period Select These bits determine how many selected ETSEL[SOCASEL] events need to occur before an EPWMxSOCA pulse is generated. To be generated, the pulse must be enabled (ETSEL[SOCAEN] = 1). The SOCA pulse will be generated even if the status flag is set from a previous start of conversion (ETFLG[SOCA] = 1). Once the SOCA pulse is generated, the ETPS[SOCACNT] bits will automatically be cleared. 0 Disable the SOCA event counter. No EPWMxSOCA pulse will be generated 1h Generate the EPWMxSOCA pulse on the first event: ETPS[SOCACNT] = 0,1 2h Generate the EPWMxSOCA pulse on the second event: ETPS[SOCACNT] = 1,0 3h Generate the EPWMxSOCA pulse on the third event: ETPS[SOCACNT] = 1,1" end="8" id="ETPS_SOCAPRD" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="7" description="Reserved" end="4" id="Reserved3" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="3" description="ePWM Interrupt Event (EPWMx_INT) Counter Register These bits indicate how many selected ETSEL[INTSEL] events have occurred. These bits are automatically cleared when an interrupt pulse is generated. If interrupts are disabled, ETSEL[INT] = 0 or the interrupt flag is set, ETFLG[INT] = 1, the counter will stop counting events when it reaches the period value ETPS[INTCNT] = ETPS[INTPRD]. 0 No events have occurred. 1h 1 event has occurred. 2h 2 events have occurred. 3h 3 events have occurred." end="2" id="ETPS_INTCNT" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="1" description="ePWM Interrupt (EPWMx_INT) Period Select These bits determine how many selected ETSEL[INTSEL] events need to occur before an interrupt is generated. To be generated, the interrupt must be enabled (ETSEL[INT] = 1). If the interrupt status flag is set from a previous interrupt (ETFLG[INT] = 1) then no interrupt will be generated until the flag is cleared via the ETCLR[INT] bit. This allows for one interrupt to be pending while another is still being serviced. Once the interrupt is generated, the ETPS[INTCNT] bits will automatically be cleared. Writing a INTPRD value that is the same as the current counter value will trigger an interrupt if it is enabled and the status flag is clear. Writing a INTPRD value that is less than the current counter value will result in an undefined state. If a counter event occurs at the same instant as a new zero or non-zero INTPRD value is written, the counter is incremented. 0 Disable the interrupt event counter. No interrupt will be generated and ETFRC[INT] is ignored. 1h Generate an interrupt on the first event INTCNT = 01 (first event) 2h Generate interrupt on ETPS[INTCNT] = 1,0 (second event) 3h Generate interrupt on ETPS[INTCNT] = 1,1 (third event)" end="0" id="ETPS_INTPRD" rwaccess="RW" width="2"></bitfield>
+  </register>
+  
+  
+  <register acronym="ETCLR_ETFRC" description="Event-Trigger Clear Register/ Event-Trigger Force Register" id="ETCLR_ETFRC" offset="0x38" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="20" id="Reserved4" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="19" description="SOCB Force Bit. The SOCB pulse will only be generated if the event is enabled in the ETSEL register. The ETFLG[SOCB] flag bit will be set regardless. 0 Has no effect. Always reads back a 0. 1 Generates a pulse on EPWMxSOCB and sets the SOCBFLG bit. This bit is used for test purposes" end="19" id="ETFRC_SOCB" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="18" description="SOCA Force Bit. The SOCA pulse will only be generated if the event is enabled in the ETSEL register. The ETFLG[SOCA] flag bit will be set regardless. 0 Writing 0 to this bit will be ignored. Always reads back a 0. 1 Generates a pulse on EPWMxSOCA and set the SOCAFLG bit. This bit is used for test purposes" end="18" id="ETFRC_SOCA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Reserved" end="17" id="Reserved3" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="16" description="INT Force Bit. The interrupt will only be generated if the event is enabled in the ETSEL register. The INT flag bit will be set regardless. 0 Writing 0 to this bit will be ignored. Always reads back a 0. 1 Generates an interrupt on EPWMxINT and set the INT flag bit. This bit is used for test purposes" end="16" id="ETFRC_INT" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="4" id="Reserved2" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="3" description="ePWM ADC Start-of-Conversion B (EPWMxSOCB) Flag Clear Bit 0 Writing a 0 has no effect. Always reads back a 0 1 Clears the ETFLG[SOCB] flag bit" end="3" id="ETCLR_SOCB" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="ePWM ADC Start-of-Conversion A (EPWMxSOCA) Flag Clear Bit 0 Writing a 0 has no effect. Always reads back a 0 1 Clears the ETFLG[SOCA] flag bit" end="2" id="ETCLR_SOCA" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Reserved" end="1" id="Reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="ePWM Interrupt (EPWMx_INT) Flag Clear Bit 0 Writing a 0 has no effect. Always reads back a 0 1 Clears the ETFLG[INT] flag bit and enable further interrupts pulses to be generated" end="0" id="ETCLR_INT" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="PCCTL" description="PWM-Chopper Control Register" id="PCCTL" offset="0x3C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="11" id="Reserved" rwaccess="R" width="21"></bitfield>
+    
+  <bitfield begin="10" description="Chopping Clock Duty Cycle 0 Duty = 1/8 (12.5%) 1h Duty = 2/8 (25.0%) 2h Duty = 3/8 (37.5%) 3h Duty = 4/8 (50.0%) 4h Duty = 5/8 (62.5%) 5h Duty = 6/8 (75.0%) 6h Duty = 7/8 (87.5%) 7h Reserved" end="8" id="CHPDUTY" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="7" description="Chopping Clock Frequency 0 Divide by 1 (no prescale, = 12.5 MHz at 100 MHz VCLK3) 1h Divide by 2 (6.25 MHz at 100 MHz VCLK3) 2h Divide by 3 (4.16 MHz at 100 MHz VCLK3) 3h Divide by 4 (3.12 MHz at 100 MHz VCLK3) 4h Divide by 5 (2.50 MHz at 100 MHz VCLK3) 5h Divide by 6 (2.08 MHz at 100 MHz VCLK3) 6h Divide by 7 (1.78 MHz at 100 MHz VCLK3) 7h Divide by 8 (1.56 MHz at 100 MHz VCLK3)" end="5" id="CHPFREQ" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="4" description="One-Shot Pulse Width 0 1 x VCLK3 / 8 wide ( = 80 nS at 100 MHz VCLK3) 1h 2 x VCLK3 / 8 wide ( = 160 nS at 100 MHz VCLK3) 2h 3 x VCLK3 / 8 wide ( = 240 nS at 100 MHz VCLK3) 3h 4 x VCLK3 / 8 wide ( = 320 nS at 100 MHz VCLK3) 4h 5 x VCLK3 / 8 wide ( = 400 nS at 100 MHz VCLK3) 5h 6 x VCLK3 / 8 wide ( = 480 nS at 100 MHz VCLK3) 6h 7 x VCLK3 / 8 wide ( = 560 nS at 100 MHz VCLK3) 7h 8 x VCLK3 / 8 wide ( = 640 nS at 100 MHz VCLK3) 8h 9 x VCLK3 / 8 wide ( = 720 nS at 100 MHz VCLK3) 9h 10 x VCLK3 / 8 wide ( = 800 nS at 100 MHz VCLK3) Ah 11 x VCLK3 / 8 wide ( = 880 nS at 100 MHz VCLK3) Bh 12 x VCLK3 / 8 wide ( = 960 nS at 100 MHz VCLK3) Ch 13 x VCLK3 / 8 wide ( = 1040 nS at 100 MHz VCLK3) Dh 14 x VCLK3 / 8 wide ( = 1120 nS at 100 MHz VCLK3) Eh 15 x VCLK3 / 8 wide ( = 1200 nS at 100 MHz VCLK3) Fh 16 x VCLK3 / 8 wide ( = 1280 nS at 100 MHz VCLK3)" end="1" id="OSHTWTH" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="0" description="PWM-chopping Enable 0 Disable (bypass) PWM chopping function 1 Enable chopping function" end="0" id="CHPEN" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Reserved1" description="Reserved" id="Reserved1" offset="0x40" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="0" id="Reserved" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Reserved2" description="Reserved" id="Reserved2" offset="0x44" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="0" id="Reserved" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Reserved3" description="Reserved" id="Reserved3" offset="0x48" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="0" id="Reserved" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Reserved4" description="Reserved" id="Reserved4" offset="0x4C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="0" id="Reserved" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Reserved5" description="Reserved" id="Reserved5" offset="0x50" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="0" id="Reserved" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Reserved6" description="Reserved" id="Reserved6" offset="0x54" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="0" id="Reserved" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Reserved7" description="Reserved" id="Reserved7" offset="0x58" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="0" id="Reserved" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Reserved8" description="Reserved" id="Reserved8" offset="0x5C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="0" id="Reserved" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DCTRIPSEL_DCACTL" description="Digital Compare Trip Select Register/ Digital Compare A Control Register" id="DCTRIPSEL_DCACTL" offset="0x60" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="26" id="Reserved2" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="DCAEVT2 Force Synchronization Signal Select 0 Source Is Synchronous Signal 1 Source Is Asynchronous Signal" end="25" id="DCACTL_EVT2FRC_SYNCSEL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="24" description="DCAEVT2 Source Signal Select 0 Source Is DCAEVT2 Signal 1 Source Is DCEVTFILT Signal" end="24" id="DCACTL_EVT2SRCSEL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="Reserved" end="20" id="Reserved1" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="19" description="DCAEVT1 SYNC, Enable/Disable 0 SYNC Generation Disabled 1 SYNC Generation Enabled" end="19" id="DCACTL_EVT1SYNCE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="18" description="DCAEVT1 SOC, Enable/Disable 0 SOC Generation Disabled 1 SOC Generation Enabled" end="18" id="DCACTL_EVT1SOCE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="17" description="DCAEVT1 Force Synchronization Signal Select 0 Source Is Synchronous Signal 1 Source Is Asynchronous Signal" end="17" id="DCACTL_EVT1FRC_SYNCSEL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="16" description="DCAEVT1 Source Signal Select 0 Source Is DCAEVT1 Signal 1 Source Is DCEVTFILT Signal" end="16" id="DCACTL_EVT1SRCSEL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="Digital Compare B Low Input Select Defines the source for the DCBL input. The TZ signals, when used as trip signals, are treated as normal inputs and can be defined as active high or active low. 0 TZ1 input 1h TZ2 input 2h TZ3 input All other values Values not shown are reserved. If a device does not have a particular comparitor, then that option is reserved." end="12" id="DCTRIPSEL_DCBLCOMPSEL" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="11" description="Digital Compare B High Input Select Defines the source for the DCBH input. The TZ signals, when used as trip signals, are treated as normal inputs and can be defined as active high or active low. 0 TZ1 input 1h TZ2 input 2h TZ3 input All other values Values not shown are reserved. If a device does not have a particular comparitor, then that option is reserved." end="8" id="DCTRIPSEL_DCBHCOMPSEL" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="7" description="Digital Compare A Low Input Select Defines the source for the DCAL input. The TZ signals, when used as trip signals, are treated as normal inputs and can be defined as active high or active low. 0 TZ1 input 1h TZ2 input 2h TZ3 input All other values Values not shown are reserved. If a device does not have a particular comparitor, then that option is reserved." end="4" id="DCTRIPSEL_DCALCOMPSEL" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="3" description="Digital Compare A High Input Select Defines the source for the DCAH input. The TZ signals, when used as trip signals, are treated as normal inputs and can be defined as active high or active low. 0 TZ1 input 1h TZ2 input 2h TZ3 input All other values Values not shown are reserved. If a device does not have a particular comparitor, then that option is reserved." end="0" id="DCTRIPSEL_DCAHCOMPSEL" rwaccess="RW" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DCBCTL_DCFCTL" description="Digital Compare B Control Register/ Digital Compare Filter Control Register" id="DCBCTL_DCFCTL" offset="0x64" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="22" id="Reserved3" rwaccess="R" width="10"></bitfield>
+    
+  <bitfield begin="21" description="Pulse Select For Blanking &amp; Capture Alignment 0 Time-base counter equal to period (TBCTR = TBPRD) 1h Time-base counter equal to zero (TBCTR = 0x0000) 2h-3h Reserved" end="20" id="DCFCTL_PULSESEL" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="19" description="Blanking Window Inversion 0 Blanking window not inverted 1 Blanking window inverted" end="19" id="DCFCTL_BLANKINV" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="18" description="Blanking Window Enable/Disable 0 Blanking window is disabled 1 Blanking window is enabled" end="18" id="DCFCTL_BLANKE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Filter Block Signal Source Select 0 Source Is DCAEVT1 Signal 1h Source Is DCAEVT2 Signal 2h Source Is DCBEVT1 Signal 3h Source Is DCBEVT2 Signal" end="16" id="DCFCTL_SRCSEL" rwaccess="RW" width="2"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="10" id="Reserved2" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="9" description="DCBEVT2 Force Synchronization Signal Select 0 Source Is Synchronous Signal 1 Source Is Asynchronous Signal" end="9" id="DCBCTL_EVT2FRC_SYNCSEL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="DCBEVT2 Source Signal Select 0 Source Is DCBEVT2 Signal 1 Source Is DCEVTFILT Signal" end="8" id="DCBCTL_EVT2SRCSEL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Reserved" end="4" id="Reserved1" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="3" description="DCBEVT1 SYNC, Enable/Disable 0 SYNC Generation Disabled 1 SYNC Generation Enabled" end="3" id="DCBCTL_EVT1SYNCE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="DCBEVT1 SOC, Enable/Disable 0 SOC Generation Disabled 1 SOC Generation Enabled" end="2" id="DCBCTL_EVT1SOCE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="DCBEVT1 Force Synchronization Signal Select 0 Source Is Synchronous Signal 1 Source Is Asynchronous Signal" end="1" id="DCBCTL_EVT1FRC_SYNCSEL" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="DCBEVT1 Source Signal Select 0 Source Is DCBEVT1 Signal 1 Source Is DCEVTFILT Signal" end="0" id="DCBCTL_EVT1SRCSEL" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DCCAPCTL_DCFOFFSET" description="Digital Compare Capture Control Register/ Digital Compare Filter Offset Register" id="DCCAPCTL_DCFOFFSET" offset="0x68" width="32">
+    
+  <bitfield begin="31" description="Blanking Window Offset These 16-bits specify the number of TBCLK cycles from the blanking window reference to the point when the blanking window is applied. The blanking window reference is either period or zero as defined by the DCFCTL[PULSESEL] bit. This offset register is shadowed and the active register is loaded at the reference point defined by DCFCTL[PULSESEL]. The offset counter is also initialized and begins to count down when the active register is loaded. When the counter expires, the blanking window is applied. If the blanking window is currently active, then the blanking window counter is restarted." end="16" id="DCFOFFSET_OFFSET" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="2" id="Reserved" rwaccess="R" width="14"></bitfield>
+    
+  <bitfield begin="1" description="TBCTR Counter Capture Shadow Select Mode 0 Enable shadow mode. The DCCAP active register is copied to shadow register on a TBCTR = TBPRD or TBCTR = zero event as defined by the DCFCTL[PULSESEL] bit. CPU reads of the DCCAP register will return the shadow register contents. 1 Active Mode. In this mode the shadow register is disabled. CPU reads from the DCCAP register will always return the active register contents" end="1" id="DCCAPCTL_SHDWMODE" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="TBCTR Counter Capture Enable/Disable 0 Disable the time-base counter capture. 1 Enable the time-base counter capture." end="0" id="DCCAPCTL_CAPE" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DCFOFFSETCNT_DCFWINDOW" description="Digital Compare Filter Offset Counter Register/ Digital Compare Filter Window Register" id="DCFOFFSETCNT_DCFWINDOW" offset="0x6C" width="32">
+    
+  <bitfield begin="31" description="Reserved" end="24" id="Reserved1" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Blanking Window Width 0 No blanking window is generated. 1h-FFh Specifies the width of the blanking window in TBCLK cycles. The blanking window begins when the offset counter expires. When this occurs, the window counter is loaded and begins to count down. If the blanking window is currently active and the offset counter expires, the blanking window counter is restarted. The blanking window can cross a PWM period boundary." end="16" id="DCFWINDOW_WINDOW" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="15" description="Blanking Offset Counter These 16-bits are read only and indicate the current value of the offset counter. The counter counts down to zero and then stops until it is re-loaded on the next period or zero event as defined by the DCFCTL[PULSESEL] bit. The offset counter is not affected by the free/soft emulation bits. That is, it will always continue to count down if the device is halted by a emulation stop." end="0" id="DCFOFFSETCNT_OFFSETCNT" rwaccess="RW" width="16"></bitfield>
+  </register>
+  
+  
+  <register acronym="DCFWINDOWCNT_DCCAP" description="Digital Compare Filter Window Counter Register/ Digital Compare Counter Capture Register" id="DCFWINDOWCNT_DCCAP" offset="0x70" width="32">
+    
+  <bitfield begin="31" description="Digital Compare Time-Base Counter Capture To enable time-base counter capture, set the DCCAPCLT[CAPE] bit to 1. If enabled, reflects the value of the time-base counter (TBCTR) on the low to high edge transition of a filtered (DCEVTFLT) event. Further capture events are ignored until the next period or zero as selected by the DCFCTL[PULSESEL] bit. Shadowing of DCCAP is enabled and disabled by the DCCAPCTL[SHDWMODE] bit. By default this register is shadowed. • If DCCAPCTL[SHDWMODE] = 0, then the shadow is enabled. In this mode, the active register is copied to the shadow register on the TBCTR = TBPRD or TBCTR = zero as defined by the DCFCTL[PULSESEL] bit. CPU reads of this register will return the shadow register value. • If DCCAPCTL[SHDWMODE] = 1, then the shadow register is disabled. In this mode, CPU reads will return the active register value. The active and shadow registers share the same memory map address." end="16" id="DCCAP" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="15" description="Reserved" end="8" id="Reserved1" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="7" description="0-FFh Blanking Window Counter These 8 bits are read only and indicate the current value of the window counter. The counter counts down to zero and then stops until it is re-loaded when the offset counter reaches zero again." end="0" id="DCFWINDOWCNT" rwaccess="RW" width="8"></bitfield>
+  </register>
+</module>

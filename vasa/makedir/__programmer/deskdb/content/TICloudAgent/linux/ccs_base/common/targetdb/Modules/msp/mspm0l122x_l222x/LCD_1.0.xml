@@ -1,0 +1,874 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module id="LCD" HW_revision="1.0">
+    <register id="LCD_PWREN" width="32" offset="0x800" description="Power enable">
+        <bitfield id="ENABLE" description="Enable the power" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="DISABLE" value="0x0" description="Disable Power"/>
+            <bitenum id="ENABLE" value="0x1" description="Enable Power"/>
+        </bitfield>
+    </register>
+    <register id="LCD_RSTCTL" width="32" offset="0x804" description="Reset Control">
+        <bitfield id="RESETSTKYCLR" description="Clear the RESETSTKY bit in the STAT register" begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="NOP" value="0x0" description="Writing 0 has no effect"/>
+            <bitenum id="CLR" value="0x1" description="Clear reset sticky bit"/>
+        </bitfield>
+        <bitfield id="RESETASSERT" description="Assert reset to the peripheral" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="NOP" value="0x0" description="Writing 0 has no effect"/>
+            <bitenum id="ASSERT" value="0x1" description="Assert reset"/>
+        </bitfield>
+    </register>
+    <register id="LCD_STAT" width="32" offset="0x814" description="Status Register">
+        <bitfield id="RESETSTKY" description="This bit indicates, if the peripheral was reset, since this bit was cleared by RESETSTKYCLR in the RSTCTL register" begin="16" end="16" width="1" rwaccess="R">
+            <bitenum id="NORES" value="0x0" description="The peripheral has not been reset since this bit was last cleared by RESETSTKYCLR in the RSTCTL register"/>
+            <bitenum id="RESET" value="0x1" description="The peripheral was reset since the last bit clear"/>
+        </bitfield>
+    </register>
+    <group id="LCD_INT_EVENT0" name="LCD_INT_EVENT0" instances="1" offset="0x1020" instaddr="0x30" description="">
+        <register id="LCD_IIDX" width="32" offset="0x0" description="Interrupt index">
+            <bitfield id="STAT" description="LCD Module Interrupt Vector Value.  This register provides the highes priority interrupt index. A read clears the corresponding interrupt flag in RIS and MISC. 15h-1Fh = Reserved" begin="7" end="0" width="8" rwaccess="R">
+                <bitenum id="NO_INTR" value="0x0" description="No interrupt pending"/>
+                <bitenum id="FRAME_START" value="0x1" description="Start of new frame interrupt"/>
+                <bitenum id="BLK_OFF" value="0x2" description="Blinking segments off interrupt"/>
+                <bitenum id="BLK_ON" value="0x3" description="Blinking segments on interrupt"/>
+            </bitfield>
+        </register>
+        <register id="LCD_IMASK" width="32" offset="0x8" description="Interrupt mask">
+            <bitfield id="FRMSTART" description="Start of new LCD frame." begin="0" end="0" width="1" rwaccess="R/W">
+                <bitenum id="CLR" value="0x0" description="Clear Interrupt Mask"/>
+                <bitenum id="SET" value="0x1" description="Set Interrrupt Mask"/>
+            </bitfield>
+            <bitfield id="BLKOFF" description="Blinking segments off." begin="1" end="1" width="1" rwaccess="R/W">
+                <bitenum id="CLR" value="0x0" description="Clear Interrupt Mask"/>
+                <bitenum id="SET" value="0x1" description="Set Interrrupt Mask"/>
+            </bitfield>
+            <bitfield id="BLKON" description="Blinkking segments on." begin="2" end="2" width="1" rwaccess="R/W">
+                <bitenum id="CLR" value="0x0" description="Clear Interrupt Mask"/>
+                <bitenum id="SET" value="0x1" description="Set Interrrupt Mask"/>
+            </bitfield>
+        </register>
+        <register id="LCD_RIS" width="32" offset="0x10" description="Raw interrupt status">
+            <bitfield id="FRMSTART" description="Set in start of a new frame." begin="0" end="0" width="1" rwaccess="R/W">
+                <bitenum id="CLR" value="0x0" description="Interrupt flag cleared"/>
+                <bitenum id="SET" value="0x1" description="Interrupt flag set"/>
+            </bitfield>
+            <bitfield id="BLKOFF" description="Blinking segments turned off interrupt flag." begin="1" end="1" width="1" rwaccess="R/W">
+                <bitenum id="CLR" value="0x0" description="Interrupt flag cleared"/>
+                <bitenum id="SET" value="0x1" description="Interrupt flag set"/>
+            </bitfield>
+            <bitfield id="BLKON" description="Blinking segments turned on." begin="2" end="2" width="1" rwaccess="R/W">
+                <bitenum id="CLR" value="0x0" description="Interrupt flag cleared"/>
+                <bitenum id="SET" value="0x1" description="Interrupt flag set"/>
+            </bitfield>
+        </register>
+        <register id="LCD_MIS" width="32" offset="0x18" description="Masked interrupt status">
+            <bitfield id="FRMSTART" description="Master FRMSTART interrupt flag" begin="0" end="0" width="1" rwaccess="R/W">
+                <bitenum id="CLR" value="0x0" description="Interrupt flag cleared"/>
+                <bitenum id="SET" value="0x1" description="Interrupt flag set"/>
+            </bitfield>
+            <bitfield id="BLKOFF" description="Masked BLKOFF interrupt flag" begin="1" end="1" width="1" rwaccess="R/W">
+                <bitenum id="CLR" value="0x0" description="Masked interrupt flag cleared"/>
+                <bitenum id="SET" value="0x1" description="Masked interrupt flag set"/>
+            </bitfield>
+            <bitfield id="BLKON" description="Masked BLKON interrupt flag" begin="2" end="2" width="1" rwaccess="R/W">
+                <bitenum id="CLR" value="0x0" description="Masked interrupt flag cleared"/>
+                <bitenum id="SET" value="0x1" description="Masked interrupt flag set"/>
+            </bitfield>
+        </register>
+        <register id="LCD_ISET" width="32" offset="0x20" description="Interrupt set">
+            <bitfield id="FRMSTART" description="Set FRMSTART RIS flag." begin="0" end="0" width="1" rwaccess="R/W">
+                <bitenum id="NO_EFFECT" value="0x0" description="Writing 0 has no effect"/>
+                <bitenum id="SET" value="0x1" description="Set corresponding RIS flag"/>
+            </bitfield>
+            <bitfield id="BLKOFF" description="Set BLKOFF RIS flag" begin="1" end="1" width="1" rwaccess="R/W">
+                <bitenum id="NO_EFFECT" value="0x0" description="Writing 0 has no effect"/>
+                <bitenum id="SET" value="0x1" description="Set corresponding RIS flag"/>
+            </bitfield>
+            <bitfield id="BLKON" description="Set BLKON RIS flag" begin="2" end="2" width="1" rwaccess="R/W">
+                <bitenum id="NO_EFFECT" value="0x0" description="Writing 0 has no effect"/>
+                <bitenum id="SET" value="0x1" description="Set corresponding RIS flag"/>
+            </bitfield>
+        </register>
+        <register id="LCD_ICLR" width="32" offset="0x28" description="Interrupt clear">
+            <bitfield id="FRMSTART" description="Clear FRMSTART RIS flag" begin="0" end="0" width="1" rwaccess="R/W">
+                <bitenum id="NO_EFFECT" value="0x0" description="Writing 0 has no effect"/>
+                <bitenum id="CLR" value="0x1" description="Clear corresponding RIS flag"/>
+            </bitfield>
+            <bitfield id="BLKOFF" description="Clear BLKOFF RIS flag" begin="1" end="1" width="1" rwaccess="R/W">
+                <bitenum id="NO_EFFECT" value="0x0" description="Writing 0 has no effect"/>
+                <bitenum id="CLR" value="0x1" description="Clear corresponding RIS flag"/>
+            </bitfield>
+            <bitfield id="BLKON" description="Clear BLKON RIS flag" begin="2" end="2" width="1" rwaccess="R/W">
+                <bitenum id="NO_EFFECT" value="0x0" description="Writing 0 has no effect"/>
+                <bitenum id="CLR" value="0x1" description="Clear corresponding RIS flag"/>
+            </bitfield>
+        </register>
+    </group>
+    <register id="LCD_EVT_MODE" width="32" offset="0x10E0" description="Event Mode">
+        <bitfield id="INT0_CFG" description="Event line mode select for event corresponding to [IPSTANDARD.INT_EVENT0]" begin="1" end="0" width="2" rwaccess="R">
+            <bitenum id="DISABLE" value="0x0" description="The interrupt or event line is disabled."/>
+            <bitenum id="SOFTWARE" value="0x1" description="The interrupt or event line is in software mode. Software must clear the RIS."/>
+            <bitenum id="HARDWARE" value="0x2" description="The interrupt or event line is in hardware mode. The hardware (another module) clears automatically the associated RIS flag."/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDCTL0" width="32" offset="0x1100" description="LCD control register 0">
+        <bitfield id="LCDDIVx" description="LCD frequency divider. Together with LCDMXx, the LCD frequency fLCD is calculated as fLCD = fSOURCE / ((LCDDIVx + 1) * Value[LCDMXx]). Change only while LCDON = 0.  00000b = Divide by 1 00001b = Divide by 2 .  11110b = Divide by 31 11111b = Divide by 32" begin="15" end="11" width="5" rwaccess="R/W">
+            <bitenum id="DIV_BY_1" value="0x0" description="Divide by 1"/>
+            <bitenum id="DIV_BY_2" value="0x1" description="Divide by 2"/>
+            <bitenum id="DIV_BY_3" value="0x2" description="Divide by 3"/>
+            <bitenum id="DIV_BY_4" value="0x3" description="Divide by 4"/>
+            <bitenum id="DIV_BY_5" value="0x4" description="Divide by 5"/>
+            <bitenum id="DIV_BY_6" value="0x5" description="Divide by 6"/>
+            <bitenum id="DIV_BY_7" value="0x6" description="Divide by 7"/>
+            <bitenum id="DIV_BY_8" value="0x7" description="Divide by 8"/>
+            <bitenum id="DIV_BY_9" value="0x8" description="Divide by 9"/>
+            <bitenum id="DIV_BY_10" value="0x9" description="Divide by 10"/>
+            <bitenum id="DIV_BY_11" value="0xA" description="Divide by 11"/>
+            <bitenum id="DIV_BY_12" value="0xB" description="Divide by 12"/>
+            <bitenum id="DIV_BY_13" value="0xC" description="Divide by 13"/>
+            <bitenum id="DIV_BY_14" value="0xD" description="Divide by 14"/>
+            <bitenum id="DIV_BY_15" value="0xE" description="Divide by 15"/>
+            <bitenum id="DIV_BY_16" value="0xF" description="Divide by 16"/>
+            <bitenum id="DIV_BY_17" value="0x10" description="Divide by 17"/>
+            <bitenum id="DIV_BY_18" value="0x11" description="Divide by 18"/>
+            <bitenum id="DIV_BY_19" value="0x12" description="Divide by 19"/>
+            <bitenum id="DIV_BY_20" value="0x13" description="Divide by 20"/>
+            <bitenum id="DIV_BY_21" value="0x14" description="Divide by 21"/>
+            <bitenum id="DIV_BY_22" value="0x15" description="Divide by 22"/>
+            <bitenum id="DIV_BY_23" value="0x16" description="Divide by 23"/>
+            <bitenum id="DIV_BY_24" value="0x17" description="Divide by 24"/>
+            <bitenum id="DIV_BY_25" value="0x18" description="Divide by 25"/>
+            <bitenum id="DIV_BY_26" value="0x19" description="Divide by 26"/>
+            <bitenum id="DIV_BY_27" value="0x1A" description="Divide by 27"/>
+            <bitenum id="DIV_BY_28" value="0x1B" description="Divide by 28"/>
+            <bitenum id="DIV_BY_29" value="0x1C" description="Divide by 29"/>
+            <bitenum id="DIV_BY_30" value="0x1D" description="Divide by 30"/>
+            <bitenum id="DIV_BY_31" value="0x1E" description="Divide by 31"/>
+            <bitenum id="DIV_BY_32" value="0x1F" description="Divide by 32"/>
+        </bitfield>
+        <bitfield id="LCDLP" description="LCD low-power waveform. This bit is only applicable for 1/3 bias mode, that is, for LCDBIASSEL = 0.  0b = Standard LCD waveforms on segment and common lines selected.  1b = Low-power LCD waveforms on segment and common lines selected." begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="STD_LCD" value="0x0" description="Standard LCD waveforms"/>
+            <bitenum id="LP_LCD" value="0x1" description="Low power LCD waveforms"/>
+        </bitfield>
+        <bitfield id="LCDMXx" description="LCD mux rate. These bits select the LCD mode. Change only while LCDON = 0.  000b = Static 001b = 2-mux 010b = 3-mux 011b = 4-mux 100b = 5-mux 101b = 6-mux 110b = 7-mux 111b = 8-mux" begin="5" end="3" width="3" rwaccess="R/W">
+            <bitenum id="Mx_STATIC" value="0x0" description="Static"/>
+            <bitenum id="MX_2" value="0x1" description="2-mux"/>
+            <bitenum id="MX_3" value="0x2" description="3-mux"/>
+            <bitenum id="MX_4" value="0x3" description="4-mux"/>
+            <bitenum id="MX_5" value="0x4" description="5-mux"/>
+            <bitenum id="MX_6" value="0x5" description="6-mux"/>
+            <bitenum id="MX_7" value="0x6" description="7-mux"/>
+            <bitenum id="MX_8" value="0x7" description="8-mux"/>
+        </bitfield>
+        <bitfield id="LCDON" description="LCD on. This bit turns the LCD module on or off.  0b = LCD module off 1b = LCD module on" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="LCD_MOD_DISABLE" value="0x0" description="LCD module off"/>
+            <bitenum id="LCD_MOD_ENABLE" value="0x1" description="LCD module on"/>
+        </bitfield>
+        <bitfield id="LCDSON" description="LCD segments on. This bit supports flashing LCD applications by turning off all segment lines, while leaving the LCD timing generator and R33 enabled.  0b = All LCD segments are off.  1b = All LCD segments are enabled and on or off according to their corresponding memory location." begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="LCD_SEG_OFF" value="0x0" description="All LCD segments are off."/>
+            <bitenum id="LCD_SEG_ON" value="0x1" description="All LCD segments are enabled and on or off according to their corresponding memory location."/>
+        </bitfield>
+        <bitfield id="LCDSYNCEXT" description="" begin="24" end="24" width="1" rwaccess="R/W">
+            <bitenum id="LCD_EXT_SYNC_OFF" value="0x0" description="External eynchronization off."/>
+            <bitenum id="LCD_EXT_SYNC_ON" value="0x1" description="External synchronization on."/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDBLKCTL" width="32" offset="0x1108" description="LCD blicking control register">
+        <bitfield id="LCDBLKMODx" description="Blinking mode 00b = Blinking disabled.  01b = Blinking of individual segments as enabled in blinking memory register LCDBMx. In mux mode &gt;5 blinking is disabled.  10b = Blinking of all segments 11b = Switching between display contents as stored in LCDMx and LCDBMx memory registers. In mux mode &gt;5 blinking is disabled." begin="1" end="0" width="2" rwaccess="R/W">
+            <bitenum id="BLINK_DISABLE" value="0x0" description="Blinking disabled."/>
+            <bitenum id="BLINK_SELECED" value="0x1" description="Blinking of individual segments as enabled in blinking memory register LCDBMx. In mux mode &gt;5 blinking is disabled."/>
+            <bitenum id="BLINK_ALL" value="0x2" description="Blinking of all segments"/>
+            <bitenum id="BKINK_TOGGLE" value="0x3" description="Switching between display contents as stored in LCDMx and LCDBMx memory registers. In mux mode &gt;5 blinking is disabled."/>
+        </bitfield>
+        <bitfield id="LCDBLKPREx" description="Clock prescaler for blinking frequency." begin="4" end="2" width="3" rwaccess="R/W">
+            <bitenum id="DIV_BY_2" value="0x0" description="Divide by 2"/>
+            <bitenum id="DIV_BY_4" value="0x1" description="Divide by 4"/>
+            <bitenum id="DIV_BY_8" value="0x2" description="Divide by 8"/>
+            <bitenum id="DIV_BY_16" value="0x3" description="Divide by 16"/>
+            <bitenum id="DIV_BY_32" value="0x4" description="Divide by 32"/>
+            <bitenum id="DIV_BY_64" value="0x5" description="Divide by 64"/>
+            <bitenum id="DIV_BY_128" value="0x6" description="Divide by 128"/>
+            <bitenum id="DIV_BY_256" value="0x7" description="Divide by 256"/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDMEMCTL" width="32" offset="0x110C" description="LCD memory control LCD memory control register">
+        <bitfield id="LCDCLRBM" description="Clear LCD blinking memory Clears all blinking memory registers LCDBMx. The bit is automatically reset when the blinking memory is cleared.  Setting this bit in 5-mux mode and above has no effect. It is immediately reset again.  0b = Contents of blinking memory registers LCDBMx remain unchanged 1b = Clear content of all blinking memory registers LCDBMx" begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="NO_CLR_BLNK_MEM_REGS" value="0x0" description="Contents of blinking memory registers LCDBMx remain unchanged"/>
+            <bitenum id="CLR_BLNK_MEM_REGS" value="0x1" description="Clear content of all blinking memory registers LCDBMx"/>
+        </bitfield>
+        <bitfield id="LCDCLRM" description="Clear LCD memory Clears all LCD memory registers LCDMx. The bit is automatically reset when the LCD memory is cleared.  0b = Contents of LCD memory registers LCDMx remain unchanged 1b = Clear content of all LCD memory registers LCDMx" begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="NO_CLR_LCD_MEM_REGS" value="0x0" description="Contents of LCD memory registers LCDMx remain unchanged"/>
+            <bitenum id="CLR_LCD_MEM_REGS" value="0x1" description="Clear content of all LCD memory registers LCDMx"/>
+        </bitfield>
+        <bitfield id="LCDDISP" description="Select LCD memory registers for display When LCDBLKMODx = 00, LCDDISP can be set by software.  The bit is cleared in LCDBLKMODx = 01 and LCDBLKMODx = 10 or if a mux mode =5 is selected and cannot be changed by software.  When LCDBLKMODx = 11, this bit reflects the currently displayed memory but cannot be changed by software. When returning to LCDBLKMODx = 00 the bit is cleared.  0b = Display content of LCD memory registers LCDMx 1b = Display content of LCD blinking memory registers LCDBMx" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="SEL_LCD_MEM_REGS" value="0x0" description="Display content of LCD memory registers LCDMx"/>
+            <bitenum id="SEL_BLNK_MEM_REGS" value="0x1" description="Display content of LCD blinking memory registers LCDBMx"/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDVCTL" width="32" offset="0x1110" description="LCD voltage control register">
+        <bitfield id="LCDBIASSEL" description="Bias select.  LCDBIASSEL is ignored in static mode as well as for 2-mux, 3-mux and 4-mux LCD modes.  For 5-mux to 8-mux modes: 0b = 1/3 bias 1b = 1/4 bias" begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="ONE_BY_3_BIAS" value="0x0" description="1/3 bias"/>
+            <bitenum id="ONE_BY_4_BIAS" value="0x1" description="1/4 bias"/>
+        </bitfield>
+        <bitfield id="LCDCPEN" description="Charge pump enable 0b = Charge pump disabled(1) 1b = Charge pump enabled when VLCD is generated internally (VLCDEXT = 0) and VLCDx &gt; 0 or VLCDREFx &gt; 0." begin="7" end="7" width="1" rwaccess="R/W">
+            <bitenum id="CP_DISABLE" value="0x0" description="Charge pump disabled(1)"/>
+            <bitenum id="CP_ENABLE" value="0x1" description="Charge pump enabled when VLCD is generated internally (VLCDEXT = 0) and VLCDx &gt; 0 or VLCDREFx &gt; 0."/>
+        </bitfield>
+        <bitfield id="LCDCPFSELx" description="Charge pump frequency selection.  0000b = 32.768 kHz / 1 / 8 = 4.096 kHz 0001b = 32.768 kHz / 2 / 8 = 2.048 kHz 0010b = 32.768 kHz / 3 / 8 = 1.365 kHz 0011b = 32.768 kHz / 4 / 8 = 1.024 kHz 0100b = 32.768 kHz / 5 / 8 = 819 Hz 0101b = 32.768 kHz / 6 / 8 = 682 Hz 0110b = 32.768 kHz / 7 / 8 = 585 Hz 0111b = 32.768 kHz / 8 / 8 = 512 Hz 1000b = 32.768 kHz / 9 / 8 = 455 Hz 1001b = 32.768 kHz / 10 / 8 = 409 Hz 1010b = 32.768 kHz / 11 / 8 = 372 Hz 1011b = 32.768 kHz / 12 / 8 = 341 Hz 1100b = 32.768 kHz / 13 / 8 = 315 Hz 1101b = 32.768 kHz / 14 / 8 = 292 Hz 1110b = 32.768 kHz / 15 / 8 = 273 Hz 1111b = 32.768 kHz / 16 / 8 = 256 Hz" begin="15" end="12" width="4" rwaccess="R/W">
+            <bitenum id="DIV_BY_1_BY_8" value="0x0" description="32.768 kHz / 1 / 8 = 4.096 kHz"/>
+            <bitenum id="DIV_BY_2_BY_8" value="0x1" description="32.768 kHz / 2 / 8 = 2.048 kHz"/>
+            <bitenum id="DIV_BY_3_BY_8" value="0x2" description="32.768 kHz / 3 / 8 = 1.365 kHz"/>
+            <bitenum id="DIV_BY_4_BY_8" value="0x3" description="32.768 kHz / 4 / 8 = 1.024 kHz"/>
+            <bitenum id="DIV_BY_5_BY_8" value="0x4" description="32.768 kHz / 5 / 8 = 819 Hz"/>
+            <bitenum id="DIV_BY_6_BY_8" value="0x5" description="32.768 kHz / 6 / 8 = 682 Hz"/>
+            <bitenum id="DIV_BY_7_BY_8" value="0x6" description="32.768 kHz / 7 / 8 = 585 Hz"/>
+            <bitenum id="DIV_BY_8_BY_8" value="0x7" description="32.768 kHz / 8 / 8 = 512 Hz"/>
+            <bitenum id="DIV_BY_9_BY_8" value="0x8" description="32.768 kHz / 9 / 8 = 455 Hz"/>
+            <bitenum id="DIV_BY_10_BY_8" value="0x9" description="32.768 kHz / 10 / 8 = 409 Hz"/>
+            <bitenum id="DIV_BY_11_BY_8" value="0xA" description="32.768 kHz / 11 / 8 = 372 Hz"/>
+            <bitenum id="DIV_BY_12_BY_8" value="0xB" description="32.768 kHz / 12 / 8 = 341 Hz"/>
+            <bitenum id="DIV_BY_13_BY_8" value="0xC" description="32.768 kHz / 13 / 8 = 315 Hz"/>
+            <bitenum id="DIV_BY_14_BY_8" value="0xD" description="32.768 kHz / 14 / 8 = 292 Hz"/>
+            <bitenum id="DIV_BY_15_BY_8" value="0xE" description="32.768 kHz / 15 / 8 = 273 Hz"/>
+            <bitenum id="DIV_BY_16_BY_8" value="0xF" description="32.768 kHz / 16 / 8 = 256 Hz"/>
+        </bitfield>
+        <bitfield id="LCDINTBIASEN" description="Enables the internal bias voltage resistor divider.  The actual voltage source used for the resistor divider is selected by the VLCDSEL_VDD_R33 bit configuration.  0b = Internal bias voltage resistor divider is disabled 1b = Internal bias voltage resistor divider is enabledDD" begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="INT_BIAS_DISABLE" value="0x0" description="Internal bias voltage resistor divider is disabled"/>
+            <bitenum id="INT_BIAS_ENABLE" value="0x1" description="Internal bias voltage resistor divider is enabled"/>
+        </bitfield>
+        <bitfield id="LCDREFEN" description="Internal reference voltage enable on R13 0b = Internal reference voltage disabled 1b = Internal reference voltage enabled" begin="6" end="6" width="1" rwaccess="R/W">
+            <bitenum id="INT_REF_DISABLE" value="0x0" description="Internal reference voltage disabled"/>
+            <bitenum id="INT_REF_ENABLE" value="0x1" description="Internal reference voltage enabled"/>
+        </bitfield>
+        <bitfield id="LCDREFMODE" description="Selects whether R13 voltage is switched or in static mode 0b = Static mode 1b = Switched mode" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="STATIC_MODE" value="0x0" description="Static mode"/>
+            <bitenum id="SWITCHED_MODE" value="0x1" description="Switched mode"/>
+        </bitfield>
+        <bitfield id="LCDSELVDD" description="Selects if R33 is supplied either from AVDD internally or from charge pump 0b = R33 connected to external supply 1b = R33 internally connected to AVDD" begin="5" end="5" width="1" rwaccess="R/W">
+            <bitenum id="SEL_EXT_SUPPLY" value="0x0" description="R33 connected to external supply"/>
+            <bitenum id="SEL_AVDD" value="0x1" description="R33 internally connected to AVDD"/>
+        </bitfield>
+        <bitfield id="LCD_HP_LP" description="High-power or Low-power LCD.  This bit is only effective when the internal bias voltage resistor divider is used, that is, when LCDINTBIASEN = 1. It selects the resistor ladder that is used to generate the bias voltages for the LCD.  0b = Low-power LCD is used 1b = Higher-power LCD is used" begin="4" end="4" width="1" rwaccess="R/W">
+            <bitenum id="LP_MODE" value="0x0" description="Low-power LCD is used"/>
+            <bitenum id="HP_MODE" value="0x1" description="Higher-power LCD is used"/>
+        </bitfield>
+        <bitfield id="VLCDSEL_VDD_R33" description="Selects if the LCD bias voltage V1 is sourced from the R33 pin or from the internal supply voltage AVDD This bit is only effective when the internal bias voltage resistor divider is used, that is, when LCDINTBIASEN = 1 0b = V1 is sourced from R33 1b = V1 is sourced internally from AVDD" begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="SEL_R33" value="0x0" description="V1 is sourced from R33"/>
+            <bitenum id="SEL_AVDD" value="0x1" description="V1 is sourced internally from AVDD"/>
+        </bitfield>
+        <bitfield id="VLCDx" description="Internal reference voltage select on R13." begin="11" end="8" width="4" rwaccess="R/W">
+            <bitenum id="SEL_2P60V" value="0x0" description="2.60 V"/>
+            <bitenum id="SEL_2P66V" value="0x1" description="2.66 V"/>
+            <bitenum id="SEL_2P72V" value="0x2" description="2.72 V"/>
+            <bitenum id="SEL_2P78V" value="0x3" description="2.78 V"/>
+            <bitenum id="SEL_2P84V" value="0x4" description="2.84 V"/>
+            <bitenum id="SEL_2P90V" value="0x5" description="2.90 V"/>
+            <bitenum id="SEL_2P96V" value="0x6" description="2.96 V"/>
+            <bitenum id="SEL_3P02V" value="0x7" description="3.02 V"/>
+            <bitenum id="SEL_3P08V" value="0x8" description="3.08 V"/>
+            <bitenum id="SEL_3P14V" value="0x9" description="3.14 V"/>
+            <bitenum id="SEL_3P20V" value="0xA" description="3.20 V"/>
+            <bitenum id="SEL_3P26V" value="0xB" description="3.26 V"/>
+            <bitenum id="SEL_3P32V" value="0xC" description="3.32 V"/>
+            <bitenum id="SEL_3P38V" value="0xD" description="3.38 V"/>
+            <bitenum id="SEL_3P44V" value="0xE" description="3.44 V"/>
+            <bitenum id="SEL_3P50V" value="0xF" description="3.50 V"/>
+        </bitfield>
+        <bitfield id="LCDVBSTEN" description="Enables the voltage boost circuitry which provides a boosted VDDA voltage. This boosted voltage is to be used in the switch controls, when the VDDA supply is less than 1.6V." begin="24" end="24" width="1" rwaccess="R/W">
+            <bitenum id="Disable" value="0x0" description="Disable."/>
+            <bitenum id="ENABLE" value="0x1" description="Enable."/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDPCTL0" width="32" offset="0x1114" description="LCD port control register 0">
+        <bitfield id="LCDS0" description="LCD pin 0 enable. This bit affects only pins with multiplexed functions. Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS1" description="LCD pin 1 enable. This bit affects only pins with multiplexed functions. Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS10" description="LCD pin 10 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="10" end="10" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS11" description="LCD pin 11 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="11" end="11" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS12" description="LCD pin 12 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="12" end="12" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS13" description="LCD pin 13 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="13" end="13" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS14" description="LCD pin 14 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="14" end="14" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS15" description="LCD pin 15 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="15" end="15" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS2" description="LCD pin 2 enable. This bit affects only pins with multiplexed functions. Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS3" description="LCD pin 3 enable. This bit affects only pins with multiplexed functions. Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS4" description="LCD pin 4 enable. This bit affects only pins with multiplexed functions. Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="4" end="4" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS5" description="LCD pin 5 enable. This bit affects only pins with multiplexed functions. Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="5" end="5" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS6" description="LCD pin 6 enable. This bit affects only pins with multiplexed functions. Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="6" end="6" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS7" description="LCD pin 7 enable. This bit affects only pins with multiplexed functions. Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="7" end="7" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS8" description="LCD pin 8 enable. This bit affects only pins with multiplexed functions. Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="8" end="8" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS9" description="LCD pin 9 enable. This bit affects only pins with multiplexed functions. Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="9" end="9" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDPCTL1" width="32" offset="0x1118" description="LCD port control register 1">
+        <bitfield id="LCDS16" description="LCD segment line 16 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS17" description="LCD segment line 17 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS18" description="LCD segment line 18 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS19" description="LCD segment line 19 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS20" description="LCD segment line 20 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="4" end="4" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS21" description="LCD segment line 21 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="5" end="5" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS22" description="LCD segment line 22 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="6" end="6" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS23" description="LCD segment line 23 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="7" end="7" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS24" description="LCD pin 24 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="8" end="8" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS25" description="LCD pin 25 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="9" end="9" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS26" description="LCD pin 26 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="10" end="10" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS27" description="LCD pin 27 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="11" end="11" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS28" description="LCD pin 28 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="12" end="12" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS29" description="LCD pin 29 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="13" end="13" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS30" description="LCD pin 30 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="14" end="14" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS31" description="LCD pin 31 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="15" end="15" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDPCTL2" width="32" offset="0x111C" description="LCD port control register 2">
+        <bitfield id="LCDS32" description="LCD pin 32 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS33" description="LCD pin 33 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS34" description="LCD pin 34 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS35" description="LCD pin 35 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS36" description="LCD pin 36 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="4" end="4" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS37" description="LCD pin 37 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="5" end="5" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS38" description="LCD pin 38 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="6" end="6" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS39" description="LCD pin 39 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="7" end="7" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS40" description="LCD pin 40 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="8" end="8" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS41" description="LCD pin 41 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="9" end="9" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS42" description="LCD pin 42 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="10" end="10" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS43" description="LCD pin 43 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="11" end="11" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS44" description="LCD pin 44 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="12" end="12" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS45" description="LCD pin 45 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="13" end="13" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS46" description="LCD pin 46 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="14" end="14" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS47" description="LCD pin 47 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="15" end="15" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDPCTL3" width="32" offset="0x1120" description="LCD port control  register 3">
+        <bitfield id="LCDS48" description="LCD pin 48 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS49" description="LCD pin 49 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS50" description="LCD pin 50 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS51" description="LCD pin 51 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS52" description="LCD pin 52 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="4" end="4" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS53" description="LCD pin 53 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="5" end="5" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS54" description="LCD pin 54 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="6" end="6" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS55" description="LCD pin 55 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="7" end="7" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS56" description="LCD pin 56 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="8" end="8" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS57" description="LCD pin 57 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="9" end="9" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS58" description="LCD pin 58 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="10" end="10" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS59" description="LCD pin 59 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="11" end="11" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS60" description="LCD pin 60 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="12" end="12" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS61" description="LCD pin 61 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="13" end="13" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS62" description="LCD pin 62 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="14" end="14" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+        <bitfield id="LCDS63" description="LCD pin 63 enable. This bit affects only pins with multiplexed functions.  Dedicated LCD pins are always LCD function.  0b = Multiplexed pins are port functions.  1b = Pins are LCD functions." begin="15" end="15" width="1" rwaccess="R/W">
+            <bitenum id="SEL_PORT" value="0x0" description="Multiplexed pins are port functions."/>
+            <bitenum id="SEL_LCD" value="0x1" description="Pins are LCD functions."/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDCSSEL0" width="32" offset="0x1128" description="LCD common segment select register 0">
+        <bitfield id="LCDCSS0" description="Selects pin L0 as either common or segment line.  0b = Segment line 1b = Common line" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS1" description="Selects pin L1 as either common or segment line.  0b = Segment line 1b = Common line" begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS10" description="Selects pin L10 as either common or segment line.  0b = Segment line 1b = Common line" begin="10" end="10" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS11" description="Selects pin L11 as either common or segment line.  0b = Segment line 1b = Common line" begin="11" end="11" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS12" description="Selects pin L12 as either common or segment line.  0b = Segment line 1b = Common line" begin="12" end="12" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS13" description="Selects pin L13 as either common or segment line.  0b = Segment line 1b = Common line" begin="13" end="13" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS14" description="Selects pin L14 as either common or segment line.  0b = Segment line 1b = Common line" begin="14" end="14" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS15" description="Selects pin L15 as either common or segment line.  0b = Segment line 1b = Common line" begin="15" end="15" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS2" description="Selects pin L2 as either common or segment line.  0b = Segment line 1b = Common line" begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS3" description="Selects pin L3 as either common or segment line.  0b = Segment line 1b = Common line" begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS4" description="Selects pin L4 as either common or segment line.  0b = Segment line 1b = Common line" begin="4" end="4" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS5" description="Selects pin L5 as either common or segment line.  0b = Segment line 1b = Common line" begin="5" end="5" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS6" description="Selects pin L6 as either common or segment line.  0b = Segment line 1b = Common line" begin="6" end="6" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS7" description="Selects pin L7 as either common or segment line.  0b = Segment line 1b = Common line" begin="7" end="7" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS8" description="Selects pin L8 as either common or segment line.  0b = Segment line 1b = Common line" begin="8" end="8" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS9" description="Selects pin L9 as either common or segment line.  0b = Segment line 1b = Common line" begin="9" end="9" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDCSSEL1" width="32" offset="0x112C" description="LCD common segment select register 1">
+        <bitfield id="LCDCSS16" description="Selects pin L16 as either common or segment line.  0b = Segment line 1b = Common line" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS17" description="Selects pin L17 as either common or segment line.  0b = Segment line 1b = Common line" begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS18" description="Selects pin L18 as either common or segment line.  0b = Segment line 1b = Common line" begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS19" description="Selects pin L19 as either common or segment line.  0b = Segment line 1b = Common line" begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS20" description="Selects pin L20 as either common or segment line.  0b = Segment line 1b = Common line" begin="4" end="4" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS21" description="Selects pin L21 as either common or segment line.  0b = Segment line 1b = Common line" begin="5" end="5" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS22" description="Selects pin L22 as either common or segment line.  0b = Segment line 1b = Common line" begin="6" end="6" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS23" description="Selects pin L23 as either common or segment line.  0b = Segment line 1b = Common line" begin="7" end="7" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS24" description="Selects pin L24 as either common or segment line.  0b = Segment line 1b = Common line" begin="8" end="8" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS25" description="Selects pin L25 as either common or segment line.  0b = Segment line 1b = Common line" begin="9" end="9" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS26" description="Selects pin L26 as either common or segment line.  0b = Segment line 1b = Common line" begin="10" end="10" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS27" description="Selects pin L27 as either common or segment line.  0b = Segment line 1b = Common line" begin="11" end="11" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS28" description="Selects pin L28 as either common or segment line.  0b = Segment line 1b = Common line" begin="12" end="12" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS29" description="Selects pin L29 as either common or segment line.  0b = Segment line 1b = Common line" begin="13" end="13" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS30" description="Selects pin L30 as either common or segment line.  0b = Segment line 1b = Common line" begin="14" end="14" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS31" description="Selects pin L31 as either common or segment line.  0b = Segment line 1b = Common line" begin="15" end="15" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDCSSEL2" width="32" offset="0x1130" description="LCD common segment select register 2">
+        <bitfield id="LCDCSS32" description="Selects pin L32 as either common or segment line.  0b = Segment line 1b = Common line" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS33" description="Selects pin L33 as either common or segment line.  0b = Segment line 1b = Common line" begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS34" description="Selects pin L34 as either common or segment line.  0b = Segment line 1b = Common line" begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS35" description="Selects pin L35 as either common or segment line.  0b = Segment line 1b = Common line" begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS36" description="Selects pin L36 as either common or segment line.  0b = Segment line 1b = Common line" begin="4" end="4" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS37" description="Selects pin L37 as either common or segment line.  0b = Segment line 1b = Common line" begin="5" end="5" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS38" description="Selects pin L38 as either common or segment line.  0b = Segment line 1b = Common line" begin="6" end="6" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS39" description="Selects pin L39 as either common or segment line.  0b = Segment line 1b = Common line" begin="7" end="7" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS40" description="Selects pin L40 as either common or segment line.  0b = Segment line 1b = Common line" begin="8" end="8" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS41" description="Selects pin L41 as either common or segment line.  0b = Segment line 1b = Common line" begin="9" end="9" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS42" description="Selects pin L42 as either common or segment line.  0b = Segment line 1b = Common line" begin="10" end="10" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS43" description="Selects pin L43 as either common or segment line.  0b = Segment line 1b = Common line" begin="11" end="11" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS44" description="Selects pin L44 as either common or segment line.  0b = Segment line 1b = Common line" begin="12" end="12" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS45" description="Selects pin L45 as either common or segment line.  0b = Segment line 1b = Common line" begin="13" end="13" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS46" description="Selects pin L46 as either common or segment line.  0b = Segment line 1b = Common line" begin="14" end="14" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS47" description="Selects pin L47 as either common or segment line.  0b = Segment line 1b = Common line" begin="15" end="15" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDCSSEL3" width="32" offset="0x1134" description="LCD common segment select register 3">
+        <bitfield id="LCDCSS48" description="Selects pin L48 as either common or segment line.  0b = Segment line 1b = Common line" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS49" description="Selects pin L49 as either common or segment line.  0b = Segment line 1b = Common line" begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS50" description="Selects pin L50 as either common or segment line.  0b = Segment line 1b = Common line" begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS51" description="Selects pin L51 as either common or segment line.  0b = Segment line 1b = Common line" begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS52" description="Selects pin L52 as either common or segment line.  0b = Segment line 1b = Common line" begin="4" end="4" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS53" description="Selects pin L53 as either common or segment line.  0b = Segment line 1b = Common line" begin="5" end="5" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS54" description="Selects pin L54 as either common or segment line.  0b = Segment line 1b = Common line" begin="6" end="6" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS55" description="Selects pin L55 as either common or segment line.  0b = Segment line 1b = Common line" begin="7" end="7" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS56" description="Selects pin L56 as either common or segment line.  0b = Segment line 1b = Common line" begin="8" end="8" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS57" description="Selects pin L57 as either common or segment line.  0b = Segment line 1b = Common line" begin="9" end="9" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS58" description="Selects pin L58 as either common or segment line.  0b = Segment line 1b = Common line" begin="10" end="10" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS59" description="Selects pin L59 as either common or segment line.  0b = Segment line 1b = Common line" begin="11" end="11" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS60" description="Selects pin L60 as either common or segment line.  0b = Segment line 1b = Common line" begin="12" end="12" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS61" description="Selects pin L61 as either common or segment line.  0b = Segment line 1b = Common line" begin="13" end="13" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS62" description="Selects pin L62 as either common or segment line.  0b = Segment line 1b = Common line" begin="14" end="14" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+        <bitfield id="LCDCSS63" description="Selects pin L63 as either common or segment line.  0b = Segment line 1b = Common line" begin="15" end="15" width="1" rwaccess="R/W">
+            <bitenum id="SEL_SEG" value="0x0" description="Segment line"/>
+            <bitenum id="SEL_COM" value="0x1" description="Common line"/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDM" width="8" offset="0x1140" instances="64" instaddr="0x1" description="LCD memory index register">
+        <bitfield id="MBIT0" description="If LCD L[2*index] is selected as segment line (LCDCSS[2*index] = 0b) and LCD mux rate is static, 2-, 3- or 4-mux (000b &lt;= LCDMXx &lt;= 011b) 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index] is selected as common line (LCDCSS[2*index] = 1b): 0b = Pin L[2*index] not used as COM0 1b = Pin L[2*index] is used as COM0 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 5-, 6-, 7- or 8-mux (LCDMXx &gt;= 100b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L(index) not used as COM0 1b = Pin L(index) is used as COM0" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT1" description="If LCD pin L[2*index] is selected as segment line (LCDCSS[2*index] = 0b) and LCD mux rate is 2-, 3- or 4-mux (001b &lt;= LCDMXx &lt;= 011b): 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index] is selected as common line (LCDCSS[2*index] = 1b): 0b = Pin L[2*index] not used as COM1 1b = Pin L[2*index] is used as COM1 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 5-, 6-, 7- or 8-mux (LCDMXx &gt;= 100b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L(index) not used as COM1 1b = Pin L(index) is used as COM1" begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT2" description="If LCD pin L[2*index] is selected as segment line (LCDCSS[2*index] = 0b) and LCD mux rate is 3- or 4-mux (010b &lt;= LCDMXx &lt;= 011b): 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index] is selected as common line (LCDCSS[2*index] = 1b): 0b = Pin L[2*index] not used as COM2 1b = Pin L[2*index] is used as COM2 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 5-, 6-, 7- or 8-mux (LCDMXx &gt;= 100b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L[index-1] not used as COM2 1b = Pin L[index-1] is used as COM2" begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT3" description="If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 4-mux (LCDMXx=011b): 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index] is selected as common line (LCDCSS[2*index] = 1b): 0b = Pin L[2*index] not used as COM3 1b = Pin L[2*index] is used as COM3 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 5-, 6-, 7- or 8-mux (LCDMXx &gt;= 100b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L(index) not used as COM3 1b = Pin L(index) is used as COM3" begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT4" description="If LCD pin L[2*index+1] is selected as segment line (LCDCSS[2*index+1] = 0b) and LCD mux rate is static, 2-, 3- or 4-mux (000 &lt;= LCDMXx &lt;= 011b) 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index+1] is selected as common line (LCDCSS[2*index+1] = 1b): 0b = Pin L[2*ndex+1] not used as COM0 1b = Pin L[2*ndex+1] is used as COM0" begin="4" end="4" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT5" description="If LCD pin L[2*index+1] is selected as segment line (LCDCSS[2*index+1] = 0b) and LCD mux rate is 2-, 3- or 4-mux (001b &lt;= LCDMXx &lt;= 011b): 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index+1] is selected as common line (LCDCSS[2*index+1] = 1b): 0b = Pin L[2*index+1] not used as COM1 1b = Pin L[2*index+1] is used as COM1 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 6-, 7- or 8-mux (LCDMXx &gt;= 101b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L(index) not used as COM5 1b = Pin L(index) is used as COM5" begin="5" end="5" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT6" description="If LCD pin L[2*index+1] is selected as segment line (LCDCSS[2*index+1] = 0b) and LCD mux rate is 3- or 4-mux (010b &lt;= LCDMXx &lt;= 011b): 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index+1] is selected as common line (LCDCSS[2*index+1] = 1b): 0b = Pin L[2*index+1] not used as COM2 1b = Pin L[2*index+1] is used as COM2 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 7- or 8-mux (LCDMXx &gt;= 110b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L(index) not used as COM6 1b = Pin L(index) is used as COM6" begin="6" end="6" width="1" rwaccess="R/W">
+        </bitfield>
+        <bitfield id="MBIT7" description="If LCD pin L[2*index+1] is selected as segment line (LCDCSS[2*index+1] = 0b) and LCD mux rate is 4-mux (LCDMXx=011b): 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index+1] is selected as common line (LCDCSS[2*index+1] = 1b): 0b = Pin L[2*index+1] not used as COM3 1b = Pin L[2*index+1] is used as COM3 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 8-mux (LCDMXx = 111b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L(index) not used as COM7 1b = Pin L(index) is used as COM7" begin="7" end="7" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+    </register>
+    <register id="LCD_LCDBM" width="8" offset="0x1180" instances="32" instaddr="0x1" description="LCD blinking memory index register">
+        <bitfield id="MBIT0" description="If LCD L[2*index] is selected as segment line (LCDCSS[2*index] = 0b) and LCD mux rate is static, 2-, 3- or 4-mux (000b &lt;= LCDMXx &lt;= 011b) 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index] is selected as common line (LCDCSS[2*index] = 1b): 0b = Pin L[2*index] not used as COM0 1b = Pin L[2*index] is used as COM0 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 5-, 6-, 7- or 8-mux (LCDMXx &gt;= 100b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L(index) not used as COM0 1b = Pin L(index) is used as COM0" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT1" description="If LCD pin L[2*index] is selected as segment line (LCDCSS[2*index] = 0b) and LCD mux rate is 2-, 3- or 4-mux (001b &lt;= LCDMXx &lt;= 011b): 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index] is selected as common line (LCDCSS[2*index] = 1b): 0b = Pin L[2*index] not used as COM1 1b = Pin L[2*index] is used as COM1 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 5-, 6-, 7- or 8-mux (LCDMXx &gt;= 100b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L(index) not used as COM1 1b = Pin L(index) is used as COM1" begin="1" end="1" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT2" description="If LCD pin L[2*index] is selected as segment line (LCDCSS[2*index] = 0b) and LCD mux rate is 3- or 4-mux (010b &lt;= LCDMXx &lt;= 011b): 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index] is selected as common line (LCDCSS[2*index] = 1b): 0b = Pin L[2*index] not used as COM2 1b = Pin L[2*index] is used as COM2 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 5-, 6-, 7- or 8-mux (LCDMXx &gt;= 100b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L[index-1] not used as COM2 1b = Pin L[index-1] is used as COM2" begin="2" end="2" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT3" description="If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 4-mux (LCDMXx=011b): 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index] is selected as common line (LCDCSS[2*index] = 1b): 0b = Pin L[2*index] not used as COM3 1b = Pin L[2*index] is used as COM3 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 5-, 6-, 7- or 8-mux (LCDMXx &gt;= 100b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L(index) not used as COM3 1b = Pin L(index) is used as COM3" begin="3" end="3" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT4" description="If LCD pin L[2*index+1] is selected as segment line (LCDCSS[2*index+1] = 0b) and LCD mux rate is static, 2-, 3- or 4-mux (000b &lt;= LCDMXx &lt;= 011b) 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index+1] is selected as common line (LCDCSS[2*index+1] = 1b): 0b = Pin L[2*ndex+1] not used as COM0 1b = Pin L[2*ndex+1] is used as COM0" begin="4" end="4" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT5" description="If LCD pin L[2*index+1] is selected as segment line (LCDCSS[2*index+1] = 0b) and LCD mux rate is 2-, 3- or 4-mux (001b &lt;= LCDMXx &lt;= 011b): 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index+1] is selected as common line (LCDCSS[2*index+1] = 1b): 0b = Pin L[2*index+1] not used as COM1 1b = Pin L[2*index+1] is used as COM1 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 6-, 7- or 8-mux (LCDMXx &gt;= 101b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L(index) not used as COM5 1b = Pin L(index) is used as COM5" begin="5" end="5" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT6" description="If LCD pin L[2*index+1] is selected as segment line (LCDCSS[2*index+1] = 0b) and LCD mux rate is 3- or 4-mux (010b &lt;= LCDMXx &lt;= 011b): 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index+1] is selected as common line (LCDCSS[2*index+1] = 1b): 0b = Pin L[2*index+1] not used as COM2 1b = Pin L[2*index+1] is used as COM2 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 7- or 8-mux (LCDMXx &gt;= 110b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L(index) not used as COM6 1b = Pin L(index) is used as COM6" begin="6" end="6" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+        <bitfield id="MBIT7" description="If LCD pin L[2*index+1] is selected as segment line (LCDCSS[2*index+1] = 0b) and LCD mux rate is 4-mux (LCDMXx=011b): 0b = LCD segment off 1b = LCD segment on If LCD pin L[2*index+1] is selected as common line (LCDCSS[2*index+1] = 1b): 0b = Pin L[2*index+1] not used as COM3 1b = Pin L[2*index+1] is used as COM3 If LCD pin L(index) is selected as segment line (LCDCSS(index) = 0b) and LCD mux rate is 8-mux (LCDMXx = 111b): 0b = LCD segment off 1b = LCD segment on If LCD pin L(index) is selected as common line (LCDCSS(index) = 1b): 0b = Pin L(index) not used as COM7 1b = Pin L(index) is used as COM7" begin="7" end="7" width="1" rwaccess="R/W">
+            <bitenum id="OFF" value="0x0" description="LCD segment/common off"/>
+            <bitenum id="ON" value="0x1" description="LCD segment/common on"/>
+        </bitfield>
+    </register>
+</module>

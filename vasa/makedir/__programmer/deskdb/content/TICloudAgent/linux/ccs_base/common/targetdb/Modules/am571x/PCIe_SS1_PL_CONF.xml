@@ -1,0 +1,319 @@
+<module name="PCIe_SS1_PL_CONF" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="PCIECTRL_PL_LAT_REL_TIM" acronym="PCIECTRL_PL_LAT_REL_TIM" offset="0x0" width="32" description="Ack Latency and Replay Timer Register">
+    <bitfield id="REPLAY_TIME_LIMIT" width="16" begin="31" end="16" resetval="0xc0" description="The replay timer expires when it reaches this limit; The core initiates a replay upon reception of a Nak or when the replay timer expires; The default value depends on number of bytes (NB) per cycle, which is defined by the maximum core base frequency of the device PCIe core, corresponding to 250 MHz for PCIe-Gen2 (5 Gbps) operation. The default is then updated based on the Negotiated Link Width and Max_Payload_Size; Note: If operating at 5 Gb/s, then the rounded-up value of an additional (153/CX_NB) cycles is added, where CX_NB correspond to the number of PCIEPCS 8-bit input symbols per single 16-bit lane, that is, CX_NB=2. This means at 5Gbps, 77 extra cycles should be considered for the replay time limit. This is for additional internal processing for received TLPs and transmitted DLLPs." range="" rwaccess="RW"/>
+    <bitfield id="ACK_LATENCY_TIME_LIMIT" width="16" begin="15" end="0" resetval="0x40" description="The Ack/Nak latency timer expires when it reaches this limit; The default value depends on number of bytes (NB) per cycle, which is defined by the maximum core base frequency of the device PCIe core, corresponding to 250 MHz for PCIe-Gen2 (5 Gbps) operation. The default is then updated based on the Negotiated Link Width and Max_Payload_Size. Note: If operating at 5 Gb/s, then the rounded-up value of an additional (51 /CX_NB) cycles is added, where CX_NB correspond to the number of PCIEPCS 8-bit input symbols per single 16-bit lane, that is, CX_NB=2. This means at 5Gbps, 26 extra cycles should be considered for the acknowledge latency time limit. This is for additional internal processing for received TLPs and transmitted DLLPs." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_VENDOR_SPECIFIC_DLLP" acronym="PCIECTRL_PL_VENDOR_SPECIFIC_DLLP" offset="0x4" width="32" description="Vendor Specific DLLP Register">
+    <bitfield id="VEN_DLLP_REG" width="32" begin="31" end="0" resetval="0xFFFFFFFF" description="To send custom DLLP, write 8-bit DLLP Type and 24-bits of Payload data, then set PT_LNK_CTRL_R[0]" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_PT_LNK_R" acronym="PCIECTRL_PL_PT_LNK_R" offset="0x8" width="32" description="Port Force Link Register">
+    <bitfield id="LOW_POWER_ENTR_CNT" width="8" begin="31" end="24" resetval="0x7" description="The Power Management state will wait for this many clock cycles for the associated completion of a CfgWr to D-state register to go low-power; This register is intended for applications that do not let the core handle a completion for configuration request to the PMCSCR register; Note: Only used in the DM core (in EP mode), EP core, and the Upstream Port of a Switch" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="23" end="22" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="FORCED_LINK_COMMAND" width="6" begin="21" end="16" resetval="0x0" description="Link command transmitted by setting Force_Link (bit 15);" range="" rwaccess="RW"/>
+    <bitfield id="FORCE_LINK" width="1" begin="15" end="15" resetval="0x0" description="Forces the LTSSM state and the Link command specified in this register; Self-clearing" range="" rwaccess="RW">
+      <bitenum value="1" id="FORCE" token="FORCE_LINK_1" description="FORCE"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="14" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="FORCED_LTSSM_STATE" width="4" begin="11" end="8" resetval="0x0" description="LTSSM state forced by setting Force_Link (bit 15)" range="" rwaccess="RW"/>
+    <bitfield id="LINK_NUM" width="8" begin="7" end="0" resetval="0x4" description="Link Number; Not used for Endpoint" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_ACK_FREQ_ASPM" acronym="PCIECTRL_PL_ACK_FREQ_ASPM" offset="0xC" width="32" description="Ack Frequency and L0-L1 ASPM Control Register (Sticky)">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="L1_ENTR_WO_L0S" width="1" begin="30" end="30" resetval="0x0" description="Enter ASPM L1 without receive in L0s; Allow core to enter ASPM L1 even when link partner did not go to L0s (receive is not in L0s); When not set, core goes to ASPM L1 only after idle period during which both receive and transmit are in L0s" range="" rwaccess="RW"/>
+    <bitfield id="L1_ENTR_LAT" width="3" begin="29" end="27" resetval="0x3" description="L1 Entrance Latency 0x0: 1 uS 0x1: 2 uS 0x2: 4 uS 0x3: 8 uS 0x4: 16 uS 0x5: 32 uS 0x6: 64 uS 0x7: 64 uS (alternate encoding)" range="" rwaccess="RW"/>
+    <bitfield id="L0S_ENTR_LAT" width="3" begin="26" end="24" resetval="0x3" description="L0s Entrance Latency; Values correspond to: 0b000: 1 us 0b001: 2 us 0b010: 3 us 0b011: 4 us 0b100: 5 us 0b101: 6 us 0b110: 7 us 0b111: 7 us (alternate encoding)" range="" rwaccess="RW"/>
+    <bitfield id="COMMOM_CLK_N_FTS" width="8" begin="23" end="16" resetval="0xf" description="Alternative N_FTS value, for common clock mode" range="" rwaccess="RW"/>
+    <bitfield id="N_FTS" width="8" begin="15" end="8" resetval="0xf" description="Number of Fast Training Sequence (FTS) ordered sets to be transmitted when exiting L0s to L0; The maximum that can be requested is 255; Value 0 is not supported, and may cause LTSSM to go into Recovery upon L0s exit" range="" rwaccess="RW"/>
+    <bitfield id="ACK_FREQ" width="8" begin="7" end="0" resetval="0x0" description="Ack Frequency; Number of pending ACKs accumulated before sending an ACK DLLP" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_PT_LNK_CTRL_R" acronym="PCIECTRL_PL_PT_LNK_CTRL_R" offset="0x10" width="32" description="Port Link Control Register (Sticky)">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="CROSSLINK_ACT" width="1" begin="23" end="23" resetval="0x0" description="Crosslink Active" range="" rwaccess="R"/>
+    <bitfield id="CROSSLINK_EN" width="1" begin="22" end="22" resetval="0x0" description="Crosslink Enable" range="" rwaccess="RW"/>
+    <bitfield id="LINK_MODE" width="6" begin="21" end="16" resetval="0x3" description="Link Mode Enable; Write 1 to bit N to enable (2**N)-lane mode 0x01: _1x 0x03: _2x 0x07: _4x" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="8" begin="15" end="8" resetval="0x1" description="" range="" rwaccess="R"/>
+    <bitfield id="FAST_LINK" width="1" begin="7" end="7" resetval="0x0" description="Fast Link Mode" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="6" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DL_EN" width="1" begin="5" end="5" resetval="0x1" description="DLL Link Enable" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="4" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESET_ASSERT" width="1" begin="3" end="3" resetval="0x0" description="Reset Assert" range="" rwaccess="RW"/>
+    <bitfield id="LB_EN" width="1" begin="2" end="2" resetval="0x0" description="Loopback Enable" range="" rwaccess="RW"/>
+    <bitfield id="SCRAMBLE_DIS" width="1" begin="1" end="1" resetval="0x0" description="Scramble Disable" range="" rwaccess="RW"/>
+    <bitfield id="VEN_DLLP_REQ" width="1" begin="0" end="0" resetval="0x0" description="Vendor Specific DLLP transmit Request" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_LN_SKW_R" acronym="PCIECTRL_PL_LN_SKW_R" offset="0x14" width="32" description="Lane Skew Register (Sticky)">
+    <bitfield id="DIS_L2L_SKEW" width="1" begin="31" end="31" resetval="0x0" description="Disable Lane-to-Lane Deskew" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="30" end="26" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="ACKNAK_DIS" width="1" begin="25" end="25" resetval="0x0" description="Ack/Nak Disable" range="" rwaccess="RW"/>
+    <bitfield id="FC_DIS" width="1" begin="24" end="24" resetval="0x0" description="Flow Control Disable" range="" rwaccess="RW"/>
+    <bitfield id="LANE_SKEW" width="24" begin="23" end="0" resetval="0x0" description="Insert Lane Skew for Transmit" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_SYMB_N_R" acronym="PCIECTRL_PL_SYMB_N_R" offset="0x18" width="32" description="Timer Control and Symbol Number Register (Sticky)">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ACK_LATENCY_INC" width="5" begin="23" end="19" resetval="0x0" description="Timer Modifier for Ack/Nak Latency Timer" range="" rwaccess="RW"/>
+    <bitfield id="REPLAY_ADJ" width="5" begin="18" end="14" resetval="0x1" description="Timer Modifier for Replay Timer" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="6" begin="13" end="8" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="MAX_FUNC" width="8" begin="7" end="0" resetval="0x0" description="Configuration Requests targeted at function numbers above this value will be returned with UR (unsupported request)." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_SYMB_T_R" acronym="PCIECTRL_PL_SYMB_T_R" offset="0x1C" width="32" description="Symbol Timer Register and Filter Mask Register 1 (Sticky)">
+    <bitfield id="FLT_MSK_1" width="16" begin="31" end="16" resetval="0x0" description="Mask RADM Filtering and Error Handling Rules: Mask 1" range="" rwaccess="RW"/>
+    <bitfield id="DIS_FC_TIM" width="1" begin="15" end="15" resetval="0x0" description="Disable FC Watchdog Timer" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="14" end="11" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="SKP_INT" width="11" begin="10" end="0" resetval="0x280" description="SKP Interval Value minus one, PIPE clock cycles. (1 PIPE cycle = 2 symbols in 16-bit-per-lane PIPE)" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_FL_MSK_R2" acronym="PCIECTRL_PL_FL_MSK_R2" offset="0x20" width="32" description="Filter Mask Register 2 (Sticky)">
+    <bitfield id="FLT_MSK_2" width="32" begin="31" end="0" resetval="0x0" description="Mask RADM Filtering and Error Handling Rules: Mask 2" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_OBNP_SUBREQ_CTRL" acronym="PCIECTRL_PL_OBNP_SUBREQ_CTRL" offset="0x24" width="32" description="AXI Multiple Outbound Decomposed NP SubRequests Control Register (Sticky)">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="EN_OBNP_SUBREQ" width="1" begin="0" end="0" resetval="0x1" description="Enable AXI Multiple Outbound Decomposed NP Sub-Requests." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_TR_P_STS_R" acronym="PCIECTRL_PL_TR_P_STS_R" offset="0x30" width="32" description="Transmit Posted FC Credit Status Register (Sticky)">
+    <bitfield id="RESERVED" width="12" begin="31" end="20" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="PH_CRDT" width="8" begin="19" end="12" resetval="0x0" description="Transmit Posted Header FC Credits" range="" rwaccess="R"/>
+    <bitfield id="PD_CRDT" width="12" begin="11" end="0" resetval="0x0" description="Transmit Posted Data FC Credits" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_TR_NP_STS_R" acronym="PCIECTRL_PL_TR_NP_STS_R" offset="0x34" width="32" description="Transmit Non-Posted FC Credit Status Register (Sticky)">
+    <bitfield id="RESERVED" width="12" begin="31" end="20" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="NPH_CRDT" width="8" begin="19" end="12" resetval="0x0" description="Transmit Non-Posted Header FC Credits" range="" rwaccess="R"/>
+    <bitfield id="NPD_CRDT" width="12" begin="11" end="0" resetval="0x0" description="Transmit Non-Posted Data FC Credits" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_TR_C_STS_R" acronym="PCIECTRL_PL_TR_C_STS_R" offset="0x38" width="32" description="Transmit Completion FC Credit Status Register (Sticky)">
+    <bitfield id="RESERVED" width="12" begin="31" end="20" resetval="0x0" description="Reserved" range="" rwaccess="R"/>
+    <bitfield id="CPLH_CRDT" width="8" begin="19" end="12" resetval="0x0" description="Transmit Completion Header FC Credits" range="" rwaccess="R"/>
+    <bitfield id="CPLD_CRDT" width="12" begin="11" end="0" resetval="0x0" description="Transmit Completion Data FC Credits" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_Q_STS_R" acronym="PCIECTRL_PL_Q_STS_R" offset="0x3C" width="32" description="Queue Status Register (Sticky)">
+    <bitfield id="FC_LATENCY_OVR_EN" width="1" begin="31" end="31" resetval="0x0" description="FC Latency Timer Override Enable" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="30" end="29" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="FC_LATENCY_OVR" width="13" begin="28" end="16" resetval="0x0" description="FC Latency Timer Override Value" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="13" begin="15" end="3" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RCVQ_not_EMPTY" width="1" begin="2" end="2" resetval="0x0" description="Received Queue Not Empty" range="" rwaccess="R"/>
+    <bitfield id="RTYB_not_EMPTY" width="1" begin="1" end="1" resetval="0x0" description="Transmit Retry Buffer Not Empty" range="" rwaccess="R"/>
+    <bitfield id="CRDT_not_RTRN" width="1" begin="0" end="0" resetval="0x0" description="Received TLP FC Credits Not Returned" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_VC_TR_A_R1" acronym="PCIECTRL_PL_VC_TR_A_R1" offset="0x40" width="32" description="VC Transmit Arbitration Register 1 (Sticky)">
+    <bitfield id="WRR_VC3" width="8" begin="31" end="24" resetval="0x0" description="WRR Weight for VC3" range="" rwaccess="R"/>
+    <bitfield id="WRR_VC2" width="8" begin="23" end="16" resetval="0x0" description="WRR Weight for VC2" range="" rwaccess="R"/>
+    <bitfield id="WRR_VC1" width="8" begin="15" end="8" resetval="0x0" description="WRR Weight for VC1" range="" rwaccess="R"/>
+    <bitfield id="WRR_VC0" width="8" begin="7" end="0" resetval="0xf" description="WRR Weight for VC0" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_VC_TR_A_R2" acronym="PCIECTRL_PL_VC_TR_A_R2" offset="0x44" width="32" description="VC Transmit Arbitration Register 2 (Sticky)">
+    <bitfield id="WRR_VC7" width="8" begin="31" end="24" resetval="0x0" description="WRR Weight for VC7" range="" rwaccess="R"/>
+    <bitfield id="WRR_VC6" width="8" begin="23" end="16" resetval="0x0" description="WRR Weight for VC6" range="" rwaccess="R"/>
+    <bitfield id="WRR_VC5" width="8" begin="15" end="8" resetval="0x0" description="WRR Weight for VC5" range="" rwaccess="R"/>
+    <bitfield id="WRR_VC4" width="8" begin="7" end="0" resetval="0x0" description="WRR Weight for VC4" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_VC0_PR_Q_C" acronym="PCIECTRL_PL_VC0_PR_Q_C" offset="0x48" width="32" description="VC0 Posted Receive Queue Control (Sticky)">
+    <bitfield id="STRICT_VC_PRIORITY" width="1" begin="31" end="31" resetval="0x0" description="VC Ordering for Receive Queues" range="" rwaccess="RW">
+      <bitenum value="0" id="ROUND_ROBIN" token="STRICT_VC_PRIORITY_0" description="ROUND_ROBIN"/>
+      <bitenum value="1" id="STRICT" token="STRICT_VC_PRIORITY_1" description="STRICT Ordering by VC"/>
+    </bitfield>
+    <bitfield id="ORDERING_RULES" width="1" begin="30" end="30" resetval="0x1" description="VC0 TLP Type Ordering Rules" range="" rwaccess="RW">
+      <bitenum value="0" id="STRICT" token="ORDERING_RULES_0" description="STRICT Posted, then Completion, then Non-Posted"/>
+      <bitenum value="1" id="STANDARD" token="ORDERING_RULES_1" description="STANDARD As per PCIe standard"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="29" end="24" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="P_QMODE" width="3" begin="23" end="21" resetval="0x1" description="VC0 Poster TLP Queue Mode Read 0x1: STORE_AND_FORWARD Read 0x2: CUT_THROUGH Read 0x4: BYPASS Others: Reserved" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="20" end="20" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="P_HCRD" width="8" begin="19" end="12" resetval="0x15" description="VC0 Posted Header Credits" range="" rwaccess="R"/>
+    <bitfield id="P_DCRD" width="12" begin="11" end="0" resetval="0x2d" description="VC0 Posted Data Credits" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_VC0_NPR_Q_C" acronym="PCIECTRL_PL_VC0_NPR_Q_C" offset="0x4C" width="32" description="VC0 Non-Posted Receive Queue Control (Sticky)">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="NP_QMODE" width="3" begin="23" end="21" resetval="0x1" description="VC0 Non-Poster TLP Queue Mode Read 0x1: STORE_AND_FORWARD Read 0x2: CUT_THROUGH Read 0x4: BYPASS Others: Reserved" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="20" end="20" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="NP_HCRD" width="8" begin="19" end="12" resetval="0x15" description="VC0 Non-Posted Header Credits" range="" rwaccess="R"/>
+    <bitfield id="NP_DCRD" width="12" begin="11" end="0" resetval="0x5" description="VC0 Non-Posted Data Credits" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_VC0_CR_Q_C" acronym="PCIECTRL_PL_VC0_CR_Q_C" offset="0x50" width="32" description="VC0 Completion Receive Queue Control (Sticky)">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="CPL_QMODE" width="3" begin="23" end="21" resetval="0x4" description="VC0 Completion TLP Queue Mode Read 0x1: STORE_AND_FORWARD Read 0x2: CUT_THROUGH Read 0x4: BYPASS" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="20" end="20" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="CPL_HCRD" width="8" begin="19" end="12" resetval="0x0" description="VC0 Completion Header Credits" range="" rwaccess="R"/>
+    <bitfield id="CPL_DCRD" width="12" begin="11" end="0" resetval="0x0" description="VC0 Completion Data Credits" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_WIDTH_SPEED_CTL" acronym="PCIECTRL_PL_WIDTH_SPEED_CTL" offset="0x10C" width="32" description="Link Width and Speed Change Control Register (Sticky)">
+    <bitfield id="RESERVED" width="11" begin="31" end="21" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="CFG_UP_SEL_DEEMPH" width="1" begin="20" end="20" resetval="0x0" description="Used to set the de-emphasis level for Upstream Ports" range="" rwaccess="RW"/>
+    <bitfield id="CFG_TX_COMPLIANCE_RCV" width="1" begin="19" end="19" resetval="0x0" description="Config Tx Compliance Receive Bit" range="" rwaccess="RW"/>
+    <bitfield id="CFG_PHY_TXSWING" width="1" begin="18" end="18" resetval="0x0" description="Config PHY Tx Swing" range="" rwaccess="RW"/>
+    <bitfield id="CFG_DIRECTED_SPEED_CHANGE" width="1" begin="17" end="17" resetval="0x1" description="Directed Speed Change" range="" rwaccess="RW"/>
+    <bitfield id="CFG_LANE_EN" width="9" begin="16" end="8" resetval="0x2" description="Predetermined Number of Lanes" range="" rwaccess="RW"/>
+    <bitfield id="CFG_Gen2_N_FTS" width="8" begin="7" end="0" resetval="0xf" description="Number of Fast Training Sequences" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_PHY_STS_R" acronym="PCIECTRL_PL_PHY_STS_R" offset="0x110" width="32" description="PHY Status Register (Sticky)">
+    <bitfield id="PHY_STS" width="32" begin="31" end="0" resetval="0x0" description="PHY Status" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_PHY_CTRL_R" acronym="PCIECTRL_PL_PHY_CTRL_R" offset="0x114" width="32" description="PHY Control Register (Sticky)">
+    <bitfield id="PHY_CTRL" width="32" begin="31" end="0" resetval="0x0" description="PHY Control" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_ADDRESS" acronym="PCIECTRL_PL_MSI_CTRL_ADDRESS" offset="0x120" width="32" description="MSI Controller Address Register (RC-mode MSI receiver)">
+    <bitfield id="MSI_CTRL_ADDRESS" width="32" begin="31" end="0" resetval="0x0" description="" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_UPPER_ADDRESS" acronym="PCIECTRL_PL_MSI_CTRL_UPPER_ADDRESS" offset="0x124" width="32" description="MSI Controller Upper Address Register (RC-mode MSI receiver)">
+    <bitfield id="MSI_CTRL_UPPER_ADDRESS" width="32" begin="31" end="0" resetval="0x0" description="" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_0" acronym="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_0" offset="0x128" width="32" description="MSI Controller Interrupt #N Enable Register (RC-mode MSI receiver) with N = MSI data [7:5] and ENABLE[i] = enable MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_ENABLE" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_1" acronym="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_1" offset="0x134" width="32" description="MSI Controller Interrupt #N Enable Register (RC-mode MSI receiver) with N = MSI data [7:5] and ENABLE[i] = enable MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_ENABLE" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_2" acronym="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_2" offset="0x140" width="32" description="MSI Controller Interrupt #N Enable Register (RC-mode MSI receiver) with N = MSI data [7:5] and ENABLE[i] = enable MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_ENABLE" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_3" acronym="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_3" offset="0x14C" width="32" description="MSI Controller Interrupt #N Enable Register (RC-mode MSI receiver) with N = MSI data [7:5] and ENABLE[i] = enable MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_ENABLE" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_4" acronym="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_4" offset="0x158" width="32" description="MSI Controller Interrupt #N Enable Register (RC-mode MSI receiver) with N = MSI data [7:5] and ENABLE[i] = enable MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_ENABLE" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_5" acronym="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_5" offset="0x164" width="32" description="MSI Controller Interrupt #N Enable Register (RC-mode MSI receiver) with N = MSI data [7:5] and ENABLE[i] = enable MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_ENABLE" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_6" acronym="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_6" offset="0x170" width="32" description="MSI Controller Interrupt #N Enable Register (RC-mode MSI receiver) with N = MSI data [7:5] and ENABLE[i] = enable MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_ENABLE" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_7" acronym="PCIECTRL_PL_MSI_CTRL_INT_ENABLE_N_7" offset="0x17C" width="32" description="MSI Controller Interrupt #N Enable Register (RC-mode MSI receiver) with N = MSI data [7:5] and ENABLE[i] = enable MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_ENABLE" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_0" acronym="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_0" offset="0x12C" width="32" description="MSI Controller Interrupt #N Mask Register (RC-mode MSI receiver) with N = MSI data [7:5] and MASK[i] = mask of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_MASK" width="32" begin="31" end="0" resetval="0x0" description="Status of a masked bit (vector) triggers no IRQ to MPU when set." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_1" acronym="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_1" offset="0x138" width="32" description="MSI Controller Interrupt #N Mask Register (RC-mode MSI receiver) with N = MSI data [7:5] and MASK[i] = mask of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_MASK" width="32" begin="31" end="0" resetval="0x0" description="Status of a masked bit (vector) triggers no IRQ to MPU when set." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_2" acronym="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_2" offset="0x144" width="32" description="MSI Controller Interrupt #N Mask Register (RC-mode MSI receiver) with N = MSI data [7:5] and MASK[i] = mask of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_MASK" width="32" begin="31" end="0" resetval="0x0" description="Status of a masked bit (vector) triggers no IRQ to MPU when set." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_3" acronym="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_3" offset="0x150" width="32" description="MSI Controller Interrupt #N Mask Register (RC-mode MSI receiver) with N = MSI data [7:5] and MASK[i] = mask of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_MASK" width="32" begin="31" end="0" resetval="0x0" description="Status of a masked bit (vector) triggers no IRQ to MPU when set." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_4" acronym="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_4" offset="0x15C" width="32" description="MSI Controller Interrupt #N Mask Register (RC-mode MSI receiver) with N = MSI data [7:5] and MASK[i] = mask of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_MASK" width="32" begin="31" end="0" resetval="0x0" description="Status of a masked bit (vector) triggers no IRQ to MPU when set." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_5" acronym="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_5" offset="0x168" width="32" description="MSI Controller Interrupt #N Mask Register (RC-mode MSI receiver) with N = MSI data [7:5] and MASK[i] = mask of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_MASK" width="32" begin="31" end="0" resetval="0x0" description="Status of a masked bit (vector) triggers no IRQ to MPU when set." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_6" acronym="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_6" offset="0x174" width="32" description="MSI Controller Interrupt #N Mask Register (RC-mode MSI receiver) with N = MSI data [7:5] and MASK[i] = mask of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_MASK" width="32" begin="31" end="0" resetval="0x0" description="Status of a masked bit (vector) triggers no IRQ to MPU when set." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_7" acronym="PCIECTRL_PL_MSI_CTRL_INT_MASK_N_7" offset="0x180" width="32" description="MSI Controller Interrupt #N Mask Register (RC-mode MSI receiver) with N = MSI data [7:5] and MASK[i] = mask of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_MASK" width="32" begin="31" end="0" resetval="0x0" description="Status of a masked bit (vector) triggers no IRQ to MPU when set." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_0" acronym="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_0" offset="0x130" width="32" description="MSI Controller Interrupt #N Status Register (RC-mode MSI receiver) with N = MSI data [7:5] and STATUS[i] = status of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_STATUS" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_1" acronym="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_1" offset="0x13C" width="32" description="MSI Controller Interrupt #N Status Register (RC-mode MSI receiver) with N = MSI data [7:5] and STATUS[i] = status of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_STATUS" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_2" acronym="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_2" offset="0x148" width="32" description="MSI Controller Interrupt #N Status Register (RC-mode MSI receiver) with N = MSI data [7:5] and STATUS[i] = status of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_STATUS" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_3" acronym="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_3" offset="0x154" width="32" description="MSI Controller Interrupt #N Status Register (RC-mode MSI receiver) with N = MSI data [7:5] and STATUS[i] = status of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_STATUS" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_4" acronym="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_4" offset="0x160" width="32" description="MSI Controller Interrupt #N Status Register (RC-mode MSI receiver) with N = MSI data [7:5] and STATUS[i] = status of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_STATUS" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_5" acronym="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_5" offset="0x16C" width="32" description="MSI Controller Interrupt #N Status Register (RC-mode MSI receiver) with N = MSI data [7:5] and STATUS[i] = status of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_STATUS" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_6" acronym="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_6" offset="0x178" width="32" description="MSI Controller Interrupt #N Status Register (RC-mode MSI receiver) with N = MSI data [7:5] and STATUS[i] = status of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_STATUS" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_7" acronym="PCIECTRL_PL_MSI_CTRL_INT_STATUS_N_7" offset="0x184" width="32" description="MSI Controller Interrupt #N Status Register (RC-mode MSI receiver) with N = MSI data [7:5] and STATUS[i] = status of MSI vector #i, with i = MSI data [4:0]">
+    <bitfield id="MSI_CTRL_INT_STATUS" width="32" begin="31" end="0" resetval="0x0" description="Status of an enabled bit (vectors) is set upon incoming MSI." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_MSI_CTRL_GPIO" acronym="PCIECTRL_PL_MSI_CTRL_GPIO" offset="0x188" width="32" description="MSI Controller General Purpose IO Register (RC-mode MSI receiver)">
+    <bitfield id="MSI_CTRL_GPIO" width="32" begin="31" end="0" resetval="0x0" description="" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_PIPE_LOOPBACK" acronym="PCIECTRL_PL_PIPE_LOOPBACK" offset="0x1B8" width="32" description="PIPE loopback control register (Sticky)">
+    <bitfield id="LOOPBACK_EN" width="1" begin="31" end="31" resetval="0x0" description="PIPE Loopback Enable" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="31" begin="30" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_DBI_RO_WR_EN" acronym="PCIECTRL_PL_DBI_RO_WR_EN" offset="0x1BC" width="32" description="DIF Read-Only register Write Enable (Sticky)">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="CX_DBI_RO_WR_EN" width="1" begin="0" end="0" resetval="0x1" description="Control the writability over DIF of certain configuration fields that are RO over the PCIe wire" range="" rwaccess="RW">
+      <bitenum value="0" id="WRDIS" token="CX_DBI_RO_WR_EN_0" description="WRDIS, RO fields are also RO over DIF; Use for RC mode (Type-1) config to mimic PCIe wire access when using DIF"/>
+      <bitenum value="1" id="WREN" token="CX_DBI_RO_WR_EN_1" description="WREN, Some RO fields are writable over DIF"/>
+    </bitfield>
+  </register>
+  <register id="PCIECTRL_PL_AXIS_SLV_ERR_RESP" acronym="PCIECTRL_PL_AXIS_SLV_ERR_RESP" offset="0x1D0" width="32" description="AXI Slave Error Response Register (Sticky)">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESET_TIMEOUT_ERR_MAP" width="1" begin="3" end="3" resetval="0x0" description="Graceful Reset and Link Timeout Slave Error Response Mapping" range="" rwaccess="RW"/>
+    <bitfield id="NO_VID_ERR_MAP" width="1" begin="2" end="2" resetval="0x0" description="Vendor ID Non-existent Slave Error Response Mapping" range="" rwaccess="RW"/>
+    <bitfield id="DBI_ERR_MAP" width="1" begin="1" end="1" resetval="0x0" description="DIF Slave Error Response Mapping" range="" rwaccess="RW"/>
+    <bitfield id="SLAVE_ERR_MAP" width="1" begin="0" end="0" resetval="0x0" description="Global Slave Error Response Mapping" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_AXIS_SLV_TIMEOUT" acronym="PCIECTRL_PL_AXIS_SLV_TIMEOUT" offset="0x1D4" width="32" description="Link Down AXI Slave Timeout Register (Sticky)">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="FLUSH_EN" width="1" begin="8" end="8" resetval="0x0" description="Enable flush" range="" rwaccess="RW"/>
+    <bitfield id="TIMEOUT_VALUE" width="8" begin="7" end="0" resetval="0x32" description="Timeout Value (ms)" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_IATU_INDEX" acronym="PCIECTRL_PL_IATU_INDEX" offset="0x200" width="32" description="iATU Viewport Register: makes the registers of the corresponding iATU region accessible.">
+    <bitfield id="REGION_DIRECTION" width="1" begin="31" end="31" resetval="0x0" description="" range="" rwaccess="RW">
+      <bitenum value="0" id="OUTBOUND" token="REGION_DIRECTION_0" description="OUTBOUND"/>
+      <bitenum value="1" id="INBOUND" token="REGION_DIRECTION_1" description="INBOUND"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="27" begin="30" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="REGION_INDEX" width="4" begin="3" end="0" resetval="0x0" description="Outbound region, from 0 to 15. Inbound region, from 0 to 3." range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_IATU_REG_CTRL_1" acronym="PCIECTRL_PL_IATU_REG_CTRL_1" offset="0x204" width="32" description="iATU Region Control 1 Register">
+    <bitfield id="RESERVED" width="7" begin="31" end="25" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="FUNCTION_NUMBER" width="5" begin="24" end="20" resetval="0x0" description="Outbound: F.N; applied to outgoing TLP (RID) with matching addess Inbound: F.N.-match criteria for incoming TLP (if Function_Number_match_enable=1)" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="19" end="18" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="AT" width="2" begin="17" end="16" resetval="0x0" description="Outbound: AT applied to outgoing TLP with matching addess Inbound: AT-match criteria for matching TLP (if AT_match_enable=1)" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ATTR" width="2" begin="10" end="9" resetval="0x0" description="Outbound: ATTR applied to outgoing TLP with matching addess Inbound: ATTR-match criteria (if ATTR_match_enable=1)" range="" rwaccess="RW"/>
+    <bitfield id="TD" width="1" begin="8" end="8" resetval="0x0" description="Outbound: TD applied to outgoing TLP with matching addess Inbound: TD-match criteria (if TD_match_enable=1)" range="" rwaccess="RW"/>
+    <bitfield id="TC" width="3" begin="7" end="5" resetval="0x0" description="Outbound: TC applied to outgoing TLP with matching addess Inbound: TC-match criteria (if TC_match_enable=1)" range="" rwaccess="RW"/>
+    <bitfield id="TYPE" width="5" begin="4" end="0" resetval="0x0" description="Outbound: TYPE applied to outgoing TLP with matching addess Inbound: TYPE-match criteria" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_IATU_REG_CTRL_2" acronym="PCIECTRL_PL_IATU_REG_CTRL_2" offset="0x208" width="32" description="iATU Region Control 2 Register">
+    <bitfield id="REGION_ENABLE" width="1" begin="31" end="31" resetval="0x0" description="Enable AT for this region" range="" rwaccess="RW"/>
+    <bitfield id="MATCH_MODE" width="1" begin="30" end="30" resetval="0x0" description="Sets inbound TLP match mode, depending on TYPE" range="" rwaccess="RW">
+      <bitenum value="0" id="_0" token="MATCH_MODE_0" description="MEM,I/O: Address Match: as per region base &amp;amp; limit registers; CFG0: Routing ID Match: Completer ID (BDF) + reg address matches base &amp;amp; limit-defined region; MSG[D]: Address Match: as per region base &amp;amp; limit registers"/>
+      <bitenum value="1" id="_1" token="MATCH_MODE_1" description="MEM,I/O: BAR match: as defined in BAR_number field; CFG0: Accept mode: Completer ID (BDF) is ignored; MSG[D]: VendorID match: VendorID = upper_base[15:0] + VendorDefined = lower_base/limit"/>
+    </bitfield>
+    <bitfield id="INVERT_MODE" width="1" begin="29" end="29" resetval="0x0" description="Redefine match criteria as outside the defined range (instead of inside)" range="" rwaccess="RW"/>
+    <bitfield id="CFG_SHIFT_MODE" width="1" begin="28" end="28" resetval="0x0" description="Enable the shifting of CFG CID (BDF), incoming and outgoing TLP; CFG get mapped to a contiguous 2**28 = 256 MByte address space Untranslated CID = CFG_DW#3[31:16] Shifted CID = CFG_DW#3[27:12]" range="" rwaccess="RW"/>
+    <bitfield id="FUZZY_TYPE_MATCH_MODE" width="1" begin="27" end="27" resetval="0x0" description="Outbound: DMA Bypass Mode Inbound: Relax matching on inbound TLP TYPE: CfgRd0 == CfgRd1 CfgWr0 == CfgWr1 MRd == MRdLk routing field of Msg/MsgD ignored" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="26" end="26" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESPONSE_CODE" width="2" begin="25" end="24" resetval="0x0" description="Override HW-generated completion status when responding inbound TLP 0x0: No override, use HW-generated CS 0x1: Unsupported Request: CS= 3'b001 0x2: Completer Abort: CS= 3'b100" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="23" end="22" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="MESSAGE_CODE_MATCH_ENABLE" width="1" begin="21" end="21" resetval="0x0" description="Enable MessageCode match criteria on inbound TLP" range="" rwaccess="RW"/>
+    <bitfield id="VIRTUAL_FUNCTION_NUMBER_MATCH_ENABLE" width="1" begin="20" end="20" resetval="0x0" description="VIRTUAL FUNCTIONS not IMPLEMENTED: not USED" range="" rwaccess="RW"/>
+    <bitfield id="FUNCTION_NUMBER_MATCH_ENABLE" width="1" begin="19" end="19" resetval="0x0" description="Outbound: Function Number Translation Bypass Inbound: Enable Function Number match criteria" range="" rwaccess="RW"/>
+    <bitfield id="AT_MATCH_ENABLE" width="1" begin="18" end="18" resetval="0x0" description="Enable AT match criteria on inbound TLP ATS not SUPPORTED: DO not USE" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="17" end="17" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ATTR_MATCH_ENABLE" width="1" begin="16" end="16" resetval="0x0" description="Enable ATTR match criteria on inbound TLP" range="" rwaccess="RW"/>
+    <bitfield id="TD_MATCH_ENABLE" width="1" begin="15" end="15" resetval="0x0" description="Enable TD match criteria on inbound TLP" range="" rwaccess="RW"/>
+    <bitfield id="TC_MATCH_ENABLE" width="1" begin="14" end="14" resetval="0x0" description="Enable TC match criteria on inbound TLP" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="13" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="BAR_NUMBER" width="3" begin="10" end="8" resetval="0x0" description="BAR number for mayching with incoming MEM, I/O TLP (if Match_Mode = 1) 0x0: BAR0 0x1: BAR1 0x2: BAR2 0x3: BAR3 0x4: BAR4 0x5: BAR5 0x6: ROM" range="" rwaccess="RW"/>
+    <bitfield id="MESSAGECODE" width="8" begin="7" end="0" resetval="0x0" description="Outbound: MessageCode applied to outgoing message TLP with matching addess Inbound: MessageCode-match criteria for infoming message TLP (if Message_Code_match_enable=1)" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_IATU_REG_LOWER_BASE" acronym="PCIECTRL_PL_IATU_REG_LOWER_BASE" offset="0x20C" width="32" description="iATU Region Lower Base Address Register (2**12 = 4kbyte - aligned)">
+    <bitfield id="IATU_REG_LOWER_BASE" width="20" begin="31" end="12" resetval="0x0" description="" range="" rwaccess="RW"/>
+    <bitfield id="ZERO" width="12" begin="11" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_IATU_REG_UPPER_BASE" acronym="PCIECTRL_PL_IATU_REG_UPPER_BASE" offset="0x210" width="32" description="iATU Region Upper Base Address Register">
+    <bitfield id="IATU_REG_UPPER_BASE" width="32" begin="31" end="0" resetval="0x0" description="" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_IATU_REG_LIMIT" acronym="PCIECTRL_PL_IATU_REG_LIMIT" offset="0x214" width="32" description="iATU Region Limit Address Register">
+    <bitfield id="IATU_REG_LIMIT" width="20" begin="31" end="12" resetval="0x0" description="" range="" rwaccess="RW"/>
+    <bitfield id="ONES" width="12" begin="11" end="0" resetval="0xfff" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_IATU_REG_LOWER_TARGET" acronym="PCIECTRL_PL_IATU_REG_LOWER_TARGET" offset="0x218" width="32" description="iATU Region Lower Target Address Register (2**12 = 4kbyte - aligned)">
+    <bitfield id="IATU_REG_LOWER_TARGET" width="20" begin="31" end="12" resetval="0x0" description="" range="" rwaccess="RW"/>
+    <bitfield id="ZERO" width="12" begin="11" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_PL_IATU_REG_UPPER_TARGET" acronym="PCIECTRL_PL_IATU_REG_UPPER_TARGET" offset="0x21C" width="32" description="iATU Region Upper Target Address Register">
+    <bitfield id="IATU_REG_UPPER_TARGET" width="32" begin="31" end="0" resetval="0x0" description="" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_PL_IATU_REG_CTRL_3" acronym="PCIECTRL_PL_IATU_REG_CTRL_3" offset="0x220" width="32" description="iATU Region Control 3 Register; VIRTUAL FUNCTIONS not IMPLEMENTED: not USED">
+    <bitfield id="IATU_REG_CTRL_3" width="32" begin="31" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+</module>

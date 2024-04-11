@@ -1,0 +1,541 @@
+<module name="VIP1_Slice0_parser" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="VIP_MAIN" acronym="VIP_MAIN" offset="0x0" width="32" description="Main Configuration for VIP Parser">
+    <bitfield id="RESERVED" width="26" begin="31" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="CLIP_ACTIVE" width="1" begin="5" end="5" resetval="0x0" description="Discrete Sync Only; 0 = Do not clip active pixels; 1 = Clip Active Pixels as follows: 0xFF -&amp;amp;gt; 0xFE, 0x00 -&amp;amp;gt; 0x01" range="" rwaccess="RW"/>
+    <bitfield id="CLIP_BLNK" width="1" begin="4" end="4" resetval="0x0" description="Discrete Sync Only; 0 = Do not clip Blanking Data; 1 = Clip Blanking Data as follows: 0xFF -&amp;amp;gt; 0xFE, 0x00 -&amp;amp;gt; 0x01" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="3" end="2" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DATA_INTERFACE_MODE" width="2" begin="1" end="0" resetval="0x0" description="00 = 24b Port A data interface. 01 = 16b Port A data interface. 10 = 8b Port A data interfaces. 11 = Undefined. Port B is always an 8b data interface." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_PORT_A" acronym="VIP_PORT_A" offset="0x4" width="32" description="Configuration for Input Port A">
+    <bitfield id="ANALYZER_FVH_ERR_CORRECTION_ENABLE" width="1" begin="31" end="31" resetval="0x0" description="Embedded Sync Only 0 = Ignore the protection bits in the XV (fvh) codeword header. This setting is typically desired. 1 = Use the protection bits in an attempt to do error correction for the fvh control bits." range="" rwaccess="RW"/>
+    <bitfield id="ANALYZER_2X4X_SRCNUM_POS" width="1" begin="30" end="30" resetval="0x0" description="Embedded Sync Only 0 = For 2x/4x mux mode, srcnum is in the least significant nibble of the XV/fvh codeword (srcnum replaces the protection bits) 1 = For 2x/4x mux mode, srcnum is in the least significant nibble of a horizontal blanking pixel value" range="" rwaccess="RW"/>
+    <bitfield id="FID_SKEW_POSTCOUNT" width="6" begin="29" end="24" resetval="0x0" description="Discrete Sync Only post count value when using vsync skew in FID determination" range="" rwaccess="RW"/>
+    <bitfield id="SW_RESET" width="1" begin="23" end="23" resetval="0x0" description="0 = Normal 1 = Reset Port A logic. Must be set to ?0? again by the software for the module to function." range="" rwaccess="RW"/>
+    <bitfield id="DISCRETE_BASIC_MODE" width="1" begin="22" end="22" resetval="0x0" description="This register is valid for Discrete Sync mode only. 0 = Normal Discrete Mode. Hsync Style Capture operates as follows: - Captures line starting from HSYNC inactive to active condition. - VSYNC determined by sync window. - FID can be determined by VSYNC skew or captured from pin at first pixel in first line. ACTVID style capture works as follows: - Captures line during contiguous ACTVID envelope. - VSYNC is captured at the first pixel in each line. - FID is captured on first pixel of ACTVID window. 1 = Basic Discrete Mode. When using hsync with Hsync Style Capture operates as follows: - The last line of active video ends on the pixel clock cycle where VSYNC transitions from inactive to active. - FID pin value is captured on this cycle and is used for the next field. - FID detection by VSYNC skew is not allowed. ACTVID style capture works as follows: - VSYNC is expected to transition from inactive to active between ACTVID window. - This VSYNC transition allows the next line in an ACTVID envelope to be sent to a new VPDMA buffer. - FID value is determined by the FID pin value on the cycle where VSYNC transitions from inactive to active. In basic discrete mode, there is no Vertical Ancillary Data. Therefore, VPDMA descriptors should not use Ancillary Data channels." range="" rwaccess="RW"/>
+    <bitfield id="FID_SKEW_PRECOUNT" width="6" begin="21" end="16" resetval="0x0" description="Discrete Sync Only pre count value when using vsync skew in FID determination" range="" rwaccess="RW"/>
+    <bitfield id="USE_ACTVID_HSYNC_N" width="1" begin="15" end="15" resetval="0x0" description="Discrete Sync Only 0 = Use HSYNC style line capture 1 = Use ACTVID style line capture" range="" rwaccess="RW"/>
+    <bitfield id="FID_DETECT_MODE" width="1" begin="14" end="14" resetval="0x0" description="Discrete Sync Only 0 = Take FID from pin 1 = FID is determined by VSYNC skew" range="" rwaccess="RW"/>
+    <bitfield id="ACTVID_POLARITY" width="1" begin="13" end="13" resetval="0x0" description="Discrete Sync Only 0 = ACTVID is active low 1 = ACTVID is active high" range="" rwaccess="RW"/>
+    <bitfield id="VSYNC_POLARITY" width="1" begin="12" end="12" resetval="0x0" description="Discrete Sync Only 0 = VSYNC is active low 1 = VSYNC is active high" range="" rwaccess="RW"/>
+    <bitfield id="HSYNC_POLARITY" width="1" begin="11" end="11" resetval="0x0" description="Discrete Sync Only 0 = HSYNC is active low 1 = HSYNC is active high" range="" rwaccess="RW"/>
+    <bitfield id="PIXCLK_EDGE_POLARITY" width="1" begin="10" end="10" resetval="0x0" description="0 = Rising Edge is active PIXCLK edge 1 = Falling Edge is active PIXCLK edge" range="" rwaccess="RW"/>
+    <bitfield id="FID_POLARITY" width="1" begin="9" end="9" resetval="0x0" description="0 = Keep FID as found 1 = Invert Determined Value of FID" range="" rwaccess="RW"/>
+    <bitfield id="ENABLE" width="1" begin="8" end="8" resetval="0x0" description="0 = Disable Port 1 = Enable Port" range="" rwaccess="RW"/>
+    <bitfield id="CLR_ASYNC_FIFO_RD" width="1" begin="7" end="7" resetval="0x0" description="0 = Normal 1 = Clear Async FIFO Read Logic" range="" rwaccess="RW"/>
+    <bitfield id="CLR_ASYNC_FIFO_WR" width="1" begin="6" end="6" resetval="0x0" description="0 = Normal 1 = Clear Async FIFO Write Logic" range="" rwaccess="RW"/>
+    <bitfield id="CTRL_CHAN_SEL" width="2" begin="5" end="4" resetval="0x0" description="Embedded Sync Only In 8b mode.. there is only one channel on data[7:0]. In 16b mode.. there are two channels. The Luma Channel is on data[15:8]. The Chroma Channel is on data[7:0]. In 24b mode.. there are three channels. The R channel is on data[23:16].. the G channel is on [15:8]. and the B channel is on data[7:0]. 00 = Use data[7:0] to extract control codes. 01 = Use data[15:8] to extract control codes. 10 = Use data[23:16] to extract control codes. 11 = Undefined In 16b and 24b modes.. this register is also used to select the channel from which Ancillary Data is extracted. The Ancillary Data channel must be the same as the control code channel. For 8b mode.. the anc_chan_sel_8b register is used to select the Luma or Chroma channel from which Ancillary Data is taken." range="" rwaccess="RW"/>
+    <bitfield id="SYNC_TYPE" width="4" begin="3" end="0" resetval="0x0" description="0000 = embedded sync single 4:2:2 YUV stream 0001 = embedded sync 2x multiplexed 4:2:2 YUV stream 0010 = embedded sync 4x multiplexed 4:2:2 YUV stream 0011 = embedded sync line multiplexed 4:2:2 YUV stream 0100 = discrete sync single 4:2:2 YUV stream 0101 = embedded sync single RGB stream or single 444 YUV stream 0110 = reserved 0111 = reserved 1000 = reserved 1001 = reserved 1010 = discrete sync single 24b RGB stream" range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_XTRA_PORT_A" acronym="VIP_XTRA_PORT_A" offset="0x8" width="32" description="ore Configuration for Input Port A">
+    <bitfield id="RESERVED" width="1" begin="31" end="31" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="REPACK_SEL" width="3" begin="30" end="28" resetval="0x0" description="000 = Straight Through 001 = Cross Swap 010 = Left Center Swap 011 = Center Right Swap 100 = Right Rotate 101 = Left Rotate 110 = RAW16 to RGB565 Mapping 111 = RAW12 Swap" range="" rwaccess="RW"/>
+    <bitfield id="SRC0_NUMPIX" width="12" begin="27" end="16" resetval="0x0" description="Number of expected pixels on Source Number 0. The Port_a_src0_size interrupt will trigger if a line is encountered that differs from this pixelcount." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ANC_CHAN_SEL_8B" width="2" begin="14" end="13" resetval="0x0" description="In 8b mode, Vertically Ancillary Data typically resides in the Luma sites. This bit allows vertical ancillary data to be extracted from the chroma sites instead . 00 = Extract 8b Mode Vertical Ancillary Data from Luma Sites 01 = Extract 8b Mode Vertical Ancillary Data from Chroma Sites 10, 11 = Extract every single sample of vertical ancillary data. The output line is twice as wide as the other modes. For 16b and 24b inputs, ctrl_chan_sel is used to select which channel is used as a source for vertical ancillary data." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="12" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="SRC0_NUMLINES" width="12" begin="11" end="0" resetval="0x0" description="Number of expected lines on Source Number 0. The Port_a_src0_size interrupt will trigger if a field/frame is encountered that differs from this linecount." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_PORT_B" acronym="VIP_PORT_B" offset="0xC" width="32" description="Configuration for Input Port B">
+    <bitfield id="ANALYZER_FVH_ERR_CORRECTION_ENABLE" width="1" begin="31" end="31" resetval="0x0" description="Embedded Sync Only 0 = Ignore the protection bits in the XV (fvh) codeword header. This setting is typically desired. 1 = Use the protection bits in an attempt to do error correction for the fvh control bits." range="" rwaccess="RW"/>
+    <bitfield id="ANALYZER_2X4X_SRCNUM_POS" width="1" begin="30" end="30" resetval="0x0" description="Embedded Sync Only 0 = For 2x/4x mux mode, srcnum is in the least significant nibble of the XV/fvh codeword (srcnum replaces the protection bits) 1 = For 2x/4x mux mode, srcnum is in the least significant nibble of a horizontal blanking pixel value" range="" rwaccess="RW"/>
+    <bitfield id="FID_SKEW_POSTCOUNT" width="6" begin="29" end="24" resetval="0x0" description="Discrete Sync Only post count value when using vsync skew in FID determination" range="" rwaccess="RW"/>
+    <bitfield id="SW_RESET" width="1" begin="23" end="23" resetval="0x0" description="0 = Normal 1 = Reset Port B logic. Must be set to ?0? again by the software for the module to function." range="" rwaccess="RW"/>
+    <bitfield id="DISCRETE_BASIC_MODE" width="1" begin="22" end="22" resetval="0x0" description="This register is valid for Discrete Sync mode only. 0 = Normal Discrete Mode. Hsync Style Capture operates as follows: - Captures line starting from HSYNC inactive to active condition. - VSYNC determined by sync window. - FID can be determined by VSYNC skew or captured from pin at first pixel in first line. ACTVID style capture works as follows: - Captures line during contiguous ACTVID envelope. - VSYNC is captured at the first pixel in each line. - FID is captured on first pixel of ACTVID window. 1 = Basic Discrete Mode. When using hsync with Hsync Style Capture operates as follows: - The last line of active video ends on the pixel clock cycle where VSYNC transitions from inactive to active. - FID pin value is captured on this cycle and is used for the next field. - FID detection by VSYNC skew is not allowed. ACTVID style capture works as follows: - VSYNC is expected to transition from inactive to active between ACTVID window. - This VSYNC transition allows the next line in an ACTVID envelope to be sent to a new VPDMA buffer. - FID value is determined by the FID pin value on the cycle where VSYNC transitions from inactive to active. In basic discrete mode, there is no Vertical Ancillary Data. Therefore, VPDMA descriptors should not use Ancillary Data channels." range="" rwaccess="RW"/>
+    <bitfield id="FID_SKEW_PRECOUNT" width="6" begin="21" end="16" resetval="0x0" description="Discrete Sync Only pre count value when using vsync skew in FID determination" range="" rwaccess="RW"/>
+    <bitfield id="USE_ACTVID_HSYNC_N" width="1" begin="15" end="15" resetval="0x0" description="Discrete Sync Only 0 = Use HSYNC style line capture 1 = Use ACTVID style line capture" range="" rwaccess="RW"/>
+    <bitfield id="FID_DETECT_MODE" width="1" begin="14" end="14" resetval="0x0" description="Discrete Sync Only 0 = Take FID from pin 1 = FID is determined by VSYNC skew" range="" rwaccess="RW"/>
+    <bitfield id="ACTVID_POLARITY" width="1" begin="13" end="13" resetval="0x0" description="Discrete Sync Only 0 = ACTVID is active low 1 = ACTVID is active high" range="" rwaccess="RW"/>
+    <bitfield id="VSYNC_POLARITY" width="1" begin="12" end="12" resetval="0x0" description="Discrete Sync Only 0 = VSYNC is active low 1 = VSYNC is active high" range="" rwaccess="RW"/>
+    <bitfield id="HSYNC_POLARITY" width="1" begin="11" end="11" resetval="0x0" description="Discrete Sync Only 0 = HSYNC is active low 1 = HSYNC is active high" range="" rwaccess="RW"/>
+    <bitfield id="PIXCLK_EDGE_POLARITY" width="1" begin="10" end="10" resetval="0x0" description="0 = Rising Edge is active PIXCLK edge 1 = Falling Edge is active PIXCLK edge" range="" rwaccess="RW"/>
+    <bitfield id="FID_POLARITY" width="1" begin="9" end="9" resetval="0x0" description="0 = Keep FID as found 1 = Invert Determined Value of FID" range="" rwaccess="RW"/>
+    <bitfield id="ENABLE" width="1" begin="8" end="8" resetval="0x0" description="0 = Disable 1 = Enable" range="" rwaccess="RW"/>
+    <bitfield id="CLR_ASYNC_FIFO_RD" width="1" begin="7" end="7" resetval="0x0" description="0 = Normal 1 = Clear Async FIFO Read Logic" range="" rwaccess="RW"/>
+    <bitfield id="CLR_ASYNC_FIFO_WR" width="1" begin="6" end="6" resetval="0x0" description="0 = Normal 1 = Clear Async FIFO Write Logic" range="" rwaccess="RW"/>
+    <bitfield id="CTRL_CHAN_SEL" width="2" begin="5" end="4" resetval="0x0" description="PORT B supports on 8b mode. Always write 0 to this field. The anc_chan_sel_8b register is used to select the Luma or Chroma channel from which Ancillary Data is taken." range="" rwaccess="RW"/>
+    <bitfield id="SYNC_TYPE" width="4" begin="3" end="0" resetval="0x0" description="0000 = embedded sync single YUV stream 0001 = embedded sync 2x multiplexed YUV stream 0010 = embedded sync 4x multiplexed YUV stream 0011 = embedded sync line multiplexed YUV stream 0100 = discrete sync single YUV stream 0101 = embedded sync single RGB stream 0110 = reserved 0111 = reserved 1000 = reserved 1001 = reserved 1010 = discrete sync single 24b RGB stream" range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_XTRA_PORT_B" acronym="VIP_XTRA_PORT_B" offset="0x10" width="32" description="ore Configuration for Input Port B">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="SRC0_NUMPIX" width="12" begin="27" end="16" resetval="0x0" description="Number of expected pixels on Source Number 0. The Port_b_src0_size interrupt will trigger if a line is encountered that differs from this pixelcount." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ANC_CHAN_SEL_8B" width="2" begin="14" end="13" resetval="0x0" description="In 8b mode, Vertically Ancillary Data typically resides in the Luma sites. This bit allows vertical ancillary data to be extracted from the chroma sites instead . 00 = Extract 8b Mode Vertical Ancillary Data from Luma Sites 01 = Extract 8b Mode Vertical Ancillary Data from Chroma Sites 10, 11 = Extract every single sample of vertical ancillary data. The output line is twice as wide as the other modes. For 16b and 24b inputs, ctrl_chan_sel is used to select which channel is used as a source for vertical ancillary data." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="12" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="SRC0_NUMLINES" width="12" begin="11" end="0" resetval="0x0" description="Number of expected lines on Source Number 0. The Port_b_src0_size interrupt will trigger if a field/frame is encountered that differs from this linecount." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_FIQ_MASK" acronym="VIP_FIQ_MASK" offset="0x14" width="32" description="ask Bits for ARM FIQs">
+    <bitfield id="RESERVED" width="10" begin="31" end="22" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PORT_B_CFG_DISABLE_COMPLETE_MASK" width="1" begin="21" end="21" resetval="0x0" description="Port B Cfg Disable Complete Mask" range="" rwaccess="RW"/>
+    <bitfield id="PORT_A_CFG_DISABLE_COMPLETE_MASK" width="1" begin="20" end="20" resetval="0x0" description="Port A Cfg Disable Complete Mask" range="" rwaccess="RW"/>
+    <bitfield id="PORT_B_ANC_PROTOCOL_VIOLATION_MASK" width="1" begin="19" end="19" resetval="0x0" description="Port B ANC VPI Protocol Violation Mask" range="" rwaccess="RW"/>
+    <bitfield id="PORT_B_YUV_PROTOCOL_VIOLATION_MASK" width="1" begin="18" end="18" resetval="0x0" description="Port B YUV VPI Protocol Violation Mask" range="" rwaccess="RW"/>
+    <bitfield id="PORT_A_ANC_PROTOCOL_VIOLATION_MASK" width="1" begin="17" end="17" resetval="0x0" description="Port A ANC VPI Protocol Violation Mask" range="" rwaccess="RW"/>
+    <bitfield id="PORT_A_YUV_PROTOCOL_VIOLATION_MASK" width="1" begin="16" end="16" resetval="0x0" description="Port A YUV VPI Protocol Violation Mask" range="" rwaccess="RW"/>
+    <bitfield id="PORT_B_SRC0_SIZE" width="1" begin="15" end="15" resetval="0x0" description="Video size detected on Port B does not match size programmed in xtra_port_b register" range="" rwaccess="RW"/>
+    <bitfield id="PORT_A_SRC0_SIZE" width="1" begin="14" end="14" resetval="0x0" description="Video size detected on Port A does not match size programmed in xtra_port_a register" range="" rwaccess="RW"/>
+    <bitfield id="PORT_B_DISCONN" width="1" begin="13" end="13" resetval="0x0" description="Port B Link Disconnect Srcnum 0 Mask" range="" rwaccess="RW"/>
+    <bitfield id="PORT_B_CONN" width="1" begin="12" end="12" resetval="0x0" description="Port B Link Connect Srcnum 0 Mask" range="" rwaccess="RW"/>
+    <bitfield id="PORT_A_DISCONN" width="1" begin="11" end="11" resetval="0x0" description="Port A Link Disconnect Scrnum 0 Mask" range="" rwaccess="RW"/>
+    <bitfield id="PORT_A_CONN" width="1" begin="10" end="10" resetval="0x0" description="Port A Link Connect Srcnum 0 Mask" range="" rwaccess="RW"/>
+    <bitfield id="OUTPUT_FIFO_PRTB_ANC_OF" width="1" begin="9" end="9" resetval="0x0" description="Output FIFO Port B Ancillary Overflow Mask" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="OUTPUT_FIFO_PRTB_YUV_OF" width="1" begin="7" end="7" resetval="0x0" description="Output FIFO Port B Luma Overflow Mask" range="" rwaccess="RW"/>
+    <bitfield id="OUTPUT_FIFO_PRTA_ANC_OF" width="1" begin="6" end="6" resetval="0x0" description="Output FIFO Port A Ancillary Overflow Mask" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="5" end="5" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="OUTPUT_FIFO_PRTA_YUV_OF" width="1" begin="4" end="4" resetval="0x0" description="Output FIFO Port A Luma Overflow Mask" range="" rwaccess="RW"/>
+    <bitfield id="ASYNC_FIFO_PRTB_OF" width="1" begin="3" end="3" resetval="0x0" description="Port B Async FIFO Overflow FIQ Mask" range="" rwaccess="RW"/>
+    <bitfield id="ASYNC_FIFO_PRTA_OF" width="1" begin="2" end="2" resetval="0x0" description="Port A Async FIFO Overflow FIQ Mask" range="" rwaccess="RW"/>
+    <bitfield id="PRTB_VDET_MASK" width="1" begin="1" end="1" resetval="0x0" description="Port B Video Detect FIQ Mask" range="" rwaccess="RW"/>
+    <bitfield id="PRTA_VDET_MASK" width="1" begin="0" end="0" resetval="0x0" description="Port A Video Detect FIQ Mask" range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_FIQ_CLEAR" acronym="VIP_FIQ_CLEAR" offset="0x18" width="32" description="Clears bits in the FIQ Status">
+    <bitfield id="RESERVED" width="10" begin="31" end="22" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PORT_A_YUV_PROTOCOL_VIOLATION_CLR" width="1" begin="21" end="21" resetval="0x0" description="Write 1 followed by 0 to Clear Port B Cfg Disable Complete FIQ" range="" rwaccess="RW"/>
+    <bitfield id="PORT_A_ANC_PROTOCOL_VIOLATION_CLR" width="1" begin="20" end="20" resetval="0x0" description="Write 1 followed by 0 to Clear Port A Cfg Disable Complete FIQ" range="" rwaccess="RW"/>
+    <bitfield id="PORT_B_YUV_PROTOCOL_VIOLATION_CLR" width="1" begin="19" end="19" resetval="0x0" description="Write 1 followed by 0 to Clear Port B ANC VPI Protocol Violation FIQ" range="" rwaccess="RW"/>
+    <bitfield id="PORT_B_ANC_PROTOCOL_VIOLATION_CLR" width="1" begin="18" end="18" resetval="0x0" description="Write 1 followed by 0 to Clear Port B YUV VPI Protocol Violation FIQ" range="" rwaccess="RW"/>
+    <bitfield id="PORT_A_CFG_DISABLE_COMPLETE_CLR" width="1" begin="17" end="17" resetval="0x0" description="Write 1 followed by 0 to Clear Port A ANC VPI Protocol Violation FIQ" range="" rwaccess="RW"/>
+    <bitfield id="PORT_B_CFG_DISABLE_COMPLETE_CLR" width="1" begin="16" end="16" resetval="0x0" description="Write 1 followed by 0 to Clear Port A YUV VPI Protocol Violation FIQ" range="" rwaccess="RW"/>
+    <bitfield id="PORT_B_SRC0_SIZE_CLR" width="1" begin="15" end="15" resetval="0x0" description="Write 1 followed by 0 to Clear Port B Src0 Size FIQ" range="" rwaccess="RW"/>
+    <bitfield id="PORT_A_SRC0_SIZE_CLR" width="1" begin="14" end="14" resetval="0x0" description="Write 1 followed by 0 to Clear Port A Src0 Size FIQ" range="" rwaccess="RW"/>
+    <bitfield id="PORT_B_DISCONN_CLR" width="1" begin="13" end="13" resetval="0x0" description="Write 1 followed by 0 to Clear Port B Link Disconnect FIQ" range="" rwaccess="RW"/>
+    <bitfield id="PORT_B_CONN_CLR" width="1" begin="12" end="12" resetval="0x0" description="Write 1 followed by 0 to Clear Port B Link Connect FIQ" range="" rwaccess="RW"/>
+    <bitfield id="PORT_A_DISCONN_CLR" width="1" begin="11" end="11" resetval="0x0" description="Write 1 followed by 0 to Clear Port A Link Disconnect FIQ" range="" rwaccess="RW"/>
+    <bitfield id="PORT_A_CONN_CLR" width="1" begin="10" end="10" resetval="0x0" description="Write 1 followed by 0 to Clear Port A Link Connect FIQ" range="" rwaccess="RW"/>
+    <bitfield id="OUTPUT_FIFO_PRTB_ANC_CLR" width="1" begin="9" end="9" resetval="0x0" description="Write 1 followed by 0 to Clear Output FIFO Port B Ancillary Overflow FIQ" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="OUTPUT_FIFO_PRTB_YUV_CLR" width="1" begin="7" end="7" resetval="0x0" description="Write 1 followed by 0 to Clear Output FIFO Port B Luma Overflow FIQ" range="" rwaccess="RW"/>
+    <bitfield id="OUTPUT_FIFO_PRTA_ANC_CLR" width="1" begin="6" end="6" resetval="0x0" description="Write 1 followed by 0 to Clear Output FIFO Port A Ancillary Overflow FIQ" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="5" end="5" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="OUTPUT_FIFO_PRTA_YUV_CLR" width="1" begin="4" end="4" resetval="0x0" description="Write 1 followed by 0 to Clear Output FIFO Port A Luma Overflow FIQ" range="" rwaccess="RW"/>
+    <bitfield id="ASYNC_FIFO_PRTB_CLR" width="1" begin="3" end="3" resetval="0x0" description="Write 1 followed by 0 to Clear Async FIFO Port B Overflow FIQ" range="" rwaccess="RW"/>
+    <bitfield id="ASYNC_FIFO_PRTA_CLR" width="1" begin="2" end="2" resetval="0x0" description="Write 1 followed by 0 to Clear Async FIFO Port A Overflow FIQ" range="" rwaccess="RW"/>
+    <bitfield id="PRTB_VDET_CLR" width="1" begin="1" end="1" resetval="0x0" description="Write 1 followed by 0 to Clear Video Detect FIQ for Port B" range="" rwaccess="RW"/>
+    <bitfield id="PRTA_VDET_CLR" width="1" begin="0" end="0" resetval="0x0" description="Write 1 followed by 0 to Clear Video Detect FIQ for Port A" range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_FIQ_STATUS" acronym="VIP_FIQ_STATUS" offset="0x1C" width="32" description="FIQ Status values">
+    <bitfield id="RESERVED" width="10" begin="31" end="22" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PORT_B_CFG_DISABLE_COMPLETE_CLR" width="1" begin="21" end="21" resetval="0x0" description="Port B Cfg Disable Complete FIQ" range="" rwaccess="R"/>
+    <bitfield id="PORT_A_CFG_DISABLE_COMPLETE" width="1" begin="20" end="20" resetval="0x0" description="Port A Cfg Disable Complete FIQ" range="" rwaccess="R"/>
+    <bitfield id="PORT_B_ANC_PROTOCOL_VIOLATION" width="1" begin="19" end="19" resetval="0x0" description="Port B ANC VPI Protocol Violation FIQ" range="" rwaccess="R"/>
+    <bitfield id="PORT_B_YUV_PROTOCOL_VIOLATION" width="1" begin="18" end="18" resetval="0x0" description="Port B YUV VPI Protocol Violation FIQ" range="" rwaccess="R"/>
+    <bitfield id="PORT_A_ANC_PROTOCOL_VIOLATION" width="1" begin="17" end="17" resetval="0x0" description="Port A ANC VPI Protocol Violation FIQ" range="" rwaccess="R"/>
+    <bitfield id="PORT_A_YUV_PROTOCOL_VIOLATION" width="1" begin="16" end="16" resetval="0x0" description="Port A YUV VPI Protocol Violation FIQ" range="" rwaccess="R"/>
+    <bitfield id="PORT_B_SRC0_SIZE_STATUS" width="1" begin="15" end="15" resetval="0x0" description="Port B Source 0 Size FIQ" range="" rwaccess="R"/>
+    <bitfield id="PORT_A_SRC0_SIZE_STATUS" width="1" begin="14" end="14" resetval="0x0" description="Port A Source 0 Size FIQ" range="" rwaccess="R"/>
+    <bitfield id="PORT_B_DISCONN_STATUS" width="1" begin="13" end="13" resetval="0x0" description="Port B Disconnect FIQ" range="" rwaccess="R"/>
+    <bitfield id="PORT_B_CONN_STATUS" width="1" begin="12" end="12" resetval="0x0" description="Port B Connect FIQ" range="" rwaccess="R"/>
+    <bitfield id="PORT_A_DISCONN_STATUS" width="1" begin="11" end="11" resetval="0x0" description="Port A Disconnect FIQ" range="" rwaccess="R"/>
+    <bitfield id="PORT_A_CONN_STATUS" width="1" begin="10" end="10" resetval="0x0" description="Port A Connect FIQ" range="" rwaccess="R"/>
+    <bitfield id="OUTPUT_FIFO_PRTB_ANC_STATUS" width="1" begin="9" end="9" resetval="0x0" description="Output FIFO Port B Ancillary Overflow Status" range="" rwaccess="R"/>
+    <bitfield id="OUTPUT_FIFO_PRTB_CHROMA_STATUS" width="1" begin="8" end="8" resetval="0x0" description="Output FIFO Port B Chroma Overflow Status" range="" rwaccess="R"/>
+    <bitfield id="OUTPUT_FIFO_PRTB_LUMA_STATUS" width="1" begin="7" end="7" resetval="0x0" description="Output FIFO Port B Luma Overflow Status" range="" rwaccess="R"/>
+    <bitfield id="OUTPUT_FIFO_PRTA_ANC_STATUS" width="1" begin="6" end="6" resetval="0x0" description="Output FIFO Port A Ancillary Overflow Status" range="" rwaccess="R"/>
+    <bitfield id="OUTPUT_FIFO_PRTA_CHROMA_STATUS" width="1" begin="5" end="5" resetval="0x0" description="Output FIFO Port A Chroma Overflow Status" range="" rwaccess="R"/>
+    <bitfield id="OUTPUT_FIFO_PRTA_LUMA_STATUS" width="1" begin="4" end="4" resetval="0x0" description="Output FIFO Port A Luma Overflow Status" range="" rwaccess="R"/>
+    <bitfield id="ASYNC_FIFO_PRTB_STATUS" width="1" begin="3" end="3" resetval="0x0" description="Async FIFO Port B Overflow Status" range="" rwaccess="R"/>
+    <bitfield id="ASYNC_FIFO_PRTA_STATUS" width="1" begin="2" end="2" resetval="0x0" description="Async FIFO Port A Overflow Status" range="" rwaccess="R"/>
+    <bitfield id="PRTB_VDET_STATUS" width="1" begin="1" end="1" resetval="0x0" description="VDET Status for Port B" range="" rwaccess="R"/>
+    <bitfield id="PRTA_VDET_STATUS" width="1" begin="0" end="0" resetval="0x0" description="VDET Status for Port A" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC_FID" acronym="VIP_OUTPUT_PORT_A_SRC_FID" offset="0x20" width="32" description="Current and Previous Output Port A Source FID values">
+    <bitfield id="PRTA_SRC15_CURR_SOURCE_FID" width="1" begin="31" end="31" resetval="0x0" description="For Source ID 15 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC15_PREV_SOURCE_FID" width="1" begin="30" end="30" resetval="0x0" description="For Source ID 15 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC14_CURR_SOURCE_FID" width="1" begin="29" end="29" resetval="0x0" description="For Source ID 14 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC14_PREV_SOURCE_FID" width="1" begin="28" end="28" resetval="0x0" description="For Source ID 14 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC13_CURR_SOURCE_FID" width="1" begin="27" end="27" resetval="0x0" description="For Source ID 13 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC13_PREV_SOURCE_FID" width="1" begin="26" end="26" resetval="0x0" description="For Source ID 13 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC12_CURR_SOURCE_FID" width="1" begin="25" end="25" resetval="0x0" description="For Source ID 12 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC12_PREV_SOURCE_FID" width="1" begin="24" end="24" resetval="0x0" description="For Source ID 12 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC11_CURR_SOURCE_FID" width="1" begin="23" end="23" resetval="0x0" description="For Source ID 11 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC11_PREV_SOURCE_FID" width="1" begin="22" end="22" resetval="0x0" description="For Source ID 11 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC10_CURR_SOURCE_FID" width="1" begin="21" end="21" resetval="0x0" description="For Source ID 10 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC10_PREV_SOURCE_FID" width="1" begin="20" end="20" resetval="0x0" description="For Source ID 10 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC9_CURR_SOURCE_FID" width="1" begin="19" end="19" resetval="0x0" description="For Source ID 9 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC9_PREV_SOURCE_FID" width="1" begin="18" end="18" resetval="0x0" description="For Source ID 9 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC8_CURR_SOURCE_FID" width="1" begin="17" end="17" resetval="0x0" description="For Source ID 8 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC8_PREV_SOURCE_FID" width="1" begin="16" end="16" resetval="0x0" description="For Source ID 8 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC7_CURR_SOURCE_FID" width="1" begin="15" end="15" resetval="0x0" description="For Source ID 7 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC7_PREV_SOURCE_FID" width="1" begin="14" end="14" resetval="0x0" description="For Source ID 7 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC6_CURR_SOURCE_FID" width="1" begin="13" end="13" resetval="0x0" description="For Source ID 6 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC6_PREV_SOURCE_FID" width="1" begin="12" end="12" resetval="0x0" description="For Source ID 6 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC5_CURR_SOURCE_FID" width="1" begin="11" end="11" resetval="0x0" description="For Source ID 5 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC5_PREV_SOURCE_FID" width="1" begin="10" end="10" resetval="0x0" description="For Source ID 5 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC4_CURR_SOURCE_FID" width="1" begin="9" end="9" resetval="0x0" description="For Source ID 4 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC4_PREV_SOURCE_FID" width="1" begin="8" end="8" resetval="0x0" description="For Source ID 4 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC3_CURR_SOURCE_FID" width="1" begin="7" end="7" resetval="0x0" description="For Source ID 3 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC3_PREV_SOURCE_FID" width="1" begin="6" end="6" resetval="0x0" description="For Source ID 3 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC2_CURR_SOURCE_FID" width="1" begin="5" end="5" resetval="0x0" description="For Source ID 2 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC2_PREV_SOURCE_FID" width="1" begin="4" end="4" resetval="0x0" description="For Source ID 2 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC1_CURR_SOURCE_FID" width="1" begin="3" end="3" resetval="0x0" description="For Source ID 1 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC1_PREV_SOURCE_FID" width="1" begin="2" end="2" resetval="0x0" description="For Source ID 1 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC0_CURR_SOURCE_FID" width="1" begin="1" end="1" resetval="0x0" description="For Source ID 0 from Port A. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC0_PREV_SOURCE_FID" width="1" begin="0" end="0" resetval="0x0" description="For Source ID 0 from Port A. Source Field ID for Previous Field" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_ENC_FID" acronym="VIP_OUTPUT_PORT_A_ENC_FID" offset="0x24" width="32" description="Current and Previous Output Port A Encoder FID values">
+    <bitfield id="PRTA_SRC15_CURR_ENC_FID" width="1" begin="31" end="31" resetval="0x0" description="For Source ID 15 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC15_PREV_ENC_FID" width="1" begin="30" end="30" resetval="0x0" description="For Source ID 15 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC14_CURR_ENC_FID" width="1" begin="29" end="29" resetval="0x0" description="For Source ID 14 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC14_PREV_ENC_FID" width="1" begin="28" end="28" resetval="0x0" description="For Source ID 14 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC13_CURR_ENC_FID" width="1" begin="27" end="27" resetval="0x0" description="For Source ID 13 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC13_PREV_ENC_FID" width="1" begin="26" end="26" resetval="0x0" description="For Source ID 13 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC12_CURR_ENC_FID" width="1" begin="25" end="25" resetval="0x0" description="For Source ID 12 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC12_PREV_ENC_FID" width="1" begin="24" end="24" resetval="0x0" description="For Source ID 12 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC11_CURR_ENC_FID" width="1" begin="23" end="23" resetval="0x0" description="For Source ID 11 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC11_PREV_ENC_FID" width="1" begin="22" end="22" resetval="0x0" description="For Source ID 11 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC10_CURR_ENC_FID" width="1" begin="21" end="21" resetval="0x0" description="For Source ID 10 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC10_PREV_ENC_FID" width="1" begin="20" end="20" resetval="0x0" description="For Source ID 10 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC9_CURR_ENC_FID" width="1" begin="19" end="19" resetval="0x0" description="For Source ID 9 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC9_PREV_ENC_FID" width="1" begin="18" end="18" resetval="0x0" description="For Source ID 9 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC8_CURR_ENC_FID" width="1" begin="17" end="17" resetval="0x0" description="For Source ID 8 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC8_PREV_ENC_FID" width="1" begin="16" end="16" resetval="0x0" description="For Source ID 8 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC7_CURR_ENC_FID" width="1" begin="15" end="15" resetval="0x0" description="For Source ID 7 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC7_PREV_ENC_FID" width="1" begin="14" end="14" resetval="0x0" description="For Source ID 7 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC6_CURR_ENC_FID" width="1" begin="13" end="13" resetval="0x0" description="For Source ID 6 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC6_PREV_ENC_FID" width="1" begin="12" end="12" resetval="0x0" description="For Source ID 6 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC5_CURR_ENC_FID" width="1" begin="11" end="11" resetval="0x0" description="For Source ID 5 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC5_PREV_ENC_FID" width="1" begin="10" end="10" resetval="0x0" description="For Source ID 5 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC4_CURR_ENC_FID" width="1" begin="9" end="9" resetval="0x0" description="For Source ID 4 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC4_PREV_ENC_FID" width="1" begin="8" end="8" resetval="0x0" description="For Source ID 4 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC3_CURR_ENC_FID" width="1" begin="7" end="7" resetval="0x0" description="For Source ID 3 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC3_PREV_ENC_FID" width="1" begin="6" end="6" resetval="0x0" description="For Source ID 3 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC2_CURR_ENC_FID" width="1" begin="5" end="5" resetval="0x0" description="For Source ID 2 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC2_PREV_ENC_FID" width="1" begin="4" end="4" resetval="0x0" description="For Source ID 2 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC1_CURR_ENC_FID" width="1" begin="3" end="3" resetval="0x0" description="For Source ID 1 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC1_PREV_ENC_FID" width="1" begin="2" end="2" resetval="0x0" description="For Source ID 1 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC0_CURR_ENC_FID" width="1" begin="1" end="1" resetval="0x0" description="For Source ID 0 from Port A. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC0_PREV_ENC_FID" width="1" begin="0" end="0" resetval="0x0" description="For Source ID 0 from Port A. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC_FID" acronym="VIP_OUTPUT_PORT_B_SRC_FID" offset="0x28" width="32" description="Current and Previous Output Port B Source FID values">
+    <bitfield id="PRTB_SRC15_CURR_SOURCE_FID" width="1" begin="31" end="31" resetval="0x0" description="For Source ID 15 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC15_PREV_SOURCE_FID" width="1" begin="30" end="30" resetval="0x0" description="For Source ID 15 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC14_CURR_SOURCE_FID" width="1" begin="29" end="29" resetval="0x0" description="For Source ID 14 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC14_PREV_SOURCE_FID" width="1" begin="28" end="28" resetval="0x0" description="For Source ID 14 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC13_CURR_SOURCE_FID" width="1" begin="27" end="27" resetval="0x0" description="For Source ID 13 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC13_PREV_SOURCE_FID" width="1" begin="26" end="26" resetval="0x0" description="For Source ID 13 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC12_CURR_SOURCE_FID" width="1" begin="25" end="25" resetval="0x0" description="For Source ID 12 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC12_PREV_SOURCE_FID" width="1" begin="24" end="24" resetval="0x0" description="For Source ID 12 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC11_CURR_SOURCE_FID" width="1" begin="23" end="23" resetval="0x0" description="For Source ID 11 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC11_PREV_SOURCE_FID" width="1" begin="22" end="22" resetval="0x0" description="For Source ID 11. from Port B Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC10_CURR_SOURCE_FID" width="1" begin="21" end="21" resetval="0x0" description="For Source ID 10 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC10_PREV_SOURCE_FID" width="1" begin="20" end="20" resetval="0x0" description="For Source ID 10 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC9_CURR_SOURCE_FID" width="1" begin="19" end="19" resetval="0x0" description="For Source ID 9 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC9_PREV_SOURCE_FID" width="1" begin="18" end="18" resetval="0x0" description="For Source ID 9 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC8_CURR_SOURCE_FID" width="1" begin="17" end="17" resetval="0x0" description="For Source ID 8 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC8_PREV_SOURCE_FID" width="1" begin="16" end="16" resetval="0x0" description="For Source ID 8 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC7_CURR_SOURCE_FID" width="1" begin="15" end="15" resetval="0x0" description="For Source ID 7 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC7_PREV_SOURCE_FID" width="1" begin="14" end="14" resetval="0x0" description="For Source ID 7 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC6_CURR_SOURCE_FID" width="1" begin="13" end="13" resetval="0x0" description="For Source ID 6 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC6_PREV_SOURCE_FID" width="1" begin="12" end="12" resetval="0x0" description="For Source ID 6 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC5_CURR_SOURCE_FID" width="1" begin="11" end="11" resetval="0x0" description="For Source ID 5 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC5_PREV_SOURCE_FID" width="1" begin="10" end="10" resetval="0x0" description="For Source ID 5 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC4_CURR_SOURCE_FID" width="1" begin="9" end="9" resetval="0x0" description="For Source ID 4 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC4_PREV_SOURCE_FID" width="1" begin="8" end="8" resetval="0x0" description="For Source ID 4 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC3_CURR_SOURCE_FID" width="1" begin="7" end="7" resetval="0x0" description="For Source ID 3 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC3_PREV_SOURCE_FID" width="1" begin="6" end="6" resetval="0x0" description="For Source ID 3 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC2_CURR_SOURCE_FID" width="1" begin="5" end="5" resetval="0x0" description="For Source ID 2 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC2_PREV_SOURCE_FID" width="1" begin="4" end="4" resetval="0x0" description="For Source ID 2 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC1_CURR_SOURCE_FID" width="1" begin="3" end="3" resetval="0x0" description="For Source ID 1 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC1_PREV_SOURCE_FID" width="1" begin="2" end="2" resetval="0x0" description="For Source ID 1 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC0_CURR_SOURCE_FID" width="1" begin="1" end="1" resetval="0x0" description="For Source ID 0 from Port B. Source Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC0_PREV_SOURCE_FID" width="1" begin="0" end="0" resetval="0x0" description="For Source ID 0 from Port B. Source Field ID for Previous Field" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_ENC_FID" acronym="VIP_OUTPUT_PORT_B_ENC_FID" offset="0x2C" width="32" description="Current and Previous Output Port B Encoder FID values">
+    <bitfield id="PRTB_SRC15_CURR_ENC_FID" width="1" begin="31" end="31" resetval="0x0" description="For Source ID 15 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC15_PREV_ENC_FID" width="1" begin="30" end="30" resetval="0x0" description="For Source ID 15 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC14_CURR_ENC_FID" width="1" begin="29" end="29" resetval="0x0" description="For Source ID 14 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC14_PREV_ENC_FID" width="1" begin="28" end="28" resetval="0x0" description="For Source ID 14 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC13_CURR_ENC_FID" width="1" begin="27" end="27" resetval="0x0" description="For Source ID 13 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC13_PREV_ENC_FID" width="1" begin="26" end="26" resetval="0x0" description="For Source ID 13 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC12_CURR_ENC_FID" width="1" begin="25" end="25" resetval="0x0" description="For Source ID 12 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC12_PREV_ENC_FID" width="1" begin="24" end="24" resetval="0x0" description="For Source ID 12 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC11_CURR_ENC_FID" width="1" begin="23" end="23" resetval="0x0" description="For Source ID 11 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC11_PREV_ENC_FID" width="1" begin="22" end="22" resetval="0x0" description="For Source ID 11 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC10_CURR_ENC_FID" width="1" begin="21" end="21" resetval="0x0" description="For Source ID 10 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC10_PREV_ENC_FID" width="1" begin="20" end="20" resetval="0x0" description="For Source ID 10 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC9_CURR_ENC_FID" width="1" begin="19" end="19" resetval="0x0" description="For Source ID 9 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC9_PREV_ENC_FID" width="1" begin="18" end="18" resetval="0x0" description="For Source ID 9 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC8_CURR_ENC_FID" width="1" begin="17" end="17" resetval="0x0" description="For Source ID 8 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC8_PREV_ENC_FID" width="1" begin="16" end="16" resetval="0x0" description="For Source ID 8 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC7_CURR_ENC_FID" width="1" begin="15" end="15" resetval="0x0" description="For Source ID 7 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC7_PREV_ENC_FID" width="1" begin="14" end="14" resetval="0x0" description="For Source ID 7 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC6_CURR_ENC_FID" width="1" begin="13" end="13" resetval="0x0" description="For Source ID 6 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC6_PREV_ENC_FID" width="1" begin="12" end="12" resetval="0x0" description="For Source ID 6 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC5_CURR_ENC_FID" width="1" begin="11" end="11" resetval="0x0" description="For Source ID 5 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC5_PREV_ENC_FID" width="1" begin="10" end="10" resetval="0x0" description="For Source ID 5 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC4_CURR_ENC_FID" width="1" begin="9" end="9" resetval="0x0" description="For Source ID 4 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC4_PREV_ENC_FID" width="1" begin="8" end="8" resetval="0x0" description="For Source ID 4 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC3_CURR_ENC_FID" width="1" begin="7" end="7" resetval="0x0" description="For Source ID 3 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC3_PREV_ENC_FID" width="1" begin="6" end="6" resetval="0x0" description="For Source ID 3 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC2_CURR_ENC_FID" width="1" begin="5" end="5" resetval="0x0" description="For Source ID 2 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC2_PREV_ENC_FID" width="1" begin="4" end="4" resetval="0x0" description="For Source ID 2 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC1_CURR_ENC_FID" width="1" begin="3" end="3" resetval="0x0" description="For Source ID 1 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC1_PREV_ENC_FID" width="1" begin="2" end="2" resetval="0x0" description="For Source ID 1 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC0_CURR_ENC_FID" width="1" begin="1" end="1" resetval="0x0" description="For Source ID 0 from Port B. Encoder Field ID for Current Field" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC0_PREV_ENC_FID" width="1" begin="0" end="0" resetval="0x0" description="For Source ID 0 from Port B. Encoder Field ID for Previous Field" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC0_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC0_SIZE" offset="0x30" width="32" description="Width and Height for Source 0">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC0_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 0" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC0_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 0" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC1_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC1_SIZE" offset="0x34" width="32" description="Width and Height for Source 1">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC1_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 1" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC1_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 1" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC2_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC2_SIZE" offset="0x38" width="32" description="Width and Height for Source 2">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC2_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 2" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC2_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 2" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC3_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC3_SIZE" offset="0x3C" width="32" description="Width and Height for Source 3">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC3_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 3" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC3_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 3" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC4_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC4_SIZE" offset="0x40" width="32" description="Width and Height for Source 4">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC4_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 4" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC4_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 4" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC5_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC5_SIZE" offset="0x44" width="32" description="Width and Height for Source 5">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC5_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 5" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC5_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 5" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC6_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC6_SIZE" offset="0x48" width="32" description="Width and Height for Source 6">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC6_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 6" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC6_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 6" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC7_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC7_SIZE" offset="0x4C" width="32" description="Width and Height for Source 7">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC7_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 7" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC7_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 7" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC8_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC8_SIZE" offset="0x50" width="32" description="Width and Height for Source 8">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC8_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 8" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC8_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 8" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC9_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC9_SIZE" offset="0x54" width="32" description="Width and Height for Source 9">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC9_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 9" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC9_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 9" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC10_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC10_SIZE" offset="0x58" width="32" description="Width and Height for Source 10">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC10_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 10" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC10_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 10" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC11_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC11_SIZE" offset="0x5C" width="32" description="Width and Height for Source 11">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC11_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 11" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC11_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 11" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC12_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC12_SIZE" offset="0x60" width="32" description="Width and Height for Source 12">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC12_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 12" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC12_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 12" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC13_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC13_SIZE" offset="0x64" width="32" description="Width and Height for Source 13">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC13_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 13" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC13_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 13" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC14_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC14_SIZE" offset="0x68" width="32" description="Width and Height for Source 14">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC14_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 14" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC14_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 14" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_A_SRC15_SIZE" acronym="VIP_OUTPUT_PORT_A_SRC15_SIZE" offset="0x6C" width="32" description="Width and Height for Source 15">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC15_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port A. Width of Source ID 15" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTA_SRC15_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port A. Height of Source ID 15" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC0_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC0_SIZE" offset="0x70" width="32" description="Width and Height for Source 0">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC0_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 0" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC0_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 0" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC1_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC1_SIZE" offset="0x74" width="32" description="Width and Height for Source 1">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC1_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 1" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC1_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 1" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC2_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC2_SIZE" offset="0x78" width="32" description="Width and Height for Source 2">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC2_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 2" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC2_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 2" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC3_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC3_SIZE" offset="0x7C" width="32" description="Width and Height for Source 3">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC3_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 3" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC3_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 3" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC4_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC4_SIZE" offset="0x80" width="32" description="Width and Height for Source 4">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC4_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 4" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC4_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 4" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC5_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC5_SIZE" offset="0x84" width="32" description="Width and Height for Source 5">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC5_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 5" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC5_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 5" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC6_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC6_SIZE" offset="0x88" width="32" description="Width and Height for Source 6">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC6_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 6" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC6_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 6" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC7_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC7_SIZE" offset="0x8C" width="32" description="Width and Height for Source 7">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC7_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 7" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC7_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 7" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC8_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC8_SIZE" offset="0x90" width="32" description="Width and Height for Source 8">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC8_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 8" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC8_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 8" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC9_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC9_SIZE" offset="0x94" width="32" description="Width and Height for Source 9">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC9_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 9" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC9_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 9" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC10_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC10_SIZE" offset="0x98" width="32" description="Width and Height for Source 10">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC10_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 10" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC10_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 10" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC11_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC11_SIZE" offset="0x9C" width="32" description="Width and Height for Source 11">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC11_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 11" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC11_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 11" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC12_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC12_SIZE" offset="0xA0" width="32" description="Width and Height for Source 12">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC12_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 12" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC12_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 12" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC13_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC13_SIZE" offset="0xA4" width="32" description="Width and Height for Source 13">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC13_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 13" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC13_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 13" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC14_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC14_SIZE" offset="0xA8" width="32" description="Width and Height for Source 14">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC14_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 14" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC14_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 14" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_OUTPUT_PORT_B_SRC15_SIZE" acronym="VIP_OUTPUT_PORT_B_SRC15_SIZE" offset="0xAC" width="32" description="Width and Height for Source 15">
+    <bitfield id="RESERVED" width="5" begin="31" end="27" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC15_WIDTH" width="11" begin="26" end="16" resetval="0x0" description="On Port B. Width of Source ID 15" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="5" begin="15" end="11" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PRTB_SRC15_HEIGHT" width="11" begin="10" end="0" resetval="0x0" description="On Port B. Height of Source ID 15" range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_PORT_A_VDET_VEC" acronym="VIP_PORT_A_VDET_VEC" offset="0xB0" width="32" description="Each bit represents the VDET bit setting for Line Mux Mode">
+    <bitfield id="PRTA_VDET_VEC" width="32" begin="31" end="0" resetval="0x0" description="For Embedded Sync Only In Line Mux Mode. each bit represents the vdet value on Port A for the corresponding source id. This vector is meaningless for 1x/2x/4x mux modes." range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_PORT_B_VDET_VEC" acronym="VIP_PORT_B_VDET_VEC" offset="0xB4" width="32" description="Each bit represents the VDET bit setting for Line Mux Mode">
+    <bitfield id="PRTB_VDET_VEC" width="32" begin="31" end="0" resetval="0x0" description="For Embedded Sync Only In Line Mux Mode. each bit represents the vdet value on Port B for the corresponding source id. This vector is meaningless for 1x/2x/4x mux modes." range="" rwaccess="R"/>
+  </register>
+  <register id="VIP_ANC_CROP_HORZ_PORT_A" acronym="VIP_ANC_CROP_HORZ_PORT_A" offset="0xB8" width="32" description="Ancillary Cropping Configuration for Input Port A">
+    <bitfield id="ANC_TARGET_SRCNUM" width="4" begin="31" end="28" resetval="0x0" description="The cropping module can work on only one srcnum. specified in this field. for each dss_vip_parser output port (Ancillary data)." range="" rwaccess="RW"/>
+    <bitfield id="ANC_USE_NUMPIX" width="12" begin="27" end="16" resetval="0x0" description="When cropping, the number of pixels to keep after the skip_numpix value. skip_numpix + use_numpix must be smaller than the original line width." range="" rwaccess="RW"/>
+    <bitfield id="ANC_BYPASS_N" width="1" begin="15" end="15" resetval="0x0" description="0 = Bypass cropping module 1 = Cropping module enabled" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="14" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ANC_SKIP_NUMPIX" width="12" begin="11" end="0" resetval="0x0" description="The number of pixels to crop from the beginning of each line." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_ANC_CROP_VERT_PORT_A" acronym="VIP_ANC_CROP_VERT_PORT_A" offset="0xBC" width="32" description="Ancillary Cropping Configuration for Input Port A">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ANC_USE_NUMLINES" width="12" begin="27" end="16" resetval="0x0" description="When cropping, the number of lines to keep after the skip_numlines value. Use_numlines + skip_numlines must be smaller than the total number of lines in the srcnum's ancillary data region." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ANC_SKIP_NUMLINES" width="12" begin="11" end="0" resetval="0x0" description="The number of lines to crop from the top of the vertical ancillary data region." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_CROP_HORZ_PORT_A" acronym="VIP_CROP_HORZ_PORT_A" offset="0xC0" width="32" description="Active Video Cropping Configuration for Input Port A">
+    <bitfield id="ACT_TARGET_SRCNUM" width="4" begin="31" end="28" resetval="0x0" description="The cropping module can work on only one srcnum. specified in this field. for each dss_vip_parser output port (Active video)." range="" rwaccess="RW"/>
+    <bitfield id="ACT_USE_NUMPIX" width="12" begin="27" end="16" resetval="0x0" description="When cropping, the number of pixels to keep after the skip_numpix value. skip_numpix + use_numpix must be smaller than the original line width." range="" rwaccess="RW"/>
+    <bitfield id="ACT_BYPASS_N" width="1" begin="15" end="15" resetval="0x0" description="0 = Bypass cropping module 1 = Cropping module enabled" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="14" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ACT_SKIP_NUMPIX" width="12" begin="11" end="0" resetval="0x0" description="The number of pixels to crop from the beginning of each line." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_CROP_VERT_PORT_A" acronym="VIP_CROP_VERT_PORT_A" offset="0xC4" width="32" description="Active Video Cropping Configuration for Input Port A">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ACT_USE_NUMLINES" width="12" begin="27" end="16" resetval="0x0" description="When cropping.. the number of lines to keep after the skip_numlines value. Use_numlines + skip_numlines must be smaller than the total number of lines in the srcnum's active video region." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ACT_SKIP_NUMLINES" width="12" begin="11" end="0" resetval="0x0" description="The number of lines to crop from the top of the vertical active video region." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_ANC_VIP_CROP_HORZ_PORT_B" acronym="VIP_ANC_VIP_CROP_HORZ_PORT_B" offset="0xC8" width="32" description="Ancillary Cropping Configuration for Input Port B">
+    <bitfield id="ANC_TARGET_SRCNUM" width="4" begin="31" end="28" resetval="0x0" description="The cropping module can work on only one srcnum. specified in this field. for each dss_vip_parser output port (Ancillary data)." range="" rwaccess="RW"/>
+    <bitfield id="ANC_USE_NUMPIX" width="12" begin="27" end="16" resetval="0x0" description="When cropping, the number of pixels to keep after the skip_numpix value. skip_numpix + use_numpix must be smaller than the original line width." range="" rwaccess="RW"/>
+    <bitfield id="ANC_BYPASS_N" width="1" begin="15" end="15" resetval="0x0" description="0 = Bypass cropping module 1 = Cropping module enabled" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="14" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ANC_SKIP_NUMPIX" width="12" begin="11" end="0" resetval="0x0" description="The number of pixels to crop from the beginning of each line." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_ANC_VIP_CROP_VERT_PORT_B" acronym="VIP_ANC_VIP_CROP_VERT_PORT_B" offset="0xCC" width="32" description="Ancillary Cropping Configuration for Input Port B">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ANC_USE_NUMLINES" width="12" begin="27" end="16" resetval="0x0" description="When cropping, the number of lines to keep after the skip_numlines value. Use_numlines + skip_numlines must be smaller than the total number of lines in the srcnums active video region." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ANC_SKIP_NUMLINES" width="12" begin="11" end="0" resetval="0x0" description="The number of lines to crop from the top of the vertical ancillary data region." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_CROP_HORZ_PORT_B" acronym="VIP_CROP_HORZ_PORT_B" offset="0xD0" width="32" description="Active Video Cropping Configuration for Input Port B">
+    <bitfield id="ACT_TARGET_SRCNUM" width="4" begin="31" end="28" resetval="0x0" description="The cropping module can work on only one srcnum. specified in this field. for each dss_vip_parser output port (Active video)." range="" rwaccess="RW"/>
+    <bitfield id="ACT_USE_NUMPIX" width="12" begin="27" end="16" resetval="0x0" description="When cropping, the number of pixels to keep after the skip_numpix value. skip_numpix + use_numpix must be smaller than the original line width." range="" rwaccess="RW"/>
+    <bitfield id="ACT_BYPASS_N" width="1" begin="15" end="15" resetval="0x0" description="0 = Bypass cropping module 1 = Cropping module enabled" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="14" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ACT_SKIP_NUMPIX" width="12" begin="11" end="0" resetval="0x0" description="The number of pixels to crop from the beginning of each line." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_CROP_VERT_PORT_B" acronym="VIP_CROP_VERT_PORT_B" offset="0xD4" width="32" description="Active Video Cropping Configuration for Input Port B">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ACT_USE_NUMLINES" width="12" begin="27" end="16" resetval="0x0" description="When cropping, the number of lines to keep after the skip_numlines value. Use_numlines + skip_numlines must be smaller than the total number of lines in the srcnum's active video region." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ACT_SKIP_NUMLINES" width="12" begin="11" end="0" resetval="0x0" description="The number of lines to crop from the top of the vertical active video region." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_XTRA6_PORT_A" acronym="VIP_XTRA6_PORT_A" offset="0xD8" width="32" description="Cfg Disable Active Srcnum Vector Input for Port A">
+    <bitfield id="YUV_SRCNUM_STOP_IMMEDIATELY" width="16" begin="31" end="16" resetval="0x0" description="For the Active Video Port to the VPDMA, logic exists to ensure that a complete frame is sent out to the VPDMA following cfg_enable transitioning inactive for that port. Each bit in this vector represents a srcnum (remapped srcnum for TI line mux mode) going to the VPDMA. For example, bit 0 is srcnum 0, bit 1 is srcnum 1, etc. A ?0? in a bit position means that the hardware will wait for that srcnum, if it is in the middle of a frame, to continue until the end of the frame before stopping. A ?1? in a bit position means that it is ok for a srcnum to stop in the middle of a frame. For example, suppose a source is removed and the input will never complete sending a frame. If the bit position representing that srcnum is set to ?0?, the port will never disable." range="" rwaccess="RW"/>
+    <bitfield id="ANC_SRCNUM_STOP_IMMEDIATELY" width="16" begin="15" end="0" resetval="0x0" description="For the Ancillary Data Port to the VPDMA, logic exists to ensure that a complete frame is sent out to the VPDMA following cfg_enable transitioning inactive for that port. Each bit in this vector represents a srcnum (remapped srcnum for TI line mux mode) going to the VPDMA. For example, bit 0 is srcnum 0, bit 1 is srcnum 1, etc. A ?0? in a bit position means that the hardware will wait for that srcnum, if it is in the middle of a frame, to continue until the end of the frame before stopping. A ?1? in a bit position means that it is ok for a srcnum to stop in the middle of a frame. For example, suppose a source is removed and the input will never complete sending a frame. If the bit position representing that srcnum is set to ?0?, the port will never disable." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_XTRA7_PORT_B" acronym="VIP_XTRA7_PORT_B" offset="0xDC" width="32" description="Cfg Disable Active Srcnum Vector Input for Port B">
+    <bitfield id="YUV_SRCNUM_STOP_IMMEDIATELY" width="16" begin="31" end="16" resetval="0x0" description="For the Active Video Port to the VPDMA, logic exists to ensure that a complete frame is sent out to the VPDMA following cfg_enable transitioning inactive for that port. Each bit in this vector represents a srcnum (remapped srcnum for TI line mux mode) going to the VPDMA. For example, bit 0 is srcnum 0, bit 1 is srcnum 1, etc. A ?0? in a bit position means that the hardware will wait for that srcnum, if it is in the middle of a frame, to continue until the end of the frame before stopping. A ?1? in a bit position means that it is ok for a srcnum to stop in the middle of a frame. For example, suppose a source is removed and the input will never complete sending a frame. If the bit position representing that srcnum is set to ?0?, the port will never disable." range="" rwaccess="RW"/>
+    <bitfield id="ANC_SRCNUM_STOP_IMMEDIATELY" width="16" begin="15" end="0" resetval="0x0" description="For the Ancillary Data Port to the VPDMA, logic exists to ensure that a complete frame is sent out to the VPDMA following cfg_enable transitioning inactive for that port. Each bit in this vector represents a srcnum (remapped srcnum for TI line mux mode) going to the VPDMA. For example, bit 0 is srcnum 0, bit 1 is srcnum 1, etc. A ?0? in a bit position means that the hardware will wait for that srcnum, if it is in the middle of a frame, to continue until the end of the frame before stopping. A ?1? in a bit position means that it is ok for a srcnum to stop in the middle of a frame. For example, suppose a source is removed and the input will never complete sending a frame. If the bit position representing that srcnum is set to ?0?, the port will never disable." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_XTRA8_PORT_A" acronym="VIP_XTRA8_PORT_A" offset="0xE0" width="32" description="Reserved Register for Port A">
+    <bitfield id="RESERVED" width="32" begin="31" end="0" resetval="0x0" description="ust be 0x0 at all times." range="" rwaccess="RW"/>
+  </register>
+  <register id="VIP_XTRA9_PORT_B" acronym="VIP_XTRA9_PORT_B" offset="0xE4" width="32" description="Reserved Register for Port B">
+    <bitfield id="RESERVED" width="32" begin="31" end="0" resetval="0x0" description="ust be 0x0 at all times." range="" rwaccess="RW"/>
+  </register>
+</module>

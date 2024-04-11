@@ -1,0 +1,174 @@
+/***********************************************************************/
+/* AWR16xx/IWR16xx Sequences for DSP Power Management required by CCS  */
+/*                                                                     */
+/* Expected to be run from CS_DAP_0                                    */
+/***********************************************************************/
+
+#define uint32_t                  unsigned int
+#define HW_WR_REG32(addr, data)   *(uint32_t *) (addr) = (uint32_t) (data)
+#define HW_RD_REG32(addr)         *(uint32_t *) (addr)
+
+#define DSS_REG_BASE 0x50000400U
+#define DSS_STC_BASE 0x50040000U
+
+#define DSS_REG_GEMPWRSMCFG3_REG    (DSS_REG_BASE + 0x000002C8U ) /* GEMPWRSMCFG3   */
+#define DSS_REG_GEMPWRSMCFG4_REG    (DSS_REG_BASE + 0x000002CCU ) /* GEMPWRSMCFG4   */
+#define DSS_REG_STCPBISTSMCFG1_REG  (DSS_REG_BASE + 0x0000034CU ) /* STCPBISTSMCFG1 */
+#define DSS_STC_STCGSTAT_REG        (DSS_STC_BASE + 0x00000014U ) /* STCGSTAT       */
+
+
+menuitem "AWR16xx/IWR16xx DSP Support"
+
+
+/* Wrapper function to simplify importing GEL file to a C code */
+printf(char *temp)
+{
+    GEL_TextOut(temp);
+}
+
+hotmenu DSS_CheckResetStatus()
+{
+    uint32_t pwrap_dprec0_rd = 0;
+    int ctxWasConnected = GEL_IsConnected(); /* Store CCS connection state */
+
+    if(0 == ctxWasConnected)
+    {
+        GEL_Connect();
+    }
+
+    pwrap_dprec0_rd = PWRAP_DPREC0;  /* Debug Sub-Domain Power Reset Execution Control Register for DSS */
+
+    if(0x00000000 == (pwrap_dprec0_rd & 0x00000020))
+    {
+        printf("--->> DSS is powered-off\n");
+    }
+    else if(0x00000000 == (pwrap_dprec0_rd & 0x00000004))
+    {
+        printf("--->> DSS does not have clocks\n");
+    }
+    else if(0x00020000 == (pwrap_dprec0_rd & 0x0007C000))
+    {
+        printf("--->> DSS is under application-controlled reset\n");
+    }
+    else if(0x00060000 == (pwrap_dprec0_rd & 0x00060000))
+    {
+        printf("--->> DSS is under debug-controlled reset\n");
+    }
+    else
+    {
+        printf("--->> DSS is operating normally\n");
+    }
+
+    if(0 == ctxWasConnected)
+    {
+        GEL_Disconnect();
+    }
+}
+
+hotmenu DSS_ReleaseDSPHalt()
+{
+    uint32_t gempwrsmcfg4_rd = 0;
+    int ctxWasConnected = GEL_IsConnected(); /* Store CCS connection state */
+
+    if(0 == ctxWasConnected)
+    {
+        GEL_Connect();
+    }
+
+    gempwrsmcfg4_rd = HW_RD_REG32(DSS_REG_GEMPWRSMCFG4_REG);
+   
+    if(0x00020000 == (gempwrsmcfg4_rd & 0x00020000))
+    {
+       uint32_t gempwrsmcfg4_wr = 0;
+       uint32_t stcgstat_rd = 0;
+       uint32_t power_status = 0;
+       uint32_t gempwrsmcfg3_rd = 0;
+       int      timeout = 0;
+       int      success = 0;
+
+       stcgstat_rd = HW_RD_REG32(DSS_STC_STCGSTAT_REG);
+
+        // Check if DSS_STC is triggered by Bootloader 
+       if(0x1 == (stcgstat_rd & 0x1))
+       {
+           unsigned int stcpbistsmcfg1_rd = HW_RD_REG32(DSS_REG_STCPBISTSMCFG1_REG);
+           unsigned int stcpbistsmcfg1_wr = 0;
+           
+           // Clear bit 3
+           stcpbistsmcfg1_wr = stcpbistsmcfg1_rd & (~(1 << 3));  
+           HW_WR_REG32(DSS_REG_STCPBISTSMCFG1_REG, stcpbistsmcfg1_wr);
+       }
+       
+       // Clear 17th bit to unhalt DSS
+       gempwrsmcfg4_wr = gempwrsmcfg4_rd & (~(1 << 17));
+       HW_WR_REG32(DSS_REG_GEMPWRSMCFG4_REG, gempwrsmcfg4_wr);
+       
+       // Wait until the DSS is powered on
+       timeout = 100;
+       while(timeout-- > 0)
+       {
+           gempwrsmcfg3_rd = HW_RD_REG32(DSS_REG_GEMPWRSMCFG3_REG);
+           power_status = (gempwrsmcfg3_rd >> 18) & 0x3;
+           
+           if(power_status == 0x3)
+           {
+               break;
+           }                    
+       }
+
+       // Clear 18th bit to enable monitoring event outside from DSS
+       gempwrsmcfg4_rd = HW_RD_REG32(DSS_REG_GEMPWRSMCFG4_REG);
+       gempwrsmcfg4_wr = gempwrsmcfg4_rd & (~(1 << 18));
+       HW_WR_REG32(DSS_REG_GEMPWRSMCFG4_REG,gempwrsmcfg4_wr);
+
+       if(0x3 != power_status)
+       {
+           printf("--->> ERROR : timeout while waiting for DSS to power on\n");
+       }
+       else
+       {
+           printf("--->> DSS application extended reset released\n");
+       }
+    }
+
+    if(0 == ctxWasConnected)
+    {
+        GEL_Disconnect();
+    }
+}
+
+DSS_PreConnect_CheckResetStatus()
+{
+    uint32_t pwrap_dprec0_rd = 0;
+    uint32_t gempwrsmcfg4_rd = 0;
+    int ctxWasConnected = GEL_IsConnected(); /* Store CCS connection state */
+
+    if(0 == ctxWasConnected)
+    {
+        GEL_Connect();
+    }
+
+    pwrap_dprec0_rd = PWRAP_DPREC0;  /* Debug Sub-Domain Power Reset Execution Control Register for DSS */
+    gempwrsmcfg4_rd = HW_RD_REG32(DSS_REG_GEMPWRSMCFG4_REG);
+  
+ 
+    // Check if PWRSMLRSTHALT is set
+    if(0x00020000 == (gempwrsmcfg4_rd & 0x00020000))
+    {
+        // Check if DSS is powered-off or in application-controlled reset
+        if((0x00000000 == (pwrap_dprec0_rd & 0x00000020)) || (0x00020000 == (pwrap_dprec0_rd & 0x0007C000)))
+        {
+            printf("--->> DSS is under application controlled reset.  Prior to connecting this reset must be released.\n");
+            printf("--->> The debugger will enable \"Halt On Reset\" and release the application-extended reset\n");
+
+            GEL_EvalOnTarget("C674X_0", "GEL_SetWaitInResetMode(1)");
+            printf("--->> \"Halt On Reset\" has been enabled on the C674X_0");
+            DSS_ReleaseDSPHalt();
+        }
+    }
+
+    if(0 == ctxWasConnected)
+    {
+        GEL_Disconnect();
+    }
+}

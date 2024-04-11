@@ -1,0 +1,207 @@
+<module name="PCIe_SS1_TI_CONF" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="PCIECTRL_TI_CONF_REVISION" acronym="PCIECTRL_TI_CONF_REVISION" offset="0x0" width="32" description="IP Revision Identifier">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="0x-" description="IP Revision" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_SYSCONFIG" acronym="PCIECTRL_TI_CONF_SYSCONFIG" offset="0x10" width="32" description="Controls various parameters of the master and slave interfaces.">
+    <bitfield id="RESERVED" width="15" begin="31" end="17" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="MCOHERENT_EN" width="1" begin="16" end="16" resetval="0x0" description="Allows the no-snoop (NS) attribute of inbound PCIe TLPs to be passed to SoC system bus (AXI) master as a 'coherent' inband flag." range="" rwaccess="RW">
+      <bitenum value="0" id="DIS" token="MCOHERENT_EN_0" description="DIS AXI not coherent"/>
+      <bitenum value="1" id="EN" token="MCOHERENT_EN_1" description="EN AXI coherent = not(PCIE 'NS') that is, cache-coherence is preserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="10" begin="15" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="STANDBYMODE" width="2" begin="5" end="4" resetval="0x2" description="PM mode of local initiator (master); Initiator may generate read/write transaction as long as it is out of STANDBY state. 0x0: Force-standby mode = Initiator is unconditionally placed in standby state. 0x1: No-standby mode = initiator is unconditionally placed out of standby state. 0x2: Smart-standby mode = initiator's standby state depends on internal conditions, that is, the module's functional requirements. Asynchronous wakeup events cannot be generated. 0x3: Smart-Standby, wakeup-capable mode = initiator's standby state depends on internal conditions, ie the module's functional requirements. Asynchronous wakeup events can be generated." range="" rwaccess="RW"/>
+    <bitfield id="IDLEMODE" width="2" begin="3" end="2" resetval="0x2" description="PM mode of local target (slave); Target shall be capable of handling read/write transaction as long as it is out of IDLE state. 0x0: Force-idle mode = local target's idle state follows (acknowledges) the system's idle requests unconditionally, regardless of the IP module's internal requirements. 0x1: No-idle mode = local target never enters idle state. 0x2: Smart-idle mode = local target's idle state eventually follows (acknowledges) the system's idle requests, depending on the IP module's internal requirements. Module shall not generate (IRQ- or DMA-request-related) wakeup events. 0x3: Smart-idle wakeup-capable mode: local target's idle state eventually follows (acknowledges) the system's idle requests, depending on the IP module's internal requirements. IP module may generate (IRQ- or DMA-request-related) wakeup events when in idle state." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="1" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_IRQ_EOI" acronym="PCIECTRL_TI_CONF_IRQ_EOI" offset="0x18" width="32" description="Software End-Of-Interrupt: Allows the generation of further pulses on the interrupt line, if an new interrupt event is pending, when using the pulsed output. Unused when using the level interrupt line (depending on module integration).">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x000 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="LINE_NUMBER" width="4" begin="3" end="0" resetval="0x0" description="Write the IRQ line number to apply software EOI to it. Write 0x0: software EOI on main interrupt line Read 0x0: Read always returns zeros Write 0x1: software EOI on message-signalled (MSI) interrupt line" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_IRQSTATUS_RAW_MAIN" acronym="PCIECTRL_TI_CONF_IRQSTATUS_RAW_MAIN" offset="0x20" width="32" description="Raw status of 'main' interrupt requests; Set even if event is not enabled. Write 1 to set the (raw) status, mostly for debug (regular status also gets set).">
+    <bitfield id="RESERVED" width="17" begin="31" end="15" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="CFG_MSE_EVT" width="1" begin="14" end="14" resetval="0x0" description="CFG 'Memory Space Enable' change IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="CFG_BME_EVT" width="1" begin="13" end="13" resetval="0x0" description="CFG 'Bus Master Enable' change IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="LINK_UP_EVT" width="1" begin="12" end="12" resetval="0x0" description="Link-up state change IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="LINK_REQ_RST" width="1" begin="11" end="11" resetval="0x0" description="Link Request Reset IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PM_PME" width="1" begin="10" end="10" resetval="0x0" description="PM Power Management Event message received IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PME_TO_ACK" width="1" begin="9" end="9" resetval="0x0" description="Power Management Event Turn-Off Ack message received IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PME_TURN_OFF" width="1" begin="8" end="8" resetval="0x0" description="Power Management Event Turn-Off message received IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="RESERVED" width="2" begin="7" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ERR_ECRC" width="1" begin="5" end="5" resetval="0x0" description="ECRC Error IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="ERR_AXI" width="1" begin="4" end="4" resetval="0x0" description="AXI tag lookup fatal Error IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="ERR_COR" width="1" begin="3" end="3" resetval="0x0" description="Correctable Error message received IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="ERR_NONFATAL" width="1" begin="2" end="2" resetval="0x0" description="Non-Fatal Error message received IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="ERR_FATAL" width="1" begin="1" end="1" resetval="0x0" description="Fatal Error message received IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="ERR_SYS" width="1" begin="0" end="0" resetval="0x0" description="System Error IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_IRQSTATUS_MAIN" acronym="PCIECTRL_TI_CONF_IRQSTATUS_MAIN" offset="0x24" width="32" description="Regular status of 'main' interrupt requests; Set only when enabled. Write 1 to clear after interrupt has been serviced (raw status also gets cleared).">
+    <bitfield id="RESERVED" width="17" begin="31" end="15" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="CFG_MSE_EVT" width="1" begin="14" end="14" resetval="0x0" description="CFG 'Memory Space Enable' change IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="CFG_BME_EVT" width="1" begin="13" end="13" resetval="0x0" description="CFG 'Bus Master Enable' change IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="LINK_UP_EVT" width="1" begin="12" end="12" resetval="0x0" description="Link-up state change IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="LINK_REQ_RST" width="1" begin="11" end="11" resetval="0x0" description="Link Request Reset IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PM_PME" width="1" begin="10" end="10" resetval="0x0" description="PM Power Management Event message received IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PME_TO_ACK" width="1" begin="9" end="9" resetval="0x0" description="Power Management Event Turn-Off Ack message received IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="PME_TURN_OFF" width="1" begin="8" end="8" resetval="0x0" description="Power Management Event Turn-Off message received IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="RESERVED" width="2" begin="7" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ERR_ECRC" width="1" begin="5" end="5" resetval="0x0" description="ECRC Error IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="ERR_AXI" width="1" begin="4" end="4" resetval="0x0" description="AXI tag lookup fatal Error IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="ERR_COR" width="1" begin="3" end="3" resetval="0x0" description="Correctable Error message received IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="ERR_NONFATAL" width="1" begin="2" end="2" resetval="0x0" description="Non-Fatal Error message received IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="ERR_FATAL" width="1" begin="1" end="1" resetval="0x0" description="Fatal Error message received IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="ERR_SYS" width="1" begin="0" end="0" resetval="0x0" description="System Error IRQ status Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_IRQENABLE_SET_MAIN" acronym="PCIECTRL_TI_CONF_IRQENABLE_SET_MAIN" offset="0x28" width="32" description="Enable of 'main' interrupt requests; Write 1 to set (ie to enable interrupt). Readout is the same as corresponding _CLR register.">
+    <bitfield id="RESERVED" width="17" begin="31" end="15" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="CFG_MSE_EVT_EN" width="1" begin="14" end="14" resetval="0x0" description="CFG 'Memory Space Enable' change IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="CFG_BME_EVT_EN" width="1" begin="13" end="13" resetval="0x0" description="CFG 'Bus Master Enable' change IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="LINK_UP_EVT_EN" width="1" begin="12" end="12" resetval="0x0" description="Link-up state change IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="LINK_REQ_RST_EN" width="1" begin="11" end="11" resetval="0x0" description="Link Request Reset IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PM_PME_EN" width="1" begin="10" end="10" resetval="0x0" description="PM Power Management Event message received IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PME_TO_ACK_EN" width="1" begin="9" end="9" resetval="0x0" description="Power Management Event Turn-Off Ack message received IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="PME_TURN_OFF_EN" width="1" begin="8" end="8" resetval="0x0" description="Power Management Event Turn-Off message received IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="RESERVED" width="2" begin="7" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ERR_ECRC_EN" width="1" begin="5" end="5" resetval="0x0" description="ECRC Error IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="ERR_AXI_EN" width="1" begin="4" end="4" resetval="0x0" description="AXI tag lookup fatal Error IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="ERR_COR_EN" width="1" begin="3" end="3" resetval="0x0" description="Correctable Error message received IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="ERR_NONFATAL_EN" width="1" begin="2" end="2" resetval="0x0" description="Non-Fatal Error message received IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="ERR_FATAL_EN" width="1" begin="1" end="1" resetval="0x0" description="Fatal Error message received IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="ERR_SYS_EN" width="1" begin="0" end="0" resetval="0x0" description="System Error IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_IRQENABLE_CLR_MAIN" acronym="PCIECTRL_TI_CONF_IRQENABLE_CLR_MAIN" offset="0x2C" width="32" description="Enable of 'main' interrupt requests; Write 1 to clear (ie to disable interrupt). Readout is the same as corresponding _SET register.">
+    <bitfield id="RESERVED" width="17" begin="31" end="15" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="CFG_MSE_EVT_EN" width="1" begin="14" end="14" resetval="0x0" description="CFG 'Memory Space Enable' change IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+    <bitfield id="CFG_BME_EVT_EN" width="1" begin="13" end="13" resetval="0x0" description="CFG 'Bus Master Enable' change IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+    <bitfield id="LINK_UP_EVT_EN" width="1" begin="12" end="12" resetval="0x0" description="Link-up state change IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+    <bitfield id="LINK_REQ_RST_EN" width="1" begin="11" end="11" resetval="0x0" description="Link Request Reset IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+    <bitfield id="PM_PME_EN" width="1" begin="10" end="10" resetval="0x0" description="PM Power Management Event message received IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+    <bitfield id="PME_TO_ACK_EN" width="1" begin="9" end="9" resetval="0x0" description="Power Management Event Turn-Off Ack message received IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+    <bitfield id="PME_TURN_OFF_EN" width="1" begin="8" end="8" resetval="0x0" description="Power Management Event Turn-Off message received IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+    <bitfield id="RESERVED" width="2" begin="7" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ERR_ECRC_EN" width="1" begin="5" end="5" resetval="0x0" description="ECRC Error IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+    <bitfield id="ERR_AXI_EN" width="1" begin="4" end="4" resetval="0x0" description="AXI tag lookup fatal Error IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+    <bitfield id="ERR_COR_EN" width="1" begin="3" end="3" resetval="0x0" description="Correctable Error message received IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+    <bitfield id="ERR_NONFATAL_EN" width="1" begin="2" end="2" resetval="0x0" description="Non-Fatal Error message received IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+    <bitfield id="ERR_FATAL_EN" width="1" begin="1" end="1" resetval="0x0" description="Fatal Error message received IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+    <bitfield id="ERR_SYS_EN" width="1" begin="0" end="0" resetval="0x0" description="System Error IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW Wr1toClr"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_IRQSTATUS_RAW_MSI" acronym="PCIECTRL_TI_CONF_IRQSTATUS_RAW_MSI" offset="0x30" width="32" description="Raw status of legacy and MSI interrupt requests; Set even if event is not enabled. Write 1 to set the (raw) status, mostly for debug (regular status also gets set).">
+    <bitfield id="RESERVED" width="27" begin="31" end="5" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="MSI" width="1" begin="4" end="4" resetval="0x0" description="Message Signaled Interrupt IRQ status Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="INTD" width="1" begin="3" end="3" resetval="0x0" description="INTD IRQ status (Legacy PCIe message interrupt D); RC mode only. Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="INTC" width="1" begin="2" end="2" resetval="0x0" description="INTC IRQ status (Legacy PCIe message interrupt C); RC mode only. Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="INTB" width="1" begin="1" end="1" resetval="0x0" description="INTB IRQ status (Legacy PCIe message interrupt B); RC mode only. Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="INTA" width="1" begin="0" end="0" resetval="0x0" description="INTA IRQ status (Legacy PCIe message interrupt A); RC mode only. Write 0: No action Read 0: No event pending Write 1: Trigger IRQ event by software Read 1: IRQ event pending" range="" rwaccess="RW W1toSet"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_IRQSTATUS_MSI" acronym="PCIECTRL_TI_CONF_IRQSTATUS_MSI" offset="0x34" width="32" description="Regular status of legacy and MSI interrupt requests; Set only when enabled. Write 1 to clear after interrupt has been serviced (raw status also gets cleared). HW-generated events are self-clearing.">
+    <bitfield id="RESERVED" width="27" begin="31" end="5" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="MSI" width="1" begin="4" end="4" resetval="0x0" description="Message Signaled Interrupt IRQ status. Cleared by clearing all vectors in the MSI controller (PL) registers Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any. Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="INTD" width="1" begin="3" end="3" resetval="0x0" description="INTD IRQ status (Legacy PCIe message interrupt D); RC mode only. Typically set AND cleared by the remote EP, without local software intervention. Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any. Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="INTC" width="1" begin="2" end="2" resetval="0x0" description="INTC IRQ status (Legacy PCIe message interrupt C); RC mode only. Typically set AND cleared by the remote EP, without local software intervention. Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any. Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="INTB" width="1" begin="1" end="1" resetval="0x0" description="INTB IRQ status (Legacy PCIe message interrupt B); RC mode only. Typically set AND cleared by the remote EP, without local software intervention. Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any. Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="INTA" width="1" begin="0" end="0" resetval="0x0" description="INTA IRQ status (Legacy PCIe message interrupt A); RC mode only. Typically set AND cleared by the remote EP, without local software intervention. Write 0: No action Read 0: No event pending Write 1: Clear pending event, if any. Read 1: IRQ event pending" range="" rwaccess="RW W1toClr"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_IRQENABLE_SET_MSI" acronym="PCIECTRL_TI_CONF_IRQENABLE_SET_MSI" offset="0x38" width="32" description="Enable of legacy and MSI interrupt requests; Write 1 to set (ie to enable interrupt). Readout is the same as corresponding _CLR register.">
+    <bitfield id="RESERVED" width="27" begin="31" end="5" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="MSI_EN" width="1" begin="4" end="4" resetval="0x0" description="Message Signaled Interrupt IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="INTD_EN" width="1" begin="3" end="3" resetval="0x0" description="INTD IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="INTC_EN" width="1" begin="2" end="2" resetval="0x0" description="INTC IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="INTB_EN" width="1" begin="1" end="1" resetval="0x0" description="INTB IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+    <bitfield id="INTA_EN" width="1" begin="0" end="0" resetval="0x0" description="INTA IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Set IRQ enable (that is, enable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toSet"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_IRQENABLE_CLR_MSI" acronym="PCIECTRL_TI_CONF_IRQENABLE_CLR_MSI" offset="0x3C" width="32" description="Enable of legacy and MSI interrupt requests; Write 1 to clear (ie to disable interrupt). Readout is the same as corresponding _SET register.">
+    <bitfield id="RESERVED" width="27" begin="31" end="5" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="MSI_EN" width="1" begin="4" end="4" resetval="0x0" description="Message Signaled Interrupt IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="INTD_EN" width="1" begin="3" end="3" resetval="0x0" description="INTD IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="INTC_EN" width="1" begin="2" end="2" resetval="0x0" description="INTC IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="INTB_EN" width="1" begin="1" end="1" resetval="0x0" description="INTB IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toClr"/>
+    <bitfield id="INTA_EN" width="1" begin="0" end="0" resetval="0x0" description="INTA IRQ enable Write 0: No action Read 0: IRQ event is disabled Write 1: Clear IRQ enable (that is, disable event) Read 1: IRQ event is enabled" range="" rwaccess="RW W1toClr"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_DEVICE_TYPE" acronym="PCIECTRL_TI_CONF_DEVICE_TYPE" offset="0x100" width="32" description="Sets the Dual-Mode device's type">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="TYPE" width="4" begin="3" end="0" resetval="0x4" description="PCIe device type including the contents of the PCI config space (Type-0 for EP, Type-1 for RC); Apply fundamental reset after change; Do not change during core operation; 0x0: PCIe endpoint (EP) 0x1: Legacy PCIe endpoint (LEG_EP) 0x4: Root Complex (RC) Other values: Reserved" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_DEVICE_CMD" acronym="PCIECTRL_TI_CONF_DEVICE_CMD" offset="0x104" width="32" description="Device command (startup control and status); WARNING: cleared by all reset conditions, including fundamental reset">
+    <bitfield id="RESERVED" width="3" begin="31" end="29" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="BUS_NUM" width="8" begin="28" end="21" resetval="0x0" description="PCIe bus number" range="" rwaccess="R"/>
+    <bitfield id="DEV_NUM" width="5" begin="20" end="16" resetval="0x0" description="PCIe device number" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="8" begin="15" end="8" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="LTSSM_STATE" width="6" begin="7" end="2" resetval="0x0" description="LTSSM state /substate, implementation-specific, for debug Read 0x00: DETECT_QUIET Read 0x01: DETECT_ACT Read 0x02: POLL_ACTIVE Read 0x03: POLL_COMPLIANCE Read 0x04: POLL_CONFIG Read 0x05: PRE_DETECT_QUIET Read 0x06: DETECT_WAIT Read 0x07: CFG_LINKWD_START Read 0x08: CFG_LINKWD_ACEPT Read 0x09: CFG_LANENUM_WAIT Read 0x0A: CFG_LANENUM_ACEPT Read 0x0B: CFG_COMPLETE Read 0x0C: CFG_IDLE Read 0x0D: RCVRY_LOCK Read 0x0E: RCVRY_SPEED Read 0x0F: RCVRY_RCVRCFG Read 0x10: RCVRY_IDLE Read 0x11: L0 Read 0x12: L0S Read 0x13: L123_SEND_EIDLE Read 0x14: L1_IDLE Read 0x15: L2_IDLE Read 0x16: L2_WAKE Read 0x17: DISABLED_ENTRY Read 0x18: DISABLED_IDLE Read 0x19: DISABLED Read 0x1A: LPBK_ENTRY Read 0x1B: LPBK_ACTIVE Read 0x1C: LPBK_EXIT Read 0x1D: LPBK_EXIT_TIMEOUT Read 0x1E: HOT_RESET_ENTRY Read 0x1F: HOT_RESET Read 0x20: RCVRY_EQ0 Read 0x21: RCVRY_EQ1 Read 0x22: RCVRY_EQ2 Read 0x23: RCVRY_EQ3" range="" rwaccess="R"/>
+    <bitfield id="APP_REQ_RETRY_EN" width="1" begin="1" end="1" resetval="0x0" description="Application Request Retry Enable (This bit is CLEARED BY FUNDAMENTAL RESET)" range="" rwaccess="RW">
+      <bitenum value="0" id="DISABLED" token="APP_REQ_RETRY_EN_0" description="DISABLED Incoming PCI transactions are processed normally"/>
+      <bitenum value="1" id="ENABLED" token="APP_REQ_RETRY_EN_1" description="ENABLED Incoming PCI transactions are responded with 'retry'"/>
+    </bitfield>
+    <bitfield id="LTSSM_EN" width="1" begin="0" end="0" resetval="0x0" description="LTSSM enable: start the PCI link (This bit is CLEARED BY FUNDAMENTAL RESET)" range="" rwaccess="RW">
+      <bitenum value="0" id="DISABLED" token="LTSSM_EN_0" description="DISABLED"/>
+      <bitenum value="1" id="ENABLED" token="LTSSM_EN_1" description="ENABLED"/>
+    </bitfield>
+  </register>
+  <register id="PCIECTRL_TI_CONF_PM_CTRL" acronym="PCIECTRL_TI_CONF_PM_CTRL" offset="0x108" width="32" description="Power Management Control">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="AUX_PWR_DET" width="1" begin="11" end="11" resetval="0x0" description="Auxilliary Power Detection; Status of Vaux detection for the PCIe controller; Determines transition to L2 vs L3 upon Vmain turn-off." range="" rwaccess="RW">
+      <bitenum value="0" id="UNPOWERED" token="AUX_PWR_DET_0" description="UNPOWERED Vaux not present: D3cold maps to L3 link state"/>
+      <bitenum value="1" id="POWERED" token="AUX_PWR_DET_1" description="POWERED Vaux present: D3cold maps to L2 link state"/>
+    </bitfield>
+    <bitfield id="REQ_EXIT_L1" width="1" begin="10" end="10" resetval="0x0" description="Request to exit L1 state (to L0)" range="" rwaccess="RW">
+      <bitenum value="0" id="INACTIVE" token="REQ_EXIT_L1_0" description="INACTIVE No request"/>
+      <bitenum value="1" id="ACTIVE" token="REQ_EXIT_L1_1" description="ACTIVE L1 exit request"/>
+    </bitfield>
+    <bitfield id="REQ_ENTR_L1" width="1" begin="9" end="9" resetval="0x0" description="Request to transition to L1 state" range="" rwaccess="RW">
+      <bitenum value="0" id="INACTIVE" token="REQ_ENTR_L1_0" description="INACTIVE No request"/>
+      <bitenum value="1" id="ACTIVE" token="REQ_ENTR_L1_1" description="ACTIVE L1 entry request"/>
+    </bitfield>
+    <bitfield id="L23_READY" width="1" begin="8" end="8" resetval="0x0" description="Indicates system readiness for the link to enter L2/L3 ready state (EP mode only); Allows the transmission of PM_Enter_L23 following PM_Turn_OFF/PME_TO_Ack handshake. Self-cleared upon transition to L2/L3." range="" rwaccess="RW">
+      <bitenum value="0" id="NOT_READY" token="L23_READY_0" description="not_READY"/>
+      <bitenum value="1" id="READY" token="L23_READY_1" description="READY"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="6" begin="7" end="2" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PM_PME" width="1" begin="1" end="1" resetval="0x0" description="Transmits PM_PME wakeup message (EP mode only)" range="" rwaccess="W">
+      <bitenum value="0" id="NOACTION" token="PM_PME_0" description="NOACTION"/>
+      <bitenum value="1" id="TRANSMIT" token="PM_PME_1" description="TRANSMIT"/>
+    </bitfield>
+    <bitfield id="PME_TURN_OFF" width="1" begin="0" end="0" resetval="0x0" description="Transmits PME_Turn_Off message downstream (RC mode only); Eventually sends all links of hierarchy domain to L2L/3_ready" range="" rwaccess="W">
+      <bitenum value="0" id="NOACTION" token="PME_TURN_OFF_0" description="NOACTION"/>
+      <bitenum value="1" id="TRANSMIT" token="PME_TURN_OFF_1" description="TRANSMIT"/>
+    </bitfield>
+  </register>
+  <register id="PCIECTRL_TI_CONF_PHY_CS" acronym="PCIECTRL_TI_CONF_PHY_CS" offset="0x10C" width="32" description="Physical Layer Control and Status">
+    <bitfield id="RESERVED" width="15" begin="31" end="17" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="LINK_UP" width="1" begin="16" end="16" resetval="0x0" description="Link status, from LTSSM" range="" rwaccess="R">
+      <bitenum value="0" id="DOWN" token="LINK_UP_0" description="DOWN"/>
+      <bitenum value="1" id="UP" token="LINK_UP_1" description="UP"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="15" begin="15" end="1" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="REVERSE_LANES" width="1" begin="0" end="0" resetval="0x0" description="Manual lane reversal control, allowing lane 0 and lane 1 to be swapped by default; Both Tx and Rx are reversed; Polarity of the individual lane is unchanged" range="" rwaccess="RW">
+      <bitenum value="0" id="STRAIGHT" token="REVERSE_LANES_0" description="STRAIGHT"/>
+      <bitenum value="1" id="REVERSED" token="REVERSE_LANES_1" description="REVERSED"/>
+    </bitfield>
+  </register>
+  <register id="PCIECTRL_TI_CONF_INTX_ASSERT" acronym="PCIECTRL_TI_CONF_INTX_ASSERT" offset="0x124" width="32" description="Legacy INTx ASSERT message control, with 'x' in (A,B,C,D) set by the 'Interrupt Pin' field. Write 1 to send message, read to get the status; EP mode only">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="ASSERT_F0" width="1" begin="0" end="0" resetval="0x0" description="INTx ASSERT for function 0 Write 0: No action Read 0: INTx is inactive (has been deasserted) Write 1: Transmit INTx ASSERT to RC Read 1: INTx is active (has been asserted)" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_INTX_DEASSERT" acronym="PCIECTRL_TI_CONF_INTX_DEASSERT" offset="0x128" width="32" description="Legacy INTx DEASSERT message control, with 'x' in (A,B,C,D) set by the 'Interrupt Pin' field. Write 1 to send message, read to get the status; EP mode only">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="DEASSERT_F0" width="1" begin="0" end="0" resetval="0x0" description="INTx DEASSERT for function 0 Write 0: No action Read 0: INTx is inactive (has been deasserted) Write 1: Transmit INTx DEASSERT to RC Read 1: INTx is active (has been asserted)" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_MSI_XMT" acronym="PCIECTRL_TI_CONF_MSI_XMT" offset="0x12C" width="32" description="MSI transmitter (EP mode); Specifies parameters of MSI, together with MSI capability descriptor already configured by remote RC.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="MSI_VECTOR" width="5" begin="11" end="7" resetval="0x0" description="Vector number for transmitted MSI (as allowed by RC at enumeration)" range="" rwaccess="RW"/>
+    <bitfield id="MSI_TC" width="3" begin="6" end="4" resetval="0x0" description="Traffic class (TC) for transmitted MSI" range="" rwaccess="RW"/>
+    <bitfield id="MSI_FUNC_NUM" width="3" begin="3" end="1" resetval="0x0" description="Function number for transmitted MSI; Always 0 for single-function EP" range="" rwaccess="RW"/>
+    <bitfield id="MSI_REQ_GRANT" width="1" begin="0" end="0" resetval="0x0" description="MSI transmit request (and grant status) Write 0: No Action Read 0: MSI transmission request pending Read 1: No MSI request pending (last request granted) Write 1: Request MSI transmission" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_DEBUG_CFG" acronym="PCIECTRL_TI_CONF_DEBUG_CFG" offset="0x140" width="32" description="Configuration of debug_data output and register (observability)">
+    <bitfield id="RESERVED" width="26" begin="31" end="6" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="SEL" width="6" begin="5" end="0" resetval="0x0" description="Debug_data mode" range="" rwaccess="RW"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_DEBUG_DATA" acronym="PCIECTRL_TI_CONF_DEBUG_DATA" offset="0x144" width="32" description="Debug data vector, depending on DEBUG_CFG.sel value">
+    <bitfield id="DEBUG" width="32" begin="31" end="0" resetval="0x0" description="" range="" rwaccess="R"/>
+  </register>
+  <register id="PCIECTRL_TI_CONF_DIAG_CTRL" acronym="PCIECTRL_TI_CONF_DIAG_CTRL" offset="0x148" width="32" description="Diagnostic control">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0" description="software must always keep this bit at its default value - 0." range="" rwaccess="RW"/>
+    <bitfield id="INV_ECRC" width="1" begin="1" end="1" resetval="0x0" description="Corrupt LSB of ECRC in the next packet, then self-clears. Read 0: No CRC corruption pending Read 1: CRC corruption pending Write 1: Request CRC corruption" range="" rwaccess="RW"/>
+    <bitfield id="INV_LCRC" width="1" begin="0" end="0" resetval="0x0" description="Corrupts LSB of LCRC in the next packet, then self-clears. Read 0: No CRC corruption pending Read 1: CRC corruption pending Write 1: Request CRC corruption" range="" rwaccess="RW"/>
+  </register>
+</module>

@@ -1,0 +1,457 @@
+/*****************************************************************************
+
+  Copyright (C) 2022 Texas Instruments Incorporated - http://www.ti.com/
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+
+   Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+   Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the
+   distribution.
+
+   Neither the name of Texas Instruments Incorporated nor the names of
+   its contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*****************************************************************************/
+
+/* Definitions of DSSM commands */
+#define DSSM_BC_FACTORY_RESET                           (0x020AU)
+#define DSSM_BC_MASS_ERASE                              (0x020CU)
+#define DSSM_BC_PW_AUTH                                 (0x030EU)
+#define DSSM_DATA_EXCHANGE                              (0x00EEU)
+
+/* Definition of Masks */
+
+#define DEBUGSS_SECAP_TCR_TRANSMIT_FULL_MASK            ((int)0x00000001U)
+#define DEBUGSS_SECAP_TCR_TRANSMIT_EMPTY_MASK           ((int)0x00000000U)
+#define DEBUGSS_SECAP_RCR_RECEIVE_FULL_MASK             ((int)0x00000001U)
+#define DEBUGSS_SECAP_RCR_RECEIVE_EMPTY_MASK            ((int)0x00000000U)
+#define SECAP_CTL_MASK                                  (0xFFFFU)
+#define SECAP_CMD_MASK                                  (0x00FEU)
+
+#define DSSM_CMD_RECEIVED                               (0x0100U)
+#define DSSM_CMD_NOT_RECEIVED                           (0x0101U)
+#define DSSM_ERROR_UNEXPECTED_COMMAND                   (0x0102U)
+
+#define RESET_LEN_POR                                   (1500)
+#define RESET_LEN_BOOTRST                               (1)
+
+#define PASSWORD_LENGTH                                 (4)
+//#define PASSWORD_DATA_1                                 (0x04030201)
+//#define PASSWORD_DATA_2                                 (0x08070605)
+//#define PASSWORD_DATA_3                                 (0x12111009)
+//#define PASSWORD_DATA_4                                 (0x16151413)
+
+int gDAPBoardResetPend = 0;     // Indicates if a Board reset is in progress
+int gDAPBoardResetDone = 0;     // Indicates if a local board reset was done
+int gDAPResetWait = 0;          // Used to wait for reset to be asserted
+int gDAPRmtBoardReset = 0;      // Indicates if the reset was triggered by device
+int gDAPBoardResetLen = RESET_LEN_POR; // Duration of NRST pulse
+
+int gDAPSecAPCmd;               // SEC_AP command to execute
+int gDAPSecAPAutoReset;         // Force NRST automatically on command execution
+int gDAPSecAPDataLen;           // Length of data (or zero)
+
+int gDAPCmdWait = 0;            // Flag for command waiting
+int gDAPRxCmd;                  // Stores received command after execution
+int gDAPRxResp;                 // Stores received Response after command execution
+
+// Data to be sent
+int gDAPSecAPData0;
+int gDAPSecAPData1;
+int gDAPSecAPData2;
+int gDAPSecAPData3;
+
+#define GEL_DAP_TIMER_RESET_ASSERT      (1)
+#define GEL_DAP_TIMER_MCUBOOT           (2)
+#define GEL_DAP_REMOTE_RESET            (3)
+#define GEL_DAP_TIMER_COMMAND           (4)
+#define GEL_DAP_REMOTE_COMMAND          (5)
+
+menuitem "MSPM0 DAP Commands"
+
+/*
+ * Called during startup of CS_DAP
+ *  Sets a handler to force external reset if an error is detected
+ */
+StartUp(major, minor, revision, build)
+{
+    GEL_HandleTargetError( ".*-613.*", "\nDAP Connection Error.
+This could be caused by the device having gone to low power mode.
+Try forcing an external reset pressing the 'Force Reset' button.
+If the error persists, try:
+    1) Invoking BSL,
+    2) Calling a DSSM Mass erase, or,
+    3) Calling a DSSM Factory Reset.
+Check device FAQs for more information.",
+    1, "Force Reset", "GEL_DAPInit_MSPM0_Board_Reset()" );
+   GEL_HandleTargetError( ".*-615.*", "\nDAP Connection Error. This could be caused by the device having gone to low power mode.
+Try forcing an external reset.If the error persists, try forcing BSL, a Mass erase or a Factory Reset. Check device FAQs for more information.\n ",
+                         1, "Force Reset", "GEL_DAPInit_MSPM0_Board_Reset()" );
+}
+
+/*
+ * Called after the parent router is connected, but before the target is connected.
+ */
+OnPreTargetConnect()
+{
+}
+
+swapEndianness(value)
+{
+    int swapped;
+
+    swapped = ( (value>>24)&0xff ) | // move byte 3 to byte 0
+              ( (value<<8)&0xff0000 ) | // move byte 1 to byte 2
+              ( (value>>8)&0xff00 ) | // move byte 2 to byte 1
+              ( (value<<24)&0xff000000 ); // byte 0 to byte 3
+
+    return swapped;
+}
+
+/*
+ * Called every time a target is connected.
+ */
+OnTargetConnect()
+{
+
+}
+
+/*
+ * Starts a board reset from the CS_DAP
+ *  Will wait until the reset is completed
+ */
+GEL_DAPInit_MSPM0_Board_Reset()
+{
+    'GEL'::gDAPBoardResetLen = RESET_LEN_BOOTRST;
+    GEL_TextOut("Initiating BOOTRST Board Reset\n");
+    if ('GEL'::gDAPBoardResetDone == 0)
+    {
+        'GEL'::gDAPRmtBoardReset = 0;
+        // Wait and call Mass Erase
+        GEL_SetTimer(1, GEL_DAP_REMOTE_RESET, "GEL_DAPInit_externalReset()");
+        while ('GEL'::gDAPBoardResetDone == 0)
+            ;
+        GEL_TextOut("Board Reset Complete\n");
+        'GEL'::gDAPBoardResetDone = 0;
+    }
+}
+
+/*
+ * Called from the device specific GEL file to force a Reset
+ */
+GEL_DAPInit_remotePORReset()
+{
+    'GEL'::gDAPBoardResetLen = RESET_LEN_POR;
+    GEL_TextOut("Initiating POR Board Reset \n");
+    gDAPRmtBoardReset = 1;
+    // Wait and force a Reset
+    GEL_SetTimer(1, GEL_DAP_REMOTE_RESET, "GEL_DAPInit_externalReset()");
+}
+
+/*
+ * Generates a board reset controlling pulse duration
+ *
+ */
+GEL_DAPInit_externalReset()
+{
+    int childConnected;
+    if ('GEL'::gDAPBoardResetPend == 0)
+    {
+        'GEL'::gDAPBoardResetPend = 1;
+        GEL_CancelTimer(GEL_DAP_REMOTE_RESET);
+        GEL_EvalOnTarget(
+            "SEC_AP",
+            "GEL_AdvancedReset(\"XDS System Reset (Assert)\")",
+            1);
+        GEL_TextOut("Reset line asserted \n");
+        'GEL'::gDAPResetWait = 1;
+        GEL_SetTimer('GEL'::gDAPBoardResetLen,
+                     GEL_DAP_TIMER_RESET_ASSERT,
+                     "GEL_DAPInit_resetDeassert()");
+        while ('GEL'::gDAPResetWait == 1)
+            ;
+        GEL_TextOut("Reset line de-asserted \n");
+        if ('GEL'::gDAPRmtBoardReset == 1)
+        {
+            // Reconnect CS_DAP if needed
+            childConnected = DEBUG_GetBoolProperty("AutoConnectIfChildConnects");
+            if (childConnected == 1)
+            {
+                DEBUG_SetBoolProperty("AutoConnectIfChildConnects", 0);
+            }
+            GEL_TextOut("DAP Disconnect\n");
+            GEL_Disconnect();
+            GEL_TextOut("DAP Reconnect\n");
+            GEL_Connect();
+            if (childConnected == 1)
+            {
+                DEBUG_SetBoolProperty("AutoConnectIfChildConnects", 1);
+            }
+            GEL_EvalOnTarget( "CORTEX_M0P", "gGEL_Reset_Done = 1" );
+        }
+        else
+        {
+            'GEL'::gDAPBoardResetDone = 1;
+        }
+        'GEL'::gDAPBoardResetPend = 0;
+        GEL_TextOut("Reset done\n");
+    }
+}
+
+/*
+ * Callback to de-assert reset line
+ */
+GEL_DAPInit_resetDeassert()
+{
+    GEL_CancelTimer(GEL_DAP_TIMER_RESET_ASSERT);
+    GEL_EvalOnTarget(
+        "SEC_AP",
+        "GEL_AdvancedReset(\"XDS System Reset (De-Assert)\")",
+        1);
+    'GEL'::gDAPResetWait = 0;
+}
+
+/*
+ * Send a SEC_AP command
+ */
+GEL_DAPInit_sendCommand(command)
+{
+    'REG'::SECAP_TCR = command;
+    'REG'::SECAP_TDR = 0;
+}
+
+/*
+ * Waits for a response after a command was executed
+ */
+GEL_DAPInit_WaitForResponse()
+{
+    int cmd;
+
+    do
+    {
+        cmd = (int)('REG'::SECAP_RCR & SECAP_CTL_MASK);
+    }while((cmd & DEBUGSS_SECAP_TCR_TRANSMIT_FULL_MASK) != DEBUGSS_SECAP_TCR_TRANSMIT_FULL_MASK);
+
+    'GEL'::gDAPRxCmd = (cmd & SECAP_CMD_MASK);
+    'GEL'::gDAPRxResp = 'REG'::SECAP_RDR;
+
+    return 1;
+}
+
+/*
+ * Transmit a data packet to SEC_AP
+ */
+GEL_DAPInit_transmitData(length)
+{
+    int i = 0;
+    int cmd;
+    do
+    {
+        cmd = (int)(SECAP_TCR & SECAP_CTL_MASK);
+        if(((cmd & DEBUGSS_SECAP_TCR_TRANSMIT_FULL_MASK) == DEBUGSS_SECAP_TCR_TRANSMIT_EMPTY_MASK) || (i == 0))
+        {
+            if(i == 0)
+            {
+                SECAP_TDR = 'GEL'::gDAPSecAPData0;
+                GEL_TextOut("Data 1 Sent = %x \n",,,,, 'GEL'::gDAPSecAPData0);
+            }
+            else
+            {
+                if(i == 1)
+                {
+                    SECAP_TDR = 'GEL'::gDAPSecAPData1;
+                    GEL_TextOut("Data 2 Sent = %x \n",,,,, 'GEL'::gDAPSecAPData1);
+                }
+                else
+                {
+                    if(i == 2)
+                    {
+                        SECAP_TDR = 'GEL'::gDAPSecAPData2;
+                        GEL_TextOut("Data 3 Sent = %x \n",,,,, 'GEL'::gDAPSecAPData2);
+                    }
+                    else if(i == 3)
+                    {
+                        SECAP_TDR = 'GEL'::gDAPSecAPData3;
+                        GEL_TextOut("Data 4 Sent = %x \n",,,,, 'GEL'::gDAPSecAPData3);
+                    }
+                }
+            }
+            SECAP_TCR = DSSM_DATA_EXCHANGE;
+            i++;
+        }
+    }while(i < length);
+}
+
+/*
+ * Returns from a wait timer
+ */
+GEL_DAPInit_gDAPCmdWaitDone()
+{
+    GEL_CancelTimer(GEL_DAP_TIMER_COMMAND);
+    'GEL'::gDAPCmdWait = 0;
+}
+
+/*
+ * Called from the device specific GEL file to force Factory Reset
+ */
+GEL_DAPInit_remoteMassErase(autoReset)
+{
+    GEL_TextOut("Initiating Device Mass Erase\n");
+    'GEL'::gDAPSecAPDataLen = 0;
+    GEL_DAPInit_remoteSECAPCommand (DSSM_BC_MASS_ERASE, autoReset);
+}
+
+/*
+ * Called from the device specific GEL file to force Factory Reset
+ */
+GEL_DAPInit_remoteFactoryReset(autoReset)
+{
+    GEL_TextOut("Initiating Device Factory Reset\n");
+    'GEL'::gDAPSecAPDataLen = 0;
+    GEL_DAPInit_remoteSECAPCommand (DSSM_BC_FACTORY_RESET, autoReset);
+}
+
+GEL_DAPInit_remotePasswordAuth(autoReset)
+{
+    GEL_TextOut("Initiating Device Password Authentication\n");
+    'GEL'::gDAPSecAPDataLen = PASSWORD_LENGTH;
+    'GEL'::gDAPSecAPData0 = GEL_GetNumericTargetDbProperty("MSPM0SWDPassword0");
+    'GEL'::gDAPSecAPData1 = GEL_GetNumericTargetDbProperty("MSPM0SWDPassword1");
+    'GEL'::gDAPSecAPData2 = GEL_GetNumericTargetDbProperty("MSPM0SWDPassword2");
+    'GEL'::gDAPSecAPData3 = GEL_GetNumericTargetDbProperty("MSPM0SWDPassword3");
+    GEL_TextOut("MSPM0SWDPassword0: %x \n",,,,, 'GEL'::gDAPSecAPData0);
+    GEL_TextOut("MSPM0SWDPassword1 %x \n",,,,, 'GEL'::gDAPSecAPData1);
+    GEL_TextOut("MSPM0SWDPassword2 %x \n",,,,, 'GEL'::gDAPSecAPData2);
+    GEL_TextOut("MSPM0SWDPassword3 %x \n",,,,, 'GEL'::gDAPSecAPData3);
+    GEL_DAPInit_remoteSECAPCommand (DSSM_BC_PW_AUTH, autoReset);
+}
+
+/*
+ * Called from the device specific GEL file to trigger a SEC_AP command
+ */
+GEL_DAPInit_remoteSECAPCommand(command, autoReset)
+{
+    if (GEL_IsConnected() == 0)
+    {
+        // connect the DAP first
+        GEL_TextOut("Attempting CS_DAP connection\n");
+        GEL_Connect();
+    }
+    if (GEL_EvalOnTarget( "SEC_AP",  "GEL_IsConnected()", 1) == 0)
+    {
+        GEL_TextOut("Attempting SEC_AP connection\n");
+        GEL_EvalOnTarget( "SEC_AP",  "GEL_Connect()", 1);
+    }
+    'GEL'::gDAPSecAPAutoReset = autoReset;
+    'GEL'::gDAPSecAPCmd = command;
+
+    // Wait and call Factory Reset
+    GEL_SetTimer(1, GEL_DAP_REMOTE_COMMAND, "GEL_DAPInit_SECAPCommand()");
+}
+
+GEL_DAPInit_SECAPCommand()
+{
+    int receivedCmd;
+    int receivedResp;
+    int success = 0;
+
+    GEL_CancelTimer(GEL_DAP_REMOTE_COMMAND);
+    GEL_DAPInit_sendCommand('GEL'::gDAPSecAPCmd);
+    GEL_TextOut("Command Sent\n");
+
+    'GEL'::gDAPCmdWait = 1;
+    GEL_SetTimer(1000, GEL_DAP_TIMER_COMMAND, "GEL_DAPInit_gDAPCmdWaitDone()");
+    while('GEL'::gDAPCmdWait == 1)
+        ;
+
+    if ('GEL'::gDAPSecAPAutoReset == 1)
+    {
+        GEL_TextOut("Start hardware Reset using NRST\n");
+        GEL_DAPInit_MSPM0_Board_Reset();
+        GEL_TextOut("SEC_AP Disconnect\n");
+        GEL_EvalOnTarget( "SEC_AP",  "GEL_Disconnect()", 1);
+        GEL_TextOut("SEC_AP Reconnect\n");
+        GEL_EvalOnTarget( "SEC_AP",  "GEL_Connect()", 1);
+
+    }
+    else
+    {
+        GEL_TextOut("Press the reset button...\n");
+    }
+
+    GEL_DAPInit_WaitForResponse();
+    if ( ('GEL'::gDAPRxCmd != ('GEL'::gDAPSecAPCmd & SECAP_CMD_MASK)) ||
+         (('GEL'::gDAPRxResp >> 8) != DSSM_CMD_RECEIVED) )
+    {
+        GEL_TextOut("Command = %x \n",,,,, 'GEL'::gDAPRxCmd);
+        GEL_TextOut("Response = %x \n",,,,, 'GEL'::gDAPRxResp);
+    }
+    else
+    {
+        if ('GEL'::gDAPSecAPDataLen > 0)
+        {
+            GEL_TextOut("Send Data...\n");
+            GEL_DAPInit_transmitData('GEL'::gDAPSecAPDataLen);
+            GEL_DAPInit_WaitForResponse();
+            if ( ('GEL'::gDAPRxCmd != ('GEL'::gDAPSecAPCmd & SECAP_CMD_MASK)) ||
+                 (('GEL'::gDAPRxResp >> 8) != 0x200) )
+            {
+                GEL_TextOut("Command = %x \n",,,,, 'GEL'::gDAPRxCmd);
+                GEL_TextOut("Response = %x \n",,,,, 'GEL'::gDAPRxResp);
+            }
+            else
+            {
+                success = 1;
+            }
+        }
+        else
+        {
+            success = 1;
+        }
+    }
+
+    if (success == 1)
+    {
+        GEL_TextOut("Command execution completed.\n");
+    }
+    else
+    {
+        GEL_TextOut("Command execution failed.\n");
+    }
+    GEL_EvalOnTarget( "CORTEX_M0P", "gGEL_RemoteCmd_Done = 1" );
+}
+
+hotmenu MSPM0_MassErase_Manual()
+{
+    // Wait and call Mass Erase
+    'GEL'::gDAPSecAPAutoReset = 0;
+    'GEL'::gDAPSecAPCmd = DSSM_BC_MASS_ERASE;
+    GEL_SetTimer(2, GEL_DAP_REMOTE_COMMAND, "GEL_DAPInit_SECAPCommand()");
+}
+
+hotmenu MSPM0_FactoryReset_Manual()
+{
+    // Wait and call Factory Reset
+    'GEL'::gDAPSecAPAutoReset = 0;
+    'GEL'::gDAPSecAPCmd = DSSM_BC_FACTORY_RESET;
+    GEL_SetTimer(2, GEL_DAP_REMOTE_COMMAND, "GEL_DAPInit_SECAPCommand()");
+}

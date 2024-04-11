@@ -1,0 +1,60 @@
+//---------------------------------------------------------
+// OMAP3430_ICEPick.gel                                         
+// version 0.03                                                                       
+//                                                                                            
+// SUMMARY:                                                                        
+//                                                                   
+// This gel file is to be used to configure the ICEPick            
+// register on OMAP3430 device                                          
+// LIMITATIONS:                                                                     
+//                                                                                            
+//                                                                                            
+//---------------------------------------------------------
+
+//------------------ --------------------------------------
+// FUNCTION SUMMARY                                                           
+//                                                                                            
+// ClearDSPReset   -- Clear reset mode for DSP                   
+// ClearARM9Reset  -- Clear reset mode for ARM9             
+//                                                                                          
+//---------------------------------------------------------
+
+#define ICEPICKC_TAP_RESET_CONTROL   0x3C000  // bits 17:14
+#define ICEPICKC_TAP_ACCESSIBLE      0x0002   // bit 1
+#define ICEPICKC_TAP_PRESENT         0x0001   // bit 0
+
+OnTargetConnect() 
+{
+   // Uncomment only if no DSP debugger is desired
+   // Otherwise, clear WIR from DSP debugger (HaltOnReset Debug menu item)
+   //
+   // ClearDSPReset();      // Clear reset mode for DSP 
+  
+   // Uncomment only if no ARM9 debugger is desired
+   // Otherwise, clear WIR from ARM9 debugger (HaltOnReset Debug menu item) 
+   // 
+   //  ClearARM9Reset();     /* Clear reset mode for ARM9 */
+  
+}
+
+ClearDSPReset() 
+{
+   // Only clear the bit when the tap is accessible 
+  if ( ( IP_TAP_CNTL_1 & ICEPICKC_TAP_ACCESSIBLE ) && 
+      (  IP_TAP_CNTL_1 & ICEPICKC_TAP_PRESENT ) ) 
+ {
+     // DSP is subpath 1 on omap3430 
+    IP_TAP_CNTL_1 &= ~ICEPICKC_TAP_RESET_CONTROL;
+  }
+}
+
+ClearARM9Reset() 
+{
+   // Only clear the bit when the tap is accessible 
+  if ( ( IP_TAP_CNTL_2 & ICEPICKC_TAP_ACCESSIBLE ) && 
+      (  IP_TAP_CNTL_2 & ICEPICKC_TAP_PRESENT ) ) 
+  {
+     // ARM9 is subpath 2 on omap3430 
+    IP_TAP_CNTL_2 &= ~ICEPICKC_TAP_RESET_CONTROL;
+  }
+}

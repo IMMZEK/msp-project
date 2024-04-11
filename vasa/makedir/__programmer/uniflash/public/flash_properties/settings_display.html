@@ -1,0 +1,55 @@
+<!-- Settings search bar -->
+<div class="uf-search-bar">
+	<table style="width:100%">
+		<tr>
+			<!-- search icon -->
+			<td class="uf-flash-properties-search-input-container"><i class="material-icons" style="font-size:16px;top:4px;left:2px;position:relative;">search</i> 
+			<!-- search text -->
+			<span class="uf-line-btn-text">Search:</span></td>
+			<!-- search input -->
+			<td style="padding-right:10px;position:relative;" uib-tooltip="Search for settings and buttons by name/description/related settings" tooltip-placement="bottom" tooltip-enable="vm.settingsUtilFilter===''" tooltip-append-to-body="true">
+				<input class="uf-flash-properties-search-input" type="text" id="settings-search-filter" placeholder="Enter Property ID Or Name To Search For Settings and Buttons" ng-model="vm.settingsUtilFilter" ng-change="vm.ufPropertiesDB.setFilter(vm.settingsUtilFilter)" ng-style="vm.settingsUtilFilter&&{'font-weight':'500','font-size':'14px','color':'#115566'}||{'font-size':'13px'}"><i class="uf-flash-properties-search-clear material-icons" id="clear-settings-search-filter" ng-click="vm.ufPropertiesDB.setFilter('');vm.settingsUtilFilter='';" title="Clear filter">clear</i>
+			</td>
+			<!-- more info button -->
+			<td class="uf-line-btn uf-settings-btn-description" id="description-toggle" ng-click="vm.toggleDescriptionSetting();" uib-tooltip="Show description, setting ID, and other information for each setting." tooltip-placement="bottom" tooltip-popup-delay="500" tooltip-trigger="mouseenter click"  tooltip-append-to-body="true" ng-class="{'active':vm.ufSettingsDisplayControlSrv.showDescription}" style="padding:0;margin:0;">
+				<i class="material-icons">list</i><span class="uf-line-btn-text">More Info</span>
+			</td>
+			<!-- quick settings button -->
+			<td class="uf-line-btn uf-settings-btn-pin" id="pin-toggle" ng-click="vm.togglePinSetting();" uib-tooltip="Show pin to Quick Settings option for each setting. Pinned settings appear in Quick Settings in the Program view." tooltip-placement="bottom" tooltip-popup-delay="500" tooltip-trigger="mouseenter click" tooltip-append-to-body="true" ng-class="{'active':vm.ufSettingsDisplayControlSrv.showPinSetting}">
+				<i class="material-icons">add_circle</i><span class="uf-line-btn-text">Pin Option</span>
+			</td>
+		</tr>
+	</table>
+</div>
+<!-- Flash settings -->
+<div class="uf-main-content">
+	<div>
+		<!-- Quick Settings info -->
+        <div ng-show="vm.ufSettingsDisplayControlSrv.showPinSetting" style="position:relative;top:-7px;text-align:right;">
+			<span class="label label-info" style="position:relative;top:-2px;">INFO</span> Click <i class="material-icons" style="font-size:14px;color:#777;">add_circle</i> on a setting to add it to Quick Settings in the <a href="" ng-click="vm.goToPrograms();"><span style="font-weight:500;color:#118899;" >Programs</span></a> view
+		</div>
+        <!-- No Flash Settings -->
+		<div ng-show="vm.ufPropertiesDB.getPropertiesList(false,vm.ufContext.getCurrentCore().name).length===0" style="padding:3px;text-align:center;">
+			<span class="label label-info" style="position:relative;top:-2px;font-size:11px;padding:2px 4px;">INFO</span> <span style="font-size:14px;">No Flash settings/utilities available for selected core.</span>
+		</div>
+        <!-- Categories -->
+		<div class="uf-flash-properties-category" ng-repeat="category in vm.ufPropertiesDB.getCategoryList(vm.ufContext.getCurrentCore().name)" ng-show="vm.displaySelect==='0'&&vm.ufPropertiesDB.getCategoryList(vm.ufContext.getCurrentCore().name).length>1">
+			<uf-property-category category="{{vm.ufPropertiesDB.getCategoryName(category)}}" showButton="true" expand="true" searchable="true" toggle="{{category._toggle}}" read="{{category._read}}"></uf-property-category>
+		</div>
+        <!-- Flat Display -->
+        <div ng-show="vm.ufPropertiesDB.getCategoryList(vm.ufContext.getCurrentCore().name).length===1">
+            <div ng-repeat="prop in propertyList = vm.ufPropertiesDB.getPropertiesList(true,vm.ufContext.getCurrentCore().name)"  style="margin:3px 8px;" ng-show="prop._id!=='FlashVerboseMode'">
+                <div ng-style="prop.valueType==='Button'&&!vm.ufSettingsDisplayControlSrv.showPinSetting&&{'display':'inline'}" ng-class="{'highlight_hover_light3':vm.ufSettingsDisplayControlSrv.showPinSetting}" style="position:relative;">	
+                    <uf-property id="{{prop._id}}" title="ID: {{prop._id}}" searchable="true"></uf-property>
+                    <div ng-show="vm.ufSettingsDisplayControlSrv.showPinSetting" style="display:inline-block;position:absolute;top:0;right:0;cursor:pointer;" id="pin-{{prop._id}}" ng-click="vm.ufQuickSettingsSrv.addEntry(prop._id,'property');" ng-class="{'disabled':vm.ufQuickSettingsSrv.added(prop._id,'property')}">
+                        <i class="material-icons" style="color:#777;font-size:20px;" title="Add to Quick Settings">add_circle</i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Utilities -->
+		<div ng-show="vm.displaySelect==='1'" style="padding:0 3px">
+			<uf-utilities></uf-utilities>
+		</div>
+	</div>
+</div>

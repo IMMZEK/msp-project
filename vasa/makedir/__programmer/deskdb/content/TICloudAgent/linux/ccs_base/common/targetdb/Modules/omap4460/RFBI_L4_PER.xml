@@ -1,0 +1,232 @@
+<module name="RFBI_L4_PER" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="RFBI_REVISION" acronym="RFBI_REVISION" offset="0x0" width="32" description="This register contains the IP revision.">
+    <bitfield id="REVISON" width="32" begin="31" end="0" resetval="See" description="IP revision" range="" rwaccess="R"/>
+  </register>
+  <register id="RFBI_SYSCONFIG" acronym="RFBI_SYSCONFIG" offset="0x10" width="32" description="This register controls various parameters of the slave port interface.">
+    <bitfield id="RESERVED" width="25" begin="31" end="7" resetval="0x0000000" description="Write 0's for future compatibility. Reads returns 0." range="" rwaccess="RO"/>
+    <bitfield id="RESERVED" width="1" begin="6" end="6" resetval="0" description="Write 0's for future compatibility. Reads returns 0." range="" rwaccess="RO"/>
+    <bitfield id="RESERVED" width="1" begin="5" end="5" resetval="0" description="Write 0's for future compatibility. Reads returns 0." range="" rwaccess="RO"/>
+    <bitfield id="SIDLEMODE" width="2" begin="4" end="3" resetval="0x0" description="Slave interface power management, Idle req/ack control." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="SIDLEMODE_0" description="Force-idle. An idle request is acknowledged unconditionally."/>
+      <bitenum value="1" id="1" token="SIDLEMODE_1" description="No-idle. An idle request is never acknowledged"/>
+      <bitenum value="2" id="2" token="SIDLEMODE_2" description="Smart-idle. Acknowledgement to an idle request is given based on the internal activity of the module."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0" description="Write 0's for future compatibility. Reads returns 0." range="" rwaccess="RO"/>
+    <bitfield id="SOFTRESET" width="1" begin="1" end="1" resetval="0" description="Software reset Sets this bit to 1 to trigger a module reset. The bit is automatically reset by the hardware. During reads, it always returns 0." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="SOFTRESET_0" description="Normal mode"/>
+      <bitenum value="1" id="1" token="SOFTRESET_1" description="The module is reset"/>
+    </bitfield>
+    <bitfield id="AUTOIDLE" width="1" begin="0" end="0" resetval="1" description="Internal clock gating strategy (RFBI_ICLK clock and DISPC clock)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="AUTOIDLE_0" description="RFBI_ICLK clock and DISPC clock are free-running"/>
+      <bitenum value="1" id="1" token="AUTOIDLE_1" description="Automatic clock gating strategy is applied for the RFBI_ICLK clock and DISPC clock, based on the slave port interface and internal activity."/>
+    </bitfield>
+  </register>
+  <register id="RFBI_SYSSTATUS" acronym="RFBI_SYSSTATUS" offset="0x14" width="32" description="This register provides status information about the module, excluding the interrupt status information.">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x000000" description="Reserved for module-specific status information Read returns 0" range="" rwaccess="RO"/>
+    <bitfield id="BUSYRFBIDATA" width="1" begin="9" end="9" resetval="0" description="Data are pending to be processed from interconnect FIFO." range="" rwaccess="R">
+      <bitenum value="0" id="0" token="BUSYRFBIDATA_0_r" description="No data pending"/>
+      <bitenum value="1" id="1" token="BUSYRFBIDATA_1_r" description="Some data are pending"/>
+    </bitfield>
+    <bitfield id="BUSY" width="1" begin="8" end="8" resetval="0" description="Slave port busy status bit" range="" rwaccess="R">
+      <bitenum value="0" id="0" token="BUSY_0_r" description="The access to the following register is not stalled:, , , ."/>
+      <bitenum value="1" id="1" token="BUSY_1_r" description="The access to any of the following registers is stalled:, , , ."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="7" end="1" resetval="0x00" description="Reserved. Read returns 0." range="" rwaccess="RO"/>
+    <bitfield id="RESETDONE" width="1" begin="0" end="0" resetval="1" description="Internal reset monitoring. It can be used to determine when a hardware reset is completed or when a software reset is completed (software has setRFBI_SYSCONFIG[0] SOFTRESET to 1)." range="" rwaccess="R">
+      <bitenum value="0" id="0" token="RESETDONE_0_r" description="Internal module reset is ongoing"/>
+      <bitenum value="1" id="1" token="RESETDONE_1_r" description="Reset completed"/>
+    </bitfield>
+  </register>
+  <register id="RFBI_CONTROL" acronym="RFBI_CONTROL" offset="0x40" width="32" description="The register configures the RFBI module.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x000000" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="SMART_DMA_REQ" width="1" begin="8" end="8" resetval="0" description="Smart DMA request" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="SMART_DMA_REQ_0" description="The dmareq is asserted and deasserted depending on FIFO space even if MIdlereq is high in smart-idle/no-idle mode and the entire burst gets error responses from the module."/>
+      <bitenum value="1" id="1" token="SMART_DMA_REQ_1" description="The dmareq is deasserted after 2 clock cycles if it has been asserted for more than or equal to 2 clock cycles and MIdlereq is high in smart-idle or no-idle mode. No more burst requests will be given even if the space is available in the FIFO."/>
+    </bitfield>
+    <bitfield id="DISABLE_DMA_REQ" width="1" begin="7" end="7" resetval="0" description="Disable DMA request" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="DISABLE_DMA_REQ_0" description="The dmareq is enabled and the signal is generated based on the space available and the request coming into the data register."/>
+      <bitenum value="1" id="1" token="DISABLE_DMA_REQ_1" description="The dmareq is disabled and the signal is not generated at all based on space in FIFO. It stays high until the DISABLE DM AREQ is high even if there is space in FIFO to take requests."/>
+    </bitfield>
+    <bitfield id="HIGHTHRESHOLD" width="2" begin="6" end="5" resetval="0x0" description="Defines the FIFO high threshold used by hardware to assert DMA request. Used only if data written toRFBI_DATA are sent using system DMA." range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="HIGHTHRESHOLD_0" description="Size of the transfer of 4 words of 32-bit wide"/>
+      <bitenum value="1" id="1" token="HIGHTHRESHOLD_1" description="Size of the transfer of 8 words of 32-bit wide"/>
+      <bitenum value="2" id="2" token="HIGHTHRESHOLD_2" description="Size of the transfer of 16 words of 32-bit wide"/>
+    </bitfield>
+    <bitfield id="ITE" width="1" begin="4" end="4" resetval="0" description="Internal Trigger" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="ITE_0" description="Hardware waits for ITE bit to be set if in internal trigger mode for the configuration in use."/>
+      <bitenum value="1" id="1" token="ITE_1" description="User sets the ITE bit to start the transfer, when hardware takes into account the bit, the hardware resets it."/>
+    </bitfield>
+    <bitfield id="CONFIGSELECT" width="2" begin="3" end="2" resetval="0x0" description="Select the CS and configuration" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="CONFIGSELECT_0" description="No CS selected"/>
+      <bitenum value="1" id="1" token="CONFIGSELECT_1" description="CS0 selected"/>
+      <bitenum value="2" id="2" token="CONFIGSELECT_2" description="Reserved"/>
+      <bitenum value="3" id="3" token="CONFIGSELECT_3" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RFBIMODE" width="1" begin="1" end="1" resetval="1" description="RFBI Mode" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="RFBIMODE_0" description="The RFBI mode is selected."/>
+      <bitenum value="1" id="1" token="RFBIMODE_1" description="The RFBI mode is not selected."/>
+    </bitfield>
+    <bitfield id="ENABLE" width="1" begin="0" end="0" resetval="0" description="Enable/Disable flag" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="ENABLE_0" description="Disable the RFBI module."/>
+      <bitenum value="1" id="1" token="ENABLE_1" description="Enable the RFBI module."/>
+    </bitfield>
+  </register>
+  <register id="RFBI_PIXEL_CNT" acronym="RFBI_PIXEL_CNT" offset="0x44" width="32" description="The register configures the RFBI pixel count value.">
+    <bitfield id="PIXELCNT" width="32" begin="31" end="0" resetval="0x0000 0000" description="Pixel counter value The software indicates the number of pixels to transfer to the LCD panel frame buffer. The value is set when the module is disabled. During the transfer the hardware decrements the register when a pixel has been sent to the RFB." range="" rwaccess="RW"/>
+  </register>
+  <register id="RFBI_LINE_NUMBER" acronym="RFBI_LINE_NUMBER" offset="0x48" width="32" description="The register configures the number of lines to synchronize the beginning of the transfer.">
+    <bitfield id="RESERVED" width="21" begin="31" end="11" resetval="0x000000" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="LINENUMBER" width="11" begin="10" end="0" resetval="0x000" description="Programmable line numberLine number from 0 to 2047. Number of HSYNC after the VSYNC occurs before the beginning of the transfer." range="" rwaccess="RW"/>
+  </register>
+  <register id="RFBI_CMD" acronym="RFBI_CMD" offset="0x4C" width="32" description="The register configures the RFBI command.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="CMD" width="8" begin="7" end="0" resetval="0x00" description="Command Value" range="" rwaccess="W"/>
+  </register>
+  <register id="RFBI_PARAM" acronym="RFBI_PARAM" offset="0x50" width="32" description="The register configures the RFBI parameter.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="PARAM" width="8" begin="7" end="0" resetval="0x00" description="Parameter value" range="" rwaccess="W"/>
+  </register>
+  <register id="RFBI_DATA" acronym="RFBI_DATA" offset="0x54" width="32" description="The register configures the RFBI data.">
+    <bitfield id="DATA" width="32" begin="31" end="0" resetval="0x0000 0000" description="Data value 12/16/18/24/2x16 bit value depending on:DataType [11:0] 12-bit DataType [15:0] 16-bit DataType [17:0] 18-bit DataType [23:0] 24-bit DataType [31:0] 2x16-bit" range="" rwaccess="W"/>
+  </register>
+  <register id="RFBI_READ" acronym="RFBI_READ" offset="0x58" width="32" description="The register configures the RFBI read.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="READ" width="8" begin="7" end="0" resetval="0x00" description="Read value" range="" rwaccess="RW"/>
+  </register>
+  <register id="RFBI_STATUS" acronym="RFBI_STATUS" offset="0x5C" width="32" description="The register configures the RFBI status.">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x000000" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="STATUS" width="8" begin="7" end="0" resetval="0x00" description="Status value" range="" rwaccess="RW"/>
+  </register>
+  <register id="RFBI_CONFIG" acronym="RFBI_CONFIG" offset="0x60" width="32" description="The control register sets the configuration for the LCD 0 and LCD 1.">
+    <bitfield id="RESERVED" width="10" begin="31" end="22" resetval="0x000" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="HSYNCPOLARITY" width="1" begin="21" end="21" resetval="1" description="HSYNC polarity" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="HSYNCPOLARITY_0" description="HSYNC active low"/>
+      <bitenum value="1" id="1" token="HSYNCPOLARITY_1" description="HSYNC active high"/>
+    </bitfield>
+    <bitfield id="TE_VSYNC_POLARITY" width="1" begin="20" end="20" resetval="1" description="TE or VSYNC polarity" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="TE_VSYNC_POLARITY_0" description="active low"/>
+      <bitenum value="1" id="1" token="TE_VSYNC_POLARITY_1" description="active high"/>
+    </bitfield>
+    <bitfield id="CSPOLARITY" width="1" begin="19" end="19" resetval="0" description="CS polarity" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="CSPOLARITY_0" description="CS active low"/>
+      <bitenum value="1" id="1" token="CSPOLARITY_1" description="CS active high"/>
+    </bitfield>
+    <bitfield id="WEPOLARITY" width="1" begin="18" end="18" resetval="0" description="WE polarity" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="WEPOLARITY_0" description="Active low"/>
+      <bitenum value="1" id="1" token="WEPOLARITY_1" description="Active high"/>
+    </bitfield>
+    <bitfield id="REPOLARITY" width="1" begin="17" end="17" resetval="0" description="RE polarity" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="REPOLARITY_0" description="Active low"/>
+      <bitenum value="1" id="1" token="REPOLARITY_1" description="Active high"/>
+    </bitfield>
+    <bitfield id="A0POLARITY" width="1" begin="16" end="16" resetval="1" description="A0 polarity" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="A0POLARITY_0" description="A0 active low"/>
+      <bitenum value="1" id="1" token="A0POLARITY_1" description="A0 active high"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="3" begin="15" end="13" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="UNUSEDBITS" width="2" begin="12" end="11" resetval="0x0" description="State of unused bits" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="UNUSEDBITS_0" description="Low level (0)"/>
+      <bitenum value="1" id="1" token="UNUSEDBITS_1" description="High level (1)"/>
+      <bitenum value="2" id="2" token="UNUSEDBITS_2" description="Unchanged from previous state"/>
+    </bitfield>
+    <bitfield id="CYCLEFORMAT" width="2" begin="10" end="9" resetval="0x0" description="Cycle format" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="CYCLEFORMAT_0" description="1 cycle for 1 pixel"/>
+      <bitenum value="1" id="1" token="CYCLEFORMAT_1" description="2 cycles for 1 pixel"/>
+      <bitenum value="2" id="2" token="CYCLEFORMAT_2" description="3 cycles for 1 pixel"/>
+      <bitenum value="3" id="3" token="CYCLEFORMAT_3" description="3 cycles for 2 pixels"/>
+    </bitfield>
+    <bitfield id="PORTFORMAT" width="2" begin="8" end="7" resetval="0x0" description="Slave port write access format" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="PORTFORMAT_0" description="1 pixel per slave port access to the register data"/>
+      <bitenum value="2" id="2" token="PORTFORMAT_2" description="2 pixels per slave port access to the register data with first pixel at the position [15:0]"/>
+      <bitenum value="3" id="3" token="PORTFORMAT_3" description="2 pixels per slave port access to the register data with first pixel at the position [31:16]"/>
+    </bitfield>
+    <bitfield id="DATATYPE" width="2" begin="6" end="5" resetval="0x0" description="Data type from the DISPC and slave port" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="DATATYPE_0" description="12-bit"/>
+      <bitenum value="1" id="1" token="DATATYPE_1" description="16-bit"/>
+      <bitenum value="2" id="2" token="DATATYPE_2" description="18-bit"/>
+      <bitenum value="3" id="3" token="DATATYPE_3" description="24-bit"/>
+    </bitfield>
+    <bitfield id="TIMEGRANULARITY" width="1" begin="4" end="4" resetval="0" description="Multiplies signal timing latencies by 2" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="TIMEGRANULARITY_0" description="x2 latencies disabled"/>
+      <bitenum value="1" id="1" token="TIMEGRANULARITY_1" description="x2 latencies enabled"/>
+    </bitfield>
+    <bitfield id="TRIGGERMODE" width="2" begin="3" end="2" resetval="0x0" description="Trigger mode" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="TRIGGERMODE_0" description="00 Internal trigger mode (ITE bit mode)"/>
+      <bitenum value="1" id="1" token="TRIGGERMODE_1" description="External trigger mode (Tearing Effect Signal, rfbi_tevsync0 with programmable line counter defined in register)"/>
+      <bitenum value="2" id="2" token="TRIGGERMODE_2" description="External trigger mode (rfbi_tevsync0/rfbi_hsync0 with programmable line counter defined in register)"/>
+    </bitfield>
+    <bitfield id="PARALLELMODE" width="2" begin="1" end="0" resetval="0x0" description="Parallel mode" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="PARALLELMODE_0" description="8-bit parallel output interface selected"/>
+      <bitenum value="1" id="1" token="PARALLELMODE_1" description="9-bit parallel output interface selected"/>
+      <bitenum value="2" id="2" token="PARALLELMODE_2" description="Reserved"/>
+      <bitenum value="3" id="3" token="PARALLELMODE_3" description="16-bit parallel output interface selected"/>
+    </bitfield>
+  </register>
+  <register id="RFBI_ONOFF_TIME" acronym="RFBI_ONOFF_TIME" offset="0x64" width="32" description="The control register configures the RFBI timings for the LCD 0 and LCD 1.">
+    <bitfield id="RESERVED" width="2" begin="31" end="30" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="REOFFTIME" width="6" begin="29" end="24" resetval="0x00" description="Read enable deassertion time from start access time. Number of RFBI_ICLK cycles" range="" rwaccess="RW"/>
+    <bitfield id="REONTIME" width="4" begin="23" end="20" resetval="0x0" description="Read enable assertion time from start access time. Number of RFBI_ICLK cycles" range="" rwaccess="RW"/>
+    <bitfield id="WEOFFTIME" width="6" begin="19" end="14" resetval="0x00" description="Write enable deassertion time from start access time. Number of RFBI_ICLK cycles" range="" rwaccess="RW"/>
+    <bitfield id="WEONTIME" width="4" begin="13" end="10" resetval="0x0" description="Write enable assertion time from start access time. Number of RFBI_ICLK cycles" range="" rwaccess="RW"/>
+    <bitfield id="CSOFFTIME" width="6" begin="9" end="4" resetval="0x00" description="CS deassertion time from start access time. Number of RFBI_ICLK cycles" range="" rwaccess="RW"/>
+    <bitfield id="CSONTIME" width="4" begin="3" end="0" resetval="0x0" description="CS assertion time from start access time. Number of RFBI_ICLK cycles" range="" rwaccess="RW"/>
+  </register>
+  <register id="RFBI_CYCLE_TIME" acronym="RFBI_CYCLE_TIME" offset="0x68" width="32" description="The control register configures the RFBI timings for the LCD 0 and LCD 1.">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="ACCESSTIME" width="6" begin="27" end="22" resetval="0x00" description="Access time number of RFBI_ICLK cycles" range="" rwaccess="RW"/>
+    <bitfield id="WRENABLE" width="1" begin="21" end="21" resetval="0" description="Write-to-read pulse width enable (same CS)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="WRENABLE_0" description="CSPULSEWIDTH does not apply on Write-to-Read access"/>
+      <bitenum value="1" id="1" token="WRENABLE_1" description="CSPULSEWIDTH applies on Write-to-Read access"/>
+    </bitfield>
+    <bitfield id="WWENABLE" width="1" begin="20" end="20" resetval="0" description="Write-to-write pulse width enable (same CS)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="WWENABLE_0" description="CSPULSEWIDTH does not apply on Write-to-Write access"/>
+      <bitenum value="1" id="1" token="WWENABLE_1" description="CSPULSEWIDTH applies on Write-to-Write access"/>
+    </bitfield>
+    <bitfield id="RRENABLE" width="1" begin="19" end="19" resetval="0" description="Read-to-read pulse width enable (same CS)" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="RRENABLE_0" description="CSPULSEWIDTH does not apply on Read-to-Read access"/>
+      <bitenum value="1" id="1" token="RRENABLE_1" description="CSPULSEWIDTH applies on Read-to-Read access"/>
+    </bitfield>
+    <bitfield id="RWENABLE" width="1" begin="18" end="18" resetval="0" description="Read-to-write pulse width enable (same CS):0x0: CSPULSEWIDTH does not apply on Read-to-Write access 0x1: CSPULSEWIDTH applies on Read-to-Write access" range="" rwaccess="RW"/>
+    <bitfield id="CSPULSEWIDTH" width="6" begin="17" end="12" resetval="0x00" description="CS pulse width number of RFBI_ICLK cycles" range="" rwaccess="RW"/>
+    <bitfield id="RECYCLETIME" width="6" begin="11" end="6" resetval="0x00" description="RE cycle time number of RFBI_ICLK cycles" range="" rwaccess="RW"/>
+    <bitfield id="WECYCLETIME" width="6" begin="5" end="0" resetval="0x00" description="WE cycle time number of RFBI_ICLK cycles" range="" rwaccess="RW"/>
+  </register>
+  <register id="RFBI_DATA_CYCLEi_0" acronym="RFBI_DATA_CYCLEi_0" offset="0x6C" width="32" description="The control register configures the RFBI data format for ith cycle (i = 1 for firstcycle, i = 2 for second cycle, i = 3 for thrid cycle).">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="BITALIGNMENTPIXEL2" width="4" begin="27" end="24" resetval="0x0" description="Alignment of the bits from pixel 2 on the output interface" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="23" end="21" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="NBBITSPIXEL2" width="5" begin="20" end="16" resetval="0x00" description="Number of bits from the pixel 2 (value from 0 to 16 bits). The values from 17 to 31 are invalid." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="BITALIGNMENTPIXEL1" width="4" begin="11" end="8" resetval="0x0" description="Alignment of the bits from pixel 1 on the output interface" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="7" end="5" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="NBBITSPIXEL1" width="5" begin="4" end="0" resetval="0x00" description="Number of bits from the pixel 1 (value from 0 to 16 bits). The values from 17 to 31 are invalid." range="" rwaccess="RW"/>
+  </register>
+  <register id="RFBI_DATA_CYCLEi_1" acronym="RFBI_DATA_CYCLEi_1" offset="0x70" width="32" description="The control register configures the RFBI data format for ith cycle (i = 1 for firstcycle, i = 2 for second cycle, i = 3 for thrid cycle).">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="BITALIGNMENTPIXEL2" width="4" begin="27" end="24" resetval="0x0" description="Alignment of the bits from pixel 2 on the output interface" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="23" end="21" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="NBBITSPIXEL2" width="5" begin="20" end="16" resetval="0x00" description="Number of bits from the pixel 2 (value from 0 to 16 bits). The values from 17 to 31 are invalid." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="BITALIGNMENTPIXEL1" width="4" begin="11" end="8" resetval="0x0" description="Alignment of the bits from pixel 1 on the output interface" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="7" end="5" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="NBBITSPIXEL1" width="5" begin="4" end="0" resetval="0x00" description="Number of bits from the pixel 1 (value from 0 to 16 bits). The values from 17 to 31 are invalid." range="" rwaccess="RW"/>
+  </register>
+  <register id="RFBI_DATA_CYCLEi_2" acronym="RFBI_DATA_CYCLEi_2" offset="0x74" width="32" description="The control register configures the RFBI data format for ith cycle (i = 1 for firstcycle, i = 2 for second cycle, i = 3 for thrid cycle).">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="BITALIGNMENTPIXEL2" width="4" begin="27" end="24" resetval="0x0" description="Alignment of the bits from pixel 2 on the output interface" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="23" end="21" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="NBBITSPIXEL2" width="5" begin="20" end="16" resetval="0x00" description="Number of bits from the pixel 2 (value from 0 to 16 bits). The values from 17 to 31 are invalid." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="4" begin="15" end="12" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="BITALIGNMENTPIXEL1" width="4" begin="11" end="8" resetval="0x0" description="Alignment of the bits from pixel 1 on the output interface" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="7" end="5" resetval="0x0" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="NBBITSPIXEL1" width="5" begin="4" end="0" resetval="0x00" description="Number of bits from the pixel 1 (value from 0 to 16 bits). The values from 17 to 31 are invalid." range="" rwaccess="RW"/>
+  </register>
+  <register id="RFBI_VSYNC_WIDTH" acronym="RFBI_VSYNC_WIDTH" offset="0x90" width="32" description="The register configures the RFBI VSYNC minimum pulse width.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="MINVSYNCPULSEWIDTH" width="16" begin="15" end="0" resetval="0x0000" description="Programmable minimum VSYNC pulse width Minimum VSYNC pulse width from 0 to 65535. Number of RFBI_ICLK clock cycles to determine when VSYNC pulse occurs. The values 0 and 1 are invalid." range="" rwaccess="RW"/>
+  </register>
+  <register id="RFBI_HSYNC_WIDTH" acronym="RFBI_HSYNC_WIDTH" offset="0x94" width="32" description="The register configures the RFBI HSYNC minimum pulse width.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Write 0's for future compatibility. Reads return 0." range="" rwaccess="RO"/>
+    <bitfield id="MINHSYNCPULSEWIDTH" width="16" begin="15" end="0" resetval="0x0000" description="Programmable minimum HSYNC pulse width minimum HSYNC pulse width from 0 to 65535. Number of RFBI_ICLK clock cycles to determine when HSYNC pulse occurs.The values 0 and 1 are invalid." range="" rwaccess="RW"/>
+  </register>
+</module>

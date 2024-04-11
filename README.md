@@ -5,7 +5,11 @@ VASA (Voice-Activated Smart Assistant)
 
 ## C2000WARE (SDK)
 Used:  Version: 5.01.00.00 Release date: 20 Nov 2023 
-(C2000WARE SDK LINK)[https://www.ti.com/tool/C2000WARE#downloads]
+[C2000WARE SDK LINK](https://www.ti.com/tool/C2000WARE#downloads)
+
+## UNIFLASH (programmer/flasher)
+Used:  Version: 8.6.0 Release date: 07 Feb 2024 
+[UNIFLASH LINK](https://www.ti.com/tool/UNIFLASH#downloads)
 
 ### i386
 <details><summary>Arch</summary>
@@ -23,7 +27,7 @@ sudo pacman -Syu
 
 3. Install 32-bit libraries
 ```
-sudo pacman -S lib32-glibc lib32-ncurses lib32-gcc-libs
+sudo pacman -S lib32-glibc lib32-ncurses lib32-gcc-libs core/libxcrypt-compat
 ```
 </details>
 
@@ -41,7 +45,7 @@ sudo apt-get update
 
 3. Install 32-bit libraries
 ```
-sudo apt-get install libc6:i386 libncurses5:i386 libstdc++6:i386
+sudo apt-get install libc6:i386 libncurses5:i386 libstdc++6:i386 libcrypt1:i386
 ```
 
 </details>
@@ -76,6 +80,6 @@ source ~/.bashrc
 
 
 ## C2000 Academy
-(C2000 Academy Link)[https://dev.ti.com/tirex/explore/node?node=A__AEIJm0rwIeU.2P1OBWwlaA__C2000-ACADEMY__3H1LnqB__LATEST]
+[C2000 Academy Link](https://dev.ti.com/tirex/explore/node?node=A__AEIJm0rwIeU.2P1OBWwlaA__C2000-ACADEMY__3H1LnqB__LATEST)
 
 

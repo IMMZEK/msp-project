@@ -1,0 +1,40 @@
+<module name="NAVSS0_TIMERMGR0_CFG" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="TIMERMGR_PID" acronym="TIMERMGR_PID" offset="0x0" width="32" description="This is the standard TI peripheral ID register that exists at address 0 in the peripheral space">
+    <bitfield id="SCHEME" width="2" begin="31" end="30" resetval="0x1" description="scheme" range="" rwaccess="R"/>
+    <bitfield id="BU" width="2" begin="29" end="28" resetval="0x2" description="bu identifier" range="" rwaccess="R"/>
+    <bitfield id="FUNCTION" width="12" begin="27" end="16" resetval="0x6F8" description="function identifier" range="" rwaccess="R"/>
+    <bitfield id="RTL_VER" width="5" begin="15" end="11" resetval="0x12" description="RTL version number12h - SR1.0, 18h - SR2.0" range="" rwaccess="R"/>
+    <bitfield id="MAJOR_REV" width="3" begin="10" end="8" resetval="0x1" description="Major revision number" range="" rwaccess="R"/>
+    <bitfield id="CUSTOM" width="2" begin="7" end="6" resetval="0x0" description="custom" range="" rwaccess="R"/>
+    <bitfield id="MINOR_REV" width="6" begin="5" end="0" resetval="0x0" description="Minor revision number" range="" rwaccess="R"/>
+  </register>
+  <register id="TIMERMGR_CNTL" acronym="TIMERMGR_CNTL" offset="0x4" width="32" description="This register controls the overall behavior of the timer manager module">
+    <bitfield id="RESERVED" width="19" begin="31" end="13" resetval="0xX" description="" range="" rwaccess="RW"/>
+    <bitfield id="MASS_ENABLE" width="1" begin="12" end="12" resetval="0x0" description="Always reads zero. When a 1 is written to this bit, all timers from 0 to the MAX_TIMER will be enabled. Useful for initial programming, to not need to loop over every TIMERMGR_CONTROL_j_k register to enable every timer if many or all are being used. This should only be used during initialization, or when ENABLE is set to 0, as this does not set the timers, only enable them" range="" rwaccess="W"/>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0xX" description="" range="" rwaccess="RW"/>
+    <bitfield id="MAX_TIMER" width="10" begin="10" end="1" resetval="0x3FF" description="The maximum timer that will be checked - e.g. if only using 512 timers, set this to 511. All timers above this number will be ignored. Should be set once during initialization" range="" rwaccess="RW"/>
+    <bitfield id="ENABLE" width="1" begin="0" end="0" resetval="0x0" description="Enables the timer manager. When this bit is zero, the timers will all be halted and will not count 0h = Timer Manager is disabled 1h = Timer Manager is enabled" range="" rwaccess="RW"/>
+  </register>
+  <register id="TIMERMGR_COUNTER" acronym="TIMERMGR_COUNTER" offset="0x8" width="32" description="This register contains the current value">
+    <bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="The current timer_counter value, in the timebase being used by all timers in this module" range="" rwaccess="R"/>
+  </register>
+  <register id="TIMERMGR_TIMEOUT_STATUS0" acronym="TIMERMGR_TIMEOUT_STATUS0" offset="0xA0" width="32" description="This register should be read whenever the timer interrupt fires. It indicates the total number of timers that have expired and the ID of the first timer to expire. If NUM_EXPIRED_TIMERS is 1, this is the only register that needs to be read. Depending on the value of NUM_EXPIRED_TIMERS, either or may be read by the software to avoid needing to read all 32 registers.">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0xX" description="" range="" rwaccess="R"/>
+    <bitfield id="VALID0" width="1" begin="23" end="23" resetval="0x0" description="1 indicates that expired_timer0 is a valid expired timer. If num_expired_timers &amp;amp;gt; 0, this should always be a 1" range="" rwaccess="R"/>
+    <bitfield id="EXPIRED_TIMER0" width="11" begin="22" end="12" resetval="0x0" description="The ID of the first timer to expire" range="" rwaccess="R"/>
+    <bitfield id="NUM_EXPIRED_TIMERS" width="12" begin="11" end="0" resetval="0x0" description="The total number of expired timers" range="" rwaccess="R"/>
+  </register>
+  <register id="TIMERMGR_TIMEOUT_STATUS1" acronym="TIMERMGR_TIMEOUT_STATUS1" offset="0xA4" width="32" description="This register contains the IDs of the second and third timers to expire. It is indended as a more efficient way of finding the first few timers to expire rather than needing to read the status of all 1024 timers.">
+    <bitfield id="RESERVED" width="8" begin="31" end="24" resetval="0xX" description="" range="" rwaccess="R"/>
+    <bitfield id="VALID2" width="1" begin="23" end="23" resetval="0x0" description="1 indicates that expired_timer2 is valid" range="" rwaccess="R"/>
+    <bitfield id="EXPIRED_TIMER2" width="11" begin="22" end="12" resetval="0x0" description="The ID of the third timer to expire" range="" rwaccess="R"/>
+    <bitfield id="VALID1" width="1" begin="11" end="11" resetval="0x0" description="1 indicates that expired_timer1 is valid" range="" rwaccess="R"/>
+    <bitfield id="EXPIRED_TIMER1" width="11" begin="10" end="0" resetval="0x0" description="The ID of the second timer to expire" range="" rwaccess="R"/>
+  </register>
+  <register id="TIMERMGR_TIMEOUT_STATUS_BANK0" acronym="TIMERMGR_TIMEOUT_STATUS_BANK0" offset="0xA8" width="32" description="This register contains the status of each timer bank for banks 31:0. When servicing the timer interrupt, if the num_expired_timers bit is greater than 3, this register may be read to see which banks contain expired timers. The registers corresponding to those banks may then be read.">
+    <bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="A 1 in bit N indicates that the corresponding bank has expired timers" range="" rwaccess="R"/>
+  </register>
+  <register id="TIMERMGR_STATUS_y" acronym="TIMERMGR_STATUS_y" offset="0x100" width="32" description="Each bit is the timeout status for an individual timer. 0 = timer has not timed out or is disabled, 1 = timer has timed out Offset = 100h + (y * 4h); where y = 0h to 1Fh">
+    <bitfield id="VAL" width="32" begin="31" end="0" resetval="0x0" description="Each bit is the timeout status for an individual timer" range="" rwaccess="R"/>
+  </register>
+</module>

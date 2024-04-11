@@ -1,0 +1,2360 @@
+/******************************************************************************
+ * Copyright (c) 2012-17 Texas Instruments Incorporated - http://www.ti.com
+ * 
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions 
+ *  are met:
+ *
+ *    Redistributions of source code must retain the above copyright 
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ *    Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the 
+ *    documentation and/or other materials provided with the   
+ *    distribution.
+ *
+ *    Neither the name of Texas Instruments Incorporated  the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
+ *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT 
+ *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT 
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * 
+ *****************************************************************************
+ *
+ *  Filename: icek2g_arm.gel
+ *    Description:  Galileo system initialization GEL for use with the Galileo 
+ *                  ICE EVM. This GEL has functions that handle the Main PLL 
+ *                  initialization and DDR3 configuration.
+ *                        
+ *                  More functions may be added as needed at a later date.
+ *        
+ *      Author: Nitin Sakhuja                  
+ *      Revision History: 
+ *
+ *    Rev 0.1 - 02/06/2012
+ *    -     Initial file creation - based on latest Appleton PLL init sequnce
+ *              +   Updated MAINPLLCTL0 and MAINPLLCTL1 MMR addresses for Keystone-2               
+ *    Rev 1.0 - 02/10/2012
+ *    -     Updates for Kepler 
+ *              +   Changed CLKIN_val and PLLM_val values according to 1GHz and 1.3GHz clock options. 
+ *              +   Removed non-relevat PLL init combinations.
+ *              +   Clean-up and formattting improvements.
+ *    -     Kepler QT specific Workarounds.
+ *              +   Added dummy reads between all Write->Read sequences to make them Write->Read->Read
+ *                  as a workaround for a potential Kepler QT PLL model bug, where the first Read following
+ *                  a Write to a PLL controller MMR seems to return the pre-write value of the MMR.            
+ *    Rev 4.0 - 01/21/2014
+ *    -     Updates for Galileo (Mark McKeown)
+ *              +   Changed CLKIN_val and PLLM_val values for 400, 600, 800, & 1000MHz clocks
+ *				+	Moved RESET assert from step 9 to step 3 where it belongs according to 6.4.4.3 PLL 
+ *					Initialization Sequences in  clock_arch_galileo_v0.93.pdf
+ *    Rev 5.0 - 08/07/2014
+ *    -     Set_Pll1: fixed hotmenu function names, GEL_TextOut for 50MHz ref clk instead of 100MHz
+ *	  - 	Set_Tetris_Pll: Changed Multiplier values for 50MHz ref clk instead of 100Mhz, updated hotmenu function names
+ * DONE	1) try moving reset (step 3) between steps 2 and 4
+ * 		2) remove extra steps 2b, 2c, 2d after "step 3"
+ * 		3) add step 8c
+ * 		4) check values for PLLDIV2 & PLLDIV3 - only SYSCLK2 and SYSCLK3 are programmable.
+ *   Rev 6.0 - 08/29/2014 (Sunil K)
+ *    -     Added NSS PLL definitions & setup function (SET_NSS_PLL)
+ *    - 	Added Hot menu (SET NSS PLL for 50MHz -> 1000MHz) to setup NSS PLL for 50MHZ sysclkp/n input for QT
+ *   Rev 7.0 - 04/30/2015 (Uday G)
+ *	  - 	Modified PLLM, PLLD, OD values to correspond to 24MHZ reference clock
+ *    -     Added DSS, DDR, UART PLL definitions & setup function
+ *    - 	Added ability to output all PLLs on OBSCLK
+ *    -     Verified GEL on Galileo Silicon
+ *
+ *   Rev 8.0 - 11/25/2015 (Pratap)
+ *    -     Added Configurations for enabling PSC
+ *    -     Added clock configurations for DSS 9MHz and 25MHz
+ *
+ *	  Rev 9.0 - 01/22/2016 (SenthilKumar S)
+ *    -     Changed the DDR PLL settings as per DPO analysis
+ *
+ *        Rev 10.0 - 02/09/2016 (William T)
+ *    -     Added configuration for K2G ICE DDR3
+ *
+ *        Rev 11.0 - 11/22/2016 (Mistral)
+ *    -     Added PLL configurations for external clock mode
+ * 
+ *        Rev 12.0 - 12/20/2016 (Mistral)
+ *    -     GEL file clean-up
+ *
+ *        Rev 13.0 - 12/20/2016 (Mistral)
+ *    -     New version created from DSP GEL file
+ *    -     Added ARM specific functions
+ *
+ *        Rev 14.0 - 25/01/2017 (Mistral)
+ *    -     Added functions to read Ethernet PHY registers
+ *    -     Added K2G_TakeDSPOutofReset() from K2G GP EVM GEL file
+  ---------------------------------------------------------------------------*/
+
+//******************************************************
+// Boot config register defintions
+#define CHIP_LEVEL_REG              0x02620000
+#define DEVSTAT                     *(unsigned int*)(CHIP_LEVEL_REG + 0x0020)
+
+// Boot cfg registers
+#define KICK0                       *(unsigned int*)(CHIP_LEVEL_REG + 0x0038)
+#define KICK1                       *(unsigned int*)(CHIP_LEVEL_REG + 0x003C)
+#define KICK0_UNLOCK                (0x83E70B13)
+#define KICK1_UNLOCK                (0x95A4F1E0)
+#define KICK_LOCK                   0
+#define MAINPLLCTL0                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0350) 
+#define MAINPLLCTL1                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0354)
+#define MAIN_PLLD_OFFSET            0
+#define MAIN_PLLD_MASK              0xFFFFFFC0
+#define MAIN_PLLM_OFFSET            12
+#define MAIN_PLLM_MASK              0xFFF80FFF
+#define MAIN_BWADJ0_OFFSET          24
+#define MAIN_BWADJ0_MASK            0x00FFFFFF
+#define MAIN_ENSAT_OFFSET           6
+#define MAIN_ENSAT_MASK             0xFFFFFFBF
+#define MAIN_BWADJ1_OFFSET          0
+#define MAIN_BWADJ1_MASK            0xFFFFFFF0
+
+#define CHIP_MISC1                  *(unsigned int*)(CHIP_LEVEL_REG + 0x0C7C)
+#define ARMPLL_ENABLE_OFFSET        13
+
+#define DDR3PLLCTL0                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0360)
+#define DDR3PLLCTL1                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0364)
+#define DDR3MUX						*(unsigned int*)(CHIP_LEVEL_REG + 0x0690)
+#define OBSCLKCTL                   *(unsigned int*)(CHIP_LEVEL_REG + 0x0C80)    
+
+#define TETRIS_BASE                 0x01E80000
+
+#define TETRIS_CPU0_PDSTAT          *(unsigned int*)(TETRIS_BASE + 0x0404)
+
+#define SECPLLCTL0                  *(unsigned int*)(CHIP_LEVEL_REG + 0x0370)
+#define SECPLLCTL1                  *(unsigned int*)(CHIP_LEVEL_REG + 0x0374)
+
+#define	ICSSPLLCTL0				  	*(unsigned int*)(CHIP_LEVEL_REG + 0x0388)
+#define ICSSPLLCTL1                 *(unsigned int*)(CHIP_LEVEL_REG + 0x038C)
+
+#define	NSSPLLCTL0				  	*(unsigned int*)(CHIP_LEVEL_REG + 0x0358)
+#define NSSPLLCTL1                  *(unsigned int*)(CHIP_LEVEL_REG + 0x035C)
+
+#define	UARTPLLCTL0				  	*(unsigned int*)(CHIP_LEVEL_REG + 0x0390)
+#define UARTPLLCTL1                 *(unsigned int*)(CHIP_LEVEL_REG + 0x0394)
+#define PLLCLKSEL_STAT              *(unsigned int*)(CHIP_LEVEL_REG + 0x0720)
+
+//******************************************************
+// PLL 1 definitions (DSP and ARM clock and subsystems)
+#define PLL1_BASE                   0x02310000
+#define PLL1_PLLCTL                 (*(unsigned int*)(PLL1_BASE + 0x100))   // PLL1 Control
+#define PLL1_OCSEL					(*(unsigned int*)(PLL1_BASE + 0x104))   // PLL1 OCSEL for Observation clock
+#define PLL1_SECCTL                 (*(unsigned int*)(PLL1_BASE + 0x108))   // PLL1 Secondary Control
+#define PLL1_PLLM                   (*(unsigned int*)(PLL1_BASE + 0x110))   // PLL1 Multiplier
+#define PLL1_DIV1                   (*(unsigned int*)(PLL1_BASE + 0x118))   // DIV1 divider
+#define PLL1_DIV2                   (*(unsigned int*)(PLL1_BASE + 0x11C))   // DIV2 divider
+#define PLL1_DIV3                   (*(unsigned int*)(PLL1_BASE + 0x120))   // DIV3 divider
+#define PLL1_CMD                    (*(unsigned int*)(PLL1_BASE + 0x138))   // CMD control
+#define PLL1_STAT                   (*(unsigned int*)(PLL1_BASE + 0x13C))   // STAT control
+#define PLL1_ALNCTL                 (*(unsigned int*)(PLL1_BASE + 0x140))   // ALNCTL control
+#define PLL1_DCHANGE                (*(unsigned int*)(PLL1_BASE + 0x144))   // DCHANGE status
+#define PLL1_CKEN                   (*(unsigned int*)(PLL1_BASE + 0x148))   // CKEN control
+#define PLL1_CKSTAT                 (*(unsigned int*)(PLL1_BASE + 0x14C))   // CKSTAT status
+#define PLL1_SYSTAT                 (*(unsigned int*)(PLL1_BASE + 0x150))   // SYSTAT status
+#define PLL1_DIV4                   (*(unsigned int*)(PLL1_BASE + 0x160))   // DIV4 divider
+#define PLLPWRDN_OFFSET             1
+#define PLLPWRDN_MASK               0xFFFFFFFD
+#define PLLRST_OFFSET               3
+#define PLLRST_MASK                 0xFFFFFFF7
+#define PLLENSRC_OFFSET             5
+#define PLLENSRC_MASK               0xFFFFFFDF
+#define PLLEN_OFFSET                0
+#define PLLEN_MASK                  0xFFFFFFFE
+#define OUTPUT_DIVIDE_OFFSET        19
+#define OUTPUT_DIVIDE_MASK          0xFF87FFFF    
+#define BYPASS_OFFSET               23
+#define BYPASS_MASK                 0xFF7FFFFF
+#define PLLM_OFFSET                 0
+#define PLLM_MASK                   0xFFFFFFC0
+#define GOSET_OFFSET                0
+#define GOSET_MASK                  0xFFFFFFFE
+#define GOSTAT_OFFSET               0
+#define GOSTAT_MASK                 0xFFFFFFFE
+
+// ARMPLL definitions
+#define SEC_PLLCTL0_PLLD_OFFSET     0
+#define SEC_PLLCTL0_PLLD_MASK		0xFFFFFFC0
+#define SEC_PLLCTL0_PLLM_OFFSET     6
+#define SEC_PLLCTL0_PLLM_MASK       0xFFFF003F
+#define SEC_PLLCTL0_BWADJ_OFFSET    24
+#define SEC_PLLCTL0_BWADJ_MASK      0x00FFFFFF
+#define SEC_PLLCTL0_OD_OFFSET       19
+#define SEC_PLLCTL0_OD_MASK         0xFF87FFFF
+#define SEC_PLLCTL0_BYPASS_OFFSET   23
+#define SEC_PLLCTL0_BYPASS_MASK     0xFF7FFFFF
+#define SEC_PLLCTL1_RESET_OFFSET    14
+#define SEC_PLLCTL1_RESET_MASK      0xFFFFBFFF
+#define SEC_PLLCTL1_PWRDWN_OFFSET   15
+#define SEC_PLLCTL1_PWRDWN_MASK     0xFFFF7FFF
+#define SEC_PLLCTL1_ENSTAT_OFFSET   6
+#define SEC_PLLCTL1_ENSTAT_MASK     0xFFFFFFBF
+
+//******************************************************
+// MSMC Register Definitions
+#define MSMC_CFG_BASE               (0x0BC00000)
+#define SMS_MPAXH_0_0               (MSMC_CFG_BASE + 0x00000204)
+#define SES_MPAXH_0_0               (MSMC_CFG_BASE + 0x00000604)   
+
+//******************************************************
+// PSC Register Definitions
+#define PSC_CFG_BASE				(0x02350000)
+
+#define PSC_MDCTL00           		(0xA00)
+#define PSC_MDSTAT00          		(0x800)
+#define PSC_PDCTL00           		(0x300)
+#define PSC_PDSTAT00          		(0x200)
+
+#define PSC_MDCTL_BASE        		PSC_CFG_BASE + PSC_MDCTL00
+#define PSC_MDSTAT_BASE       		PSC_CFG_BASE + PSC_MDSTAT00
+#define PSC_PDCTL_BASE        		PSC_CFG_BASE + PSC_PDCTL00
+#define PSC_PDSTAT_BASE       		PSC_CFG_BASE + PSC_PDSTAT00
+
+#define PMMC_PDCTL					(*(unsigned int*)(PSC_PDCTL_BASE + 0x000))
+#define PMMC_MDCTL					(*(unsigned int*)(PSC_MDCTL_BASE + 0x004))
+
+#define PSC_PTCMD             		(*(unsigned int*)(PSC_CFG_BASE + 0x120))
+#define PSC_PTCMD_H           		(*(unsigned int*)(PSC_CFG_BASE + 0x124))
+#define PSC_PTSTAT           		(*(unsigned int*)(PSC_CFG_BASE + 0x128))
+#define PSC_PTSTAT_H          		(*(unsigned int*)(PSC_CFG_BASE + 0x12C))
+
+//******************************************************
+/* DSS-UL PLL definitions */
+#define DSS_PLL_CTL0 			  *(unsigned int*)(CHIP_LEVEL_REG + 0x380)
+#define DSS_PLL_CTL1 			  *(unsigned int*)(CHIP_LEVEL_REG + 0x384)
+#define DSS_PLL_CTL0_BYPASS_EN    (1)
+#define DSS_PLL_CTL0_BYPASS_SHIFT (23)
+#define DSS_PLL_CTL0_BYPASS_MASK  (0x00000000)
+#define DSS_PLL_CTL0_CLKOD_SHIFT  (19)
+#define DSS_PLL_CTL0_CLKOD_MASK   (0x00780000)
+#define DSS_PLL_CTL0_PLLM_SHIFT   (6)
+#define DSS_PLL_CTL0_PLLM_MASK    (0x0007FFC0)
+#define DSS_PLL_CTL0_PLLD_SHIFT   (0)
+#define DSS_PLL_CTL0_PLLD_MASK    (0x0000003F)
+#define DSS_PLL_MULTIPLIER_MAX     (512)	//The max is really 4096 but recommended to stay below 512 for low jitter
+#define DSS_PLL_REF_DIVIDER_MAX    (64)
+#define DSS_PLL_OUTPUT_DIVIDER_MAX (16)
+
+//******************************************************
+#define DDR3APLLCTL0  			*(unsigned int*)(CHIP_LEVEL_REG + 0x0360)
+#define DDR3APLLCTL1  			*(unsigned int*)(CHIP_LEVEL_REG + 0x0364)
+
+// DDR3A Register definition
+#define DDR3A_BASE_ADDR (0x21010000)
+#define DDR3A_STATUS   (*(int*)(DDR3A_BASE_ADDR + 0x00000004))
+#define DDR3A_SDCFG    (*(int*)(DDR3A_BASE_ADDR + 0x00000008))
+#define DDR3A_SDRFC    (*(int*)(DDR3A_BASE_ADDR + 0x00000010))
+#define DDR3A_SDTIM1   (*(int*)(DDR3A_BASE_ADDR + 0x00000018))
+#define DDR3A_SDTIM2   (*(int*)(DDR3A_BASE_ADDR + 0x0000001C))
+#define DDR3A_SDTIM3   (*(int*)(DDR3A_BASE_ADDR + 0x00000020))
+#define DDR3A_SDTIM4   (*(int*)(DDR3A_BASE_ADDR + 0x00000028))
+#define DDR3A_ZQCFG    (*(int*)(DDR3A_BASE_ADDR + 0x000000C8))
+#define DDR3A_TMPALRT  (*(int*)(DDR3A_BASE_ADDR + 0x000000CC))
+#define DDR3A_DDRPHYC  (*(int*)(DDR3A_BASE_ADDR + 0x000000E4))
+#define DDR3A_ECC_CTRL (*(int*)(DDR3A_BASE_ADDR + 0x00000110))
+
+#define DDR3A_PHY_CFG_BASE (0x02329000)
+#define DDR3A_PIR    (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000004))
+#define DDR3A_PGCR0  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000008))
+#define DDR3A_PGCR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x0000000C))
+#define DDR3A_PGCR2  (*(int*)(DDR3A_PHY_CFG_BASE + 0x0000008C))
+#define DDR3A_PGSR0  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000010))
+#define DDR3A_PGSR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000014))
+#define DDR3A_PLLCR  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000018))
+#define DDR3A_PTR0   (*(int*)(DDR3A_PHY_CFG_BASE + 0x0000001C))
+#define DDR3A_PTR1   (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000020))
+#define DDR3A_PTR2   (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000024))
+#define DDR3A_PTR3   (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000028))
+#define DDR3A_PTR4   (*(int*)(DDR3A_PHY_CFG_BASE + 0x0000002C))
+#define DDR3A_DSGCR  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000040))
+#define DDR3A_DCR    (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000044))
+#define DDR3A_MR0    (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000054))
+#define DDR3A_MR1    (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000058))
+#define DDR3A_MR2    (*(int*)(DDR3A_PHY_CFG_BASE + 0x0000005C))
+#define DDR3A_DTCR   (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000068))
+#define DDR3A_DTPR0  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000048))
+#define DDR3A_DTPR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x0000004C))
+#define DDR3A_DTPR2  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000050))
+
+#define DDR3A_ZQ0CR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000184))
+#define DDR3A_ZQ1CR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000194))
+#define DDR3A_ZQ2CR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x000001A4))
+#define DDR3A_ZQ3CR1  (*(int*)(DDR3A_PHY_CFG_BASE + 0x000001B4))
+
+#define DDR3A_DATX8_1 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000200))
+#define DDR3A_DATX8_2 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000240))
+#define DDR3A_DATX8_3 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000280))
+#define DDR3A_DATX8_4 (*(int*)(DDR3A_PHY_CFG_BASE + 0x000002C0))
+#define DDR3A_DATX8_5 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000300))
+#define DDR3A_DATX8_6 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000340))
+#define DDR3A_DATX8_7 (*(int*)(DDR3A_PHY_CFG_BASE + 0x00000380))
+#define DDR3A_DATX8_8 (*(int*)(DDR3A_PHY_CFG_BASE + 0x000003C0))
+
+#define IODDRM_MASK            0x00000180  
+#define ZCKSEL_MASK            0x01800000
+#define CL_MASK				   0x00000072
+#define WR_MASK				   0x00000E00
+#define BL_MASK				   0x00000003
+#define RRMODE_MASK            0x00040000
+#define UDIMM_MASK             0x20000000
+#define BYTEMASK_MASK          0x0000FC00
+#define MPRDQ_MASK             0x00000080
+#define PDQ_MASK               0x00000070
+#define NOSRA_MASK             0x08000000
+#define ECC_MASK               0x00000001
+
+#define XMC_BASE_ADDR (0x08000000)
+#define XMPAX2_L     (*(int*)(XMC_BASE_ADDR + 0x00000010))
+#define XMPAX2_H     (*(int*)(XMC_BASE_ADDR + 0x00000014))
+
+//******************************************************
+// PSC module power domain register offsets
+#define PD0         (0)     // Power Domain-0
+#define PD1         (1)     // Power Domain-1
+#define PD2         (2)     // Power Domain-2
+#define PD3         (3)     // Power Domain-3
+#define PD4         (4)     // Power Domain-4
+#define PD5         (5)     // Power Domain-5
+#define PD6         (6)     // Power Domain-6
+#define PD7         (7)     // Power Domain-7
+#define PD8         (8)     // Power Domain-8
+#define PD9         (9)     // Power Domain-9
+#define PD10        (10)    // Power Domain-10
+#define PD11        (11)    // Power Domain-11
+#define PD12        (12)    // Power Domain-12
+#define PD13        (13)    // Power Domain-13
+#define PD14        (14)    // Power Domain-14
+#define PD15        (15)    // Power Domain-15
+
+// Modules on power domain 0
+#define LPSC_ALWAYSON  (0)
+
+// Modules on power domain 1
+#define LPSC_PMMC      (1)
+#define LPSC_DEBUG     (2)
+
+// Modules on power domain 2
+#define LPSC_NSS       (3)
+
+// Modules on power domain 3
+#define LPSC_SA        (4)
+
+// Modules on power domain 4
+#define LPSC_TERANET   (5)
+
+// Modules on power domain 5
+#define LPSC_SYS_COMP  (6)
+#define LPSC_QSPI      (7)
+#define LPSC_MMC       (8)
+#define LPSC_GPMC      (9)
+#define LPSC_MLB       (11)
+#define LPSC_EHRPWM    (12)
+#define LPSC_EQEP      (13)
+#define LPSC_ECAP      (14)
+#define LPSC_MCASP     (15)
+
+// Modules on power domain 7
+#define LPSC_MSMC      (17)
+
+// Modules on power domain 8
+#define LPSC_C66X_COREPAC_0  (18)
+
+// Modules on power domain 9
+#define LPSC_ARM       (19)
+
+// Modules on power domain 11
+#define LPSC_ICSS      (21)
+
+// Modules on power domain 12
+#define LPSC_DSS       (23)
+
+// Modules on power domain 13
+#define LPSC_PCIE      (24)
+
+// Modules on power domain 14
+#define LPSC_USB_0     (25)
+#define LPSC_USB_1     (26)
+
+// Modules on power domain 15
+#define LPSC_DDR3      (27)
+
+#define PSC_DISABLE   (0x2)
+#define PSC_ENABLE    (0x3)
+// Global timeout value
+#define GTIMEOUT 2000
+
+#define TIMEOUT_ID 10
+
+#define GICD_BASE_ADDRESS       0x02561000
+#define GICC_BASE_ADDRESS       0x02562000
+#define GICD_GROUP_OFFSET       0x80
+#define GICC_PMR_OFFSET         0x4
+
+/*----------Out-of-reset definitions-----------*/
+#define WR_MEM_32(addr, data)   *(unsigned int*)(addr) =(unsigned int)(data)
+#define RD_MEM_32(addr)         *(unsigned int*)(addr)
+#define uint32_t                unsigned int
+
+/*******************************************************************************
+        KS2 Registers Map Defines
+*******************************************************************************/
+/***** Power Domain Definitions *****/
+#define KS2_PDCTL5  0x02350314
+#define KS2_PDCTL8  0x02350320
+#define KS2_PDCTL9  0x02350324
+#define KS2_PDCTL10 0x02350328
+#define KS2_PDCTL11 0x0235032C
+#define KS2_PDCTL12 0x02350330
+#define KS2_PDCTL13 0x02350334
+#define KS2_PDCTL14 0x02350338
+#define KS2_PDCTL15 0x0235033C
+
+/***** Module Control Register Definitions *****/
+#define KS2_MDCTL5  0x02350A14
+#define KS2_MDCTL15 0x02350A3C
+#define KS2_MDCTL16 0x02350A40
+#define KS2_MDCTL17 0x02350A44
+#define KS2_MDCTL18 0x02350A48
+#define KS2_MDCTL19 0x02350A4C
+#define KS2_MDCTL20 0x02350A50
+#define KS2_MDCTL21 0x02350A54
+#define KS2_MDCTL22 0x02350A58
+
+/* Registers using by Ethernet PHY Register Read Functions */
+#define PRU0_MDIO_CTL 			  *(unsigned int*)(0x20AB2400 + 0x04)
+#define PRU0_MDIO_PHY_REG         *(unsigned int*)(0x20AB2400 + 0x80)
+#define PRU1_MDIO_CTL 			  *(unsigned int*)(0x20AF2400 + 0x04)
+#define PRU1_MDIO_PHY_REG         *(unsigned int*)(0x20AF2400 + 0x80)
+
+#define PADCONFIG179          *(unsigned int*)(CHIP_LEVEL_REG + 0x12CC)
+#define PADCONFIG180          *(unsigned int*)(CHIP_LEVEL_REG + 0x12D0)
+#define PADCONFIG221          *(unsigned int*)(CHIP_LEVEL_REG + 0x1374)
+#define PADCONFIG222          *(unsigned int*)(CHIP_LEVEL_REG + 0x1378)
+
+#define MDIO_CTL 			  *(unsigned int*)(0x4200F00 + 0x04)
+#define MDIO_PHY_REG          *(unsigned int*)(0x4200F00 + 0x80)
+
+#define PADCONFIG98          *(unsigned int*)(CHIP_LEVEL_REG + 0x1188)
+#define PADCONFIG99          *(unsigned int*)(CHIP_LEVEL_REG + 0x118C)
+
+// Timeout definitions
+int _GEL_Global_Timeout1 = 0;
+// Clock mode selection value
+int _GEL_Global_clkMode  = 0;
+
+/****************************************************************************
+ *
+ * NAME
+ *      Global_Default_Setup_Silent
+ *
+ * PURPOSE:
+ *      Enable the PLL, DDR3 and power domain for all the peripherals.
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Global_Default_Setup_Silent()
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+Global_Default_Setup_Silent()
+{
+    GEL_TextOut("K2G ICE EVM Setup is in Progress...\n\n");
+    
+    GEL_Reset();
+	Set_Psc_All_On();
+	setup_system_clocks();
+	
+    GEL_TextOut( "Entering A15 non secure mode .. \n");
+    enterNonSecureMode();
+    GEL_TextOut( "A15 non secure mode entered \n\n");
+	
+	GEL_TextOut("K2G ICE EVM Setup is Done!\n\n");
+}
+
+setup_system_clocks()
+{   	
+    GEL_TextOut("K2G ICE EVM PLL Setup is in Progress...\n\n");
+	
+    /* Read the PLLCLKSEL register to determine the clock mode selected */
+    _GEL_Global_clkMode = PLLCLKSEL_STAT;
+    
+    if(_GEL_Global_clkMode == 0)  // 0 - Internal clock; 1 - External clock
+    {
+    	GEL_TextOut("Internal Clock Mode\n");
+    }
+    else
+    {	
+    	GEL_TextOut("External Clock Mode\n");
+    }
+     
+	//PLL clock initializations
+	MAIN_PLL_INIT_600MHz();
+	ARM_PLL_INIT_600MHz();
+	UART_PLL_INIT_384MHz();
+	NSS_PLL_INIT_1000MHz();
+	ICSS_PLL_INIT_200MHz();
+	DDR_PLL_INIT_200MHz();
+
+	// DDR controller setup
+    InitXMC();
+    InitEmif_DDR3A();        
+	
+	GEL_TextOut("K2G ICE EVM PLL Setup is Done!\n\n");
+}
+
+/* This function is executed during the target configuration.
+   Cofigures PSC, PLL and DDR3 settings */
+OnTargetConnect()
+{
+    Global_Default_Setup_Silent();
+}
+
+/*
+   Set_Main_Pll() - This function executes the main PLL initialization 
+   sequence needed to get the PLL up after coming out of an initial power up 
+   before it is locked or after it is already locked.
+
+   Index value determines multiplier, divier used and clock reference assumed for 
+   output display. 
+ */
+Set_Main_Pll(int index)
+{
+    int i, TEMP;
+    unsigned int BYPASS_val;     
+    unsigned int BWADJ_val;     
+    unsigned int OD_val;            
+
+    float CLKIN_val;
+    unsigned int PLLM_val;
+    unsigned int PLLD_val;
+    unsigned int PLLDIV3_val; //SYSCLK3 - Used to clock the C66x DSP CorePac emulation
+    unsigned int PLLDIV4_val; //SYSCLK4 - Used for trace module.
+ 
+    unsigned int debug_info_on;
+    unsigned int delay;
+
+    if(_GEL_Global_clkMode == 1)  // Check if external clock mode is selected
+    {
+        CLKIN_val   = 25;  // setup CLKIN to 25.00 MHz
+        PLLM_val    = 96;  // setup PLLM (PLL multiplier) 
+    }
+    else
+    {
+        CLKIN_val   = 24;   // setup CLKIN to 24.00 MHz
+        PLLM_val    = 100;  // setup PLLM (PLL multiplier)     
+    }
+    
+    if(index == 400){                     
+        PLLD_val    = 1;            // setup PLLD (reference divider)
+        OD_val      = 6;            // setup OD 
+    }
+	else if(index == 600){        
+        PLLD_val    = 1;            // setup PLLD (reference divider)
+        OD_val      = 4;            // setup OD 
+    }
+	else if(index == 100){            
+        PLLD_val    = 2;            // setup PLLD (reference divider)
+        OD_val      = 12;           // setup OD 
+    }
+	else if(index == 200){            
+        PLLD_val    = 1;            // setup PLLD (reference divider)
+        OD_val      = 12;           // setup OD 
+    }
+
+    PLLDIV3_val = 2;            // setup PLL output divider 3 to /2
+    PLLDIV4_val = 5;            // setup PLL output divider 4 to /5
+
+    BYPASS_val      = PLL1_SECCTL & ~BYPASS_MASK;   // get value of the BYPASS field
+    BWADJ_val       = (PLLM_val-1) >> 1;              // setup BWADJ to be 1/2 the value of PLLM
+	
+    debug_info_on   = 0;
+    delay           = 1000; // fix this!
+
+    /* Step 1: Unlock Boot Config Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    /* Step 2 - Check the status of BYPASS */
+    if(BYPASS_val != 0x00000000){ // PLL bypass enabled - Execute PLL setup for PLL fresh out of power on reset
+        if(debug_info_on){
+            GEL_TextOut("Detected PLL bypass enabled: SECCTL[BYPASS] = %x\n",,,,, BYPASS_val);
+        }
+	
+        /* Step 2a: Set MAINPLLCTL1[ENSAT] = 1 - This enables proper biasing of PLL analog circuitry */                  
+        MAINPLLCTL1 |= (1 << MAIN_ENSAT_OFFSET); 
+        if(debug_info_on){
+            GEL_TextOut("(2a) MAINPLLCTL1 = %x\n",,,,, MAINPLLCTL1);
+        }        
+
+        /* Step 2b: Set PLLCTL[PLLEN] = 0 This enables bypass in PLL controller MUX *///PLLEN_OFFSET = 0 
+        PLL1_PLLCTL &= ~(1 << PLLEN_OFFSET);        
+        if(debug_info_on){    
+            GEL_TextOut("(2b) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+        }    
+
+        /* Step 2c: Set PLLCTL[PLLENSRC] = 0 - This enables PLLEN to control PLL controller MUX */    
+		//PLLENSRC_OFFSET = 5
+        PLL1_PLLCTL &= ~(1 << PLLENSRC_OFFSET);
+        if(debug_info_on){    
+            GEL_TextOut("(2c) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+        }    
+
+        /* Step 2d: Wait 4 reference clock cycles (slowest of ALTCORE or SYSCLK) to make sure 
+           that the PLL controller MUX switches properly to bypass. */
+        if(debug_info_on){    
+            GEL_TextOut("(2d) Delay...\n",,,,,);
+        }        
+        //Step 2d - Wait 4 cycles of the reference clock (to make sure the PLL controller mux switches properly to the bypass)		
+        for(i = 0; i < delay; i++); // this delay is much more than required         
+
+        /* Step 2e: Set SECCTL[BYPASS] = 1 - enables bypass in PLL MUX */    
+		//BYPASS_OFFSET = 23
+        //Step 2e - In SECCTL, write BYPASS = 1		
+        PLL1_SECCTL |= (1 << BYPASS_OFFSET);        
+        if(debug_info_on){    
+            GEL_TextOut("(2e) SECCTL = %x\n",,,,, PLL1_SECCTL);
+        }    
+
+        /* Step 2f: Set PLLCTL[PLLPWRDN] = 1 - power down the PLL */      
+		//PLLPWRDN_OFFSET = 1
+        //Step 2f - In PLLCTL, write PLLPWRDN = 1		
+        PLL1_PLLCTL |= (1 << PLLPWRDN_OFFSET);
+        if(debug_info_on){    
+            GEL_TextOut("(2f) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+        }    
+
+        /* Step 2g: Wait for at least 5us for the PLL to power down */
+        if(debug_info_on){    
+            GEL_TextOut("(2g) Delay...\n",,,,,);
+        }    
+        //Step 2g - Wait for at least 5 us		
+        for(i = 0; i < delay; i++); // this delay is much more than required 
+
+        /* Step 2h: Set PLLCTL[PLLPWRDN] = 0 - Power the PLL back up */    
+		//PLLPWRDN_OFFSET = 1
+        //Step 2h - In PLLCTL, write PLLPWRDN = 0		
+        PLL1_PLLCTL &= ~(1 << PLLPWRDN_OFFSET);
+        if(debug_info_on){    
+            GEL_TextOut("(2h) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+        }            
+
+    }
+    else{ // PLL bypass disabled - Execute PLL setup for PLL that has previously been locked (skip to Step 3)
+	
+        if(debug_info_on){    
+            GEL_TextOut("Detected PLL bypass disabled: SECCTL[BYPASS] = %x\n",,,,, BYPASS_val);
+        }
+
+        /* Step 3a: Set PLLCTL[PLLEN] = 0 This enables bypass in PLL controller MUX *///PLLEN_OFFSET = 0        
+        PLL1_PLLCTL &= ~(1 << PLLEN_OFFSET);        
+        if(debug_info_on){    
+            GEL_TextOut("(3a) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+        }    
+
+        /* Step 3b: Set PLLCTL[PLLENSRC] = 0 - This enables PLLEN to control PLL controller MUX */    
+		//PLLENSRC_OFFSET = 5
+        PLL1_PLLCTL &= ~(1 << PLLENSRC_OFFSET);
+        if(debug_info_on){    
+            GEL_TextOut("(3b) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+        }
+
+        /* Step 3c: Wait 4 reference clock cycles (slowest of ALTCORE or SYSCLK) to make sure that the PLL controller MUX switches properly to bypass. */
+        if(debug_info_on){    
+            GEL_TextOut("(3c) Delay...\n",,,,,);
+        }        
+        for(i = 0; i < delay; i++); // this delay is much more than required       
+	
+    }
+
+    /* Step 3 - PLLCTL, write PLLRST = 1 (PLL is reset) */
+	PLL1_PLLCTL |= (1 << PLLRST_OFFSET);
+
+    /* Step 4: Programming PLLM[5:0] in the PLLM register of the PLL controller and
+       programming PLLM[12:6] in the MAINPLLCTL0 register */        	
+    PLL1_PLLM &= PLLM_MASK;             // clear the PLLM[5:0] bit field
+
+    //Step 4a - PLLM in PLLM	
+	PLL1_PLLM |= ~PLLM_MASK & (PLLM_val - 1);   // set the PLLM[5:0] bit field to the 6 LSB of PLLM_val
+	
+    if(debug_info_on){
+        GEL_TextOut("(4)PLLM[PLLM] = %x\n",,,,, PLL1_PLLM);
+    }    
+	  
+	//MAIN_PLLM_MASK = 0xFFF80FFF
+	//MAIN_PLLM_OFFSET = 12
+	MAINPLLCTL0 &= MAIN_PLLM_MASK;      // clear the PLLM[12:6] bit field
+    //Step 4b - PLLM in MAINPLLCTL0	
+    MAINPLLCTL0 |= ~MAIN_PLLM_MASK & (( (PLLM_val - 1) >> 6) << MAIN_PLLM_OFFSET);  // set the PLLM[12:6] bit field to the 7 MSB of PLL_val
+
+    if(debug_info_on){
+        GEL_TextOut("MAINPLLCTL0 = %x\n",,,,, MAINPLLCTL0);
+    }
+
+    /* Step 5: Programming BWADJ[7:0] in the MAINPLLCTL0 register and BWADJ[11:8] in MAINPLLCTL1 register */            
+    MAINPLLCTL0 &= MAIN_BWADJ0_MASK;    // clear the MAIN_BWADJ0 bit field
+	//BWADJ_val = (PLLM_val) >> 1;
+	//MAIN_BWADJ0_MASK = 0x00FFFFFF		
+    //Step 5a - BWADJ in MAINPLLCTL0
+    MAINPLLCTL0 |= ~MAIN_BWADJ0_MASK & ((BWADJ_val - 1) << MAIN_BWADJ0_OFFSET); // set the MAIN_BWADJ[7:0] bit field to the 8 LSB of BWADJ_val
+	//~MAIN_BWADJ0_MASK  = 0xFF000000
+    if(debug_info_on){
+        GEL_TextOut("(5) MAINPLLCTL0 = %x\n",,,,, MAINPLLCTL0);
+    }
+
+    MAINPLLCTL1 &= MAIN_BWADJ1_MASK;    // clear the MAIN_BWADJ1 bit field
+	//MAIN_BWADJ1_MASK = 0xFFFFFFF0
+	//Step 5b - BWADJ in MAINPLLCTL1
+    MAINPLLCTL1 |= ~MAIN_BWADJ1_MASK & (( (BWADJ_val - 1) >> 8) << MAIN_BWADJ1_OFFSET); // set the MAIN_BWADJ[11:8] bit field to the 4 MSB of BWADJ_val
+
+    if(debug_info_on){
+        GEL_TextOut("(5) MAINPLLCTL1 = %x\n",,,,, MAINPLLCTL1);
+    }
+	
+    /* Step 6: Programming PLLD[5:0] in the MAINPLLCTL0 register */            
+    MAINPLLCTL0 &= MAIN_PLLD_MASK;      // clear the PLLD bit field
+	//MAIN_PLLD_MASK = 0xFFFFFFC0
+		
+    //Step 6 - Program PLLD in MAINPLLCTL0    
+	MAINPLLCTL0 |= ~MAIN_PLLD_MASK & (PLLD_val - 1);    // set the PLLD[5:0] bit field of PLLD to PLLD_val
+
+    if(debug_info_on){
+        GEL_TextOut("(6) MAINPLLCTL0 = %x\n",,,,, MAINPLLCTL0);
+    }
+
+    /* Step 7: Programming OD[3:0] in the SECCTL register */            
+    PLL1_SECCTL &= OUTPUT_DIVIDE_MASK;  // clear the OD bit field
+	//OUTPUT_DIVIDE_OFFSET = 19
+	// OUTPUT_DIVIDE_MASK = 0xFF87FFFF
+	//~OUTPUT_DIVIDE_MASK = 0x00780000
+	//0x00810000 & 0xFF87FFFF = 0x00810000
+    //Step 7 - In SECCTL, write OD = 1 (divide by 2)	
+	    PLL1_SECCTL |= ~OUTPUT_DIVIDE_MASK & (OD_val - 1) << OUTPUT_DIVIDE_OFFSET;  // set the OD[3:0] bit field of PLLD to OD_val    
+
+    if(debug_info_on){
+        GEL_TextOut("(7) SECCTL = %x\n",,,,, PLL1_SECCTL);
+    }
+	
+    /* Step 8: Following steps are needed to change the default output dividers */            
+
+    /* Step 8a: Check that the GOSTAT bit in PLLSTAT is cleared to show that no GO
+       operation is currently in progress*/
+    if(debug_info_on){    
+        GEL_TextOut("(8a) Delay...\n",,,,,);
+    }    
+	
+    //Step 8a - Check that the GOSTAT bit in PLLSTAT
+    while((PLL1_STAT) & 0x00000001);
+
+    /* Step 8b: Program the RATIO field in PLLDIVn to the desired new divide-down rate.
+       If RATIO field is changed, the PLL controller will flag the change in the
+       corresponding bit of DCHANGE*/
+    //Step 8b - Program the RATIO field in PLLDIVn	
+    PLL1_DIV3 = (PLLDIV3_val-1) | 0x8000;  //Set PLLDIV3 
+	PLL1_DIV4 = (PLLDIV4_val-1) | 0x8000;  //Set PLLDIV4
+	
+    if(debug_info_on){
+        GEL_TextOut("PLL1_DIV3 = %x\n",,,,, PLL1_DIV3);
+        GEL_TextOut("PLL1_DIV4 = %x\n",,,,, PLL1_DIV4);
+    }
+
+    /* Step 8c: Set GOSET bit in PLLCMD to initiate the GO operation to change the divide
+       values and align the SYSCLKs as programmed */
+	PLL1_ALNCTL |= ((1 << 2) | (1 << 3)); // SYSCLK3 & SYSCLK4   
+	   
+    /* Step 8d - Set the GOSET bit in PLLCMD */
+    PLL1_CMD |= 0x00000001;
+
+    /* Step 8e: Read the GOSTAT bit in PLLSTAT to make sure the bit returns to 0 to
+      indicate that the GO operation has completed */
+    if(debug_info_on){    
+        GEL_TextOut("(8e) Delay...\n",,,,,);
+    }    
+    //Step 8e - Read the GOSTAT bit in PLLSTAT to make sure the bit returns to 0 to indicate that the GO operation has completed.
+    while((PLL1_STAT) & 0x00000001);
+    
+     /* Step 9: Wait for the at least 7us for the PLL reset properly (128 CLKIN1 cycles) */        
+    if(debug_info_on){    
+        GEL_TextOut("(9) Delay...\n",,,,,);
+    }    
+	
+	//Step 9 - Wait for at least 7 us
+    for(i=0;i<delay;i++);
+	
+    //Step 10 - In PLLCTL, write PLLRST = 0 (PLL reset is released)    
+	PLL1_PLLCTL &= ~(1 << PLLRST_OFFSET);
+
+    /* Step 11: Wait for PLL to lock (2000 CLKIN1 cycles) */
+    if(debug_info_on){    
+        GEL_TextOut("(11) Delay...\n",,,,,);
+    }    
+	
+    //Step 11 - Wait for at least 500 * CLKIN cycles * (PLLD + 1) (PLL lock time)    
+	for(i=0;i<delay;i++);
+
+    //Step 12 - In SECCTL, write BYPASS = 0 (enable PLL mux to switch to PLL mode)	
+    PLL1_SECCTL &= ~(1 << BYPASS_OFFSET);        
+    if(debug_info_on){    
+        GEL_TextOut("(12) SECCTL = %x\n",,,,, PLL1_SECCTL);
+    }    
+
+    //Step 13 - In PLLCTL, write PLLEN = 1 (enable PLL controller mux to switch to PLL mode)	
+    PLL1_PLLCTL |= (1 << PLLEN_OFFSET);        
+    if(debug_info_on){    
+        GEL_TextOut("(13) PLLCTL = %x\n",,,,, PLL1_PLLCTL);
+    }    
+
+    /* Lock Boot Config Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+
+    //GEL_TextOut("PLL has been configured (CLKIN * PLLM / PLLD / PLLOD = PLLOUT):\n",,,,,);
+    GEL_TextOut("C66x PLL has been configured (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val,(CLKIN_val * PLLM_val / PLLD_val / OD_val) );
+}
+
+Set_ARM_Pll(int index)		
+{
+    unsigned int BWADJ_val;     
+    unsigned int OD_val;            
+    unsigned int PLLM_val;
+    unsigned int PLLD_val;
+	float CLKIN_val;
+    int i;
+ 
+    if(_GEL_Global_clkMode == 1)  // Check if external clock mode is selected
+    {
+        CLKIN_val   = 25;  // setup CLKIN to 25.00 MHz
+        PLLM_val    = 96;  // setup PLLM (PLL multiplier) 
+    }
+    else
+    {
+        CLKIN_val   = 24;   // setup CLKIN to 24.00 MHz
+        PLLM_val    = 100;  // setup PLLM (PLL multiplier)     
+    }    
+
+    if(index == 200){                 
+        OD_val      = 12;            // setup OD 
+		PLLD_val	= 1;
+    }
+    else if(index == 400){            
+        OD_val      = 6;            // setup OD 
+		PLLD_val	= 1;
+    }
+    else if(index == 600){          
+        OD_val      = 4;            // setup OD 
+		PLLD_val	= 1;
+    }
+
+    BWADJ_val       = (PLLM_val-1) >> 1;            // setup BWADJ to be 1/2 the value of PLLM
+
+    /* Step 1: Unlock Boot Config Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    //Step 1 : Assert SEC PLL Reset
+    SECPLLCTL1 = ((1 << SEC_PLLCTL1_RESET_OFFSET) | (1 << SEC_PLLCTL1_ENSTAT_OFFSET));
+
+    //Step 2 : Change CLKF/OD/BWADJ etc. for SEC PLL
+    SECPLLCTL0 = ((BWADJ_val << SEC_PLLCTL0_BWADJ_OFFSET) |
+                  ((OD_val-1) << SEC_PLLCTL0_OD_OFFSET)|
+                  ((PLLM_val-1) << SEC_PLLCTL0_PLLM_OFFSET) | 
+				   ((PLLD_val-1) << SEC_PLLCTL0_PLLD_OFFSET)
+				  );
+
+    //Step 3 : Make sure the resets are held for 5us
+    for(i = 0; i < 200000; i++);
+
+    //Step 4 : Remove SEC PLL reset
+    SECPLLCTL1 = (1 << SEC_PLLCTL1_ENSTAT_OFFSET);
+
+    //Step 5 : Wait for PLL to lock (4000 CLKIN1 cycles)
+    for(i = 0; i < 4000; i++);
+
+    //Step 6 : Get the PLL out of Bypass
+    SECPLLCTL0 &= ~(1 << SEC_PLLCTL0_BYPASS_OFFSET);
+  
+    //Step 6 : Lock Boot Config Registers
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+    
+    GEL_TextOut("ARM PLL has been configured with ref clock 24MHz, -sysclkp_period 41.6666 (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val, (CLKIN_val * PLLM_val)/OD_val);
+
+}
+
+Set_ICSS_Pll(int index)		
+{
+
+    unsigned int BWADJ_val;     
+    unsigned int OD_val;            
+    unsigned int PLLM_val;
+	unsigned int PLLD_val;
+    float CLKIN_val;
+    int i;
+    
+    if(_GEL_Global_clkMode == 1)  // Check if external clock mode is selected
+    {
+        CLKIN_val   = 25;          // setup CLKIN to 25 MHz
+        PLLM_val    = 240;         // setup PLLM (PLL multiplier)
+    }
+    else
+    {
+        CLKIN_val   = 24;          // setup CLKIN to 24 MHz
+        PLLM_val    = 250;         // setup PLLM (PLL multiplier)
+    }       
+
+    if(index == 200){                 
+	PLLD_val    = 3;           // setup PLLD (PLL divider) 
+        OD_val      = 10;            // setup OD
+    }
+
+    BWADJ_val       = (PLLM_val-1) >> 1;            // setup BWADJ to be 1/2 the value of PLLM
+ 
+    /* Step 1: Unlock Boot Config Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    //Step 1 : Assert SEC PLL Reset
+    ICSSPLLCTL1 = ((1 << SEC_PLLCTL1_RESET_OFFSET) | (1 << SEC_PLLCTL1_ENSTAT_OFFSET));
+
+    //Step 2 : Change CLKF/OD/BWADJ etc. for SEC PLL
+    ICSSPLLCTL0 = ((BWADJ_val << SEC_PLLCTL0_BWADJ_OFFSET) |
+                  ((OD_val-1) << SEC_PLLCTL0_OD_OFFSET)|
+                  ((PLLM_val-1) << SEC_PLLCTL0_PLLM_OFFSET)|
+				  (PLLD_val-1));
+
+    //Step 3 : Make sure the resets are held for 5us
+    for(i = 0; i < 200000; i++);
+
+    //Step 4 : Remove SEC PLL reset
+    ICSSPLLCTL1 &= ~(1 << SEC_PLLCTL1_RESET_OFFSET);
+
+    //Step 5 : Wait for PLL to lock (4000 CLKIN1 cycles)
+    for(i = 0; i < 4000; i++);
+
+    //Step 6 : Get the PLL out of Bypass
+    ICSSPLLCTL0 &= ~(1 << SEC_PLLCTL0_BYPASS_OFFSET);
+    
+   
+    //Step 6 : Lock Boot Config Registers
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+    
+    GEL_TextOut("ICSS PLL has been configured (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val, (CLKIN_val * PLLM_val)/(PLLD_val*OD_val));
+
+}
+
+Set_DDR_Pll(int index)		
+{
+    unsigned int BWADJ_val;     
+    unsigned int OD_val;            
+    unsigned int PLLM_val;
+	unsigned int PLLD_val;
+    float CLKIN_val;
+    int i;
+    
+    if(_GEL_Global_clkMode == 1)  // Check if external clock mode is selected
+    {
+        CLKIN_val   = 25;            // setup CLKIN to 25 MHz
+        PLLM_val    = 128;           // setup PLLM (PLL multiplier)
+    }
+    else
+    {
+        CLKIN_val   = 24;          // setup CLKIN to 24 MHz
+        PLLM_val    = 133;           // setup PLLM (PLL multiplier)  
+    }        
+
+    if(index == 200){                 
+	PLLD_val    = 1;           // setup PLLD (PLL divider) 
+        OD_val      = 16;            // setup OD
+    }
+
+    BWADJ_val       = (PLLM_val-1) >> 1;            // setup BWADJ to be 1/2 the value of PLLM
+
+    /* Step 1: Unlock Boot Config Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    //Step 1 : Assert SEC PLL Reset
+    DDR3PLLCTL1 = ((1 << SEC_PLLCTL1_RESET_OFFSET) | (1 << SEC_PLLCTL1_ENSTAT_OFFSET));
+
+    //Step 2 : Change CLKF/OD/BWADJ etc. for SEC PLL
+    DDR3PLLCTL0 = ((BWADJ_val << SEC_PLLCTL0_BWADJ_OFFSET) |
+                  ((OD_val-1) << SEC_PLLCTL0_OD_OFFSET)|
+                  ((PLLM_val-1) << SEC_PLLCTL0_PLLM_OFFSET)|
+				  (PLLD_val-1));
+
+    //Step 3 : Make sure the resets are held for 5us
+    for(i = 0; i < 200000; i++);
+
+    //Step 4 : Remove SEC PLL reset
+    DDR3PLLCTL1 &= ~(1 << SEC_PLLCTL1_RESET_OFFSET);
+
+    //Step 5 : Wait for PLL to lock (4000 CLKIN1 cycles)
+    for(i = 0; i < 4000; i++);
+
+    //Step 6 : Get the PLL out of Bypass
+    DDR3PLLCTL0 &= ~(1 << SEC_PLLCTL0_BYPASS_OFFSET);
+	
+	DDR3MUX = 0x0;
+   
+    //Step 6 : Lock Boot Config Registers
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+    
+    GEL_TextOut("DDR PLL has been configured (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val, (CLKIN_val * PLLM_val)/(PLLD_val*OD_val));
+
+}
+
+Set_UART_Pll(int index)		
+{
+
+    unsigned int BWADJ_val;     
+    unsigned int OD_val;            
+    unsigned int PLLM_val;
+	unsigned int PLLD_val;
+    float CLKIN_val;
+    int i;
+    
+    if(index == 384){                 // 24 MHz -> 200 MHz
+        if(_GEL_Global_clkMode == 1)  // Check if external clock mode is selected
+        {
+            CLKIN_val   = 25;            // setup CLKIN to 25 MHz
+            PLLM_val    = 767;           // setup PLLM (PLL multiplier)
+	    PLLD_val    = 5;           // setup PLLD (PLL divider) 
+            OD_val      = 10;            // setup OD            
+        }
+        else
+        {
+            CLKIN_val   = 24;          // setup CLKIN to 200 MHz
+            PLLM_val    = 128;           // setup PLLM (PLL multiplier)
+	    PLLD_val    = 1;           // setup PLLD (PLL divider) 
+            OD_val      = 8;            // setup OD
+            
+        }                    
+    }
+
+    BWADJ_val       = (PLLM_val-1) >> 1;            // setup BWADJ to be 1/2 the value of PLLM
+
+    /* Step 1: Unlock Boot Config Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    //Step 1 : Assert SEC PLL Reset
+    UARTPLLCTL1 = ((1 << SEC_PLLCTL1_RESET_OFFSET) | (1 << SEC_PLLCTL1_ENSTAT_OFFSET));
+
+    //Step 2 : Change CLKF/OD/BWADJ etc. for SEC PLL
+    UARTPLLCTL0 = ((BWADJ_val << SEC_PLLCTL0_BWADJ_OFFSET) |
+                  ((OD_val-1) << SEC_PLLCTL0_OD_OFFSET)|
+                  ((PLLM_val-1) << SEC_PLLCTL0_PLLM_OFFSET)|
+				  (PLLD_val-1));
+
+    //Step 3 : Make sure the resets are held for 5us
+    for(i = 0; i < 200000; i++);
+
+    //Step 4 : Remove SEC PLL reset
+    UARTPLLCTL1 &= ~(1 << SEC_PLLCTL1_RESET_OFFSET);
+
+    //Step 5 : Wait for PLL to lock (4000 CLKIN1 cycles)
+    for(i = 0; i < 4000; i++);
+
+    //Step 6 : Get the PLL out of Bypass
+    UARTPLLCTL0 &= ~(1 << SEC_PLLCTL0_BYPASS_OFFSET);
+   
+    //Step 6 : Lock Boot Config Registers
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+    
+    GEL_TextOut("UART PLL has been configured (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val, (CLKIN_val * PLLM_val)/(PLLD_val*OD_val));
+
+}
+
+Set_NSS_Pll(int index)		
+{
+
+    unsigned int BWADJ_val;     
+    unsigned int OD_val;            
+    unsigned int PLLM_val;
+	unsigned int PLLD_val;
+    float CLKIN_val;
+    int i;
+    
+    if(_GEL_Global_clkMode == 1)  // Check if external clock mode is selected
+    {
+	    CLKIN_val   = 25;         	// sysclk input is 25 MHz
+	    PLLM_val    = 240;           // setup PLLM (PLL multiplier)
+    }
+    else
+    {
+        CLKIN_val   = 24;          // setup CLKIN to 24 MHz
+        PLLM_val    = 250;           // setup PLLM (PLL multiplier)  
+    }            
+
+	if (index == 1000) {
+		PLLD_val    = 3;            // setup PLLD (PLL divider)
+		OD_val      = 2;            // setup OD 
+	}
+
+    /* Step 1: Unlock Boot Config Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    //Step 1 : Assert SEC PLL Reset
+    NSSPLLCTL1 = ((1 << SEC_PLLCTL1_RESET_OFFSET) | (1 << SEC_PLLCTL1_ENSTAT_OFFSET));
+
+    BWADJ_val       = (PLLM_val-1) >> 1;            // setup BWADJ to be 1/2 the value of PLLM
+
+    //Step 2 : Change CLKF/OD/BWADJ etc. for SEC PLL
+    NSSPLLCTL0 = ((BWADJ_val << SEC_PLLCTL0_BWADJ_OFFSET) |
+                  ((OD_val-1) << SEC_PLLCTL0_OD_OFFSET)|
+                  ((PLLM_val-1) << SEC_PLLCTL0_PLLM_OFFSET)|
+				  (PLLD_val-1));
+
+    //Step 3 : Make sure the resets are held for 5us
+    for(i = 0; i < 200000; i++);
+
+    //Step 4 : Remove SEC PLL reset
+    NSSPLLCTL1 &= ~(1 << SEC_PLLCTL1_RESET_OFFSET);
+
+    //Step 5 : Wait for PLL to lock (4000 CLKIN1 cycles)
+    for(i = 0; i < 4000; i++);
+
+    //Step 6 : Get the PLL out of Bypass
+    NSSPLLCTL0 &= ~(1 << SEC_PLLCTL0_BYPASS_OFFSET);
+    
+   
+    //Step 6 : Lock Boot Config Registers
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+    
+    GEL_TextOut("NSS PLL has been configured (%f MHz * %d / %d / %d = %f MHz)\n",,,,, CLKIN_val, PLLM_val, PLLD_val, OD_val, (CLKIN_val * PLLM_val)/PLLD_val/OD_val);
+
+}
+
+//*************************************************************************************************
+
+///*--------------------------------------------------------------*///
+///* K2G GEL Function Menu                                        *///
+///*--------------------------------------------------------------*///
+
+menuitem "System Setup Functions";
+
+hotmenu iceK2G_System_Setup()
+{
+    setup_system_clocks();
+}
+
+/************ Change A15 security mode to non-secure mode ***************/
+hotmenu enterNonSecureMode()
+{
+        int i;
+        int status;
+
+        GEL_TextOut("Enabling non-secure access to cp10 and cp11\n");
+        status = REG_CTXA15_CP15_C1_NSACR;
+        status |= 0x00000C00;
+        status &= 0x7FFFFFFF;
+        REG_CTXA15_CP15_C1_NSACR = status;
+        GEL_TextOut("Enabled non-secure access to cp10 and cp11\n");
+
+        GEL_TextOut("Making all GIC interrupts Group1 \n");
+        status = 0xFFFFFFFF;
+        for (i=0; i<32; i++) {
+                *(GICD_BASE_ADDRESS + GICD_GROUP_OFFSET + 4*i) = status;
+        }
+        GEL_TextOut("Changed interrupt group \n");
+
+        GEL_TextOut("Set secure mode PMR to non-zero value \n");
+        status = 0xFF;
+        *(GICC_BASE_ADDRESS + GICC_PMR_OFFSET) = status;
+
+        GEL_TextOut("Entering NonSecure Mode\n");
+        status = REG_CTXA15_CP15_C1_SCR;
+        status |= 0x1;
+        REG_CTXA15_CP15_C1_SCR = status;
+        GEL_TextOut("Entered NonSecure Mode\n");
+}
+
+
+///* K2G PLL Function *///
+menuitem "PLL Functions";
+
+hotmenu MAIN_PLL_INIT_600MHz()
+{
+    Set_Main_Pll(600); // 600 MHz operation 
+}
+
+hotmenu ARM_PLL_INIT_600MHz()
+{
+    Set_ARM_Pll(600); //  600 MHz operation 
+}
+
+hotmenu DDR_PLL_INIT_200MHz()
+{
+	Set_DDR_Pll(200);
+}
+
+hotmenu ICSS_PLL_INIT_200MHz()
+{
+    Set_ICSS_Pll(200);
+}
+
+/* Function to program NSS PLL to 1000MHZ from 24MHz input sysclkp */
+hotmenu NSS_PLL_INIT_1000MHz()
+{
+    Set_NSS_Pll(1000);
+}
+
+/* Function to program UART PLL to 384MHZ from 24MHz input sysclkp */
+hotmenu UART_PLL_INIT_384MHz()
+{
+    Set_UART_Pll(384);
+}
+
+///* Function to enable CORE PLL observation clock for PLL output *///
+hotmenu ENABLE_MAIN_PLL_OBSCLK()
+{
+    /* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    /* set bit 1 to enable power to the CORE PLL observation clock, clear bit 0 to view the CORE PLL observation (output) clock */
+    OBSCLKCTL = 0x201;
+	
+    /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+
+    GEL_TextOut("CORE PLL observation clock enabled and configured to show C66x PLL output\n");
+}
+
+hotmenu ENABLE_ARM_PLL_OBSCLK()
+{
+    /* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+    OBSCLKCTL = 0x803;
+    /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+	GEL_TextOut("Observation clock enabled and configured to show ARM PLL output\n");
+}
+
+hotmenu ENABLE_ICSS_PLL_OBSCLK()
+{
+	/* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+	OBSCLKCTL = 0x2005;
+	 /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+	GEL_TextOut("Observation clock enabled and configured to show ICSS PLL output\n");
+}
+
+hotmenu ENABLE_NSS_PLL_OBSCLK()
+{
+	/* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+	OBSCLKCTL = 0x10008;
+	 /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+	GEL_TextOut("Observation clock enabled and configured to show NSS PLL output\n");
+}
+
+hotmenu ENABLE_UART_PLL_OBSCLK()
+{
+	/* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+	OBSCLKCTL = 0x1004;
+	 /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+	GEL_TextOut("Observation clock enabled and configured to show UART PLL output\n");
+}
+
+/* Function to enable DDR PLL observation clock for PLL output */
+hotmenu ENABLE_DDR_PLL_OBSCLK ()
+{
+    /* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+
+    /* set bit 1 to enable power to the CORE PLL observation clock, clear bit 0 to view the CORE PLL observation (output) clock */
+    OBSCLKCTL = 0x4006;
+    
+    /* Lock Chip Level Registers */
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+
+    GEL_TextOut("DDR PLL observation clock enabled and configured to show DDR PLL output\n");
+}
+
+xmc_setup()
+{
+    /* mapping for ddr emif registers XMPAX*2 */
+    XMPAX2_L =  0x121010FF;  /* replacement addr + perm */
+    XMPAX2_H =  0x2101000B;    /* base addr + seg size (64KB)*/	//"1B"-->"B" by xj
+    GEL_TextOut("XMC setup complete.\n");
+}
+
+unsigned int read_val;
+ddr3A_setup(int ECC_Enable, int DUAL_RANK)
+{
+	unsigned int multiplier = 133;
+	unsigned int divider = 0;
+	unsigned int OD_val = 16;
+	
+	int temp,i;
+	int delay = 2000;
+    KICK0 = 0x83E70B13;
+    KICK1 = 0x95A4F1E0;
+	 
+	// Poll for IDONE=1 in the PHY General Status Register 0 (address offset 0x010).
+	 do { 
+    read_val = DDR3A_PGSR0;
+    } while ((read_val&0x00000001) != 0x00000001);
+		
+	//	Clocks are enabled and frequency is stable---------------------------------------
+		
+	//DDR3A PLL setup
+	GEL_TextOut ( "DDR3 PLL Setup ... \n");
+    //DDR3APLLCTL0 = DDR3APLLCTL0 & 0xFF7FFFFF;
+	//	Set ENSAT = 1
+	DDR3APLLCTL1 |= 0x00000040;
+	// Put the PLL in PLL Mode  
+	DDR3APLLCTL0 |= 0x00800000;
+	
+	// Program the necessary multipliers/dividers and BW adjustments            
+    // Set the divider values 
+	DDR3APLLCTL0 &= ~(0x0000003F);
+	DDR3APLLCTL0 |= (divider & 0x0000003F);
+	
+    // Program OD[3:0] in the SECCTL register            
+    DDR3APLLCTL0 &= OUTPUT_DIVIDE_MASK;  // clear the OD bit field
+    DDR3APLLCTL0 |= ~OUTPUT_DIVIDE_MASK & (OD_val - 1) << OUTPUT_DIVIDE_OFFSET;  // set the OD[3:0] bit field of PLLD to OD_val    
+
+	// Set the Multipler values 
+	DDR3APLLCTL0 &= ~(0x0007FFC0);
+	DDR3APLLCTL0 |= ((multiplier << 6) & 0x0007FFC0 );
+	temp = ((multiplier + 1) >> 1) - 1;
+	DDR3APLLCTL0 &= ~(0xFF000000); 
+	DDR3APLLCTL0 |= ((temp << 24) & 0xFF000000);
+	DDR3APLLCTL1 &= ~(0x0000000F);
+	DDR3APLLCTL1 |= ((temp >> 8) & 0x0000000F);
+	
+	// In PLL Controller, reset the PLL (bit 13 in DDR3APLLCTL1 register) 
+	DDR3APLLCTL1 |= 0x00004000;
+	for(i=0;i<delay;i++);
+	// In DDR3PLLCTL1, write PLLRST = 0 to bring PLL out of reset 
+    DDR3APLLCTL1 &= ~(0x00004000);
+	for(i=0;i<delay;i++);
+	
+	// Put the PLL in PLL Mode  
+	DDR3APLLCTL0 &= ~(0x00800000); // ReSet the Bit 23
+	GEL_TextOut( "DDR3 PLL Setup complete, DDR3A clock now running at 400MHz.\n" );
+	//DDR3A PLL setup complete ---------------------------------------
+
+
+	/*------------------------------- ECO FIX -----------------------------------------*/
+	// DDR3 write leveling ECO - Assert & release DDR PHY RESET after DDR PLL setup...
+	DDR3APLLCTL1 = DDR3APLLCTL1 | 0x80000000;	//Assert DDR PHY reset after PLL enabled
+	for(i=0;i<delay;i++);
+	DDR3APLLCTL1 = DDR3APLLCTL1 & 0x7FFFFFFF;	//Release DDR PHY reset
+	
+	do {   // Poll IDONE after resetting PHY 
+		read_val = DDR3A_PGSR0;	
+	   } while ((read_val&0x00000001) != 0x00000001);
+	/*------------------------- Start PHY Configuration -------------------------------*/
+
+	 // Program FRQSEL in the PLL Control Register (address offset 0x018).
+	 DDR3A_PLLCR = 0xDC000; //Set FRQSEL=11, for ctl_clk between 166-275MHz
+	 
+	// Program WLSTEP=1, IODDRM=2(DDR3L), and ZCKSEL in the PHY General Configuration Register 1 (address offset 0x00C).
+	DDR3A_PGCR1 |= (1 << 2); //WLSTEP = 1
+	DDR3A_PGCR1 &= ~(IODDRM_MASK);
+	DDR3A_PGCR1 |= (( 2 << 7) & IODDRM_MASK);	//MM - changed for DDR3L (changed to 2)
+	DDR3A_PGCR1 &= ~(ZCKSEL_MASK);
+	DDR3A_PGCR1 |= (( 1 << 23) & ZCKSEL_MASK);
+    
+	// Program PHY Timing Parameters Register 0-4 (address offset 0x01C - 0x02C).
+
+	DDR3A_PTR0 = 0x42C21590;
+	DDR3A_PTR1 = 0xD05612C0;	
+	
+	// Maintain default values of Phy Timing Parameters Register 2 in PUB 
+	// DDR3A_PTR2 = 0x00083DEF;
+	
+	DDR3A_PTR3 = 0x06C30D40; 	//0x18061A80; 
+	DDR3A_PTR4 = 0x06413880; 	//0x0AAE7100;
+	
+	// Program PDQ, MPRDQ, and BYTEMASK in the DRAM Configuration Register (address offset 0x044). 
+	// All other fields must be left at their default values.
+ 
+	DDR3A_DCR &= ~(PDQ_MASK); //PDQ = 0
+	DDR3A_DCR &= ~(MPRDQ_MASK); //MPRDQ = 0
+	DDR3A_DCR &= ~(BYTEMASK_MASK);
+	DDR3A_DCR |= (( 1 << 10) & BYTEMASK_MASK);
+ 
+	if(DUAL_RANK==1){
+		//Assumes Address Mirrored DIMM
+		DDR3A_DCR &= ~(NOSRA_MASK);
+		DDR3A_DCR |= (( 1 << 27) & NOSRA_MASK);
+		DDR3A_DCR &= ~(UDIMM_MASK);
+		DDR3A_DCR |= (( 1 << 29) & UDIMM_MASK);
+	}
+	
+	// Program DRAM Timing Parameters Register 0-2 (address offset 0x048 - 0x050). 
+	DDR3A_DTPR0 = 0x550E6644;	//WT - calculated: 0x550E6644, orig: 0x50CE6644
+	DDR3A_DTPR1 = 0x32834200;	//WT - calculated: 0x32834200, orig: 0x32834180		//Increase tWLO to 12
+	DDR3A_DTPR2 = 0x50022A00;	
+
+
+	// Program BL=0, CL, WR, and PD=1 in the Mode Register 0 (address offset 0x054). 
+	// All other fields must be left at their default values.
+	DDR3A_MR0 = 0x00001430; //WT - calculated: 0x00001430, orig: 0x00001420 //-CL - 6, CWL - 5
+	
+	
+	// Program DIC, RTT, and TDQS in the Mode Register 1 (address offset 0x058). 
+	// All other fields must be left at their default values.
+	
+	DDR3A_MR1 = 0x00000006;
+
+	// Program Mode Register 2 (address offset 0x05C).
+	// Maintaining default values of Program Mode Register 2??
+
+	DDR3A_MR2 = 0x00000008;
+
+	// Program DTMPR=1, DTEXD, DTEXG, RANKEN=1 or 3, and RFSHDT=7 in the Data Training Configuration Register (address offset 0x068). 
+	// All other fields must be left at their default values.
+	if(DUAL_RANK==1){
+		DDR3A_DTCR = 0x730035C7; //Dual-rank
+	}
+	else{
+		DDR3A_DTCR = 0x710035C7; //Single-rank
+	}
+	// Program tREFPRD=(5*tREFI/ddr_clk_period) in the PHY General Configuration Register 2 (address offset 0x08C). 
+	//All other fields must be left at their default values.
+	
+	//DDR3A_PGCR2 = 0x00F83D09; //NOBUB = 0, FXDLAT = 1 
+	DDR3A_PGCR2 = 0x00F03D09; //NOBUB = 0, FXDLAT = 0 	
+	
+	//Set Impedence Register and DFIPU0=1 
+	DDR3A_ZQ0CR1 = 0x0001005D; 
+	DDR3A_ZQ1CR1 = 0x0001005B;
+	DDR3A_ZQ2CR1 = 0x0001005B;
+	
+	// Re-trigger PHY initialization in DDR PHY through the VBUSP interface.
+	// Program 0x00000033 to the PHY Initialization Register (address offset 0x004) to re-trigger PLL, ZCAL, and DCAL initialization.
+
+	DDR3A_PIR = 0x00000033;
+	
+	// Poll for IDONE=1 in the PHY General Status Register 0 (address offset 0x010).
+     do { 
+    read_val = DDR3A_PGSR0;
+    } while ((read_val&0x00000001) != 0x00000001);
+
+	//---------------------------------------------------------------------------------------------------------					
+	
+	read_val = DDR3A_DATX8_2;				
+	  DDR3A_DATX8_2 = read_val & 0xFFFFFFFE; 
+	  
+	read_val = DDR3A_DATX8_3;				
+	  DDR3A_DATX8_3 = read_val & 0xFFFFFFFE;
+	
+	if(ECC_Enable == 0)
+	{
+		read_val = DDR3A_DATX8_4;				
+		DDR3A_DATX8_4 = read_val & 0xFFFFFFFE; //Disable ECC byte lane
+	}
+
+	read_val = DDR3A_DATX8_5;				
+	  DDR3A_DATX8_5 = read_val & 0xFFFFFFFE; //Disable BL5 byte lane - not present in K2G
+
+	read_val = DDR3A_DATX8_6;				
+	  DDR3A_DATX8_6 = read_val & 0xFFFFFFFE; //Disable BL6 byte lane - not present in K2G
+
+	read_val = DDR3A_DATX8_7;				
+	  DDR3A_DATX8_7 = read_val & 0xFFFFFFFE; //Disable BL7 byte lane - not present in K2G
+
+	read_val = DDR3A_DATX8_8;				
+	  DDR3A_DATX8_8 = read_val & 0xFFFFFFFE; //Disable BL8 byte lane - not present in K2G
+	
+	// Trigger DDR3 initialization and leveling/training in DDR PHY through the VBUSP interface.
+	// If using a 16-bit wide DDR interface, program DXEN=0 in the DATX8 2-7 General Configuration Registers (address offsets 0x240, 0x280, 0x2C0, 0x300, 0x340, and 0x380) to disable the leveling/training for the upper byte lanes.
+	// If using a 32-bit wide DDR interface, program DXEN=0 in the DATX8 4-7 General Configuration Registers (address offsets 0x2C0, 0x300, 0x340, and 0x380) to disable the leveling/training for the upper byte lanes.
+	// If ECC is not required, program DXEN=0 in the DATX8 8 General Configuration Register (address offset 0x3C0) to disable the leveling/training for the ECC byte lane.
+	// NOTE: Setup supports 64-bit by default,  ECC enable by default.
+ 
+	// Program 0x0000XF81 to the PHY Initialization Register (address offset 0x004) to trigger DDR3 initialization and leveling/training sequences 
+	//DDR3A_PIR = 0x0000FF81; //WLADJ - ON
+	DDR3A_PIR =   0x00000F81; //WLADJ - ON
+	//DDR3A_PIR = 0x00000781;  //WLADJ - OFF
+	
+
+	//---------------------------------------------------------------------------------------------------------					
+			
+	// Poll for IDONE=1 in the PHY General Status Register 0 (address offset 0x010).
+	do {              
+		read_val = DDR3A_PGSR0;
+	   } while ((read_val&0x00000001) != 0x00000001);
+	   
+
+	/* End PHY Configuration */
+	
+	if(ECC_Enable==1)
+	{
+		//Enable ECC
+		//0xB0000000: ECC_EN=1, ECC_VERIFY_EN=1, RMW_EN=1
+		//0x50000000: ECC_EN=1, ECC_VERIFY_EN=0, RMW_EN=1
+		DDR3A_ECC_CTRL = 0xB0000000;
+		read_val = DDR3A_ECC_CTRL;
+		if(read_val!=0xB0000000){
+			GEL_TextOut("\nIncorrect data written to DDR3A_ECC_CTRL..");
+		}
+	}
+	
+	//---------------------------------------------------------------------------------------------------------					
+	/* START EMIF INITIALIZATION
+	  ++++++++++++++++++SDCFG Register Calculation+++++++++++++++++++
+	  | 31 - 29  | 28 |27 - 25 | 24   | 23 - 22| 21 - 17 |
+	  |SDRAM_TYPE|Rsvd|DDR_TERM| DDQS | DYN_ODT|  Rsvd   |
+	  |  0x011   |  0 | 0x011  | 0x1  |   0x00 |   0x0   |
+
+	  | 16-14 |13 - 12 |  11 - 8 |  7   |6 - 5 |  4  |  3  |  2  |  1 - 0  |
+	  |   CWL | NM     |   CL    | Rsvd |IBANK | Rsvd|EBANK| Rsvd|PAGE_SIZE|
+	  |  0x11 | 0x01   |  0x1110 |  0x0 | 0x11 | 0x0 |  0  |  0  |   0x10  |
+	  SDCFG = 0x0110 0011 0010 0010 0011 0011 1011 0010
+	  SDCFG = 0x6700486A;//0x63223332
+
+	  SDRAM_TYPE = 3
+	  DDR_TERM = 3 (RZQ/4 = 1; RZQ/6=3)
+	  DDQS = 1 
+	  DYN_ODT = 0 
+	  
+	  CWL = 3 (CWL5=0; CWL6=1; CWL7=2; CWL8=3)
+	  NM = 1 (64-bit=0, 32-bit=1, 16-bit=2)
+	  CL = 14 (CL5=2; CL6=4; CL7=6; CL8=8; CL9=10; CL10=12; CL11=14)
+	  IBANK = 3 (8bank)
+	  EBANK = 0 (0 - pad_cs_o_n[0] , 1 - pad_cs_o_n[1:0])
+	  PAGE_SIZE = 2 (1024page-size=2; 2048page-size=3)
+	*/
+	/* Start DDR3A EMIF Configuration */
+	// Configure the EMIF through the VBUSM interface.
+	// Program all EMIF MMR’s.
+
+	if(DUAL_RANK==1){
+		DDR3A_SDCFG    = 0x6200046A; 	//Dual-rank
+	}
+	else{
+		DDR3A_SDCFG    = 0x62006662; 	//Single-rank, 32-bit //MM - calculated: 0x62005662, orig: 0x62000462 (orig,NM=01:62001462)
+	}																	 
+	
+    DDR3A_SDTIM1   = 0x0A385033;	//MM - calculated: 0x0A385033, orig: 0x0A384C23
+    DDR3A_SDTIM2   = 0x00001CA5;
+    DDR3A_SDTIM3   = 0x21ADFF32;
+	DDR3A_SDTIM4   = 0x533F067F;
+
+	if(DUAL_RANK==1){
+		DDR3A_ZQCFG    = 0xF0073200;	//Dual-rank
+	}
+	else{
+		DDR3A_ZQCFG    = 0x70073200;	//Single-rank
+	}
+ 	
+	//8.b.	Program reg_initref_dis=0 in the SDRAM Refresh Control Register (address offset 0x10).
+    DDR3A_SDRFC = 0x00000C34;
+      
+	GEL_TextOut("DDR3A initialization complete \n");
+	   /* End  DDR3A EMIF Configuration */
+
+}	
+
+menuitem "DDR3 Functions";
+
+hotmenu InitEmif_DDR3A()
+{
+	ddr3A_setup(0,0);
+}   
+
+menuitem "Power State Control Functions";
+
+/****************************************************************************
+ *
+ * NAME
+ *      Get_Timeout
+ *
+ * PURPOSE:
+ *      Query the running state of a timeout period started by Set_Timeout.
+ *      (see Set_Timeout for more info).
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Get_Timeout()
+ *
+ * RETURN VALUE
+ *      0:expired, 1:running
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+Get_Timeout()
+{
+	if (!_GEL_Global_Timeout1)
+	{
+		// Cancel the current timer
+		GEL_CancelTimer(TIMEOUT_ID);
+	}
+
+	// Return the global timeout status 1=running, 0=expired
+	return _GEL_Global_Timeout1;
+}
+
+/****************************************************************************
+ *
+ * NAME
+ *      Kill_Timeout
+ *
+ * PURPOSE:
+ *      Cancel a running timeout period before it expires
+ *      (see Set_Timeout for more info).
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Kill_Timeout()
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+Kill_Timeout()
+{
+	// Cancel the current timer
+	GEL_CancelTimer(TIMEOUT_ID);
+
+	// The timeout period is expired
+	_GEL_Global_Timeout1=0;
+}
+
+/****************************************************************************
+ *
+ * NAME
+ *      _Timeout_Callback
+ *
+ * PURPOSE:
+ *      Internal Callback function used by Set_timeout
+ *      (see Set_Timeout for more info).
+ *
+ * USAGE
+ *      This routine must not be called by itself.
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+_Timeout_Callback()
+{
+	// The timeout period is expired
+	_GEL_Global_Timeout1=0;
+}
+/****************************************************************************
+ *
+ * NAME
+ *      Set_Timeout
+ *
+ * PURPOSE:
+ *      Starts a timeout period of msec. The running timeout period can be
+ *      query with Get_Timeout. To kill a running timeout before the end,
+ *      call Kill_Timeout. Only one timeout period can be used at any time.
+ *      A timeout period can be used to measure a period of time while doing
+ *      anything else. Not accurate, sets timer at least as big as desired.
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Set_Timeout(msec)
+ *
+ *      msec - (i) timeout period in msec (not very precise < sec range)
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+Set_Timeout(msec)
+{
+	// Cancel the current timer if not already expired
+	GEL_CancelTimer(TIMEOUT_ID);
+
+	// Starts the timeout period
+	_GEL_Global_Timeout1=1;
+
+	// Setup a callback routine with specified timeout
+	GEL_SetTimer(msec, TIMEOUT_ID, "_Timeout_Callback()");
+}
+
+/****************************************************************************
+ *
+ * NAME
+ *      Set_PSC_State
+ *
+ * PURPOSE:
+ *      Set a new power state for the specified domain id in a power controler
+ *      domain. Wait for the power transition to complete.
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Set_PSC_State(unsigned int pd,unsigned int id,unsigned int state)
+ *
+ *      pd    - (i) power domain.
+ *
+ *      id    - (i) module id to use for module in the specified power domain
+ *
+ *      state - (i) new state value to set
+ *                  0 = RESET
+ *                  1 = SYNC RESET
+ *                  2 = DISABLE
+ *                  3 = ENABLE
+ *
+ * RETURN VALUE
+ *      0 if ok, !=0 for error
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+Set_PSC_State(unsigned int pd,unsigned int id,unsigned int state)
+{
+	unsigned int* mdctl;
+	unsigned int* mdstat;
+	unsigned int* pdctl;
+	int ret=0;
+
+	mdctl = ( unsigned int* )(PSC_MDCTL_BASE + ( 4 * id ));
+	mdstat = ( unsigned int* )( PSC_MDSTAT_BASE + ( 4 * id ));
+	pdctl = ( unsigned int* )(PSC_PDCTL_BASE + ( 4 * pd ));
+
+	// If state is already set, do nothing
+	if ( ( *mdstat & 0x1f ) == state )
+	{
+		return(0);
+	}
+
+	// Wait for GOSTAT to clear
+	Set_Timeout(GTIMEOUT);
+	while( Get_Timeout() && (PSC_PTSTAT & (0x1 << pd)) != 0 );
+
+	// Check if we got timeout error while waiting
+	if (!Get_Timeout())
+	{
+		GEL_TextOut( "Set_PSC_State... Timeout Error #01 pd=%d, md=%d!\n",,2,,,pd,id);
+		ret=1;
+	}
+	else
+	{
+		// Set power domain control
+		*pdctl = (*pdctl) | 0x00000001;
+
+		// Set MDCTL NEXT to new state
+		*mdctl = ((*mdctl) & ~(0x1f)) | state;
+
+		// Start power transition by setting PTCMD GO to 1
+		PSC_PTCMD = (PSC_PTCMD) | (0x1<<pd);
+
+		// Wait for PTSTAT GOSTAT to clear
+		Set_Timeout(GTIMEOUT);
+		while( Get_Timeout() && (PSC_PTSTAT & (0x1 << pd)) != 0 );
+
+		// Check if we got timeout error while waiting
+		if (!Get_Timeout())
+		{
+			GEL_TextOut( "Set_PSC_State... Timeout Error #02 pd=%d, md=%d!\n",,2,,,pd,id);
+			ret=2;
+		}
+		else
+		{
+			// Verify state changed
+			Set_Timeout(GTIMEOUT);
+			while(Get_Timeout() && ( *mdstat & 0x1f ) != state );
+
+			// Check if we got timeout error while waiting
+			if (!Get_Timeout())
+			{
+				GEL_TextOut( "Set_PSC_State... Timeout Error #03 pd=%d, md=%d!\n",,2,,,pd,id);
+				ret=3;
+			}
+		}
+	}
+
+	// Kill the currently running timeout
+	Kill_Timeout();
+
+	return(ret);
+}
+
+/****************************************************************************
+ *
+ * NAME
+ *      Set_Psc_All_On
+ *
+ * PURPOSE:
+ *      Enable all PSC modules and DSP power domains on ALWAYSON, and wait
+ *      for these power transitions to complete.
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      Set_Psc_All_On()
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+hotmenu Set_Psc_All_On( )
+{
+	unsigned int i=0;
+
+	GEL_TextOut( "Power on all PSC modules and power domains... \n");
+	Set_PSC_State(PD1, LPSC_PMMC, PSC_ENABLE);
+	Set_PSC_State(PD1, LPSC_DEBUG, PSC_ENABLE);		
+	Set_PSC_State(PD2, LPSC_NSS, PSC_ENABLE);		
+	Set_PSC_State(PD3, LPSC_SA, PSC_ENABLE);		
+	Set_PSC_State(PD5, LPSC_SYS_COMP, PSC_ENABLE);
+	Set_PSC_State(PD5, LPSC_QSPI, PSC_ENABLE);
+	Set_PSC_State(PD5, LPSC_MMC, PSC_ENABLE);
+	Set_PSC_State(PD5, LPSC_GPMC, PSC_ENABLE);
+	Set_PSC_State(PD5, LPSC_MLB, PSC_ENABLE);
+	Set_PSC_State(PD5, LPSC_EHRPWM, PSC_ENABLE);
+	Set_PSC_State(PD5, LPSC_EQEP, PSC_ENABLE);
+	Set_PSC_State(PD5, LPSC_ECAP, PSC_ENABLE);
+	Set_PSC_State(PD5, LPSC_MCASP, PSC_ENABLE);				
+	Set_PSC_State(PD7, LPSC_MSMC, PSC_ENABLE);
+	Set_PSC_State(PD11, LPSC_ICSS, PSC_ENABLE);
+	Set_PSC_State(PD13, LPSC_PCIE, PSC_ENABLE);		
+	Set_PSC_State(PD14, LPSC_USB_0, PSC_ENABLE);
+	Set_PSC_State(PD14, LPSC_USB_1, PSC_ENABLE);
+	Set_PSC_State(PD15, LPSC_DDR3, PSC_ENABLE);
+
+	GEL_TextOut( "Power on PSC modules and power domains... Done.\n\n" );
+}
+
+menuitem "Ethernet PHY Register Read Functions"
+
+MDIO_Init()
+{
+	MDIO_CTL = 0x411400ff;
+	GEL_TextOut( "MDIO is enabled\n");
+	//MDIO_CLK_PADCONFIG= DEVICE_PIN_MUX_VALUE (DEVICE_PIN_MUX_BUFFER_CLASS_00, DEVICE_PIN_MUX_RX_DISABLED, DEVICE_PIN_MUX_PULL_UP, DEVICE_PIN_MUX_PULL_ENABLE, DEVICE_PIN_MUX_MODE_PRIMARY)
+	PADCONFIG98 = 0x00060000;
+	//MDIO_DATA_PADCONFIG= DEVICE_PIN_MUX_VALUE (DEVICE_PIN_MUX_BUFFER_CLASS_00, DEVICE_PIN_MUX_RX_ENABLED, DEVICE_PIN_MUX_PULL_UP,    DEVICE_PIN_MUX_PULL_ENABLE, DEVICE_PIN_MUX_MODE_PRIMARY)
+	PADCONFIG99 = 0x00020000;
+
+	GEL_TextOut( "MDIO pinmux is enabled\n");
+}
+
+/* Reads Gigabit Ethernet PHY registers to verify the strapping configurations */
+hotmenu ReadEth0PHYRegs()
+{
+    unsigned phy_addr = 0;
+    unsigned reg_addr = 0;
+    unsigned MDIO_useraccess = 0x04200F80;
+    unsigned long temp;
+
+    MDIO_Init();
+    GEL_TextOut( "Gig Eth MDIO PHY settings are as follows \n");
+    for(reg_addr=0;reg_addr<16;reg_addr++)
+    {
+        WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+        //write same value with GO bit
+        WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+        temp = (RD_MEM_32(MDIO_useraccess));
+        if((temp & 0x20000000) == 0x20000000)
+            GEL_TextOut("PHY REG %x = %x\n",,,,,reg_addr,(temp & 0xFFFF));
+        else
+            GEL_TextOut("PHY REG %x read fail\n",,,,,reg_addr);
+    }
+
+    //Additional read of register at addr 0x6E to read Strap Configuration Status Register 1
+    reg_addr = 0x6E;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+    temp = (RD_MEM_32(MDIO_useraccess));
+    if((temp & 0x20000000) == 0x20000000)
+           GEL_TextOut("PHY REG %x = %x\n",,,,,reg_addr,(temp & 0xFFFF));
+    else
+           GEL_TextOut("PHY REG %x read fail\n",,,,,reg_addr);
+
+    GEL_TextOut( " Gig Eth PHY0 Boot strap settings are as follows \n");
+
+    //Additional read of register at address 0x6E to read Strap Latch-In Register #1
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x001F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x001F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x6E);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x6E);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x401F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x401F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+
+    temp = (RD_MEM_32(MDIO_useraccess));
+
+    if((temp & 0x20000000) == 0x20000000)
+        GEL_TextOut("PHY REG %x = %x\n",,,,,0x6E,(temp & 0xFFFF));
+    else
+        GEL_TextOut("PHY REG %x read fail\n",,,,,0x6E);
+}
+
+PRU0_MDIO_Init()
+{
+	PRU0_MDIO_CTL = 0x411400ff;
+	GEL_TextOut( "PRU0 MDIO is enabled\n");
+
+	PADCONFIG179 = 0x00060000;
+	PADCONFIG180 = 0x00020000;
+
+	GEL_TextOut( "PRU0 MDIO pinmux is enabled\n");
+}
+
+/* Reads PRU0 PHY0 registers to verify the strapping configurations */
+hotmenu Read_ICSS0EthPHY0_Regs()
+{
+    unsigned phy_addr = 0;
+    unsigned reg_addr = 0;
+    unsigned MDIO_useraccess = 0x20AB2480;
+    unsigned long temp;
+
+    PRU0_MDIO_Init();
+    GEL_TextOut( "PRU0 MDIO PHY0 settings are as follows \n");
+    for(reg_addr=0;reg_addr<16;reg_addr++)
+    {
+        WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+        //write same value with GO bit
+        WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+        temp = (RD_MEM_32(MDIO_useraccess));
+        if((temp & 0x20000000) == 0x20000000)
+            GEL_TextOut("PHY REG %x = %x\n",,,,,reg_addr,(temp & 0xFFFF));
+        else
+            GEL_TextOut("PHY REG %x read fail\n",,,,,reg_addr);
+    }
+
+    GEL_TextOut( "PRU0 MDIO PHY0 Boot strap settings are as follows \n");
+
+    //Additional read of register at address 0x467 and 0x468 to read 7 Strap Latch-In Register #1 and #2
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x001F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x001F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x0467);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x0467);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x401F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x401F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+
+    temp = (RD_MEM_32(MDIO_useraccess));
+
+    if((temp & 0x20000000) == 0x20000000)
+       GEL_TextOut("PHY REG %x = %x\n",,,,,0x0467,(temp & 0xFFFF));
+    else
+       GEL_TextOut("PHY REG %x read fail\n",,,,,0x0467);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x001F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x001F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x0468);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x0468);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x401F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x401F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+
+    temp = (RD_MEM_32(MDIO_useraccess));
+    if((temp & 0x20000000) == 0x20000000)
+           GEL_TextOut("PHY REG %x = %x\n",,,,,0x468,(temp & 0xFFFF));
+    else
+           GEL_TextOut("PHY REG %x read fail\n",,,,,0x468);
+}
+
+/* Reads PRU0 PHY1 registers to verify the strapping configurations */
+hotmenu Read_ICSS0EthPHY1_Regs()
+{
+    unsigned phy_addr = 0x1;
+    unsigned reg_addr = 0;
+    unsigned MDIO_useraccess = 0x20AB2480;
+    unsigned long temp;
+
+    PRU0_MDIO_Init();
+    GEL_TextOut( "PRU0 MDIO PHY1 settings are as follows \n");
+    for(reg_addr=0;reg_addr<16;reg_addr++)
+    {
+        WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+        //write same value with GO bit
+        WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+        temp = (RD_MEM_32(MDIO_useraccess));
+        if((temp & 0x20000000) == 0x20000000)
+            GEL_TextOut("PHY REG %x = %x\n",,,,,reg_addr,(temp & 0xFFFF));
+        else
+            GEL_TextOut("PHY REG %x read fail\n",,,,,reg_addr);
+    }
+
+    //Additional read of register at address 0x467 and 0x468 to read 7 Strap Latch-In Register #1 and #2
+    GEL_TextOut( "PRU0 MDIO PHY1 Boot strap settings are as follows \n");
+
+    //Additional read of register at address 0x467 and 0x468 to read 7 Strap Latch-In Register #1 and #2
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x001F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x001F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x0467);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x0467);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x401F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x401F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+
+    temp = (RD_MEM_32(MDIO_useraccess));
+
+    if((temp & 0x20000000) == 0x20000000)
+       GEL_TextOut("PHY REG %x = %x\n",,,,,0x0467,(temp & 0xFFFF));
+    else
+       GEL_TextOut("PHY REG %x read fail\n",,,,,0x0467);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x001F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x001F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x0468);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x0468);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x401F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x401F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+
+    temp = (RD_MEM_32(MDIO_useraccess));
+    if((temp & 0x20000000) == 0x20000000)
+       GEL_TextOut("PHY REG %x = %x\n",,,,,0x468,(temp & 0xFFFF));
+    else
+       GEL_TextOut("PHY REG %x read fail\n",,,,,0x468);
+}
+
+PRU1_MDIO_Init()
+{
+	PRU1_MDIO_CTL = 0x411400ff;
+	GEL_TextOut( "PRU1 MDIO is enabled\n");
+
+	PADCONFIG221 = 0x00060000;
+	PADCONFIG222 = 0x00020000;
+
+	GEL_TextOut( "PRU1 MDIO pinmux is enabled\n");
+}
+
+/* Reads PRU1 PHY0 registers to verify the strapping configurations */
+hotmenu Read_ICSS1EthPHY0_Regs()
+{
+    unsigned phy_addr = 0x2;
+    unsigned reg_addr = 0;
+    unsigned MDIO_useraccess = 0x20AF2480;
+    unsigned long temp;
+
+    PRU1_MDIO_Init();
+    GEL_TextOut( "PRU1 MDIO PHY0 settings are as follows \n");
+    for(reg_addr=0;reg_addr<16;reg_addr++)
+    {
+        WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+        //write same value with GO bit
+        WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+        temp = (RD_MEM_32(MDIO_useraccess));
+        if((temp & 0x20000000) == 0x20000000)
+            GEL_TextOut("PHY REG %x = %x\n",,,,,reg_addr,(temp & 0xFFFF));
+        else
+            GEL_TextOut("PHY REG %x read fail\n",,,,,reg_addr);
+    }
+
+    //Additional read of register at address 0x467 and 0x468 to read 7 Strap Latch-In Register #1 and #2
+    GEL_TextOut( "PRU1 MDIO PHY0 Boot strap settings are as follows \n");
+
+    //Additional read of register at address 0x467 and 0x468 to read 7 Strap Latch-In Register #1 and #2
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x001F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x001F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x0467);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x0467);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x401F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x401F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+
+    temp = (RD_MEM_32(MDIO_useraccess));
+
+    if((temp & 0x20000000) == 0x20000000)
+        GEL_TextOut("PHY REG %x = %x\n",,,,,0x0467,(temp & 0xFFFF));
+    else
+        GEL_TextOut("PHY REG %x read fail\n",,,,,0x0467);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x001F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x001F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x0468);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x0468);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x401F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x401F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+
+    temp = (RD_MEM_32(MDIO_useraccess));
+    if((temp & 0x20000000) == 0x20000000)
+        GEL_TextOut("PHY REG %x = %x\n",,,,,0x468,(temp & 0xFFFF));
+    else
+        GEL_TextOut("PHY REG %x read fail\n",,,,,0x468);
+}
+
+/* Reads PRU1 PHY1 registers to verify the strapping configurations */
+hotmenu Read_ICSS1EthPHY1_Regs()
+{
+    unsigned phy_addr = 0x3;
+    unsigned reg_addr = 0;
+    unsigned MDIO_useraccess = 0x20AF2480;
+    unsigned long temp;
+
+    PRU1_MDIO_Init();
+    GEL_TextOut( "PRU1 MDIO PHY1 settings are as follows \n");
+    for(reg_addr=0;reg_addr<16;reg_addr++)
+    {
+        WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+        //write same value with GO bit
+        WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+        temp = (RD_MEM_32(MDIO_useraccess));
+        if((temp & 0x20000000) == 0x20000000)
+            GEL_TextOut("PHY REG %x = %x\n",,,,,reg_addr,(temp & 0xFFFF));
+        else
+            GEL_TextOut("PHY REG %x read fail\n",,,,,reg_addr);
+    }
+
+    //Additional read of register at address 0x467 and 0x468 to read 7 Strap Latch-In Register #1 and #2
+    GEL_TextOut( "PRU1 MDIO PHY1 Boot strap settings are as follows \n");
+
+    //Additional read of register at address 0x467 and 0x468 to read 7 Strap Latch-In Register #1 and #2
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x001F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x001F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x0467);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x0467);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x401F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x401F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+
+    temp = (RD_MEM_32(MDIO_useraccess));
+
+    if((temp & 0x20000000) == 0x20000000)
+           GEL_TextOut("PHY REG %x = %x\n",,,,,0x0467,(temp & 0xFFFF));
+    else
+           GEL_TextOut("PHY REG %x read fail\n",,,,,0x0467);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x001F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x001F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x0468);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x0468);
+
+    reg_addr = 0xD;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16)| 0x401F);
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0xC0000000) | (reg_addr << 21) |  (phy_addr << 16) | 0x401F);
+
+    reg_addr = 0xE;
+    WR_MEM_32(MDIO_useraccess,(reg_addr << 21) | (phy_addr << 16));
+    //write same value with GO bit
+    WR_MEM_32(MDIO_useraccess,(0x80000000) | (reg_addr << 21) |  (phy_addr << 16));
+
+    temp = (RD_MEM_32(MDIO_useraccess));
+    if((temp & 0x20000000) == 0x20000000)
+           GEL_TextOut("PHY REG %x = %x\n",,,,,0x468,(temp & 0xFFFF));
+    else
+           GEL_TextOut("PHY REG %x read fail\n",,,,,0x468);
+}
+
+menuitem "Generic Functions";
+Set_Msmc_Non_Shared()
+{
+    unsigned int privid;
+
+    for (privid = 0; privid < 16; privid++)
+    {
+        *(unsigned int*)(SMS_MPAXH_0_0 + (0x40 * privid)) |= 0x00000080;
+        *(unsigned int*)(SES_MPAXH_0_0 + (0x40 * privid)) |= 0x00000080;
+    }
+}
+
+hotmenu SET_MSMC_NONSHARED()
+{
+    Set_Msmc_Non_Shared();
+}
+
+hotmenu UNLOCK_BOOT_CFG_REG ()
+{
+	/* Unlock Chip Level Registers */
+    KICK0 = KICK0_UNLOCK;
+    KICK1 = KICK1_UNLOCK;
+	GEL_TextOut("Unlocked Boot CFG Registers \n");
+}
+
+hotmenu LOCK_BOOT_CFG_REG ()
+{
+    KICK0 = 0x00000000;
+    KICK1 = 0x00000000;
+ 	GEL_TextOut("Locked Boot CFG Registers \n");
+}
+
+hotmenu InitXMC()
+{
+    xmc_setup();
+}
+
+/****************************************************************************
+
+ *
+ * NAME
+ *      K2G_out_of_reset
+ *
+ * PURPOSE:
+ *	This routine brings the C66x core out of reset after booting Linux, or at the u-boot prompt. 
+ *	These steps are necessary in to order to load an application on the C66x core, 
+ *	without interfering with the operation of Linux running on the A15.
+ *
+ * USAGE
+ *      This routine can be called as:
+ *
+ *      K2G_out_of_reset();
+ *
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+
+ ****************************************************************************/
+K2G_out_of_reset()
+{
+	GEL_TextOut("\nTaking K2G DSP 0 out of reset\n");
+	WR_MEM_32(KS2_PDCTL8, 0x1);
+	WR_MEM_32(KS2_MDCTL18, 0x103);
+	GEL_TextOut("\nDone taking K2G DSP 0 out of reset!\n");
+}
+
+hotmenu K2G_TakeDSPOutofReset()
+{
+	K2G_out_of_reset();
+}

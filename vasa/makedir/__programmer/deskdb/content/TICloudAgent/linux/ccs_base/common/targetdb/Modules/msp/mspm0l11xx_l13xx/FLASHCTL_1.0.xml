@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module id="FLASHCTL" HW_revision="1.0">
+    <register id="FLASHCTL_IIDX" width="32" offset="0x1020" description="Interrupt Index Register">
+        <bitfield id="STAT" description="Indicates which interrupt has fired. 0x0 means no event pending. The priority order is fixed. On each read, only one interrupt is indicated. On a read, the current interrupt (highest priority) is automatically cleared by the hardware and the corresponding interrupt flags in the RIS and MIS are cleared as well. After a read from the CPU (not from the debug interface), the register must be updated with the next highest priority interrupt." begin="0" end="0" width="1" rwaccess="R">
+            <bitenum id="NO_INTR" value="0x0" description="No Interrupt Pending"/>
+            <bitenum id="DONE" value="0x1" description="DONE Interrupt Pending"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_IMASK" width="32" offset="0x1028" description="Interrupt Mask Register">
+        <bitfield id="DONE" description="Interrupt mask for DONE:
+0: Interrupt is disabled in MIS register
+1: Interrupt is enabled in MIS register" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="DISABLED" value="0x0" description="Interrupt is masked out"/>
+            <bitenum id="ENABLED" value="0x1" description="Interrupt will request an interrupt service routine and corresponding bit in [IPSTANDARD.MIS] will be set"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_RIS" width="32" offset="0x1030" description="Raw Interrupt Status Register">
+        <bitfield id="DONE" description="NoWrapper operation completed.
+This interrupt bit is set by firmware or the corresponding bit in the ISET register.
+It is cleared by the corresponding bit in in the ICLR register or reading the IIDX register when this interrupt is the highest priority." begin="0" end="0" width="1" rwaccess="R">
+            <bitenum id="CLR" value="0x0" description="Interrupt did not occur"/>
+            <bitenum id="SET" value="0x1" description="Interrupt occurred"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_MIS" width="32" offset="0x1038" description="Masked Interrupt Status Register">
+        <bitfield id="DONE" description="NoWrapper operation completed.
+This masked interrupt bit reflects the bitwise AND of the corresponding RIS and IMASK bits." begin="0" end="0" width="1" rwaccess="R">
+            <bitenum id="CLR" value="0x0" description="Masked interrupt did not occur"/>
+            <bitenum id="SET" value="0x1" description="Masked interrupt occurred"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_ISET" width="32" offset="0x1040" description="Interrupt Set Register">
+        <bitfield id="DONE" description="0: No effect
+1: Set the DONE interrupt in the RIS register" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="NO_EFFECT" value="0x0" description="Writing a 0 has no effect"/>
+            <bitenum id="SET" value="0x1" description="Set [IPSTANDARD.RIS] bit"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_ICLR" width="32" offset="0x1048" description="Interrupt Clear Register">
+        <bitfield id="DONE" description="0: No effect
+1: Clear the DONE interrupt in the RIS register" begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="NO_EFFECT" value="0x0" description="Writing a 0 has no effect"/>
+            <bitenum id="CLR" value="0x1" description="Clear [IPSTANDARD.RIS] bit"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_EVT_MODE" width="32" offset="0x10E0" description="Event Mode">
+        <bitfield id="INT0_CFG" description="Event line mode select for peripheral event" begin="1" end="0" width="2" rwaccess="R">
+            <bitenum id="DISABLE" value="0x0" description="The interrupt or event line is disabled."/>
+            <bitenum id="SOFTWARE" value="0x1" description="The interrupt or event line is in software mode. Software must clear the RIS."/>
+            <bitenum id="HARDWARE" value="0x2" description="The interrupt or event line is in hardware mode. Hardware should clear the RIS."/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_DESC" width="32" offset="0x10FC" description="Hardware Version Description Register">
+        <bitfield id="MINREV" description="Minor Revision" begin="3" end="0" width="4" rwaccess="R">
+            <bitenum id="MINIMUM" value="0x0" description="Smallest value"/>
+            <bitenum id="MAXIMUM" value="0xF" description="Highest possible value"/>
+        </bitfield>
+        <bitfield id="MAJREV" description="Major Revision" begin="7" end="4" width="4" rwaccess="R">
+            <bitenum id="MINIMUM" value="0x0" description="Smallest value"/>
+            <bitenum id="MAXIMUM" value="0xF" description="Highest possible value"/>
+        </bitfield>
+        <bitfield id="INSTNUM" description="Instance number" begin="11" end="8" width="4" rwaccess="R">
+            <bitenum id="MINIMUM" value="0x0" description="Smallest value"/>
+            <bitenum id="MAXIMUM" value="0xF" description="Highest possible value"/>
+        </bitfield>
+        <bitfield id="FEATUREVER" description="Feature set" begin="15" end="12" width="4" rwaccess="R">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum Value"/>
+            <bitenum id="MAXIMUM" value="0xF" description="Maximum Value"/>
+        </bitfield>
+        <bitfield id="MODULEID" description="Module ID" begin="31" end="16" width="16" rwaccess="R">
+            <bitenum id="MINIMUM" value="0x0" description="Smallest value"/>
+            <bitenum id="MAXIMUM" value="0xFFFF" description="Highest possible value"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CMDEXEC" width="32" offset="0x1100" description="Command Execute Register">
+        <bitfield id="VAL" description="Command Execute value
+Initiates execution of the command specified in the CMDTYPE register." begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="NOEXECUTE" value="0x0" description="Command will not execute or is not executing in NoWrapper"/>
+            <bitenum id="EXECUTE" value="0x1" description="Command will execute or is executing in NoWrapper"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CMDTYPE" width="32" offset="0x1104" description="Command Type Register">
+        <bitfield id="COMMAND" description="Command type" begin="2" end="0" width="3" rwaccess="R/W">
+            <bitenum id="NOOP" value="0x0" description="No Operation"/>
+            <bitenum id="PROGRAM" value="0x1" description="Program"/>
+            <bitenum id="ERASE" value="0x2" description="Erase"/>
+            <bitenum id="READVERIFY" value="0x3" description="Read Verify - Perform a standalone read verify operation."/>
+            <bitenum id="MODECHANGE" value="0x4" description="Mode Change - Perform a mode change only, no other operation."/>
+            <bitenum id="CLEARSTATUS" value="0x5" description="Clear Status - Clear status bits in FW_SMSTAT only."/>
+            <bitenum id="BLANKVERIFY" value="0x6" description="Blank Verify - Check whether a flash word is in the erased state. This command may only be used with CMDTYPE.SIZE = ONEWORD"/>
+        </bitfield>
+        <bitfield id="SIZE" description="Command size" begin="6" end="4" width="3" rwaccess="R/W">
+            <bitenum id="ONEWORD" value="0x0" description="Operate on 1 flash word"/>
+            <bitenum id="TWOWORD" value="0x1" description="Operate on 2 flash words"/>
+            <bitenum id="FOURWORD" value="0x2" description="Operate on 4 flash words"/>
+            <bitenum id="EIGHTWORD" value="0x3" description="Operate on 8 flash words"/>
+            <bitenum id="SECTOR" value="0x4" description="Operate on a flash sector"/>
+            <bitenum id="BANK" value="0x5" description="Operate on an entire flash bank"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CMDCTL" width="32" offset="0x1108" description="Command Control Register">
+        <bitfield id="MODESEL" description="Mode
+This field is only used for the Mode Change command type.  Otherwise, bank
+and pump modes are set automaticlly via the NW hardware." begin="3" end="0" width="4" rwaccess="R/W">
+            <bitenum id="READ" value="0x0" description="Read Mode"/>
+            <bitenum id="RDMARG0" value="0x2" description="Read Margin 0 Mode"/>
+            <bitenum id="RDMARG1" value="0x4" description="Read Margin 1 Mode"/>
+            <bitenum id="RDMARG0B" value="0x6" description="Read Margin 0B Mode"/>
+            <bitenum id="RDMARG1B" value="0x7" description="Read Margin 1B Mode"/>
+            <bitenum id="PGMVER" value="0x9" description="Program Verify Mode"/>
+            <bitenum id="PGMSW" value="0xA" description="Program Single Word"/>
+            <bitenum id="ERASEVER" value="0xB" description="Erase Verify Mode"/>
+            <bitenum id="ERASESECT" value="0xC" description="Erase Sector"/>
+            <bitenum id="PGMMW" value="0xE" description="Program Multiple Word"/>
+            <bitenum id="ERASEBNK" value="0xF" description="Erase Bank"/>
+        </bitfield>
+        <bitfield id="REGIONSEL" description="Bank Region
+A specific region ID can be written to this field to indicate to which region an 
+operation should be applied if CMDCTL.ADDRXLATEOVR is set." begin="12" end="9" width="4" rwaccess="R/W">
+            <bitenum id="MAIN" value="0x1" description="Main Region"/>
+            <bitenum id="NONMAIN" value="0x2" description="Non-Main Region"/>
+            <bitenum id="TRIM" value="0x4" description="Trim Region"/>
+            <bitenum id="ENGR" value="0x8" description="Engr Region"/>
+        </bitfield>
+        <bitfield id="ADDRXLATEOVR" description="Override hardware address translation of address in CMDADDR from a 
+system address to a bank address and bank ID.  Use data written to 
+CMDADDR directly as the bank address.  Use the value written to 
+CMDCTL.BANKSEL directly as the bank ID.  Use the value written to
+CMDCTL.REGIONSEL directly as the region ID." begin="16" end="16" width="1" rwaccess="R/W">
+            <bitenum id="NOOVERRIDE" value="0x0" description="Do not override"/>
+            <bitenum id="OVERRIDE" value="0x1" description="Override"/>
+        </bitfield>
+        <bitfield id="SSERASEDIS" description="Disable Stair-Step Erase.  If set, the default VHV trim voltage setting will be used
+for all erase pulses.
+By default, this bit is reset, meaning that the VHV voltage will be stepped during
+successive erase pulses.  The step count, step voltage, begin and end voltages
+are all hard-wired." begin="20" end="20" width="1" rwaccess="R/W">
+            <bitenum id="ENABLE" value="0x0" description="Enable"/>
+            <bitenum id="DISABLE" value="0x1" description="Disable"/>
+        </bitfield>
+        <bitfield id="DATAVEREN" description="Enable invalid data verify.  
+This checks for 0-&gt;1 transitions in the memory when
+a program operation is initiated.  If such a transition is found, the program will
+fail with an error without doing any programming." begin="21" end="21" width="1" rwaccess="R/W">
+            <bitenum id="DISABLE" value="0x0" description="Disable"/>
+            <bitenum id="ENABLE" value="0x1" description="Enable"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CMDADDR" width="32" offset="0x1120" description="Command Address Register">
+        <bitfield id="VAL" description="Address value" begin="31" end="0" width="32" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value of [VAL]"/>
+            <bitenum id="MAXIMUM" value="0xFFFFFFFF" description="Maximum value of [VAL]"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CMDBYTEN" width="32" offset="0x1124" description="Command Program Byte Enable Register">
+        <bitfield id="VAL" description="Command Byte Enable value.
+A 1-bit per flash word byte value is placed in this register." begin="7" end="0" width="8" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value of [VAL]"/>
+            <bitenum id="MAXIMUM" value="0x3FFFF" description="Maximum value of [VAL]"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CMDDATA0" width="32" offset="0x1130" description="Command Data Register 0">
+        <bitfield id="VAL" description="A 32-bit data value is placed in this field." begin="31" end="0" width="32" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value of [VAL]"/>
+            <bitenum id="MAXIMUM" value="0xFFFFFFFF" description="Maximum value of [VAL]"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CMDDATA1" width="32" offset="0x1134" description="Command Data Register 1">
+        <bitfield id="VAL" description="A 32-bit data value is placed in this field." begin="31" end="0" width="32" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value of [VAL]"/>
+            <bitenum id="MAXIMUM" value="0xFFFFFFFF" description="Maximum value of [VAL]"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CMDWEPROTA" width="32" offset="0x11D0" description="Command Write Erase Protect A Register">
+        <bitfield id="VAL" description="Each bit protects 1 sector.
+
+bit [0]:	When 1, sector 0 of the flash memory will be protected from program
+		and erase.
+bit [1]:	When 1, sector 1 of the flash memory will be protected from program
+		and erase.
+	:
+	:
+bit [31]:	When 1, sector 31 of the flash memory will be protected from program
+		and erase." begin="31" end="0" width="32" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value of [VAL]"/>
+            <bitenum id="MAXIMUM" value="0xFFFFFFFF" description="Maximum value of [VAL]"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CMDWEPROTB" width="32" offset="0x11D4" description="Command Write Erase Protect B Register">
+        <bitfield id="VAL" description="Each bit protects a group of 8 sectors.  When a bit is 1, the associated 8 sectors
+in the flash will be protected from program and erase.  A maximum of 256
+sectors can be protected with this register." begin="3" end="0" width="4" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value of [VAL]"/>
+            <bitenum id="MAXIMUM" value="0xFFFFFFFF" description="Maximum value of [VAL]"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CMDWEPROTC" width="32" offset="0x11D8" description="Command Write Erase Protect C Register">
+    </register>
+    <register id="FLASHCTL_CMDWEPROTNM" width="32" offset="0x1210" description="Command Write Erase Protect Non-Main Register">
+        <bitfield id="VAL" description="Each bit protects 1 sector.
+
+bit [0]:	When 1, sector 0 of the non-main region will be protected from program
+		and erase.
+bit [1]:	When 1, sector 1 of the non-main region will be protected from program
+		and erase.
+	:
+	:
+bit [31]:	When 1, sector 31 of the non-main will be protected from program
+		and erase." begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value of [VAL]"/>
+            <bitenum id="MAXIMUM" value="0xFFFFFFFF" description="Maximum value of [VAL]"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CMDWEPROTTR" width="32" offset="0x1214" description="Command Write Erase Protect Trim Register">
+        <bitfield id="VAL" description="Each bit protects 1 sector.
+
+bit [0]:	When 1, sector 0 of the engr region will be protected from program
+		and erase.
+bit [1]:	When 1, sector 1 of the engr region will be protected from program
+		and erase.
+	:
+	:
+bit [31]:	When 1, sector 31 of the engr region will be protected from program
+		and erase." begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value of [VAL]"/>
+            <bitenum id="MAXIMUM" value="0xFFFFFFFF" description="Maximum value of [VAL]"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CMDWEPROTEN" width="32" offset="0x1218" description="Command Write Erase Protect Engr Register">
+        <bitfield id="VAL" description="Each bit protects 1 sector.
+
+bit [0]:	When 1, sector 0 of the engr region will be protected from program
+		and erase.
+bit [1]:	When 1, sector 1 of the engr region will be protected from program
+		and erase.
+	:
+	:
+bit [31]:	When 1, sector 31 of the engr region will be protected from program
+		and erase." begin="1" end="0" width="2" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value of [VAL]"/>
+            <bitenum id="MAXIMUM" value="0xFFFFFFFF" description="Maximum value of [VAL]"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CFGCMD" width="32" offset="0x13B0" description="Command Configuration Register">
+        <bitfield id="WAITSTATE" description="Wait State setting for program verify, erase verify and read verify" begin="3" end="0" width="4" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value"/>
+            <bitenum id="MAXIMUM" value="0xF" description="Maximum value"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_CFGPCNT" width="32" offset="0x13B4" description="Pulse Counter Configuration Register">
+        <bitfield id="MAXPCNTOVR" description="Override hard-wired maximum pulse count.  If MAXERSPCNTOVR
+is not set, then setting this value alone will override the max pulse count for
+both program and erase.  If MAXERSPCNTOVR is set, then this bit will only
+control the max pulse count setting for program.
+By default, this bit is 0, and a hard-wired max pulse count is used." begin="0" end="0" width="1" rwaccess="R/W">
+            <bitenum id="DEFAULT" value="0x0" description="Use hard-wired (default) value for maximum pulse count"/>
+            <bitenum id="OVERRIDE" value="0x1" description="Use value from MAXPCNTVAL field as maximum puse count"/>
+        </bitfield>
+        <bitfield id="MAXPCNTVAL" description="Override maximum pulse counter with this value.  
+If MAXPCNTOVR = 0, then this field is ignored.
+If MAXPCNTOVR = 1 and MAXERSPCNTOVR = 0, then this value will be used 
+to override the max pulse count for both program and erase.  Full max value
+will be {4'h0, MAXPCNTVAL} .
+If MAXPCNTOVR = 1 and MAXERSPCNTOVR = 1, then this value will be used
+to override the max pulse count for program only.  Full max value will be
+{4'h0, MAXPCNTVAL}." begin="11" end="4" width="8" rwaccess="R/W">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value"/>
+            <bitenum id="MAXIMUM" value="0xFF" description="Maximum value"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_STATCMD" width="32" offset="0x13D0" description="Command Status Register">
+        <bitfield id="CMDDONE" description="Command Done" begin="0" end="0" width="1" rwaccess="R">
+            <bitenum id="STATNOTDONE" value="0x0" description="Not Done"/>
+            <bitenum id="STATDONE" value="0x1" description="Done"/>
+        </bitfield>
+        <bitfield id="CMDPASS" description="Command Pass - valid when CMD_DONE field is 1" begin="1" end="1" width="1" rwaccess="R">
+            <bitenum id="STATFAIL" value="0x0" description="Fail"/>
+            <bitenum id="STATPASS" value="0x1" description="Pass"/>
+        </bitfield>
+        <bitfield id="CMDINPROGRESS" description="Command In Progress" begin="2" end="2" width="1" rwaccess="R">
+            <bitenum id="STATCOMPLETE" value="0x0" description="Complete"/>
+            <bitenum id="STATINPROGRESS" value="0x1" description="In Progress"/>
+        </bitfield>
+        <bitfield id="FAILWEPROT" description="Command failed due to Write/Erase Protect Sector Violation" begin="4" end="4" width="1" rwaccess="R">
+            <bitenum id="STATNOFAIL" value="0x0" description="No Fail"/>
+            <bitenum id="STATFAIL" value="0x1" description="Fail"/>
+        </bitfield>
+        <bitfield id="FAILVERIFY" description="Command failed due to verify error" begin="5" end="5" width="1" rwaccess="R">
+            <bitenum id="STATNOFAIL" value="0x0" description="No Fail"/>
+            <bitenum id="STATFAIL" value="0x1" description="Fail"/>
+        </bitfield>
+        <bitfield id="FAILMISC" description="Command failed due to error other than write/erase protect violation or verify
+error.  This is an extra bit in case a new failure mechanism is added which
+requires a status bit." begin="12" end="12" width="1" rwaccess="R">
+            <bitenum id="STATNOFAIL" value="0x0" description="No Fail"/>
+            <bitenum id="STATFAIL" value="0x1" description="Fail"/>
+        </bitfield>
+        <bitfield id="FAILILLADDR" description="Command failed due to the use of an illegal address" begin="6" end="6" width="1" rwaccess="R">
+            <bitenum id="STATNOFAIL" value="0x0" description="No Fail"/>
+            <bitenum id="STATFAIL" value="0x1" description="Fail"/>
+        </bitfield>
+        <bitfield id="FAILMODE" description="Command failed because a bank has been set to a mode other than READ.
+Program and Erase commands cannot be initiated unless all banks are in READ
+mode." begin="7" end="7" width="1" rwaccess="R">
+            <bitenum id="STATNOFAIL" value="0x0" description="No Fail"/>
+            <bitenum id="STATFAIL" value="0x1" description="Fail"/>
+        </bitfield>
+        <bitfield id="FAILINVDATA" description="Program command failed because an attempt was made to program a stored
+0 value to a 1." begin="8" end="8" width="1" rwaccess="R">
+            <bitenum id="STATNOFAIL" value="0x0" description="No Fail"/>
+            <bitenum id="STATFAIL" value="0x1" description="Fail"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_STATADDR" width="32" offset="0x13D4" description="Address Status Register">
+        <bitfield id="BANKADDR" description="Current Bank Address
+A bank offset address is stored in this register." begin="15" end="0" width="16" rwaccess="R">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value"/>
+            <bitenum id="MAXIMUM" value="0xFFFF" description="Maximum value"/>
+        </bitfield>
+        <bitfield id="BANKID" description="Current Bank ID
+A bank indicator is stored in this register which represents the current bank on
+which the state  machine is operating.  There is 1 bit per bank." begin="25" end="21" width="5" rwaccess="R">
+            <bitenum id="BANK0" value="0x1" description="Bank 0"/>
+            <bitenum id="BANK1" value="0x2" description="Bank 1"/>
+            <bitenum id="BANK2" value="0x4" description="Bank 2"/>
+            <bitenum id="BANK3" value="0x8" description="Bank 3"/>
+            <bitenum id="BANK4" value="0x10" description="Bank 4"/>
+        </bitfield>
+        <bitfield id="REGIONID" description="Current Region ID
+A region indicator is stored in this register which represents the current flash 
+region on which the state  machine is operating." begin="20" end="16" width="5" rwaccess="R">
+            <bitenum id="MAIN" value="0x1" description="Main Region"/>
+            <bitenum id="NONMAIN" value="0x2" description="Non-Main Region"/>
+            <bitenum id="TRIM" value="0x4" description="Trim Region"/>
+            <bitenum id="ENGR" value="0x8" description="Engr Region"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_STATPCNT" width="32" offset="0x13D8" description="Pulse Count Status Register">
+        <bitfield id="PULSECNT" description="Current Pulse Counter Value" begin="11" end="0" width="12" rwaccess="R">
+            <bitenum id="MINIMUM" value="0x0" description="Minimum value"/>
+            <bitenum id="MAXIMUM" value="0xFFF" description="Maximum value"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_STATMODE" width="32" offset="0x13DC" description="Mode Status Register">
+        <bitfield id="BANKNOTINRD" description="Bank not in read mode.
+Indicates which banks are not in READ mode.  There is 1 bit per bank." begin="0" end="0" width="1" rwaccess="R">
+            <bitenum id="BANK0" value="0x1" description="Bank 0"/>
+            <bitenum id="BANK1" value="0x2" description="Bank 1"/>
+            <bitenum id="BANK2" value="0x4" description="Bank 2"/>
+            <bitenum id="BANK3" value="0x8" description="Bank 3"/>
+            <bitenum id="BANK4" value="0x10" description="Bank 4"/>
+        </bitfield>
+        <bitfield id="BANKMODE" description="Indicates mode of bank(s) that are not in READ mode" begin="11" end="8" width="4" rwaccess="R">
+            <bitenum id="READ" value="0x0" description="Read Mode"/>
+            <bitenum id="RDMARG0" value="0x2" description="Read Margin 0 Mode"/>
+            <bitenum id="RDMARG1" value="0x4" description="Read Margin 1 Mode"/>
+            <bitenum id="RDMARG0B" value="0x6" description="Read Margin 0B Mode"/>
+            <bitenum id="RDMARG1B" value="0x7" description="Read Margin 1B Mode"/>
+            <bitenum id="PGMVER" value="0x9" description="Program Verify Mode"/>
+            <bitenum id="PGMSW" value="0xA" description="Program Single Word"/>
+            <bitenum id="ERASEVER" value="0xB" description="Erase Verify Mode"/>
+            <bitenum id="ERASESECT" value="0xC" description="Erase Sector"/>
+            <bitenum id="PGMMW" value="0xE" description="Program Multiple Word"/>
+            <bitenum id="ERASEBNK" value="0xF" description="Erase Bank"/>
+        </bitfield>
+        <bitfield id="BANK2TRDY" description="Bank 2T Ready.
+Bank(s) are ready for 2T access.  This is accomplished when the pump has
+fully driven power rails to the bank(s)." begin="16" end="16" width="1" rwaccess="R">
+            <bitenum id="FALSE" value="0x0" description="Not ready"/>
+            <bitenum id="TRUE" value="0x1" description="Ready"/>
+        </bitfield>
+        <bitfield id="BANK1TRDY" description="Bank 1T Ready.
+Bank(s) are ready for 1T access.  This is accomplished when the bank and pump
+have been trimmed." begin="17" end="17" width="1" rwaccess="R">
+            <bitenum id="FALSE" value="0x0" description="Not ready"/>
+            <bitenum id="TRUE" value="0x1" description="Ready"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_GBLINFO0" width="32" offset="0x13F0" description="Global Information Register 0">
+        <bitfield id="SECTORSIZE" description="Sector size in bytes" begin="15" end="0" width="16" rwaccess="R">
+            <bitenum id="ONEKB" value="0x400" description="Sector size is ONEKB"/>
+            <bitenum id="TWOKB" value="0x800" description="Sector size is TWOKB"/>
+        </bitfield>
+        <bitfield id="NUMBANKS" description="Number of banks instantiated
+Minimum:	1
+Maximum:	5" begin="18" end="16" width="3" rwaccess="R">
+            <bitenum id="MINIMUM" value="0x1" description="Minimum value"/>
+            <bitenum id="MAXIMUM" value="0x5" description="Maximum value"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_GBLINFO1" width="32" offset="0x13F4" description="Global Information Register 1">
+        <bitfield id="DATAWIDTH" description="Data width in bits" begin="7" end="0" width="8" rwaccess="R">
+            <bitenum id="W64BIT" value="0x40" description="Data width is 64 bits"/>
+            <bitenum id="W128BIT" value="0x80" description="Data width is 128 bits"/>
+        </bitfield>
+        <bitfield id="ECCWIDTH" description="ECC data width in bits" begin="12" end="8" width="5" rwaccess="R">
+            <bitenum id="W0BIT" value="0x0" description="ECC data width is 0.  ECC not used."/>
+            <bitenum id="W8BIT" value="0x8" description="ECC data width is 8 bits"/>
+            <bitenum id="W16BIT" value="0x10" description="ECC data width is 16 bits"/>
+        </bitfield>
+        <bitfield id="REDWIDTH" description="Redundant data width in bits" begin="18" end="16" width="3" rwaccess="R">
+            <bitenum id="W0BIT" value="0x0" description="Redundant data width is 0.  Redundancy/Repair not present."/>
+            <bitenum id="W2BIT" value="0x2" description="Redundant data width is 2 bits"/>
+            <bitenum id="W4BIT" value="0x4" description="Redundant data width is 4 bits"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_GBLINFO2" width="32" offset="0x13F8" description="Global Information Register 2">
+        <bitfield id="DATAREGISTERS" description="Number of data registers present." begin="3" end="0" width="4" rwaccess="R">
+            <bitenum id="MINIMUM" value="0x1" description="Minimum value of [DATAREGISTERS]"/>
+            <bitenum id="MAXIMUM" value="0x8" description="Maximum value of [DATAREGISTERS]"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_BANK0INFO0" width="32" offset="0x1400" description="Bank Information Register 0 for Bank 0">
+        <bitfield id="MAINSIZE" description="Main region size in sectors
+Minimum:	0x8 (8)
+Maximum:	0x200 (512)" begin="11" end="0" width="12" rwaccess="R">
+            <bitenum id="MINSECTORS" value="0x8" description="Minimum value of [MAINSIZE]"/>
+            <bitenum id="MAXSECTORS" value="0x200" description="Maximum value of [MAINSIZE]"/>
+        </bitfield>
+    </register>
+    <register id="FLASHCTL_BANK0INFO1" width="32" offset="0x1404" description="Bank Information Register 1 for Bank 0">
+        <bitfield id="NONMAINSIZE" description="Non-main region size in sectors
+Minimum:	0x0 (0)
+Maximum:	0x10 (16)" begin="7" end="0" width="8" rwaccess="R">
+            <bitenum id="MINSECTORS" value="0x0" description="Minimum value of [NONMAINSIZE]"/>
+            <bitenum id="MAXSECTORS" value="0x20" description="Maximum value of [NONMAINSIZE]"/>
+        </bitfield>
+        <bitfield id="TRIMSIZE" description="Trim region size in sectors
+Minimum:	0x0 (0)
+Maximum:	0x10 (16)" begin="15" end="8" width="8" rwaccess="R">
+            <bitenum id="MINSECTORS" value="0x0" description="Minimum value of [TRIMSIZE]"/>
+            <bitenum id="MAXSECTORS" value="0x20" description="Maximum value of [TRIMSIZE]"/>
+        </bitfield>
+        <bitfield id="ENGRSIZE" description="Engr region size in sectors
+Minimum:	0x0 (0)
+Maximum:	0x10 (16)" begin="23" end="16" width="8" rwaccess="R">
+            <bitenum id="MINSECTORS" value="0x0" description="Minimum value of [ENGRSIZE]"/>
+            <bitenum id="MAXSECTORS" value="0x20" description="Maximum value of [ENGRSIZE]"/>
+        </bitfield>
+    </register>
+</module>

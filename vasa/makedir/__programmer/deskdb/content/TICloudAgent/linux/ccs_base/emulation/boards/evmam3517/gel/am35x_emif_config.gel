@@ -1,0 +1,255 @@
+/**********************************************************************/
+/*                                                                    */
+/* Author: Marcin Nowak (TI)  June 01 2006                            */
+/*         Based on file originally created by Xavier Hanin           */
+/**********************************************************************/
+
+/*
+;------------------------------------------------------------------------------------------;
+;
+; __MEMORY__ = 1
+   ; mDDR (Samsung K4X51323PC, 1x512Mbits)
+   ; x32-bits memory on CS0 (DATA LANE [31:0])
+   ; Organization: 16Mx32, Bank: BA0-BA1, Row: A0-A12, COlumn: A0-A8 
+   ; MUX mode is 24 (2 bit bank, 13bit row, 9 bit column)
+   ; RamSize = 32 * 2MB chunks = 64MB
+;------------------------------------------------------------------------------------------;
+*/
+
+menuitem "DRAMS"
+
+#define SDRC_ENADISCLK           (1 << 3)
+#define SDRC_PWDENABLE           (1 << 2)
+#define SDRC_SRFRONIDLEREQ       (1 << 6)
+#define SDRC_SMARTIDLEMODE       (2 << 3)
+
+#define SDRC_BURSTLENGTH_SDR     1  /*BurstLength = 2 (for SDR memory only)*/
+#define SDRC_BURSTLENGTH_DDR     2  /*BurstLength = 4 (for DDR memory only)*/
+
+#define SDRC_RAMSIZE_OFFSET      8
+
+#define SDRC_RAMTYPE_SDR         0
+#define SDRC_RAMTYPE_DDR         1
+#define SDRC_RAMTYPE_OFFSET      0
+#define SDRC_RAMTYPE_MASK        (0x3 << SDRC_RAMTYPE_OFFSET)
+
+#define SDRC_CS1MUXCFG_OFFSET       12
+#define SDRC_CS0MUXCFG_OFFSET       9
+#define SDRC_SDRCTRISTATE_OFFSET    8
+
+#define SDRC_32BIT_31_0             0  /*or 1*/
+#define SDRC_16BIT_31_16            2  /*or 7*/
+#define SDRC_16BIT_15_0             3
+#define SDRC_TRISTATED_PINS         0
+#define SDRC_NORMALMODE_PINS        1
+
+#define SDRC_DLL_LOCK_STATUS        (1 << 2)
+#define SDRC_DLLA_CTRL_DLLIDLE		(1 << 4)
+#define DLL_FIXEDDELAY				15 /*Phase offset value in ModeFixedDelay */
+#define DLL_INITLAT					0 /*Initial latency in ModeFixedDelay */
+
+/*------------------------------------------------------------------------*/  
+/*Common configuration for all memories*/
+/* CASL=3, Serial mode, ;BurstLength set to 0! 
+   Needs to be specified in initialization routine 
+*/
+#define SDRC_MR_VALUE            ( (3 << 4) | (0 << 3) | (0 << 0) )
+
+/* Half Strength Driver Strength -> (1 << 5 )
+   Reserved - Quarter Strength   -> (2 << 5 )
+   Fulll Strength                -> (0 << 5 ) 
+*/
+#define SDRC_EMR2_VALUE          (1 << 5 )   /*DDR is close to OMAP*/
+
+/* Fixed delay, 	Initial latency, 			MDDR,	DLL mode on IDLE req, DLL IDLE, 
+  DLL_FIXEDDELAY DLL_MODEFIXEDDELAYINITLAT	double freq    power down		  disabled,
+  enable DLL,	lock DLL, 		DLL phase  
+  enable		tracking delay	90 degree
+                                		FIXED 				DELAY INITLAT 	  MDDR 	  IDLEREQ	DLLIDLE   ENADLL     LOCKDLL  DLL_PHASE */
+#define SDRC_DLL_CTRL_DDR_VALUE  (DLL_FIXEDDELAY << 24) | (DLL_INITLAT<<16) | (0<<7) | (0<<5) | (0<<4) | (1 << 3) | (0 << 2) | (0 << 1)
+#define SDRC_DLL_CTRL_SDR_VALUE  ( 0 << 24) | (0<<16) | (0 << 8) | (0<<7) | (0<<5) | (0<<4) | (0 << 3) | (1 << 2) | (0 << 1)
+
+/* Set for 12MHz, single refresh used*/
+#define SDRC_RFR_CTRL_VALUE      ( (93 << 8) | (1 << 0))
+
+   
+/*------------------------------------------------------------------------*/
+#define SMS_BASE_ADDR               0x6C000000
+#define EMIF_BASE_ADDR              0x6D000000
+#define CTRL_MODULE_BASE            0x48002000
+
+/*EMIF registers*/
+   unsigned int* CONTROL_PADCONF_SDRC_CKE0_REG = (CTRL_MODULE_BASE + 0x260);
+   unsigned int* CONTROL_PADCONF_SDRC_CKE1_REG = (CTRL_MODULE_BASE + 0x264);
+   
+   
+   unsigned int*	EMIF_TIMING1_REG 		= (EMIF_BASE_ADDR + 0x18);
+   unsigned int*	EMIF_TIMING1_SHDW_REG 		= (EMIF_BASE_ADDR + 0x1C);
+   unsigned int*	EMIF_TIMING2_REG 		= (EMIF_BASE_ADDR + 0x20);
+   unsigned int*	EMIF_TIMING2_SHDW_REG 		= (EMIF_BASE_ADDR + 0x24);
+   unsigned int*	EMIF_TIMING3_REG 		= (EMIF_BASE_ADDR + 0x28);
+   unsigned int*	EMIF_TIMING3_SHDW_REG 		= (EMIF_BASE_ADDR + 0x2C);
+   unsigned int*	EMIF_EMPWCTL_REG 		= (EMIF_BASE_ADDR + 0x38);
+   unsigned int*	EMIF_EMPWCTL_SHDW_REG 		= (EMIF_BASE_ADDR + 0x3C);
+   unsigned int*	EMIF_SDRCFR_REG 		= (EMIF_BASE_ADDR + 0x10);
+   unsigned int*	EMIF_SDRCFR_SHDW_REG 		= (EMIF_BASE_ADDR + 0x14);
+   unsigned int*	EMIF_SDCFGR_REG 		= (EMIF_BASE_ADDR + 0x08);
+   unsigned int*	EMIF_PHYCTL1_REG 		= (EMIF_BASE_ADDR + 0xE4);
+   unsigned int*	EMIF_PHYCTL1_SHDW_REG 		= (EMIF_BASE_ADDR + 0xE8);
+   unsigned int*	EMIF_PHYCTL2_REG 		= (EMIF_BASE_ADDR + 0xEC);
+   unsigned int*	EMIF_EMIODFT_GLBLCTRL_REG	= (EMIF_BASE_ADDR + 0x60);
+   unsigned int*	EMIF_SDSTR_REG	 		= (EMIF_BASE_ADDR + 0x04);
+   
+menuitem "EMIF_CONFIG_DDR2"   
+hotmenu DDR2_micron_166MHz()
+{
+	/* Changing muxmode for cke0 & cke1 */
+	* CONTROL_PADCONF_SDRC_CKE0_REG &= 0xFFF8FFFF;
+	* CONTROL_PADCONF_SDRC_CKE1_REG &= 0xFFFFFFF8;
+	
+	GEL_TextOut("EMIF CKE0 & CKE1 pads configured in mode1 \n" );   
+
+	/*Configure EMIF to Access Micron DDR2 */
+//	* EMIF_PHYCTL1_REG		= 0x8046;  //internal strobing	 
+//	* EMIF_PHYCTL1_SHDW_REG	= 0x8046;	 
+
+
+	* EMIF_PHYCTL1_REG		= 0x80C6;  //external strobing
+	* EMIF_PHYCTL1_SHDW_REG	= 0x80C6;	 
+
+
+	* EMIF_PHYCTL2_REG		= 0;
+	* EMIF_EMIODFT_GLBLCTRL_REG	|= 0x400;
+	
+	while((*EMIF_SDSTR_REG & 0x4) == 0);
+
+	* EMIF_EMIODFT_GLBLCTRL_REG	|= 0x1;// VRD - Debug Normal Mode
+	
+   GEL_TextOut("EMIF DDR phy PLL is ready \n" );   
+// Vinesh
+//	* EMIF_TIMING1_REG		= 0x44446251; 
+//	* EMIF_TIMING1_SHDW_REG	= 0x44446251; 
+//	* EMIF_TIMING2_REG		= 0x202231CA;
+//  * EMIF_TIMING2_SHDW_REG	= 0x202231CA;
+//  * EMIF_TIMING3_REG		= 0x207;
+//  * EMIF_TIMING3_SHDW_REG	= 0x207;
+
+//   Uday & Ajay
+	* EMIF_TIMING1_REG		= 0x4448279;
+	* EMIF_TIMING1_SHDW_REG	= 0x4448279; 
+	* EMIF_TIMING2_REG		= 0x342231CB; 
+ 	* EMIF_TIMING2_SHDW_REG	= 0x342231CB; 
+ 	* EMIF_TIMING3_REG		= 0x217; 
+ 	* EMIF_TIMING3_SHDW_REG	= 0x217; 
+    * EMIF_EMPWCTL_REG		= 0x80000000;
+    * EMIF_EMPWCTL_SHDW_REG	= 0x80000000;
+    * EMIF_SDRCFR_REG		= 0x50F;
+    * EMIF_SDRCFR_SHDW_REG 	= 0x50F;
+    * EMIF_SDCFGR_REG		= 0x43801432;	
+
+//Vaibhav
+//	* EMIF_TIMING1_REG		= 0x6668292;  //VRD 
+//	* EMIF_TIMING1_SHDW_REG	= 0x6668292;  //VRD 
+//	* EMIF_TIMING2_REG		= 0x201C320A;  //VRD 
+// 	* EMIF_TIMING2_SHDW_REG	= 0x201C320A; //VRD 
+// 	* EMIF_TIMING3_REG		= 0x257; 
+// 	* EMIF_TIMING3_SHDW_REG	= 0x257; 
+// 	* EMIF_EMPWCTL_REG		= 0x80000000;
+// 	* EMIF_EMPWCTL_SHDW_REG	= 0x80000000;
+// 	* EMIF_SDRCFR_REG		= 0x50F;
+// 	* EMIF_SDRCFR_SHDW_REG 	= 0x50F;
+// 	* EMIF_SDCFGR_REG		= 0x40801432;	
+   	
+	GEL_TextOut("EMIF initilization for Micron DDR2 [166MHz] access completed \n" );   
+}
+
+menuitem "EMIF_CONFIG_DDR2"   
+hotmenu DDR2_micron_83MHz()
+{
+	/* Changing muxmode for cke0 & cke1 */
+	* CONTROL_PADCONF_SDRC_CKE0_REG &= 0xFFF8FFFF;
+	* CONTROL_PADCONF_SDRC_CKE1_REG &= 0xFFFFFFF8;
+	
+	GEL_TextOut("EMIF CKE0 & CKE1 pads configured in mode1 \n" );   
+
+	/*Configure EMIF to Access Micron DDR2 */
+	* EMIF_PHYCTL1_REG		= 0x80C6;	 
+	* EMIF_PHYCTL1_SHDW_REG	= 0x80C6;	 
+	* EMIF_PHYCTL2_REG		= 0;
+	* EMIF_EMIODFT_GLBLCTRL_REG	|= 0x400;
+	
+	while((*EMIF_SDSTR_REG & 0x4) == 0);
+
+	* EMIF_EMIODFT_GLBLCTRL_REG	|= 0x1;// VRD - Debug Normal Mode
+	
+   GEL_TextOut("EMIF DDR phy PLL is ready \n" );   
+// Vinesh
+//	* EMIF_TIMING1_REG		= 0x44446251; 
+//	* EMIF_TIMING1_SHDW_REG	= 0x44446251; 
+//	* EMIF_TIMING2_REG		= 0x202231CA;
+//  * EMIF_TIMING2_SHDW_REG	= 0x202231CA;
+//  * EMIF_TIMING3_REG		= 0x207;
+//  * EMIF_TIMING3_SHDW_REG	= 0x207;
+
+//   Uday & Ajay
+	* EMIF_TIMING1_REG		= 0x4448279;
+	* EMIF_TIMING1_SHDW_REG	= 0x4448279; 
+	* EMIF_TIMING2_REG		= 0x342231CB; 
+ 	* EMIF_TIMING2_SHDW_REG	= 0x342231CB; 
+ 	* EMIF_TIMING3_REG		= 0x217; 
+ 	* EMIF_TIMING3_SHDW_REG	= 0x217; 
+    * EMIF_EMPWCTL_REG		= 0x80000000;
+    * EMIF_EMPWCTL_SHDW_REG	= 0x80000000;
+    * EMIF_SDRCFR_REG		= 0x50F;
+    * EMIF_SDRCFR_SHDW_REG 	= 0x50F;
+    * EMIF_SDCFGR_REG		= 0x43801432;	
+
+//Vaibhav
+//	* EMIF_TIMING1_REG		= 0x6668292;  //VRD 
+//	* EMIF_TIMING1_SHDW_REG	= 0x6668292;  //VRD 
+//	* EMIF_TIMING2_REG		= 0x201C320A;  //VRD 
+// 	* EMIF_TIMING2_SHDW_REG	= 0x201C320A; //VRD 
+// 	* EMIF_TIMING3_REG		= 0x257; 
+// 	* EMIF_TIMING3_SHDW_REG	= 0x257; 
+// 	* EMIF_EMPWCTL_REG		= 0x80000000;
+// 	* EMIF_EMPWCTL_SHDW_REG	= 0x80000000;
+// 	* EMIF_SDRCFR_REG		= 0x50F;
+// 	* EMIF_SDRCFR_SHDW_REG 	= 0x50F;
+// 	* EMIF_SDCFGR_REG		= 0x40801432;	
+   	
+	GEL_TextOut("EMIF initilization for Micron DDR2 [83MHz] access completed \n" );   
+}
+
+hotmenu DDR2_micron_125MHz()
+{
+	/* Changing muxmode for cke0 & cke1 */
+	* CONTROL_PADCONF_SDRC_CKE0_REG &= 0xFFF8FFFF;
+	* CONTROL_PADCONF_SDRC_CKE1_REG &= 0xFFFFFFF8;
+	GEL_TextOut("EMIF CKE0 & CKE1 pads configured in mode1 \n" );  	
+
+	/*Configure EMIF to Access Micron DDR2 */
+	* EMIF_PHYCTL1_REG		= 0xC5;
+	* EMIF_PHYCTL1_SHDW_REG	= 0xC5;
+	* EMIF_PHYCTL2_REG		=  0; 
+	* EMIF_EMIODFT_GLBLCTRL_REG	|= 0x400;
+	
+	while((*EMIF_SDSTR_REG & 0x4) == 0);
+	GEL_TextOut("EMIF DDR phy PLL is ready \n" );  	
+
+	* EMIF_TIMING1_REG		= 0x2246211;
+	* EMIF_TIMING1_SHDW_REG	= 0x2246211;
+	* EMIF_TIMING2_REG		= 0x201131C2;
+   	* EMIF_TIMING2_SHDW_REG	= 0x201131C2;
+   	* EMIF_TIMING3_REG		= 0x157;
+   	* EMIF_TIMING3_SHDW_REG	= 0x157;
+   	* EMIF_EMPWCTL_REG		= 0x80000000;
+   	* EMIF_EMPWCTL_SHDW_REG	= 0x80000000;
+   	* EMIF_SDRCFR_REG		= 0x50F;
+   	* EMIF_SDRCFR_SHDW_REG 	= 0x50F;
+   	* EMIF_SDCFGR_REG		= 0x40801032;
+   	
+	GEL_TextOut("EMIF initilization for Micron DDR2 [125MHz] access completed \n" );   
+}
+/* EOF */
+
+

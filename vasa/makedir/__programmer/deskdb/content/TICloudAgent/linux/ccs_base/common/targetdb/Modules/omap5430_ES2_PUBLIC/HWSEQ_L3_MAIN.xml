@@ -1,0 +1,999 @@
+<module name="HWSEQ_L3_MAIN" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="SIMCOP_HWSEQ_CTRL" acronym="SIMCOP_HWSEQ_CTRL" offset="0x68" width="32" description="SIMCOP HW sequencer control register">
+    <bitfield id="HW_SEQ_STEP_COUNTER" width="16" begin="31" end="16" resetval="0x0000" description="Number of steps executed by the HW sequencer. HW_SEQ_STEP_COUNTER=0 corresponds to manual sequencing." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="15" end="13" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="STEP" width="2" begin="12" end="11" resetval="0x0" description="This register is automatically updated by the HW sequencer when it is active. Otherwise, SW could use it to activate the content of a given set of step registers (SIMCOP_HWSEQ_STEP_i)." range="" rwaccess="RW"/>
+    <bitfield id="CPU_PROC_DONE" width="1" begin="10" end="10" resetval="0" description="Used by the CPU to tell that it has completed data processing. This feature should be used together with the CPU_PROC_START_IRQ event Read's always return 0." range="" rwaccess="W">
+      <bitenum value="0" id="No_effect." token="CPU_PROC_DONE_0_w" description="No effect."/>
+      <bitenum value="1" id="CPU_processing_completed." token="CPU_PROC_DONE_1_w" description="CPU processing completed."/>
+    </bitfield>
+    <bitfield id="BBM_SYNC_CHAN" width="2" begin="9" end="8" resetval="0x0" description="Defines the SIMCOP DMA HW synchronization channel to be used for BBM. This register is only used when BITSTREAM=ENCODE or DECODE. SW must ensure that the same DMA HW synchronization channel isn't used by the HW sequencer." range="" rwaccess="RW"/>
+    <bitfield id="BBM_STATUS" width="1" begin="7" end="7" resetval="0" description="Status of the Bitstream buffer management HW. Used only during automatic mode [BITSTREAM=5 or 6] Equals 0 (IDLE) in manual mode [BITSTREAM=0..4]. Set when automatic mode is entered. Automatic encode mode: used to detect when all banks have been flushed after the processing has completed (i.e. but request bank signals have been de-asserted by BBM). Automatic decode mode (BITSTREAM=DECODE): returns to 0 (IDLE) when automatic mode is left (BITSTREAM=COPR)." range="" rwaccess="R">
+      <bitenum value="1" id="BBM_is_busy." token="BBM_STATUS_1_r" description="BBM is busy."/>
+      <bitenum value="0" id="BBM_is_idle" token="BBM_STATUS_0_r" description="BBM is idle"/>
+    </bitfield>
+    <bitfield id="BITSTREAM" width="3" begin="6" end="4" resetval="0x0" description="BITSTREAM buffer access control" range="" rwaccess="RW">
+      <bitenum value="0" id="0" token="BITSTREAM_0" description="Bank 0: coprocessor bus (0x1000-0x17FF) Bank 1: coprocessor bus (0x1800-0x1FFF)"/>
+      <bitenum value="1" id="DMA_DMA_1" token="BITSTREAM_1" description="Bank 0: DMA (0x1000-0x17FF) Bank 1: DMA (0x1800-0x1FFF)"/>
+      <bitenum value="2" id="VLCDJ.B_VLCDJ.B_2" token="BITSTREAM_2" description="Bank 0: VLCDJ.B (0x000-0x7FF) Bank 1: VLCDJ.B (0x800-0xFFF)"/>
+      <bitenum value="3" id="DMA_VLCDJ.B_3" token="BITSTREAM_3" description="Bank 0: DMA (0x1000-0x17FF) Bank 1: VLCDJ.B (0x800-0xFFF)"/>
+      <bitenum value="4" id="VLCDJ.B_DMA_4" token="BITSTREAM_4" description="Bank 0: VLCDJ.B (0x000-0x7FF) Bank 1: DMA (0x1800-0x1FFF)"/>
+      <bitenum value="5" id="BITSTREAM_HW_PING/PONG_JPEG_SIMCOP_DMA_VLCDJ_BITSTREAM_HW_COPR,_VLCDJ_DMA._5" token="BITSTREAM_5" description="The BITSTREAM buffer is managed by HW as a PING/PONG buffer to support JPEG encode use case. It could be accessed by the SIMCOP DMA or the VLCDJ module. The BITSTREAM HW sequence is reset when the mode is changed to COPR, VLCDJ or DMA."/>
+      <bitenum value="6" id="BITSTREAM_HW_PING/PONG_JPEG_SIMCOP_DMA_VLCDJ_BITSTREAM_HW_COPR,_VLCDJ_DMA._6" token="BITSTREAM_6" description="The BITSTREAM buffer is managed by HW as a PING/PONG buffer to support JPEG decode use case. It could be accessed by the SIMCOP DMA or the VLCDJ module. The BITSTREAM HW sequence is reset when the mode is changed to COPR, VLCDJ or DMA."/>
+    </bitfield>
+    <bitfield id="BITSTR_XFER_SIZE" width="2" begin="3" end="2" resetval="0x0" description="Defines the amount of data to be transferred per HW request to the SIMCOP DMA. Bigger sizes lead to better SDRAM efficiency but prevents fine grained DMA transfer arbitration. This register is only used by HW when BITSTREAM=ENCODE or BITSTREAM=DECODE." range="" rwaccess="RW">
+      <bitenum value="0" id="2048_bytes" token="BITSTR_XFER_SIZE_0" description="2048 bytes"/>
+      <bitenum value="1" id="1024_bytes" token="BITSTR_XFER_SIZE_1" description="1024 bytes"/>
+      <bitenum value="2" id="512_bytes" token="BITSTR_XFER_SIZE_2" description="512 bytes"/>
+      <bitenum value="3" id="256_bytes" token="BITSTR_XFER_SIZE_3" description="256 bytes"/>
+    </bitfield>
+    <bitfield id="HW_SEQ_STOP" width="1" begin="1" end="1" resetval="0" description="Stop the HW sequencer. This feature is typically used to recover from an error condition. Read's always return 0." range="" rwaccess="W">
+      <bitenum value="0" id="No_effect." token="HW_SEQ_STOP_0_w" description="No effect."/>
+      <bitenum value="1" id="HW_DONE_1" token="HW_SEQ_STOP_1_w" description="Stop the HW sequence immediately (don't wait for expected DONE events). Setting this bit while the sequencer is idle has no effect."/>
+    </bitfield>
+    <bitfield id="HW_SEQ_START" width="1" begin="0" end="0" resetval="0" description="Start the HW sequencer. Read's always return 0." range="" rwaccess="W">
+      <bitenum value="0" id="No_effect." token="HW_SEQ_START_0_w" description="No effect."/>
+      <bitenum value="1" id="STEP0_HW_1" token="HW_SEQ_START_1_w" description="Start STEP0 of the HW sequence. Setting this bit while the sequencer is running has no effect."/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STATUS" acronym="SIMCOP_HWSEQ_STATUS" offset="0x6C" width="32" description="HW sequencer status register">
+    <bitfield id="HW_SEQ_STEP_COUNTER" width="16" begin="31" end="16" resetval="0x0000" description="Current step number" range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="15" begin="15" end="1" resetval="0x0000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="STATE" width="1" begin="0" end="0" resetval="0" description="Current state" range="" rwaccess="R">
+      <bitenum value="0" id="Idle" token="STATE_0_r" description="Idle"/>
+      <bitenum value="1" id="Running" token="STATE_1_r" description="Running"/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_OVERRIDE" acronym="SIMCOP_HWSEQ_OVERRIDE" offset="0x70" width="32" description="HW sequencer override control register. Bits in this register select what configuration register control a resource. 0: Resource controlled by HW sequencer. HW uses the value from SIMCOP_HWSEQ_STEP_xx registers for the chosen resource 1: Resource controlled by SW HW uses the value from SIMCOP_HWSEQ_STEP_x_OVERRIDE registers for the chosen resource The bit field name matches the one of the resource.">
+    <bitfield id="RESERVED" width="13" begin="31" end="19" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="COEFF_B" width="1" begin="18" end="18" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="COEFF_A" width="1" begin="17" end="17" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="IMBUFF_H" width="1" begin="16" end="16" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="IMBUFF_G" width="1" begin="15" end="15" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="IMBUFF_F" width="1" begin="14" end="14" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="IMBUFF_E" width="1" begin="13" end="13" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="IMBUFF_D" width="1" begin="12" end="12" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="IMBUFF_C" width="1" begin="11" end="11" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="IMBUFF_B" width="1" begin="10" end="10" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="IMBUFF_A" width="1" begin="9" end="9" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="LDC_O_OFST_OVR" width="1" begin="8" end="8" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="ROT_O_OFST_OVR" width="1" begin="7" end="7" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="ROT_I_OFST_OVR" width="1" begin="6" end="6" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="5" end="5" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DCT_F_OFST_OVR" width="1" begin="4" end="4" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="DCT_S_OFST_OVR" width="1" begin="3" end="3" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="VLCDJ_IO_OFST_OVR" width="1" begin="2" end="2" resetval="0" description="See register description" range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="2" begin="1" end="0" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_CTRL_OVERRIDE" acronym="SIMCOP_HWSEQ_STEP_CTRL_OVERRIDE" offset="0x74" width="32" description="HW sequencer override register. Used to execute SW sequences in parallel to HW sequencing steps">
+    <bitfield id="RESERVED" width="4" begin="31" end="28" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="ROT_O_OFST" width="2" begin="27" end="26" resetval="0x0" description="Controls ROT.O bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="EFGH" token="ROT_O_OFST_0" description="EFGH"/>
+      <bitenum value="1" id="FGHE" token="ROT_O_OFST_1" description="FGHE"/>
+      <bitenum value="2" id="GHEF" token="ROT_O_OFST_2" description="GHEF"/>
+      <bitenum value="3" id="HEFG" token="ROT_O_OFST_3" description="HEFG"/>
+    </bitfield>
+    <bitfield id="ROT_I_OFST" width="2" begin="25" end="24" resetval="0x0" description="Controls ROT_I bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="ROT_I_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDA" token="ROT_I_OFST_1" description="BCDA"/>
+      <bitenum value="2" id="CDAB" token="ROT_I_OFST_2" description="CDAB"/>
+      <bitenum value="3" id="DABC" token="ROT_I_OFST_3" description="DABC"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="23" end="23" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DCT_F_OFST" width="3" begin="22" end="20" resetval="0x0" description="Controls DCT.F bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="DCT_F_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDG" token="DCT_F_OFST_1" description="BCDG"/>
+      <bitenum value="2" id="CDGH" token="DCT_F_OFST_2" description="CDGH"/>
+      <bitenum value="3" id="DGHA" token="DCT_F_OFST_3" description="DGHA"/>
+      <bitenum value="4" id="GHAB" token="DCT_F_OFST_4" description="GHAB"/>
+      <bitenum value="5" id="HABC" token="DCT_F_OFST_5" description="HABC"/>
+    </bitfield>
+    <bitfield id="DCT_S_OFST" width="2" begin="19" end="18" resetval="0x0" description="Controls DCT.S bus mapping to image buffers: 0x0000 0x1000" range="" rwaccess="RW">
+      <bitenum value="0" id="EF" token="DCT_S_OFST_0" description="EF"/>
+      <bitenum value="1" id="FG" token="DCT_S_OFST_1" description="FG"/>
+      <bitenum value="2" id="GH" token="DCT_S_OFST_2" description="GH"/>
+      <bitenum value="3" id="HE" token="DCT_S_OFST_3" description="HE"/>
+    </bitfield>
+    <bitfield id="VLCDJ_IO_OFST" width="3" begin="17" end="15" resetval="0x0" description="Controls VLCDJ IO data bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="VLCDJ_IO_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDG" token="VLCDJ_IO_OFST_1" description="BCDG"/>
+      <bitenum value="2" id="CDGH" token="VLCDJ_IO_OFST_2" description="CDGH"/>
+      <bitenum value="3" id="DGHA" token="VLCDJ_IO_OFST_3" description="DGHA"/>
+      <bitenum value="4" id="GHAB" token="VLCDJ_IO_OFST_4" description="GHAB"/>
+      <bitenum value="5" id="HABC" token="VLCDJ_IO_OFST_5" description="HABC"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="7" begin="14" end="8" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DMA_TRIGGER" width="3" begin="7" end="5" resetval="0x0" description="SW controlled START/DONE synchronization" range="" rwaccess="RW">
+      <bitenum value="0" id="No_effect" token="DMA_TRIGGER_0_w" description="No effect"/>
+      <bitenum value="0" id="DMA_TRIGGER_0" token="DMA_TRIGGER_0_r" description="No done pulse have been received since last non zero write into the DMA_TRIGGER register"/>
+      <bitenum value="1" id="DONE_1" token="DMA_TRIGGER_1_r" description="DONE pulses for channel 0 and 1 have been received"/>
+      <bitenum value="1" id="DMA._1" token="DMA_TRIGGER_1_w" description="Trigger channel 0 and 1. Clears all memorized done pulses for DMA."/>
+      <bitenum value="2" id="DMA._2" token="DMA_TRIGGER_2_w" description="Trigger channel 0, 1, 2. Clears all memorized done pulses for DMA."/>
+      <bitenum value="2" id="DONE_2" token="DMA_TRIGGER_2_r" description="DONE pulses for channel 0, 1 and 2 have been received"/>
+      <bitenum value="3" id="DONE_3" token="DMA_TRIGGER_3_r" description="DONE pulses for channel 0, 1, 2 and 3 have been received."/>
+      <bitenum value="3" id="DMA._3" token="DMA_TRIGGER_3_w" description="Trigger channel 0, 1, 2 and 3. Clears all memorized done pulses for DMA."/>
+      <bitenum value="4" id="DONE_4" token="DMA_TRIGGER_4_r" description="DONE pulse for channel 0 has been received"/>
+      <bitenum value="4" id="DMA._4" token="DMA_TRIGGER_4_w" description="Trigger channel 0. Clears all memorized done pulses for DMA."/>
+      <bitenum value="5" id="DMA._5" token="DMA_TRIGGER_5_w" description="Trigger channel 1. Clears all memorized done pulses for DMA."/>
+      <bitenum value="5" id="DONE_5" token="DMA_TRIGGER_5_r" description="DONE pulse for channel 1 has been received"/>
+      <bitenum value="6" id="DONE_6" token="DMA_TRIGGER_6_r" description="DONE pulse for channel 2 has been received"/>
+      <bitenum value="6" id="DMA._6" token="DMA_TRIGGER_6_w" description="Trigger channel 2. Clears all memorized done pulses for DMA."/>
+      <bitenum value="7" id="DMA._7" token="DMA_TRIGGER_7_w" description="Trigger channel 3. Clears all memorized done pulses for DMA."/>
+      <bitenum value="7" id="DONE_7" token="DMA_TRIGGER_7_r" description="DONE pulse for channel 3 has been received"/>
+    </bitfield>
+    <bitfield id="ROT_A_TRIGGER" width="1" begin="4" end="4" resetval="0" description="SW controlled START/DONE synchronization" range="" rwaccess="RW">
+      <bitenum value="0" id="No_Effect" token="ROT_A_TRIGGER_0_w" description="No Effect"/>
+      <bitenum value="0" id="DONE_START_0" token="ROT_A_TRIGGER_0_r" description="No DONE pulse received since the last START pulse has been sent"/>
+      <bitenum value="1" id="DONE_pulse_received" token="ROT_A_TRIGGER_1_r" description="DONE pulse received"/>
+      <bitenum value="1" id="1" token="ROT_A_TRIGGER_1_w" description="Send a start pulse and clears the memorized done pulse"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="VLCDJ_TRIGGER" width="1" begin="2" end="2" resetval="0" description="SW controlled START/DONE synchronization" range="" rwaccess="RW">
+      <bitenum value="0" id="No_Effect" token="VLCDJ_TRIGGER_0_w" description="No Effect"/>
+      <bitenum value="0" id="DONE_START_0" token="VLCDJ_TRIGGER_0_r" description="No DONE pulse received since the last START pulse has been sent"/>
+      <bitenum value="1" id="DONE_pulse_received" token="VLCDJ_TRIGGER_1_r" description="DONE pulse received"/>
+      <bitenum value="1" id="1" token="VLCDJ_TRIGGER_1_w" description="Send a start pulse and clears the memorized done pulse"/>
+    </bitfield>
+    <bitfield id="DCT_TRIGGER" width="1" begin="1" end="1" resetval="0" description="SW controlled START/DONE synchronization" range="" rwaccess="RW">
+      <bitenum value="0" id="No_Effect" token="DCT_TRIGGER_0_w" description="No Effect"/>
+      <bitenum value="0" id="DONE_START_0" token="DCT_TRIGGER_0_r" description="No DONE pulse received since the last START pulse has been sent"/>
+      <bitenum value="1" id="DONE_pulse_received" token="DCT_TRIGGER_1_r" description="DONE pulse received"/>
+      <bitenum value="1" id="1" token="DCT_TRIGGER_1_w" description="Send a start pulse and clears the memorized done pulse"/>
+    </bitfield>
+    <bitfield id="LDC_TRIGGER" width="1" begin="0" end="0" resetval="0" description="SW controlled START/DONE synchronization" range="" rwaccess="RW">
+      <bitenum value="0" id="No_Effect" token="LDC_TRIGGER_0_w" description="No Effect"/>
+      <bitenum value="0" id="DONE_START_0" token="LDC_TRIGGER_0_r" description="No DONE pulse received since the last START pulse has been sent"/>
+      <bitenum value="1" id="DONE_pulse_received" token="LDC_TRIGGER_1_r" description="DONE pulse received"/>
+      <bitenum value="1" id="1" token="LDC_TRIGGER_1_w" description="Send a start pulse and clears the memorized done pulse"/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_SWITCH_OVERRIDE" acronym="SIMCOP_HWSEQ_STEP_SWITCH_OVERRIDE" offset="0x78" width="32" description="HW sequencer override register. Used to execute SW sequences in parallel to HW sequencing steps">
+    <bitfield id="IMBUFF_H" width="4" begin="31" end="28" resetval="0x0" description="Switch for image buffer h" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_H_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_H_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_H_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_S" token="IMBUFF_H_5" description="DCT_S"/>
+      <bitenum value="6" id="DCT_F" token="IMBUFF_H_6" description="DCT_F"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_H_7" description="ROT_A_O"/>
+      <bitenum value="9" id="LDC_O" token="IMBUFF_H_9" description="LDC_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_G" width="4" begin="27" end="24" resetval="0x0" description="Switch for image buffer g" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_G_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_G_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_G_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_S" token="IMBUFF_G_5" description="DCT_S"/>
+      <bitenum value="6" id="DCT_F" token="IMBUFF_G_6" description="DCT_F"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_G_7" description="ROT_A_O"/>
+      <bitenum value="9" id="LDC_O" token="IMBUFF_G_9" description="LDC_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_F" width="4" begin="23" end="20" resetval="0x0" description="Switch for image buffer f" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_F_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_F_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="DCT_S" token="IMBUFF_F_4" description="DCT_S"/>
+      <bitenum value="6" id="LDC_O" token="IMBUFF_F_6" description="LDC_O"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_F_7" description="ROT_A_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_E" width="4" begin="19" end="16" resetval="0x0" description="Switch for image buffer e" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_E_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_E_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="DCT_S" token="IMBUFF_E_4" description="DCT_S"/>
+      <bitenum value="6" id="LDC_O" token="IMBUFF_E_6" description="LDC_O"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_E_7" description="ROT_A_O"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_D" width="3" begin="14" end="12" resetval="0x0" description="Switch for image buffer d" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_D_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_D_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_D_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_D_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_D_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_D_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_C" width="3" begin="10" end="8" resetval="0x0" description="Switch for image buffer c" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_C_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_C_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_C_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_C_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_C_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_C_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_B" width="3" begin="6" end="4" resetval="0x0" description="Switch for image buffer b" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_B_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_B_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_B_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_B_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_B_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_B_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_A" width="3" begin="2" end="0" resetval="0x0" description="Switch for image buffer a" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_A_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_A_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_A_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_A_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_A_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_A_7" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_CTRL2_OVERRIDE" acronym="SIMCOP_HWSEQ_STEP_CTRL2_OVERRIDE" offset="0x7C" width="32" description="HW sequencer override register. Used to execute SW sequences in parallel to HW sequencing steps">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="LDC_O_OFST" width="2" begin="9" end="8" resetval="0x0" description="Controls LDC.O bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="EFGH" token="LDC_O_OFST_0" description="EFGH"/>
+      <bitenum value="1" id="FGHE" token="LDC_O_OFST_1" description="FGHE"/>
+      <bitenum value="2" id="GHEF" token="LDC_O_OFST_2" description="GHEF"/>
+      <bitenum value="3" id="HEFG" token="LDC_O_OFST_3" description="HEFG"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="COEFF_B" width="3" begin="6" end="4" resetval="0x0" description="Coefficient buffer B switch" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="COEFF_B_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="COEFF_B_1" description="SIMCOP DMA"/>
+      <bitenum value="2" id="IMX_A" token="COEFF_B_2" description="IMX A"/>
+      <bitenum value="3" id="IMX_B" token="COEFF_B_3" description="IMX B"/>
+      <bitenum value="4" id="VLCDJ_IO" token="COEFF_B_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="COEFF_B_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_O" token="COEFF_B_6" description="ROT A O"/>
+      <bitenum value="7" id="Reserved" token="COEFF_B_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="COEFF_A" width="3" begin="2" end="0" resetval="0x0" description="Coefficient buffer a switch" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="COEFF_A_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="COEFF_A_1" description="SIMCOP DMA"/>
+      <bitenum value="2" id="IMX_A" token="COEFF_A_2" description="IMX A"/>
+      <bitenum value="3" id="IMX_B" token="COEFF_A_3" description="IMX B"/>
+      <bitenum value="4" id="VLCDJ_IO" token="COEFF_A_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="COEFF_A_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="COEFF_A_6" description="ROT A I"/>
+      <bitenum value="7" id="Reserved" token="COEFF_A_7" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_CTRL_i_0" acronym="SIMCOP_HWSEQ_STEP_CTRL_i_0" offset="0x80" width="32" description="HW sequencer step control register">
+    <bitfield id="CPU_SYNC" width="1" begin="31" end="31" resetval="0" description="Enable HW synchronization with the CPU so that it could be used for some processing on in the macro-block pipeline." range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="CPU_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="CPU_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="DMA_OFST" width="3" begin="30" end="28" resetval="0x0" description="Controls DMA bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000 0x4000 0x5000 0x6000 0x7000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCDEFGH" token="DMA_OFST_0" description="ABCDEFGH"/>
+      <bitenum value="1" id="BCDEFGHA" token="DMA_OFST_1" description="BCDEFGHA"/>
+      <bitenum value="2" id="CDEFGHAB" token="DMA_OFST_2" description="CDEFGHAB"/>
+      <bitenum value="3" id="DEFGHABC" token="DMA_OFST_3" description="DEFGHABC"/>
+      <bitenum value="4" id="EFGHABCD" token="DMA_OFST_4" description="EFGHABCD"/>
+      <bitenum value="5" id="FGHABCDE" token="DMA_OFST_5" description="FGHABCDE"/>
+      <bitenum value="6" id="GHABCDEF" token="DMA_OFST_6" description="GHABCDEF"/>
+      <bitenum value="7" id="HABCDEFG" token="DMA_OFST_7" description="HABCDEFG"/>
+    </bitfield>
+    <bitfield id="ROT_O_OFST" width="2" begin="27" end="26" resetval="0x0" description="Controls ROT.O bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="EFGH" token="ROT_O_OFST_0" description="EFGH"/>
+      <bitenum value="1" id="FGHE" token="ROT_O_OFST_1" description="FGHE"/>
+      <bitenum value="2" id="GHEF" token="ROT_O_OFST_2" description="GHEF"/>
+      <bitenum value="3" id="HEFG" token="ROT_O_OFST_3" description="HEFG"/>
+    </bitfield>
+    <bitfield id="ROT_I_OFST" width="2" begin="25" end="24" resetval="0x0" description="Controls ROT_I bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="ROT_I_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDA" token="ROT_I_OFST_1" description="BCDA"/>
+      <bitenum value="2" id="CDAB" token="ROT_I_OFST_2" description="CDAB"/>
+      <bitenum value="3" id="DABC" token="ROT_I_OFST_3" description="DABC"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="23" end="23" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DCT_F_OFST" width="3" begin="22" end="20" resetval="0x0" description="Controls DCT.F bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="DCT_F_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDG" token="DCT_F_OFST_1" description="BCDG"/>
+      <bitenum value="2" id="CDGH" token="DCT_F_OFST_2" description="CDGH"/>
+      <bitenum value="3" id="DGHA" token="DCT_F_OFST_3" description="DGHA"/>
+      <bitenum value="4" id="GHAB" token="DCT_F_OFST_4" description="GHAB"/>
+      <bitenum value="5" id="HABC" token="DCT_F_OFST_5" description="HABC"/>
+    </bitfield>
+    <bitfield id="DCT_S_OFST" width="2" begin="19" end="18" resetval="0x0" description="Controls DCT.S bus mapping to image buffers: 0x0000 0x1000" range="" rwaccess="RW">
+      <bitenum value="0" id="EF" token="DCT_S_OFST_0" description="EF"/>
+      <bitenum value="1" id="FG" token="DCT_S_OFST_1" description="FG"/>
+      <bitenum value="2" id="GH" token="DCT_S_OFST_2" description="GH"/>
+      <bitenum value="3" id="HE" token="DCT_S_OFST_3" description="HE"/>
+    </bitfield>
+    <bitfield id="VLCDJ_IO_OFST" width="3" begin="17" end="15" resetval="0x0" description="Controls VLCDJ IO data bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="VLCDJ_IO_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDG" token="VLCDJ_IO_OFST_1" description="BCDG"/>
+      <bitenum value="2" id="CDGH" token="VLCDJ_IO_OFST_2" description="CDGH"/>
+      <bitenum value="3" id="DGHA" token="VLCDJ_IO_OFST_3" description="DGHA"/>
+      <bitenum value="4" id="GHAB" token="VLCDJ_IO_OFST_4" description="GHAB"/>
+      <bitenum value="5" id="HABC" token="VLCDJ_IO_OFST_5" description="HABC"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="14" end="11" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="NEXT" width="2" begin="10" end="9" resetval="0x0" description="Next channel in the sync chain" range="" rwaccess="RW">
+      <bitenum value="0" id="Step_0" token="NEXT_0" description="Step 0"/>
+      <bitenum value="1" id="Step_1" token="NEXT_1" description="Step 1"/>
+      <bitenum value="2" id="Step_2" token="NEXT_2" description="Step 2"/>
+      <bitenum value="3" id="Step_3" token="NEXT_3" description="Step 3"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DMA_SYNC" width="3" begin="7" end="5" resetval="0x0" description="Enable HW synchronization with the SIMCOP DMA" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="DMA_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Channel_0_and_1" token="DMA_SYNC_1" description="Channel 0 and 1"/>
+      <bitenum value="2" id="Channel_0,_1,_2" token="DMA_SYNC_2" description="Channel 0, 1, 2"/>
+      <bitenum value="3" id="Channel_0,_1,_2_and_3" token="DMA_SYNC_3" description="Channel 0, 1, 2 and 3"/>
+      <bitenum value="4" id="Channel_0" token="DMA_SYNC_4" description="Channel 0"/>
+      <bitenum value="5" id="Channel_1" token="DMA_SYNC_5" description="Channel 1"/>
+      <bitenum value="6" id="Channel_2" token="DMA_SYNC_6" description="Channel 2"/>
+      <bitenum value="7" id="Channel_3" token="DMA_SYNC_7" description="Channel 3"/>
+    </bitfield>
+    <bitfield id="ROT_A_SYNC" width="1" begin="4" end="4" resetval="0" description="Enable HW synchronization with the ROT A module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="ROT_A_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="ROT_A_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="VLCDJ_SYNC" width="1" begin="2" end="2" resetval="0" description="Enable HW synchronization with the VLCDJ module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="VLCDJ_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="VLCDJ_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="DCT_SYNC" width="1" begin="1" end="1" resetval="0" description="Enable HW synchronization with the DCT module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="DCT_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="DCT_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="LDC_SYNC" width="1" begin="0" end="0" resetval="0" description="Enable HW synchronization with the LDC module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="LDC_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="LDC_SYNC_1" description="Enabled."/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_CTRL_i_1" acronym="SIMCOP_HWSEQ_STEP_CTRL_i_1" offset="0x90" width="32" description="HW sequencer step control register">
+    <bitfield id="CPU_SYNC" width="1" begin="31" end="31" resetval="0" description="Enable HW synchronization with the CPU so that it could be used for some processing on in the macro-block pipeline." range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="CPU_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="CPU_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="DMA_OFST" width="3" begin="30" end="28" resetval="0x0" description="Controls DMA bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000 0x4000 0x5000 0x6000 0x7000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCDEFGH" token="DMA_OFST_0" description="ABCDEFGH"/>
+      <bitenum value="1" id="BCDEFGHA" token="DMA_OFST_1" description="BCDEFGHA"/>
+      <bitenum value="2" id="CDEFGHAB" token="DMA_OFST_2" description="CDEFGHAB"/>
+      <bitenum value="3" id="DEFGHABC" token="DMA_OFST_3" description="DEFGHABC"/>
+      <bitenum value="4" id="EFGHABCD" token="DMA_OFST_4" description="EFGHABCD"/>
+      <bitenum value="5" id="FGHABCDE" token="DMA_OFST_5" description="FGHABCDE"/>
+      <bitenum value="6" id="GHABCDEF" token="DMA_OFST_6" description="GHABCDEF"/>
+      <bitenum value="7" id="HABCDEFG" token="DMA_OFST_7" description="HABCDEFG"/>
+    </bitfield>
+    <bitfield id="ROT_O_OFST" width="2" begin="27" end="26" resetval="0x0" description="Controls ROT.O bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="EFGH" token="ROT_O_OFST_0" description="EFGH"/>
+      <bitenum value="1" id="FGHE" token="ROT_O_OFST_1" description="FGHE"/>
+      <bitenum value="2" id="GHEF" token="ROT_O_OFST_2" description="GHEF"/>
+      <bitenum value="3" id="HEFG" token="ROT_O_OFST_3" description="HEFG"/>
+    </bitfield>
+    <bitfield id="ROT_I_OFST" width="2" begin="25" end="24" resetval="0x0" description="Controls ROT_I bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="ROT_I_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDA" token="ROT_I_OFST_1" description="BCDA"/>
+      <bitenum value="2" id="CDAB" token="ROT_I_OFST_2" description="CDAB"/>
+      <bitenum value="3" id="DABC" token="ROT_I_OFST_3" description="DABC"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="23" end="23" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DCT_F_OFST" width="3" begin="22" end="20" resetval="0x0" description="Controls DCT.F bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="DCT_F_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDG" token="DCT_F_OFST_1" description="BCDG"/>
+      <bitenum value="2" id="CDGH" token="DCT_F_OFST_2" description="CDGH"/>
+      <bitenum value="3" id="DGHA" token="DCT_F_OFST_3" description="DGHA"/>
+      <bitenum value="4" id="GHAB" token="DCT_F_OFST_4" description="GHAB"/>
+      <bitenum value="5" id="HABC" token="DCT_F_OFST_5" description="HABC"/>
+    </bitfield>
+    <bitfield id="DCT_S_OFST" width="2" begin="19" end="18" resetval="0x0" description="Controls DCT.S bus mapping to image buffers: 0x0000 0x1000" range="" rwaccess="RW">
+      <bitenum value="0" id="EF" token="DCT_S_OFST_0" description="EF"/>
+      <bitenum value="1" id="FG" token="DCT_S_OFST_1" description="FG"/>
+      <bitenum value="2" id="GH" token="DCT_S_OFST_2" description="GH"/>
+      <bitenum value="3" id="HE" token="DCT_S_OFST_3" description="HE"/>
+    </bitfield>
+    <bitfield id="VLCDJ_IO_OFST" width="3" begin="17" end="15" resetval="0x0" description="Controls VLCDJ IO data bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="VLCDJ_IO_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDG" token="VLCDJ_IO_OFST_1" description="BCDG"/>
+      <bitenum value="2" id="CDGH" token="VLCDJ_IO_OFST_2" description="CDGH"/>
+      <bitenum value="3" id="DGHA" token="VLCDJ_IO_OFST_3" description="DGHA"/>
+      <bitenum value="4" id="GHAB" token="VLCDJ_IO_OFST_4" description="GHAB"/>
+      <bitenum value="5" id="HABC" token="VLCDJ_IO_OFST_5" description="HABC"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="14" end="11" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="NEXT" width="2" begin="10" end="9" resetval="0x0" description="Next channel in the sync chain" range="" rwaccess="RW">
+      <bitenum value="0" id="Step_0" token="NEXT_0" description="Step 0"/>
+      <bitenum value="1" id="Step_1" token="NEXT_1" description="Step 1"/>
+      <bitenum value="2" id="Step_2" token="NEXT_2" description="Step 2"/>
+      <bitenum value="3" id="Step_3" token="NEXT_3" description="Step 3"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DMA_SYNC" width="3" begin="7" end="5" resetval="0x0" description="Enable HW synchronization with the SIMCOP DMA" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="DMA_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Channel_0_and_1" token="DMA_SYNC_1" description="Channel 0 and 1"/>
+      <bitenum value="2" id="Channel_0,_1,_2" token="DMA_SYNC_2" description="Channel 0, 1, 2"/>
+      <bitenum value="3" id="Channel_0,_1,_2_and_3" token="DMA_SYNC_3" description="Channel 0, 1, 2 and 3"/>
+      <bitenum value="4" id="Channel_0" token="DMA_SYNC_4" description="Channel 0"/>
+      <bitenum value="5" id="Channel_1" token="DMA_SYNC_5" description="Channel 1"/>
+      <bitenum value="6" id="Channel_2" token="DMA_SYNC_6" description="Channel 2"/>
+      <bitenum value="7" id="Channel_3" token="DMA_SYNC_7" description="Channel 3"/>
+    </bitfield>
+    <bitfield id="ROT_A_SYNC" width="1" begin="4" end="4" resetval="0" description="Enable HW synchronization with the ROT A module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="ROT_A_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="ROT_A_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="VLCDJ_SYNC" width="1" begin="2" end="2" resetval="0" description="Enable HW synchronization with the VLCDJ module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="VLCDJ_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="VLCDJ_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="DCT_SYNC" width="1" begin="1" end="1" resetval="0" description="Enable HW synchronization with the DCT module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="DCT_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="DCT_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="LDC_SYNC" width="1" begin="0" end="0" resetval="0" description="Enable HW synchronization with the LDC module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="LDC_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="LDC_SYNC_1" description="Enabled."/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_CTRL_i_2" acronym="SIMCOP_HWSEQ_STEP_CTRL_i_2" offset="0xA0" width="32" description="HW sequencer step control register">
+    <bitfield id="CPU_SYNC" width="1" begin="31" end="31" resetval="0" description="Enable HW synchronization with the CPU so that it could be used for some processing on in the macro-block pipeline." range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="CPU_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="CPU_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="DMA_OFST" width="3" begin="30" end="28" resetval="0x0" description="Controls DMA bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000 0x4000 0x5000 0x6000 0x7000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCDEFGH" token="DMA_OFST_0" description="ABCDEFGH"/>
+      <bitenum value="1" id="BCDEFGHA" token="DMA_OFST_1" description="BCDEFGHA"/>
+      <bitenum value="2" id="CDEFGHAB" token="DMA_OFST_2" description="CDEFGHAB"/>
+      <bitenum value="3" id="DEFGHABC" token="DMA_OFST_3" description="DEFGHABC"/>
+      <bitenum value="4" id="EFGHABCD" token="DMA_OFST_4" description="EFGHABCD"/>
+      <bitenum value="5" id="FGHABCDE" token="DMA_OFST_5" description="FGHABCDE"/>
+      <bitenum value="6" id="GHABCDEF" token="DMA_OFST_6" description="GHABCDEF"/>
+      <bitenum value="7" id="HABCDEFG" token="DMA_OFST_7" description="HABCDEFG"/>
+    </bitfield>
+    <bitfield id="ROT_O_OFST" width="2" begin="27" end="26" resetval="0x0" description="Controls ROT.O bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="EFGH" token="ROT_O_OFST_0" description="EFGH"/>
+      <bitenum value="1" id="FGHE" token="ROT_O_OFST_1" description="FGHE"/>
+      <bitenum value="2" id="GHEF" token="ROT_O_OFST_2" description="GHEF"/>
+      <bitenum value="3" id="HEFG" token="ROT_O_OFST_3" description="HEFG"/>
+    </bitfield>
+    <bitfield id="ROT_I_OFST" width="2" begin="25" end="24" resetval="0x0" description="Controls ROT_I bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="ROT_I_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDA" token="ROT_I_OFST_1" description="BCDA"/>
+      <bitenum value="2" id="CDAB" token="ROT_I_OFST_2" description="CDAB"/>
+      <bitenum value="3" id="DABC" token="ROT_I_OFST_3" description="DABC"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="23" end="23" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DCT_F_OFST" width="3" begin="22" end="20" resetval="0x0" description="Controls DCT.F bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="DCT_F_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDG" token="DCT_F_OFST_1" description="BCDG"/>
+      <bitenum value="2" id="CDGH" token="DCT_F_OFST_2" description="CDGH"/>
+      <bitenum value="3" id="DGHA" token="DCT_F_OFST_3" description="DGHA"/>
+      <bitenum value="4" id="GHAB" token="DCT_F_OFST_4" description="GHAB"/>
+      <bitenum value="5" id="HABC" token="DCT_F_OFST_5" description="HABC"/>
+    </bitfield>
+    <bitfield id="DCT_S_OFST" width="2" begin="19" end="18" resetval="0x0" description="Controls DCT.S bus mapping to image buffers: 0x0000 0x1000" range="" rwaccess="RW">
+      <bitenum value="0" id="EF" token="DCT_S_OFST_0" description="EF"/>
+      <bitenum value="1" id="FG" token="DCT_S_OFST_1" description="FG"/>
+      <bitenum value="2" id="GH" token="DCT_S_OFST_2" description="GH"/>
+      <bitenum value="3" id="HE" token="DCT_S_OFST_3" description="HE"/>
+    </bitfield>
+    <bitfield id="VLCDJ_IO_OFST" width="3" begin="17" end="15" resetval="0x0" description="Controls VLCDJ IO data bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="VLCDJ_IO_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDG" token="VLCDJ_IO_OFST_1" description="BCDG"/>
+      <bitenum value="2" id="CDGH" token="VLCDJ_IO_OFST_2" description="CDGH"/>
+      <bitenum value="3" id="DGHA" token="VLCDJ_IO_OFST_3" description="DGHA"/>
+      <bitenum value="4" id="GHAB" token="VLCDJ_IO_OFST_4" description="GHAB"/>
+      <bitenum value="5" id="HABC" token="VLCDJ_IO_OFST_5" description="HABC"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="14" end="11" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="NEXT" width="2" begin="10" end="9" resetval="0x0" description="Next channel in the sync chain" range="" rwaccess="RW">
+      <bitenum value="0" id="Step_0" token="NEXT_0" description="Step 0"/>
+      <bitenum value="1" id="Step_1" token="NEXT_1" description="Step 1"/>
+      <bitenum value="2" id="Step_2" token="NEXT_2" description="Step 2"/>
+      <bitenum value="3" id="Step_3" token="NEXT_3" description="Step 3"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DMA_SYNC" width="3" begin="7" end="5" resetval="0x0" description="Enable HW synchronization with the SIMCOP DMA" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="DMA_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Channel_0_and_1" token="DMA_SYNC_1" description="Channel 0 and 1"/>
+      <bitenum value="2" id="Channel_0,_1,_2" token="DMA_SYNC_2" description="Channel 0, 1, 2"/>
+      <bitenum value="3" id="Channel_0,_1,_2_and_3" token="DMA_SYNC_3" description="Channel 0, 1, 2 and 3"/>
+      <bitenum value="4" id="Channel_0" token="DMA_SYNC_4" description="Channel 0"/>
+      <bitenum value="5" id="Channel_1" token="DMA_SYNC_5" description="Channel 1"/>
+      <bitenum value="6" id="Channel_2" token="DMA_SYNC_6" description="Channel 2"/>
+      <bitenum value="7" id="Channel_3" token="DMA_SYNC_7" description="Channel 3"/>
+    </bitfield>
+    <bitfield id="ROT_A_SYNC" width="1" begin="4" end="4" resetval="0" description="Enable HW synchronization with the ROT A module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="ROT_A_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="ROT_A_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="VLCDJ_SYNC" width="1" begin="2" end="2" resetval="0" description="Enable HW synchronization with the VLCDJ module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="VLCDJ_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="VLCDJ_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="DCT_SYNC" width="1" begin="1" end="1" resetval="0" description="Enable HW synchronization with the DCT module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="DCT_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="DCT_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="LDC_SYNC" width="1" begin="0" end="0" resetval="0" description="Enable HW synchronization with the LDC module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="LDC_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="LDC_SYNC_1" description="Enabled."/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_CTRL_i_3" acronym="SIMCOP_HWSEQ_STEP_CTRL_i_3" offset="0xB0" width="32" description="HW sequencer step control register">
+    <bitfield id="CPU_SYNC" width="1" begin="31" end="31" resetval="0" description="Enable HW synchronization with the CPU so that it could be used for some processing on in the macro-block pipeline." range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="CPU_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="CPU_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="DMA_OFST" width="3" begin="30" end="28" resetval="0x0" description="Controls DMA bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000 0x4000 0x5000 0x6000 0x7000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCDEFGH" token="DMA_OFST_0" description="ABCDEFGH"/>
+      <bitenum value="1" id="BCDEFGHA" token="DMA_OFST_1" description="BCDEFGHA"/>
+      <bitenum value="2" id="CDEFGHAB" token="DMA_OFST_2" description="CDEFGHAB"/>
+      <bitenum value="3" id="DEFGHABC" token="DMA_OFST_3" description="DEFGHABC"/>
+      <bitenum value="4" id="EFGHABCD" token="DMA_OFST_4" description="EFGHABCD"/>
+      <bitenum value="5" id="FGHABCDE" token="DMA_OFST_5" description="FGHABCDE"/>
+      <bitenum value="6" id="GHABCDEF" token="DMA_OFST_6" description="GHABCDEF"/>
+      <bitenum value="7" id="HABCDEFG" token="DMA_OFST_7" description="HABCDEFG"/>
+    </bitfield>
+    <bitfield id="ROT_O_OFST" width="2" begin="27" end="26" resetval="0x0" description="Controls ROT.O bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="EFGH" token="ROT_O_OFST_0" description="EFGH"/>
+      <bitenum value="1" id="FGHE" token="ROT_O_OFST_1" description="FGHE"/>
+      <bitenum value="2" id="GHEF" token="ROT_O_OFST_2" description="GHEF"/>
+      <bitenum value="3" id="HEFG" token="ROT_O_OFST_3" description="HEFG"/>
+    </bitfield>
+    <bitfield id="ROT_I_OFST" width="2" begin="25" end="24" resetval="0x0" description="Controls ROT_I bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="ROT_I_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDA" token="ROT_I_OFST_1" description="BCDA"/>
+      <bitenum value="2" id="CDAB" token="ROT_I_OFST_2" description="CDAB"/>
+      <bitenum value="3" id="DABC" token="ROT_I_OFST_3" description="DABC"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="23" end="23" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DCT_F_OFST" width="3" begin="22" end="20" resetval="0x0" description="Controls DCT.F bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="DCT_F_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDG" token="DCT_F_OFST_1" description="BCDG"/>
+      <bitenum value="2" id="CDGH" token="DCT_F_OFST_2" description="CDGH"/>
+      <bitenum value="3" id="DGHA" token="DCT_F_OFST_3" description="DGHA"/>
+      <bitenum value="4" id="GHAB" token="DCT_F_OFST_4" description="GHAB"/>
+      <bitenum value="5" id="HABC" token="DCT_F_OFST_5" description="HABC"/>
+    </bitfield>
+    <bitfield id="DCT_S_OFST" width="2" begin="19" end="18" resetval="0x0" description="Controls DCT.S bus mapping to image buffers: 0x0000 0x1000" range="" rwaccess="RW">
+      <bitenum value="0" id="EF" token="DCT_S_OFST_0" description="EF"/>
+      <bitenum value="1" id="FG" token="DCT_S_OFST_1" description="FG"/>
+      <bitenum value="2" id="GH" token="DCT_S_OFST_2" description="GH"/>
+      <bitenum value="3" id="HE" token="DCT_S_OFST_3" description="HE"/>
+    </bitfield>
+    <bitfield id="VLCDJ_IO_OFST" width="3" begin="17" end="15" resetval="0x0" description="Controls VLCDJ IO data bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="ABCD" token="VLCDJ_IO_OFST_0" description="ABCD"/>
+      <bitenum value="1" id="BCDG" token="VLCDJ_IO_OFST_1" description="BCDG"/>
+      <bitenum value="2" id="CDGH" token="VLCDJ_IO_OFST_2" description="CDGH"/>
+      <bitenum value="3" id="DGHA" token="VLCDJ_IO_OFST_3" description="DGHA"/>
+      <bitenum value="4" id="GHAB" token="VLCDJ_IO_OFST_4" description="GHAB"/>
+      <bitenum value="5" id="HABC" token="VLCDJ_IO_OFST_5" description="HABC"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="4" begin="14" end="11" resetval="0x0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="NEXT" width="2" begin="10" end="9" resetval="0x0" description="Next channel in the sync chain" range="" rwaccess="RW">
+      <bitenum value="0" id="Step_0" token="NEXT_0" description="Step 0"/>
+      <bitenum value="1" id="Step_1" token="NEXT_1" description="Step 1"/>
+      <bitenum value="2" id="Step_2" token="NEXT_2" description="Step 2"/>
+      <bitenum value="3" id="Step_3" token="NEXT_3" description="Step 3"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="8" end="8" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="DMA_SYNC" width="3" begin="7" end="5" resetval="0x0" description="Enable HW synchronization with the SIMCOP DMA" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="DMA_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Channel_0_and_1" token="DMA_SYNC_1" description="Channel 0 and 1"/>
+      <bitenum value="2" id="Channel_0,_1,_2" token="DMA_SYNC_2" description="Channel 0, 1, 2"/>
+      <bitenum value="3" id="Channel_0,_1,_2_and_3" token="DMA_SYNC_3" description="Channel 0, 1, 2 and 3"/>
+      <bitenum value="4" id="Channel_0" token="DMA_SYNC_4" description="Channel 0"/>
+      <bitenum value="5" id="Channel_1" token="DMA_SYNC_5" description="Channel 1"/>
+      <bitenum value="6" id="Channel_2" token="DMA_SYNC_6" description="Channel 2"/>
+      <bitenum value="7" id="Channel_3" token="DMA_SYNC_7" description="Channel 3"/>
+    </bitfield>
+    <bitfield id="ROT_A_SYNC" width="1" begin="4" end="4" resetval="0" description="Enable HW synchronization with the ROT A module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="ROT_A_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="ROT_A_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="VLCDJ_SYNC" width="1" begin="2" end="2" resetval="0" description="Enable HW synchronization with the VLCDJ module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="VLCDJ_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="VLCDJ_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="DCT_SYNC" width="1" begin="1" end="1" resetval="0" description="Enable HW synchronization with the DCT module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="DCT_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="DCT_SYNC_1" description="Enabled."/>
+    </bitfield>
+    <bitfield id="LDC_SYNC" width="1" begin="0" end="0" resetval="0" description="Enable HW synchronization with the LDC module" range="" rwaccess="RW">
+      <bitenum value="0" id="Disabled" token="LDC_SYNC_0" description="Disabled"/>
+      <bitenum value="1" id="Enabled." token="LDC_SYNC_1" description="Enabled."/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_SWITCH_i_0" acronym="SIMCOP_HWSEQ_STEP_SWITCH_i_0" offset="0x84" width="32" description="Image buffer switch control. The configuration of Step 0 is used when HW sequencer is idle.">
+    <bitfield id="IMBUFF_H" width="4" begin="31" end="28" resetval="0x0" description="Switch for image buffer h" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_H_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_H_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_H_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_S" token="IMBUFF_H_5" description="DCT_S"/>
+      <bitenum value="6" id="DCT_F" token="IMBUFF_H_6" description="DCT_F"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_H_7" description="ROT_A_O"/>
+      <bitenum value="9" id="LDC_O" token="IMBUFF_H_9" description="LDC_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_G" width="4" begin="27" end="24" resetval="0x0" description="Switch for image buffer g" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_G_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_G_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_G_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_S" token="IMBUFF_G_5" description="DCT_S"/>
+      <bitenum value="6" id="DCT_F" token="IMBUFF_G_6" description="DCT_F"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_G_7" description="ROT_A_O"/>
+      <bitenum value="9" id="LDC_O" token="IMBUFF_G_9" description="LDC_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_F" width="4" begin="23" end="20" resetval="0x0" description="Switch for image buffer f" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_F_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_F_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="DCT_S" token="IMBUFF_F_4" description="DCT_S"/>
+      <bitenum value="6" id="LDC_O" token="IMBUFF_F_6" description="LDC_O"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_F_7" description="ROT_A_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_E" width="4" begin="19" end="16" resetval="0x0" description="Switch for image buffer e" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_E_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_E_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="DCT_S" token="IMBUFF_E_4" description="DCT_S"/>
+      <bitenum value="6" id="LDC_O" token="IMBUFF_E_6" description="LDC_O"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_E_7" description="ROT_A_O"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_D" width="3" begin="14" end="12" resetval="0x0" description="Switch for image buffer d" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_D_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_D_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_D_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_D_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_D_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_D_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_C" width="3" begin="10" end="8" resetval="0x0" description="Switch for image buffer c" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_C_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_C_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_C_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_C_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_C_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_C_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_B" width="3" begin="6" end="4" resetval="0x0" description="Switch for image buffer b" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_B_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_B_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_B_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_B_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_B_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_B_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_A" width="3" begin="2" end="0" resetval="0x0" description="Switch for image buffer a" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_A_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_A_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_A_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_A_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_A_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_A_7" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_SWITCH_i_1" acronym="SIMCOP_HWSEQ_STEP_SWITCH_i_1" offset="0x94" width="32" description="Image buffer switch control. The configuration of Step 0 is used when HW sequencer is idle.">
+    <bitfield id="IMBUFF_H" width="4" begin="31" end="28" resetval="0x0" description="Switch for image buffer h" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_H_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_H_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_H_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_S" token="IMBUFF_H_5" description="DCT_S"/>
+      <bitenum value="6" id="DCT_F" token="IMBUFF_H_6" description="DCT_F"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_H_7" description="ROT_A_O"/>
+      <bitenum value="9" id="LDC_O" token="IMBUFF_H_9" description="LDC_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_G" width="4" begin="27" end="24" resetval="0x0" description="Switch for image buffer g" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_G_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_G_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_G_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_S" token="IMBUFF_G_5" description="DCT_S"/>
+      <bitenum value="6" id="DCT_F" token="IMBUFF_G_6" description="DCT_F"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_G_7" description="ROT_A_O"/>
+      <bitenum value="9" id="LDC_O" token="IMBUFF_G_9" description="LDC_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_F" width="4" begin="23" end="20" resetval="0x0" description="Switch for image buffer f" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_F_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_F_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="DCT_S" token="IMBUFF_F_4" description="DCT_S"/>
+      <bitenum value="6" id="LDC_O" token="IMBUFF_F_6" description="LDC_O"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_F_7" description="ROT_A_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_E" width="4" begin="19" end="16" resetval="0x0" description="Switch for image buffer e" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_E_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_E_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="DCT_S" token="IMBUFF_E_4" description="DCT_S"/>
+      <bitenum value="6" id="LDC_O" token="IMBUFF_E_6" description="LDC_O"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_E_7" description="ROT_A_O"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_D" width="3" begin="14" end="12" resetval="0x0" description="Switch for image buffer d" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_D_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_D_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_D_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_D_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_D_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_D_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_C" width="3" begin="10" end="8" resetval="0x0" description="Switch for image buffer c" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_C_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_C_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_C_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_C_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_C_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_C_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_B" width="3" begin="6" end="4" resetval="0x0" description="Switch for image buffer b" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_B_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_B_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_B_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_B_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_B_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_B_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_A" width="3" begin="2" end="0" resetval="0x0" description="Switch for image buffer a" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_A_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_A_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_A_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_A_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_A_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_A_7" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_SWITCH_i_2" acronym="SIMCOP_HWSEQ_STEP_SWITCH_i_2" offset="0xA4" width="32" description="Image buffer switch control. The configuration of Step 0 is used when HW sequencer is idle.">
+    <bitfield id="IMBUFF_H" width="4" begin="31" end="28" resetval="0x0" description="Switch for image buffer h" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_H_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_H_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_H_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_S" token="IMBUFF_H_5" description="DCT_S"/>
+      <bitenum value="6" id="DCT_F" token="IMBUFF_H_6" description="DCT_F"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_H_7" description="ROT_A_O"/>
+      <bitenum value="9" id="LDC_O" token="IMBUFF_H_9" description="LDC_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_G" width="4" begin="27" end="24" resetval="0x0" description="Switch for image buffer g" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_G_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_G_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_G_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_S" token="IMBUFF_G_5" description="DCT_S"/>
+      <bitenum value="6" id="DCT_F" token="IMBUFF_G_6" description="DCT_F"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_G_7" description="ROT_A_O"/>
+      <bitenum value="9" id="LDC_O" token="IMBUFF_G_9" description="LDC_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_F" width="4" begin="23" end="20" resetval="0x0" description="Switch for image buffer f" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_F_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_F_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="DCT_S" token="IMBUFF_F_4" description="DCT_S"/>
+      <bitenum value="6" id="LDC_O" token="IMBUFF_F_6" description="LDC_O"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_F_7" description="ROT_A_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_E" width="4" begin="19" end="16" resetval="0x0" description="Switch for image buffer e" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_E_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_E_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="DCT_S" token="IMBUFF_E_4" description="DCT_S"/>
+      <bitenum value="6" id="LDC_O" token="IMBUFF_E_6" description="LDC_O"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_E_7" description="ROT_A_O"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_D" width="3" begin="14" end="12" resetval="0x0" description="Switch for image buffer d" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_D_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_D_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_D_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_D_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_D_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_D_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_C" width="3" begin="10" end="8" resetval="0x0" description="Switch for image buffer c" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_C_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_C_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_C_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_C_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_C_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_C_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_B" width="3" begin="6" end="4" resetval="0x0" description="Switch for image buffer b" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_B_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_B_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_B_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_B_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_B_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_B_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_A" width="3" begin="2" end="0" resetval="0x0" description="Switch for image buffer a" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_A_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_A_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_A_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_A_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_A_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_A_7" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_SWITCH_i_3" acronym="SIMCOP_HWSEQ_STEP_SWITCH_i_3" offset="0xB4" width="32" description="Image buffer switch control. The configuration of Step 0 is used when HW sequencer is idle.">
+    <bitfield id="IMBUFF_H" width="4" begin="31" end="28" resetval="0x0" description="Switch for image buffer h" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_H_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_H_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_H_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_S" token="IMBUFF_H_5" description="DCT_S"/>
+      <bitenum value="6" id="DCT_F" token="IMBUFF_H_6" description="DCT_F"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_H_7" description="ROT_A_O"/>
+      <bitenum value="9" id="LDC_O" token="IMBUFF_H_9" description="LDC_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_G" width="4" begin="27" end="24" resetval="0x0" description="Switch for image buffer g" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_G_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_G_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_G_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_S" token="IMBUFF_G_5" description="DCT_S"/>
+      <bitenum value="6" id="DCT_F" token="IMBUFF_G_6" description="DCT_F"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_G_7" description="ROT_A_O"/>
+      <bitenum value="9" id="LDC_O" token="IMBUFF_G_9" description="LDC_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_F" width="4" begin="23" end="20" resetval="0x0" description="Switch for image buffer f" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_F_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_F_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="DCT_S" token="IMBUFF_F_4" description="DCT_S"/>
+      <bitenum value="6" id="LDC_O" token="IMBUFF_F_6" description="LDC_O"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_F_7" description="ROT_A_O"/>
+    </bitfield>
+    <bitfield id="IMBUFF_E" width="4" begin="19" end="16" resetval="0x0" description="Switch for image buffer e" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_E_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_E_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="DCT_S" token="IMBUFF_E_4" description="DCT_S"/>
+      <bitenum value="6" id="LDC_O" token="IMBUFF_E_6" description="LDC_O"/>
+      <bitenum value="7" id="ROT_A_O" token="IMBUFF_E_7" description="ROT_A_O"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="15" end="15" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_D" width="3" begin="14" end="12" resetval="0x0" description="Switch for image buffer d" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_D_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_D_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_D_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_D_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_D_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_D_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="11" end="11" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_C" width="3" begin="10" end="8" resetval="0x0" description="Switch for image buffer c" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_C_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_C_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_C_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_C_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_C_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_C_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_B" width="3" begin="6" end="4" resetval="0x0" description="Switch for image buffer b" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_B_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_B_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_B_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_B_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_B_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_B_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="IMBUFF_A" width="3" begin="2" end="0" resetval="0x0" description="Switch for image buffer a" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="IMBUFF_A_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="IMBUFF_A_1" description="SIMCOP DMA"/>
+      <bitenum value="4" id="VLCDJ_IO" token="IMBUFF_A_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="IMBUFF_A_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="IMBUFF_A_6" description="ROT_A_I"/>
+      <bitenum value="7" id="Reserved" token="IMBUFF_A_7" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_CTRL2_i_0" acronym="SIMCOP_HWSEQ_STEP_CTRL2_i_0" offset="0x8C" width="32" description="HW sequencer step control register">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="LDC_O_OFST" width="2" begin="9" end="8" resetval="0x0" description="Controls LDC.O bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="EFGH" token="LDC_O_OFST_0" description="EFGH"/>
+      <bitenum value="1" id="FGHE" token="LDC_O_OFST_1" description="FGHE"/>
+      <bitenum value="2" id="GHEF" token="LDC_O_OFST_2" description="GHEF"/>
+      <bitenum value="3" id="HEFG" token="LDC_O_OFST_3" description="HEFG"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="COEFF_B" width="3" begin="6" end="4" resetval="0x0" description="Coefficient buffer b switch" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="COEFF_B_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="COEFF_B_1" description="SIMCOP DMA"/>
+      <bitenum value="2" id="IMX_A" token="COEFF_B_2" description="IMX A"/>
+      <bitenum value="3" id="IMX_B" token="COEFF_B_3" description="IMX B"/>
+      <bitenum value="4" id="VLCDJ_IO" token="COEFF_B_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="COEFF_B_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_O" token="COEFF_B_6" description="ROT A O"/>
+      <bitenum value="7" id="Reserved" token="COEFF_B_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="COEFF_A" width="3" begin="2" end="0" resetval="0x0" description="Coefficient buffer a switch" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="COEFF_A_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="COEFF_A_1" description="SIMCOP DMA"/>
+      <bitenum value="2" id="IMX_A" token="COEFF_A_2" description="IMX A"/>
+      <bitenum value="3" id="IMX_B" token="COEFF_A_3" description="IMX B"/>
+      <bitenum value="4" id="VLCDJ_IO" token="COEFF_A_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="COEFF_A_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="COEFF_A_6" description="ROT A I"/>
+      <bitenum value="7" id="Reserved" token="COEFF_A_7" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_CTRL2_i_1" acronym="SIMCOP_HWSEQ_STEP_CTRL2_i_1" offset="0x9C" width="32" description="HW sequencer step control register">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="LDC_O_OFST" width="2" begin="9" end="8" resetval="0x0" description="Controls LDC.O bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="EFGH" token="LDC_O_OFST_0" description="EFGH"/>
+      <bitenum value="1" id="FGHE" token="LDC_O_OFST_1" description="FGHE"/>
+      <bitenum value="2" id="GHEF" token="LDC_O_OFST_2" description="GHEF"/>
+      <bitenum value="3" id="HEFG" token="LDC_O_OFST_3" description="HEFG"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="COEFF_B" width="3" begin="6" end="4" resetval="0x0" description="Coefficient buffer b switch" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="COEFF_B_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="COEFF_B_1" description="SIMCOP DMA"/>
+      <bitenum value="2" id="IMX_A" token="COEFF_B_2" description="IMX A"/>
+      <bitenum value="3" id="IMX_B" token="COEFF_B_3" description="IMX B"/>
+      <bitenum value="4" id="VLCDJ_IO" token="COEFF_B_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="COEFF_B_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_O" token="COEFF_B_6" description="ROT A O"/>
+      <bitenum value="7" id="Reserved" token="COEFF_B_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="COEFF_A" width="3" begin="2" end="0" resetval="0x0" description="Coefficient buffer a switch" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="COEFF_A_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="COEFF_A_1" description="SIMCOP DMA"/>
+      <bitenum value="2" id="IMX_A" token="COEFF_A_2" description="IMX A"/>
+      <bitenum value="3" id="IMX_B" token="COEFF_A_3" description="IMX B"/>
+      <bitenum value="4" id="VLCDJ_IO" token="COEFF_A_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="COEFF_A_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="COEFF_A_6" description="ROT A I"/>
+      <bitenum value="7" id="Reserved" token="COEFF_A_7" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_CTRL2_i_2" acronym="SIMCOP_HWSEQ_STEP_CTRL2_i_2" offset="0xAC" width="32" description="HW sequencer step control register">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="LDC_O_OFST" width="2" begin="9" end="8" resetval="0x0" description="Controls LDC.O bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="EFGH" token="LDC_O_OFST_0" description="EFGH"/>
+      <bitenum value="1" id="FGHE" token="LDC_O_OFST_1" description="FGHE"/>
+      <bitenum value="2" id="GHEF" token="LDC_O_OFST_2" description="GHEF"/>
+      <bitenum value="3" id="HEFG" token="LDC_O_OFST_3" description="HEFG"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="COEFF_B" width="3" begin="6" end="4" resetval="0x0" description="Coefficient buffer b switch" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="COEFF_B_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="COEFF_B_1" description="SIMCOP DMA"/>
+      <bitenum value="2" id="IMX_A" token="COEFF_B_2" description="IMX A"/>
+      <bitenum value="3" id="IMX_B" token="COEFF_B_3" description="IMX B"/>
+      <bitenum value="4" id="VLCDJ_IO" token="COEFF_B_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="COEFF_B_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_O" token="COEFF_B_6" description="ROT A O"/>
+      <bitenum value="7" id="Reserved" token="COEFF_B_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="COEFF_A" width="3" begin="2" end="0" resetval="0x0" description="Coefficient buffer a switch" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="COEFF_A_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="COEFF_A_1" description="SIMCOP DMA"/>
+      <bitenum value="2" id="IMX_A" token="COEFF_A_2" description="IMX A"/>
+      <bitenum value="3" id="IMX_B" token="COEFF_A_3" description="IMX B"/>
+      <bitenum value="4" id="VLCDJ_IO" token="COEFF_A_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="COEFF_A_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="COEFF_A_6" description="ROT A I"/>
+      <bitenum value="7" id="Reserved" token="COEFF_A_7" description="Reserved"/>
+    </bitfield>
+  </register>
+  <register id="SIMCOP_HWSEQ_STEP_CTRL2_i_3" acronym="SIMCOP_HWSEQ_STEP_CTRL2_i_3" offset="0xBC" width="32" description="HW sequencer step control register">
+    <bitfield id="RESERVED" width="22" begin="31" end="10" resetval="0x00000" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="LDC_O_OFST" width="2" begin="9" end="8" resetval="0x0" description="Controls LDC.O bus mapping to image buffers: 0x0000 0x1000 0x2000 0x3000" range="" rwaccess="RW">
+      <bitenum value="0" id="EFGH" token="LDC_O_OFST_0" description="EFGH"/>
+      <bitenum value="1" id="FGHE" token="LDC_O_OFST_1" description="FGHE"/>
+      <bitenum value="2" id="GHEF" token="LDC_O_OFST_2" description="GHEF"/>
+      <bitenum value="3" id="HEFG" token="LDC_O_OFST_3" description="HEFG"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="7" end="7" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="COEFF_B" width="3" begin="6" end="4" resetval="0x0" description="Coefficient buffer b switch" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="COEFF_B_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="COEFF_B_1" description="SIMCOP DMA"/>
+      <bitenum value="2" id="IMX_A" token="COEFF_B_2" description="IMX A"/>
+      <bitenum value="3" id="IMX_B" token="COEFF_B_3" description="IMX B"/>
+      <bitenum value="4" id="VLCDJ_IO" token="COEFF_B_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="COEFF_B_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_O" token="COEFF_B_6" description="ROT A O"/>
+      <bitenum value="7" id="Reserved" token="COEFF_B_7" description="Reserved"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="3" end="3" resetval="0" description="Read returns 0." range="" rwaccess="R"/>
+    <bitfield id="COEFF_A" width="3" begin="2" end="0" resetval="0x0" description="Coefficient buffer a switch" range="" rwaccess="RW">
+      <bitenum value="0" id="Coprocessor_bus" token="COEFF_A_0" description="Coprocessor bus"/>
+      <bitenum value="1" id="SIMCOP_DMA" token="COEFF_A_1" description="SIMCOP DMA"/>
+      <bitenum value="2" id="IMX_A" token="COEFF_A_2" description="IMX A"/>
+      <bitenum value="3" id="IMX_B" token="COEFF_A_3" description="IMX B"/>
+      <bitenum value="4" id="VLCDJ_IO" token="COEFF_A_4" description="VLCDJ_IO"/>
+      <bitenum value="5" id="DCT_F" token="COEFF_A_5" description="DCT_F"/>
+      <bitenum value="6" id="ROT_A_I" token="COEFF_A_6" description="ROT A I"/>
+      <bitenum value="7" id="Reserved" token="COEFF_A_7" description="Reserved"/>
+    </bitfield>
+  </register>
+</module>

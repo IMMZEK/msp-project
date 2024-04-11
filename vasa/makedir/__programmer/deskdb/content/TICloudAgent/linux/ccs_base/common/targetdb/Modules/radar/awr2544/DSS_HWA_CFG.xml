@@ -1,0 +1,1688 @@
+
+
+<module description="" id="DSS_HWA_CFG">
+  
+  
+  <register acronym="PID" description=" PID register " id="PID" offset="0x0" width="32">
+    
+  <bitfield begin="31" description="" end="16" id="" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="15" description="" end="11" id="" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="10" description="" end="8" id="" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="7" description="" end="6" id="" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="5" description="" end="0" id="" rwaccess="R" width="6"></bitfield>
+  </register>
+  
+  
+  <register acronym="PARAM_RAM_IDX" description="" id="PARAM_RAM_IDX" offset="0x4" width="32">
+    
+  <bitfield begin="25" description="The state machine starts at the parameter-set specified by PARAM_START_IDX and loads each parameter-set one after another and runs the accelerator as per that configuration. When the state machine reaches the parameter-set specified by PARAM_ENS_IDX, it loops back to the start index as specified by PARAM_START_IDX." end="16" id="param_end_idx" rwaccess="RW" width="10"></bitfield>
+    
+  <bitfield begin="9" description="The state machine starts at the parameter-set specified by PARAM_START_IDX and loads each parameter-set one after another and runs the accelerator as per that configuration. When the state machine reaches the parameter-set specified by PARAM_ENS_IDX, it loops back to the start index as specified by PARAM_START_IDX.." end="0" id="param_start_idx" rwaccess="RW" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="PARAM_RAM_LOOP" description="" id="PARAM_RAM_LOOP" offset="0x8" width="32">
+    
+  <bitfield begin="11" description="Number of loops: This register controls the number of times the State Machine will loop through the parameter-sets (from a programmed start index till a programmed end index) and run them. The maximum number of times the loop can be made is run is 4094. A value of zero programmed in this register means that the looping mechanism is disabled." end="0" id="numloops" rwaccess="RW" width="12"></bitfield>
+  </register>
+  
+  
+  <register acronym="PREVIOUS_NAME" description="" id="PREVIOUS_NAME" offset="0x14" width="32">
+    
+  <bitfield begin="24" description="Dynamic Clock-gating Control: Setting this register bit to '1' enables the capability to clock gate the 4 Radar Accelerator core IPs (FFT datapath,CFAR,Memory compression,Local Maxima) based on the ParamSet being executed." end="24" id="hwa_dyn_clk_en" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="18" description="Software Reset Control: This register provides software reset control for the Radar Hardware Accelerator. The assertion of these register bits by the main processor will bring the Accelerator Engine to a known reset state. This is mostly applicable for resetting the accelerator in case of unexpected behavior. The sequence to be followed in case software reset is to write 111b to this register and then a 000b" end="16" id="hwa_reset" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="10" description="Clock-gating Control: This register  controls the enable/disable for the clock of the Radar Accelerator. This register bit can be set to 0 to clock-gate the accelerator when not using the accelerator. Before enabling the accelerator or before configuring the accelerator   s registers, this register bit should be set first to 111b, so that the clock is available" end="8" id="hwa_clk_en" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="2" description="Enable/Disable Control: A value of ACC_ENABLE = 111b enables the Radar Hardware Accelerator and any other value of the register keeps the Accelerator Engine in disabled state. A 000b to 111b transition is expected to trigger a new Paramset execution" end="0" id="hwa_en" rwaccess="RW" width="3"></bitfield>
+  </register>
+  
+  
+  <register acronym="FW2DMA_TRIG" description="" id="FW2DMA_TRIG" offset="0x1C" width="32">
+    
+  <bitfield begin="31" description="SW Override for HWA Trigger to DMA by the CPU It   s a Self clearing bit" end="0" id="fw2dma_trigger" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMA2HWA_TRIG" description="" id="DMA2HWA_TRIG" offset="0x20" width="32">
+    
+  <bitfield begin="31" description="DMA trigger register: This register is relevant whenever DMA triggered mode is used (i.e., TRIGMODE = 011b). Whenever a DMA channel has finished copying input samples into the local memory of the accelerator and wants to trigger the accelerator, the procedure to follow is to use a second linked DMA channel to write a 16-bit one-hot signature into this register to trigger the accelerator. In DMA triggered mode, the State Machine keeps monitoring this 32-bit register and waits as long as a specific bit (see DMA2ACC_CHANNEL_TRIGSRC) in this register is zero. The second linked DMA channel writes a one-hot signature that sets the specific bit, so that the State Machine gets triggered and starts the accelerator operations for that parameter-set. It   s a Self clearing bit" end="0" id="dma2hwa_trigger" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH0DONE" description="" id="SIGDMACH0DONE" offset="0x24" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 0 completion : 0x0000_0001 Linked DMA can copy from one of these    SIG_DMACHx_DONE    registers into DMA2HWA_TRIGGER register to set the appropriate register bit to signal the completion of DMA and trigger the accelerator" end="0" id="SIGDMACH0DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH1DONE" description="" id="SIGDMACH1DONE" offset="0x28" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 1 completion  : 0x0000_0002" end="0" id="SIGDMACH1DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH2DONE" description="" id="SIGDMACH2DONE" offset="0x2C" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 2 completion  : 0x0000_0004" end="0" id="SIGDMACH2DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH3DONE" description="" id="SIGDMACH3DONE" offset="0x30" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 3 completion  : 0x0000_0008" end="0" id="SIGDMACH3DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH4DONE" description="" id="SIGDMACH4DONE" offset="0x34" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 4 completion  : 0x0000_0010" end="0" id="SIGDMACH4DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH5DONE" description="" id="SIGDMACH5DONE" offset="0x38" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 5 completion  : 0x0000_0020" end="0" id="SIGDMACH5DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH6DONE" description="" id="SIGDMACH6DONE" offset="0x3C" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 6 completion  : 0x0000_0040" end="0" id="SIGDMACH6DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH7DONE" description="" id="SIGDMACH7DONE" offset="0x40" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 7 completion  : 0x0000_0080" end="0" id="SIGDMACH7DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH8DONE" description="" id="SIGDMACH8DONE" offset="0x44" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 8 completion  : 0x0000_0100" end="0" id="SIGDMACH8DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH9DONE" description="" id="SIGDMACH9DONE" offset="0x48" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 9 completion  : 0x0000_0200" end="0" id="SIGDMACH9DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH10DONE" description="" id="SIGDMACH10DONE" offset="0x4C" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 10 completion : 0x0000_0400" end="0" id="SIGDMACH10DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH11DONE" description="" id="SIGDMACH11DONE" offset="0x50" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 11 completion : 0x0000_0800" end="0" id="SIGDMACH11DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH12DONE" description="" id="SIGDMACH12DONE" offset="0x54" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 12 completion : 0x0000_1000" end="0" id="SIGDMACH12DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH13DONE" description="" id="SIGDMACH13DONE" offset="0x58" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 13 completion : 0x0000_2000" end="0" id="SIGDMACH13DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH14DONE" description="" id="SIGDMACH14DONE" offset="0x5C" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 14 completion : 0x0000_4000" end="0" id="SIGDMACH14DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH15DONE" description="" id="SIGDMACH15DONE" offset="0x60" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 15 completion : 0x0000_8000" end="0" id="SIGDMACH15DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH16DONE" description="" id="SIGDMACH16DONE" offset="0x64" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 16 completion : 0x0001_0000" end="0" id="SIGDMACH16DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH17DONE" description="" id="SIGDMACH17DONE" offset="0x68" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 17 completion : 0x0002_0000" end="0" id="SIGDMACH17DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH18DONE" description="" id="SIGDMACH18DONE" offset="0x6C" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 18 completion : 0x0004_0000" end="0" id="SIGDMACH18DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH19DONE" description="" id="SIGDMACH19DONE" offset="0x70" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 19 completion : 0x0008_0000" end="0" id="SIGDMACH19DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH20DONE" description="" id="SIGDMACH20DONE" offset="0x74" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 20 completion : 0x0010_0000" end="0" id="SIGDMACH20DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH21DONE" description="" id="SIGDMACH21DONE" offset="0x78" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 21 completion : 0x0020_0000" end="0" id="SIGDMACH21DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH22DONE" description="" id="SIGDMACH22DONE" offset="0x7C" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 22 completion : 0x0040_0000" end="0" id="SIGDMACH22DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH23DONE" description="" id="SIGDMACH23DONE" offset="0x80" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 23 completion : 0x0080_0000" end="0" id="SIGDMACH23DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH24DONE" description="" id="SIGDMACH24DONE" offset="0x84" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 24 completion : 0x0100_0000" end="0" id="SIGDMACH24DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH25DONE" description="" id="SIGDMACH25DONE" offset="0x88" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 25 completion : 0x0200_0000" end="0" id="SIGDMACH25DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH26DONE" description="" id="SIGDMACH26DONE" offset="0x8C" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 26 completion : 0x0400_0000" end="0" id="SIGDMACH26DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH27DONE" description="" id="SIGDMACH27DONE" offset="0x90" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 27 completion : 0x0800_0000" end="0" id="SIGDMACH27DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH28DONE" description="" id="SIGDMACH28DONE" offset="0x94" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 28 completion : 0x1000_0000" end="0" id="SIGDMACH28DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH29DONE" description="" id="SIGDMACH29DONE" offset="0x98" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 29 completion : 0x2000_0000" end="0" id="SIGDMACH29DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH30DONE" description="" id="SIGDMACH30DONE" offset="0x9C" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 30 completion : 0x4000_0000" end="0" id="SIGDMACH30DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="SIGDMACH31DONE" description="" id="SIGDMACH31DONE" offset="0xA0" width="32">
+    
+  <bitfield begin="31" description="Signature for DMA channel 31 completion : 0x8000_0000" end="0" id="SIGDMACH31DONE" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="FW2HWA_TRIG_0" description="" id="FW2HWA_TRIG_0" offset="0xA4" width="32">
+    
+  <bitfield begin="0" description="Software trigger bit 0: This register bit is relevant whenever software triggered mode is used (i.e., TRIGMODE = 001b). The main processor software can set this register bit, so that the State Machine gets triggered and starts the accelerator operations for that parameter-set. It   s a Self clearing bit" end="0" id="fw2hwa_trigger_0" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="FW2HWA_TRIG_1" description="" id="FW2HWA_TRIG_1" offset="0xA8" width="32">
+    
+  <bitfield begin="0" description="Software trigger bit 1: This register bit is relevant whenever software triggered mode is used (i.e., TRIGMODE = 111b). The main processor software can set this register bit, so that the State Machine gets triggered and starts the accelerator operations for that parameter-set. It   s a Self clearing bit" end="0" id="fw2hwa_trigger_1" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="BPM_PATTERN_0" description="" id="BPM_PATTERN_0" offset="0xB0" width="32">
+    
+  <bitfield begin="31" description="BPM pattern [31:0]: Specifies the BPM pattern to be used to multiply the input samples if BPM removal is enabled" end="0" id="bpm_pattern_0" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="BPM_PATTERN_1" description="" id="BPM_PATTERN_1" offset="0xB4" width="32">
+    
+  <bitfield begin="31" description="BPM pattern [63:32]: Specifies the BPM pattern to be used to multiply the input samples if BPM removal is enabled" end="0" id="bpm_pattern_1" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="BPM_PATTERN_2" description="" id="BPM_PATTERN_2" offset="0xB8" width="32">
+    
+  <bitfield begin="31" description="BPM pattern [95:64]: Specifies the BPM pattern to be used to multiply the input samples if BPM removal is enabled" end="0" id="bpm_pattern_2" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="BPM_PATTERN_3" description="" id="BPM_PATTERN_3" offset="0xBC" width="32">
+    
+  <bitfield begin="31" description="BPM pattern [127:96]: Specifies the BPM pattern to be used to multiply the input samples if BPM removal is enabled" end="0" id="bpm_pattern_3" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="BPM_PATTERN_4" description="" id="BPM_PATTERN_4" offset="0xC0" width="32">
+    
+  <bitfield begin="31" description="BPM pattern [159:128]: Specifies the BPM pattern to be used to multiply the input samples if BPM removal is enabled" end="0" id="bpm_pattern_4" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="BPM_PATTERN_5" description="" id="BPM_PATTERN_5" offset="0xC4" width="32">
+    
+  <bitfield begin="31" description="BPM pattern [191:160]: Specifies the BPM pattern to be used to multiply the input samples if BPM removal is enabled" end="0" id="bpm_pattern_5" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="BPM_PATTERN_6" description="" id="BPM_PATTERN_6" offset="0xC8" width="32">
+    
+  <bitfield begin="31" description="BPM pattern [223:192]: Specifies the BPM pattern to be used to multiply the input samples if BPM removal is enabled" end="0" id="bpm_pattern_6" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="BPM_PATTERN_7" description="" id="BPM_PATTERN_7" offset="0xCC" width="32">
+    
+  <bitfield begin="31" description="BPM pattern[255:224]: Specifies the BPM pattern to be used to multiply the input samples if BPM removal is enabled" end="0" id="bpm_pattern_7" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="BPM_RATE" description="" id="BPM_RATE" offset="0xD0" width="32">
+    
+  <bitfield begin="9" description="BPM rate: Specifies the number of input samples corresponding to each BPM bit. Minimum valid value for this register is 1." end="0" id="bpm_rate" rwaccess="RW" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="PARAM_DONE_SET_STATUS_0" description="" id="PARAM_DONE_SET_STATUS_0" offset="0xD4" width="32">
+    
+  <bitfield begin="31" description="Parameter-set done status[31:0]: This read-only status register can be used by the main processor to see which parameter-sets are complete that led to the interrupt to the main processor. The individual bits in this 64-bit status register indicate which of the 64 parameter-sets have completed." end="0" id="param_done_set_status_0" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="PARAM_DONE_SET_STATUS_1" description="" id="PARAM_DONE_SET_STATUS_1" offset="0xD8" width="32">
+    
+  <bitfield begin="31" description="Parameter-set done status[63:32]: This read-only status register can be used by the main processor to see which parameter-sets are complete that led to the interrupt to the main processor. The individual bits in this 64-bit status register indicate which of the 64 parameter-sets have completed." end="0" id="param_done_set_status_1" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="PARAM_DONE_CLR_0" description="" id="PARAM_DONE_CLR_0" offset="0xDC" width="32">
+    
+  <bitfield begin="31" description="Status bits in PARAM_DONE_SET_STATUS are not automatically cleared, but they can be individually cleared by writing to PARAM_DONE_CLR. It is a Self clearing bit" end="0" id="param_done_status_clr_0" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="PARAM_DONE_CLR_1" description="" id="PARAM_DONE_CLR_1" offset="0xE0" width="32">
+    
+  <bitfield begin="31" description="Status bits in PARAM_DONE_SET_STATUS are not automatically cleared, but they can be individually cleared by writing to PARAM_DONE_CLR. It is a Self clearing bit" end="0" id="param_done_status_clr_1" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRIGGER_SET_STATUS_0" description="" id="TRIGGER_SET_STATUS_0" offset="0xE4" width="32">
+    
+  <bitfield begin="31" description="Debug register for trigger status[31:0]: This is a read-only status register, which indicates the trigger status of the accelerator, i.e., whether a specific DMA trigger or a CSI or a SW trigger was ever received (refer TRIGMODE in HW_ACC_PARAM register set). The mapping for 32 bits is as given below: {DMA2HWA_TRIGGER[31:0]}" end="0" id="trigger_set_status_0" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRIGGER_SET_STATUS_1" description="" id="TRIGGER_SET_STATUS_1" offset="0xE8" width="32">
+    
+  <bitfield begin="31" description="Debug register for trigger status[63:32]: This is a read-only status register, which indicates the trigger status of the accelerator, i.e., whether a specific DMA trigger or a CSI or a SW trigger was ever received (refer TRIGMODE in HW_ACC_PARAM register set). The mapping for 32 bits is as given below: {4'b0,CSI2A_FRAME_START[1:0],CSI2A_LINE_END[7:0],CSI2B_FRAME_START[1:0],CSI2B_LINE_END[7:0],FW2HWA_TRIGGER_CS,FW2HWA_TRIGGER_1,3'b0,FW2HWA_TRIGGER_0,1'b1}" end="0" id="trigger_set_status_1" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRIGGER_SET_IN_CLR_0" description="" id="TRIGGER_SET_IN_CLR_0" offset="0xEC" width="32">
+    
+  <bitfield begin="0" description="Clear trigger_set_status : This register-bit when set clears the trigger status register TRIGGER_SET_STATUS_0 described above It   s a Self clearing bit" end="0" id="trigger_set_in_clr_0" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="TRIGGER_SET_IN_CLR_1" description="" id="TRIGGER_SET_IN_CLR_1" offset="0xF0" width="32">
+    
+  <bitfield begin="0" description="Clear trigger_set_status : This register-bit when set clears the trigger status register TRIGGER_SET_STATUS_1 described above It   s a Self clearing bit" end="0" id="trigger_set_in_clr_1" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_RESET_SW" description="" id="DC_EST_RESET_SW" offset="0xF4" width="32">
+    
+  <bitfield begin="0" description="Reset for all  DC estimation accumulators It   s a Self clearing bit" end="0" id="dc_est_reset_sw" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_CTRL" description="" id="DC_EST_CTRL" offset="0xF8" width="32">
+    
+  <bitfield begin="19" description="Programmable shift applied to all 12 accumulator outputs. Cannot be bypassed.  Output shifted by 2^(8 + 6+DCEST_SHIFT).  For DCEST_SHIFT = 15 also gives 2^(28)  and not 29 (saturate at 28)" end="16" id="dc_est_shift" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="8" description="9-bit scale applied to all accumulators.  Multiplies the accumulator output by DCEST_SCALE/256.This is followed by right shift and truncation.  Default value is 256 giving a scale of 1.0. Setting it to 128, gives a scale of 0.5" end="0" id="dc_est_scale" rwaccess="RW" width="9"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_I_0_VAL" description="" id="DC_EST_I_0_VAL" offset="0xFC" width="32">
+    
+  <bitfield begin="23" description="This read only  register provide the DC estimates    I  for  bcnt= 0" end="0" id="dc_est_i_0_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_I_1_VAL" description="" id="DC_EST_I_1_VAL" offset="0x100" width="32">
+    
+  <bitfield begin="23" description="This read only  register provide the DC estimates    I  for  bcnt= 1" end="0" id="dc_est_i_1_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_I_2_VAL" description="" id="DC_EST_I_2_VAL" offset="0x104" width="32">
+    
+  <bitfield begin="23" description="This read only  register provide the DC estimates    I  for  bcnt= 2" end="0" id="dc_est_i_2_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_I_3_VAL" description="" id="DC_EST_I_3_VAL" offset="0x108" width="32">
+    
+  <bitfield begin="23" description="This read only  register provide the DC estimates    I  for  bcnt= 3" end="0" id="dc_est_i_3_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_I_4_VAL" description="" id="DC_EST_I_4_VAL" offset="0x10C" width="32">
+    
+  <bitfield begin="23" description="This read only  register provide the DC estimates    I  for  bcnt= 4" end="0" id="dc_est_i_4_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_I_5_VAL" description="" id="DC_EST_I_5_VAL" offset="0x110" width="32">
+    
+  <bitfield begin="23" description="This read only  register provide the DC estimates    I  for  bcnt= 5" end="0" id="dc_est_i_5_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_I_6_VAL" description="" id="DC_EST_I_6_VAL" offset="0x114" width="32">
+    
+  <bitfield begin="23" description="This read only  register provide the DC estimates    I  for  bcnt= 6" end="0" id="dc_est_i_6_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_I_7_VAL" description="" id="DC_EST_I_7_VAL" offset="0x118" width="32">
+    
+  <bitfield begin="23" description="This read only  register provide the DC estimates    I  for  bcnt= 7" end="0" id="dc_est_i_7_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_Q_0_VAL" description="" id="DC_EST_Q_0_VAL" offset="0x12C" width="32">
+    
+  <bitfield begin="23" description="This  read only register provide the DC estimates    Q for  bcnt= 0" end="0" id="dc_est_q_0_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_Q_1_VAL" description="" id="DC_EST_Q_1_VAL" offset="0x130" width="32">
+    
+  <bitfield begin="23" description="This  read only register provide the DC estimates    Q for  bcnt= 1" end="0" id="dc_est_q_1_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_Q_2_VAL" description="" id="DC_EST_Q_2_VAL" offset="0x134" width="32">
+    
+  <bitfield begin="23" description="This  read only register provide the DC estimates    Q for  bcnt= 2" end="0" id="dc_est_q_2_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_Q_3_VAL" description="" id="DC_EST_Q_3_VAL" offset="0x138" width="32">
+    
+  <bitfield begin="23" description="This  read only register provide the DC estimates    Q for  bcnt= 3" end="0" id="dc_est_q_3_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_Q_4_VAL" description="" id="DC_EST_Q_4_VAL" offset="0x13C" width="32">
+    
+  <bitfield begin="23" description="This  read only register provide the DC estimates    Q for  bcnt= 4" end="0" id="dc_est_q_4_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_Q_5_VAL" description="" id="DC_EST_Q_5_VAL" offset="0x140" width="32">
+    
+  <bitfield begin="23" description="This  read only register provide the DC estimates    Q for  bcnt= 5" end="0" id="dc_est_q_5_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_Q_6_VAL" description="" id="DC_EST_Q_6_VAL" offset="0x144" width="32">
+    
+  <bitfield begin="23" description="This  read only register provide the DC estimates    Q for  bcnt= 6" end="0" id="dc_est_q_6_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_Q_7_VAL" description="" id="DC_EST_Q_7_VAL" offset="0x148" width="32">
+    
+  <bitfield begin="23" description="This  read only register provide the DC estimates    Q for  bcnt= 7" end="0" id="dc_est_q_7_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_0_VAL_LSB" description="" id="DC_ACC_I_0_VAL_LSB" offset="0x15C" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator  I  channel value for  bcnt=0" end="0" id="dc_acc_i_0_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_0_VAL_MSB" description="" id="DC_ACC_I_0_VAL_MSB" offset="0x160" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator I channel value for  bcnt=0" end="0" id="dc_acc_i_0_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_1_VAL_LSB" description="" id="DC_ACC_I_1_VAL_LSB" offset="0x164" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator I channel value for  bcnt=1" end="0" id="dc_acc_i_1_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_1_VAL_MSB" description="" id="DC_ACC_I_1_VAL_MSB" offset="0x168" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator I  channel value for  bcnt=1" end="0" id="dc_acc_i_1_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_2_VAL_LSB" description="" id="DC_ACC_I_2_VAL_LSB" offset="0x16C" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator I channel value for  bcnt=2" end="0" id="dc_acc_i_2_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_2_VAL_MSB" description="" id="DC_ACC_I_2_VAL_MSB" offset="0x170" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator I channel value for  bcnt=2" end="0" id="dc_acc_i_2_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_3_VAL_LSB" description="" id="DC_ACC_I_3_VAL_LSB" offset="0x174" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator I channel  value for  bcnt=3" end="0" id="dc_acc_i_3_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_3_VAL_MSB" description="" id="DC_ACC_I_3_VAL_MSB" offset="0x178" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator I channel  value for  bcnt=3" end="0" id="dc_acc_i_3_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_4_VAL_LSB" description="" id="DC_ACC_I_4_VAL_LSB" offset="0x17C" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator I channel  value for  bcnt=4" end="0" id="dc_acc_i_4_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_4_VAL_MSB" description="" id="DC_ACC_I_4_VAL_MSB" offset="0x180" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator I channel  value for  bcnt=4" end="0" id="dc_acc_i_4_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_5_VAL_LSB" description="" id="DC_ACC_I_5_VAL_LSB" offset="0x184" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator I channel  value for  bcnt=5" end="0" id="dc_acc_i_5_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_5_VAL_MSB" description="" id="DC_ACC_I_5_VAL_MSB" offset="0x188" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator I channel  value for  bcnt=5" end="0" id="dc_acc_i_5_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_6_VAL_LSB" description="" id="DC_ACC_I_6_VAL_LSB" offset="0x18C" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator I channel  value for  bcnt=6" end="0" id="dc_acc_i_6_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_6_VAL_MSB" description="" id="DC_ACC_I_6_VAL_MSB" offset="0x190" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator I channel  value for  bcnt=6" end="0" id="dc_acc_i_6_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_7_VAL_LSB" description="" id="DC_ACC_I_7_VAL_LSB" offset="0x194" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator I channel  value for  bcnt=7" end="0" id="dc_acc_i_7_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_I_7_VAL_MSB" description="" id="DC_ACC_I_7_VAL_MSB" offset="0x198" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator I channel  value for  bcnt=7" end="0" id="dc_acc_i_7_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_0_VAL_LSB" description="" id="DC_ACC_Q_0_VAL_LSB" offset="0x1BC" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator  Q  channel value for  bcnt=0" end="0" id="dc_acc_q_0_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_0_VAL_MSB" description="" id="DC_ACC_Q_0_VAL_MSB" offset="0x1C0" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator  Q channel value for  bcnt=0" end="0" id="dc_acc_q_0_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_1_VAL_LSB" description="" id="DC_ACC_Q_1_VAL_LSB" offset="0x1C4" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator Q channel value for  bcnt=1" end="0" id="dc_acc_q_1_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_1_VAL_MSB" description="" id="DC_ACC_Q_1_VAL_MSB" offset="0x1C8" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator Q channel value for  bcnt=1" end="0" id="dc_acc_q_1_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_2_VAL_LSB" description="" id="DC_ACC_Q_2_VAL_LSB" offset="0x1CC" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator Q channel value for  bcnt=2" end="0" id="dc_acc_q_2_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_2_VAL_MSB" description="" id="DC_ACC_Q_2_VAL_MSB" offset="0x1D0" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator Q channel value for  bcnt=2" end="0" id="dc_acc_q_2_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_3_VAL_LSB" description="" id="DC_ACC_Q_3_VAL_LSB" offset="0x1D4" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator Q channel  value for  bcnt=3" end="0" id="dc_acc_q_3_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_3_VAL_MSB" description="" id="DC_ACC_Q_3_VAL_MSB" offset="0x1D8" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator Q channel  value for  bcnt=3" end="0" id="dc_acc_q_3_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_4_VAL_LSB" description="" id="DC_ACC_Q_4_VAL_LSB" offset="0x1DC" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator Q channel  value for  bcnt=4" end="0" id="dc_acc_q_4_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_4_VAL_MSB" description="" id="DC_ACC_Q_4_VAL_MSB" offset="0x1E0" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator Q channel  value for  bcnt=4" end="0" id="dc_acc_q_4_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_5_VAL_LSB" description="" id="DC_ACC_Q_5_VAL_LSB" offset="0x1E4" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator Q channel  value for  bcnt=5" end="0" id="dc_acc_q_5_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_5_VAL_MSB" description="" id="DC_ACC_Q_5_VAL_MSB" offset="0x1E8" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator Q channel  value for  bcnt=5" end="0" id="dc_acc_q_5_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_6_VAL_LSB" description="" id="DC_ACC_Q_6_VAL_LSB" offset="0x1EC" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator Q channel  value for  bcnt=6" end="0" id="dc_acc_q_6_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_6_VAL_MSB" description="" id="DC_ACC_Q_6_VAL_MSB" offset="0x1F0" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator Q channel  value for  bcnt=6" end="0" id="dc_acc_q_6_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_7_VAL_LSB" description="" id="DC_ACC_Q_7_VAL_LSB" offset="0x1F4" width="32">
+    
+  <bitfield begin="31" description="This read only register provide the LSB 32 bits  value of  DC accumulator Q channel  value for  bcnt=7" end="0" id="dc_acc_q_7_val_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_Q_7_VAL_MSB" description="" id="DC_ACC_Q_7_VAL_MSB" offset="0x1F8" width="32">
+    
+  <bitfield begin="3" description="This read only register provide the MSB 4 bits  value of  DC accumulator Q channel  value for  bcnt=7" end="0" id="dc_acc_q_7_val_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_ACC_CLIP_STATUS" description="" id="DC_ACC_CLIP_STATUS" offset="0x21C" width="32">
+    
+  <bitfield begin="11" description="This register contains the clip status of both I/Q of DC accumulators 0 to 11" end="0" id="dc_acc_clip_status" rwaccess="R" width="12"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_CLIP_STATUS" description="" id="DC_EST_CLIP_STATUS" offset="0x220" width="32">
+    
+  <bitfield begin="11" description="This register contains the clip status of DC estimates (both I &amp; Q combined)" end="0" id="dc_est_clip_status" rwaccess="R" width="12"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_I0_SW" description="" id="DC_I0_SW" offset="0x224" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC I value(for bcnt =0 ) used in DC subtraction" end="0" id="dc_i0_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_I1_SW" description="" id="DC_I1_SW" offset="0x228" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC I value(for bcnt =1) used in DC subtraction" end="0" id="dc_i1_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_I2_SW" description="" id="DC_I2_SW" offset="0x22C" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC I value(for bcnt =2 ) used in DC subtraction" end="0" id="dc_i2_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_I3_SW" description="" id="DC_I3_SW" offset="0x230" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC I value(for bcnt =3) used in DC subtraction" end="0" id="dc_i3_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_I4_SW" description="" id="DC_I4_SW" offset="0x234" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC I value(for bcnt =4 ) used in DC subtraction" end="0" id="dc_i4_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_I5_SW" description="" id="DC_I5_SW" offset="0x238" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC I value(for bcnt =5 ) used in DC subtraction" end="0" id="dc_i5_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_I6_SW" description="" id="DC_I6_SW" offset="0x23C" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC I value(for bcnt =6 ) used in DC subtraction" end="0" id="dc_i6_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_I7_SW" description="" id="DC_I7_SW" offset="0x240" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC I value(for bcnt =7 ) used in DC subtraction" end="0" id="dc_i7_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_Q0_SW" description="" id="DC_Q0_SW" offset="0x254" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC Q value(for bcnt =0 ) used in DC subtraction" end="0" id="dc_q0_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_Q1_SW" description="" id="DC_Q1_SW" offset="0x258" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC Q value(for bcnt =1) used in DC subtraction" end="0" id="dc_q1_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_Q2_SW" description="" id="DC_Q2_SW" offset="0x25C" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC Q value(for bcnt =2 ) used in DC subtraction" end="0" id="dc_q2_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_Q3_SW" description="" id="DC_Q3_SW" offset="0x260" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC Q value(for bcnt =3) used in DC subtraction" end="0" id="dc_q3_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_Q4_SW" description="" id="DC_Q4_SW" offset="0x264" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC Q value(for bcnt =4 ) used in DC subtraction" end="0" id="dc_q4_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_Q5_SW" description="" id="DC_Q5_SW" offset="0x268" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC Q value(for bcnt =5 ) used in DC subtraction" end="0" id="dc_q5_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_Q6_SW" description="" id="DC_Q6_SW" offset="0x26C" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC Q value(for bcnt =6 ) used in DC subtraction" end="0" id="dc_q6_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_Q7_SW" description="" id="DC_Q7_SW" offset="0x270" width="32">
+    
+  <bitfield begin="23" description="SW programmed DC Q value(for bcnt =7 ) used in DC subtraction" end="0" id="dc_q7_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_SUB_CLIP" description="" id="DC_SUB_CLIP" offset="0x284" width="32">
+    
+  <bitfield begin="0" description="Indicates the DC subtraction clip status" end="0" id="DC_SUB_CLIP" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_EST_CTRL_PROFILE2" description="" id="DC_EST_CTRL_PROFILE2" offset="0x288" width="32">
+    
+  <bitfield begin="19" description="Programmable shift applied to all accumulator outputs of second chirp profile. Cannot be bypassed.  Output shifted by 2^(8 + 6+DCEST_SHIFT).  For DCEST_SHIFT = 15 also gives 2^(28)  and not 29 (saturate at 28)" end="16" id="dc_est_shift_profile2" rwaccess="RW" width="4"></bitfield>
+    
+  <bitfield begin="8" description="9-bit scale applied to all accumulators for second chirp profile.  Multiplies the accumulator output by DCEST_SCALE/256.This is followed by right shift and truncation.  Default value is 256 giving a scale of 1.0. Setting it to 128, gives a scale of 0.5" end="0" id="dc_est_scale_profile2" rwaccess="RW" width="9"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_RESERVED_3" description="" id="DC_RESERVED_3" offset="0x28C" width="32">
+    
+  <bitfield begin="31" description="Reserved for future addition" end="0" id="dc_sub_reserved_3" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_RESERVED_4" description="" id="DC_RESERVED_4" offset="0x290" width="32">
+    
+  <bitfield begin="31" description="Reserved for future addition" end="0" id="dc_sub_reserved_4" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DC_RESERVED_5" description="" id="DC_RESERVED_5" offset="0x294" width="32">
+    
+  <bitfield begin="31" description="Reserved for future addition" end="0" id="dc_sub_reserved_5" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_RESET_SW" description="" id="INTF_STATS_RESET_SW" offset="0x298" width="32">
+    
+  <bitfield begin="0" description="SW reset for Interference stats module. It   s a self clearing bit." end="0" id="intf_stats_reset_sw" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_CTRL" description="" id="INTF_STATS_CTRL" offset="0x29C" width="32">
+    
+  <bitfield begin="31" description="Unsigned scaler (5.3) applied to INTERFSUM_MAGDIFFn from  interference statistics block.  Default 8= scale of 1.0" end="24" id="intf_stats_magdiff_scale" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Unsigned scaler (5.3) applied to  INTERFSUM_MAGn from interference statistics block. Default 8= scale of 1.0" end="16" id="intf_stats_mag_scale" rwaccess="RW" width="8"></bitfield>
+    
+  <bitfield begin="6" description="Right shift applied after scaling - 2^(6+INTERFSUM_MAGDIFF_SHIFT). Can   t be more than 2^(12)." end="4" id="intf_stats_magdiff_shift" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="2" description="Right shift applied after scaling - 2^(6+INTERSUM_MAGS_SHIFT). Can   t be more than 2^(12)." end="0" id="intf_stats_mag_shift" rwaccess="RW" width="3"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAG0_VAL" description="" id="INTF_LOC_THRESH_MAG0_VAL" offset="0x2A0" width="32">
+    
+  <bitfield begin="23" description="Interference magnitude threshold value from Interference stats module ( read only) for bcnt =0" end="0" id="intf_loc_thresh_mag0_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAG1_VAL" description="" id="INTF_LOC_THRESH_MAG1_VAL" offset="0x2A4" width="32">
+    
+  <bitfield begin="23" description="Interference magnitude threshold value from Interference stats module ( read only) for bcnt =1" end="0" id="intf_loc_thresh_mag1_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAG2_VAL" description="" id="INTF_LOC_THRESH_MAG2_VAL" offset="0x2A8" width="32">
+    
+  <bitfield begin="23" description="Interference magnitude threshold value from Interference stats module ( read only) for bcnt =2" end="0" id="intf_loc_thresh_mag2_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAG3_VAL" description="" id="INTF_LOC_THRESH_MAG3_VAL" offset="0x2AC" width="32">
+    
+  <bitfield begin="23" description="Interference magnitude threshold value from Interference stats module ( read only) for bcnt =3" end="0" id="intf_loc_thresh_mag3_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAGDIFF0_VAL" description="" id="INTF_LOC_THRESH_MAGDIFF0_VAL" offset="0x2D0" width="32">
+    
+  <bitfield begin="23" description="Interference magnitude difference threshold value from Interference stats module ( read only) for bcnt =0" end="0" id="intf_loc_thresh_magdiff0_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAGDIFF1_VAL" description="" id="INTF_LOC_THRESH_MAGDIFF1_VAL" offset="0x2D4" width="32">
+    
+  <bitfield begin="23" description="Interference magnitude difference threshold value from Interference stats module ( read only) for bcnt =1" end="0" id="intf_loc_thresh_magdiff1_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAGDIFF2_VAL" description="" id="INTF_LOC_THRESH_MAGDIFF2_VAL" offset="0x2D8" width="32">
+    
+  <bitfield begin="23" description="Interference magnitude difference threshold value from Interference stats module ( read only) for bcnt =2" end="0" id="intf_loc_thresh_magdiff2_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAGDIFF3_VAL" description="" id="INTF_LOC_THRESH_MAGDIFF3_VAL" offset="0x2DC" width="32">
+    
+  <bitfield begin="23" description="Interference magnitude difference threshold value from Interference stats module ( read only) for bcnt =3" end="0" id="intf_loc_thresh_magdiff3_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_COUNT_ALL_CHIRP" description="" id="INTF_LOC_COUNT_ALL_CHIRP" offset="0x300" width="32">
+    
+  <bitfield begin="11" description="Number of samples that exceeded the threshold in a chirp" end="0" id="intf_loc_count_all_chirp" rwaccess="R" width="12"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_COUNT_ALL_FRAME" description="" id="INTF_LOC_COUNT_ALL_FRAME" offset="0x304" width="32">
+    
+  <bitfield begin="19" description="Number of samples that exceeded the threshold in a frame" end="0" id="intf_loc_count_all_frame" rwaccess="R" width="20"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAG_ACC_0_LSB" description="" id="INTF_STATS_MAG_ACC_0_LSB" offset="0x308" width="32">
+    
+  <bitfield begin="31" description="This read only register contains the accumulator value of  interference magnitude(LSB 32 bits)  for bcnt =  0" end="0" id="intf_stats_mag_acc_0_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAG_ACC_0_MSB" description="" id="INTF_STATS_MAG_ACC_0_MSB" offset="0x30C" width="32">
+    
+  <bitfield begin="3" description="This read only register contains the accumulator value of  interference magnitude(MSB 4 bits)  for bcnt =  0" end="0" id="intf_stats_mag_acc_0_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAG_ACC_1_LSB" description="" id="INTF_STATS_MAG_ACC_1_LSB" offset="0x310" width="32">
+    
+  <bitfield begin="31" description="This read only contains the accumulator value of interference magnitude (LSB 32 bits) for bcnt =  1" end="0" id="intf_stats_mag_acc_1_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAG_ACC_1_MSB" description="" id="INTF_STATS_MAG_ACC_1_MSB" offset="0x314" width="32">
+    
+  <bitfield begin="3" description="This read only contains the accumulator value of interference magnitude (MSB 4 bits) for bcnt =  1" end="0" id="intf_stats_mag_acc_1_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAG_ACC_2_LSB" description="" id="INTF_STATS_MAG_ACC_2_LSB" offset="0x318" width="32">
+    
+  <bitfield begin="31" description="This read only contains the accumulator value of interference magnitude (LSB 32 bits) for bcnt =  2" end="0" id="intf_stats_mag_acc_2_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAG_ACC_2_MSB" description="" id="INTF_STATS_MAG_ACC_2_MSB" offset="0x31C" width="32">
+    
+  <bitfield begin="3" description="This read only register contains the accumulator value of interference magnitude (MSB 4 bits) for bcnt =  2" end="0" id="intf_stats_mag_acc_2_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAG_ACC_3_LSB" description="" id="INTF_STATS_MAG_ACC_3_LSB" offset="0x320" width="32">
+    
+  <bitfield begin="31" description="This read only register contains the accumulator value of the  interference magnitude( for LSB 32 bits) for bcnt =  3" end="0" id="intf_stats_mag_acc_3_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAG_ACC_3_MSB" description="" id="INTF_STATS_MAG_ACC_3_MSB" offset="0x324" width="32">
+    
+  <bitfield begin="3" description="This read only register contains the accumulator value of the  interference magnitude(for MSB 4 bits) for bcnt =  3" end="0" id="intf_stats_mag_acc_3_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAGDIFF_ACC_0_LSB" description="" id="INTF_STATS_MAGDIFF_ACC_0_LSB" offset="0x368" width="32">
+    
+  <bitfield begin="31" description="This read only register contains the accumulator value of the  interference magnitude difference (LSB 32 bits)  for bcnt =  0" end="0" id="intf_stats_magdiff_acc_0_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAGDIFF_ACC_0_MSB" description="" id="INTF_STATS_MAGDIFF_ACC_0_MSB" offset="0x36C" width="32">
+    
+  <bitfield begin="3" description="This read only register contains the accumulator value of the  interference magnitude difference (MSB 4 bits)  for bcnt =  0" end="0" id="intf_stats_magdiff_acc_0_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAGDIFF_ACC_1_LSB" description="" id="INTF_STATS_MAGDIFF_ACC_1_LSB" offset="0x370" width="32">
+    
+  <bitfield begin="31" description="This read only register contains the accumulator value of the  interference magnitude difference (LSB 32 bits)  for bcnt =  1" end="0" id="intf_stats_magdiff_acc_1_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAGDIFF_ACC_1_MSB" description="" id="INTF_STATS_MAGDIFF_ACC_1_MSB" offset="0x374" width="32">
+    
+  <bitfield begin="3" description="This read only register contains the accumulator value of the  interference magnitude difference (MSB 4 bits)  for bcnt =  1" end="0" id="intf_stats_magdiff_acc_1_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAGDIFF_ACC_2_LSB" description="" id="INTF_STATS_MAGDIFF_ACC_2_LSB" offset="0x378" width="32">
+    
+  <bitfield begin="31" description="This read only register contains the accumulator value of the  interference magnitude difference (LSB 32 bits)  for bcnt =  2" end="0" id="intf_stats_magdiff_acc_2_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAGDIFF_ACC_2_MSB" description="" id="INTF_STATS_MAGDIFF_ACC_2_MSB" offset="0x37C" width="32">
+    
+  <bitfield begin="3" description="This read only register contains the accumulator value of the  interference magnitude  difference (MSB 4 bits)  for bcnt =  2" end="0" id="intf_stats_magdiff_acc_2_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAGDIFF_ACC_3_LSB" description="" id="INTF_STATS_MAGDIFF_ACC_3_LSB" offset="0x380" width="32">
+    
+  <bitfield begin="31" description="This read only register contains the accumulator value of the  interference magnitude  difference (LSB 32 bits)  for bcnt =  3" end="0" id="intf_stats_magdiff_acc_3_lsb" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_MAGDIFF_ACC_3_MSB" description="" id="INTF_STATS_MAGDIFF_ACC_3_MSB" offset="0x384" width="32">
+    
+  <bitfield begin="3" description="This read only register contains the accumulator value of the  interference magnitude difference (MSB 4 bits)  for bcnt =  3" end="0" id="intf_stats_magdiff_acc_3_msb" rwaccess="R" width="4"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAG0_SW" description="" id="INTF_LOC_THRESH_MAG0_SW" offset="0x3C8" width="32">
+    
+  <bitfield begin="23" description="SW programmed interface threshold magnitude for bcnt=0" end="0" id="intf_loc_thresh_mag0_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAG1_SW" description="" id="INTF_LOC_THRESH_MAG1_SW" offset="0x3CC" width="32">
+    
+  <bitfield begin="23" description="SW programmed interface threshold magnitude for bcnt=1" end="0" id="intf_loc_thresh_mag1_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAG2_SW" description="" id="INTF_LOC_THRESH_MAG2_SW" offset="0x3D0" width="32">
+    
+  <bitfield begin="23" description="SW programmed interface threshold magnitude for bcnt=2" end="0" id="intf_loc_thresh_mag2_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAG3_SW" description="" id="INTF_LOC_THRESH_MAG3_SW" offset="0x3D4" width="32">
+    
+  <bitfield begin="23" description="SW programmed interface threshold magnitude for bcnt=3" end="0" id="intf_loc_thresh_mag3_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAGDIFF0_SW" description="" id="INTF_LOC_THRESH_MAGDIFF0_SW" offset="0x3F8" width="32">
+    
+  <bitfield begin="23" description="SW programmed interface threshold magnitude difference for bcnt=0" end="0" id="intf_loc_thresh_magdiff0_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAGDIFF1_SW" description="" id="INTF_LOC_THRESH_MAGDIFF1_SW" offset="0x3FC" width="32">
+    
+  <bitfield begin="23" description="SW programmed interface threshold magnitude difference for bcnt=1" end="0" id="intf_loc_thresh_magdiff1_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAGDIFF2_SW" description="" id="INTF_LOC_THRESH_MAGDIFF2_SW" offset="0x400" width="32">
+    
+  <bitfield begin="23" description="SW programmed interface threshold magnitude difference for bcnt=2" end="0" id="intf_loc_thresh_magdiff2_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_LOC_THRESH_MAGDIFF3_SW" description="" id="INTF_LOC_THRESH_MAGDIFF3_SW" offset="0x404" width="32">
+    
+  <bitfield begin="23" description="SW programmed interface threshold magnitude difference for bcnt=3" end="0" id="intf_loc_thresh_magdiff3_sw" rwaccess="RW" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_ACC_CLIP_STATUS" description="" id="INTF_STATS_ACC_CLIP_STATUS" offset="0x428" width="32">
+    
+  <bitfield begin="27" description="Interference magnitue difference accumulator Clip status" end="16" id="intf_stats_magdiff_accumulator_clip_status" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="11" description="Interference magnitue  accumulator Clip status" end="0" id="intf_stats_mag_accumulator_clip_status" rwaccess="R" width="12"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_THRESH_CLIP_STATUS" description="" id="INTF_STATS_THRESH_CLIP_STATUS" offset="0x42C" width="32">
+    
+  <bitfield begin="27" description="Interference magnitude difference  threshold  Clip status" end="16" id="intf_stats_thresh_magdiff_clip_status" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="11" description="Interference magnitude threshold  Clip status" end="0" id="intf_stats_thresh_mag_clip_status" rwaccess="R" width="12"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_MITG_WINDOW_PARAM_0" description="" id="INTF_MITG_WINDOW_PARAM_0" offset="0x430" width="32">
+    
+  <bitfield begin="4" description="This is a programmable array of window parameters. Each window parameter is an unsigned 5 bit integer. The total length of the array is 5.   The BFR of the array is given by the matlab code : val = round(hanning(12)*32) INTF_MITG_WINDOW_PARAM = val(1:5);" end="0" id="intf_mitg_window_param_0" rwaccess="RW" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_MITG_WINDOW_PARAM_1" description="" id="INTF_MITG_WINDOW_PARAM_1" offset="0x434" width="32">
+    
+  <bitfield begin="4" description="Refer description of INTF_MITG_WINDOW_PARAM_0" end="0" id="intf_mitg_window_param_1" rwaccess="RW" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_MITG_WINDOW_PARAM_2" description="" id="INTF_MITG_WINDOW_PARAM_2" offset="0x438" width="32">
+    
+  <bitfield begin="4" description="Refer description of INTF_MITG_WINDOW_PARAM_0" end="0" id="intf_mitg_window_param_2" rwaccess="RW" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_MITG_WINDOW_PARAM_3" description="" id="INTF_MITG_WINDOW_PARAM_3" offset="0x43C" width="32">
+    
+  <bitfield begin="4" description="Refer description of INTF_MITG_WINDOW_PARAM_0" end="0" id="intf_mitg_window_param_3" rwaccess="RW" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_MITG_WINDOW_PARAM_4" description="" id="INTF_MITG_WINDOW_PARAM_4" offset="0x440" width="32">
+    
+  <bitfield begin="4" description="Refer description of INTF_MITG_WINDOW_PARAM_0" end="0" id="intf_mitg_window_param_4" rwaccess="RW" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_SUM_MAG_VAL" description="" id="INTF_STATS_SUM_MAG_VAL" offset="0x444" width="32">
+    
+  <bitfield begin="23" description="Indicates the sum of mag values ; Only Configured BCNT mag values are added" end="0" id="intf_stats_sum_mag_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_SUM_MAG_VAL_CLIP_STATUS" description="" id="INTF_STATS_SUM_MAG_VAL_CLIP_STATUS" offset="0x448" width="32">
+    
+  <bitfield begin="0" description="Indicates the clip status of sum of mag values" end="0" id="intf_stats_sum_mag_val_clip_status" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_SUM_MAGDIFF_VAL" description="" id="INTF_STATS_SUM_MAGDIFF_VAL" offset="0x44C" width="32">
+    
+  <bitfield begin="23" description="Indicates the sum of magdiff values ; Only Configured BCNT magdiff values are added" end="0" id="intf_stats_sum_magdiff_val" rwaccess="R" width="24"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTF_STATS_SUM_MAGDIFF_VAL_CLIP_STATUS" description="" id="INTF_STATS_SUM_MAGDIFF_VAL_CLIP_STATUS" offset="0x450" width="32">
+    
+  <bitfield begin="0" description="indicates the clip status of sum of magdiff values" end="0" id="intf_stats_sum_magdiff_val_clip_status" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="INTERF_RESERVED_5" description="" id="INTERF_RESERVED_5" offset="0x454" width="32">
+    
+  <bitfield begin="31" description="Reserved for future addition" end="0" id="interf_reserved_5" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="ICMULT_SCALE0" description="" id="ICMULT_SCALE0" offset="0x458" width="32">
+    
+  <bitfield begin="20" description="Complex scalars used in CMULT_MODE = 0101, In CMULT_MODE : 0101 , The input samples are multiplied by a different complex scalar per-iteration based on REG_BCNT in complex inputs mode." end="0" id="icmult_scale0" rwaccess="RW" width="21"></bitfield>
+  </register>
+  
+  
+  <register acronym="ICMULT_SCALE1" description="" id="ICMULT_SCALE1" offset="0x45C" width="32">
+    
+  <bitfield begin="20" description="Complex scalars used in CMULT_MODE = 0101, In CMULT_MODE : 0101 , The input samples are multiplied by a different complex scalar per-iteration based on REG_BCNT in complex inputs mode." end="0" id="icmult_scale1" rwaccess="RW" width="21"></bitfield>
+  </register>
+  
+  
+  <register acronym="ICMULT_SCALE2" description="" id="ICMULT_SCALE2" offset="0x460" width="32">
+    
+  <bitfield begin="20" description="Complex scalars used in CMULT_MODE = 0101, In CMULT_MODE : 0101 , The input samples are multiplied by a different complex scalar per-iteration based on REG_BCNT in complex inputs mode." end="0" id="icmult_scale2" rwaccess="RW" width="21"></bitfield>
+  </register>
+  
+  
+  <register acronym="ICMULT_SCALE3" description="" id="ICMULT_SCALE3" offset="0x464" width="32">
+    
+  <bitfield begin="20" description="Complex scalars used in CMULT_MODE = 0101, In CMULT_MODE : 0101 , The input samples are multiplied by a different complex scalar per-iteration based on REG_BCNT in complex inputs mode." end="0" id="icmult_scale3" rwaccess="RW" width="21"></bitfield>
+  </register>
+  
+  
+  <register acronym="QCMULT_SCALE0" description="" id="QCMULT_SCALE0" offset="0x488" width="32">
+    
+  <bitfield begin="20" description="Complex scalars used in CMULT_MODE = 0101, In CMULT_MODE : 0101 , The input samples are multiplied by a different complex scalar per-iteration based on REG_BCNT in complex inputs mode." end="0" id="qcmult_scale0" rwaccess="RW" width="21"></bitfield>
+  </register>
+  
+  
+  <register acronym="QCMULT_SCALE1" description="" id="QCMULT_SCALE1" offset="0x48C" width="32">
+    
+  <bitfield begin="20" description="Complex scalars used in CMULT_MODE = 0101, In CMULT_MODE : 0101 , The input samples are multiplied by a different complex scalar per-iteration based on REG_BCNT in complex inputs mode." end="0" id="qcmult_scale1" rwaccess="RW" width="21"></bitfield>
+  </register>
+  
+  
+  <register acronym="QCMULT_SCALE2" description="" id="QCMULT_SCALE2" offset="0x490" width="32">
+    
+  <bitfield begin="20" description="Complex scalars used in CMULT_MODE = 0101, In CMULT_MODE : 0101 , The input samples are multiplied by a different complex scalar per-iteration based on REG_BCNT in complex inputs mode." end="0" id="qcmult_scale2" rwaccess="RW" width="21"></bitfield>
+  </register>
+  
+  
+  <register acronym="QCMULT_SCALE3" description="" id="QCMULT_SCALE3" offset="0x494" width="32">
+    
+  <bitfield begin="20" description="Complex scalars used in CMULT_MODE = 0101, In CMULT_MODE : 0101 , The input samples are multiplied by a different complex scalar per-iteration based on REG_BCNT in complex inputs mode." end="0" id="qcmult_scale3" rwaccess="RW" width="21"></bitfield>
+  </register>
+  
+  
+  <register acronym="TWID_INCR_DELTA_FRAC" description="" id="TWID_INCR_DELTA_FRAC" offset="0x4B8" width="32">
+    
+  <bitfield begin="9" description="Used in complex multiplier mode 10 Delta Fractional frequency increment per param-set  looping Instantaneous frequency is (TWIDINCR &lt;&lt; 10) +TWID_INCR_DELTA_ FRAC*c, c is current execution count of the parameter set." end="0" id="twid_incr_delta_frac" rwaccess="RW" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="TWID_INCR_DELTA_FRAC_RESET_SW" description="" id="TWID_INCR_DELTA_FRAC_RESET_SW" offset="0x4C0" width="32">
+    
+  <bitfield begin="0" description="This resets the param set counter used in Complex multiplier mode 10 .   It   s a Self clearing bit" end="0" id="twid_incr_delta_frac_reset_sw" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="TWID_INCR_DELTA_FRAC_CLIP_STATUS" description="" id="TWID_INCR_DELTA_FRAC_CLIP_STATUS" offset="0x4C4" width="32">
+    
+  <bitfield begin="0" description="Indicates the clip status for TWID_INCR_DELTA_FRAC accumulator" end="0" id="twid_incr_delta_frac_clip_status" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="CMULT_RESERVED_2" description="" id="CMULT_RESERVED_2" offset="0x4CC" width="32">
+    
+  <bitfield begin="31" description="Reserved for future addition" end="0" id="cmult_reserved_2" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="LFSR_SEED" description="" id="LFSR_SEED" offset="0x52C" width="32">
+    
+  <bitfield begin="28" description="Seed for LFSR (random pattern): For twiddle factor dithering, there is an LFSR that is used, whose seed value is loaded by writing to this 29-bit LFSRSEED register. The LFSRSEED register should be set to any non-zero value, say 0x1234567" end="0" id="lfsr_seed" rwaccess="RW" width="29"></bitfield>
+  </register>
+  
+  
+  <register acronym="LFSR_LOAD" description="" id="LFSR_LOAD" offset="0x530" width="32">
+    
+  <bitfield begin="0" description="Its self clearing bit . It should be set for loading the LFSR_SEED. It   s a self clearing bit" end="0" id="lfsr_load" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DITHER_TWID_EN" description="" id="DITHER_TWID_EN" offset="0x534" width="32">
+    
+  <bitfield begin="0" description="Twiddle factor dithering enable: This register-bit is used to enable and disable dithering of twiddle factors in the FFT. The twiddle factors are 24-bits wide (24-bits for each I and Q), but they are quantized to 21-bits before twiddle factor multiplication. This quantization is implemented with dithering on the LSB, to avoid periodic quantization pattern affecting SFDR performance of the FFT. TI recommends keeping this register bit set to 1 (for example, dithering enabled), with appropriate LSFR seed loaded (see the following)." end="0" id="dither_twid_en" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="FFT_CLIP" description="" id="FFT_CLIP" offset="0x538" width="32">
+    
+  <bitfield begin="13" description="FFT Clip Status (read-only): This is a read-only status register, which indicates any saturation/clipping events that have happened in the FFT butterfly stages. Note that each of the individual butterfly stages in the FFT can be programmed to either saturate the MSB or round the LSB. Whenever saturation of MSB is used in any stage, there is a possibility that that stage can saturate or clip samples. In that case, this saturation event is indicated in the corresponding bit in this status register, so that the Cortex-R4F processor can read it. If multiple FFTs are performed, this status register includes any saturation events happening in any of them. This status register can only be cleared by the R4F, by setting another single-bit register CLR_FFTCLIP, so that the saturation status indication gets cleared back to 0 and any subsequent saturation events can be freshly monitored. The second MSB of this register indicates clip status corresponding to the radix 3 butterfly.The MSB indicates the clip status corresponding to the conjugate combiner operation in real 2x mode." end="0" id="fft_clip" rwaccess="R" width="14"></bitfield>
+  </register>
+  
+  
+  <register acronym="CLR_FFTCLIP" description="" id="CLR_FFTCLIP" offset="0x53C" width="32">
+    
+  <bitfield begin="0" description="Clear FFT Clip Status register: This register bit, when set, clears the FFTCLIP register. It   s a self clearing bit" end="0" id="clr_fftclip" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="CLR_CLIP_MISC" description="" id="CLR_CLIP_MISC" offset="0x540" width="32">
+    
+  <bitfield begin="0" description="This clears the  following clip register channel_comb_clip_status dc_acc_clip_status dc_est_clip_status intf_stats_mag_accumulator_clip_status intf_stats_magdiff_accumulator_clip_status intf_stats_thresh_mag_clip_status intf_stats_thresh_magdiff_clip_status twid_incr_delta_frac_clip_status ip_formatter_clip_status op_formatter_clip_status intf_stats_sum_mag_val_clip_status intf_stats_sum_magdiff_val_clip_status dc_sub_clip Its a self clearing bit" end="0" id="clr_clip_status" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="IP_OP_FORMATTER_CLIP_STATUS" description="" id="IP_OP_FORMATTER_CLIP_STATUS" offset="0x544" width="32">
+    
+  <bitfield begin="16" description="Indicates the output formatter clip status" end="16" id="op_formatter_clip_status" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Indicates the input formatter clip status" end="0" id="ip_formatter_clip_status" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="FFT_RESERVED_1" description="" id="FFT_RESERVED_1" offset="0x548" width="32">
+    
+  <bitfield begin="31" description="Reserved for future addition" end="0" id="fft_reserved_1" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="FFT_RESERVED_2" description="" id="FFT_RESERVED_2" offset="0x54C" width="32">
+    
+  <bitfield begin="31" description="Reserved for future addition" end="0" id="fft_reserved_2" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="FFT_RESERVED_3" description="" id="FFT_RESERVED_3" offset="0x550" width="32">
+    
+  <bitfield begin="31" description="Reserved for future addition" end="0" id="fft_reserved_3" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="CMP_EGE_K0123" description="" id="CMP_EGE_K0123" offset="0x5F8" width="32">
+    
+  <bitfield begin="28" description="3th K-param value should be loaded here which would be used in the First-pass of EGE Compression" end="24" id="cmp_ege_k3" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="20" description="2th K-param value should be loaded here which would be used in the First-pass of EGE Compression" end="16" id="cmp_ege_k2" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="12" description="1th K-param value should be loaded here which would be used in the First-pass of EGE Compression" end="8" id="cmp_ege_k1" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="4" description="0th K-param value should be loaded here which would be used in the First-pass of EGE Compression" end="0" id="cmp_ege_k0" rwaccess="RW" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="CMP_EGE_K4567" description="" id="CMP_EGE_K4567" offset="0x5FC" width="32">
+    
+  <bitfield begin="28" description="7th K-param value should be loaded here which would be used in the First-pass of EGE Compression" end="24" id="cmp_ege_k7" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="20" description="6th K-param value should be loaded here which would be used in the First-pass of EGE Compression" end="16" id="cmp_ege_k6" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="12" description="5th K-param value should be loaded here which would be used in the First-pass of EGE Compression" end="8" id="cmp_ege_k5" rwaccess="RW" width="5"></bitfield>
+    
+  <bitfield begin="4" description="4th K-param value should be loaded here which would be used in the First-pass of EGE Compression" end="0" id="cmp_ege_k4" rwaccess="RW" width="5"></bitfield>
+  </register>
+  
+  
+  <register acronym="MEM_INIT_START" description="" id="MEM_INIT_START" offset="0x600" width="32">
+    
+  <bitfield begin="9" description="writing 1'b1 would start the memory initialization for the window memory It   s a self clearing bit" end="9" id="window_ram" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="writing 1'b1 would start the memory initialization for the Param memory It   s a self clearing bit" end="8" id="param_ram" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="writing 1'b1 would start the memory initialization for the DMEM3 It   s a self clearing bit" end="3" id="dmem3" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="writing 1'b1 would start the memory initialization for the DMEM2 It   s a self clearing bit" end="2" id="dmem2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="writing 1'b1 would start the memory initialization for the DMEM1. It   s a self clearing bit" end="1" id="dmem1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="writing 1'b1 would start the memory initialization for the DMEM0 It   s a self clearing bit" end="0" id="dmem0" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="MEM_INIT_DONE" description="" id="MEM_INIT_DONE" offset="0x604" width="32">
+    
+  <bitfield begin="9" description="Will be 1'b1 after cmpletion of memory initialization for window_ram" end="9" id="window_ram" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Will be 1'b1 after cmpletion of memory initialization for param_ram" end="8" id="param_ram" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Will be 1'b1 after cmpletion of memory initialization for dmem3" end="3" id="dmem3" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Will be 1'b1 after cmpletion of memory initialization for dmem2" end="2" id="dmem2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Will be 1'b1 after cmpletion of memory initialization for dmem1" end="1" id="dmem1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Will be 1'b1 after cmpletion of memory initialization for dmem0" end="0" id="dmem0" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="MEM_INIT_STATUS" description="" id="MEM_INIT_STATUS" offset="0x608" width="32">
+    
+  <bitfield begin="9" description="Will be 1'b1 during memory initialization for window_ram" end="9" id="window_ram" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Will be 1'b1 during memory initialization for param_ram" end="8" id="param_ram" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Will be 1'b1 during memory initialization for dmem3" end="3" id="dmem3" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Will be 1'b1 during memory initialization for dmem2" end="2" id="dmem2" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Will be 1'b1 during memory initialization for dmem1" end="1" id="dmem1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Will be 1'b1 during memory initialization for dmem0" end="0" id="dmem0" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWA_SAFETY_EN" description="" id="HWA_SAFETY_EN" offset="0x614" width="32">
+    
+  <bitfield begin="3" description="Writing 1'b1 would enable the parity chekcer for the 8 DMEM memories" end="3" id="cfg_dmem_parity_en" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Writing 1'b1  enables parity for windowing RAM" end="2" id="cfg_window_ram_parity_en" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Writing 1'b1 will invert the redundant FSM outputs. This can be used for selftest of FSM lockstep error interrupt. This bit is self clearing bit" end="1" id="cfg_fsm_lockstep_inv_en" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Writing 1'b1 would enable the lockstep logic for FSM" end="0" id="cfg_fsm_lockstep_en" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWA_SAFETY_ERR_MASK" description="" id="HWA_SAFETY_ERR_MASK" offset="0x618" width="32">
+    
+  <bitfield begin="9" description="When 1'b1 :    FSM lockstep  error is masked                1'b0 :   FSM lockstep error is not masked" end="9" id="fsm_lockstep" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="When 1'b1 : window RAM   parity error is masked                1'b0 : window RAM    parity error is not masked" end="8" id="window_ram" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="When 1'b1 : DMEM3 parity error is masked                1'b0 : DMEM3  parity error is not masked" end="3" id="dmem3" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="When 1'b1 : DMEM2 parity error is masked                1'b0 : DMEM2 parity error is not masked" end="2" id="dmem2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="When 1'b1 : DMEM1  parity error is masked                1'b0 : DMEM1  parity error is not masked" end="1" id="dmem1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="When 1'b1 : DMEM0 parity error is masked               1'b0 : DMEM0 parity error is not masked" end="0" id="dmem0" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWA_SAFETY_ERR_STATUS" description="" id="HWA_SAFETY_ERR_STATUS" offset="0x61C" width="32">
+    
+  <bitfield begin="9" description="Indicates the FSM lockstep error (Masked status)" end="9" id="fsm_lockstep" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Indicates the parity error in window RAM  (Masked status)" end="8" id="window_ram" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Indicates the parity error in dmem3 (Masked status)" end="3" id="dmem3" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Indicates the parity error in dmem2 (Masked status)" end="2" id="dmem2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Indicates the parity error in dmem1 (Masked status)" end="1" id="dmem1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Indicates the parity error in dmem0 (Masked status)" end="0" id="dmem0" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWA_SAFETY_ERR_STATUS_RAW" description="" id="HWA_SAFETY_ERR_STATUS_RAW" offset="0x620" width="32">
+    
+  <bitfield begin="9" description="Indicates the FSM lockstep error (raw status) Set irrespective of HWA_SAFETY_ERR_MASK bit 9" end="9" id="fsm_lockstep" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Indicates the parity error in  window RAM(raw status) Set irrespective of HWA_SAFETY_ERR_MASK bit 8" end="8" id="window_ram" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Indicates the parity error in dmem3(raw status) Set irrespective of HWA_SAFETY_ERR_MASK bit 3" end="3" id="dmem3" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Indicates the  parity error in dmem2(raw status) Set irrespective of HWA_SAFETY_ERR_MASK bit 2" end="2" id="dmem2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Indicates the  parity error in dmem1(raw status) Set irrespective of HWA_SAFETY_ERR_MASK bit 1" end="1" id="dmem1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Indicates the parity error in dmem0(raw status). Set irrespective of HWA_SAFETY_ERR_MASK bit 0" end="0" id="dmem0" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWA_SAFETY_DMEM0_ERR_ADDR" description="" id="HWA_SAFETY_DMEM0_ERR_ADDR" offset="0x624" width="32">
+    
+  <bitfield begin="9" description="Captures the address where parity error occured for dmem0" end="0" id="dmem0_err_addr" rwaccess="R" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWA_SAFETY_DMEM1_ERR_ADDR" description="" id="HWA_SAFETY_DMEM1_ERR_ADDR" offset="0x628" width="32">
+    
+  <bitfield begin="9" description="Captures the address where parity error occured for dmem1" end="0" id="dmem1_err_addr" rwaccess="R" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWA_SAFETY_DMEM2_ERR_ADDR" description="" id="HWA_SAFETY_DMEM2_ERR_ADDR" offset="0x62C" width="32">
+    
+  <bitfield begin="9" description="Captures the address where parity error occured for dmem2" end="0" id="dmem2_err_addr" rwaccess="R" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWA_SAFETY_DMEM3_ERR_ADDR" description="" id="HWA_SAFETY_DMEM3_ERR_ADDR" offset="0x630" width="32">
+    
+  <bitfield begin="9" description="Captures the address where parity error occured for dmem3" end="0" id="dmem3_err_addr" rwaccess="R" width="10"></bitfield>
+  </register>
+  
+  
+  <register acronym="HWA_SAFETY_WINDOW_RAM_ERR_ADDR" description="" id="HWA_SAFETY_WINDOW_RAM_ERR_ADDR" offset="0x644" width="32">
+    
+  <bitfield begin="10" description="Captures the address where parity error occured for window RAM" end="0" id="window_ram_err_addr" rwaccess="R" width="11"></bitfield>
+  </register>
+  
+  
+  <register acronym="MEM_ACCESS_ERR_STATUS" description="" id="MEM_ACCESS_ERR_STATUS" offset="0x648" width="32">
+    
+  <bitfield begin="3" description="Indicates if more than 1 master ( DMA,CM4,Accelerator) are trying to access the dmem3 at the same time" end="3" id="dmem3" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Indicates if more than 1 master ( DMA,CM4,Accelerator) are trying to access the dmem2 at the same time" end="2" id="dmem2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Indicates if more than 1 master ( DMA,CM4,Accelerator) are trying to access the dmem1 at the same time" end="1" id="dmem1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Indicates if more than 1 master ( DMA,CM4,Accelerator) are trying to access the dmem0 at the same time" end="0" id="dmem0" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="LOOP_CNT" description="" id="LOOP_CNT" offset="0x64C" width="32">
+    
+  <bitfield begin="11" description="Loop count" end="0" id="loop_cnt" rwaccess="R" width="12"></bitfield>
+  </register>
+  
+  
+  <register acronym="PARAMADDR" description="" id="PARAMADDR" offset="0x650" width="32">
+    
+  <bitfield begin="5" description="Index of the current parameter set being executed from PARAM RAM ." end="0" id="paramaddr" rwaccess="R" width="6"></bitfield>
+  </register>
+  
+  
+  <register acronym="PARAMADDR_CPUINTR0" description="" id="PARAMADDR_CPUINTR0" offset="0x654" width="32">
+    
+  <bitfield begin="5" description="Index of the parameter set when PARAM_DONE_INTR0 is generated" end="0" id="paramaddr" rwaccess="R" width="6"></bitfield>
+  </register>
+  
+  
+  <register acronym="FSM_STATE" description="" id="FSM_STATE" offset="0x65C" width="32">
+    
+  <bitfield begin="2" description="Current state of the state machine" end="0" id="fsm_state" rwaccess="R" width="3"></bitfield>
+  </register>
+  
+  
+  <register acronym="SINGLE_STEP_EN" description="" id="SINGLE_STEP_EN" offset="0x660" width="32">
+    
+  <bitfield begin="0" description="Single step enable  1'b1 : the state machine  executes one parameter-set at a time and wait for the single step trigger every time" end="0" id="single_step_en" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="SINGLE_STEP_TRIG" description="" id="SINGLE_STEP_TRIG" offset="0x664" width="32">
+    
+  <bitfield begin="0" description="This is a self clearing sofware trigger bit .  When single_step_en is 1 , the state machine  executes one parameter-set at a time and wait for the single step trigger every time" end="0" id="single_step_trig" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="REG_CMP_LFSRSEED_0" description="" id="REG_CMP_LFSRSEED_0" offset="0x694" width="32">
+    
+  <bitfield begin="28" description="This register is the first seed for the 29-bit LFSR used for compression" end="0" id="REG_CMP_LFSRSEED_0" rwaccess="RW" width="29"></bitfield>
+  </register>
+  
+  
+  <register acronym="REG_CMP_LFSRSEED_1" description="" id="REG_CMP_LFSRSEED_1" offset="0x698" width="32">
+    
+  <bitfield begin="28" description="This register is the second seed for the 29-bit LFSR used for compression" end="0" id="REG_CMP_LFSRSEED_1" rwaccess="RW" width="29"></bitfield>
+  </register>
+  
+  
+  <register acronym="REG_CMP_LFSRLOAD_0" description="" id="REG_CMP_LFSRLOAD_0" offset="0x69C" width="32">
+    
+  <bitfield begin="0" description="Resets CMP LFSR 0 with the programmed value. This is a self clearing bit" end="0" id="REG_CMP_LFSRLOAD_0" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="REG_CMP_LFSRLOAD_1" description="" id="REG_CMP_LFSRLOAD_1" offset="0x6A0" width="32">
+    
+  <bitfield begin="0" description="Resets CMP LFSR 1 with the programmed value. This is a self clearing bit" end="0" id="REG_CMP_LFSRLOAD_1" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="HW_SPARE_RW0" description="" id="HW_SPARE_RW0" offset="0xFD0" width="32">
+    
+  <bitfield begin="31" description="Reserved for HW R&amp;D" end="0" id="hw_spare_rw0" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="HW_SPARE_RW1" description="" id="HW_SPARE_RW1" offset="0xFD4" width="32">
+    
+  <bitfield begin="31" description="Reserved for HW R&amp;D" end="0" id="hw_spare_rw1" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="HW_SPARE_RW2" description="" id="HW_SPARE_RW2" offset="0xFD8" width="32">
+    
+  <bitfield begin="31" description="Reserved for HW R&amp;D" end="0" id="hw_spare_rw2" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="HW_SPARE_RW3" description="" id="HW_SPARE_RW3" offset="0xFDC" width="32">
+    
+  <bitfield begin="31" description="Reserved for HW R&amp;D" end="0" id="hw_spare_rw3" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="HW_SPARE_RO0" description="" id="HW_SPARE_RO0" offset="0xFE0" width="32">
+    
+  <bitfield begin="31" description="Reserved for HW R&amp;D" end="0" id="hw_spare_ro0" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="HW_SPARE_RO1" description="" id="HW_SPARE_RO1" offset="0xFE4" width="32">
+    
+  <bitfield begin="31" description="Reserved for HW R&amp;D" end="0" id="hw_spare_ro1" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="HW_SPARE_RO2" description="" id="HW_SPARE_RO2" offset="0xFE8" width="32">
+    
+  <bitfield begin="31" description="Reserved for HW R&amp;D" end="0" id="hw_spare_ro2" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="HW_SPARE_RO3" description="" id="HW_SPARE_RO3" offset="0xFEC" width="32">
+    
+  <bitfield begin="31" description="Reserved for HW R&amp;D" end="0" id="hw_spare_ro3" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="HW_SPARE_WPH" description="" id="HW_SPARE_WPH" offset="0xFF0" width="32">
+    
+  <bitfield begin="31" description="Reserved for HW R&amp;D" end="0" id="hw_spare_wph" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="HW_SPARE_REC" description="" id="HW_SPARE_REC" offset="0xFF4" width="32">
+    
+  <bitfield begin="31" description="Reserved for HW R&amp;D" end="31" id="hw_spare_rec31" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="30" description="Reserved for HW R&amp;D" end="30" id="hw_spare_rec30" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="29" description="Reserved for HW R&amp;D" end="29" id="hw_spare_rec29" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="28" description="Reserved for HW R&amp;D" end="28" id="hw_spare_rec28" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="27" description="Reserved for HW R&amp;D" end="27" id="hw_spare_rec27" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="26" description="Reserved for HW R&amp;D" end="26" id="hw_spare_rec26" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="25" description="Reserved for HW R&amp;D" end="25" id="hw_spare_rec25" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="24" description="Reserved for HW R&amp;D" end="24" id="hw_spare_rec24" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="23" description="Reserved for HW R&amp;D" end="23" id="hw_spare_rec23" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="22" description="Reserved for HW R&amp;D" end="22" id="hw_spare_rec22" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="21" description="Reserved for HW R&amp;D" end="21" id="hw_spare_rec21" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="20" description="Reserved for HW R&amp;D" end="20" id="hw_spare_rec20" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="19" description="Reserved for HW R&amp;D" end="19" id="hw_spare_rec19" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="18" description="Reserved for HW R&amp;D" end="18" id="hw_spare_rec18" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="17" description="Reserved for HW R&amp;D" end="17" id="hw_spare_rec17" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="16" description="Reserved for HW R&amp;D" end="16" id="hw_spare_rec16" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="15" description="Reserved for HW R&amp;D" end="15" id="hw_spare_rec15" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="14" description="Reserved for HW R&amp;D" end="14" id="hw_spare_rec14" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="13" description="Reserved for HW R&amp;D" end="13" id="hw_spare_rec13" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="12" description="Reserved for HW R&amp;D" end="12" id="hw_spare_rec12" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="11" description="Reserved for HW R&amp;D" end="11" id="hw_spare_rec11" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="10" description="Reserved for HW R&amp;D" end="10" id="hw_spare_rec10" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="9" description="Reserved for HW R&amp;D" end="9" id="hw_spare_rec9" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Reserved for HW R&amp;D" end="8" id="hw_spare_rec8" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Reserved for HW R&amp;D" end="7" id="hw_spare_rec7" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Reserved for HW R&amp;D" end="6" id="hw_spare_rec6" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved for HW R&amp;D" end="5" id="hw_spare_rec5" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Reserved for HW R&amp;D" end="4" id="hw_spare_rec4" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved for HW R&amp;D" end="3" id="hw_spare_rec3" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Reserved for HW R&amp;D" end="2" id="hw_spare_rec2" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Reserved for HW R&amp;D" end="1" id="hw_spare_rec1" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved for HW R&amp;D" end="0" id="hw_spare_rec0" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="LOCK0_KICK0" description="  - KICK0 component " id="LOCK0_KICK0" offset="0x1008" width="32">
+    
+  <bitfield begin="31" description=" - KICK0 component" end="0" id="" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="LOCK0_KICK1" description="  - KICK1 component " id="LOCK0_KICK1" offset="0x100C" width="32">
+    
+  <bitfield begin="31" description=" - KICK1 component" end="0" id="" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="intr_raw_status" description=" Interrupt Raw Status/Set Register " id="intr_raw_status" offset="0x1010" width="32">
+    
+  <bitfield begin="3" description="Proxy0 access violation error. Raw status is read. Write a 1 to set the status. Writing a 0 has no effect." end="3" id="" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Kick access violation error. Raw status is read. Write a 1 to set the status. Writing a 0 has no effect." end="2" id="" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Addressing violation error. Raw status is read. Write a 1 to set the status. Writing a 0 has no effect." end="1" id="" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Protection violation error. Raw status is read. Write a 1 to set the status. Writing a 0 has no effect." end="0" id="" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="intr_enabled_status_clear" description=" Interrupt Enabled Status/Clear register " id="intr_enabled_status_clear" offset="0x1014" width="32">
+    
+  <bitfield begin="3" description="Proxy0 access violation error. Enabled status is read. Write a 1 to clear the status. Writing a 0 has no effect." end="3" id="" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Kick access violation error. Enabled status is read. Write a 1 to clear the status. Writing a 0 has no effect." end="2" id="" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Addressing violation error. Enabled status is read. Write a 1 to clear the status. Writing a 0 has no effect." end="1" id="" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Protection violation error. Enabled status is read. Write a 1 to clear the status. Writing a 0 has no effect." end="0" id="" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="intr_enable" description=" Interrupt Enable register " id="intr_enable" offset="0x1018" width="32">
+    
+  <bitfield begin="3" description="Proxy0 access violation error enable. Write a 1 to set the enable. Writing a 0 has no effect." end="3" id="" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Kick access violation error enable. Write a 1 to set the enable. Writing a 0 has no effect." end="2" id="" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Addressing violation error enable. Write a 1 to set the enable. Writing a 0 has no effect." end="1" id="" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Protection violation error enable. Write a 1 to set the enable. Writing a 0 has no effect." end="0" id="" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="intr_enable_clear" description=" Interrupt Enable Clear register " id="intr_enable_clear" offset="0x101C" width="32">
+    
+  <bitfield begin="3" description="Proxy0 access violation error enable clear. Write a 1 to clear the enable. Writing a 0 has no effect." end="3" id="" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Kick access violation error enable clear. Write a 1 to clear the enable. Writing a 0 has no effect." end="2" id="" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Addressing violation error enable clear. Write a 1 to clear the enable. Writing a 0 has no effect." end="1" id="" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Protection violation error enable clear. Write a 1 to clear the enable. Writing a 0 has no effect." end="0" id="" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="eoi" description=" EOI register " id="eoi" offset="0x1020" width="32">
+    
+  <bitfield begin="7" description="EOI vector value. Write this with interrupt distribution value in the chip." end="0" id="" rwaccess="RW" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="fault_address" description=" Fault Address register " id="fault_address" offset="0x1024" width="32">
+    
+  <bitfield begin="31" description="Fault Address." end="0" id="" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="fault_type_status" description=" Fault Type Status register " id="fault_type_status" offset="0x1028" width="32">
+    
+  <bitfield begin="6" description="Non-secure access." end="6" id="" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Fault Type   10_0000 = Supervisor read  fault  - priv = 1 dir = 1 dtype != 1    01_0000 = Supervisor write fault  - priv = 1 dir = 0   00_1000 = Supervisor execute fault - priv = 1 dir = 1 dtype = 1   00_0100 = User read  fault - priv = 0 dir = 1 dtype = 1   00_0010 = User write fault - priv = 0 dir = 0   00_0001 = User execute fault - priv = 0 dir = 1 dtype = 1   00_0000 = No fault" end="0" id="" rwaccess="R" width="6"></bitfield>
+  </register>
+  
+  
+  <register acronym="fault_attr_status" description=" Fault Attribute Status register " id="fault_attr_status" offset="0x102C" width="32">
+    
+  <bitfield begin="31" description="XID." end="20" id="" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="19" description="Route ID." end="8" id="" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="7" description="Privilege ID." end="0" id="" rwaccess="R" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="fault_clear" description=" Fault Clear register " id="fault_clear" offset="0x1030" width="32">
+    
+  <bitfield begin="0" description="Fault clear. Writing a 1 clears the current fault. Writing a 0 has no effect." end="0" id="" rwaccess="W" width="1"></bitfield>
+  </register>
+</module>

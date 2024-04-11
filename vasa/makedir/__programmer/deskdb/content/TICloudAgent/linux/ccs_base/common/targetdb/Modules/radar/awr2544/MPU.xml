@@ -1,0 +1,807 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+
+<module description="MPU" id="MPU">
+  
+  
+  <register acronym="Revision" description="Revision" id="Revision" offset="0x0" width="32">
+    
+  <bitfield begin="31" description="Scheme. " end="30" id="scheme" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="29" description="Always read a s0. Writes have no affect." end="28" id="reserved" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="27" description="Module ID field." end="16" id="modID" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="15" description="RTL revision.Will vary depending on release." end="11" id="revrtl" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="10" description="Majo revision." end="8" id="revmaj" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="7" description="Custom revision." end="6" id="revcustom" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="5" description="Minor revision." end="0" id="revmin" rwaccess="R" width="6"></bitfield>
+  </register>
+  
+  
+  <register acronym="Configuration" description="Configuration" id="Configuration" offset="0x4" width="32">
+    
+  <bitfield begin="31" description="Address alignment for range checking. " end="24" id="address_align" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Number of fixed address ranges Configurable as 0 or 1. " end="20" id="num_fixed" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="19" description="Number of programmable address ranges.Value is determined by configuration  " end="16" id="num_prog" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="15" description="Number of supported AIDs. 0 = no specific AIDs supported (all treated equally) N = PrivIDs from 0 to N-1 supported, others use AIDX " end="12" id="num_fixed_aids" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="11" description="Always read as 0. " end="1" id="reserved" rwaccess="R" width="11"></bitfield>
+    
+  <bitfield begin="0" description="Assumed allowed mode.  0 = assumed disallowed,  1 = assumed allowed " end="0" id="assumed_allowed" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Interrupt Raw Status/Set" description="Interrupt Raw Status/Set" id="Interrupt Raw Status/Set" offset="0x10" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="2" id="reserved" rwaccess="R" width="30"></bitfield>
+    
+  <bitfield begin="1" description="Addressing violation error. Raw status is read.Write a 1 to set the status. Writing a 0 has no effect. " end="1" id="addr_err" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Protection violation error. Raw status is read. Write a 1 to set the status. Writing a 0 has no effect." end="0" id="prot_err" rwaccess="" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Interrupt Enabled Status/Clear" description="Interrupt Enabled Status/Clear" id="Interrupt Enabled Status/Clear" offset="0x14" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="2" id="reserved" rwaccess="R" width="30"></bitfield>
+    
+  <bitfield begin="1" description="Addressing violation error. Enabled status is read.Write a 1 to clear the status. Writing a 0 has no effect. " end="1" id="enabled_addr_err" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Protection violation error. Enabled status is read. Write a 1 to clear the status. Writing a 0 has no effect." end="0" id="enabled_prot_err" rwaccess="" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Interrupt Enable" description="Interrupt Enable" id="Interrupt Enable" offset="0x18" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="2" id="reserved" rwaccess="R" width="30"></bitfield>
+    
+  <bitfield begin="1" description="Addressing violation error enable. Write a 1 to set the enable. Writing a 0 has no effect. " end="1" id="addr_err_en" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Protection violation error enable. Write a 1 to set the enable. Writing a 0 has no effect." end="0" id="prot_err_en" rwaccess="" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Interrupt Enable Clear" description="Interrupt Enable Clear" id="Interrupt Enable Clear" offset="0x1C" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="2" id="reserved" rwaccess="R" width="30"></bitfield>
+    
+  <bitfield begin="1" description="Addressing violation error enable. Write a 1 to clear the enable. Writing a 0 has no effect. " end="1" id="addr_err_en_clr" rwaccess="" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Protection violation error enable. Write a 1 to clear the enable. Writing a 0 has no effect." end="0" id="prot_err_en_clr" rwaccess="" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="EOI" description="EOI" id="EOI" offset="0x20" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="8" id="reserved" rwaccess="R" width="24"></bitfield>
+    
+  <bitfield begin="7" description="EOI vector value.Write this with the interrupt distribution value in the chip. This drives the mpu_eoi_vector output signal." end="0" id="eoi_vector" rwaccess="RW" width="8"></bitfield>
+  </register>
+  
+  
+  <register acronym="Interrupt Vector" description="Interrupt Vector" id="Interrupt Vector" offset="0x24" width="32">
+    
+  <bitfield begin="31" description="Interrupt vector. Reads mpu_intr_vector input signal." end="0" id="intr_vec" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Fixed Start Address" description="Fixed Start Address" id="Fixed Start Address" offset="0x100" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="start_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Fixed End Address" description="Fixed End Address" id="Fixed End Address" offset="0x104" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="end_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Fixed MPPA" description="Fixed MPPA" id="Fixed MPPA" offset="0x108" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="Reserved not used in Design" end="10" id="AID15_0" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Reserved not used in Design" end="9" id="AIDX" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Reserved not used in Design" end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Reserved not used in Design" end="7" id="ns" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Reserved not used in Design" end="6" id="emu" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved not used in Design" end="5" id="sr" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Reserved not used in Design" end="4" id="sw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved not used in Design" end="3" id="sx" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Reserved not used in Design" end="2" id="ur" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Reserved not used in Design" end="1" id="uw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved not used in Design" end="0" id="ux" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 1 Start Address" description="Programmable 1 Start Address" id="Programmable 1 Start Address" offset="0x200" width="32">
+    
+  <bitfield begin="31" description="Start address for range N. Defaults to input signal value." end="0" id="start_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 1 End Address" description="Programmable 1 End Address" id="Programmable 1 End Address" offset="0x204" width="32">
+    
+  <bitfield begin="31" description="End address for range N. Defaults to input signal value." end="0" id="end_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 1 MPPA" description="Programmable 1 MPPA" id="Programmable 1 MPPA" offset="0x208" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="AIDs checked for this region. Defaults to input value. 0 = AID is not checked for these permissions. 1 = AID is checked for these permissions." end="10" id="AID15_0" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Additional AIDs checked. Defaults to input value." end="9" id="AIDX" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Always read as 0." end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Non-secure permission. Defaults to input value." end="7" id="ns" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Debug permission. Defaults to input value." end="6" id="emu" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Supervisor read permission. Defaults to input value." end="5" id="sr" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Supervisor write permission. Defaults to input value." end="4" id="sw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Supervisor executable permission. Defaults to input value." end="3" id="sx" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="User read permission. Defaults to input value." end="2" id="ur" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="User write permission. Defaults to input value." end="1" id="uw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="User executable permission. Defaults to input value." end="0" id="ux" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 2 Start Address" description="Programmable 2 Start Address" id="Programmable 2 Start Address" offset="0x210" width="32">
+    
+  <bitfield begin="31" description="Start address for range N. Defaults to input signal value." end="0" id="start_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 2 End Address" description="Programmable 2 End Address" id="Programmable 2 End Address" offset="0x214" width="32">
+    
+  <bitfield begin="31" description="End address for range N. Defaults to input signal value." end="0" id="end_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 2 MPPA" description="Programmable 2 MPPA" id="Programmable 2 MPPA" offset="0x218" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="AIDs checked for this region. Defaults to input value. 0 = AID is not checked for these permissions. 1 = AID is checked for these permissions." end="10" id="AID15_0" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Additional AIDs checked. Defaults to input value." end="9" id="AIDX" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Always read as 0." end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Non-secure permission. Defaults to input value." end="7" id="ns" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Debug permission. Defaults to input value." end="6" id="emu" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Supervisor read permission. Defaults to input value." end="5" id="sr" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Supervisor write permission. Defaults to input value." end="4" id="sw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Supervisor executable permission. Defaults to input value." end="3" id="sx" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="User read permission. Defaults to input value." end="2" id="ur" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="User write permission. Defaults to input value." end="1" id="uw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="User executable permission. Defaults to input value." end="0" id="ux" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 3 Start Address" description="Programmable 3 Start Address" id="Programmable 3 Start Address" offset="0x220" width="32">
+    
+  <bitfield begin="31" description="Start address for range N. Defaults to input signal value." end="0" id="start_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 3 End Address" description="Programmable 3 End Address" id="Programmable 3 End Address" offset="0x224" width="32">
+    
+  <bitfield begin="31" description="End address for range N. Defaults to input signal value." end="0" id="end_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 3 MPPA" description="Programmable 3 MPPA" id="Programmable 3 MPPA" offset="0x228" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="AIDs checked for this region. Defaults to input value. 0 = AID is not checked for these permissions. 1 = AID is checked for these permissions." end="10" id="AID15_0" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Additional AIDs checked. Defaults to input value." end="9" id="AIDX" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Always read as 0." end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Non-secure permission. Defaults to input value." end="7" id="ns" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Debug permission. Defaults to input value." end="6" id="emu" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Supervisor read permission. Defaults to input value." end="5" id="sr" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Supervisor write permission. Defaults to input value." end="4" id="sw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Supervisor executable permission. Defaults to input value." end="3" id="sx" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="User read permission. Defaults to input value." end="2" id="ur" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="User write permission. Defaults to input value." end="1" id="uw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="User executable permission. Defaults to input value." end="0" id="ux" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 4 Start Address" description="Programmable 4 Start Address" id="Programmable 4 Start Address" offset="0x230" width="32">
+    
+  <bitfield begin="31" description="Start address for range N. Defaults to input signal value." end="0" id="start_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 4 End Address" description="Programmable 4 End Address" id="Programmable 4 End Address" offset="0x234" width="32">
+    
+  <bitfield begin="31" description="End address for range N. Defaults to input signal value." end="0" id="end_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 4 MPPA" description="Programmable 4 MPPA" id="Programmable 4 MPPA" offset="0x238" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="AIDs checked for this region. Defaults to input value. 0 = AID is not checked for these permissions. 1 = AID is checked for these permissions." end="10" id="AID15_0" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Additional AIDs checked. Defaults to input value." end="9" id="AIDX" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Always read as 0." end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Non-secure permission. Defaults to input value." end="7" id="ns" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Debug permission. Defaults to input value." end="6" id="emu" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Supervisor read permission. Defaults to input value." end="5" id="sr" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Supervisor write permission. Defaults to input value." end="4" id="sw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Supervisor executable permission. Defaults to input value." end="3" id="sx" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="User read permission. Defaults to input value." end="2" id="ur" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="User write permission. Defaults to input value." end="1" id="uw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="User executable permission. Defaults to input value." end="0" id="ux" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 5 Start Address" description="Programmable 5 Start Address" id="Programmable 5 Start Address" offset="0x240" width="32">
+    
+  <bitfield begin="31" description="Start address for range N. Defaults to input signal value." end="0" id="start_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 5 End Address" description="Programmable 5 End Address" id="Programmable 5 End Address" offset="0x244" width="32">
+    
+  <bitfield begin="31" description="End address for range N. Defaults to input signal value." end="0" id="end_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 5 MPPA" description="Programmable 5 MPPA" id="Programmable 5 MPPA" offset="0x248" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="AIDs checked for this region. Defaults to input value. 0 = AID is not checked for these permissions. 1 = AID is checked for these permissions." end="10" id="AID15_0" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Additional AIDs checked. Defaults to input value." end="9" id="AIDX" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Always read as 0." end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Non-secure permission. Defaults to input value." end="7" id="ns" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Debug permission. Defaults to input value." end="6" id="emu" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Supervisor read permission. Defaults to input value." end="5" id="sr" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Supervisor write permission. Defaults to input value." end="4" id="sw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Supervisor executable permission. Defaults to input value." end="3" id="sx" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="User read permission. Defaults to input value." end="2" id="ur" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="User write permission. Defaults to input value." end="1" id="uw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="User executable permission. Defaults to input value." end="0" id="ux" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 6 Start Address" description="Programmable 6 Start Address" id="Programmable 6 Start Address" offset="0x250" width="32">
+    
+  <bitfield begin="31" description="Start address for range N. Defaults to input signal value." end="0" id="start_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 6 End Address" description="Programmable 6 End Address" id="Programmable 6 End Address" offset="0x254" width="32">
+    
+  <bitfield begin="31" description="End address for range N. Defaults to input signal value." end="0" id="end_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 6 MPPA" description="Programmable 6 MPPA" id="Programmable 6 MPPA" offset="0x258" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="AIDs checked for this region. Defaults to input value. 0 = AID is not checked for these permissions. 1 = AID is checked for these permissions." end="10" id="AID15_0" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Additional AIDs checked. Defaults to input value." end="9" id="AIDX" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Always read as 0." end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Non-secure permission. Defaults to input value." end="7" id="ns" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Debug permission. Defaults to input value." end="6" id="emu" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Supervisor read permission. Defaults to input value." end="5" id="sr" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Supervisor write permission. Defaults to input value." end="4" id="sw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Supervisor executable permission. Defaults to input value." end="3" id="sx" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="User read permission. Defaults to input value." end="2" id="ur" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="User write permission. Defaults to input value." end="1" id="uw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="User executable permission. Defaults to input value." end="0" id="ux" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 7 Start Address" description="Programmable 7 Start Address" id="Programmable 7 Start Address" offset="0x260" width="32">
+    
+  <bitfield begin="31" description="Start address for range N. Defaults to input signal value." end="0" id="start_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 7 End Address" description="Programmable 7 End Address" id="Programmable 7 End Address" offset="0x264" width="32">
+    
+  <bitfield begin="31" description="End address for range N. Defaults to input signal value." end="0" id="end_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 7 MPPA" description="Programmable 7 MPPA" id="Programmable 7 MPPA" offset="0x268" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="AIDs checked for this region. Defaults to input value. 0 = AID is not checked for these permissions. 1 = AID is checked for these permissions." end="10" id="AID15_0" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Additional AIDs checked. Defaults to input value." end="9" id="AIDX" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Always read as 0." end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Non-secure permission. Defaults to input value." end="7" id="ns" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Debug permission. Defaults to input value." end="6" id="emu" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Supervisor read permission. Defaults to input value." end="5" id="sr" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Supervisor write permission. Defaults to input value." end="4" id="sw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Supervisor executable permission. Defaults to input value." end="3" id="sx" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="User read permission. Defaults to input value." end="2" id="ur" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="User write permission. Defaults to input value." end="1" id="uw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="User executable permission. Defaults to input value." end="0" id="ux" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 8 Start Address" description="Programmable 8 Start Address" id="Programmable 8 Start Address" offset="0x270" width="32">
+    
+  <bitfield begin="31" description="Start address for range N. Defaults to input signal value." end="0" id="start_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 8 End Address" description="Programmable 8 End Address" id="Programmable 8 End Address" offset="0x274" width="32">
+    
+  <bitfield begin="31" description="End address for range N. Defaults to input signal value." end="0" id="end_addr" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 8 MPPA" description="Programmable 8 MPPA" id="Programmable 8 MPPA" offset="0x278" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="AIDs checked for this region. Defaults to input value. 0 = AID is not checked for these permissions. 1 = AID is checked for these permissions." end="10" id="AID15_0" rwaccess="RW" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Additional AIDs checked. Defaults to input value." end="9" id="AIDX" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Always read as 0." end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Non-secure permission. Defaults to input value." end="7" id="ns" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Debug permission. Defaults to input value." end="6" id="emu" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Supervisor read permission. Defaults to input value." end="5" id="sr" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Supervisor write permission. Defaults to input value." end="4" id="sw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Supervisor executable permission. Defaults to input value." end="3" id="sx" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="2" description="User read permission. Defaults to input value." end="2" id="ur" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description="User write permission. Defaults to input value." end="1" id="uw" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description="User executable permission. Defaults to input value." end="0" id="ux" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 9 Start Address" description="Programmable 9 Start Address" id="Programmable 9 Start Address" offset="0x280" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="start_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 9 End Address" description="Programmable 9 End Address" id="Programmable 9 End Address" offset="0x284" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="end_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 9 MPPA" description="Programmable 9 MPPA" id="Programmable 9 MPPA" offset="0x288" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="Reserved not used in Design" end="10" id="AID15_0" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Reserved not used in Design" end="9" id="AIDX" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Reserved not used in Design" end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Reserved not used in Design" end="7" id="ns" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Reserved not used in Design" end="6" id="emu" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved not used in Design" end="5" id="sr" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Reserved not used in Design" end="4" id="sw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved not used in Design" end="3" id="sx" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Reserved not used in Design" end="2" id="ur" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Reserved not used in Design" end="1" id="uw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved not used in Design" end="0" id="ux" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 10 Start Address" description="Programmable 10 Start Address" id="Programmable 10 Start Address" offset="0x290" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="start_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 10 End Address" description="Programmable 10 End Address" id="Programmable 10 End Address" offset="0x294" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="end_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 10 MPPA" description="Programmable 10 MPPA" id="Programmable 10 MPPA" offset="0x298" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="Reserved not used in Design" end="10" id="AID15_0" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Reserved not used in Design" end="9" id="AIDX" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Reserved not used in Design" end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Reserved not used in Design" end="7" id="ns" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Reserved not used in Design" end="6" id="emu" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved not used in Design" end="5" id="sr" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Reserved not used in Design" end="4" id="sw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved not used in Design" end="3" id="sx" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Reserved not used in Design" end="2" id="ur" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Reserved not used in Design" end="1" id="uw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved not used in Design" end="0" id="ux" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 11 Start Address" description="Programmable 11 Start Address" id="Programmable 11 Start Address" offset="0x2A0" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="start_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 11 End Address" description="Programmable 11 End Address" id="Programmable 11 End Address" offset="0x2A4" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="end_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 11 MPPA" description="Programmable 11 MPPA" id="Programmable 11 MPPA" offset="0x2A8" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="Reserved not used in Design" end="10" id="AID15_0" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Reserved not used in Design" end="9" id="AIDX" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Reserved not used in Design" end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Reserved not used in Design" end="7" id="ns" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Reserved not used in Design" end="6" id="emu" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved not used in Design" end="5" id="sr" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Reserved not used in Design" end="4" id="sw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved not used in Design" end="3" id="sx" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Reserved not used in Design" end="2" id="ur" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Reserved not used in Design" end="1" id="uw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved not used in Design" end="0" id="ux" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 12 Start Address" description="Programmable 12 Start Address" id="Programmable 12 Start Address" offset="0x2B0" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="start_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 12 End Address" description="Programmable 12 End Address" id="Programmable 12 End Address" offset="0x2B4" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="end_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 12 MPPA" description="Programmable 12 MPPA" id="Programmable 12 MPPA" offset="0x2B8" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="Reserved not used in Design" end="10" id="AID15_0" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Reserved not used in Design" end="9" id="AIDX" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Reserved not used in Design" end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Reserved not used in Design" end="7" id="ns" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Reserved not used in Design" end="6" id="emu" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved not used in Design" end="5" id="sr" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Reserved not used in Design" end="4" id="sw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved not used in Design" end="3" id="sx" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Reserved not used in Design" end="2" id="ur" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Reserved not used in Design" end="1" id="uw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved not used in Design" end="0" id="ux" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 13 Start Address" description="Programmable 13 Start Address" id="Programmable 13 Start Address" offset="0x2C0" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="start_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 13 End Address" description="Programmable 13 End Address" id="Programmable 13 End Address" offset="0x2C4" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="end_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 13 MPPA" description="Programmable 13 MPPA" id="Programmable 13 MPPA" offset="0x2C8" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="Reserved not used in Design" end="10" id="AID15_0" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Reserved not used in Design" end="9" id="AIDX" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Reserved not used in Design" end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Reserved not used in Design" end="7" id="ns" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Reserved not used in Design" end="6" id="emu" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved not used in Design" end="5" id="sr" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Reserved not used in Design" end="4" id="sw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved not used in Design" end="3" id="sx" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Reserved not used in Design" end="2" id="ur" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Reserved not used in Design" end="1" id="uw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved not used in Design" end="0" id="ux" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 14 Start Address" description="Programmable 14 Start Address" id="Programmable 14 Start Address" offset="0x2D0" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="start_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 14 End Address" description="Programmable 14 End Address" id="Programmable 14 End Address" offset="0x2D4" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="end_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 14 MPPA" description="Programmable 14 MPPA" id="Programmable 14 MPPA" offset="0x2D8" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="Reserved not used in Design" end="10" id="AID15_0" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Reserved not used in Design" end="9" id="AIDX" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Reserved not used in Design" end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Reserved not used in Design" end="7" id="ns" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Reserved not used in Design" end="6" id="emu" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved not used in Design" end="5" id="sr" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Reserved not used in Design" end="4" id="sw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved not used in Design" end="3" id="sx" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Reserved not used in Design" end="2" id="ur" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Reserved not used in Design" end="1" id="uw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved not used in Design" end="0" id="ux" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 15 Start Address" description="Programmable 15 Start Address" id="Programmable 15 Start Address" offset="0x2E0" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="start_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 15 End Address" description="Programmable 15 End Address" id="Programmable 15 End Address" offset="0x2E4" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="end_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 15 MPPA" description="Programmable 15 MPPA" id="Programmable 15 MPPA" offset="0x2E8" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="Reserved not used in Design" end="10" id="AID15_0" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Reserved not used in Design" end="9" id="AIDX" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Reserved not used in Design" end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Reserved not used in Design" end="7" id="ns" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Reserved not used in Design" end="6" id="emu" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved not used in Design" end="5" id="sr" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Reserved not used in Design" end="4" id="sw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved not used in Design" end="3" id="sx" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Reserved not used in Design" end="2" id="ur" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Reserved not used in Design" end="1" id="uw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved not used in Design" end="0" id="ux" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 16 Start Address" description="Programmable 16 Start Address" id="Programmable 16 Start Address" offset="0x2F0" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="start_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 16 End Address" description="Programmable 16 End Address" id="Programmable 16 End Address" offset="0x2F4" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="0" id="end_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Programmable 16 MPPA" description="Programmable 16 MPPA" id="Programmable 16 MPPA" offset="0x2F8" width="32">
+    
+  <bitfield begin="31" description="Reserved not used in Design" end="26" id="reserved" rwaccess="R" width="6"></bitfield>
+    
+  <bitfield begin="25" description="Reserved not used in Design" end="10" id="AID15_0" rwaccess="R" width="16"></bitfield>
+    
+  <bitfield begin="9" description="Reserved not used in Design" end="9" id="AIDX" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="8" description="Reserved not used in Design" end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Reserved not used in Design" end="7" id="ns" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Reserved not used in Design" end="6" id="emu" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Reserved not used in Design" end="5" id="sr" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="4" description="Reserved not used in Design" end="4" id="sw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description="Reserved not used in Design" end="3" id="sx" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description="Reserved not used in Design" end="2" id="ur" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description="Reserved not used in Design" end="1" id="uw" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description="Reserved not used in Design" end="0" id="ux" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="Fault Address" description="Fault Address" id="Fault Address" offset="0x300" width="32">
+    
+  <bitfield begin="31" description="Fault address." end="0" id="fault_addr" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="Fault Status" description="Fault Status" id="Fault Status" offset="0x304" width="32">
+    
+  <bitfield begin="31" description="Transfer ID" end="24" id="id" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="23" description="Master ID." end="16" id="mstid" rwaccess="R" width="8"></bitfield>
+    
+  <bitfield begin="15" description="Always read as 0." end="13" id="reserved" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="12" description="Privilege ID." end="9" id="privid" rwaccess="R" width="4"></bitfield>
+    
+  <bitfield begin="8" description="Always read as 0." end="8" id="reserved1" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="7" description="Non-secure access." end="7" id="ns" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="6" description="Always read as 0." end="6" id="reserved2" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="5" description="Fault type. 100000 = supervisor read fault 010000 = supervisor write fault 001000 = supervisor execute fault 000100 = user read fault 000010 = user write fault 000001 = user execute fault 111111 = relaxed cache linefill fault 010010 = relaxed cache writeback fault 000000 = no fault" end="0" id="fault_type" rwaccess="R" width="6"></bitfield>
+  </register>
+  
+  
+  <register acronym="Fault Clear" description="Fault Clear" id="Fault Clear" offset="0x308" width="32">
+    
+  <bitfield begin="31" description="Always read as 0." end="1" id="reserved" rwaccess="R" width="31"></bitfield>
+    
+  <bitfield begin="0" description="Fault clear. Writing a 1 clears the current fault. Writing a 0 has no effect." end="0" id="fault_clr" rwaccess="W" width="1"></bitfield>
+  </register>
+</module>

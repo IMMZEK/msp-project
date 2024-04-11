@@ -1,0 +1,181 @@
+<div style="margin-right:12px;">
+    <div style="padding:7px 8px 16px 8px;border-bottom:1px solid #ddd;">
+        <!-- Flash Image title and global controls -->
+        <div style="margin-bottom:2px;">
+            <span style="font-weight:500;font-size:14px;color:#595959;">Flash Image(s)</span>
+            
+            <!-- controls -->
+            <div ng-show="vm.programs.length>1 && vm.numDefaultImageSelection===1" style="float:right;">
+                <!-- remove all selected images -->
+                <i ng-show="vm.programs.length>1" class="material-icons material-icons-btn" style="font-size:16px;margin-right:2px;" uib-tooltip="Remove All Entries" tooltip-placement="left" ng-click="vm.removeAll()" tooltip-popup-delay="200" tooltip-popup-close-delay="200">clear_all</i>
+                <!-- sort order and categories --> 
+                <i class="material-icons material-icons-btn" style="font-size:16px;margin-right:4px;" ng-click="vm.reverse=!vm.reverse" uib-tooltip="Ascend/Descend Ordering" tooltip-placement="left" tooltip-popup-delay="200" tooltip-popup-close-delay="200">swap_vert</i>Sort by:
+                <select style="width:70px;color:#117788;font-weight:500;outline:none;padding:0 2px;background-color:inherit;" ng-model="vm.programSort" ng-change="vm.order(vm.programSort)">
+                    <option value="" style="color:#666;">Added</option>
+                    <option value="file.name" style="color:#666;">Name</option>
+                    <option value="file.size" style="color:#666;">Size</option>
+                    <option value="isBinary" style="color:#666;">Type</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- List of Programs (default view with 1 image selection) -->
+        <div style="padding-left:2px;" ng-if="vm.numDefaultImageSelection === 1">
+            <!-- Program Image List -->
+            <div ng-repeat="program in vm.sortedPrograms = (vm.programs | orderBy:vm.predicate:vm.reverse) track by $index" style="width:100%;" ng-style="(vm.programs.length>1)&&{'padding-bottom':'7px','padding-top':'4px','border-top':'1px solid #eee'}">
+                <!-- Image name and checkbox (only shows when there are multiple images) -->
+                <div style="display:table-cell;white-space:nowrap;">
+                    <span ng-show="(vm.programs.length)>1" style="position:relative;top:1px;margin-right:5px;"><span style="position:relative;top:1px;" ng-class="{ 'disabled': !program.file.name }"><tic-checkbox ng-model="program.isSelected" ></tic-checkbox></span> Image {{$index+1}} </span>
+                </div>
+                <!-- Image Input -->
+                <div class="inputHover" style="display:table-cell;width:98%;white-space:nowrap;margin-right:5px;padding:3px 8px 3px 6px;border:1px solid #d0d0d0;border-radius:4px;position:relative;top:2px;cursor:pointer;" ng-click="vm.browseClicked(program);" ng-class="{ 'disabled': (!program.isSelected&&program.file.name) }" title="{{program.file.path}}">
+                    <span style="display:table;width:100%">
+                        <span ng-if="program && !program.file.isReady" style="display:table-cell;white-space:nowrap;padding-right:2px;position:relative;top:-1px;" >
+                            <span style="padding:4px 6px;" class="label label-info">
+                                <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+                                <span style="padding-left:2px;font-weight:500;">{{program.file.notReadyMessage}}</span>
+                            </span>
+                        </span>
+                        
+                        <span style="display:table-cell;white-space:nowrap;width:98%;color:#115566;font-weight:500;" ng-class="{'disabled':!program.file.isReady}">{{program.file.name}}</span>
+                        <span style="display:table-cell;white-space:nowrap;" ng-class="{'disabled':!program.file.isReady}">
+                            <span ng-show="program.file.checksum">MD5: <span style="font-weight:500;color:#115566;">{{program.file.checksum}}</span></span>
+                            Size: <span style="font-weight:500;color:#115566;">{{program.file.getDisplaySize()}}</span> | <span ng-click="$event.stopPropagation()" title="">Binary:<span id="is-binary-image-{{$index+1}}" style="position:relative;top:1px;margin-left:1px;margin-right:1px;" title="Load this image as a binary file."><tic-checkbox ng-model="program.isBinary"></tic-checkbox></span><span ng-show="program.isBinary">| Load Addr: <span style="font-weight:500;color:#115566;"></span><input id="load-addr-image-{{$index+1}}" type="text" class="form-control input-sm" ng-model="program.loadAddress" ng-change="vm.checkHex(program)" style="display:inline;width:72px;line-height:20px;height:20px;font-weight:700;color:#115566;padding-left:1px;" placeholder="0x00000000" title="Enter load address of binary file" /></span><span ng-show="!program.isBinary&&vm.hasBinary()">| Load Addr: <span style="font-weight:500;color:#777;padding-right:38px;font-size:13px;letter-spacing:0.2px">AUTO</span></span></span>
+                        </span>
+                    </span>
+                </div>
+                <!-- Program Image control (only shows when there are multiple images) -->
+                <div style="display:table-cell;white-space:nowrap;" ng-style="(vm.programs.length > 1)&&{'padding-left':'7px'}||{'padding':'0 4px'}" ng-class="{'disabled':!program.file.isReady}">
+                    <span>
+                        <!-- Program Image button -->
+                        <span id="program-image-{{$index+1}}" ng-show="vm.programs.length>1" class="glyphicon glyphicon-download-alt glyphicon-icon" ng-show="vm.programs.length>0" ng-click="vm.performDSAction('program',[program])" uib-tooltip="Load This Image" tooltip-placement="left" tooltip-popup-delay="200" tooltip-popup-close-delay="200"></span><!-- Verify Image button 
+                        --><span id="verify-image-{{$index+1}}" ng-show="vm.programs.length>1" class="glyphicon glyphicon-check glyphicon-icon" ng-show="vm.programs.length>0" ng-click="vm.performDSAction('verify',[program])" uib-tooltip="Verify This Image" tooltip-placement="left" tooltip-popup-delay="200" tooltip-popup-close-delay="200"></span><!-- Remove Image button
+                        --><span id="remove-image-{{$index+1}}" class="glyphicon glyphicon-remove glyphicon-icon" ng-show="vm.programs.length>0" ng-click="vm.removeClicked(program)" uib-tooltip="Remove This Image" tooltip-placement="left" tooltip-popup-delay="200" tooltip-popup-close-delay="200"></span>
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Empty Programs List -->
+            <div ng-show="vm.programs.length===0" ng-style="($index > 0 || vm.programs[0].file.name)&&{'margin-top':'9px','padding-top':'4px','border-top':'1px solid #eee'}">
+                <div ng-repeat="programProvider in vm.programProviders" style="display:table;width:100%;">
+                    <span style="width:99%;display:inline-block;padding:3px 8px 3px 3px;border:1px solid #d0d0d0;border-radius:4px;position:relative;top:2px;background-color:#fbfbfb;box-shadow:inset 1px 0px 5px #eee;height:32px;display:table-cell;" ng-click="vm.selectClicked(programProvider);programProvider.programClicked=true;">&nbsp;</span>
+                    <button type="button" style="display:table-cell;margin-left:8px;margin-right:20px;" class="btn btn-success btn-sm" id="browse-program" ng-click="vm.selectClicked(programProvider);programProvider.programClicked=true;"  uib-tooltip="{{programProvider.tooltipText}}" tooltip-placement="bottom" tooltip-popup-delay="200" tooltip-popup-close-delay="200" tooltip-enable="!programProvider.programClicked" tooltip-trigger="mouseenter click">
+                        <span class="glyphicon {{programProvider.icon}}"></span> Browse
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- List of Programs with multiple image selection -->
+        <div ng-if="vm.numDefaultImageSelection > 1">
+            <!-- Program Image List -->
+            <div ng-repeat="imageName in vm.imageSelectionNames" style="width:100%;display:table-row;">
+                <!-- Image name and checkbox -->
+                <div style="display:table-cell;white-space:nowrap;">
+                    <span style="position:relative;top:1px;margin-right:5px;">
+                        <span style="position:relative;top:1px;"><tic-checkbox ng-model="vm.findImageByIndex($index+1).isSelected"></tic-checkbox></span> {{imageName}}
+                    </span>
+                </div>
+                <!-- Image Input -->
+                <div style="display:table-cell;width:98%;padding:5px 2px;">
+                    <span ng-repeat="programProvider in vm.programProviders">
+                        <div class="inputHover" style="white-space:nowrap;padding:3px 8px 3px 6px;border:1px solid #d0d0d0;border-radius:4px;position:relative;top:2px;cursor:pointer;" ng-click="vm.selectClicked(programProvider,$parent.$index+1);programProvider.programClicked=true;" title="{{vm.findImageByIndex($parent.$index+1).file.path}}">
+                            <span style="display:table;width:100%">
+                                <span style="display:table-cell;white-space:nowrap;width:98%;color:#115566;font-weight:500;">&nbsp;{{vm.findImageByIndex($parent.$index+1).file.name}}</span>
+                                <span ng-show="vm.findImageByIndex($parent.$index+1).file.name" style="display:table-cell;white-space:nowrap;">
+                                    Size: <span style="font-weight:500;color:#115566;">{{vm.findImageByIndex($parent.$index+1).file.getDisplaySize()}}</span>
+                                    <span ng-show="vm.imageSelectionAddress[$parent.$index] !== undefined">| Load Addr: <input id="load-addr-image-{{$index+1}}" ng-click="$event.stopPropagation()" type="text" class="form-control input-sm" ng-model="vm.imageSelectionAddress[$parent.$index]" ng-change="vm.updateAddress(vm.imageSelectionAddress[$parent.$index],'{{vm.imageSelectionAddress[$parent.$index]}}',$parent.$index)" style="display:inline;width:72px;line-height:20px;height:20px;font-weight:700;color:#115566;padding-left:1px;" placeholder="0x00000000" title="Enter load address of binary file" />
+                                    </span>
+                                </span>
+                            </span>
+                        </div>
+                    </span>
+                </div>
+                <!-- Program Image control  -->
+                <div style="display:table-cell;white-space:nowrap;">
+                    <span ng-repeat="programProvider in vm.programProviders">
+                        <button type="button" style="display:table-cell;margin-left:8px;" class="btn btn-success btn-sm" id="browse-program" ng-click="vm.selectClicked(programProvider,$parent.$index+1);programProvider.programClicked=true;" uib-tooltip="{{programProvider.tooltipText}}" tooltip-placement="bottom" tooltip-popup-delay="200" tooltip-popup-close-delay="200" tooltip-enable="!programProvider.programClicked" tooltip-trigger="mouseenter click">
+                            <span class="glyphicon {{programProvider.icon}}"></span> Browse
+                        </button>
+                    </span>
+                    <!-- Remove Image button-->
+                    <span ng-class="{ 'disabled': !vm.findImageByIndex($index+1).file.name }" ng-style="!vm.findImageByIndex($index+1).file.name&&{'color':'#fff'}" class="glyphicon glyphicon-remove glyphicon-icon" ng-click="vm.removeClicked(vm.findImageByIndex($index+1));vm.findImageByIndex($index+1).isSelected = false;" uib-tooltip="Remove This Image" tooltip-placement="left" tooltip-popup-delay="200" tooltip-popup-close-delay="200"></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- add additional images button -->
+        <div ng-init="addIconText='add_circle_outline'" ng-if="vm.programs[0].file.name && (vm.numDefaultImageSelection === 1)" ng-repeat="programProvider in vm.programProviders" style="height:15px;" ng-style="(vm.programs.length>1)&&{'border-top':'1px solid #eee','padding-top':'5px','padding-left':'0','padding-bottom':'15px'}||{'padding-top':'4px','padding-left':'1px','padding-bottom':'9px'}">
+            <span id="add-program" ng-mouseleave="addImageHover=false;addIconText='add_circle_outline';">
+                <i class="material-icons add_circle" style="transition:all 0.5s ease" ng-style="addImageHover&&{'color':'#117788'}" ng-mouseover="addImageHover=true;addIconText='add_circle'" ng-click="vm.selectClicked(programProvider);programProvider.programClicked=true;">{{addIconText}}</i><span ng-class="{'disabled':!addImageHover}" style="transition:color 0.5s ease;font-weight:500;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;padding-left:3px;" ng-style="addImageHover&&{'opacity':'100','color':'#117788','cursor':'pointer'}||{'opacity':'100','color':'#fff','cursor':'default'}" ng-click="vm.selectClicked(programProvider);programProvider.programClicked=true;">Add Another Image</span>
+            </span>
+        </div>
+    </div>
+    
+    <!-- Actions button -->
+    <div style="padding:8px 8px 16px 8px;border-bottom:1px solid #ddd;" ng-class="{ 'disabled': vm.numProgramsSelected()===0 }" ng-click="vm.actionClicked=true;vm.actionClickNum=vm.actionClickNum+1;">
+        <div>
+            <span style="font-weight:500;font-size:14px;color:#595959;">Available Action(s)</span> <span ng-show="(vm.numProgramsSelected()>0)">- {{vm.numProgramsSelected()}} Image<span ng-show="(vm.numProgramsSelected()>1)">s</span> Selected</span>
+            <div style="float:right;padding-right:8px;padding-top:2px;" ng-show="false">
+                Show:
+                <select style="width:110px;color:#115566;font-weight:500;outline:none;padding:0 2px;">
+                    <option>Program Load</option>
+                    <option>All</option>
+                </select>
+            </div>
+        </div>
+        <div style="padding-left:4px;margin-top:3px;">
+            <button type="button" class="btn btn-primary btn-sm" id="load-programs" ng-click="vm.loadSelectedClicked()" uib-tooltip="Load selected images (includes erase and verify steps depending on user settings)" tooltip-placement="bottom" tooltip-popup-delay="200" tooltip-popup-close-delay="200">
+                Load Image<span ng-show="(vm.numProgramsSelected()>1)">s</span>
+            </button>
+            <button ng-show="vm.verifySupported()" type="button" class="btn btn-primary btn-sm" id="verify-programs" ng-click="vm.verifySelectedClicked()" style="margin-left:2px;" uib-tooltip="Verify selected images (Does not erase/program device)" tooltip-placement="bottom" tooltip-popup-delay="200" tooltip-popup-close-delay="200">
+                Verify Image<span ng-show="(vm.numProgramsSelected()>1)">s</span>
+            </button>
+            <span ng-show="(vm.numDefaultImageSelection > 1) && (vm.numProgramsSelected() > 0)" class="uf-property-text-main" style="position:relative;top:1px;margin-left:10px;">
+                <span class="uf-property-text-sub" style="">Note: </span> 
+                <span>Please power cycle your device before loading images</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Reset Actions section -->
+    <div style="padding:8px 8px 16px 8px;border-bottom:1px solid #ddd;" ng-show="vm.showResetActions">
+        <div>
+            <span style="font-weight:500;font-size:14px;color:#595959;">Reset Actions</span> 
+        </div>
+        <div style="padding-left:10px;margin-top:3px;" ng-show="vm.resets.availableResetOptions.length === 0">
+            <a ng-show="vm.resets.availableResetOptions.length === 0" href="" ng-click="vm.queryResets()" uib-tooltip="Note: Requires connecting to device" tooltip-placement="right" tooltip-popup-delay="500">[Click here to query available reset options]</a>
+        </div>
+        <div style="padding-left:10px;margin-top:3px;" ng-show="vm.resets.availableResetOptions.length > 0">
+            <div class="uf-property">
+                <span>1. Choose: </span>
+                <select ng-model="vm.resets.selectedResetOption">
+                    <option ng-repeat="option in vm.resets.availableResetOptions">{{option}}</option>
+                </select>
+            </div>
+            <div>
+                <div>2. Action:</div>
+                <ul>
+                    <li>
+                        <tic-checkbox type="checkbox" ng-model="vm.resets.resetAfterLoad">
+                            <span>Execute selected reset after program load</span>
+                        </tic-checkbox>
+                    </li>
+                    <li>
+                        <button uib-tooltip="Perform standalone {{vm.resets.selectedResetOption}}" tooltip-placement="right" tooltip-popup-delay="500" type="button" class="btn btn-primary btn-sm" ng-click="vm.performReset(vm.resets.selectedResetOption)">Reset Now</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Actions section -->
+    <div style="padding:8px;border-bottom:1px solid #ddd;" ng-hide="vm.ufSession.isSerial() || vm.ufDS.runTargetAfterProgramLoadDisabled">
+        <div>
+            <span style="font-weight:500;font-size:14px;color:#595959;">Run Actions</span> 
+        </div>
+        <div style="padding:4px 8px">
+             <tic-checkbox ng-model="vm.ufDS.getRunTargetAfterProgramLoad()" ng-click="vm.ufDS.toggleRunTargetAfterProgramLoad()"> Run Target After Program Load/Flash Operation</tic-checkbox>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,174 @@
+<module name="KBD" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="KBD_REVISION" acronym="KBD_REVISION" offset="0x0" width="32" description="This register contains the IP revision code. A write to this register has no effect.">
+    <bitfield id="Reserved" width="32" begin="31" end="0" resetval="0x1" description="IP Revision" range="" rwaccess="R"/>
+  </register>
+  <register id="KBD_SYSCONFIG" acronym="KBD_SYSCONFIG" offset="0x10" width="32" description="This register controls the various parameters of the OCP interface">
+    <bitfield id="RESERVED" width="26" begin="31" end="6" resetval="0x000 0000" description="Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="EMUFREE" width="1" begin="5" end="5" resetval="0" description="Emulation mode" range="" rwaccess="RW">
+      <bitenum value="0" id="module_frozen" token="EMUFREE_0" description="The KBDOCP module is frozen in emulation mode (PINSUSPENDN signal active)."/>
+      <bitenum value="1" id="module_free" token="EMUFREE_1" description="The KBDOCP module runs free, regardless of PINSUSPENDN value."/>
+    </bitfield>
+    <bitfield id="IDLEMODE" width="2" begin="4" end="3" resetval="0x0" description="Power Management, req/ack control" range="" rwaccess="RW">
+      <bitenum value="0" id="force_idle" token="IDLEMODE_0" description="Force-idle. An idle request is acknowledged unconditionally."/>
+      <bitenum value="1" id="no_idle" token="IDLEMODE_1" description="No-idle. An idle request is never acknowledged."/>
+      <bitenum value="3" id="reserved" token="IDLEMODE_3" description="Reserved. Do not use."/>
+      <bitenum value="2" id="smart_idle" token="IDLEMODE_2" description="Smart-idle. Acknowledgement to an idle request is given based on the internal activity of the module."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="2" end="2" resetval="0" description="Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="SOFTRESET" width="1" begin="1" end="1" resetval="0" description="Software reset. Write: initiate software reset Read: Reset done (0) / Reset ongoing (1)" range="" rwaccess="RW">
+      <bitenum value="0" id="normal_mode" token="SOFTRESET_0" description="Normal mode"/>
+      <bitenum value="1" id="reset_mode" token="SOFTRESET_1" description="The module is reset"/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="0" end="0" resetval="0" description="Reads return 0." range="" rwaccess="R"/>
+  </register>
+  <register id="KBD_EOI" acronym="KBD_EOI" offset="0x1C" width="32" description="Software End-Of-Interrupt: Allows the generation of further pulses on the interrupt line, if an new interrupt event is pending, when using the pulsed output. Unused when using the level interrupt line (depending on module integration).">
+    <bitfield id="RESERVED" width="31" begin="31" end="1" resetval="0x0" description="Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="LINE_NUMBER" width="1" begin="0" end="0" resetval="0x0" description="Software End Of Interrupt (EOI) control. Write number of interrupt output." range="" rwaccess="RW">
+      <bitenum value="0" id="IT_EVENT_0" token="LINE_NUMBER_0" description="No event."/>
+      <bitenum value="1" id="IT_EVENT_1" token="LINE_NUMBER_1" description="An event occurs."/>
+    </bitfield>
+  </register>
+  <register id="KBD_IRQSTATUS_RAW" acronym="KBD_IRQSTATUS_RAW" offset="0x20" width="32" description="Per-event raw interrupt status vector Raw status is set even if event is not enabled. Write 1 to set the (raw) status, mostly for debug.">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x000 0000" description="Reads return 0" range="" rwaccess="R"/>
+    <bitfield id="MISS_EVENT" width="1" begin="3" end="3" resetval="0" description="IRQ status for Miss event Read 0 : No event pending Write 0 : No action Read 1 : IRQ event pending Write 1 : Trigger IRQ event by software" range="" rwaccess="RW"/>
+    <bitfield id="IT_TIMEOUT" width="1" begin="2" end="2" resetval="0" description="IRQ status for Timeout Read 0 : No event pending Write 0 : No action Read 1 : IRQ event pending Write 1 : Trigger IRQ event by software" range="" rwaccess="RW"/>
+    <bitfield id="IT_LONG_KEY" width="1" begin="1" end="1" resetval="0" description="IRQ status for Long key Read 0 : No event pending Write 0 : No action Read 1 : IRQ event pending Write 1 : Trigger IRQ event by software" range="" rwaccess="RW"/>
+    <bitfield id="IT_EVENT" width="1" begin="0" end="0" resetval="0" description="IRQ status for Event Read 0 : No event pending Write 0 : No action Read 1 : IRQ event pending Write 1 : Trigger IRQ event by software" range="" rwaccess="RW"/>
+  </register>
+  <register id="KBD_IRQSTATUS" acronym="KBD_IRQSTATUS" offset="0x24" width="32" description="Per-event 'enabled' interrupt status vector. Enabled status isn't set unless event is enabled. Write 1 to clear the status after interrupt has been serviced (raw status gets cleared, i.e. even if not enabled).">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x000 0000" description="Reads return 0" range="" rwaccess="R"/>
+    <bitfield id="MISS_EVENT" width="1" begin="3" end="3" resetval="0" description="IRQ status for Miss event Read always returns zero Write 0 : No action Write 1 : Clear pending event, if any" range="" rwaccess="RW"/>
+    <bitfield id="IT_TIMEOUT" width="1" begin="2" end="2" resetval="0" description="IRQ status for Timeout Read 0 : No event pending Write 0 : No action Read 1 : IRQ event pending Write 1 : Clear pending event, if any" range="" rwaccess="RW"/>
+    <bitfield id="IT_LONG_KEY" width="1" begin="1" end="1" resetval="0" description="IRQ status for Long key Read 0 : No event pending Write 0 : No action Read 1 : IRQ event pending Write 1 : Clear pending event, if any" range="" rwaccess="RW"/>
+    <bitfield id="IT_EVENT" width="1" begin="0" end="0" resetval="0" description="IRQ status for Event Read 0 : No event pending Write 0 : No action Read 1 : IRQ event pending Write 1 : Clear pending event, if any" range="" rwaccess="RW"/>
+  </register>
+  <register id="KBD_IRQENABLE_SET" acronym="KBD_IRQENABLE_SET" offset="0x28" width="32" description="Per-event interrupt enable bit vector Write 1 to set (enable interrupt). Readout equal to corresponding _CLR register.">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0000 0000" description="Reads return 0" range="" rwaccess="R"/>
+    <bitfield id="IT_TIMEOUT_EN" width="1" begin="2" end="2" resetval="0" description="IRQ enable for Timeout Read 0 : IRQ event is disabled Write 0 : No action Read 1 : IRQ event is enabled Write 1 : Set IRQ enable" range="" rwaccess="RW"/>
+    <bitfield id="IT_LONG_KEY_EN" width="1" begin="1" end="1" resetval="0" description="IRQ enable for Long key Read 0 : IRQ event is disabled Write 0 : No action Read 1 : IRQ event is enabled Write 1 : Set IRQ enable" range="" rwaccess="RW"/>
+    <bitfield id="IT_EVENT_EN" width="1" begin="0" end="0" resetval="0" description="IRQ enable for Event Read 0 : IRQ event is disabled Write 0 : No action Read 1 : IRQ event is enabled Write 1 : Set IRQ enable" range="" rwaccess="RW"/>
+  </register>
+  <register id="KBD_IRQENABLE_CLR" acronym="KBD_IRQENABLE_CLR" offset="0x2C" width="32" description="Per-event interrupt enable bit vector Write 1 to clear (disable interrupt). Readout equal to corresponding _SET register.">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0000 0000" description="Reads return 0" range="" rwaccess="R"/>
+    <bitfield id="IT_TIMEOUT_EN" width="1" begin="2" end="2" resetval="0" description="IRQ enable for Timeout Read 0 : IRQ event is disabled Write 0 : No action Read 1 : IRQ event is enabled Write 1 : Clear IRQ enable" range="" rwaccess="RW"/>
+    <bitfield id="IT_LONG_KEY_EN" width="1" begin="1" end="1" resetval="0" description="IRQ enable for Long key Read 0 : IRQ event is disabled Write 0 : No action Read 1 : IRQ event is enabled Write 1 : Clear IRQ enable" range="" rwaccess="RW"/>
+    <bitfield id="IT_EVENT_EN" width="1" begin="0" end="0" resetval="0" description="IRQ enable for Event Read 0 : IRQ event is disabled Write 0 : No action Read 1 : IRQ event is enabled Write 1 : Clear IRQ enable" range="" rwaccess="RW"/>
+  </register>
+  <register id="KBD_IRQWAKEEN" acronym="KBD_IRQWAKEEN" offset="0x30" width="32" description="The Keyboard Wake-up Enable Register allows the user to mask the expected source of wake-up event that will generate a wake-up request. The is programmed synchronously with the interface clock before any idle mode request comes from the host processor.">
+    <bitfield id="RESERVED" width="29" begin="31" end="3" resetval="0x0000 0000" description="Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="WUP_TIMEOUT_ENA" width="1" begin="2" end="2" resetval="0" description="Timeout wakeup enable." range="" rwaccess="RW">
+      <bitenum value="0" id="WUP_TIMEOUT_ENA_0" token="WUP_TIMEOUT_ENA_0" description="Timeout wakeup generation disabled."/>
+      <bitenum value="1" id="WUP_TIMEOUT_ENA_1" token="WUP_TIMEOUT_ENA_1" description="Timeout wakeup generation enabled."/>
+    </bitfield>
+    <bitfield id="WUP_LONG_KEY_ENA" width="1" begin="1" end="1" resetval="0" description="Long key wakeup enable." range="" rwaccess="RW">
+      <bitenum value="0" id="WUP_LONG_KEY_ENA_0" token="WUP_LONG_KEY_ENA_0" description="Long key wakeup generation disabled."/>
+      <bitenum value="1" id="WUP_LONG_KEY_ENA_1" token="WUP_LONG_KEY_ENA_1" description="Long key wakeup generation enabled."/>
+    </bitfield>
+    <bitfield id="WUP_EVENT_ENA" width="1" begin="0" end="0" resetval="0" description="Event wakeup enable." range="" rwaccess="RW">
+      <bitenum value="0" id="WUP_EVENT_ENA_0" token="WUP_EVENT_ENA_0" description="Event wakeup generation disabled."/>
+      <bitenum value="1" id="WUP_EVENT_ENA_1" token="WUP_EVENT_ENA_1" description="Event wakeup generation enabled."/>
+    </bitfield>
+  </register>
+  <register id="KBD_PENDING" acronym="KBD_PENDING" offset="0x34" width="32" description="The software must read the pending write bits to insure that following write access will not be discarded due to on going write synchronization process. These bits are automatically cleared by internal logic when the write to the corresponding register is acknowledged.">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x000 0000" description="Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="PEND_TIMEOUT" width="1" begin="3" end="3" resetval="0" description="Write pending bit forKBD_TIMEOUT register" range="" rwaccess="R">
+      <bitenum value="1" id="PEND_TIMEOUT_1" token="PEND_TIMEOUT_1_r" description="A write is pending to the register"/>
+      <bitenum value="0" id="PEND_TIMEOUT_0" token="PEND_TIMEOUT_0_r" description="No write pending to the register"/>
+    </bitfield>
+    <bitfield id="PEND_LONG_KEY" width="1" begin="2" end="2" resetval="0" description="Write pending bit forKBD_KEYLONGTIME register" range="" rwaccess="R">
+      <bitenum value="1" id="PEND_LONGKEY_1" token="PEND_LONG_KEY_1_r" description="A write is pending to the register"/>
+      <bitenum value="0" id="PEND_LONGKEY_0" token="PEND_LONG_KEY_0_r" description="No write pending to the register"/>
+    </bitfield>
+    <bitfield id="PEND_DEBOUNCING" width="1" begin="1" end="1" resetval="0" description="Write pending bit forKBD_DEBOUNCINGTIME register" range="" rwaccess="R">
+      <bitenum value="1" id="PEND_DEBOUNCING_1" token="PEND_DEBOUNCING_1_r" description="A write is pending to the register"/>
+      <bitenum value="0" id="PEND_DEBOUNCING_0" token="PEND_DEBOUNCING_0_r" description="No write pending to the register"/>
+    </bitfield>
+    <bitfield id="PEND_CTRL" width="1" begin="0" end="0" resetval="0" description="Write pending bit forKBD_CTRL register" range="" rwaccess="R">
+      <bitenum value="1" id="PEND_CTRL_1" token="PEND_CTRL_1_r" description="A write is pending to the register"/>
+      <bitenum value="0" id="PEND_CTRL_0" token="PEND_CTRL_0_r" description="No write pending to the register"/>
+    </bitfield>
+  </register>
+  <register id="KBD_CTRL" acronym="KBD_CTRL" offset="0x38" width="32" description="This register sets the functional configuration of the module.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x00 0000" description="Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="REPEAT_MODE" width="1" begin="8" end="8" resetval="0" description="Repeat mode enable." range="" rwaccess="RW">
+      <bitenum value="0" id="REPEAT_MODE_0" token="REPEAT_MODE_0" description="Repeat mode detection disabled."/>
+      <bitenum value="1" id="REPEAT_MODE_1" token="REPEAT_MODE_1" description="Repeat mode detection enabled."/>
+    </bitfield>
+    <bitfield id="TIMEOUT_LONG_KEY" width="1" begin="7" end="7" resetval="0" description="Timeout long key mode enable." range="" rwaccess="RW">
+      <bitenum value="0" id="TIMEOUT_LONG_KEY_0" token="TIMEOUT_LONG_KEY_0" description="Timeout long key mode disabled."/>
+      <bitenum value="1" id="TIMEOUT_LONG_KEY_1" token="TIMEOUT_LONG_KEY_1" description="Timeout long key mode enabled."/>
+    </bitfield>
+    <bitfield id="TIMEOUT_EMPTY" width="1" begin="6" end="6" resetval="0" description="Timeout empty mode enable." range="" rwaccess="RW">
+      <bitenum value="0" id="TIMEOUT_EMPTY_0" token="TIMEOUT_EMPTY_0" description="Timeout long key mode disabled."/>
+      <bitenum value="1" id="TIMEOUT_EMPTY_1" token="TIMEOUT_EMPTY_1" description="Timeout long key mode enabled."/>
+    </bitfield>
+    <bitfield id="LONG_KEY" width="1" begin="5" end="5" resetval="0" description="Long key mode enable." range="" rwaccess="RW">
+      <bitenum value="0" id="LONG_KEY_0" token="LONG_KEY_0" description="Long key mode disabled."/>
+      <bitenum value="1" id="LONG_KEY_1" token="LONG_KEY_1" description="Long key mode enabled."/>
+    </bitfield>
+    <bitfield id="PTV" width="3" begin="4" end="2" resetval="0x7" description="Pre-scale clock timer value." range="" rwaccess="RW"/>
+    <bitfield id="NSOFTWARE_MODE" width="1" begin="1" end="1" resetval="1" description="Select hardware or software mode for key decoding." range="" rwaccess="RW">
+      <bitenum value="0" id="NSOFTWARE_MODE_0" token="NSOFTWARE_MODE_0" description="Enable software mode."/>
+      <bitenum value="1" id="NSOFTWARE_MODE_1" token="NSOFTWARE_MODE_1" description="Enable hardware decoding using internal sequencer."/>
+    </bitfield>
+    <bitfield id="RESERVED" width="1" begin="0" end="0" resetval="0" description="Reads return 0." range="" rwaccess="R"/>
+  </register>
+  <register id="KBD_DEBOUNCINGTIME" acronym="KBD_DEBOUNCINGTIME" offset="0x3C" width="32" description="This register is used to filter glitches on the press key or release key.">
+    <bitfield id="RESERVED" width="26" begin="31" end="6" resetval="0x000 0000" description="Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="DEBOUNCING_VALUE" width="6" begin="5" end="0" resetval="0x00" description="This value correspond to the desired value of debouncing time." range="" rwaccess="RW"/>
+  </register>
+  <register id="KBD_KEYLONGTIME" acronym="KBD_KEYLONGTIME" offset="0x40" width="32" description="This register is used to measure duration of a key press, to allow, shortcut detection.">
+    <bitfield id="RESERVED" width="20" begin="31" end="12" resetval="0x0 0000" description="Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="LONG_KEY_VALUE" width="12" begin="11" end="0" resetval="0x000" description="This value correspond to the desired value of the long key interrupt or repeat mode value." range="" rwaccess="RW"/>
+  </register>
+  <register id="KBD_TIMEOUT" acronym="KBD_TIMEOUT" offset="0x44" width="32" description="This register is used to detect a long inactivity on the keyboard.">
+    <bitfield id="RESERVED" width="16" begin="31" end="16" resetval="0x0000" description="Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="TIMEOUT_VALUE" width="16" begin="15" end="0" resetval="0x0000" description="This value correspond to the desired value of the time out interrupt." range="" rwaccess="RW"/>
+  </register>
+  <register id="KBD_STATEMACHINE" acronym="KBD_STATEMACHINE" offset="0x48" width="32" description="This register indicates the state of the sequencer.">
+    <bitfield id="RESERVED" width="28" begin="31" end="4" resetval="0x000 0000" description="Reads return 0" range="" rwaccess="R"/>
+    <bitfield id="STATE_MACHINE" width="4" begin="3" end="0" resetval="0x0" description="The state of internal state machine." range="" rwaccess="R"/>
+  </register>
+  <register id="KBD_ROWINPUTS" acronym="KBD_ROWINPUTS" offset="0x4C" width="32" description="This register stores the value of the rows input.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x00 0000" description="Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="KBR_LATCH" width="9" begin="8" end="0" resetval="0x000" description="The value of the rows input." range="" rwaccess="R"/>
+  </register>
+  <register id="KBD_COLUMNOUTPUTS" acronym="KBD_COLUMNOUTPUTS" offset="0x50" width="32" description="This register holds the value of the columns output.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x00 0000" description="Reads return 0." range="" rwaccess="R"/>
+    <bitfield id="KBC_REG" width="9" begin="8" end="0" resetval="0x000" description="The value of the columns output." range="" rwaccess="RW"/>
+  </register>
+  <register id="KBD_FULLCODE31_0" acronym="KBD_FULLCODE31_0" offset="0x54" width="32" description="The register codes the row 0, row 1, row 2 and row 3">
+    <bitfield id="FULL_CODE_31_0" width="32" begin="31" end="0" resetval="0x0000 0000" description="A bit at one indicate that the corresponding key is pressed." range="" rwaccess="R"/>
+  </register>
+  <register id="KBD_FULLCODE63_32" acronym="KBD_FULLCODE63_32" offset="0x58" width="32" description="The register codes the row 4, row 5, row 6 and row 7.">
+    <bitfield id="FULL_CODE_63_32" width="32" begin="31" end="0" resetval="0x0000 0000" description="A bit at one indicate that the corresponding key is pressed." range="" rwaccess="R"/>
+  </register>
+  <register id="KBD_FULLCODE17_0" acronym="KBD_FULLCODE17_0" offset="0x5C" width="32" description="The register codes the row 0 and row 1. The row 0 is coded between bit 0 and 8, the row 1 is coded between bit 24 and">
+    <bitfield id="RESERVED" width="7" begin="31" end="25" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="ROW1" width="9" begin="24" end="16" resetval="0x000" description="A bit at one indicate that the corresponding key is pressed." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="7" begin="15" end="9" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="ROW0" width="9" begin="8" end="0" resetval="0x000" description="A bit at one indicate that the corresponding key is pressed." range="" rwaccess="R"/>
+  </register>
+  <register id="KBD_FULLCODE35_18" acronym="KBD_FULLCODE35_18" offset="0x60" width="32" description="The register codes the row 2 and row 3. The row 2 is coded between bit 0 and 8, the row 3 is coded between bit 24 and 16">
+    <bitfield id="RESERVED" width="7" begin="31" end="25" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="ROW3" width="9" begin="24" end="16" resetval="0x000" description="A bit at one indicate that the corresponding key is pressed." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="7" begin="15" end="9" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="ROW2" width="9" begin="8" end="0" resetval="0x000" description="A bit at one indicate that the corresponding key is pressed." range="" rwaccess="R"/>
+  </register>
+  <register id="KBD_FULLCODE53_36" acronym="KBD_FULLCODE53_36" offset="0x64" width="32" description="The register codes the row 4 and row 5. The row 4 is coded between bit 0 and 8, the row 5 is coded between bit 24 and 16.">
+    <bitfield id="RESERVED" width="7" begin="31" end="25" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="ROW5" width="9" begin="24" end="16" resetval="0x000" description="A bit at one indicate that the corresponding key is pressed." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="7" begin="15" end="9" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="ROW4" width="9" begin="8" end="0" resetval="0x000" description="A bit at one indicate that the corresponding key is pressed." range="" rwaccess="R"/>
+  </register>
+  <register id="KBD_FULLCODE71_54" acronym="KBD_FULLCODE71_54" offset="0x68" width="32" description="The register codes the row 6 and row 7. The row 0 is coded between bit 0 and 8, the row 1 is coded between bit 24 and 16">
+    <bitfield id="RESERVED" width="7" begin="31" end="25" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="ROW7" width="9" begin="24" end="16" resetval="0x000" description="A bit at one indicate that the corresponding key is pressed." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="7" begin="15" end="9" resetval="0x00" description="" range="" rwaccess="R"/>
+    <bitfield id="ROW6" width="9" begin="8" end="0" resetval="0x000" description="A bit at one indicate that the corresponding key is pressed." range="" rwaccess="R"/>
+  </register>
+  <register id="KBD_FULLCODE80_72" acronym="KBD_FULLCODE80_72" offset="0x6C" width="32" description="The register codes the row 8. The row 8 is coded between bit 0 and 8.">
+    <bitfield id="RESERVED" width="23" begin="31" end="9" resetval="0x00 0000" description="" range="" rwaccess="R"/>
+    <bitfield id="ROW8" width="9" begin="8" end="0" resetval="0x000" description="A bit at one indicate that the corresponding key is pressed." range="" rwaccess="R"/>
+  </register>
+</module>

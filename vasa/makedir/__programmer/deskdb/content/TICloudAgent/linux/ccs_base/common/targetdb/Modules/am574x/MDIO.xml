@@ -1,0 +1,80 @@
+<module name="MDIO" acronym="" XML_version="1.0" HW_revision="n/a" description="">
+  <register id="MDIO_VER" acronym="MDIO_VER" offset="0x0" width="32" description="MDIO Revision">
+    <bitfield id="REVISION" width="32" begin="31" end="0" resetval="0x-" description="MDIO revision value" range="" rwaccess="RW"/>
+  </register>
+  <register id="MDIO_CONTROL" acronym="MDIO_CONTROL" offset="0x4" width="32" description="MDIO Control register">
+    <bitfield id="IDLE" width="1" begin="31" end="31" resetval="0x0" description="MDIO state machine IDLE. Set to 1 when the state machine is in the idle state. 0: State machine is not in idle state. 1: State machine is in idle state." range="" rwaccess="R"/>
+    <bitfield id="ENABLE" width="1" begin="30" end="30" resetval="0x0" description="Enable control. If the MDIO state machine is active at the time it is disabled, it will complete the current operation before halting and setting the IDLE bit. If using byte access, the ENABLE bit has to be the last bit written in this register. 0: Disables the MDIO state machine. 1: Enable the MDIO state machine." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="29" end="29" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="HIGHEST_USER_CHANNEL" width="5" begin="28" end="24" resetval="0x0" description="Highest user channel. This field specifies the highest user access channel that is available in the module and is currently set to 1. This implies that theMDIO_USERACCESS1 register is the highest available user access channel." range="" rwaccess="R"/>
+    <bitfield id="RESERVED" width="3" begin="23" end="21" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PREAMBLE" width="1" begin="20" end="20" resetval="0x0" description="Preamble disable. 0: Standard MDIO preamble is used. 1: Disables this device from sending MDIO frame preambles." range="" rwaccess="RW"/>
+    <bitfield id="FAULT" width="1" begin="19" end="19" resetval="0x0" description="Fault indicator. This bit is set to 1 if the MDIO pins fail to read back what the device is driving onto them. This indicates a physical layer fault and the module state machine is reset. Writing a 1 to it clears this bit. 0: No failure. 1: Physical layer fault; the MDIO state machine is reset." range="" rwaccess="RW"/>
+    <bitfield id="FAULTENB" width="1" begin="18" end="18" resetval="0x0" description="Fault detect enable. This bit has to be set to 1 to enable the physical layer fault detection. 0: Disables the physical layer fault detection. 1: Enables the physical layer fault detection." range="" rwaccess="RW"/>
+    <bitfield id="INTTESTENB" width="1" begin="17" end="17" resetval="0x0" description="Interrupt test enable. This bit can be set to 1 to enable the host to set the USERINT and LINKINT bits for test purposes. 0: Interrupt bits are not set. 1: Enables the host to set the USERINT and LINKINT bits for test purposes." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="16" end="16" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="CLKDIV" width="16" begin="15" end="0" resetval="0x0" description="Clock divider. This field specifies the division ratio between ICLK and the frequency of MDCLK. MDCLK is disabled when CLKDIV is set to 0. MDCLK frequency = ICLK frequency/(CLKDIV+1)." range="" rwaccess="RW"/>
+  </register>
+  <register id="MDIO_ALIVE" acronym="MDIO_ALIVE" offset="0x8" width="32" description="PHY Alive Status Register">
+    <bitfield id="ALIVE" width="32" begin="31" end="0" resetval="0x0" description="MDIO alive. Each of the 32 bits of this register is set if the most recent access to the PHY with address corresponding to the register bit number was acknowledged by the PHY, the bit is reset if the PHY fails to acknowledge the access. Both the user and polling accesses to a PHY will cause the corresponding alive bit to be updated. The alive bits are only meant to be used to give an indication of the presence or not of a PHY with the corresponding address. Writing a 1 to any bit will clear it, writing a 0 has no effect." range="" rwaccess="RW"/>
+  </register>
+  <register id="MDIO_LINK" acronym="MDIO_LINK" offset="0xC" width="32" description="PHY Link Status">
+    <bitfield id="LINK" width="32" begin="31" end="0" resetval="0x0" description="MDIO link state. This register is updated after a read of the Generic Status Register of a PHY. The bit is set if the PHY with the corresponding address has link and the PHY acknowledges the read transaction. The bit is reset if the PHY indicates it does not have link or fails to acknowledge the read transaction. Writes to the register have no effect. In addition, the status of the two PHYs specified in the MDIO_USERPHYSEL registers can be determined using the MLINK input pins (NOT PINNED OUT). This is determined by the LINKSEL bit in the MDIO_USERPHYSEL register." range="" rwaccess="R"/>
+  </register>
+  <register id="MDIO_LINKINTRAW" acronym="MDIO_LINKINTRAW" offset="0x10" width="32" description="">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="LINKINTRAW" width="2" begin="1" end="0" resetval="0x0" description="MDIO link change event, raw value." range="" rwaccess="RW"/>
+  </register>
+  <register id="MDIO_LINKINTMASKED" acronym="MDIO_LINKINTMASKED" offset="0x14" width="32" description="MDIO Link Status Change Interrupt Register">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="LINKINTMASKED" width="2" begin="1" end="0" resetval="0x0" description="MDIO link change interrupt, masked value. When asserted 1, a bit indicates that there was an MDIO link change event (i.e. change in the MDIO Link register) corresponding to the PHY address in the MDIO_USERPHYSEL register and the corresponding LINKINTENB bit was set. LINKINTMASKED[0] and LINKINTMASKED[1] correspond toMDIO_USERPHYSEL0 and MDIO_USERPHYSEL1, respectively. Writing a 1 will clear the interrupt and writing 0 has no effect. If the INTTESTENB bit in the MDIO_CONTROL register is set, the host may set the LINKINT bits to a 1. This mode may be used for test purposes." range="" rwaccess="RW"/>
+  </register>
+  <register id="MDIO_USERINTRAW" acronym="MDIO_USERINTRAW" offset="0x20" width="32" description="MDIO User Command Complete Interrupt">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="USERINTRAW" width="2" begin="1" end="0" resetval="0x0" description="Raw value of MDIO user command complete event for theMDIO_USERACCESS1 and MDIO_USERACCESS0 register, respectively. When asserted 1, a bit indicates that the previously scheduled PHY read or write command using that particular MDIO_USERACCESS register has completed. Writing a 1 will clear the event and writing 0 has no effect. If the INTTESTENB bit in the MDIO_CONTROL register is set, the host may set the USERINTRAW bits to a 1. This mode may be used for test purposes." range="" rwaccess="RW"/>
+  </register>
+  <register id="MDIO_USERINTMASKED" acronym="MDIO_USERINTMASKED" offset="0x24" width="32" description="MDIO User Command Complete Interrupt">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="USERINTMASKED" width="2" begin="1" end="0" resetval="0x0" description="Masked value of MDIO user command complete interrupt for theMDIO_USERACCESS1 and MDIO_USERACCESS0 register, respectively. When asserted 1, a bit indicates that the previously scheduled PHY read or write command using that particular MDIO_USERACCESS register has completed and the corresponding USERINTMASKSET bit is set to 1. Writing a 1 will clear the interrupt and writing 0 has no effect. If the INTTESTENB bit in the MDIO_CONTROL register is set, the host may set the USERINTMASKED bits to a 1. This mode may be used for test purposes." range="" rwaccess="RW"/>
+  </register>
+  <register id="MDIO_USERINTMASKSET" acronym="MDIO_USERINTMASKSET" offset="0x28" width="32" description="MDIO User Command Complete Interrupt Mask Set">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="USERINTMASKSET" width="2" begin="1" end="0" resetval="0x0" description="MDIO user interrupt mask set for USERINTMASKED[1:0], respectively. Writing a bit to 1 will enable MDIO user command complete interrupts for that particular MDIO_USERACCESS register. MDIO user interrupt for a particular MDIO_USERACCESS register is disabled if the corresponding bit is 0. Writing a 0 to this register has no effect." range="" rwaccess="RW"/>
+  </register>
+  <register id="MDIO_USERINTMASKCLR" acronym="MDIO_USERINTMASKCLR" offset="0x2C" width="32" description="MDIO User Command Complete Interrupt Mask Clear">
+    <bitfield id="RESERVED" width="30" begin="31" end="2" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="USERINTMASKCLEAR" width="2" begin="1" end="0" resetval="0x0" description="MDIO user command complete interrupt mask clear for USERINTMASKED[1:0], respectively. Writing a bit to 1 will disable further user command complete interrupts for that particular MDIO_USERACCESS register. Writing a 0 to this register has no effect." range="" rwaccess="RW"/>
+  </register>
+  <register id="MDIO_USERACCESS0" acronym="MDIO_USERACCESS0" offset="0x80" width="32" description="MDIO_User_Access">
+    <bitfield id="GO" width="1" begin="31" end="31" resetval="0x0" description="Go. Writing a 1 to this bit causes the MDIO state machine to perform an MDIO access when it is convenient for it to do so, this is not an instantaneous process. Writing a 0 to this bit has no effect. This bit is write able only if the MDIO state machine is enabled. This bit will self clear when the requested access has been completed. Any writes to theMDIO_USERACCESS0 register are blocked when the GO bit is 1. If byte access is being used, the GO bit should be written last." range="" rwaccess="RW"/>
+    <bitfield id="WRITE" width="1" begin="30" end="30" resetval="0x0" description="Write enable. Setting this bit to a 1 causes the MDIO transaction to be a register write, otherwise it is a register read." range="" rwaccess="RW"/>
+    <bitfield id="ACK" width="1" begin="29" end="29" resetval="0x0" description="Acknowledge. This bit is set if the PHY acknowledged the read transaction." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="28" end="26" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="REGADR" width="5" begin="25" end="21" resetval="0x0" description="Register address. Specifies the PHY register to be accessed for this transaction." range="" rwaccess="RW"/>
+    <bitfield id="PHYADR" width="5" begin="20" end="16" resetval="0x0" description="PHY address. Specifies the PHY to be accesses for this transaction." range="" rwaccess="RW"/>
+    <bitfield id="DATA" width="16" begin="15" end="0" resetval="0x0" description="User data. The data value read from or to be written to the specified PHY register." range="" rwaccess="RW"/>
+  </register>
+  <register id="MDIO_USERPHYSEL0" acronym="MDIO_USERPHYSEL0" offset="0x84" width="32" description="MDIO User PHY Select">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="LINKSEL" width="1" begin="7" end="7" resetval="0x0" description="Link status determination select. Set to 1 to determine link status using the MLINK pin (NOT PINNED OUT). Default value is 0 which implies that the link status is determined by the MDIO state machine." range="" rwaccess="RW"/>
+    <bitfield id="LINKINTENB" width="1" begin="6" end="6" resetval="0x0" description="Link change interrupt enable. Set to 1 to enable link change status interrupts for PHY address specified in PHYADDRMON. Link change interrupts are disabled if this bit is set to 0. 0: Link change interrupts are disabled. 1: Link change status interrupts for PHY address specified in PHYADDRMON bits are enabled." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="5" end="5" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PHYADDRMON" width="5" begin="4" end="0" resetval="0x0" description="PHY address whose link status is to be monitored." range="" rwaccess="RW"/>
+  </register>
+  <register id="MDIO_USERACCESS1" acronym="MDIO_USERACCESS1" offset="0x88" width="32" description="MDIO User Access">
+    <bitfield id="GO" width="1" begin="31" end="31" resetval="0x0" description="Go. Writing a 1 to this bit causes the MDIO state machine to perform an MDIO access when it is convenient for it to do so, this is not an instantaneous process. Writing a 0 to this bit has no effect. This bit is write able only if the MDIO state machine is enabled. This bit will self clear when the requested access has been completed. Any writes to theMDIO_USERACCESS1 register are blocked when the GO bit is 1. If byte access is being used, the GO bit should be written last." range="" rwaccess="RW"/>
+    <bitfield id="WRITE" width="1" begin="30" end="30" resetval="0x0" description="Write enable. Setting this bit to a 1 causes the MDIO transaction to be a register write, otherwise it is a register read." range="" rwaccess="RW"/>
+    <bitfield id="ACK" width="1" begin="29" end="29" resetval="0x0" description="Acknowledge. This bit is set if the PHY acknowledged the read transaction." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="3" begin="28" end="26" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="REGADR" width="5" begin="25" end="21" resetval="0x0" description="Register address. Specifies the PHY register to be accessed for this transaction." range="" rwaccess="RW"/>
+    <bitfield id="PHYADR" width="5" begin="20" end="16" resetval="0x0" description="PHY address. Specifies the PHY to be accesses for this transaction." range="" rwaccess="RW"/>
+    <bitfield id="DATA" width="16" begin="15" end="0" resetval="0x0" description="User data. The data value read from or to be written to the specified PHY register." range="" rwaccess="RW"/>
+  </register>
+  <register id="MDIO_USERPHYSEL1" acronym="MDIO_USERPHYSEL1" offset="0x8C" width="32" description="MDIO User PHY Select">
+    <bitfield id="RESERVED" width="24" begin="31" end="8" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="LINKSEL" width="1" begin="7" end="7" resetval="0x0" description="Link status determination select. Set to 1 to determine link status using the MLINK pin (NOT PINNED OUT). Default value is 0 which implies that the link status is determined by the MDIO state machine." range="" rwaccess="RW"/>
+    <bitfield id="LINKINTENB" width="1" begin="6" end="6" resetval="0x0" description="Link change interrupt enable. Set to 1 to enable link change status interrupts for PHY address specified in PHYADDRMON. Link change interrupts are disabled if this bit is set to 0. 0: Link change interrupts are disabled. 1: Link change status interrupts for PHY address specified in PHYADDRMON bits are enabled." range="" rwaccess="RW"/>
+    <bitfield id="RESERVED" width="1" begin="5" end="5" resetval="0x0" description="" range="" rwaccess="R"/>
+    <bitfield id="PHYADDRMON" width="5" begin="4" end="0" resetval="0x0" description="PHY address whose link status is to be monitored." range="" rwaccess="RW"/>
+  </register>
+</module>

@@ -1,0 +1,4090 @@
+// *  66AKH12 GEL File
+// *
+// *  This is the GEL file for use in Code Composer Studio for the 66AKE05/02 (Edison) platform.
+// *
+// *  Copyright (C) 2013 Texas Instruments Incorporated - http://www.ti.com/
+// *
+// *
+// *  Redistribution and use in source and binary forms, with or without
+// *  modification, are permitted provided that the following conditions
+// *  are met:
+// *
+// *    Redistributions of source code must retain the above copyright
+// *    notice, this list of conditions and the following disclaimer.
+// *
+// *    Redistributions in binary form must reproduce the above copyright
+// *    notice, this list of conditions and the following disclaimer in the
+// *    documentation and/or other materials provided with the
+// *    distribution.
+// *
+// *    Neither the name of Texas Instruments Incorporated nor the names of
+// *    its contributors may be used to endorse or promote products derived
+// *    from this software without specific prior written permission.
+// *
+// *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// *  OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+// *  KeyStone2 Emupack version "xxx"
+
+#define GEL_VERSION                    0.1
+
+// Default system reference clock is 156.25 MHz.
+#define CLKIN_DEFAULT                156250000
+
+/* BB register field read macro */
+#define BB_REG_FIELD_READ(reg_value, reg_high, reg_low) (((reg_value)&((0xFFFFFFFF>>((31-reg_high)+reg_low))<<reg_low))>>reg_low)
+
+
+//    Abreviations:
+//
+//    MPAX        XMC Memory Protection and Address eXtension
+//    MSMC        Multicore Shared Memory Controller
+//    PA            Packet Accelerator
+//    PLL            Phase-Locked Loop
+//    PSC            Power Sleep Controller
+//    SERDES
+//    XMC            eXternal Memory Controller - extends 32-bit memory space to 36-bit and provides protection
+
+
+// Enable for when Manually using CCS and AVV Framework style memory map
+#define SYSTEM_RESET_BEFORE_FILE_LOAD_ENABLE    (0)
+#define ON_RESET_CODE_ENABLE                    (1)
+#define ON_TARGET_CONNECT_CODE_ENABLE           (1)
+#define ON_FILE_LOAD_CODE_ENABLE                (1)
+#define AVV_MEM_MAP                             (0)
+
+
+
+// Global Register and constant definitions
+
+#define DDR3_BASE_ADDRESS                       (0x80000000u)
+#define PSC_BASE_ADDRESS                        (0x02350000u)
+
+#define KICK0_UNLOCK                            (0x83E70B13u)
+#define KICK1_UNLOCK                            (0x95A4F1E0u)
+#define KICK_LOCK                               (0)
+
+// Global timeout value
+#define GTIMEOUT                                (2000)
+
+//*****************************************************
+//
+// BOOT and CONFIG dsp system modules Definitions
+//
+
+#define MM_REVID                                (*(unsigned int *)(0x01812000u))
+#define VERSION_MASK                            (0xFFFF0000u)
+#define VERSION_SHIFT                           (16)
+#define REVISION_MASK                           (0x0000FFFFu)
+
+#define CHIP_LEVEL_REG                          (0x02620000u)
+#define DIEID0                                  (*(unsigned int*)(CHIP_LEVEL_REG + 0x0008))
+#define DIEID1                                  (*(unsigned int*)(CHIP_LEVEL_REG + 0x000C))
+#define DIEID2                                  (*(unsigned int*)(CHIP_LEVEL_REG + 0x0010))
+#define DIEID3                                  (*(unsigned int*)(CHIP_LEVEL_REG + 0x0014))
+#define JTAGID                                  (*(unsigned int*)(CHIP_LEVEL_REG + 0x0018))
+#define DEVSTAT                                 (*(unsigned int*)(CHIP_LEVEL_REG + 0x0020))        /* See Chapter 7 of SPRS866, Device Boot and Configuration for more info*/
+#define KICK0                                   (*(unsigned int*)(CHIP_LEVEL_REG + 0x0038))
+#define KICK1                                   (*(unsigned int*)(CHIP_LEVEL_REG + 0x003C))
+#define MACID1                                  (*(unsigned int*)(CHIP_LEVEL_REG + 0x0110))
+#define MACID2                                  (*(unsigned int*)(CHIP_LEVEL_REG + 0x0114))
+#define TINPSEL                                 (*(unsigned int*)(CHIP_LEVEL_REG + 0x0300))
+#define TOUTPSEL                                (*(unsigned int*)(CHIP_LEVEL_REG + 0x0304))
+#define DEVSPEED                                (*(unsigned int*)(CHIP_LEVEL_REG + 0x03F8))        /* Device speed grade
+
+#define DEVSTAT_BOOTMODE_MASK                   (0x000001FEu)                                        /*DEVSTAT[16:1] contains BOOTMODE*/
+#define DEVSTAT_ARM_PLL_CONFIG_MASK             (0x00000E00u)                                        /*DEVSTAT[11:9] contains ARM PLL CONFIG*/
+#define DEVSTAT_MAIN_PLL_CTRL_CONFIG_MASK       (0x000000E0u)                                /*DEVSTAT[7:5] contains SYS PLL CONFIG*/
+#define DEVSTAT_BOOTMODE_DEVICE_MASK            (0x0001401Eu)                                        /*DEVSTAT[16-14-4-3-2-1] contains BOOTMODE DEVICE*/
+
+// Supported boot modes; encoded with BOOTMODE[4] (Minumum boot pin select - usually a don't care though) and BOOTMODE[3:1]
+// BOOTMODE[8] determines C66x vs ARM master
+
+#define SLEEP_BOOT                              (0x00000000u)
+#define I2C_SLAVE_BOOT                          (0x00004000u)
+#define I2C_MASTER_BOOT                         (0x00000002u)
+#define SPI_BOOT                                (0x00000004u)
+#define EMIF_ARM_MASTER_BOOT                    (0x00000005u)
+#define EMIF_C66X_MASTER_BOOT                   (0x00000105u)
+#define NAND_ARM_MASTER_BOOT                    (0x00010005u)
+#define NAND_C66X_MASTER_BOOT                   (0x00010105u)
+#define SRIO_ARM_MASTER_BOOT                    (0x00000008u)
+#define SRIO_C66X_MASTER_BOOT                   (0x00000108u)
+#define ETH_ARM_MASTER_BOOT                     (0x0000000Au)
+#define ETH_C66X_MASTER_BOOT                    (0x0000010Au)
+#define PCIE_ARM_MASTER_BOOT                    (0x0000000Cu)
+#define PCIE_C66X_MASTER_BOOT                   (0x0000010Cu)
+#define HYPR_ARM_MASTER_BOOT                    (0x0000001Cu)
+#define HYPR_C66X_MASTER_BOOT                   (0x0000011Cu)
+#define UART_ARM_MASTER_BOOT                    (0x0000000Eu)
+#define UART_C66X_MASTER_BOOT                   (0x0000010Eu)
+
+#define C66X_BOOT_MASTER                        (0)
+#define ARM_BOOT_MASTER                         (1)
+#define SLAVE_BOOT                              (2)
+
+// Hardware Register Definitions
+
+// Global variables to hold boot mode data- can be useful for other functions as well
+//
+// Note: only those values relavent to a given boot mode will be touched
+// FYI: global variables use a Pascal_Case_With_Underscore_Convention
+unsigned int Devstat_Device_Endianess           = 0xBAD;
+unsigned int Devstat_Boot_Mode                  = 0xBAD;
+unsigned int Devstat_Min                        = 0xBAD;
+unsigned int Devstat_Sys_Pll_Config             = 0xBAD;
+unsigned int Devstat_Boot_Master                = 0xBAD;
+unsigned int Devstat_Arm_Pll_Config             = 0xBAD;
+unsigned int Devstat_Sys_En                     = 0xBAD;
+unsigned int Devstat_Arm_En                     = 0xBAD;
+unsigned int Devstat_Port                       = 0xBAD;
+unsigned int Devstat_Slave_Addr                 = 0xBAD;
+unsigned int Devstat_Param_Idx                  = 0xBAD;
+unsigned int Devstat_Mode                       = 0xBAD;
+unsigned int Devstat_Npin                       = 0xBAD;
+unsigned int Devstat_Bus_Addr                   = 0xBAD;
+unsigned int Devstat_Csel                       = 0xBAD;
+unsigned int Devstat_Width                      = 0xBAD;
+unsigned int Devstat_Wait                       = 0xBAD;
+unsigned int Devstat_Base_Addr                  = 0xBAD;
+unsigned int Devstat_Chip_Sel                   = 0xBAD;
+unsigned int Devstat_Clear                      = 0xBAD;
+unsigned int Devstat_First_Block                = 0xBAD;
+unsigned int Devstat_Lane_Setup                 = 0xBAD;
+unsigned int Devstat_Data_Rate                  = 0xBAD;
+unsigned int Devstat_Ref_Clk                    = 0xBAD;
+unsigned int Devstat_Lane                       = 0xBAD;
+unsigned int Devstat_Rsvd                       = 0xBAD;
+unsigned int Devstat_Ext_Con                    = 0xBAD;
+unsigned int Devstat_SerDes_Cfg                 = 0xBAD;
+unsigned int Devstat_Bar_Config                 = 0xBAD;
+unsigned int Devstat_Pa_Clk                     = 0xBAD;
+
+#define ARM_PLL_CONFIG_SHIFT                    (9)
+#define MAIN_PLL_CTRL_CONFIG_SHIFT              (5)
+
+#define DEVSPEED_C66X_MASK                      (0x03FF0000u)       /*DEVSPEED[27:16] contains C66x CorePac speed rating*/
+#define DEVSPEED_ARM_MASK                       (0x00000FFFu)       /*DEVSPEED[11:0] contains ARM CorePac speed rating*/
+#define DEVSPEED_C66X_SHIFT                     (16)
+
+#define DEVSPEED_800_MHZ                        (0x00000000u)
+#define    DEVSPEED_1000_MHZ                    (0x00000001u)
+#define DEVSPEED_1228_8_MHZ                     (0x00000002u)
+#define DEVSPEED_1350_8_MHZ                     (0x00000004u)       /*may be supported in the future*/
+#define DEVSPEED_1413_12_MHZ                    (0x00000008u)       /*may be supported in the future*/
+#define DEVSPEED_1536_MHZ                       (0x00000010u)       /*may be supported in the future*/
+
+//*****************************************************
+//
+// PLL definitions
+
+// Main PLL Controller
+
+#define MAIN_PLL_CTRL_BASE                      (0x02310000u)
+#define MAIN_PLL_CTRL_RSTYPE                    (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x0E4))    // Reset Type Status Register (Reset Main PLL Controller)
+#define MAIN_PLL_CTRL_RSTCTRL                   (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x0E8))    // Software Reset Control Register (Reset Main PLL Controller)
+#define MAIN_PLL_CTRL_RSTCFG                    (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x0EC))    // Reset Configuration Register (Reset Main PLL Controller)
+#define MAIN_PLL_CTRL_RSISO                     (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x0F0))    // Reset Isolation Register (Reset Main PLL Controller)
+#define MAIN_PLL_CTRL_PLLCTL                    (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x100))   // PLL Control Register
+#define MAIN_PLL_CTRL_SECCTL                    (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x108))   // PLL Secondary Control Register
+#define MAIN_PLL_CTRL_PLLM                      (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x110))   // PLL Multiplier Control Register
+#define MAIN_PLL_CTRL_DIV1                      (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x118))   // Reserved
+#define MAIN_PLL_CTRL_DIV2                      (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x11C))   // PLL Controller Divider 2 Register
+#define MAIN_PLL_CTRL_DIV3                      (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x120))   // Reserved
+#define MAIN_PLL_CTRL_POSTDIV                   (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x128))   // PLL Controller Post-Divide Register
+#define MAIN_PLL_PLLCMD                         (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x138))   // PLL Controller Command Register
+#define MAIN_PLL_PLLSTAT                        (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x13C))   // PLL Controller Status Register
+#define MAIN_PLL_CTRL_ALNCTL                    (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x140))   // PLL Controller Clock Align Control Register
+#define MAIN_PLL_CTRL_DCHANGE                   (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x144))   // PLLDIV Ratio Change Status Register
+#define MAIN_PLL_CTRL_CKEN                      (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x148))   // Reserved
+#define MAIN_PLL_CTRL_CKSTAT                    (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x14C))   // Reserved
+#define MAIN_PLL_CTRL_SYSTAT                    (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x150))   // SYSCLK Status Register
+#define MAIN_PLL_CTRL_DIV4                      (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x160))   // Reserved
+#define MAIN_PLL_CTRL_DIV5                      (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x164))   // PLL Controller Divider 5 Register
+#define MAIN_PLL_CTRL_DIV6                      (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x168))   // Reserved
+#define MAIN_PLL_CTRL_DIV7                      (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x16C))   // Reserved
+#define MAIN_PLL_CTRL_DIV8                      (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x170))   // PLL Controller Divider 8 Register
+#define MAIN_PLL_CTRL_DIV9                      (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x174))   // Reserved
+#define MAIN_PLL_CTRL_DIV10                     (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x178))   // Reserved
+#define MAIN_PLL_CTRL_DIV11                     (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x17C))   // Reserved
+#define MAIN_PLL_CTRL_DIV12                     (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x180))   // Reserved
+#define MAIN_PLL_CTRL_DIV13                     (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x184))   // Reserved
+#define MAIN_PLL_CTRL_DIV14                     (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x188))   // Reserved
+#define MAIN_PLL_CTRL_DIV15                     (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x18C))   // Reserved
+#define MAIN_PLL_CTRL_DIV16                     (*(unsigned int*)(MAIN_PLL_CTRL_BASE + 0x190))   // Reserved
+
+#define SECCTL_BYPASS_MASK                      (0x00800000u)
+#define SECCTL_DIVIDE_MASK                      (0x00780000u)
+#define SECCTL_BYPASS_SHIFT                     (23)
+#define SECCTL_DIVIDE_SHIFT                     (19)
+
+#define RSTCFG_SWRST_MASK                       (0x00010000u)
+#define RSTCTL_KEY_MASK                         (0x0000FFFFu)
+#define RSTCTL_VALUE_KEY                        (0x5A69u)
+#define RSTCTL_VALID_KEY                        (0x000Cu)
+
+#define PLLM_MASK                               (0x0000003Fu)
+
+#define POSTDIV_CLOCK_EN_MASK                   (0x00008000u)
+#define POSTDIV_MASK                            (0x0000001Fu)
+
+#define PLL_REG_RSCFG_FIELD_POWER_ON_RESET      (1<<29)
+#define MAIN_PLL_CTRL_M 39                                          
+#define MAIN_PLL_CTRL_D 1                                           
+
+
+#define ARM_PLL_CTL0                            (*(unsigned int *)(CHIP_LEVEL_REG + 0x0370))
+#define ARM_PLL_CTL1                            (*(unsigned int *)(CHIP_LEVEL_REG + 0x0374))
+
+#define DDR3A_PLL_CTL0                          (*(unsigned int*)(CHIP_LEVEL_REG + 0x0360))
+#define DDR3A_PLL_CTL1                          (*(unsigned int*)(CHIP_LEVEL_REG + 0x0364))
+
+#define DDR3B_PLL_CTL0                          (*(unsigned int*)(CHIP_LEVEL_REG + 0x0368))
+#define DDR3B_PLL_CTL1                          (*(unsigned int*)(CHIP_LEVEL_REG + 0x036C))
+
+#define PASS_PLL_CTL0                           (*(unsigned int*)(CHIP_LEVEL_REG + 0x0358))
+#define PASS_PLL_CTL1                           (*(unsigned int*)(CHIP_LEVEL_REG + 0x035C))
+
+//CLT0
+#define PLL_BWADJ_7_0_SHIFT                     (24)
+#define PLL_BYPASS_SHIFT                        (23)
+#define PLL_M_SHIFT                             (6)
+#define PLL_BWADJ_7_0_MASK                      (0xFF000000u)       /* Tells the BWADJ[7:0] value [8-bits]*/
+#define PLL_BYPASS_MASK                         (1 << PLL_BYPASS_SHIFT)     /* Tells the bypass mode*/
+#define    PLL_M_MASK                           (0x0007FFCu)        /* Tells the multiplication factor [13-bits]*/
+#define    PLL_D_MASK                           (0x0000003Fu)       /* Tells the reference divider [6-bits]*/
+    
+// CTL1
+#define PLL_RESET_SHIFT                         (14)
+#define PLL_RESET_MASK                          (1 << PLL_RESET_SHIFT)      /* Tells the PLLRESET value*/
+#define PLL_BWADJ_11_8_MASK                     (0x0000000F)        /* Tells the BWADJ[11:8] value [4-bits]*/
+
+#define PASS_PLL_FIXED_OUTPUT_DIVIDER           (3)
+
+#define C66X_CACHE_BASE                         (0x01840000u)
+#define C66X_CACHE_L1P_CFG                      (*(unsigned int*)(C66X_CACHE_BASE+0x0020))            // Configures the size of L1P cache ( 0K, 4K, 8K, 16K, and 32K)
+#define C66X_CACHE_L1P_CC                       (*(unsigned int*)(C66X_CACHE_BASE+0x0024))            // Controls L1P operating mode (freeze / normal)
+#define C66X_CACHE_L1P_PIBAR                    (*(unsigned int*)(C66X_CACHE_BASE+0x4020))            // Base Address                    Specified range is invalidated in L1P
+#define C66X_CACHE_L1P_PIWC                     (*(unsigned int*)(C66X_CACHE_BASE+0x4024))            // Word Count                   without being written back
+#define C66X_CACHE_L1P_PINV                     (*(unsigned int*)(C66X_CACHE_BASE+0x5028))            // Entire contents of L1P is invalidated without being written back
+#define C66X_CACHE_L1P_MPFAR                    (*(unsigned int*)(C66X_CACHE_BASE+0xA400))            // Memory fault address register
+#define C66X_CACHE_L1P_MPFSET                   (*(unsigned int*)(C66X_CACHE_BASE+0xA404))            // Memory fault set register
+
+#define C66X_CACHE_L1D_CFG                      (*(unsigned int*)(C66X_CACHE_BASE+0x0040))            // Configures size of L1D cache
+#define C66X_CACHE_L1D_CC                       (*(unsigned int*)(C66X_CACHE_BASE+0x0044))            // Configures operating mode (freeze/ normal)
+#define C66X_CACHE_L1D_WIBAR                    (*(unsigned int*)(C66X_CACHE_BASE+0x4030))            // Base Address (W-only)        Specified range is written back
+#define C66X_CACHE_L1D_WIWC                     (*(unsigned int*)(C66X_CACHE_BASE+0x4034))            // Word Count                   and invalidated within L1D.
+#define C66X_CACHE_L1D_WBAR                     (*(unsigned int*)(C66X_CACHE_BASE+0x4040))            // Base Address (W-only)        Specified range is written back
+#define C66X_CACHE_L1D_WWC                      (*(unsigned int*)(C66X_CACHE_BASE+0x4044))            // Word Count                    from L1D and left valid.
+#define C66X_CACHE_L1D_IBAR                     (*(unsinged int*)(C66X_CACHE_BASE+0x4048))            // Base Address (W-only)        Specified range is invalidated
+#define C66X_CACHE_L1D_IWC                      (*(unsinged int*)(C66X_CACHE_BASE+0x404C))            // Word Count                    in L1D without being written back.
+#define C66X_CACHE_L1D_WB                       (*(unsigned int*)(C66X_CACHE_BASE+0x5040))            // Write back cache lines
+#define C66X_CACHE_L1D_WBINV                    (*(unsigned int*)(C66X_CACHE_BASE+0x5044))            // controls write-back invalidation
+#define C66X_CACHE_L1D_INV                      (*(unsigned int*)(C66X_CACHE_BASE+0x5048))            // Global L1D invalidate
+
+#define C66X_CACHE_L2_CFG                       (*(unsigned int*)(C66X_CACHE_BASE))                   // L2 Configuration Register (size, freeze mode, invalidation, n cores, etc)
+#define C66X_CACHE_L2_WBAR                      (*(unsigned int*)(C66X_CACHE_BASE+0x4000))            // L2 Writeback Base Address Register (W-only)
+#define C66X_CACHE_L2_WWC                       (*(unsigned int*)(C66X_CACHE_BASE+0x4004))            // L2 L2 Writeback Word Count
+#define C66X_CACHE_L2_WIBAR                     (*(unsigned int*)(C66X_CACHE_BASE+0x4010))            // L2 Writeback Base Address Register (W-only)
+#define C66X_CACHE_L2_WIWC                      (*(unsigned int*)(C66X_CACHE_BASE+0x4014))            // L2 Writeback-Invalidate Word Count Register
+#define C66X_CACHE_L2_IBAR                      (*(unsigned int*)(C66X_CACHE_BASE+0x4018))            // L2 Invalidate Base Address Register (W-only)
+#define C66X_CACHE_L2_IWC                       (*(unsigned int*)(C66X_CACHE_BASE+0x401C))            // L2 Invalidate Word Count Register
+#define C66X_CACHE_L2_WB                        (*(unsigned int*)(C66X_CACHE_BASE+0x5000))            // L2 Writeback Register
+#define C66X_CACHE_L2_WBINV                     (*(unsigned int*)(C66X_CACHE_BASE+0x5004))            // L2 Writeback-Invalidate Register
+#define C66X_CACHE_L2_INV                       (*(unsigned int*)(C66X_CACHE_BASE+0x5008))            // L2 Invalidate Register
+
+// EDMA 3
+/* EDMA3 CC Base Memory address */
+#define EDMA_TPCC0_BASE                         (0x02700000u)
+#define EDMA_TPCC1_BASE                         (0x02720000u)
+#define EDMA_TPCC2_BASE                         (0x02740000u)
+#define EDMA_TPCC3_BASE                         (0x02728000u)
+#define EDMA_TPCC4_BASE                         (0x02708000u)
+
+#define EDMA_TPCC0_QUEPRI                       (*(unsigned int *)(EDMA_TPCC0_BASE + 0x0284)
+#define EDMA_TPCC1_QUEPRI                       (*(unsigned int *)(EDMA_TPCC0_BASE + 0x0284)
+#define EDMA_TPCC2_QUEPRI                       (*(unsigned int *)(EDMA_TPCC0_BASE + 0x0284)
+#define EDMA_TPCC3_QUEPRI                       (*(unsigned int *)(EDMA_TPCC0_BASE + 0x0284)
+#define EDMA_TPCC4_QUEPRI                       (*(unsigned int *)(EDMA_TPCC0_BASE + 0x0284)
+
+// DDR3 Controller
+#define DDR3EMIF_CTRL_BASE                      (0x21010000u)
+#define DDR3EMIF_MOD_ID_REV                     (*(unsigned int*)(DDR3EMIF_CTRL_BASE))
+#define DDR3EMIF_STATUS                         (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0004))
+#define DDR3EMIF_SDCFG                          (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0008))
+#define DDR3EMIF_SDRFC                          (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0010))
+#define DDR3EMIF_SDRAMTIM1                      (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0018))
+#define DDR3EMIF_SDRAMTIM2                      (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0020))
+#define DDR3EMIF_SDRAMTIM3                      (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0028))
+#define DDR3EMIF_PMCTL                          (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0038))
+#define DDR3EMIF_LAT_CONFIG                     (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0054))
+#define DDR3EMIF_IRQ_STATUS_SYS                 (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x00AC))           
+#define DDR3EMIF_ZQCONFIG                       (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x00C8))
+#define DDR3EMIF_RDWR_LVL_RMP_WIN               (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x00D4))
+#define DDR3EMIF_RDWR_LVL_RMP_CTRL              (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x00D8))
+#define DDR3EMIF_RDWR_LVL_CTRL                  (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x00DC))
+#define DDR3EMIF_DDR_PHY_CTRL_1                 (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x00E4))
+#define DDR3EMIF_READ_IDLE_CTRL                 (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0098))
+#define DDR3EMIF_PRICOSMAP                      (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0100))
+#define DDR3EMIF_MIDCOSMAP1                     (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0104))
+#define DDR3EMIF_MIDCOSMAP2                     (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0108))
+#define DDR3EMIF_ECCCTL                         (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0110))
+#define DDR3EMIF_ECCADDR1                       (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0114))
+#define DDR3EMIF_ECCADDR2                       (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0118))
+#define DDR3EMIF_RWTHRESH                       (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0120))
+
+// do not emit
+#define DDR3EMIF_PERF_CNT_1                     (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0080))
+#define DDR3EMIF_PERF_CNT_2                     (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0084))
+#define DDR3EMIF_PERF_CNT_CFG                   (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0088))
+#define DDR3EMIF_PERF_CNT_SEL                   (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x008C))
+#define DDR3EMIF_PERF_CNT_TIM                   (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x0090))
+#define DDR3EMIF_IRQSTATUS_RAW_SYS              (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x00A4))
+#define DDR3EMIF_IRQSTATUS_SYS                  (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x00AC))
+#define DDR3EMIF_IRQENABLE_SET_SYS              (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x00B4))
+#define DDR3EMIF_IRQENABLE_CLR_SYS              (*(unsigned int*)(DDR3EMIF_CTRL_BASE+0x00BC))
+
+#define DDR3EMIF_CONFIG_BASE                    (0x02620404u)      // Unlock boot configuration before programming these registers
+#define DDR3EMIF_CONFIG_0                       (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0404))
+#define DDR3EMIF_CONFIG_2                       (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x040C))
+#define DDR3EMIF_CONFIG_3                       (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0410))
+#define DDR3EMIF_CONFIG_4                       (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0414))
+#define DDR3EMIF_CONFIG_5                       (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0418))
+#define DDR3EMIF_CONFIG_6                       (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x041C))
+#define DDR3EMIF_CONFIG_7                       (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0420))
+#define DDR3EMIF_CONFIG_8                       (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0424))
+#define DDR3EMIF_CONFIG_9                       (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0428))
+#define DDR3EMIF_CONFIG_10                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x042C))
+#define DDR3EMIF_CONFIG_12                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0434))
+#define DDR3EMIF_CONFIG_14                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x043C))
+#define DDR3EMIF_CONFIG_15                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0440))
+#define DDR3EMIF_CONFIG_16                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0444))
+#define DDR3EMIF_CONFIG_17                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0448))
+#define DDR3EMIF_CONFIG_18                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x044C))
+#define DDR3EMIF_CONFIG_19                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0450))
+#define DDR3EMIF_CONFIG_20                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0454))
+#define DDR3EMIF_CONFIG_21                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0458))
+#define DDR3EMIF_CONFIG_22                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x045C))
+#define DDR3EMIF_CONFIG_23                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0460))
+#define DDR3EMIF_CONFIG_24                      (*(unsigned int*)(DDR3EMIF_CONFIG_BASE+0x0464))
+
+
+#define    XMPAX_BASE                           (0x08000000u)
+
+//*****************************************************
+//
+// Hyperlink definitions
+// CS = Control and Status
+#define HYPERLINK0_SERDES_CFG_BASE              (0x0231A000u)
+
+
+#define HYPERLINK0_SERDES_CS1                   (*(unsigned int*)(HYPERLINK0_SERDES_CFG_BASE+0x0070))
+#define HYPERLINK0_SERDES_CS2                   (*(unsigned int*)(HYPERLINK0_SERDES_CFG_BASE+0x0074))
+#define HYPERLINK0_SERDES_CS3                   (*(unsigned int*)(HYPERLINK0_SERDES_CFG_BASE+0x0078))
+#define HYPERLINK0_SERDES_CS4                   (*(unsigned int*)(HYPERLINK0_SERDES_CFG_BASE+0x007C))
+
+#define HYPERLINK1_SERDES_CS1                   (*(unsigned int*)(HYPERLINK1_SERDES_CFG_BASE+0x0070))
+#define HYPERLINK1_SERDES_CS2                   (*(unsigned int*)(HYPERLINK1_SERDES_CFG_BASE+0x0074))
+#define HYPERLINK1_SERDES_CS3                   (*(unsigned int*)(HYPERLINK1_SERDES_CFG_BASE+0x0078))
+#define HYPERLINK1_SERDES_CS4                   (*(unsigned int*)(HYPERLINK1_SERDES_CFG_BASE+0x007C))
+
+#define HYPERLINK_SERDES_SLEEP_CNT_MASK         (0xFF000000u)
+#define HYPERLINK_SERDES_DISABLE_CNT_MASK       (0x00FF0000u)
+#define HYPERLINK_SERDES_SLEEP_CNT_SHIFT        (24)
+#define HYPERLINK_SERDES_DISABLE_CNT_SHIFT      (16)    
+
+#define HYPERLINK_SERDES_S2CTL_MASK             (0xFFFF0000u)
+#define HYPERLINK_SERDES_S2CTL_SHIFT            (16)
+
+#define HYPERLINK_SERDES_S3CTL_MASK             (0xFFFF0000u)
+#define HYPERLINK_SERDES_S3CTL_SHIFT            (16)
+
+#define HYPERLINK_SERDES_DVQUICK_MASK           (0x80000000u)
+#define HYPERLINK_SERDES_S4CTL_MASK             (0x7FF00000u)
+#define HYPERLINK_SERDES_TX_SPC_MASK            (0x000C0000u)
+#define HYPERLINK_SERDES_RX_SPC_MASK            (0x00003000u)
+#define HYPERLINK_SERDES_DVQUICK_SHIFT          (31)
+#define HYPERLINK_SERDES_S4CTL_SHIFT            (20)
+#define HYPERLINK_SERDES_TX_SPC_SHIFT           (18)
+#define HYPERLINK_SERDES_RX_SPC_SHIFT           (16)
+
+// TODO: need correct address & fields for K2
+#define HYPERLINK0_SERDES_STATUS                (*(unsigned int*)(HYPERLINK0_SERDES_CFG_BASE+0x0160))    
+
+#define HYPERLINK0_CONFIG_BASE                  (0x21400000u)
+#define PCIE_SERDES_CFG_BASE                    (0x02320000u)
+
+// TODO: need to confirm this - PCIE guide does not have Keystone 2 data
+#define BOOTCFG_PCIE_SERDES_STS            (*(unsigned int*)(PCIE_SERDES_CFG_BASE + 0x015C))
+#define BOOTCFG_PCIE_SERDES_CFGPLL        (*(unsigned int*)(PCIE_SERDES_CFG_BASE + 0x0358))
+
+//*****************************************************
+//
+// Power definitions
+
+#define PSC_PTCMD                               (*(unsigned int*)( PSC_BASE_ADDRESS+0x120 ))
+#define PSC_PTSTAT                              (*(unsigned int*)( PSC_BASE_ADDRESS+0x128 ))
+#define PSC_PDCTL_BASE                          (*(unsigned int*)( PSC_BASE_ADDRESS+0x300 ))
+#define PSC_MDSTAT_BASE                         (*(unsigned int*)( PSC_BASE_ADDRESS+0x800 ))
+#define PSC_MDCTL_BASE                          (*(unsigned int*)( PSC_BASE_ADDRESS+0xA00 ))
+
+#define PSC_PDSTAT                              (0xC001FFBFu)       // encodes the presense of power domains
+#define LPSC_MDSTATL                            (0x01FFFFE5u)       // encodes the presense of mdstat 0-31
+#define LPSC_MDSTATH                            (0x00180000u)      // encodes the presense of mdstat 32-63
+
+
+
+
+// ***********************************************************************************
+//
+// Main PLL Controller
+//
+// ***********************************************************************************
+
+GetMainPllResetTypeStatusRegister()
+{
+    GEL_TextOut("******************** Reset Type Status Register (RSTYPE)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_RSTYPE:     %x (%x)\n",,2,,,MAIN_PLL_CTRL_RSTYPE,&MAIN_PLL_CTRL_RSTYPE);
+    GEL_TextOut(" POR[0]:       Power-on Reset %s\n",,2,,,( (MAIN_PLL_CTRL_RSTYPE & 0x1) != 0 ? "**was** the last reset to occur" : "not asserted" ) );                        
+    GEL_TextOut(" nRESET[1]:    nReset %s\n",,2,,,( (MAIN_PLL_CTRL_RSTYPE & 0x2) != 0 ? "**was** the last reset to occur" : "not asserted" ) );
+    GEL_TextOut(" PLLCTLRST[2]: Reset initiated by PLLCTL %s\n",,2,,,( (MAIN_PLL_CTRL_RSTYPE & 0x4) != 0 ? "the last reset to occur" : "not asserted" ) );
+    GEL_TextOut(" WDRST0[8]:    Reset initiated by Watchdog Timer[0] %s\n",,2,,,( (MAIN_PLL_CTRL_RSTYPE & 0x100) != 0 ? "**was** the last reset to occur" : "not asserted" ) );
+    GEL_TextOut(" WDRST0[9]:    Reset initiated by Watchdog Timer[1] %s\n",,2,,,( (MAIN_PLL_CTRL_RSTYPE & 0x200) != 0 ? "**was** the last reset to occur" : "not asserted" ) );
+    GEL_TextOut(" WDRST0[10]:   Reset initiated by Watchdog Timer[2] %s\n",,2,,,( (MAIN_PLL_CTRL_RSTYPE & 0x400) != 0 ? "**was** the last reset to occur" : "not asserted" ) );
+    GEL_TextOut(" WDRST0[11]:   Reset initiated by Watchdog Timer[3] %s\n",,2,,,( (MAIN_PLL_CTRL_RSTYPE & 0x800) != 0 ? "**was** the last reset to occur" : "not asserted" ) );
+    GEL_TextOut(" EMU-RST[23]:  Reset initiated by the emulation %s\n\n",,2,,,( (MAIN_PLL_CTRL_RSTYPE & 0x10000000) != 0 ? "**was** the last reset to occur" : "not asserted" ) ); 
+}
+
+GetMainPllResetControlRegister()
+{
+    unsigned int key = MAIN_PLL_CTRL_RSTCTRL & RSTCTL_KEY_MASK;
+    
+    GEL_TextOut("******************** Software Reset Control Register (RSTCTRL)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_RSTCTRL:    %x (%x)\n",,2,,,MAIN_PLL_CTRL_RSTCTRL, &MAIN_PLL_CTRL_RSTCTRL);
+    GEL_TextOut(" KEY[15:0]:    %x (%s)\n",,2,,,key, (key == RSTCTL_VALID_KEY ? "Valid key entered" : "Valid key not entered") );
+    GEL_TextOut(" SWRST[16]:    %s\n\n",,2,,,((MAIN_PLL_CTRL_RSTCFG & RSTCFG_SWRST_MASK) == 0 ? "Software reset **ASSERTED**" : "Software reset not asserted") );
+}
+
+GetMainPllCtrlResetConfigurationRegister()
+{    
+    GEL_TextOut("******************** Reset Configuration Register (RSTCFG)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_RSTCFG:     %x (%x)\n",,2,,,MAIN_PLL_CTRL_RSTCFG, &MAIN_PLL_CTRL_RSTCFG);
+    GEL_TextOut(" WDTYPE[0]:    Watchdog timer 0 initiates a %s Reset\n",,2,,,((MAIN_PLL_CTRL_RSTCFG & 0x1) == 0 ? "Hard" : "Soft") );
+    GEL_TextOut(" WDTYPE[1]:    Watchdog timer 1 initiates a %s Reset\n",,2,,,((MAIN_PLL_CTRL_RSTCFG & 0x2) == 0 ? "Hard" : "Soft") );
+    GEL_TextOut(" WDTYPE[2]:    Watchdog timer 2 initiates a %s Reset\n",,2,,,((MAIN_PLL_CTRL_RSTCFG & 0x4) == 0 ? "Hard" : "Soft") );
+    GEL_TextOut(" WDTYPE[3]:    Watchdog timer 3 initiates a %s Reset\n",,2,,,((MAIN_PLL_CTRL_RSTCFG & 0x8) == 0 ? "Hard" : "Soft") );
+    GEL_TextOut(" nResetType[12]:    nReset initiates a %s Reset\n",,2,,,((MAIN_PLL_CTRL_RSTCFG & 0x1000) == 0 ? "Hard" : "Soft") );
+    GEL_TextOut(" PLLCTLRSTTYPE[13]: PLL controller initiates a software-driven %s Reset\n\n",,2,,,((MAIN_PLL_CTRL_RSTCFG & 0x2000) == 0 ? "Hard" : "Soft") );
+}
+
+GetMainPllCtrlResetIsolationRegister()
+{
+    GEL_TextOut("******************** Reset Isolation Register (RSISO)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_RSISO:      %x (%x)\n",,2,,,MAIN_PLL_CTRL_RSISO, &MAIN_PLL_CTRL_RSISO);
+    GEL_TextOut(" SRIOS[8]:     SRIO module clock ** %s ** Reset Isolated\n",,2,,,((MAIN_PLL_CTRL_RSISO & 0x100) == 0 ? "IS NOT" : "IS") );
+    GEL_TextOut(" SRISO[9]:     Smart Reflex ** %s ** Reset Isolated\n\n",,2,,,((MAIN_PLL_CTRL_RSISO & 0x200) == 0 ? "IS NOT" : "IS") );
+}
+
+GetMainPllCtrlPllCtlRegister()
+{
+    GEL_TextOut("******************** PLL Control Register (PLLCTL)\n\n");
+    
+    GEL_TextOut("MAIN_PLL_CTRL_PLLCTL:      %x (%x)\n",,2,,,MAIN_PLL_CTRL_PLLCTL, &MAIN_PLL_CTRL_PLLCTL);
+    GEL_TextOut(" PLLEN[0]:     %s\n",,2,,,((MAIN_PLL_CTRL_PLLCTL & 0x1) == 0 ? "Bypass mode. Dividers PREDIV and PLL are ** BYPASSED **" : "PLL mode. Dividers PREDIV and PLL are ** NOT BYPASSED **" ) );
+    GEL_TextOut(" PLLPWRDN[1]:  PLL is %s\n",,2,,,((MAIN_PLL_CTRL_PLLCTL & 0x2) == 0 ? "** OPERATIONAL **" : "placed in a ** POWER-DOWN STATE **; i.e., all analog circuitry in the PLL is turned off" ) );
+    GEL_TextOut(" PLLRST[3]:    PLL reset is %s\n",,2,,,((MAIN_PLL_CTRL_PLLCTL & 0x8) == 0 ? "** RELEASED **" : "** ASSERTED **") );
+    GEL_TextOut(" PLLENSRC[5]:  PLLEN bit is %s\n\n",,2,,,((MAIN_PLL_CTRL_PLLCTL & 0x20) == 0 ? "** ENABLD **" : "** DISABLED **") );
+}
+
+GetMainPllCtrlPllClockEnableRegister()
+{
+    GEL_TextOut("******************** Clock Enable Control Register (CKEN)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_CKEN:       %x (%x)\n",,2,,,MAIN_PLL_CTRL_CKEN, &MAIN_PLL_CTRL_CKEN);
+    
+    GEL_TextOut(" AUXEN[0]:     ** %s ** AUXCLK\n\n",,2,,, (BB_REG_FIELD_READ(MAIN_PLL_CTRL_CKEN,0,0) == 0 ? "DISABLE" : "ENABLE") );
+}
+
+GetMainPllCtrlClockStatusRegister()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut(" ******************** Clock Status Register (CKSTAT)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_CKSTAT:     %x (%x)\n",,2,,,MAIN_PLL_CTRL_CKSTAT, &MAIN_PLL_CTRL_CKSTAT);
+    
+    GEL_TextOut(" AUXON[0]:     AUXCLK is ** %s **\n\n",,2,,,(BB_REG_FIELD_READ(MAIN_PLL_CTRL_CKSTAT,0,0) == 0 ? "GATED" : "ON") );
+}
+
+GetMainPllCtrlSecondaryControlRegister()
+{
+    unsigned int output_divide = (MAIN_PLL_CTRL_SECCTL & SECCTL_DIVIDE_MASK) >> SECCTL_DIVIDE_SHIFT;
+    unsigned int pll_bypass = (MAIN_PLL_CTRL_SECCTL & SECCTL_BYPASS_MASK) >> SECCTL_BYPASS_SHIFT;
+    
+    GEL_TextOut("******************** PLL Secondary Control Register (SECCTL)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_SECCTL:     %x (%x)\n",,2,,,MAIN_PLL_CTRL_SECCTL, &MAIN_PLL_CTRL_SECCTL);
+    
+    if(pll_bypass == 1) {
+        GEL_TextOut(" Main PLL Bypass is ENABLED (PLLOUT = PLLIN)\n" );
+        GEL_TextOut(" OUTPUT_DIVIDE[22:19]:    %d [HAS NO EFFECT]\n\n",,2,,,(output_divide+1) );
+    } else {
+        GEL_TextOut(" Main PLL Bypass is disabled\n");
+        GEL_TextOut(" OUTPUT_DIVIDE[22:19]:    %d\n\n",,2,,,(output_divide+1) );
+    }
+    
+    
+}
+
+GetMainPllCtrlPllMRegister()
+{
+    GEL_TextOut("******************** PLL Multiplier Control Register (PLLM)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_PLLM:       %x (%x) \n",,2,,,MAIN_PLL_CTRL_PLLM, &MAIN_PLL_CTRL_PLLM);
+    GEL_TextOut(" PLLM[5:0]:    %d multiplier rate\n\n",,2,,,MAIN_PLL_CTRL_PLLM & PLLM_MASK);
+}
+
+GetMainPllCtrlDiv2Register()
+{
+    unsigned int ratio = MAIN_PLL_CTRL_DIV2 & 0xFF;
+    
+    GEL_TextOut("******************** PLL Controller Divider 2 Register (PLLDIV2)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_DIV2:       %x (%x)\n",,2,,,MAIN_PLL_CTRL_DIV2, &MAIN_PLL_CTRL_DIV2);
+    GEL_TextOut(" RATIO[7:0]:   /%d (divide frequency by %d)\n",,2,,,(ratio+1), (ratio+1));
+    GEL_TextOut(" D2EN[15]:     %s\n\n",,2,,,((MAIN_PLL_CTRL_DIV2 & 0x8000) != 0 ? "No clock output: Divider 2 is enabled" : "Divider 2 is disabled") );
+}
+
+GetMainPllCtrlPostDivRegister()
+{
+    unsigned int divider = MAIN_PLL_CTRL_POSTDIV & POSTDIV_MASK;
+    
+    GEL_TextOut("******************** PLL Controller Post-Divide Register (POSTDIV)\n\n");
+    
+    GEL_TextOut("MAIN_PLL_CTRL_POSTDIV:     %x (%x)\n",,2,,,MAIN_PLL_CTRL_POSTDIV, &MAIN_PLL_CTRL_POSTDIV);
+    GEL_TextOut("RATIO[4:0]:    /%d. Divide frequency by %d\n",,,,,(divider+1), (divider+1));
+    GEL_TextOut("PREDEN[15]:    Post-divider is ** %s **\n\n",,2,,,((MAIN_PLL_CTRL_POSTDIV & 0x8000) != 0 ? "ENABLD" : "DISABLD (no clock output)") );
+}
+
+GetMainPllCtrlCmdRegister()
+{
+    GEL_TextOut("******************** PLL Controller Command Register (PLLCMD)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_PLLCMD:          %x (%x)\n\n",,2,,,MAIN_PLL_PLLCMD, &MAIN_PLL_PLLCMD);
+}
+
+GetMainPllCtrlStatRegister()
+{
+    GEL_TextOut("******************** PLL Controller Status Register (PLLSTAT)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_PLLSTAT:         %x (%x)\n\n",,2,,,MAIN_PLL_PLLSTAT, &MAIN_PLL_PLLSTAT);
+}
+
+GetMainPllCtrlAnlCtrlRegister()
+{
+    GEL_TextOut("******************** PLL Controller Clock Align Control Register (ALNCTL)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_ALNCTL:     %x (%x)\n",,2,,,MAIN_PLL_CTRL_ALNCTL, &MAIN_PLL_CTRL_ALNCTL);
+    GEL_TextOut(" ALN2[1]:      %s SYSCLK2 to other SYSCLKs during GO operation\n",,2,,,((MAIN_PLL_CTRL_ALNCTL & 0x2) == 0 ? "**DO NOT** Align" : "Align") );
+    GEL_TextOut(" ALN5[4]:      %s SYSCLK5 to other SYSCLKs during GO operation\n",,2,,,((MAIN_PLL_CTRL_ALNCTL & 0x10) == 0 ? "**DO NOT** Align" : "Align") );
+    GEL_TextOut(" ALN8[7]:      %s SYSCLK8 to other SYSCLKs during GO operation\n\n",,2,,,((MAIN_PLL_CTRL_ALNCTL & 0x80) == 0 ? "**DO NOT** Align" : "Align") );
+}
+
+GetMainPllCtrlDChangeRegister()
+{
+    GEL_TextOut("******************** PLLDIV Ratio Change Status Register (DCHANGE)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_DCHANGE:    %x (%x)\n",,2,,,MAIN_PLL_CTRL_DCHANGE, &MAIN_PLL_CTRL_DCHANGE);
+    GEL_TextOut(" SYS2[1]:      SYSCLK2 ratio ** %s ** modified (SYSCLK2 %s)\n",,2,,,((MAIN_PLL_CTRL_DCHANGE & 0x2) == 0 ? "HAS NOT": "HAS"), ((MAIN_PLL_CTRL_DCHANGE & 0x2) == 0 ? "will not be modified": "will change to the new ratio") );
+    GEL_TextOut(" SYS5[4]:      SYSCLK5 ratio ** %s ** modified (SYSCLK2 %s)\n",,2,,,((MAIN_PLL_CTRL_DCHANGE & 0x10) == 0 ? "HAS NOT": "HAS"), ((MAIN_PLL_CTRL_DCHANGE & 0x10) == 0 ? "will not be modified": "will change to the new ratio") );
+    GEL_TextOut(" SYS8[7]:      SYSCLK8 ratio ** %s ** modified (SYSCLK2 %s)\n\n",,2,,,((MAIN_PLL_CTRL_DCHANGE & 0x80) == 0 ? "HAS NOT": "HAS"), ((MAIN_PLL_CTRL_DCHANGE & 0x80) == 0 ? "will not be modified": "will change to the new ratio") );
+    
+}
+
+GetMainPllCtrlSyStatRegister()
+{
+    GEL_TextOut("******************** SYSCLK Status Register (SYSTAT\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_SYSTAT:     %x (%x)\n",,2,,,MAIN_PLL_CTRL_SYSTAT, &MAIN_PLL_CTRL_SYSTAT);
+    GEL_TextOut(" SYSnON[0]:    SYSCLK1 is ** %s **\n",,2,,,((MAIN_PLL_CTRL_SYSTAT & 0x1) != 0 ? "GATED" : "ON") );
+    GEL_TextOut(" SYSnON[1]:    SYSCLK2 is ** %s **\n",,2,,,((MAIN_PLL_CTRL_SYSTAT & 0x2) != 0 ? "GATED" : "ON") );
+    GEL_TextOut(" SYSnON[2]:    SYSCLK3 is ** %s **\n",,2,,,((MAIN_PLL_CTRL_SYSTAT & 0x4) != 0 ? "GATED" : "ON") );
+    GEL_TextOut(" SYSnON[3]:    SYSCLK4 is ** %s **\n\n",,2,,,((MAIN_PLL_CTRL_SYSTAT & 0x8) != 0 ? "GATED" : "ON") );
+}
+
+GetMainPllCtrlDiv5Register()
+{
+    unsigned int ratio = MAIN_PLL_CTRL_DIV5 & 0xFF;
+    
+    GEL_TextOut("******************** PLL Controller Divider 5 Register (PLLDIV5)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_DIV5:       %x (%x)\n",,2,,,MAIN_PLL_CTRL_DIV5, &MAIN_PLL_CTRL_DIV5);
+    GEL_TextOut(" RATIO[7:0]:   /%d (divide frequency by %d)\n",,2,,,(ratio+1), (ratio+1));
+    GEL_TextOut(" D5EN[15]:     %s\n\n",,2,,,((MAIN_PLL_CTRL_DIV5 & 0x8000) != 0 ? "No clock output: Divider 5 is enabled" : "Divider 5 is disabled") );
+
+}
+
+GetMainPllCtrlDiv8Register()
+{
+    unsigned int ratio = MAIN_PLL_CTRL_DIV8 & 0xFF;
+    
+    GEL_TextOut("******************** PLL Controller Divider 8 Register (PLLDIV8)\n\n");
+    
+    GEL_TextOut(" MAIN_PLL_CTRL_DIV8:       %x (%x)\n",,2,,,MAIN_PLL_CTRL_DIV8, &MAIN_PLL_CTRL_DIV8);
+    GEL_TextOut(" RATIO[7:0]:   /%d (divide frequency by %d)\n",,2,,,(ratio+1), (ratio+1));
+    GEL_TextOut(" D8EN[15]:     %s\n\n",,2,,,((MAIN_PLL_CTRL_DIV8 & 0x8000) != 0 ? "No clock output: Divider 8 is enabled" : "Divider 8 is disabled") );
+
+}
+
+// ***********************************************************************************
+//
+// MAIN PLL (C66x CorePac)
+//
+// ***********************************************************************************
+
+GetMainPllConfig()
+{
+    //Otherwise known as SYS PLL - DEVSTAT contains boot-time configuration, except in two cases (see below)
+    unsigned int bootmode;
+    unsigned int devspeed_rating;
+    unsigned int boot_device;
+    unsigned int bypass_en;
+    unsigned int pllm = 0, plld = 0, post_div = 0, clock_en = 0;
+    float sys_clk_in = 0.0;
+    float sys_clk1 = 0.0, sys_clk2 = 0.0, sys_clk5 = 0.0, sys_clk8 = 0.0;
+
+    bypass_en = (MAIN_PLL_CTRL_SECCTL & SECCTL_BYPASS_MASK);
+
+    GEL_TextOut("********************  C66x CorePac MAIN PLL Configuration:\n");
+
+    // do some sanity checks:
+    clock_en = (MAIN_PLL_CTRL_POSTDIV & POSTDIV_CLOCK_EN_MASK);
+    if(clock_en == 0) {
+        GEL_TextOut(" POSTDIV Clock Enable is not asserted; *** all clocks are disabled ***\n\n");
+    }
+    
+    devspeed_rating = GetC66xSpeedRating();
+    if(devspeed_rating > DEVSPEED_1228_8_MHZ) {
+        GEL_TextOut(" ERROR: Unsupported speed rating: modify GEL file to support this new device (speed rating reported: %x)\n",,2,,,devspeed_rating);
+        return;
+    }
+    
+    GEL_TextOut(" Device speed rating:     %d MHz\n",,2,,,GetMhzFromSpeedRating(devspeed_rating));
+    
+    // either we have not checked boot mode yet, or bootmode does not have sys_pll encoded
+    if (Devstat_Sys_Pll_Config == 0xBAD) { 
+        GEL_TextOut(" Fetching BOOTMODE to get SYSCLK_IN...\n\n");
+        GetBootModeConfiguration();
+        if (Devstat_Sys_Pll_Config == 0xBAD) {    
+            GEL_TextOut(" The current BOOTMODE does not include SYSCLK_IN, using default (156.25MHz)\n");
+            sys_clk_in = 156.25;
+        }
+        
+        GEL_TextOut("******************** C66x CorePac PLL Configuration (Continued...)\n\n");
+    }
+    
+    plld = GetPllmPlldFromBootmode(Devstat_Sys_Pll_Config, devspeed_rating);
+    pllm = (plld >> 16) & 0xFFFF;
+    plld = plld & 0xFFFF;
+
+    sys_clk_in = GetSysClkIn(Devstat_Sys_Pll_Config);
+    
+    if(bypass_en) {
+        GEL_TextOut(" PLL Bypass enabled; PLL input fed directly out as SYSCLK1\n");
+        sys_clk1 = sys_clk_in;
+    } else {
+	    GEL_TextOut(" PLLM =        %d\n",,2,,,pllm);
+	    GEL_TextOut(" PLLD =        %d\n",,2,,,plld);
+        sys_clk1 = sys_clk_in * (float)(pllm+1.0) / (float)(2.0 * (plld+1.0));
+    }
+    
+    post_div = (MAIN_PLL_CTRL_POSTDIV & POSTDIV_MASK) + 1;
+    GEL_TextOut(" POST_DIV =    %d\n",,2,,,post_div);
+    
+    // TODO: these could be disabled by several registers
+    sys_clk1 = sys_clk1 / (float)(post_div);
+    sys_clk2 = sys_clk1 / (float)((MAIN_PLL_CTRL_DIV2 & 0xFF)+1);
+    sys_clk5 = sys_clk1 / (float)((MAIN_PLL_CTRL_DIV5 & 0xFF)+1);
+    sys_clk8 = sys_clk1 / (float)((MAIN_PLL_CTRL_DIV8 & 0xFF)+1);
+    
+    
+    GEL_TextOut(" SYSCLK_IN =   %f MHz\n",,2,,,sys_clk_in);
+    GEL_TextOut(" SYSCLK1 =     %f MHz (Calculated)\n",,2,,,sys_clk1);
+    GEL_TextOut(" SYSCLK2 =     %f MHz (Calculated)\n",,2,,,sys_clk2);
+    GEL_TextOut(" SYSCLK5 =     %f MHz (Calculated)\n",,2,,,sys_clk5);
+    GEL_TextOut(" SYSCLK8 =     %f MHz (Calculated)\n\n",,2,,,sys_clk8);
+}
+
+
+
+// ***********************************************************************************
+//
+// ARM PLL (ARM CorePac)
+//
+// ***********************************************************************************
+
+GetArmPllConfig()
+{
+    unsigned int bootmode;
+    unsigned int devspeed_rating;
+    unsigned int boot_device;
+    unsigned int bypass_en;
+    unsigned int pllm = 0, plld = 0, post_div = 0;
+    float sys_clk_in = 0.0;
+    float sys_clk1 = 0.0;
+
+    bypass_en = (ARM_PLL_CTL0 & PLL_BYPASS_MASK) >> PLL_BYPASS_SHIFT;
+
+    GEL_TextOut("******************** ARM CorePac PLL Configuration\n\n");
+
+    // need to get the SYS PLL setting from BOOTMODE and device speed rating to determine default pllm & plld
+    // do some error checking here for a sanity check:
+    devspeed_rating = GetArmSpeedRating();
+    if(devspeed_rating > DEVSPEED_1228_8_MHZ) {
+        GEL_TextOut(" ERROR: Unsupported speed rating: modify GEL file to support this new device (speed rating reported: %x)\n",,2,,,devspeed_rating);
+        return;
+    }
+    
+    // either we have not checked boot mode yet, or bootmode does not have arm_pll encoded
+    if (Devstat_Arm_Pll_Config == 0xBAD) { 
+        GEL_TextOut(" Fetching BOOTMODE to get SYSCLK_IN...\n\n");
+        GetBootModeConfiguration();
+        if (Devstat_Arm_Pll_Config == 0xBAD) {    
+            GEL_TextOut(" The current BOOTMODE does not include SYSCLK_IN, using default (156.25MHz)\n");
+            sys_clk_in = 156.25;
+        }
+        
+        GEL_TextOut("******************** ARM CorePac PLL Configuration (Continued...)\n\n");
+    }
+    
+    GEL_TextOut(" Warning: PLL values are based on bootstrap pin configuration; they do not reflect and software settings!\n");
+	
+    plld = GetPllmPlldFromBootmode(Devstat_Arm_Pll_Config, devspeed_rating);
+    pllm = (plld >> 16) & 0xFFFF;
+    plld = plld & 0xFFFF;
+
+    sys_clk_in = GetSysClkIn(Devstat_Arm_Pll_Config);
+
+    if(bypass_en) {
+        GEL_TextOut(" PLL Bypass enabled; PLL input fed directly out as SYSCLK1\n");
+        sys_clk1 = sys_clk_in;
+    } else {
+	    GEL_TextOut(" PLLM =        %d\n",,2,,,pllm);
+	    GEL_TextOut(" PLLD =        %d\n",,2,,,plld);
+        sys_clk1 = sys_clk_in * (float)(pllm+1.0) / (float)(2.0 * (plld+1.0));
+    }
+    
+    post_div = (MAIN_PLL_CTRL_POSTDIV & POSTDIV_MASK) + 1;
+    GEL_TextOut(" POST_DIV =    %d\n",,2,,,post_div);
+    
+    sys_clk1 = sys_clk1 / (float)(post_div);
+    
+    GEL_TextOut(" Device speed rating: %d MHz\n",,2,,,GetMhzFromSpeedRating(devspeed_rating));
+    GEL_TextOut(" CLK_IN =      %f MHz\n",,2,,,sys_clk_in);
+    GEL_TextOut(" CLK =         %f MHz (Calculated)\n\n",,2,,,sys_clk1);
+}
+
+
+
+
+
+
+// ***********************************************************************************
+//
+// DDR3A PLL Settings - DDR3A_PLL
+//
+// The DDR3A PLL and DDR3B PLL generate interface clocks for the DDR3A and DDR3B memory controllers. When
+// coming out of power-on reset, DDR3A PLL and DDR3B PLL are programmed to a valid frequency during the boot
+// configuration process before being enabled and used.
+
+// The DDR3A PLL and DDR3B PLL, which are used to drive the DDR3A PHY and DDR3B PHY for the EMIF, do
+// not use a PLL controller. DDR3A PLL and DDR3B PLL can be controlled using the
+// DDR3APLLCTL0/DDR3BPLLCTL0 and DDR3APLLCTL1/DDR3BPLLCTL1 registers located in the Bootcfg
+// module. These MMRs (memory-mapped registers) exist inside the Bootcfg space. To write to these registers,
+// software must go through an unlocking sequence using the KICK0 and KICK1 registers.
+//
+// ***********************************************************************************
+
+GetDdr3aPllConfig()
+{
+    unsigned int bwadjl, bwadjh, pll_reset;
+
+    bwadjl = (unsigned int)((DDR3A_PLL_CTL0 & PLL_BWADJ_7_0_MASK) >> PLL_BWADJ_7_0_SHIFT);
+    bwadjh = (unsigned int)(DDR3A_PLL_CTL1 & PLL_BWADJ_11_8_MASK);
+    pll_reset = (unsigned int)(DDR3A_PLL_CTL1 & PLL_RESET_MASK);
+    
+    GEL_TextOut("******************** DDR3A_PLL\n\n");
+    
+    GEL_TextOut(" DDR3A_PLL_CTL0 register:  %x (%x)\n",,2,,,DDR3A_PLL_CTL0, &DDR3A_PLL_CTL0);
+    GEL_TextOut(" PLLD[5:0]:    %d\n",,2,,,(DDR3A_PLL_CTL0 & PLL_D_MASK) );
+    GEL_TextOut(" PLLM[18:6]:   %d\n",,2,,,((DDR3A_PLL_CTL0 & PLL_M_MASK) >> PLL_M_SHIFT) );
+    GEL_TextOut(" BYPASS[23]:   %d\n",,2,,,((DDR3A_PLL_CTL0 & PLL_BYPASS_MASK) >> PLL_BYPASS_SHIFT) );
+    GEL_TextOut(" BWADJ[31:24]: %d\n",,2,,,bwadjl);
+    
+    GEL_TextOut(" DDR3A_PLL_CTL1 register:  %x\n",,2,,,DDR3A_PLL_CTL1);
+    GEL_TextOut(" PLLRESET[14]: Reset ** %s ** to PLL\n",,2,,,(pll_reset != 0 ? "ASSERTED" : "DEASSERTED") );
+    GEL_TextOut(" BWADJ[11:8]:  %d\n",,2,,,bwadjh);    
+    
+    GEL_TextOut(" BWADJ[11:0] (combined):   %d\n\n",,2,,,(bwadjl + (bwadjh << 8)) );
+    
+}
+
+
+// ***********************************************************************************
+//
+// DDR3B PLL Settings - DDR3B_PLL
+//
+// ***********************************************************************************
+
+GetDdr3bPllConfig()
+{
+    unsigned int bwadjl, bwadjh, pll_reset;
+
+    bwadjl = (unsigned int)((DDR3B_PLL_CTL0 & PLL_BWADJ_7_0_MASK) >> PLL_BWADJ_7_0_SHIFT);
+    bwadjh = (unsigned int)(DDR3B_PLL_CTL1 & PLL_BWADJ_11_8_MASK);
+    pll_reset = (unsigned int)(DDR3B_PLL_CTL1 & PLL_RESET_MASK);
+    
+    GEL_TextOut("******************** DDR3B_PLL\n\n");
+    
+    GEL_TextOut(" DDR3B_PLL_CTL0 register:  %x (%x)\n",,2,,,DDR3B_PLL_CTL0, &DDR3B_PLL_CTL0);
+    GEL_TextOut(" PLLD[5:0]:    %d\n",,2,,,(DDR3B_PLL_CTL0 & PLL_D_MASK) );
+    GEL_TextOut(" PLLM[18:6]:   %d\n",,2,,,((DDR3B_PLL_CTL0 & PLL_M_MASK) >> PLL_M_SHIFT) );
+    GEL_TextOut(" BYPASS[23]:   %d\n",,2,,,((DDR3B_PLL_CTL0 & PLL_BYPASS_MASK) >> PLL_BYPASS_SHIFT) );
+    GEL_TextOut(" BWADJ[31:24]: %d\n",,2,,,bwadjl);
+    
+    GEL_TextOut(" DDR3B_PLL_CTL1 register:  %x\n",,2,,,DDR3B_PLL_CTL1);
+    GEL_TextOut(" PLLRESET[14]: Reset ** %s ** to PLL\n",,2,,,(pll_reset != 0 ? "ASSERTED" : "DEASSERTED") );
+    GEL_TextOut(" BWADJ[11:8]:  %d\n",,2,,,bwadjh);    
+    
+    GEL_TextOut(" BWADJ[11:0] (combined):   %d\n\n",,2,,,(bwadjl + (bwadjh << 8)) );
+    
+}
+
+
+
+
+
+
+// ***********************************************************************************
+//
+// PASS PLL Settings - PASS_PLL
+//
+// The PASS PLL generates interface clocks for the Network Coprocessor. Using the PACLKSEL pin the user can select
+// the input source of the PASS PLL as either the output of the Main PLL mux or the PASSCLK clock reference source.
+// When coming out of power-on reset, PASS PLL comes out in a bypass mode and needs to be programmed to a valid
+// frequency before being enabled and used.
+
+// The PASS PLL, which is used to drive the Network Coprocessor, does not use a PLL controller. PASS PLL can be
+// controlled using the PAPLLCTL0 and PAPLLCTL1 registers located in the Bootcfg module. These MMRs
+// (memory-mapped registers) exist inside the Bootcfg space. To write to these registers, software must go through an
+// unlocking sequence using the KICK0 and KICK1 registers.
+
+// BWADJ[11:8] and BWADJ[7:0] are located in PASSPLLCTL0 and PASSPLLCTL1 registers. BWADJ[11:0] should be
+// programmed to a value equal to half of PLLM[12:0] value (round down if PLLM has an odd value) Example: If PLLM = 15,
+// then BWADJ = 7
+//
+// ***********************************************************************************
+
+
+
+/****************************************************************************
+ *
+ * NAME
+ *      GetPassPllRegValues
+ *
+ * PURPOSE:
+ *     Read PLL configuration
+ *        - All device level PLL configuration registers will be read
+ *        - Device operating frequency will be identified
+ *        - Individual master operating frequency will be identified
+ *
+ * USAGE
+ *
+ *
+ * RETURN VALUE
+ *      NONE
+ *
+ * REFERENCE
+ *
+ ****************************************************************************/
+GetPassPllRegValues()
+{
+    unsigned int bwadjl, bwadjh, pll_reset;
+
+    bwadjl = (unsigned int)((PASS_PLL_CTL0 & PLL_BWADJ_7_0_MASK) >> PLL_BWADJ_7_0_SHIFT);
+    bwadjh = (unsigned int)(PASS_PLL_CTL1 & PLL_BWADJ_11_8_MASK);
+    pll_reset = (unsigned int)(PASS_PLL_CTL1 & PLL_RESET_MASK);
+    
+    GEL_TextOut("******************** PASS_PLL\n\n");
+    
+    GEL_TextOut(" PASS_PLL_CTL0 register:   %x (%x)\n",,2,,,PASS_PLL_CTL0, &PASS_PLL_CTL0);
+    GEL_TextOut(" PLLD[5:0]:    %d\n",,2,,,(PASS_PLL_CTL0 & PLL_D_MASK) );
+    GEL_TextOut(" PLLM[18:6]:   %d\n",,2,,,((PASS_PLL_CTL0 & PLL_M_MASK) >> PLL_M_SHIFT) );
+    GEL_TextOut(" BYPASS[23]:   %d\n",,2,,,((PASS_PLL_CTL0 & PLL_BYPASS_MASK) >> PLL_BYPASS_SHIFT) );
+    GEL_TextOut(" BWADJ[31:24]: %d\n",,2,,,bwadjl);
+    
+    GEL_TextOut(" PASS_PLL_CTL1 register:   %x\n",,2,,,PASS_PLL_CTL1);
+    GEL_TextOut(" PLLRESET[14]: Reset ** %s ** to PLL\n",,2,,,(pll_reset != 0 ? "ASSERTED" : "DEASSERTED") );
+    GEL_TextOut(" BWADJ[11:8]:  %d\n",,2,,,bwadjh);    
+    
+    GEL_TextOut(" BWADJ[11:0] (combined):    %d\n\n",,2,,,(bwadjl + (bwadjh << 8)) );
+}
+
+
+
+
+///*********************************************************************
+///
+///    EVM66AK2H____ PLL Functions
+///
+///*********************************************************************
+
+// device speed rating determines what default pll multiplier and divisor will be used, based on BOOTMODE[7:5]
+GetC66xSpeedRating()
+{
+    unsigned int dev_rating = (DEVSPEED & DEVSPEED_C66X_MASK) >> DEVSPEED_C66X_SHIFT;
+
+    return dev_rating;
+}
+
+GetArmSpeedRating()
+{
+    unsigned int dev_rating = (DEVSPEED & DEVSPEED_ARM_MASK);
+
+    return dev_rating;
+}
+
+GetMhzFromSpeedRating(unsigned int speed_rating)
+{
+    if(speed_rating == DEVSPEED_800_MHZ) {
+        return 800;
+    } else if (speed_rating == DEVSPEED_1000_MHZ) {
+        return 1000;
+    } else if (speed_rating == DEVSPEED_1228_8_MHZ) {
+        return 1200;
+    } else if (speed_rating == DEVSPEED_1350_8_MHZ) {
+        return 1350;
+    } else if (speed_rating == DEVSPEED_1413_12_MHZ) {
+        return 1400;
+    } else if (speed_rating == DEVSPEED_1536_MHZ) {
+        return 1500;
+    }
+}
+
+// pll_config comes from a bitfield within DEVSTAT
+GetSysClkIn(unsigned int pll_config_bits)
+{
+    if(pll_config_bits == 0) {
+        return 50.0;
+    } else if(pll_config_bits == 1) {
+        return 66.67;
+    } else if(pll_config_bits == 2) {
+        return 80.0;
+    } else if(pll_config_bits == 3) {
+        return 100.0;
+    } else if(pll_config_bits == 4) {
+        return 156.25;
+    } else if(pll_config_bits == 5) {
+        return 250.0;
+    } else if(pll_config_bits == 6) {
+        return 312.5;
+    } else { //(pll_config_bits == 7) {
+        return 122.88;
+    }
+}
+
+
+//*****************************************************
+//
+// Cache definitions
+
+
+// C66x CorePac - see C66x CorePac http://www.ti.com/lit/ug/sprugw0b/sprugw0b.pdf
+//
+
+GetC66xCacheL1P(){
+    unsigned int l1p_cfg         = C66X_CACHE_L1P_CFG;
+    unsigned int l1p_oper         = (C66X_CACHE_L1P_CC & 0x1);
+    unsigned int l1p_poper        = (C66X_CACHE_L1P_CC & 0x00010000) >> 16;
+    
+    GEL_TextOut("******************** C66x CorePac L1P Cache Configuration\n\n");
+    
+    GEL_TextOut(" C66X_CACHE_L1P_CFG:       %x (%x)\n",,2,,,C66X_CACHE_L1P_CFG, &C66X_CACHE_L1P_CFG);
+    GEL_TextOut(" C66X_CACHE_L1P_CFG:       %x (%x)\n\n",,2,,,C66X_CACHE_L1P_CC, &C66X_CACHE_L1P_CC);
+    
+    if(l1p_cfg == 0){
+        GEL_TextOut(" L1P is DISABLED         (not printing remaining status)\n\n");
+    } else {
+        GEL_TextOut(" L1P Size:                 %x (%dK)\n",,2,,,l1p_cfg, ( l1p_cfg == 1 ? 4 : ( l1p_cfg == 2 ? 8 : ( l1p_cfg == 3 ? 16 : 32))) ); //32K is max size
+        GEL_TextOut(" L1P Freeze mode (previous):  %d - %s (%d)\n",,2,,,l1p_oper, ( l1p_oper == 1 ? "Enabled" : "Disabled"), l1p_poper);
+        GEL_TextOut(" L1P Invalidate Base Addr:    %x\n",,2,,,C66X_CACHE_L1P_PIBAR);  // TODO: This is listed as write only... lets see what happens when we read it!
+        GEL_TextOut(" L1P Invalidate Word Count:   %x\n",,2,,,C66X_CACHE_L1P_PIWC);
+        GEL_TextOut(" L1P Invalidate Reg. Status:  %d\n\n",,2,,,C66X_CACHE_L1P_PINV & 0x1);
+    }
+}
+
+GetC66xCacheL1D(){
+    unsigned int l1d_cfg        = C66X_CACHE_L1D_CFG;
+    unsigned int l1d_oper       = (C66X_CACHE_L1D_CC & 0x1);
+    unsigned int l1d_poper      = (C66X_CACHE_L1D_CC & 0x00010000) >> 16;
+
+    GEL_TextOut("******************** C66x CorePac L1D Cache Configuration\n\n");
+    
+    GEL_TextOut(" C66X_CACHE_L1D_CFG:       %x (%x)\n",,2,,,C66X_CACHE_L1D_CFG, &C66X_CACHE_L1D_CFG);
+    GEL_TextOut(" C66X_CACHE_L1D_CFG:       %x (%x)\n\n",,2,,,C66X_CACHE_L1D_CC, &C66X_CACHE_L1D_CC);
+    
+    if(l1d_cfg == 0){
+        GEL_TextOut(" L1D is DISABLED         (not printing remaining status)\n\n");
+    } else {
+        GEL_TextOut(" L1D Size:                 %x (%dK)\n",,2,,,l1d_cfg, ( l1d_cfg == 1 ? 4 : ( l1d_cfg == 2 ? 8 : ( l1d_cfg == 3 ? 16 : 32))) ); //32K is max size
+        GEL_TextOut(" L1P Freeze mode (previous):    %d - %s (%d)\n\n",,2,,,l1d_oper, ( l1d_oper == 1 ? "Enabled" : "Disabled"), l1d_poper);
+    }
+}
+
+GetC66xCoreL1PMemoryFault()
+{
+    GEL_TextOut("******************** C66x Core L1P Memory Fault Register\n\n");
+    
+    //GEL_TextOut(" L1P Memory Protection Fault on Core ID:    %d\n",,2,,,core_id);
+    GEL_TextOut(" L1P MPF Address:          %x\n",,2,,,C66X_CACHE_L1P_MPFAR);
+    GEL_TextOut(" L1P Memory Protection Fault Set:    %x\n\n",,2,,,C66X_CACHE_L1P_MPFSET);
+}
+
+
+
+GetC66xCacheL2(){
+    unsigned int l2_cfg          = (C66X_CACHE_L2_CFG & 0x00000003);                    // 0 = disabled
+    unsigned int freeze_mode     = (C66X_CACHE_L2_CFG & 0x00000004) >> 3;            // 1 = frozen
+    unsigned int l1d_global_inv  = (C66X_CACHE_L2_CFG & 0x00000100) >> 8;            // L1D global invalidate bit - legacy - should use L1DINV register
+    unsigned int l1p_global_inv  = (C66X_CACHE_L2_CFG & 0x00000200) >> 9;            // L1P global invalidate bit - legacy - should use L1PINV register
+    unsigned int mm_id           = (C66X_CACHE_L2_CFG & 0x000F0000) >> 16;            // C66x CorePac ID [mm = MegaModule]
+    unsigned int num_mm          = (C66X_CACHE_L2_CFG & 0x0F000000) >> 24;            // Number of C66x CorePacs, minus 1
+    
+    GEL_TextOut("******************** C66x L2 Cache Configuration\n\n");
+    
+    GEL_TextOut(" C66X_CACHE_L2_CFG:        %x (%x)\n\n",,2,,,C66X_CACHE_L2_CFG, &C66X_CACHE_L2_CFG);
+    GEL_TextOut(" C66X Core ID:      %d\n",,2,,,mm_id);
+    GEL_TextOut(" Number C66X Cores: %d\n",,2,,,num_mm);
+
+    if(l2_cfg == 0){
+        GEL_TextOut(" L2 is DISABLED         (not printing remaining status)\n\n");
+    } else {
+        GEL_TextOut(" L2 Size:                  %x (%dK)\n",,2,,,l2_cfg, ( l2_cfg == 1 ? 32 : ( l2_cfg == 2 ? 64 : ( l2_cfg == 3 ? 128 : ( l2_cfg == 4 ? 256 : ( l2_cfg == 5 ? 512 : ( l2_cfg == 6 ? 1024 : 1024)))))) ); //1024K is max size
+        GEL_TextOut(" L2 Freeze mode:     %d\n",,2,,,freeze_mode);
+        GEL_TextOut(" L1D Global Inv.:    %d\n",,2,,,l1d_global_inv);
+        GEL_TextOut(" L1P Global Inv.:    %d\n",,2,,,l1p_global_inv);
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// *****************************************************
+//
+// EMIF Configuration
+
+SDRAM_Configuration_Register()
+{
+    unsigned int sdram_type         = (DDR3EMIF_SDCFG & 0xE0000000) >> 29;
+    unsigned int int_bank_position  = (DDR3EMIF_SDCFG & 0x18000000) >> 27;
+    unsigned int ddr_term_resistor  = (DDR3EMIF_SDCFG & 0x07000000) >> 24;
+    unsigned int dynamic_odt        = (DDR3EMIF_SDCFG & 0x00600000) >> 21;
+    unsigned int ddr_disable_dll    = (DDR3EMIF_SDCFG & 0x00100000) >> 20;
+    unsigned int sdram_drive        = (DDR3EMIF_SDCFG & 0x000C0000) >> 18;
+    unsigned int cas_write_latency  = (DDR3EMIF_SDCFG & 0x00030000) >> 16;
+    unsigned int data_bus_width     = (DDR3EMIF_SDCFG & 0x0000C000) >> 14;
+    unsigned int cas_latency        = (DDR3EMIF_SDCFG & 0x00003C00) >> 10;
+    unsigned int row_size           = (DDR3EMIF_SDCFG & 0x00000380) >> 7;
+    unsigned int ibank              = (DDR3EMIF_SDCFG & 0x00000070) >> 4;
+    unsigned int ext_chip_sel       = (DDR3EMIF_SDCFG & 0x00000008) >> 3;
+    unsigned int page_size          = (DDR3EMIF_SDCFG & 0x00000007);
+    
+    GEL_TextOut("******************** SDRAM Configuration Register (SDCFG)\n\n");
+    GEL_TextOut(" DDR3EMIF_SDCFG:           %x (%x)\n",,2,,,DDR3EMIF_SDCFG, &DDR3EMIF_SDCFG);
+    GEL_TextOut(" SDRAM Type:   %s (%d)\n",,2,,,(sdram_type == 3 ? "3" : "Reserved Value"), sdram_type);
+    GEL_TextOut(" Internal Bank Position: %x\n",,2,,,int_bank_position);
+    GEL_TextOut(" SDRAM Drive:  %s (%d)\n",,2,,,(ddr_term_resistor > 5 ? "Reserved value" : (ddr_term_resistor == 5 ? "RZQ/8" : (ddr_term_resistor == 4 ? "RZQ/12" : (ddr_term_resistor == 3 ? "RZQ/6" : (ddr_term_resistor == 2 ? "RZQ/2" : (ddr_term_resistor == 1 ? "RZQ/4" : "Disabled")))))), ddr_term_resistor);
+    GEL_TextOut(" Dynamic ODT:  %s (%d)\n",,2,,,(dynamic_odt > 2 ? "Reserved Value" : (dynamic_odt == 2 ? "RZQ/2" : (dynamic_odt == 1 ? "RZQ/4" : "OFF"))), dynamic_odt);
+    GEL_TextOut(" DDL Select:   %d\n",,2,,,ddr_disable_dll);
+    GEL_TextOut(" SDRAM Drive:  %s (%d)\n",,2,,,(sdram_drive > 1 ? "Reserved value" : (sdram_drive == 1 ? "RZQ/7" : "RZQ/6")), sdram_drive);
+    GEL_TextOut(" Data Bus Width: %s-bit (%d)\n",,2,,,(data_bus_width > 2 ? "Reserved Value" : (data_bus_width == 0 ? "64" : (data_bus_width == 1 ? "32" : "16"))), data_bus_width);
+    GEL_TextOut(" Row size:     %d bits (%d)\n",,2,,,row_size+9, row_size);
+    GEL_TextOut(" Banks per SDRAM device:     %s (%d)\n",,2,,,(ibank == 0 ? "1" : (ibank == 1 ? "2" : (ibank == 2 ? "4" : (ibank == 3 ? "8" : "Reserved Value")))), ibank);
+    GEL_TextOut(" External Chip Select Setup: %s (%d)\n",,2,,,(ext_chip_sel == 0 ? "DCE0#" : "DCE0# + DCE1#"), ext_chip_sel );
+    GEL_TextOut(" Page Size:    %d bits (%d)\n",,2,,,(256*page_size + 256), page_size );
+
+    if(cas_write_latency <= 3){
+        GEL_TextOut(" CAS Write Latency:    %d (%d)\n",,2,,,(cas_write_latency + 5), cas_write_latency);
+    } else {
+        GEL_TextOut(" CAS Write Latency:    Reserved value (%d)\n",,2,,,cas_write_latency);
+    }
+
+    if(cas_latency > 0 && cas_latency % 2 == 0){ //must be even and greater than 0
+        GEL_TextOut(" CAS Latency:  %d (%d)\n",,2,,,(cas_latency == 2 ? "5" : (cas_latency == 4 ? "6" : (cas_latency == 6 ? "7" : (cas_latency == 8 ? "8" : (cas_latency == 10 ? "9" : (cas_latency == 12 ? "10" : (cas_latency == 14 ? "11" : "Reserved Value"))))))) );
+        //    GEL_TextOut(" CAS Latency:            %d (%d)\n",,2,,,(cas_latency == 2 ? 5 : (cas_latency == 4 ? 6 : (cas_latency == 6 ? 7 : (cas_latency == 8 ? 8 : (cas_latency == 10 ? 9 : (cas_latency == 12 ? 10 : 11)))))) );
+    } else {
+        GEL_TextOut(" CAS Latency:  Reserved value (%d)\n",,2,,,cas_latency);
+    }
+}
+
+SDRAM_Refresh_Control_Register()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut("********************SDRAM Refresh Control Register (SDRFC)\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_SDRFC ---> %x (%x)\n\n",,,,,DDR3EMIF_SDRFC, &DDR3EMIF_SDRFC);
+    
+    GEL_TextOut(" REFRESH_RATE[15:0] ---> %d (REFRESH_RATE = Refresh period * DDR3 clock frequency.)\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_SDRFC,15,0));
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_SDRFC,26,24);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" PASR[26:24](Partial Array self-refresh) ---> Full-array\n");
+    }
+    else if((reg_field == 1) || (reg_field == 5))
+    {
+        GEL_TextOut(" PASR[26:24](Partial Array self-refresh) ---> 1/2 array\n");
+    }
+    else if((reg_field == 2) || (reg_field == 6))
+    {
+        GEL_TextOut(" PASR[26:24](Partial Array self-refresh) ---> 1/4 array\n");
+    }
+    else if((reg_field == 3) || (reg_field == 7))
+    {
+        GEL_TextOut(" PASR[26:24](Partial Array self-refresh) ---> 1/8 array\n");
+    }
+    else if(reg_field == 4)
+    {
+        GEL_TextOut(" PASR[26:24](Partial Array self-refresh) ---> 3/4 array\n");
+    }
+    else
+    {
+        GEL_TextOut(" PASR[26:24](Partial Array self-refresh) ---> Reserved\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_SDRFC,28,28);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" ASR[28] ---> Manual self-refresh\n");
+    }
+    else
+    {
+        GEL_TextOut(" ASR[28] ---> Auto self-refresh enable\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_SDRFC,29,29);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" SRT[29] ---> Normal operating temperature range. This must be set to zero ASR bit is set to 1\n");
+    }
+    else
+    {
+        GEL_TextOut(" SRT[29] ---> NExtended operating temperature range when ASR bit is set to zero\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_SDRFC,31,31);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" INITREF_DIS[29] ---> Normal operation\n\n");
+    }
+    else
+    {
+        GEL_TextOut(" INITREF_DIS[29] ---> Disables SDRAM initialization and refreshes, but carries out SDRAM write/read transactions\n\n");
+    }
+}
+
+Power_Management_Control_Register()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut(" *************************** Power Management Control Register (PMCTL) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_PMCTL ---> %x (%x)\n\n",,,,,DDR3EMIF_PMCTL, &DDR3EMIF_PMCTL);
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PMCTL,3,0);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Immediately enter clock-stop\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 16 clocks\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 32 clocks\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 64 clocks\n");
+    }
+    else if(reg_field == 4)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 128 clocks\n");
+    }
+    else if(reg_field == 5)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 256 clocks\n");
+    }
+    else if(reg_field == 6)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 512 clocks\n");
+    }
+    else if(reg_field == 7)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 1024 clocks\n");
+    }
+    else if(reg_field == 8)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 2048 clocks\n");
+    }
+    else if(reg_field == 9)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 4096 clocks\n");
+    }
+    else if(reg_field == 10)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 8192 clocks\n");
+    }
+    else if(reg_field == 11)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 16384 clocks\n");
+    }
+    else if(reg_field == 12)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 32768 clocks\n");
+    }
+    else if(reg_field == 13)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 65536 clocks\n");
+    }
+    else if(reg_field == 14)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 131072 clocks\n");
+    }
+    else if(reg_field == 15)
+    {
+        GEL_TextOut(" CS_TIM(Power management timer for clock stop mode) ---> Enter clock-stop after 262144 clocks\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PMCTL,7,4);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Immediately enter self-refresh\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 16 clocks\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 32 clocks\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 64 clocks\n");
+    }
+    else if(reg_field == 4)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 128 clocks\n");
+    }
+    else if(reg_field == 5)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 256 clocks\n");
+    }
+    else if(reg_field == 6)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 512 clocks\n");
+    }
+    else if(reg_field == 7)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 1024 clocks\n");
+    }
+    else if(reg_field == 8)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 2048 clocks\n");
+    }
+    else if(reg_field == 9)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 4096 clocks\n");
+    }
+    else if(reg_field == 10)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 8192 clocks\n");
+    }
+    else if(reg_field == 11)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 16384 clocks\n");
+    }
+    else if(reg_field == 12)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 32768 clocks\n");
+    }
+    else if(reg_field == 13)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 65536 clocks\n");
+    }
+    else if(reg_field == 14)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 131072 clocks\n");
+    }
+    else if(reg_field == 15)
+    {
+        GEL_TextOut(" SR_TIM(Power management timer for self-refresh) ---> Enter self-refresh after 262144 clocks\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PMCTL,10,8);
+    
+    if(reg_field == 2)
+    {
+        GEL_TextOut(" LP_MODE[10:8] ---> Self-refresh mode\n");
+    }
+    else if(reg_field == 4)
+    {
+        GEL_TextOut(" LP_MODE[10:8] ---> Power-down mode\n");
+    }
+    else
+    {
+        GEL_TextOut(" LP_MODE[10:8] ---> disable automatic power management\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PMCTL,15,12);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Immediately enter power-down\n\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 16 clocks\n\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 32 clocks\n\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 64 clocks\n\n");
+    }
+    else if(reg_field == 4)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 128 clocks\n\n");
+    }
+    else if(reg_field == 5)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 256 clocks\n\n");
+    }
+    else if(reg_field == 6)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 512 clocks\n\n");
+    }
+    else if(reg_field == 7)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 1024 clocks\n\n");
+    }
+    else if(reg_field == 8)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 2048 clocks\n\n");
+    }
+    else if(reg_field == 9)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 4096 clocks\n\n");
+    }
+    else if(reg_field == 10)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 8192 clocks\n\n");
+    }
+    else if(reg_field == 11)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 16384 clocks\n\n");
+    }
+    else if(reg_field == 12)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 32768 clocks\n\n");
+    }
+    else if(reg_field == 13)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 65536 clocks\n\n");
+    }
+    else if(reg_field == 14)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 131072 clocks\n\n");
+    }
+    else if(reg_field == 15)
+    {
+        GEL_TextOut(" PD_TIM(Power Management timer for power-down) ---> Enter power-down after 262144 clocks\n\n");
+    }
+}
+
+Latency_Configuration_Register()
+{
+    GEL_TextOut(" *************************** Latency Configuration Register (LAT_CONFIG) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_LAT_CONFIG ---> %x (%x)\n\n",,,,,DDR3EMIF_LAT_CONFIG, &DDR3EMIF_LAT_CONFIG);
+    
+    GEL_TextOut(" PR_OLD_COUNT[7:0] ---> %d (Num of clk cycles = PR_OLD_COUNT_2 x 16 clks)\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_LAT_CONFIG,7,0));
+    
+    GEL_TextOut(" COS_COUNT_2[15:8] ---> %d (Num of clk cycles = COS_COUNT_2 x 16 clks)\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_LAT_CONFIG,15,8));
+    
+    GEL_TextOut(" COS_COUNT_1[23:16] ---> %d (Num of clk cycles = COS_COUNT_1 x 16 clks)\n\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_LAT_CONFIG,23,16));
+}
+
+
+SDRAM_Output_Impedance_Calibration_Configuration_Register()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut(" *************************** SDRAM Output Impedance Calibration Configuration Register (ZQCFG) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_ZQCONFIG ---> %x (%x)\n\n",,,,,DDR3EMIF_ZQCONFIG, &DDR3EMIF_ZQCONFIG);
+    
+    GEL_TextOut(" ZQ_REFINTERVAL[15:0] ---> %d (Number of refresh periods between ZQCS commands)\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_ZQCONFIG,15,0));
+    
+    GEL_TextOut(" ZQ_ZQCL_MULT[17:16] ---> %d (Number of ZQCS intervals that make up a ZACL interval(-1))\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_ZQCONFIG,17,16));
+    
+    GEL_TextOut(" ZQ_ZQINIT_MULT[19:18] ---> %d (Number of ZQCL intervals that make up a ZQINIT interval(-1))\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_ZQCONFIG,19,18));
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_ZQCONFIG,28,28);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" ZQ_SFEXITEN[28] ---> Disable ZQCL on Self-refresh, Active power-down and precharge power-down exit enable\n");
+    }
+    else
+    {
+        GEL_TextOut(" ZQ_SFEXITEN[28] ---> Enable ZQCL on Self-refresh, Active power-down and precharge power-down exit enable\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_ZQCONFIG,29,29);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" ZQ_DUALCALEN[29] ---> Dual ZQ calibration disable\n");
+    }
+    else
+    {
+        GEL_TextOut(" ZQ_DUALCALEN[29] ---> Both chip selects have a separate calibration resistor per device\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_ZQCONFIG,30,30);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" ZQ_CS0EN[30] ---> Disable ZQ calibration for CS0\n");
+    }
+    else
+    {
+        GEL_TextOut(" ZQ_CS0EN[30] ---> Enable ZQ calibration for CS0\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_ZQCONFIG,31,31);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" ZQ_CS1EN[31] ---> Disable ZQ calibration for CS1\n\n");
+    }
+    else
+    {
+        GEL_TextOut(" ZQ_CS1EN[31] ---> Enable ZQ calibration for CS1\n\n");
+    }
+}
+
+
+Read_Write_Leveling_Ramp_Window_Register()
+{
+    GEL_TextOut(" *************************** Read-Write Leveling Ramp Window Register (RDWR_LVL_RMP_WIN) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_RDWR_LVL_RMP_WIN ---> %x (%x)\n\n",,,,,DDR3EMIF_RDWR_LVL_RMP_WIN, &DDR3EMIF_RDWR_LVL_RMP_WIN);
+    
+    GEL_TextOut(" Incremental leveling ramp window in number of refresh periods(RDWRLVLINC_RMP_WIN) ---> %d\n\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_RDWR_LVL_RMP_WIN,12,0));
+}
+
+Read_Write_Leveling_Ramp_Control_Register()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut(" *************************** Read-Write Leveling Ramp Control Register (RDWR_LVL_RMP_CTRL) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_RDWR_LVL_RMP_CTRL ---> %x (%x)\n\n",,,,,DDR3EMIF_RDWR_LVL_RMP_CTRL, &DDR3EMIF_RDWR_LVL_RMP_CTRL);
+    
+    GEL_TextOut(" Number of RDWRLVLINC_RMP_PRE intervals between incremental write leveling(WRLVLINC_RMP_INT) ---> %d\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_RDWR_LVL_RMP_CTRL,7,0));
+    
+    GEL_TextOut(" Number of RDWRLVLINC_RMP_PRE intervals between incremental read DQS gate training(RDLVLGATEINC_RMP_INT) ---> %d\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_RDWR_LVL_RMP_CTRL,15,8));
+    
+    GEL_TextOut(" Number of RDWRLVLINC_RMP_PRE intervals between incremental read data eye training(RDLVLINC_RMP_INT) ---> %d\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_RDWR_LVL_RMP_CTRL,23,16));
+    
+    GEL_TextOut(" Incremental leveling pre-scalar in number of refresh periods during ramp window(RDWRLVLINC_RMP_PRE) ---> %d\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_RDWR_LVL_RMP_CTRL,30,24));
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_RDWR_LVL_RMP_CTRL,31,31);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" RDWR_LVL_EN[31] ---> Disable leveling\n\n");
+    }
+    else
+    {
+        GEL_TextOut(" RDWR_LVL_EN[31] ---> Enable leveling\n\n");
+    }
+}
+
+Read_Write_Leveling_Control_Register()
+{
+
+    unsigned int reg_field;
+    
+    GEL_TextOut(" *************************** Read-Write Leveling Control Register (RDWR_LVL_CTRL) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_RDWR_LVL_CTRL ---> %x (%x)\n\n",,,,,DDR3EMIF_RDWR_LVL_CTRL, &DDR3EMIF_RDWR_LVL_CTRL);
+    
+    GEL_TextOut(" Number of RDWRLVLINC_PRE intervals between incremental write leveling(WRLVLINC_INT) ---> %d\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_RDWR_LVL_CTRL,7,0));
+    
+    GEL_TextOut(" Number of RDWRLVLINC_PRE intervals between incremental read DQS gate training(RDLVLGATEINC_INT) ---> %d\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_RDWR_LVL_CTRL,15,8));
+    
+    GEL_TextOut(" Number of RDWRLVLINC_PRE intervals between incremental read data eye training(RDLVLINC_INT) ---> %d\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_RDWR_LVL_CTRL,23,16));
+    
+    GEL_TextOut(" Incremental leveling pre-scalar in number of refresh periods during ramp window(RDWRLVLINC_PRE) ---> %d\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_RDWR_LVL_CTRL,30,24));
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_RDWR_LVL_CTRL,31,31);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" RDWR_LVL_EN[31] ---> Disable leveling\n\n");
+    }
+    else
+    {
+        GEL_TextOut(" RDWR_LVL_EN[31] ---> Enable leveling\n\n");
+    }
+}
+
+DDR_PHY_Control_1_Register()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut(" *************************** DDR PHY Control 1 Register (DDR_PHY_CTRL_1) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_DDR_PHY_CTRL_1 ---> %x (%x)\n\n",,,,,DDR3EMIF_DDR_PHY_CTRL_1, &DDR3EMIF_DDR_PHY_CTRL_1);
+    
+    GEL_TextOut(" READ_LATENCY[4:0] ---> %d (Max val possible = CAS latency + 7; Min val possible = CAS Latency + 1)\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_DDR_PHY_CTRL_1,4,0));
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_DDR_PHY_CTRL_1,20,20);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" EN_DYN_PWRDN[20] ---> IO Receiver for DQ, DQS powered up during a read\n\n");
+    }
+    else
+    {
+        GEL_TextOut(" EN_DYN_PWRDN[20] ---> IO Receiver for DQ, DQS always powered up\n\n");
+    }
+}
+
+Read_Idle_Control_Register()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut(" *************************** Read Idle Control Register (READ_IDLE_CTRL) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_READ_IDLE_CTRL ---> %x (%x)\n\n",,,,,DDR3EMIF_READ_IDLE_CTRL, &DDR3EMIF_READ_IDLE_CTRL);
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_READ_IDLE_CTRL,8,0);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" READ_IDLE_INTERVAL[8:0] ---> disables read idle function\n");
+    }
+    else
+    {
+        GEL_TextOut(" READ_IDLE_INTERVAL[8:0] ---> %d ((READ_IDLE_INTERVAL – 1) * 64 DDR3 clock cycles)\n",,,,,reg_field);
+    }
+    
+    GEL_TextOut(" READ_IDLE_LEN[19:16] ---> %d (minimum length of read idle window)\n\n",,,,,BB_REG_FIELD_READ(DDR3EMIF_READ_IDLE_CTRL,19,16));
+}
+
+
+Priority_to_Class_Of_Service_Mapping_Register()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut(" *************************** Priority to Class-Of-Service Mapping Register (PRICOSMAP) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_PRICOSMAP ---> %x (%x)\n\n",,,,,DDR3EMIF_PRICOSMAP, &DDR3EMIF_PRICOSMAP);
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PRICOSMAP,1,0);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" PRI_0_COS[1:0] ---> Map to Class-of-service 1\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" PRI_0_COS[1:0] ---> Map to Class-of-service 2\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" PRI_0_COS[1:0] ---> Map to Class-of-service 3\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" PRI_0_COS[1:0] ---> Map to Class-of-service 3\n");
+    } 
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PRICOSMAP,3,2);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" PRI_1_COS[3:2] ---> Map to Class-of-service 1\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" PRI_1_COS[3:2] ---> Map to Class-of-service 2\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" PRI_1_COS[3:2] ---> Map to Class-of-service 3\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" PRI_1_COS[3:2] ---> Map to Class-of-service 3\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PRICOSMAP,5,4);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" PRI_2_COS[5:4] ---> Map to Class-of-service 1\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" PRI_2_COS[5:4] ---> Map to Class-of-service 2\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" PRI_2_COS[5:4] ---> Map to Class-of-service 3\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" PRI_2_COS[5:4] ---> Map to Class-of-service 3\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PRICOSMAP,7,6);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" PRI_3_COS[7:6] ---> Map to Class-of-service 1\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" PRI_3_COS[7:6] ---> Map to Class-of-service 2\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" PRI_3_COS[7:6] ---> Map to Class-of-service 3\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" PRI_3_COS[7:6] ---> Map to Class-of-service 3\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PRICOSMAP,9,8);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" PRI_4_COS[9:8] ---> Map to Class-of-service 1\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" PRI_4_COS[9:8] ---> Map to Class-of-service 2\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" PRI_4_COS[9:8] ---> Map to Class-of-service 3\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" PRI_4_COS[9:8] ---> Map to Class-of-service 3\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PRICOSMAP,11,10);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" PRI_5_COS[11:10] ---> Map to Class-of-service 1\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" PRI_5_COS[11:10] ---> Map to Class-of-service 2\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" PRI_5_COS[11:10] ---> Map to Class-of-service 3\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" PRI_5_COS[11:10] ---> Map to Class-of-service 3\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PRICOSMAP,13,12);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" PRI_6_COS[13:12] ---> Map to Class-of-service 1\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" PRI_6_COS[13:12] ---> Map to Class-of-service 2\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" PRI_6_COS[13:12] ---> Map to Class-of-service 3\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" PRI_6_COS[13:12] ---> Map to Class-of-service 3\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PRICOSMAP,15,14);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" PRI_7_COS[15:14] ---> Map to Class-of-service 1\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" PRI_7_COS[15:14] ---> Map to Class-of-service 2\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" PRI_7_COS[15:14] ---> Map to Class-of-service 3\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" PRI_7_COS[15:14] ---> Map to Class-of-service 3\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_PRICOSMAP,31,31);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" PRI_COS_MAP_EN[31] ---> Disable Priority to Class-of-service mapping\n\n");
+    }
+    else
+    {
+        GEL_TextOut(" PRI_COS_MAP_EN[31] ---> Enable Priority to Class-of-service mapping\n\n");
+    }
+}
+
+
+Master_ID_to_Class_Of_Service_1_Mapping_Register()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut(" *************************** Master ID to Class-Of-Service 1 Mapping Register (MIDCOS1MAP) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_MIDCOSMAP1 ---> %x (%x)\n\n",,,,,DDR3EMIF_MIDCOSMAP1, &DDR3EMIF_MIDCOSMAP1);
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP1,1,0);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" MSK_3_COS_1[1:0] ---> Disable masking\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" MSK_3_COS_1[1:0] ---> Mask master ID bit 0\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" MSK_3_COS_1[1:0] ---> Mask master ID bits 1-0\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" MSK_3_COS_1[1:0] ---> Mask master ID bits 2-0\n");
+    }
+    
+    GEL_TextOut(" Master ID value 3 for Class-of-service 1(MSTID_3_COS_1) ---> %x\n",,,,,(unsigned char)BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP1,9,2));
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP1,11,10);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" MSK_2_COS_1[11:10] ---> Disable masking\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" MSK_2_COS_1[11:10] ---> Mask master ID bit 0\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" MSK_2_COS_1[11:10] ---> Mask master ID bits 1-0\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" MSK_2_COS_1[11:10] ---> Mask master ID bits 2-0\n");
+    }
+    
+    GEL_TextOut(" Master ID value 2 for Class-of-service 1(MSTID_2_COS_1) ---> %x\n",,,,,(unsigned char)BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP1,19,12));
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP1,21,20);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" MSK_1_COS_1[21:20] ---> Disable masking\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" MSK_1_COS_1[21:20] ---> Mask master ID bit 0\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" MSK_1_COS_1[21:20] ---> Mask master ID bits 1-0\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" MSK_1_COS_1[21:20] ---> Mask master ID bits 2-0\n");
+    }
+    
+    GEL_TextOut(" Master ID value 1 for Class-of-service 1(MSTID_1_COS_1) ---> %x\n",,,,,(unsigned char)BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP1,29,22));
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP1,31,31);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" MSTID_COS_1_MAP_EN[31] ---> Disable Master ID to Class-of-service 1 mapping\n\n");
+    }
+    else
+    {
+        GEL_TextOut(" MSTID_COS_1_MAP_EN[31] ---> Enable Master ID to Class-of-service 1 mapping\n\n");
+    }
+}
+
+Master_ID_to_Class_Of_Service_2_Mapping_Register()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut(" *************************** Master ID to Class-Of-Service 2 Mapping Register (MIDCOS2MAP) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_MIDCOSMAP2 ---> %x (%x)\n\n",,,,,DDR3EMIF_MIDCOSMAP2, &DDR3EMIF_MIDCOSMAP2);
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP2,1,0);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" MSK_3_COS_2[1:0] ---> Disable masking\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" MSK_3_COS_2[1:0] ---> Mask master ID bit 0\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" MSK_3_COS_2[1:0] ---> Mask master ID bits 1-0\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" MSK_3_COS_2[1:0] ---> Mask master ID bits 2-0\n");
+    }
+    
+    GEL_TextOut(" Master ID value 3 for Class-of-service 2(MSTID_3_COS_2) ---> %x\n",,,,,(unsigned char)BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP2,9,2));
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP2,11,10);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" MSK_2_COS_2[11:10] ---> Disable masking\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" MSK_2_COS_2[11:10] ---> Mask master ID bit 0\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" MSK_2_COS_2[11:10] ---> Mask master ID bits 1-0\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" MSK_2_COS_2[11:10] ---> Mask master ID bits 2-0\n");
+    }
+    
+    GEL_TextOut(" Master ID value 2 for Class-of-service 2(MSTID_2_COS_2) ---> %x\n",,,,,(unsigned char)BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP2,19,12));
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP2,21,20);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" MSK_1_COS_2[21:20] ---> Disable masking\n");
+    }
+    else if(reg_field == 1)
+    {
+        GEL_TextOut(" MSK_1_COS_2[21:20] ---> Mask master ID bit 0\n");
+    }
+    else if(reg_field == 2)
+    {
+        GEL_TextOut(" MSK_1_COS_2[21:20] ---> Mask master ID bits 1-0\n");
+    }
+    else if(reg_field == 3)
+    {
+        GEL_TextOut(" MSK_1_COS_2[21:20] ---> Mask master ID bits 2-0\n");
+    }
+    
+    GEL_TextOut(" Master ID value 1 for Class-of-service 2(MSTID_1_COS_2) ---> %x\n",,,,,(unsigned char)BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP2,29,22));
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_MIDCOSMAP2,31,31);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" MSTID_COS_2_MAP_EN[31] ---> Disable Master ID to Class-of-service 2 mapping\n\n");
+    }
+    else
+    {
+        GEL_TextOut(" MSTID_COS_2_MAP_EN[31] ---> Enable Master ID to Class-of-service 2 mapping\n\n");
+    }
+}
+
+ECC_Control_Register()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut(" *************************** ECC Control Register (ECCCTL) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_ECCCTL ---> %x (%x)\n\n",,,,,DDR3EMIF_ECCCTL, &DDR3EMIF_ECCCTL);
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_ECCCTL,0,0);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" ECC_ADDR_RNG_1_EN[0] ---> Disable ECC Address Range 1\n");
+    }
+    else
+    {
+        GEL_TextOut(" ECC_ADDR_RNG_1_EN[0] ---> Enable ECC Address Range 1\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_ECCCTL,1,1);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" ECC_ADDR_RNG_2_EN[1] ---> Disable ECC Address Range 2\n");
+    }
+    else
+    {
+        GEL_TextOut(" ECC_ADDR_RNG_2_EN[1] ---> Enable ECC Address Range 2\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_ECCCTL,30,30);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" ECC_ADDR_RNG_PROT[30] ---> Disable ECC calculation within address ranges defined in ECC Address Range 1 and 2 registers and enable\n");
+        GEL_TextOut("                           calculation for accesses outside of these address ranges\n");
+    }
+    else
+    {
+        GEL_TextOut(" ECC_ADDR_RNG_PROT[30] ---> Enable ECC calculation within address ranges defined in ECC Address Range 1 and 2 registers and disable\n");
+        GEL_TextOut("                           calculation for accesses outside of these address ranges\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_ECCCTL,31,31);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" ECC_EN[31] ---> Disable ECC\n\n");
+    }
+    else
+    {
+        GEL_TextOut(" ECC_EN[31] ---> Enable ECC\n\n");
+    }
+}
+
+ECC_Address_Range_1_Register()
+{
+    GEL_TextOut(" *************************** ECC Address Range 1 Register (ECCADDR1) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_ECCADDR1 ---> %x (%x)\n\n",,,,,DDR3EMIF_ECCADDR1, &DDR3EMIF_ECCADDR1);
+    
+    GEL_TextOut(" ECC_STRT_ADDR_1[15:0] ---> %x\n",,,,,(unsigned short)BB_REG_FIELD_READ(DDR3EMIF_ECCADDR1,15,0));
+    
+    GEL_TextOut(" ECC_END_ADDR_1[31:16] ---> %x\n\n",,,,,(unsigned short)BB_REG_FIELD_READ(DDR3EMIF_ECCADDR1,31,16));
+}
+
+ECC_Address_Range_2_Register()
+{
+    GEL_TextOut(" *************************** ECC Address Range 2 Register (ECCADDR2) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_ECCADDR2 ---> %x (%x)\n\n",,,,,DDR3EMIF_ECCADDR2, &DDR3EMIF_ECCADDR2);
+    
+    GEL_TextOut(" ECC_STRT_ADDR_2[15:0] ---> %x\n",,,,,(unsigned short)BB_REG_FIELD_READ(DDR3EMIF_ECCADDR2,15,0));
+    
+    GEL_TextOut(" ECC_END_ADDR_2[31:16] ---> %x\n\n",,,,,(unsigned short)BB_REG_FIELD_READ(DDR3EMIF_ECCADDR2,31,16));
+}
+
+Read_Write_Execution_Threshold_Register()
+{
+    GEL_TextOut(" *************************** Read Write Execution Threshold Register (RWTHRESH) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_RWTHRESH ---> %x (%x)\n\n",,,,,DDR3EMIF_RWTHRESH, &DDR3EMIF_RWTHRESH);
+    
+    GEL_TextOut(" Number of SDRAM read bursts after which the arbitration will switch to executing write commands(RD_THRSH) ---> %d\n",,,,,(unsigned short)BB_REG_FIELD_READ(DDR3EMIF_RWTHRESH,4,0));
+    
+    GEL_TextOut(" Number of SDRAM write bursts after which the arbitration will switch to executing read commands(WR_THRSH) ---> %d\n\n",,,,,(unsigned short)BB_REG_FIELD_READ(DDR3EMIF_RWTHRESH,12,8));
+}
+
+DDR3_Memory_Controller_Status_Register()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut(" *************************** DDR3 Memory Controller Status Register (STATUS) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_STATUS ---> %x (%x)\n\n",,,,,DDR3EMIF_STATUS, &DDR3EMIF_STATUS);
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_STATUS,2,2);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" IFRDY[2] ---> Interface logic is not ready; either powered down, not ready, or not locked\n");
+    }
+    else
+    {
+        GEL_TextOut(" IFRDY[2] ---> Interface logic is powered up, locked and ready for operation\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_STATUS,4,4);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" WRLVLTO[4] ---> Reset value\n");
+    }
+    else
+    {
+        GEL_TextOut(" WRLVLTO[4] ---> Write Leveling has timed out\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_STATUS,5,5);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" RDLVLTO[5] ---> Reset value\n");
+    }
+    else
+    {
+        GEL_TextOut(" RDLVLTO[5] ---> Read data eye training has timed out\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_STATUS,6,6);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" RDLVGATETO[6] ---> Reset value\n\n");
+    }
+    else
+    {
+        GEL_TextOut(" RDLVGATETO[6] ---> Indicates read DQS gate training has timed out\n\n");
+    }
+}
+
+Interrupt_Status_Register()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut(" *************************** Interrupt Status Register (IRQSTATUS_SYS) ****************************\n\n");
+    
+    GEL_TextOut(" DDR3EMIF_IRQ_STATUS_SYS ---> %x (%x)\n\n",,,,,DDR3EMIF_IRQ_STATUS_SYS, &DDR3EMIF_IRQ_STATUS_SYS);
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_IRQ_STATUS_SYS,3,3);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" WR_ECC_ERR_SYS[3] ---> write ECC error interrupt not pending\n");
+    }
+    else
+    {
+        GEL_TextOut(" WR_ECC_ERR_SYS[3] ---> write ECC error interrupt pending\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(DDR3EMIF_IRQ_STATUS_SYS,4,4);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" RD_ECC_ERR_SYS[4] ---> Read ECC error interrupt not pending\n\n");
+    }
+    else
+    {
+        GEL_TextOut(" RD_ECC_ERR_SYS[4] ---> Read ECC error interrupt pending\n\n");
+    }
+}
+
+GetDdr3Configuration()
+{
+    unsigned int i = 0;
+    unsigned int addr = DDR3EMIF_CONFIG_BASE;
+    unsigned int reg_width = 0x4;
+
+    for(i = 0; i <= 24; i++, addr += reg_width)
+    {
+        if(i != 1 && i != 11 && i != 13) //these registers are reserved, so skip them
+        {
+            GEL_TextOut("    ----- DDR3 Configuration %d Register (DDR3EMIF_CONFIG_%d) -----\n",,2,,,i,i);
+            GEL_TextOut("    Raw Register:        %x\n",,2,,,addr);
+        }
+    }
+}
+
+
+
+
+
+
+
+/////////////////////////////////////////////////
+//
+// XMC Controller
+//
+
+
+GetXmcConfiguration()
+{
+    unsigned int *xmc_reg_addr = XMPAX_BASE;
+    unsigned int baddr;                // Upper bits of address range to match in C66x CorePac’s native 32-bit address space
+    unsigned int seg_size;            // segment size
+    unsigned int raddr;                // Bits that replace and extend the upper address bits matched by baddr
+    unsigned int perm;                // Access types allowed in this address range
+    unsigned int i, n_regs = 15;
+    unsigned int sr, sw, sx, ur, uw, ux;
+    
+    GEL_TextOut("******************** Core %i XMC Configuration\n\n",,,,,DNUM);
+    
+    for(i = 0; i < n_regs; i++, xmc_reg_addr += 2) {
+    baddr =     ( *(xmc_reg_addr+1) & 0xFFFFF000) >> 12;        //this should be a shift 8; baddr is contained in XMPAXH
+    seg_size  = ( *(xmc_reg_addr+1) & 0x00000FFF);            //segz is contained in XMPAXH
+    raddr =( *xmc_reg_addr & 0xFFFFFF00) >> 8;
+    perm = ( *xmc_reg_addr & 0x000000FF);
+
+    if( i == 0) {  // XMPAX0 is dedicated to the EMIF
+        GEL_TextOut(" ------XMPAX%d [EMIF]\n",,2,,,i);
+    } else {
+        GEL_TextOut(" ------XMPAX%d\n",,2,,,i);
+    }
+
+        //GEL_TextOut(" XMPAXL%d addr:  %x\n",,2,,,i,xmc_reg_addr);            // for debugging pointer stuff
+        //GEL_TextOut(" XMPAXH%d addr:  %x\n",,2,,,i,(xmc_reg_addr+1));        // for debugging pointer stuff
+        GEL_TextOut(" XMPAXL%d raw: %x\n",,2,,,i, *(xmc_reg_addr) );
+        GEL_TextOut(" XMPAXH%d raw: %x\n",,2,,,i, *(xmc_reg_addr+1) );
+        GEL_TextOut(" Base Addr->Logical Addr:    %x -> %x000\n",,2,,,(baddr<<8), raddr);
+        GEL_TextOut(" Segment Size:     %s (%x)\n",,2,,,( seg_size == 0 ? "Segment Disabled" : (seg_size < 0xB ? "Reserved (Disabled)" : (seg_size == 0xB ? "4KB" : (seg_size == 0xC ? "8KB" : (seg_size == 0xD ? "16KB" : (seg_size == 0xE ? "32KB" : (seg_size == 0xF ? "64KB" : (seg_size == 0x10 ? "128KB" : (seg_size == 0x11 ? "256KB" : (seg_size == 0x12 ? "512KB" : (seg_size == 0x13 ? "1MB" : (seg_size == 0x14 ? "2MB" : (seg_size == 0x15 ? "4MB" : (seg_size == 0x16 ? "8MB" : (seg_size == 0x17 ? "16MB" : (seg_size == 0x18 ? "32MB" : (seg_size == 0x19 ? "64MB" : (seg_size == 0x1A ? "128MB" : (seg_size == 0x1B ? "256MB" : (seg_size == 0x1C ? "512MB" : (seg_size == 0x1D ? "1GB" : (seg_size == 0x1E ? "2GB" : "4GB"))))))))))))))))))))) ), seg_size);
+        GEL_TextOut(" Permissions:      Sr/Sw/Sx: %d/%d/%d   Ur/Uw/Ux: %d/%d/%d (%x)\n\n",,2,,,(perm&0x20>>5),(perm&0x10>>4),(perm&0x8>>3),(perm&0x4>>2),(perm&0x2>>1),(perm&0x1), perm);
+    }
+}
+
+GetDieId()
+{
+    GEL_TextOut("******************** DIE ID Register (DIEID)\n\n");
+    
+    GEL_TextOut(" DIEID0:       %x\n",,2,,,DIEID0);
+    GEL_TextOut(" DIEID1:       %x\n",,2,,,DIEID1);
+    GEL_TextOut(" DIEID2:       %x\n",,2,,,DIEID2);
+    GEL_TextOut(" DIEID3:       %x\n\n",,2,,,DIEID3);
+}
+
+GetJtagId()
+{
+    GEL_TextOut("******************** JTAG ID Register (JTAGID)\n\n");
+    GEL_TextOut(" JTAGID:       %x (%x)\n",,2,,,(BB_REG_FIELD_READ(JTAGID,31,0)), &JTAGID);
+    GEL_TextOut(" LSB[0]:       %d\n",,2,,,(BB_REG_FIELD_READ(JTAGID,0,0)) );
+    GEL_TextOut(" MANUFACTURER[11:1]:   %x\n",,2,,,(BB_REG_FIELD_READ(JTAGID,11,1)) );
+    GEL_TextOut(" PART_NUMBER[27:12]:   %x\n",,2,,,(BB_REG_FIELD_READ(JTAGID,27,12)) );
+    GEL_TextOut(" VARIANT[31:28]:       %x\n",,2,,,(BB_REG_FIELD_READ(JTAGID,31,28)) );
+}
+
+GetMacId()
+{
+    unsigned int mac5, mac4, mac3, mac2, mac1, mac0;
+    
+    GEL_TextOut("******************** MAC ID Register (MACID)\n\n");
+    GEL_TextOut(" MACID[32:47]: %x\n",,2,,,(MACID2 & 0xFFFF) );
+    GEL_TextOut(" MACID[31:0]:  %x\n\n",,2,,,MACID1);
+ }
+
+GetCorePacRevision()
+{
+    unsigned int version = (MM_REVID & VERSION_MASK) >> VERSION_SHIFT;
+    unsigned int revision = (MM_REVID & REVISION_MASK);
+    
+    GEL_TextOut("******************** CorePac Revision (MM_REVID)\n\n"); 
+    
+    GEL_TextOut(" Version:      %x\n",,2,,,version);
+    GEL_TextOut(" Revision:     %x\n\n",,2,,,revision);
+}
+
+/*
+    This funtion returns the device's boot mode.
+
+    Note: this is determined by the state DEVSTAT[4:1], which are Mode and Min (DEVSTAT[4] is not always Min)
+*/
+GetBootMode()
+{
+    return (unsigned int)(DEVSTAT & DEVSTAT_BOOTMODE_DEVICE_MASK);
+}
+
+/*
+In Bootstrape configuration, all configurations decided by bootstrape pins at the device input pins will be read and boot level configuration will be identified.
+
+*/
+GetBootModeConfiguration()
+{
+    unsigned int bootmode = GetBootMode();
+
+    Devstat_Device_Endianess = DEVSTAT & 0x1;
+    Devstat_Boot_Master         = (bootmode & 0x000000100) >> 8;
+    
+    GEL_TextOut("******************** Bootstrap Configuration (DEVSTAT)\n\n");
+    
+    GEL_TextOut(" Raw DEVSTAT[16:0]:    %x (%x)\n",,2,,,DEVSTAT, &DEVSTAT);
+    GEL_TextOut(" Endianess (device):   %s\n",,2,,,( Devstat_Device_Endianess == 1 ? "Little" : "Big") );  // this is opposite from the datasheet, but DEVSTAT[0] is 1 in LE on the device
+    GEL_TextOut(" Boot Master:          %s\n",,2,,,( Devstat_Boot_Master == 1 ? "C66x" : "ARM") );
+
+	if(bootmode == SLEEP_BOOT){
+        GetSleepBootConfiguration(bootmode);
+
+    } else if(bootmode == I2C_SLAVE_BOOT){
+        GetI2CSlaveBootConfiguration(bootmode);
+
+    } else if(bootmode == I2C_MASTER_BOOT){
+        GetI2CMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == SPI_BOOT){
+        GetSpiBootConfiguration(bootmode);
+
+    } else if(bootmode == EMIF_ARM_MASTER_BOOT){
+        GetEmifArmMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == EMIF_C66X_MASTER_BOOT){
+        GetEmifC66xMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == NAND_ARM_MASTER_BOOT){
+        GetNandArmMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == NAND_C66X_MASTER_BOOT){
+        GetNandC66xMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == SRIO_ARM_MASTER_BOOT){
+        GetSrioArmMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == SRIO_C66X_MASTER_BOOT){
+        GetSrioC66xMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == ETH_ARM_MASTER_BOOT){
+        GetEthArmMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == ETH_C66X_MASTER_BOOT){
+        GetEthC66xMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == PCIE_ARM_MASTER_BOOT){
+        GetPcieArmMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == PCIE_C66X_MASTER_BOOT){
+        GetPcieC66xMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == HYPR_ARM_MASTER_BOOT){
+        GetHyprArmMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == HYPR_C66X_MASTER_BOOT){
+        GetHyprC66xMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == UART_ARM_MASTER_BOOT){
+        GetUartArmMasterBootConfiguration(bootmode);
+
+    } else if(bootmode == UART_C66X_MASTER_BOOT){
+        GetUartC66xMasterBootConfiguration(bootmode);
+
+    } else {
+        GEL_TextOut("    ERROR: unrecognized boot mode!\n");
+    }
+}
+
+// This family of functions will decode the bootmode bits from devstat.  Since the same name is used in different bit positions, I'm resisting the urge
+// to #define individual masks and shifts.
+GetSleepBootConfiguration(unsigned int bootmode)
+{
+    Devstat_Boot_Mode       = SLEEP_BOOT;
+    Devstat_Min             = (bootmode & 0x000000010) >> 4;
+    Devstat_Sys_Pll_Config  = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Arm_Pll_Config  = (bootmode & 0x000000E00) >> 9;
+    Devstat_Sys_En          = (bootmode & 0x000001000) >> 12;
+    Devstat_Arm_En          = (bootmode & 0x000002000) >> 13;
+
+    GEL_TextOut(" Detected boot mode:   %x - SLEEP\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" Min Boot Selected:    %d (%s)\n",,2,,,Devstat_Min, ( Devstat_Min == 1 ? "Yes" : "No") );
+    GEL_TextOut(" SYS PLL CONFIG:       %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" ARM PLL CONFIG:       %x\n",,2,,,Devstat_Arm_Pll_Config);
+    GEL_TextOut(" SYS (MAIN)PLL Enable: %s\n",,2,,,( Devstat_Sys_En == 1 ? "Yes" : "No") );
+    GEL_TextOut(" ARM PLL Enable:       %s\n\n",,2,,,( Devstat_Arm_En == 1 ? "Yes" : "No") );
+
+}
+
+GetI2CSlaveBootConfiguration(unsigned int bootmode)
+{
+    Devstat_Boot_Mode       = I2C_SLAVE_BOOT;
+    Devstat_Min             = (bootmode & 0x000000010) >> 4;
+    Devstat_Sys_Pll_Config  = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Arm_Pll_Config  = (bootmode & 0x000000E00) >> 9;
+    Devstat_Port            = (bootmode & 0x000003000) >> 12;
+    Devstat_Slave_Addr      = (bootmode & 0x000018000) >> 15;
+
+    GEL_TextOut("    Detected boot mode:    %x - I2C Slave\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut("    Min Boot Selected: %d (%s)\n",,2,,,Devstat_Min, ( Devstat_Min == 1 ? "Yes" : "No") );
+    GEL_TextOut("    SYS PLL CONFIG:    %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut("    ARM PLL CONFIG:    %x\n",,2,,,Devstat_Arm_Pll_Config);
+    GEL_TextOut("    I2C Port:          I2C%d\n",,2,,,Devstat_Port);
+    GEL_TextOut("    I2C Slave Boot Addr:   %x\n",,2,,,Devstat_Slave_Addr);
+}
+
+GetI2CMasterBootConfiguration(unsigned int bootmode)
+{
+    Devstat_Boot_Mode       = I2C_MASTER_BOOT;
+    Devstat_Min             = (bootmode & 0x000000010) >> 4;
+    Devstat_Port            = (bootmode & 0x000000060) >> 5;
+    Devstat_Param_Idx       = (bootmode & 0x000000E00) >> 9;
+    Devstat_Bus_Addr        = (bootmode & 0x000003000) >> 12;
+
+    GEL_TextOut(" Detected boot mode:   %x - I2C Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" Min Boot Selected:    %d (%s)\n",,2,,,Devstat_Min, ( Devstat_Min == 1 ? "Yes" : "No") );
+    GEL_TextOut(" I2C Port:             I2C%d\n",,2,,,Devstat_Port);
+    GEL_TextOut(" Boot Master:          %s\n",,2,,,( Devstat_Boot_Master == 1 ? "C66x" : "ARM") );
+
+    // TODO: pull out these values from these locations
+    if(Devstat_Boot_Master == 1) {
+        GEL_TextOut(" Parameter Table Index: %x\n\n",,2,,,Devstat_Param_Idx);
+    } else {
+        GEL_TextOut(" Parameter Offset:     %x\n\n",,2,,,(Devstat_Param_Idx * 0x2000) ); // ARM offset address is multiplied by 8K
+    }
+
+}
+
+GetSpiBootConfiguration(unsigned int bootmode)
+{
+    Devstat_Boot_Mode       = SPI_BOOT;
+    Devstat_Min             = (bootmode & 0x000000010) >> 4;
+    Devstat_Port            = (bootmode & 0x000000060) >> 5;
+    Devstat_Npin            = (bootmode & 0x000000080) >> 7;
+    Devstat_Param_Idx       = (bootmode & 0x000000E00) >> 9;
+    Devstat_Mode            = (bootmode & 0x000003000) >> 12;
+    Devstat_Csel            = (bootmode & 0x000006000) >> 14;
+    Devstat_Width           = (bootmode & 0x000010000) >> 16;
+
+    GEL_TextOut(" Detected boot mode:   %x - SPI\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" Min Boot Selected:    %d (%s)\n",,2,,,Devstat_Min, ( Devstat_Min == 1 ? "Yes" : "No") );
+    GEL_TextOut(" SPI Port:             SPI%d\n",,2,,,Devstat_Port);
+    GEL_TextOut(" Selected CS Driven:   %d\n",,2,,,Devstat_Npin);
+    GEL_TextOut(" Boot Master:          %s\n",,2,,,( Devstat_Boot_Master == 1 ? "C66x" : "ARM") );
+
+    // TODO: pull out these values from these locations
+    if(Devstat_Boot_Master == 1) {
+        GEL_TextOut(" Parameter Table Index: %x\n",,2,,,Devstat_Param_Idx);
+    } else {
+        GEL_TextOut(" Parameter Offset:      %x\n",,2,,,(Devstat_Param_Idx * 0x2000) ); // ARM offset address is multiplied by 8K
+    }
+
+    GEL_TextOut(" Clk Polarity/ Phase:  %d\n",,2,,,Devstat_Mode);
+    GEL_TextOut(" Chip Select:          %d\n",,2,,,Devstat_Csel);
+    GEL_TextOut(" SPI Address width:    %s\n\n",,2,,,( Devstat_Width == 1 ? "24-bit" : "16-bit") );
+}
+
+GetEmifArmMasterBootConfiguration(unsigned int bootmode)
+{
+    Devstat_Boot_Mode        = EMIF_ARM_MASTER_BOOT;
+    Devstat_Sys_Pll_Config   = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Arm_Pll_Config   = (bootmode & 0x000000E00) >> 9;
+    Devstat_Width            = (bootmode & 0x000001000) >> 12;
+    Devstat_Wait             = (bootmode & 0x000002000) >> 13;
+    Devstat_Base_Addr        = (bootmode & 0x00000C000) >> 14;
+
+    GEL_TextOut(" Detected boot mode:   %x - EMIF ARM Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" SYS PLL CONFIG:   %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" ARM PLL CONFIG:   %x\n",,2,,,Devstat_Arm_Pll_Config);
+    GEL_TextOut(" EMIF Width:       %d (%s)\n",,2,,,Devstat_Width, ( Devstat_Width == 1 ? "16-bit" : "8-bit") );
+    GEL_TextOut(" Extended Wait:    %d (%s)\n",,2,,,( Devstat_Wait == 1 ? "Yes" : "No") );
+    GEL_TextOut(" Base Address:     %x (%x)\n",,2,,,( Devstat_Base_Addr * 0x01000000) );  // base_addr = (base_addr + cs) * 0x01000000 [cs2 = 0 for ARM master]
+    GEL_TextOut(" NOTE:             CS2 is used when when ARM is master in EMIF boot\n\n");
+}
+
+GetEmifC66xMasterBootConfiguration(unsigned int bootmode)
+{
+    Devstat_Boot_Mode       = EMIF_ARM_MASTER_BOOT;
+    Devstat_Sys_Pll_Config  = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Chip_Sel        = (bootmode & 0x000000E00) >> 9;
+    Devstat_Width           = (bootmode & 0x000001000) >> 12;
+    Devstat_Wait            = (bootmode & 0x000002000) >> 13;
+    Devstat_Base_Addr       = (bootmode & 0x00000C000) >> 14;
+
+    GEL_TextOut(" Detected boot mode:   %x - EMIF C66x Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" SYS PLL CONFIG:   %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" Chip Select:      %x (CS%d)\n",,2,,,Devstat_Chip_Sel, (Devstat_Chip_Sel+2) );            //Starts at CS2
+    GEL_TextOut(" EMIF Width:       %d (%s)\n",,2,,,Devstat_Width, ( Devstat_Width == 1 ? "16-bit" : "8-bit") );
+    GEL_TextOut(" Extended Wait:    %d (%s)\n",,2,,,( Devstat_Wait == 1 ? "Yes" : "No") );
+    GEL_TextOut(" Base Address:     %x (%x)\n\n",,2,,,( Devstat_Base_Addr * 0x01000000) );  // base_addr = (base_addr + cs) * 0x01000000 [cs2 = 0 for ARM master]
+}
+
+GetNandArmMasterBootConfiguration(unsigned int bootmode)
+{
+    Devstat_Boot_Mode       = NAND_ARM_MASTER_BOOT;
+    Devstat_Min             = (bootmode & 0x000000010) >> 4;
+    Devstat_Sys_Pll_Config  = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Arm_Pll_Config  = (bootmode & 0x000000E00) >> 9;
+    Devstat_Clear           = (bootmode & 0x000001000) >> 12;
+    Devstat_First_Block     = (bootmode & 0x000006000) >> 13;
+
+    GEL_TextOut(" Detected boot mode:   %x - NAND ARM Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" Min Boot Selected:    %d (%s)\n",,2,,,Devstat_Min, ( Devstat_Min == 1 ? "Yes" : "No") );
+    GEL_TextOut(" SYS PLL CONFIG:   %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" ARM PLL CONFIG:   %x\n",,2,,,Devstat_Arm_Pll_Config);
+    GEL_TextOut(" ClearNAND Device?:    %s\n",,2,,,( Devstat_Clear == 1 ? "Yes" : "No") );
+    GEL_TextOut(" First Block Read (*16): %x (%x)\n",,2,,,( Devstat_First_Block, (Devstat_First_Block * 16) ) );
+    GEL_TextOut(" NOTE:             CS2 is used when when ARM is master in NAND boot\n\n");
+}
+
+GetNandC66xMasterBootConfiguration(unsigned int bootmode)
+{
+    Devstat_Boot_Mode        = NAND_C66x_MASTER_BOOT;
+    Devstat_Min              = (bootmode & 0x000000010) >> 4;
+    Devstat_Sys_Pll_Config   = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Chip_Sel         = (bootmode & 0x000000E00) >> 9;
+    Devstat_Clear            = (bootmode & 0x000001000) >> 12;
+    Devstat_First_Block      = (bootmode & 0x000006000) >> 13;
+
+    GEL_TextOut(" Detected boot mode:   %x - NAND C66x Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" Min Boot Selected:    %d (%s)\n",,2,,,Devstat_Min, ( Devstat_Min == 1 ? "Yes" : "No") );
+    GEL_TextOut(" SYS PLL CONFIG:       %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" Chip Select:          %d (CS%d)\n",,2,,,Devstat_Chip_Sel, (Devstat_Chip_Sel+2) );            //Starts at CS2
+    GEL_TextOut(" ClearNAND Device?:    %s\n",,2,,,( Devstat_Clear == 1 ? "Yes" : "No") );
+    GEL_TextOut(" First Block Read (*16):   %x (%x)\n\n",,2,,,( Devstat_First_Block, (Devstat_First_Block * 16) ) );
+}
+
+GetSrioArmMasterBootConfiguration(unsigned int bootmode)
+{
+    float data_rate;
+
+    Devstat_Boot_Mode        = SRIO_ARM_MASTER_BOOT;
+    Devstat_Min              = (bootmode & 0x000000010) >> 4;
+    Devstat_Sys_Pll_Config   = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Arm_Pll_Config   = (bootmode & 0x000000E00) >> 9;
+    Devstat_Data_Rate        = (bootmode & 0x000003000) >> 12;
+    Devstat_Ref_Clk          = (bootmode & 0x00000C000) >> 14;
+    Devstat_Lane             = (bootmode & 0x000010000) >> 16;
+
+    data_rate = 1.25f * (Devstat_Data_Rate + 1);
+
+    GEL_TextOut(" Detected boot mode:   %x - SRIO ARM Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" Min Boot Selected:    %d (%s)\n",,2,,,Devstat_Min, ( Devstat_Min == 1 ? "Yes" : "No") );
+    GEL_TextOut(" SYS PLL CONFIG:   %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" ARM PLL CONFIG:   %x\n",,2,,,Devstat_Arm_Pll_Config);
+    GEL_TextOut(" SRIO Data Rate (GB/s): %d (%1.2f)\n",,2,,,Devstat_Data_Rate, data_rate);
+    GEL_TextOut(" SRIO Ref Clock (MHz):  %d (%s)\n",,2,,,Devstat_Ref_Clk, ( Devstat_Ref_Clk == 1 ? "156.25MHz" : ( Devstat_Ref_Clk == 0 ? "125MHz" : "Reserved Value") ) );
+    GEL_TextOut(" Lane:        %d (%s)\n\n",,2,,,Devstat_Lane, ( Devstat_Lane == 1 ? "4 ports, each 1 lane" : "2 ports, each 2 lanes" ) );
+}
+
+GetSrioC66xMasterBootConfiguration(unsigned int bootmode)
+{
+    float data_rate;
+
+    Devstat_Boot_Mode        = SRIO_ARM_MASTER_BOOT;
+    Devstat_Min              = (bootmode & 0x000000010) >> 4;
+    Devstat_Sys_Pll_Config   = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Lane             = (bootmode & 0x000000E00) >> 9;
+    Devstat_Data_Rate        = (bootmode & 0x000003000) >> 12;
+    Devstat_Ref_Clk          = (bootmode & 0x00000C000) >> 14;
+
+    data_rate = 1.25f * (Devstat_Data_Rate + 1);
+
+    GEL_TextOut(" Detected boot mode:   %x - SRIO C66x Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" Min Boot Selected:    %d (%s)\n",,2,,,Devstat_Min, ( Devstat_Min == 1 ? "Yes" : "No") );
+    GEL_TextOut(" SYS PLL CONFIG:   %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" ARM PLL CONFIG:   %x\n",,2,,,Devstat_Arm_Pll_Config);
+    GEL_TextOut(" SRIO Data Rate (GB/s):    %d (%1.2f)\n",,2,,,Devstat_Data_Rate, data_rate);
+    GEL_TextOut(" SRIO Ref Clock (MHz): %d (%s)\n",,2,,,Devstat_Ref_Clk, ( Devstat_Ref_Clk == 1 ? "156.25MHz" : ( Devstat_Ref_Clk == 0 ? "125MHz" : "Reserved Value") ) );
+    GEL_TextOut(" Lane Setup:        %d\n\n",,2,,,Devstat_Lane );
+}
+
+GetEthArmMasterBootConfiguration(unsigned int bootmode)
+{
+    Devstat_Boot_Mode        = SRIO_ARM_MASTER_BOOT;
+    Devstat_Min              = (bootmode & 0x000000010) >> 4;
+    Devstat_Sys_Pll_Config   = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Arm_Pll_Config   = (bootmode & 0x000000E00) >> 9;
+    Devstat_Ext_Con          = (bootmode & 0x000003000) >> 12;
+    Devstat_Ref_Clk          = (bootmode & 0x00000C000) >> 14;
+    Devstat_Pa_Clk           = (bootmode & 0x000010000) >> 16;
+
+    GEL_TextOut(" Detected boot mode:   %x - Ethernet ARM Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" Min Boot Selected:    %d (%s)\n",,2,,,Devstat_Min, ( Devstat_Min == 1 ? "Yes" : "No") );
+    GEL_TextOut(" SYS PLL CONFIG:   %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" ARM PLL CONFIG:   %x\n",,2,,,Devstat_Arm_Pll_Config);
+    GEL_TextOut(" External Conn Mode:   %d (%s)\n",,2,,,Devstat_Ext_Con, (Devstat_Ext_Con == 3 ? "MAC2Fiber" : (Devstat_Ext_Con == 2 ? "MAC2MAC, forced link, max speed" : (Devstat_Ext_Con == 1 ? "MAC2MAC, slave auto neg." : "MAC2MAC, master auto neg."))) );
+    GEL_TextOut(" Eth Ref Clock (MHz):  %d (%s)\n",,2,,,Devstat_Ref_Clk, ( Devstat_Ref_Clk == 1 ? "156.25MHz" : ( Devstat_Ref_Clk == 0 ? "125MHz" : "Reserved Value") ) );
+    GEL_TextOut(" PA Clock Ref:         %d (%s)\n\n",,2,,,Devstat_Pa_Clk, (Devstat_Pa_Clk == 1 ? "PA clk ref = SerDes clk ref" : "PA clk ref = core ref") );
+}
+
+GetEthC66xMasterBootConfiguration(bootmode)
+{
+    Devstat_Boot_Mode        = SRIO_ARM_MASTER_BOOT;
+    Devstat_Min              = (bootmode & 0x000000010) >> 4;
+    Devstat_Sys_Pll_Config   = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Lane             = (bootmode & 0x000000E00) >> 9;
+    Devstat_Ext_Con          = (bootmode & 0x000003000) >> 12;
+    Devstat_Ref_Clk          = (bootmode & 0x00000C000) >> 14;
+    Devstat_Pa_Clk           = (bootmode & 0x000010000) >> 16;
+
+    GEL_TextOut(" Detected boot mode: %x - Ethernet C66x Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" Min Boot Selected:  %d (%s)\n",,2,,,Devstat_Min, ( Devstat_Min == 1 ? "Yes" : "No") );
+    GEL_TextOut(" SYS PLL CONFIG:     %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" Lane Setup:         %d (%s)\n",,2,,,Devstat_Lane, (Devstat_Lane > 3 ? "Reserved Value" : (Devstat_Lane == 3 ? "SGMII port 0, 1, 2 enabled" : (Devstat_Ext_Con == 2 ? "SGMII port 0, 1 enabled" : (Devstat_Ext_Con == 1 ? "SGMII port 0 enabled" : "All SGMII ports enabled")))) );
+    GEL_TextOut(" External Conn Mode: %d (%s)\n",,2,,,Devstat_Ext_Con, (Devstat_Ext_Con == 3 ? "MAC2Fiber" : (Devstat_Ext_Con == 2 ? "MAC2MAC, forced link, max speed" : (Devstat_Ext_Con == 1 ? "MAC2MAC, slave auto neg." : "MAC2MAC, master auto neg."))) );
+    GEL_TextOut(" Eth Ref Clock (MHz): %d (%s)\n",,2,,,Devstat_Ref_Clk, ( Devstat_Ref_Clk == 1 ? "156.25MHz" : ( Devstat_Ref_Clk == 0 ? "125MHz" : "Reserved Value") ) );
+    GEL_TextOut(" PA Clock Ref:       %d (%s)\n\n",,2,,,Devstat_Pa_Clk, (Devstat_Pa_Clk == 1 ? "PA clk ref = SerDes clk ref" : "PA clk ref = core ref") );
+}
+
+GetPcieArmMasterBootConfiguration(bootmode)
+{
+    Devstat_Boot_Mode        = PCIE_ARM_MASTER_BOOT;
+    Devstat_Sys_Pll_Config   = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Arm_Pll_Config   = (bootmode & 0x000000E00) >> 9;
+    Devstat_Bar_Config       = (bootmode & 0x00000F000) >> 12;
+    Devstat_Ref_Clk          = (bootmode & 0x000010000) >> 16;
+
+    GEL_TextOut(" Detected boot mode: %x - PCIe ARM Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" SYS PLL CONFIG:     %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" ARM PLL CONFIG:     %x\n",,2,,,Devstat_Arm_Pll_Config);
+    GEL_TextOut(" PCIe BAR Reg. Config: %x\n",,2,,,Devstat_Bar_Config);
+    GEL_TextOut(" PCIe Ref Clock (MHz): %d (%s)\n\n",,2,,,Devstat_Ref_Clk, ( Devstat_Ref_Clk == 1 ? "156.25MHz" : "125MHz") );
+}
+
+GetPcieC66xMasterBootConfiguration(bootmode)
+{
+    Devstat_Boot_Mode        = PCIE_C66X_MASTER_BOOT;
+    Devstat_Sys_Pll_Config   = (bootmode & 0x0000000E0) >> 5;
+    Devstat_SerDes_Config    = (bootmode & 0x000000E00) >> 9;
+    Devstat_Bar_Config       = (bootmode & 0x00000F000) >> 12;
+    Devstat_Ref_Clk          = (bootmode & 0x000010000) >> 16;
+
+    GEL_TextOut(" Detected boot mode: %x - PCIe C66x Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" SYS PLL CONFIG:     %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" SerDes Config:      %x\n",,2,,,Devstat_SerDes_Config);
+    GEL_TextOut(" PCIe BAR Reg. Config: %x\n",,2,,,Devstat_Bar_Config);
+    GEL_TextOut(" PCIe Ref Clock (MHz): %d (%s)\n\n",,2,,,Devstat_Ref_Clk, ( Devstat_Ref_Clk == 1 ? "156.25MHz" : "125MHz") );
+}
+
+GetHyprArmMasterBootConfiguration(bootmode)
+{
+    Devstat_Boot_Mode        = HYPR_ARM_MASTER_BOOT;
+    Devstat_Sys_Pll_Config   = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Arm_Pll_Config   = (bootmode & 0x000000E00) >> 9;
+    Devstat_Data_Rate        = (bootmode & 0x00000F000) >> 12;
+    Devstat_Ref_Clk          = (bootmode & 0x00000C000) >> 14;
+    Devstat_Port             = (bootmode & 0x000010000) >> 16;
+
+    GEL_TextOut(" Detected boot mode: %x - Hyperlink ARM Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" SYS PLL CONFIG:     %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" ARM PLL CONFIG:     %x\n",,2,,,Devstat_Arm_Pll_Config);
+    GEL_TextOut(" Hyperlink Data Rate: %d (%s)\n",,2,,,Devstat_Ext_Con, (Devstat_Ext_Con == 3 ? "12.5GBs" : (Devstat_Ext_Con == 2 ? "6.25 GBs" : (Devstat_Ext_Con == 1 ? "3.125 GBs" : "1.25 GBs"))) );
+    GEL_TextOut(" Hyperlink Ref Clock (MHz): %d (%s)\n",,2,,,Devstat_Ref_Clk, ( Devstat_Ref_Clk == 1 ? "156.25MHz" : ( Devstat_Ref_Clk == 0 ? "125MHz" : "Reserved Value") ) );
+    GEL_TextOut(" Hyperlink port:     %d (%s)\n\n",,2,,,Devstat_Port, (Devstat_Port == 1 ? "Hyperlink1": "Hyperlink0") );
+}
+
+GetHyprC66xMasterBootConfiguration(bootmode)
+{
+    Devstat_Boot_Mode        = HYPR_C66X_MASTER_BOOT;
+    Devstat_Sys_Pll_Config   = (bootmode & 0x0000000E0) >> 5;
+    Devstat_SerDes_Config    = (bootmode & 0x000000E00) >> 9;
+    Devstat_Data_Rate        = (bootmode & 0x00000F000) >> 12;
+    Devstat_Ref_Clk          = (bootmode & 0x00000C000) >> 14;
+    Devstat_Port             = (bootmode & 0x000010000) >> 16;
+
+    GEL_TextOut(" Detected boot mode: %x - Hyperlink C66X Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" SYS PLL CONFIG:     %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" SerDes Config:      %x\n",,2,,,Devstat_SerDes_Config);
+    GEL_TextOut(" Hyperlink Data Rate: %d (%s)\n",,2,,,Devstat_Ext_Con, (Devstat_Ext_Con == 3 ? "12.5GBs" : (Devstat_Ext_Con == 2 ? "6.25 GBs" : (Devstat_Ext_Con == 1 ? "3.125 GBs" : "1.25 GBs"))) );
+    GEL_TextOut(" Hyperlink Ref Clock (MHz): %d (%s)\n",,2,,,Devstat_Ref_Clk, ( Devstat_Ref_Clk == 1 ? "156.25MHz" : ( Devstat_Ref_Clk == 0 ? "125MHz" : "Reserved Ve") ) );
+    GEL_TextOut(" Hyperlink port:     %d (%s)\n\n",,2,,,Devstat_Port, (Devstat_Port == 1 ? "Hyperlink1": "Hyperlink0") );
+}
+
+GetUartArmMasterBootConfiguration(bootmode)
+{
+    Devstat_Boot_Mode        = UART_ARM_MASTER_BOOT;
+    Devstat_Min              = (bootmode & 0x000000010) >> 4;
+    Devstat_Sys_Pll_Config   = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Arm_Pll_Config   = (bootmode & 0x000000E00) >> 9;
+    Devstat_Port             = (bootmode & 0x00000F000) >> 12;
+
+    GEL_TextOut(" Detected boot mode: %x - Hyperlink C66X Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" Min Boot Selected:  %d (%s)\n",,2,,,Devstat_Min, ( Devstat_Min == 1 ? "Yes" : "No") );
+    GEL_TextOut(" SYS PLL CONFIG:     %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" ARM PLL CONFIG:     %x\n",,2,,,Devstat_Arm_Pll_Config);
+    GEL_TextOut(" UART Port Number:   %d\n\n",,2,,,Devstat_Port);
+}
+
+GetUartC66xMasterBootConfiguration(bootmode)
+{
+    Devstat_Boot_Mode        = UART_C66X_MASTER_BOOT;
+    Devstat_Min              = (bootmode & 0x000000010) >> 4;
+    Devstat_Sys_Pll_Config   = (bootmode & 0x0000000E0) >> 5;
+    Devstat_Port             = (bootmode & 0x00000F000) >> 12;
+
+    GEL_TextOut(" Detected boot mode: %x - Hyperlink C66X Master\n",,2,,,(bootmode & DEVSTAT_BOOTMODE_DEVICE_MASK) );
+    GEL_TextOut(" Min Boot Selected:  %d (%s)\n",,2,,,Devstat_Min, ( Devstat_Min == 1 ? "Yes" : "No") );
+    GEL_TextOut(" SYS PLL CONFIG:     %x\n",,2,,,Devstat_Sys_Pll_Config);
+    GEL_TextOut(" ARM PLL CONFIG:     %x\n",,2,,,Devstat_Arm_Pll_Config);
+    GEL_TextOut(" UART Port Number:   %d\n\n",,2,,,Devstat_Port);
+}
+
+GetMasterBootCore()
+{
+    unsigned int bootmode = GetBootMode();
+    unsigned int master_core;
+
+    if( bootmode == SLEEP_BOOT || bootmode == I2C_SLAVE_BOOT || bootmode == EMIF_ARM_MASTER_BOOT || bootmode == NAND_ARM_MASTER_BOOT ||
+        bootmode == SRIO_ARM_MASTER_BOOT || bootmode == ETH_ARM_MASTER_BOOT || bootmode == PCIE_ARM_MASTER_BOOT ||
+        bootmode == HYPR_ARM_MASTER_BOOT || bootmode == UART_ARM_MASTER_BOOT)
+    {
+        master_core = ARM_BOOT_MASTER;
+    } else if( bootmode != I2C_MASTER_BOOT && bootmode != SPI_BOOT) {                      // these two modes do not have SYS PLL CONFIG info
+        master_core = C66X_BOOT_MASTER;
+    } else {
+        master_core = SLAVE_BOOT;
+    }
+
+    return master_core;
+}
+
+// return both pllm and plld encoded in a single unsigned int: pllm << 16 | plld
+GetPllmPlldFromBootmode(unsigned int pll_config_bits, unsigned int devspeed_rating)
+{
+    unsigned int pllm, plld;
+
+    if(devspeed_rating > DEVSPEED_1228_8_MHZ) {
+        GEL_TextOut("    The device speed rating is not compatible with this script (got %x)\n", devspeed_rating);
+        return 0;
+    }
+
+    if(pll_config_bits == 0) {
+        if(devspeed_rating == DEVSPEED_800_MHZ) {
+            plld = 0;
+            pllm = 31;
+        } else if(devspeed_rating == DEVSPEED_1000_MHZ) {
+            plld = 0;
+            pllm = 39;
+        } else if(devspeed_rating == DEVSPEED_1228_8_MHZ) {
+            plld = 0;
+            pllm = 47;
+        }
+    } else if(pll_config_bits == 1) {
+        if(devspeed_rating == DEVSPEED_800_MHZ) {
+            plld = 0;
+            pllm = 23;
+        } else if(devspeed_rating == DEVSPEED_1000_MHZ) {
+            plld = 0;
+            pllm = 29;
+        } else if(devspeed_rating == DEVSPEED_1228_8_MHZ) {
+            plld = 0;
+            pllm = 35;
+        }
+    } else if(pll_config_bits == 2) {
+        if(devspeed_rating == DEVSPEED_800_MHZ) {
+            plld = 0;
+            pllm = 19;
+        } else if(devspeed_rating == DEVSPEED_1000_MHZ) {
+            plld = 0;
+            pllm = 24;
+        } else if(devspeed_rating == DEVSPEED_1228_8_MHZ) {
+            plld = 0;
+            pllm = 29;
+        }
+    } else if(pll_config_bits == 3) {
+        if(devspeed_rating == DEVSPEED_800_MHZ) {
+            plld = 0;
+            pllm = 15;
+        } else if(devspeed_rating == DEVSPEED_1000_MHZ) {
+            plld = 0;
+            pllm = 19;
+        } else if(devspeed_rating == DEVSPEED_1228_8_MHZ) {
+            plld = 0;
+            pllm = 23;
+        }
+    } else if(pll_config_bits == 4) {
+        if(devspeed_rating == DEVSPEED_800_MHZ) {
+            plld = 0;
+            pllm = 40;
+        } else if(devspeed_rating == DEVSPEED_1000_MHZ) {
+            plld = 4;
+            pllm = 63;
+        } else if(devspeed_rating == DEVSPEED_1228_8_MHZ) {
+            plld = 24;
+            pllm = 45;
+        }
+    } else if(pll_config_bits == 5) {
+        if(devspeed_rating == DEVSPEED_800_MHZ) {
+            plld = 4;
+            pllm = 31;
+        } else if(devspeed_rating == DEVSPEED_1000_MHZ) {
+            plld = 0;
+            pllm = 7;
+        } else if(devspeed_rating == DEVSPEED_1228_8_MHZ) {
+            plld = 4;
+            pllm = 47;
+        }
+    } else if(pll_config_bits == 6) {
+        if(devspeed_rating == DEVSPEED_800_MHZ) {
+            plld = 7;
+            pllm = 40;
+        } else if(devspeed_rating == DEVSPEED_1000_MHZ) {
+            plld = 4;
+            pllm = 31;
+        } else if(devspeed_rating == DEVSPEED_1228_8_MHZ) {
+            plld = 2;
+            pllm = 22;
+        }
+    } else if(pll_config_bits == 7) {
+        if(devspeed_rating == DEVSPEED_800_MHZ) {
+            plld = 0;
+            pllm = 12;
+        } else if(devspeed_rating == DEVSPEED_1000_MHZ) {
+            plld = 3;
+            pllm = 64;
+        } else if(devspeed_rating == DEVSPEED_1228_8_MHZ) {
+            plld = 0;
+            pllm = 19;
+        }
+    } else {
+        GEL_TextOut("    The pll config bits passed in were not valid (got %x)\n", pll_config_bits);
+        return 0;
+    }
+    return (pllm << 16) | plld;
+}
+
+// *************************************************************
+//
+// Power and Clock
+//
+//
+
+GetPowerDomainStatusUtility()
+{
+    unsigned int *ppdstat = PSC_BASE_ADDRESS+0x0200;
+    unsigned int *ptemp;
+    unsigned int i, state;
+    
+    GEL_TextOut("******************** Power Domain Status (PDSTATn)\n");
+        
+    for(i = 0; i < 32; i++) {
+        if( PSC_PDSTAT & (1 << i) ) {
+            ptemp    =   ppdstat+i;
+            state    =      *ptemp & 0x1;
+        
+            GEL_TextOut("    PDSTAT%d:    STATE %s (ADDR %x RAW %x)\n",,2,,,i, (state == 1 ? "ON" : "OFF"), ptemp, *ptemp);
+        } 
+        /*else {
+            GEL_TextOut("    PDSTAT%d:    Reserved\n",,2,,,i);    
+        }*/
+    }
+}
+
+ActivateAllPowerDomainsUtility()
+{
+    unsigned int *ppdctl = PSC_BASE_ADDRESS+0x0300;  // Power domain control registers - these control the state of their power domain (on/off)
+    unsigned int *ptemp;
+    unsigned int i;
+        
+    GEL_TextOut("******************** Activate All Power Domains (PDCTNn)\n\n");
+    
+    for(i = 0; i < 32; i++) {
+        if( PSC_PDSTAT & (1 << i) ) {
+            ptemp    =   ppdctl+i;
+            *ptemp   =   1;
+            
+            GEL_TextOut("    Setting PDCTL%d    ON!\n",,2,,,i);
+        }
+    }
+    
+    
+    PSC_PTCMD    = PSC_PDSTAT;        //Tell all domains to GO to their new state
+    
+    // should we poll PTSTAT before saying complete?
+    
+    GEL_TextOut("    Complete!\n");            
+}
+
+//LPSC = Local Power Sleep Controller
+
+GetLpscMdstatUtility()   
+{
+    unsigned int *pmdstat = PSC_BASE_ADDRESS+0x0800;
+    unsigned int *ptemp;
+    
+    unsigned int i, mdstat, mckout, mrstdone, mrst, lrstdone, lrst, state;
+    
+    GEL_TextOut("******************** Clock Domain Status (MDSTATn)\n");
+    
+    // MDSTAT0 - MDSTAT31    
+    for(i = 0; i < 32; i++) {
+        if( LPSC_MDSTATL & (1 << i) ) {
+            ptemp    =   pmdstat+i;
+            mdstat   =  *ptemp;
+            mckout   =     (mdstat >> 12) & 0x1;
+            mrstdone =     (mdstat >> 11) & 0x1;
+            mrst     =    (mdstat >> 10) & 0x1;
+            lrstdone =     (mdstat >> 9)  & 0x1;
+            lrst     =     (mdstat >> 8)  & 0x1;
+            state    =      mdstat          & 0x1F;
+        
+            GEL_TextOut("    MDSTAT%d:    MCKOUT %d  MRSTDONE %d  MRST %d  LRSTDONE %d  LRST %d  STATE %d    (ADDR %x RAW %x)\n",,2,,,i, mckout, mrstdone, mrst, lrstdone, lrst, state, ptemp, *ptemp);
+        } 
+        /*else {
+            GEL_TextOut("    MDSTAT%d:    Reserved\n",,2,,,i);    
+        }*/
+    }
+    
+    // MDSTAT32 - MDSTAT63
+    for(i=32; i < 64; i++) {
+        if( LPSC_MDSTATH & (1 << (i-32)) ) {
+            ptemp    =   pmdstat+i;
+            mdstat   =  *ptemp;
+            mckout   =     (mdstat >> 12) & 0x1;
+            mrstdone =     (mdstat >> 11) & 0x1;
+            mrst     =     (mdstat >> 10) & 0x1;
+            lrstdone =     (mdstat >> 9)  & 0x1;
+            lrst     =     (mdstat >> 8)  & 0x1;
+            state    =      mdstat          & 0x1F;
+            
+            GEL_TextOut("    MDSTAT%d:    MCKOUT %d  MRSTDONE %d  MRST %d  LRSTDONE %d  LRST %d  STATE %d    (ADDR %x RAW %x)\n",,2,,,i, mckout, mrstdone, mrst, lrstdone, lrst, state, ptemp, *ptemp);
+        
+        } 
+        /*else {
+            GEL_TextOut("    MDSTAT%d:    Reserved\n",,2,,,i);    
+        }*/
+    }
+}
+
+GetHyperlink0SerdesStatus()
+{
+    unsigned int eqover, equnder, ocip, losdtc, sync, lock;
+    unsigned int i, shift, num_lanes = 4;
+    
+    GEL_TextOut("******************** HyperLink 0 SERDES Status\n\n");
+    GEL_TextOut(" Hyperlink 0 PLL Serdes Status:    %x (%x)\n\n",,2,,,HYPERLINK0_SERDES_STATUS, &HYPERLINK0_SERDES_STATUS);
+    
+    lock = HYPERLINK0_SERDES_STATUS & 0x1;
+    
+    GEL_TextOut(" Hyperlink 0 PLL Lock:    %d\n",,2,,,lock);
+    
+    for(i = 0, shift = 2; i < num_lanes; i++, shift+=7) {
+        sync    = (HYPERLINK0_SERDES_STATUS >> shift++) & 0x1;
+        losdtc  = (HYPERLINK0_SERDES_STATUS >> shift++) & 0x1;
+        ocip    = (HYPERLINK0_SERDES_STATUS >> shift++) & 0x1;
+        equnder = (HYPERLINK0_SERDES_STATUS >> shift++) & 0x1;
+        eqover  = (HYPERLINK0_SERDES_STATUS >> shift++) & 0x1;
+        
+        GEL_TextOut(" Hyperlink 0 Lane %d Symbol alignment:                %d\n",,2,,,i,sync);
+        GEL_TextOut(" Hyperlink 0 Lane %d Loss of Signal Detect:           %d\n",,2,,,i,losdtc);
+        GEL_TextOut(" Hyperlink 0 Lane %d Offset compensation in progress: %d\n",,2,,,i,ocip);
+        GEL_TextOut(" Hyperlink 0 Lane %d Received signal under equalized: %d\n",,2,,,i,equnder);
+        GEL_TextOut(" Hyperlink 0 Lane %d Received signal over equalized:  %d\n\n",,2,,,i,eqover);
+    }
+}
+
+GetPcieSerdesStatusUtility()
+{
+    GEL_TextOut("******************** PCIe SERDES Status\n\n");
+    
+    GEL_TextOut(" BOOTCFG_PCIE_SERDES_STS:    %x (%x)\n\n",,2,,,BOOTCFG_PCIE_SERDES_STS, &BOOTCFG_PCIE_SERDES_STS);
+
+    //SERDES PLL LOCK Status
+    GEL_TextOut(" PCIE SERDES PLL LOCK:    PLL %s Locked\n\n",,2,,,(BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,0,0) != 0 ? "** IS **" : "** IS NOT **") );
+    
+    GEL_TextOut(" PCIE 0 SERDES STATUS:\n");
+    GEL_TextOut(" Rx Test Fail: %d\n",,2,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,1,1));
+    GEL_TextOut(" Sync:         %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,2,2));
+    GEL_TextOut(" Losdtct:      %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,3,3));
+    GEL_TextOut(" OCIP:         %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,4,4));
+    GEL_TextOut(" Tx Test Fail: %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,5,5));
+    GEL_TextOut(" RDTCTIP:      %d\n\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,6,6));
+    
+    
+    GEL_TextOut(" PCIE 1 SERDES STATUS:\n");
+    GEL_TextOut(" Rx Test Fail: %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,7,7));
+    GEL_TextOut(" Sync:         %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,8,8));
+    GEL_TextOut(" Losdtct:      %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,9,9));
+    GEL_TextOut(" OCIP:         %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,10,10));
+    GEL_TextOut(" Tx Test Fail: %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,11,11));
+    GEL_TextOut(" RDTCTIP:      %d\n\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_STS,12,12));
+}
+
+GetPcieSerdesPll()
+{
+    unsigned int reg_field;
+    
+    GEL_TextOut("******************** PCIE SERDES PLL CONFIGURATION\n\n");
+    
+    GEL_TextOut(" BOOTCFG_PCIE_SERDES_CFGPLL:    %x (%x) \n\n",,2,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_CFGPLL,31,0), &BOOTCFG_PCIE_SERDES_CFGPLL);
+    
+    reg_field = BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_CFGPLL,0,0);
+    
+    if(reg_field == 0)
+    {
+        GEL_TextOut(" PCIE SERDES ENPLL:        PLL is **DISABLED**\n");
+    }
+    else
+    {
+        GEL_TextOut(" PCIE SERDES ENPLL:        PLL is ##ENABLED##\n");
+    }
+    
+    reg_field = BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_CFGPLL,7,1);
+    
+    if(reg_field == 0x10)
+    {
+        GEL_TextOut(" MPY[7:1]:            4x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x14)
+    {
+        GEL_TextOut(" MPY[7:1]:            5x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x18)
+    {
+        GEL_TextOut(" MPY[7:1]:            6x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x20)
+    {
+        GEL_TextOut(" MPY[7:1]:            8x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x21)
+    {
+        GEL_TextOut(" MPY[7:1]:            8.25x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x28)
+    {
+        GEL_TextOut(" MPY[7:1]:            10x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x30)
+    {
+        GEL_TextOut(" MPY[7:1]:            12x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x32)
+    {
+        GEL_TextOut(" MPY[7:1]            12.5x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x3C)
+    {
+        GEL_TextOut(" MPY[7:1]            15x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x40)
+    {
+        GEL_TextOut(" MPY[7:1]            16x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x42)
+    {
+        GEL_TextOut(" MPY[7:1]            16.5x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x50)
+    {
+        GEL_TextOut(" MPY[7:1]            20x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x58)
+    {
+        GEL_TextOut(" MPY[7:1]            22x PLL Multiply factor\n");
+    }
+    else if(reg_field == 0x64)
+    {
+        GEL_TextOut(" MPY[7:1]            25x PLL Multiply factor\n");
+    }
+    else
+    {
+        GEL_TextOut(" MPY[7:1] => Reserved\n");
+    }
+    
+    GEL_TextOut(" ENDIVCLK:     %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_CFGPLL,8,8));
+    GEL_TextOut(" VRANGE:       %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_CFGPLL,9,9));
+    GEL_TextOut(" SLEEPPLL:     %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_CFGPLL,10,10));
+    GEL_TextOut(" LOOP BANDWIDTH: %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_CFGPLL,12,11));
+    GEL_TextOut(" CLKBYP:       %d\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_CFGPLL,14,13));
+    GEL_TextOut(" STD:          %d\n\n",,,,,BB_REG_FIELD_READ(BOOTCFG_PCIE_SERDES_CFGPLL,15,15));
+}    
+
+GetPaSerdesStatusUtility()
+{
+    GEL_TextOut("******************** PA SERDES Status\n\n");
+    GEL_TextOut(" TODO\n\n");
+}    
+
+GetSrioSerdesStatusUtility()
+{
+    GEL_TextOut("******************** SRIO SERDES Status\n\n");
+    GEL_TextOut(" TODO\n\n");
+}
+
+// TODO: verify these addresses
+
+#define AIF2_CDMA_GBL_CNTL_PRIO                 (*(unsigned int*)(0x01F1400C))
+#define PA_CDMA_GBL_CNTL_PRIO                   (*(unsigned int*)(0x0200400C))
+#define FFTC_CDMA_GBL_CNTL_PRIO                 (*(unsigned int*)(0x021F020C))
+#define SRIO_CDMA_GBL_CNTL_PRIO                 (*(unsigned int*)(0x0290100C))
+#define QMSS_CDMA_GBL_CNTL_PRIO                 (*(unsigned int*)(0x02A6C00C))
+
+#define SRIO_PER_SET_CNTL                       (*(unsigned int*)(0x02900014))
+#define PCIE_PRIORITY                           (*(unsigned int*)(0x2180003C))
+
+#define TAC_FE_HEAD_PRIO                        (*(unsigned int*)(0x02180080))
+#define TAC_FE_DATA_PRIO                        (*(unsigned int*)(0x02180084))
+#define TAC_FE_WARN_PRIO                        (*(unsigned int*)(0x02180088))
+#define TAC_FE_CPM_PRIO                         (*(unsigned int*)(0x0218008C))
+#define BOOTCFG_CHIP_MISC_CTL                   (*(unsigned int*)(0x02620400))
+#define COREPAC_MDMAARBU                        (*(unsigned int*)(0x01841010))
+
+GetMasterPriorityConfiguration()
+{
+    GEL_TextOut("******************** Master_Priority_Configuration\n");
+    GEL_TextOut("******************** PRIORITY-0 (Highest) & PRIORITY-7 (Lowest)\n\n");
+    
+    //EDMA3 masters
+    // TPCC = Third Party Channel Controller = EDMA3CC
+    
+    GEL_TextOut(" EDMA0_TC0 Master: Priority-%d\n",,2,,,(EDMA_TPCC0_QUEPRI & 0x0007)) );
+    GEL_TextOut(" EDMA0_TC1 Master: Priority-%d\n",,2,,,((EDMA_TPCC0_QUEPRI & 0x0038) >> 3)) );
+    
+    GEL_TextOut(" EDMA1_TC0 Master: Priority-%d\n",,2,,, (EDMA_TPCC1_QUEPRI & 0x0007)) );
+    GEL_TextOut(" EDMA1_TC1 Master: Priority-%d\n",,2,,,((EDMA_TPCC1_QUEPRI & 0x0038) >> 3)) );
+    GEL_TextOut(" EDMA1_TC2 Master: Priority-%d\n",,2,,, (EDMA_TPCC1_QUEPRI & 0x01C0) >> 6) );
+    GEL_TextOut(" EDMA1_TC3 Master: Priority-%d\n",,2,,,((EDMA_TPCC1_QUEPRI & 0x0E00) >> 9)) );
+    
+    GEL_TextOut(" EDMA2_TC0 Master: Priority-%d\n",,2,,, (EDMA_TPCC2_QUEPRI & 0x0007)) );
+    GEL_TextOut(" EDMA2_TC1 Master: Priority-%d\n",,2,,,((EDMA_TPCC2_QUEPRI & 0x0038) >> 3)) );
+    GEL_TextOut(" EDMA2_TC2 Master: Priority-%d\n",,2,,, (EDMA_TPCC2_QUEPRI & 0x01C0) >> 6) );
+    GEL_TextOut(" EDMA2_TC3 Master: Priority-%d\n",,2,,,((EDMA_TPCC2_QUEPRI & 0x0E00) >> 9)) );
+    
+    GEL_TextOut(" EDMA3_TC0 Master: Priority-%d\n",,2,,, (EDMA_TPCC3_QUEPRI & 0x0007)) );
+    GEL_TextOut(" EDMA3_TC1 Master: Priority-%d\n",,2,,,((EDMA_TPCC3_QUEPRI & 0x0038) >> 3)) );
+    
+    GEL_TextOut(" EDMA4_TC0 Master: Priority-%d\n",,2,,, (EDMA_TPCC4_QUEPRI & 0x0007)) );
+    GEL_TextOut(" EDMA4_TC1 Master: Priority-%d\n\n",,2,,,((EDMA_TPCC4_QUEPRI & 0x0038) >> 3)) );
+    
+    //PA CPPI Master
+    //GEL_TextOut(" PA PKT DMA Master: TX Priority-%d, RX Priority-%d\n\n",,,,,(BB_REG_FIELD_READ(PA_CDMA_GBL_CNTL,2,0)), (BB_REG_FIELD_READ(PA_CDMA_GBL_CNTL,18,16)) );
+    
+    //SRIO CPPI Master
+    //GEL_TextOut(" SRIO PKT DMA Master: TX Priority-%d, RX Priority-%d\n\n",,,,,(BB_REG_FIELD_READ(SRIO_CDMA_GBL_CNTL,2,0)), (BB_REG_FIELD_READ(SRIO_CDMA_GBL_CNTL,18,16)) );
+    
+    //QMSS CPPI Master
+    //GEL_TextOut(" QMSS PKT DMA Master: TX Priority-%d, RX Priority-%d\n\n",,,,,(BB_REG_FIELD_READ(QMSS_CDMA_GBL_CNTL,2,0)), (BB_REG_FIELD_READ(QMSS_CDMA_GBL_CNTL,18,16)) );
+    
+    //QM_Second Master
+    GEL_TextOut(" QM_Second Master: Priority-%d\n\n",,,,,(BB_REG_FIELD_READ(BOOTCFG_CHIP_MISC_CTL,2,0)) );
+    
+    //SRIO Master
+    GEL_TextOut(" SRIO Master: Priority-%d\n\n",,,,,(BB_REG_FIELD_READ(SRIO_PER_SET_CNTL,11,9)) );
+    
+    //PCIe Master
+    GEL_TextOut(" PCIE Master: Priority-%d\n\n",,,,,(BB_REG_FIELD_READ(PCIE_PRIORITY,2,0)) );
+    
+    //Hyperbridge Master
+    
+    GEL_TextOut(" HYPERBRIDGE Master: Priority at VBUSM is determined according to the priority field value\n");
+    GEL_TextOut("                     received from the command word. The pri bit encoding is given below:\n");
+    GEL_TextOut("                     pri-0b0 ---> Priority0 on the VBUSM\n");
+    GEL_TextOut("                     pri-0b1 ---> Priority4 on the VBUSM\n\n");
+    
+    // COREPAC0 MDMA
+    GEL_TextOut(" COREPAC%d MDMA Master(For other COREPACs load the GEL on the respective COREPAC): Urgent Priority-%d, Normal Priority-%d\n\n",,,,,DNUM,(BB_REG_FIELD_READ(COREPAC_MDMAARBU,26,24)), (BB_REG_FIELD_READ(COREPAC_MDMAARBU,18,16)));
+}
+
+#define QM_STATUS_CONFIG_BASE                   (0x02a00000) // Base Address of QM status & config region
+#define QM_STATUS_CONFIG_REGA                   (0x00)
+#define QM_STATUS_CONFIG_REGB                   (0x04)
+#define QM_STATUS_CONFIG_REGC                   (0x08)
+#define QM_STATUS_CONFIG_REGD                   (0x0C)
+
+#define HK_AIF2_TXQ_START                       (512)
+#define HK_AIF2_TXQ_END                         (639)
+
+#define HK_PA_TXQ_START                         (640)
+#define HK_PA_TXQ_END                           (648)
+
+#define HK_SRIO_TXQ_START                       (672)
+#define HK_SRIO_TXQ_END                         (687)
+
+#define HK_FFTC_A_TXQ_START                     (688)
+#define HK_FFTC_A_TXQ_END                       (691)
+
+#define HK_FFTC_B_TXQ_START                     (692)
+#define HK_FFTC_B_TXQ_END                       (695)
+
+#define HK_BCP_TXQ_START                        (864)
+#define HK_BCP_TXQ_END                          (871)
+
+#define HK_FFTC_C_TXQ_START                     (872)
+#define HK_FFTC_C_TXQ_END                       (875)
+
+#define HK_FFTC_D_TXQ_START                     (876)
+#define HK_FFTC_D_TXQ_END                       (879)
+
+#define HK_FFTC_E_TXQ_START                     (880)
+#define HK_FFTC_E_TXQ_END                       (883)
+
+#define HK_FFTC_F_TXQ_START                     (884)
+#define HK_FFTC_F_TXQ_END                       (887)
+
+#define HK_QMSS_TXQ_START                       (8992)
+#define HK_QMSS_TXQ_END                         (9023)
+
+
+cppi_txqueue_status()
+{
+    unsigned int Threshold, Temp, Entry_Count, Byte_Count, Packet_Size, Queue_Num, reg_field;
+    unsigned int flag = 0;
+    
+    GEL_TextOut("*******************************************************************************************************\n");
+    GEL_TextOut("********************************** CPPI TX QUEUES STATUS **************************************\n");
+    GEL_TextOut("*******************************************************************************************************\n\n");
+    
+    //Scan AIF2 TX Queues
+    
+    for (Queue_Num = HK_AIF2_TXQ_START; Queue_Num <= HK_AIF2_TXQ_END; Queue_Num++)
+    {
+        Entry_Count = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGA)) & 0x0007FFFF;
+        
+        if(Entry_Count != 0)
+        {
+            if(flag == 0)
+            {
+                GEL_TextOut(" AIF2 Master: Has pending read requests on SCR_3A (From AIF2 TX Queues)\n");
+                GEL_TextOut("              The status of the active AIF2 TX queues are:\n\n");
+                
+                flag=1;
+            }
+            
+            Byte_Count     = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGB)) & 0x0FFFFFFF;
+            Packet_Size = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGC)) & 0x0000001F;
+            Temp         = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGD)) & 0x0000000F;
+            Threshold     = (1<<Temp) - 1;
+            
+            GEL_TextOut("              AIF2 TX QNum: %d --> Entry Count %d   Byte Count %d   Packet Size %d   Queue Threshold In terms of Packets %d\n",,,,, Queue_Num, Entry_Count, Byte_Count, Packet_Size, Threshold);
+        }
+        else if((Queue_Num == HK_AIF2_TXQ_END) && (flag != 1))
+        {
+            GEL_TextOut(" AIF2 Master: Has No pending read requests on SCR_3A (From AIF2 TX Queues)\n");
+        }
+    }
+    
+    GEL_TextOut("\n");
+    
+    //Reset Flag
+    flag = 0;
+    
+    //Scan PA TX Queues
+    
+    for (Queue_Num = HK_PA_TXQ_START; Queue_Num <= HK_PA_TXQ_END; Queue_Num++)
+    {
+        Entry_Count = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGA)) & 0x0007FFFF;
+        
+        if(Entry_Count != 0)
+        {
+            if(flag == 0)
+            {
+                GEL_TextOut(" PA Master: Has pending read requests on SCR_3A (From PA TX Queues)\n");
+                GEL_TextOut("              The status of the active PA TX queues are:\n\n");
+                
+                flag=1;
+            }
+            
+            Byte_Count     = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGB)) & 0x0FFFFFFF;
+            Packet_Size = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGC)) & 0x0000001F;
+            Temp         = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGD)) & 0x0000000F;
+            Threshold     = (1<<Temp) - 1;
+            
+            GEL_TextOut("              PA TX QNum: %d --> Entry Count %d   Byte Count %d   Packet Size %d   Queue Threshold In terms of Packets %d\n",,,,, Queue_Num, Entry_Count, Byte_Count, Packet_Size, Threshold);
+        }
+        else if((Queue_Num == HK_PA_TXQ_END) && (flag != 1))
+        {
+            GEL_TextOut(" PA Master: Has No pending read requests on SCR_3A (From PA TX Queues)\n");
+        }
+    }
+    
+    GEL_TextOut("\n");
+    
+    //Reset Flag
+    flag = 0;
+    
+    //Scan SRIO TX Queues
+    
+    for (Queue_Num = HK_SRIO_TXQ_START; Queue_Num <= HK_SRIO_TXQ_END; Queue_Num++)
+    {
+        Entry_Count = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGA)) & 0x0007FFFF;
+        
+        if(Entry_Count != 0)
+        {
+            if(flag == 0)
+            {
+                GEL_TextOut(" SRIO Master: Has pending read requests on SCR_3A (From SRIO TX Queues)\n");
+                GEL_TextOut("              The status of the active SRIO TX queues are:\n\n");
+                
+                flag=1;
+            }
+            
+            Byte_Count     = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGB)) & 0x0FFFFFFF;
+            Packet_Size = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGC)) & 0x0000001F;
+            Temp         = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGD)) & 0x0000000F;
+            Threshold     = (1<<Temp) - 1;
+            
+            GEL_TextOut("              SRIO TX QNum: %d --> Entry Count %d   Byte Count %d   Packet Size %d   Queue Threshold In terms of Packets %d\n",,,,, Queue_Num, Entry_Count, Byte_Count, Packet_Size, Threshold);
+        }
+        else if((Queue_Num == HK_SRIO_TXQ_END) && (flag != 1))
+        {
+            GEL_TextOut(" SRIO Master: Has No pending read requests on SCR_3A (From SRIO TX Queues)\n");
+        }
+    }
+    
+    GEL_TextOut("\n");
+    
+    //Reset Flag
+    flag = 0;
+    
+    //Scan FFTC_A TX Queues
+    
+    for (Queue_Num = HK_FFTC_A_TXQ_START; Queue_Num <= HK_FFTC_A_TXQ_END; Queue_Num++)
+    {
+        Entry_Count = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGA)) & 0x0007FFFF;
+        
+        if(Entry_Count != 0)
+        {
+            if(flag == 0)
+            {
+                GEL_TextOut(" FFTC_A Master: Has pending read requests on SCR_3A (From FFTC_A TX Queues)\n");
+                GEL_TextOut("              The status of the active FFTC_A TX queues are:\n\n");
+                
+                flag=1;
+            }
+            
+            Byte_Count     = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGB)) & 0x0FFFFFFF;
+            Packet_Size = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGC)) & 0x0000001F;
+            Temp         = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGD)) & 0x0000000F;
+            Threshold     = (1<<Temp) - 1;
+            
+            GEL_TextOut("              FFTC_A TX QNum: %d --> Entry Count %d   Byte Count %d   Packet Size %d   Queue Threshold In terms of Packets %d\n",,,,, Queue_Num, Entry_Count, Byte_Count, Packet_Size, Threshold);
+        }
+        else if((Queue_Num == HK_FFTC_A_TXQ_END) && (flag != 1))
+        {
+            GEL_TextOut(" FFTC_A Master: Has No pending read requests on SCR_3A (From FFTC_A TX Queues)\n");
+        }
+    }
+    
+    GEL_TextOut("\n");
+    
+    //Reset Flag
+    flag = 0;
+    
+    //Scan FFTC_B TX Queues
+    
+    for (Queue_Num = HK_FFTC_B_TXQ_START; Queue_Num <= HK_FFTC_B_TXQ_END; Queue_Num++)
+    {
+        Entry_Count = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGA)) & 0x0007FFFF;
+        
+        if(Entry_Count != 0)
+        {
+            if(flag == 0)
+            {
+                GEL_TextOut(" FFTC_B Master: Has pending read requests on SCR_3A (From FFTC_B TX Queues)\n");
+                GEL_TextOut("              The status of the active FFTC_B TX queues are:\n\n");
+                
+                flag=1;
+            }
+            
+            Byte_Count     = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGB)) & 0x0FFFFFFF;
+            Packet_Size = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGC)) & 0x0000001F;
+            Temp         = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGD)) & 0x0000000F;
+            Threshold     = (1<<Temp) - 1;
+            
+            GEL_TextOut("              FFTC_B TX QNum: %d --> Entry Count %d   Byte Count %d   Packet Size %d   Queue Threshold In terms of Packets %d\n",,,,, Queue_Num, Entry_Count, Byte_Count, Packet_Size, Threshold);
+        }
+        else if((Queue_Num == HK_FFTC_B_TXQ_END) && (flag != 1))
+        {
+            GEL_TextOut(" FFTC_B Master: Has No pending read requests on SCR_3A (From FFTC_B TX Queues)\n");
+        }
+    }
+    
+    GEL_TextOut("\n");
+    
+    //Reset Flag
+    flag = 0;
+    
+    //Scan BCP TX Queues
+    
+    for (Queue_Num = HK_BCP_TXQ_START; Queue_Num <= HK_BCP_TXQ_END; Queue_Num++)
+    {
+        Entry_Count = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGA)) & 0x0007FFFF;
+        
+        if(Entry_Count != 0)
+        {
+            if(flag == 0)
+            {
+                GEL_TextOut(" BCP Master: Has pending read requests on SCR_3A (From BCP TX Queues)\n");
+                GEL_TextOut("              The status of the active BCP TX queues are:\n\n");
+                
+                flag=1;
+            }
+            
+            Byte_Count     = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGB)) & 0x0FFFFFFF;
+            Packet_Size = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGC)) & 0x0000001F;
+            Temp         = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGD)) & 0x0000000F;
+            Threshold     = (1<<Temp) - 1;
+            
+            GEL_TextOut("              FFTC_B TX QNum: %d --> Entry Count %d   Byte Count %d   Packet Size %d   Queue Threshold In terms of Packets %d\n",,,,, Queue_Num, Entry_Count, Byte_Count, Packet_Size, Threshold);
+        }
+        else if((Queue_Num == HK_BCP_TXQ_END) && (flag != 1))
+        {
+            GEL_TextOut(" BCP Master: Has No pending read requests on SCR_3A (From BCP TX Queues)\n");
+        }
+    }
+    
+    GEL_TextOut("\n");
+    
+    //Reset Flag
+    flag = 0;
+    
+    //Scan QMSS TX Queues
+    
+    for (Queue_Num = HK_QMSS_TXQ_START; Queue_Num <= HK_QMSS_TXQ_END; Queue_Num++)
+    {
+        Entry_Count = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGA)) & 0x0007FFFF;
+        
+        if(Entry_Count != 0)
+        {
+            if(flag == 0)
+            {
+                GEL_TextOut(" QMSS Master: Has pending read requests on SCR_3A (From QMSS TX Queues)\n");
+                GEL_TextOut("              The status of the active QMSS TX queues are:\n\n");
+                
+                flag=1;
+            }
+            
+            Byte_Count     = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGB)) & 0x0FFFFFFF;
+            Packet_Size = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGC)) & 0x0000001F;
+            Temp         = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGD)) & 0x0000000F;
+            Threshold     = (1<<Temp) - 1;
+            
+            GEL_TextOut("              QMSS TX QNum: %d --> Entry Count %d   Byte Count %d   Packet Size %d   Queue Threshold In terms of Packets %d\n",,,,, Queue_Num, Entry_Count, Byte_Count, Packet_Size, Threshold);
+        }
+        else if((Queue_Num == HK_QMSS_TXQ_END) && (flag != 1))
+        {
+            GEL_TextOut(" QMSS Master: Has No pending read requests on SCR_3A (From QMSS TX Queues)\n");
+        }
+    }
+    
+    GEL_TextOut("\n");
+    
+    //Reset Flag
+    flag = 0;
+}
+
+
+
+
+
+
+/************* Menu Items *************************/
+
+
+menuitem "66AK2E Main PLL Controller Configuration";
+
+hotmenu PLLCTL()
+{
+    GetMainPllCtrlPllCtlRegister();
+}
+
+hotmenu PLLM()
+{
+    GetMainPllCtrlPllMRegister();
+}
+
+hotmenu PLLDIVn()
+{
+    GetMainPllCtrlDiv2Register();
+    GetMainPllCtrlDiv5Register();
+    GetMainPllCtrlDiv8Register();
+}
+
+hotmenu CKEN()
+{
+    GetMainPllCtrlPllClockEnableRegister();
+}
+
+hotmenu POSTDIV()
+{
+    GetMainPllCtrlPostDivRegister();
+}
+
+hotmenu SECCTL()
+{
+    GetMainPllCtrlSecondaryControlRegister();
+}
+
+hotmenu RSTCTRL()
+{
+    GetMainPllResetControlRegister();
+}
+
+hotmenu RSTCFG()
+{
+    GetMainPllCtrlResetConfigurationRegister();
+}
+
+hotmenu RSISO()
+{
+    GetMainPllCtrlResetIsolationRegister();
+}
+
+hotmenu Main_PLL_Controller_Snapshot()
+{
+    GEL_TextOut("***************************\n");
+    GEL_TextOut("*************************** Main PLL Controller Configuration Snapshot\n");
+    GEL_TextOut("***************************\n\n");
+    
+    GetMainPllResetTypeStatusRegister();
+    GetMainPllResetControlRegister();
+    GetMainPllCtrlResetConfigurationRegister();
+    GetMainPllCtrlResetIsolationRegister();
+    GetMainPllCtrlPllCtlRegister();
+    GetMainPllCtrlSecondaryControlRegister();
+    GetMainPllCtrlPllMRegister();
+    GetMainPllCtrlDiv2Register();
+    GetMainPllCtrlDiv5Register();
+    GetMainPllCtrlDiv8Register();
+    GetMainPllCtrlPllClockEnableRegister();
+    GetMainPllCtrlPostDivRegister();
+    GetMainPllCtrlCmdRegister();
+    GetMainPllCtrlStatRegister();
+    GetMainPllCtrlAnlCtrlRegister();
+    GetMainPllCtrlDChangeRegister();
+    GetMainPllCtrlSyStatRegister();
+    
+    GEL_TextOut("*************************** End of Main PLL Controller Configuration Snapshot\n\n");
+}
+
+menuitem "66AK2E Main PLL Controller Status";
+
+hotmenu CKSTAT()
+{
+    GetMainPllCtrlClockStatusRegister();
+}
+
+hotmenu SYSTAT()
+{
+    GetMainPllCtrlSyStatRegister();
+}
+
+hotmenu RSTYPE()
+{
+    GetMainPllResetTypeStatusRegister();
+}
+
+hotmenu PLLSTAT()
+{
+    GetMainPllCtrlStatRegister();
+}
+
+hotmenu PLLCMD()
+{
+    GetMainPllCtrlCmdRegister();
+}
+
+hotmenu ALNCTL()
+{
+    GetMainPllCtrlAnlCtrlRegister();
+}
+
+hotmenu DCHANGE()
+{    
+    GetMainPllCtrlDChangeRegister();
+}
+
+hotmenu PLL_Controller_Status_Snapshot()
+{
+    GEL_TextOut("***************************\n");
+    GEL_TextOut("*************************** Main PLL Controller Status Snapshot\n");
+    GEL_TextOut("***************************\n\n");
+    
+    GetMainPllCtrlClockStatusRegister();
+    GetMainPllCtrlSyStatRegister();
+    GetMainPllResetTypeStatusRegister();
+    GetMainPllCtrlStatRegister();
+    GetMainPllCtrlCmdRegister();
+    GetMainPllCtrlAnlCtrlRegister();
+    GetMainPllCtrlDChangeRegister();
+    
+    GEL_TextOut("*************************** End of Main PLL Controller Status Snapshot\n\n");
+}
+
+
+menuitem "66AK2E PLL Configuration";
+
+hotmenu MAIN_PLL()
+{
+    GetMainPllConfig();
+}
+
+hotmenu ARM_PLL()
+{
+    GetArmPllConfig();
+}
+
+hotmenu DDR3A_PLL()
+{
+    GetDdr3aPllConfig();
+}
+
+hotmenu DDR3B_PLL()
+{
+    GetDdr3bPllConfig();
+}
+
+hotmenu PASS_PLL()
+{
+    GetPassPllRegValues();
+}
+
+hotmenu PCIE_SERDES_PLL()
+{
+    GetPcieSerdesPll();
+}
+
+hotmenu PLL_snapshot()
+{
+    GEL_TextOut("***************************\n");
+    GEL_TextOut("*************************** C66x Cache Snapshot \n");
+    GEL_TextOut("***************************\n\n");
+        
+    GetMainPllConfig();
+    GetArmPllConfig();
+    GetDdr3aPllConfig();
+    GetDdr3bPllConfig();
+    GetPassPllRegValues();
+    GetPcieSerdesPll();
+    
+    GEL_TextOut("*************************** End of C66x Cache Snapshot\n\n");
+}
+
+menuitem "66AK2H C66x Core Cache Configuration";
+
+hotmenu    C66x_L2_Cache()
+{
+    GetC66xCacheL2();
+}
+
+hotmenu    C66x_L1P_Cache()
+{
+    GetC66xCacheL1P();
+}
+
+hotmenu    C66x_L1D_Cache()
+{
+    GetC66xCacheL1D();
+}
+
+hotmenu C66x_Core_L1P_Memory_Fault_Reg_Dump()
+{
+    GetC66xCoreL1PMemoryFault();
+}
+
+hotmenu C66x_Cache_Snapshot()
+{
+    GEL_TextOut("***************************\n");
+    GEL_TextOut("*************************** C66x Cache Snapshot \n");
+    GEL_TextOut("***************************\n\n");
+        
+    GetC66xCacheL2();
+    GetC66xCacheL1D();
+    GetC66xCacheL1P();
+    GetC66xCoreL1PMemoryFault();
+    
+    GEL_TextOut("*************************** End of C66x Cache Snapshot\n\n");
+}
+
+menuitem "66AK2H ARM Core Cache Configuration";
+
+hotmenu ARM_Core_Cache_Configuration()
+{
+    GetArmCorePacCacheConfiguration();
+}
+
+menuitem "66AK2E DDR3 EMIF Configuration";
+
+hotmenu SDCFG_SDRAM_Configuration_Register()
+{
+    SDRAM_Configuration_Register();
+}
+
+hotmenu SDRFC_SDRAM_Refresh_Control_Register()
+{
+    SDRAM_Refresh_Control_Register();
+}
+
+hotmenu PMCTL_Power_Management_Control_Register()
+{
+    Power_Management_Control_Register();
+}
+
+hotmenu LAT_CONFIG_Latency_Configuration_Register()
+{
+    Latency_Configuration_Register();
+}
+
+
+hotmenu ZQCFG_SDRAM_Output_Impedance_Calibration_Configuration_Register()
+{
+    SDRAM_Output_Impedance_Calibration_Configuration_Register();
+}
+
+
+hotmenu RDWR_LVL_RMP_WIN_Read_Write_Leveling_Ramp_Window_Register()
+{
+    Read_Write_Leveling_Ramp_Window_Register();
+}
+
+hotmenu RDWR_LVL_RMP_CTRL_Read_Write_Leveling_Ramp_Control_Register()
+{
+    Read_Write_Leveling_Ramp_Control_Register();
+}
+
+hotmenu RDWR_LVL_CTRL_Read_Write_Leveling_Control_Register()
+{
+
+    Read_Write_Leveling_Control_Register();
+}
+
+hotmenu DDR_PHY_CTRL_1_DDR_PHY_Control_1_Register()
+{
+    DDR_PHY_Control_1_Register();
+}
+
+hotmenu READ_IDLE_CTRL_Read_Idle_Control_Register()
+{
+    Read_Idle_Control_Register();
+}
+
+
+hotmenu PRICOSMAP_Priority_to_Class_Of_Service_Mapping_Register()
+{
+    Priority_to_Class_Of_Service_Mapping_Register();
+}
+
+
+hotmenu MIDCOS1MAP_Master_ID_to_Class_Of_Service_1_Mapping_Register()
+{
+    Master_ID_to_Class_Of_Service_1_Mapping_Register();
+}
+
+hotmenu MIDCOS2MAP_Master_ID_to_Class_Of_Service_2_Mapping_Register()
+{
+    Master_ID_to_Class_Of_Service_2_Mapping_Register();
+}
+
+hotmenu ECCCTL_ECC_Control_Register()
+{
+    ECC_Control_Register();
+}
+
+hotmenu ECCADDR1_ECC_Address_Range_1_Register()
+{
+    ECC_Address_Range_1_Register();
+}
+
+hotmenu ECCADDR2_ECC_Address_Range_2_Register()
+{
+    ECC_Address_Range_2_Register();
+}
+
+hotmenu RWTHRESH_Read_Write_Execution_Threshold_Register()
+{
+    Read_Write_Execution_Threshold_Register();
+}
+
+hotmenu DDR3EMIF_Config_registers_Snapshot()
+{
+    GEL_TextOut("***************************\n");
+    GEL_TextOut("*************************** DDR3 EMIF Configuration Snapshot \n");
+    GEL_TextOut("***************************\n\n");
+        
+    SDRAM_Configuration_Register();
+    SDRAM_Refresh_Control_Register();
+    Power_Management_Control_Register();
+    Latency_Configuration_Register();
+    SDRAM_Output_Impedance_Calibration_Configuration_Register();
+    Read_Write_Leveling_Ramp_Window_Register();
+    Read_Write_Leveling_Ramp_Control_Register();
+    Read_Write_Leveling_Control_Register();
+    DDR_PHY_Control_1_Register();
+    Read_Idle_Control_Register();
+    Priority_to_Class_Of_Service_Mapping_Register();
+    Master_ID_to_Class_Of_Service_1_Mapping_Register();
+    Master_ID_to_Class_Of_Service_2_Mapping_Register();
+    ECC_Control_Register();
+    ECC_Address_Range_1_Register();
+    ECC_Address_Range_2_Register();
+    Read_Write_Execution_Threshold_Register();
+    
+    GEL_TextOut("*************************** End of DDR3 EMIF Configuration Snapshot\n\n");
+}
+
+menuitem "66AK2E DDR3 EMIF Status"
+
+hotmenu STATUS_DDR3_Memory_Controller_Status_Register()
+{
+    DDR3_Memory_Controller_Status_Register();
+}
+
+hotmenu IRQSTATUS_SYS_Interrupt_Status_Register()
+{
+    Interrupt_Status_Register();
+}
+
+hotmenu DDR3EMIF_Status_Snapshot()
+{
+    GEL_TextOut("***************************\n");
+    GEL_TextOut("*************************** DDR3 EMIF Status Snapshot \n");
+    GEL_TextOut("***************************\n\n");
+        
+    DDR3_Memory_Controller_Status_Register();
+    Interrupt_Status_Register();
+
+    GEL_TextOut("*************************** End of DDR3 EMIF Status Snapshot\n\n");
+}
+
+menuitem "66AK2E XMC Configuration";
+
+hotmenu XMC_Configuration()
+{
+    GetXmcConfiguration();
+}
+
+menuitem "66AK2E Master Priority Configuration";
+
+hotmenu Master_Priority_Configuration()
+{
+    GetMasterPriorityConfiguration();    
+}
+
+menuitem "66AK2E Device Level Configuration";
+
+hotmenu Bootstrap_Configuration()
+{
+    GetBootModeConfiguration();
+}
+
+menuitem "66AK2E Device Level Status";
+
+hotmenu C66x_CorePacRevision()
+{
+    GetCorePacRevision();    
+}
+
+hotmenu BootCfgGetDieId()
+{
+    GetDieId();
+}
+
+hotmenu JtagId()
+{
+    GetJtagId();
+}
+
+hotmenu BootCfgGetMacId()
+{
+    GetMacId();
+}
+
+hotmenu device_snapshot()
+{
+    GEL_TextOut("***************************\n");
+    GEL_TextOut("*************************** Device Snapshot \n");
+    GEL_TextOut("***************************\n\n");
+        
+    GetCorePacRevision();    
+    GetDieId();
+    GetJtagId();
+    GetMacId();
+
+    GEL_TextOut("*************************** End of Device Snapshot\n\n");    
+}
+
+menuitem "66AK2H Power and Clock Utilities";
+
+hotmenu Clock_Domain_Status()
+{
+    GetLpscMdstatUtility();
+}
+
+hotmenu Power_Domain_Status()
+{
+    GetPowerDomainStatusUtility();
+}
+
+hotmenu Power_Domain_Snapshot()
+{
+    GEL_TextOut("***************************\n");
+    GEL_TextOut("*************************** Power Domain Snapshot \n");
+    GEL_TextOut("***************************\n\n");
+        
+    GetLpscMdstatUtility();
+    GetPowerDomainStatusUtility();
+    
+    GEL_TextOut("*************************** End of Power Domain Snapshot\n\n");    
+}
+
+hotmenu Activate_All_Power_Domains()
+{
+    ActivateAllPowerDomainsUtility();    
+}
+
+menuitem "66AK2E SERDES Status";
+
+hotmenu Hyperlink_0_Serdes_Status()
+{
+    GetHyperlink0SerdesStatus();
+}
+
+hotmenu PCIe_Serdes_Status()
+{
+    GetPcieSerdesStatusUtility();
+    
+    GetPcieSerdesPll();
+}    
+
+hotmenu PA_Serdes_Status()
+{
+    GetPaSerdesStatusUtility();
+}    
+
+hotmenu SRIO_Serdes_Status()
+{
+    GetSrioSerdesStatusUtility();
+}    
+
+hotmenu Serdes_Snapshot()
+{
+    GEL_TextOut("***************************\n");
+    GEL_TextOut("*************************** SERDES Snapshot \n");
+    GEL_TextOut("***************************\n\n");
+        
+    GetHyperlink0SerdesStatus();
+    GetPcieSerdesStatusUtility();
+    GetPcieSerdesPll();
+    GetPaSerdesStatusUtility();
+    GetSrioSerdesStatusUtility();
+    
+    GEL_TextOut("*************************** End of SERDES Snapshot\n\n");    
+}    
+
+#define QM_STATUS_CONFIG_BASE             (0x02a00000) // Base Address of QM status & config region
+#define QM_STATUS_CONFIG_REGA             (0x00)
+#define QM_STATUS_CONFIG_REGB             (0x04)
+#define QM_STATUS_CONFIG_REGC             (0x08)
+#define QM_STATUS_CONFIG_REGD             (0x0C)
+
+
+menuitem "66AK2E CPPI Queue Status"; 
+
+dialog cppi_queue_status (start_queue_num "Start Queue Number", end_queue_num "End Queue Number")
+{
+    unsigned int Threshold, Temp, Entry_Count, Byte_Count, Packet_Size, Queue_Num;
+    
+    GEL_TextOut("***************************\n");
+    GEL_TextOut("*************************** CPPI QUEUES (%d to %d) STATUS\n",,,,,start_queue_num,end_queue_num);
+    GEL_TextOut("***************************\n\n");
+    
+    for (Queue_Num = start_queue_num; Queue_Num <= end_queue_num; Queue_Num++)
+    {
+        Entry_Count = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGA)) & 0x0007FFFF;
+        Byte_Count     = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGB)) & 0x0FFFFFFF;
+        Packet_Size = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGC)) & 0x0000001F;
+        Temp         = *((unsigned int*)(QM_STATUS_CONFIG_BASE + (16 * Queue_Num) + QM_STATUS_CONFIG_REGD)) & 0x0000000F;
+        Threshold     = (1<<Temp) - 1;
+        
+        GEL_TextOut("Queue Num: %d --> Entry Count %d   Byte Count %d   Packet Size %d   Queue Threshold In terms of Packets %d\n",,,,, Queue_Num, Entry_Count, Byte_Count, Packet_Size, Threshold);
+
+    }
+    GEL_TextOut("\n");
+}
+
+
+
+menuitem "CPPI Masters TX Queue Status";
+
+hotmenu cppi_Masters_Status()
+{
+    cppi_txqueue_status();
+}
+
+menuitem "66AK2E Complete Snapshot";
+
+hotmenu complete_snapshot()
+{
+    GEL_TextOut("***************************\n");
+    GEL_TextOut("*************************** Complete Snapshot \n");
+    GEL_TextOut("***************************\n\n");
+    
+    Main_PLL_Controller_Snapshot();
+    PLL_Controller_Status_Snapshot();
+    PLL_snapshot();
+    C66x_Cache_Snapshot();
+    DDR3EMIF_Config_registers_Snapshot();
+    DDR3EMIF_Status_Snapshot();
+    device_snapshot();
+    Power_Domain_Snapshot();
+    Serdes_Snapshot();
+    cppi_Masters_Status();
+
+    GEL_TextOut("*************************** End of Complete Snapshot\n\n");    
+}
+
+
+
+///*********************************************************************
+///
+///    EVM66AK2H____ HW Setup Functions
+///
+///*********************************************************************
+
+//  These definitions are not used because the address for these registers are generated
+//  programmatically with a word to encode which registers are mapped to a domain vs reserved
+
+// see Table 9-6 66AK2H xx Power Domains in SPRS866
+#define PSC_PDSTAT0                 (*(unsigned int*)( PSC_BASE_ADDRESS+0x200u))        // peripheral logic                                Cannot be disabled                 Always on
+#define PSC_PDSTAT1                 (*(unsigned int*)( PSC_BASE_ADDRESS+0x204u))        // Per-core TETB and system TETB                RAMs can be powered down         Software control
+#define PSC_PDSTAT2                 (*(unsigned int*)( PSC_BASE_ADDRESS+0x208u))        // Network Coprocessor                            Logic can be powered down         Software control
+#define PSC_PDSTAT3                 (*(unsigned int*)( PSC_BASE_ADDRESS+0x20Cu))        // PCIe                                            Logic can be powered down         Software control
+#define PSC_PDSTAT4                 (*(unsigned int*)( PSC_BASE_ADDRESS+0x210u))        // SRIO                                            Logic can be powered down         Software control
+#define PSC_PDSTAT5                 (*(unsigned int*)( PSC_BASE_ADDRESS+0x214u))        // HyperLink0                                    Logic can be powered down         Software control
+
+/* PD 6 is reserved */
+
+#define PSC_PDSTAT7                 (*(unsigned int*)( PSC_BASE_ADDRESS+0x21Cu))        // MSMC RAM                                        MSMC RAM can be powered down     Software control
+#define PSC_PDSTAT8                 (*(unsigned int*)( PSC_BASE_ADDRESS+0x220u))        // C66x Core 0, L1/L2 RAMs                        L2 RAMs can sleep
+#define PSC_PDSTAT9                 (*(unsigned int*)( PSC_BASE_ADDRESS+0x224u))        // C66x Core 1, L1/L2 RAMs                        L2 RAMs can sleep
+#define PSC_PDSTAT10                (*(unsigned int*)( PSC_BASE_ADDRESS+0x228u))        // C66x Core 2, L1/L2 RAMs                        L2 RAMs can sleep                Software control via C66x CorePac. For
+#define PSC_PDSTAT11                (*(unsigned int*)( PSC_BASE_ADDRESS+0x22Cu))        // C66x Core 3, L1/L2 RAMs                        L2 RAMs can sleep                details, see the C66x CorePac Reference
+#define PSC_PDSTAT12                (*(unsigned int*)( PSC_BASE_ADDRESS+0x230u))        // C66x Core 4, L1/L2 RAMs (66AK2H12 only)        L2 RAMs can sleep                Guide.
+#define PSC_PDSTAT13                (*(unsigned int*)( PSC_BASE_ADDRESS+0x234u))        // C66x Core 5, L1/L2 RAMs (66AK2H12 only)        L2 RAMs can sleep
+#define PSC_PDSTAT14                (*(unsigned int*)( PSC_BASE_ADDRESS+0x238u))        // C66x Core 6, L1/L2 RAMs (66AK2H12 only)        L2 RAMs can sleep
+#define PSC_PDSTAT15                (*(unsigned int*)( PSC_BASE_ADDRESS+0x23Cu))        // C66x Core 7, L1/L2 RAMs (66AK2H12 only)        L2 RAMs can sleep
+#define PSC_PDSTAT16                (*(unsigned int*)( PSC_BASE_ADDRESS+0x240u))        // EMIF(DDR3A, DDR3B)                            Logic can be powered down         Software control
+
+/* PD 17-29 are reserved */
+
+#define PSC_PDSTAT30                (*(unsigned int*)( PSC_BASE_ADDRESS+0x278u))        // ARM Smart Reflex                             Logic can be powered down         Software control
+#define PSC_PDSTAT31                (*(unsigned int*)( PSC_BASE_ADDRESS+0x27cu))        // ARM CorePac                                     Logic can be powered down         Software control
+
+#define PSC_PDCTL0                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x300))            // Power Domain Control Register 0
+#define PSC_PDCTL1                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x304))            // Power Domain Control Register 1
+#define PSC_PDCTL2                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x308))            // Power Domain Control Register 2
+#define PSC_PDCTL3                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x30C))            // Power Domain Control Register 3
+#define PSC_PDCTL4                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x310))            // Power Domain Control Register 4
+#define PSC_PDCTL5                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x314))            // Power Domain Control Register 5
+
+#define PSC_PDCTL7                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x31C))            // Power Domain Control Register 7
+#define PSC_PDCTL8                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x320))            // Power Domain Control Register 8
+#define PSC_PDCTL9                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x324))            // Power Domain Control Register 9
+#define PSC_PDCTL10                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x328))            // Power Domain Control Register 10
+#define PSC_PDCTL11                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x32C))            // Power Domain Control Register 11
+#define PSC_PDCTL12                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x330))            // Power Domain Control Register 12
+#define PSC_PDCTL13                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x334))            // Power Domain Control Register 13
+#define PSC_PDCTL14                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x338))            // Power Domain Control Register 14
+#define PSC_PDCTL15                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x33C))            // Power Domain Control Register 15
+#define PSC_PDCTL16                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x340))            // Power Domain Control Register 16
+#define PSC_PDCTL28                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x370))            // Power Domain Control Register 28
+#define PSC_PDCTL30                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x340))            // Power Domain Control Register 31
+#define PSC_PDCTL31                    (*(unsigned int*)( PSC_BASE_ADDRESS+0x340))            // Power Domain Control Register 32
+
+//LPSC = Local Power Sleep Controller
+// omitted registers are reserved
+
+#define LPSC_MDSTAT_0        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0800)    // Shared
+#define LPSC_MDSTAT_2        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0808)    // USB
+#define LPSC_MDSTAT_5        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0814)    // Debug subsystem and tracers
+#define LPSC_MDSTAT_6        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0818)    // Per-core TETB and system TETB
+#define LPSC_MDSTAT_7        (*(unsigned int*)(PSC_BASE_ADDRESS+0x081C)    // Packet accelerator
+#define LPSC_MDSTAT_8        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0820)    // Ethernet SGMIIs
+#define LPSC_MDSTAT_9        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0824)    // Security accelerator
+#define LPSC_MDSTAT_10        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0828)    // PCIe
+#define LPSC_MDSTAT_11        (*(unsigned int*)(PSC_BASE_ADDRESS+0x082C)    // SRIO
+#define LPSC_MDSTAT_12        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0830)    // HyperLink0
+#define LPSC_MDSTAT_13        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0834)    // SmartReflex
+#define LPSC_MDSTAT_14        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0838)    // MSMC RAM
+#define LPSC_MDSTAT_15        (*(unsigned int*)(PSC_BASE_ADDRESS+0x083C)    // C66x CorePac0
+#define LPSC_MDSTAT_16        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0840)    // C66x CorePac1
+#define LPSC_MDSTAT_17        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0844)    // C66x CorePac2
+#define LPSC_MDSTAT_18        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0848)    // C66x CorePac3
+#define LPSC_MDSTAT_19        (*(unsigned int*)(PSC_BASE_ADDRESS+0x084C)    // C66x CorePac4
+#define LPSC_MDSTAT_20        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0850)    // C66x CorePac5
+#define LPSC_MDSTAT_21        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0854)    // C66x CorePac6
+#define LPSC_MDSTAT_22        (*(unsigned int*)(PSC_BASE_ADDRESS+0x0858)    // C66x CorePac7
+#define LPSC_MDSTAT_23        (*(unsigned int*)(PSC_BASE_ADDRESS+0x085C)    // DDR3A EMIF
+#define LPSC_MDSTAT_24       (*(unsigned int*)(PSC_BASE_ADDRESS+0x0860)    // DDR3B EMIF
+#define LPSC_MDSTAT_51        (*(unsigned int*)(PSC_BASE_ADDRESS+0x08CC)    // ARM Smart Reflex
+#define LPSC_MDSTAT_52        (*(unsigned int*)(PSC_BASE_ADDRESS+0x08D0)    // ARM CorePac
+
+/// More redundant register definitions
+#define XMPAXL0                        (*(unsigned int*)(XMPAX_BASE+0x0000))
+#define XMPAXH0                        (*(unsigned int*)(XMPAX_BASE+0x0004))
+#define XMPAXL1                        (*(unsigned int*)(XMPAX_BASE+0x0008))
+#define XMPAXH1                        (*(unsigned int*)(XMPAX_BASE+0x000C))
+#define XMPAXL2                        (*(unsigned int*)(XMPAX_BASE+0x0010))
+#define XMPAXH2                        (*(unsigned int*)(XMPAX_BASE+0x0014))
+#define XMPAXL3                        (*(unsigned int*)(XMPAX_BASE+0x0018))
+#define XMPAXH3                        (*(unsigned int*)(XMPAX_BASE+0x001C))
+#define XMPAXL4                        (*(unsigned int*)(XMPAX_BASE+0x0020))
+#define XMPAXH4                        (*(unsigned int*)(XMPAX_BASE+0x0024))
+#define XMPAXL5                        (*(unsigned int*)(XMPAX_BASE+0x0028))
+#define XMPAXH5                        (*(unsigned int*)(XMPAX_BASE+0x002C))
+#define XMPAXL6                        (*(unsigned int*)(XMPAX_BASE+0x0030))
+#define XMPAXH6                        (*(unsigned int*)(XMPAX_BASE+0x0034))
+#define XMPAXL7                        (*(unsigned int*)(XMPAX_BASE+0x0038))
+#define XMPAXH7                        (*(unsigned int*)(XMPAX_BASE+0x003C))
+#define XMPAXL8                        (*(unsigned int*)(XMPAX_BASE+0x0040))
+#define XMPAXH8                        (*(unsigned int*)(XMPAX_BASE+0x0044))
+#define XMPAXL9                        (*(unsigned int*)(XMPAX_BASE+0x0048))
+#define XMPAXH9                        (*(unsigned int*)(XMPAX_BASE+0x004C))
+#define XMPAXL10                    (*(unsigned int*)(XMPAX_BASE+0x0050))
+#define XMPAXH10                    (*(unsigned int*)(XMPAX_BASE+0x0054))
+#define XMPAXL11                    (*(unsigned int*)(XMPAX_BASE+0x0058))
+#define XMPAXH11                    (*(unsigned int*)(XMPAX_BASE+0x005C))
+#define XMPAXL12                    (*(unsigned int*)(XMPAX_BASE+0x0060))
+#define XMPAXH12                    (*(unsigned int*)(XMPAX_BASE+0x0064))
+#define XMPAXL13                    (*(unsigned int*)(XMPAX_BASE+0x0068))
+#define XMPAXH13                    (*(unsigned int*)(XMPAX_BASE+0x006C))
+#define XMPAXL14                    (*(unsigned int*)(XMPAX_BASE+0x0070))
+#define XMPAXH14                    (*(unsigned int*)(XMPAX_BASE+0x0074))
+#define XMPAXL15                    (*(unsigned int*)(XMPAX_BASE+0x0078))
+#define XMPAXH15                    (*(unsigned int*)(XMPAX_BASE+0x007C))
+

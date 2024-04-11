@@ -1,0 +1,263 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+
+
+<module description="DMTIMER" id="DMTIMER">
+  
+  
+  <register acronym="DMTIMER_TIDR" description="This read only register contains the revision number of the module. A write to this register has no effect. This Register is used by software to track features, bugs, and compatibility." id="DMTIMER_TIDR" offset="0x0" width="32">
+    
+  <bitfield begin="31" description=" Used to distinguish between old scheme and current" end="30" id="SCHEME" rwaccess="R" width="2">
+    <bitenum description="Highlander 0.8 scheme" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="Legacy ASP or WTBU scheme" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="29" description=" Reads return 0" end="28" id="RESERVED_1" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="27" description=" Function indicates a software compatible module family. [[br]]If there is no level of software compatibility a new Func number (and hence REVISION) should be assigned." end="16" id="FUNC" rwaccess="R" width="12"></bitfield>
+    
+  <bitfield begin="15" description=" RTL Version (R), maintained by IP design owner. [[br]]RTL follows a numbering such as X.Y.R.Z which are explained in this table. [[br]]R changes ONLY when:  (1) PDS uploads occur which may have been due to spec changes  (2) Bug fixes occur  (3) Resets to '0' when X or Y changes. [[br]]Design team has an internal 'Z' (customer invisible) number which increments on every drop that happens due to DV and RTL updates. [[br]]Z resets to 0 when R increments." end="11" id="R_RTL" rwaccess="R" width="5"></bitfield>
+    
+  <bitfield begin="10" description=" Major Revision (X), maintained by IP specification owner. [[br]]X changes ONLY when:  (1) There is a major feature addition. [[br]]An example would be adding Master Mode to Utopia Level2. [[br]]The Func field (or Class/Type in old PID format) will remain the same. [[br]]X does NOT change due to:  (1) Bug fixes  (2) Change in feature parameters." end="8" id="X_MAJOR" rwaccess="R" width="3"></bitfield>
+    
+  <bitfield begin="7" description=" Indicates a special version for a particular device. [[br]]Consequence of use may avoid use of standard Chip Support Library (CSL) / Drivers." end="6" id="CUSTOM" rwaccess="R" width="2"></bitfield>
+    
+  <bitfield begin="5" description=" Minor Revision (Y), maintained by IP specification owner. [[br]]Y changes ONLY when:  (1) Features are scaled (up or down). [[br]]Flexibility exists in that this feature scalability may either be represented in the Y change or a specific register in the IP that indicates which features are exactly available. [[br]](2) When feature creeps from Is-Not list to Is list. [[br]]But this may not be the case once it sees silicon[[br]] in which case X will change. [[br]]Y does NOT change due to:  (1) Bug fixes  (2) Typos or clarifications  (3) major functional/feature change/addition/deletion. [[br]]Instead these changes may be reflected via R, S, X as applicable. [[br]]Spec owner maintains a customer-invisible number 'S' which changes due to:  (1) Typos/clarifications  (2) Bug documentation. [[br]]Note that this bug is not due to a spec change but due to implementation. [[br]]Nevertheless, the spec tracks the IP bugs. [[br]]An RTL release (say for silicon PG1.1) that occurs due to bug fix should document the corresponding spec number (X.Y.S) in its release notes." end="0" id="Y_MINOR" rwaccess="R" width="6"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_TIOCP_CFG" description="This register controls the various parameters of the OCP interface" id="DMTIMER_TIOCP_CFG" offset="0x10" width="32">
+    
+  <bitfield begin="31" description=" " end="4" id="RESERVED_1" rwaccess="R" width="28"></bitfield>
+    
+  <bitfield begin="3" description=" Power management, req/ack control" end="2" id="IDLEMODE" rwaccess="RW" width="2">
+    <bitenum description="Smart-idle wakeup-capable mode: local target's idle state eventually follows (acknowledges) the system's idle requests, depending on the IP module's internal requirements. IP module may generate (IRQ- or DMA-request-related) wakeup events when in idle state. Mode is only relevant if the appropriate IP module &quot;swakeup&quot; output(s) is (are) implemented." id="en_4_0x3" token="en_4_0x3" value="0x3"></bitenum>
+    <bitenum description="Smart-idle mode: local target's idle state eventually follows (acknowledges) the system's idle requests, depending on the IP module's internal requirements. IP module shall not generate (IRQ- or DMA-request-related) wakeup events." id="en_3_0x2" token="en_3_0x2" value="0x2"></bitenum>
+    <bitenum description="No-idle mode: local target never enters idle state. Backup mode, for debug only." id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="Force-idle mode: local target's idle state follows (acknowledges) the system's idle requests unconditionally, i.e. regardless of the IP module's internal requirements. Backup mode, for debug only." id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="1" description=" Sensitivity to emulation (debug) suspend event from Debug Subsystem." end="1" id="EMUFREE" rwaccess="RW" width="1">
+    <bitenum description="The timer runs free. Debug suspend event is ignored." id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="The timer is frozen during a debug suspend event." id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="0" description=" Software reset." end="0" id="SOFTRESET" rwaccess="RW" width="1">
+    <bitenum description="Read 1 : initiate software reset Write 1 : Reset ongoing" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="Read 0 : reset done, no pending action Write 0 : no action" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_IRQ_EOI" description="This module supports DMA events with its interrupt signal.  This register must be written to after the DMA completes in order for subsequent DMA events to be triggered from this module." id="DMTIMER_IRQ_EOI" offset="0x20" width="32">
+    
+  <bitfield begin="31" description=" " end="1" id="RESERVED_1" rwaccess="R" width="31"></bitfield>
+    
+  <bitfield begin="0" description=" Write 0 to acknowledge DMA event has been completed. Module will be able to generate another DMA event only when the previous one has been acknowledged using this register.  Reads always return 0." end="0" id="DMAEVENT_ACK" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_IRQSTS_RAW" description="Component interrupt request status. Check the corresponding secondary status register. Raw status is set even if event is not enabled. Write 1 to set the (raw) status, mostly for debug." id="DMTIMER_IRQSTS_RAW" offset="0x24" width="32">
+    
+  <bitfield begin="31" description=" " end="3" id="RESERVED_1" rwaccess="R" width="29"></bitfield>
+    
+  <bitfield begin="2" description=" IRQ status for Capture [[br]]Read 0 : No event pending [[br]]Write 0 : No action [[br]]Read 1 : IRQ event pending [[br]]Write 1 : Trigger IRQ event by software" end="2" id="TCAR_IT_FLAG" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description=" IRQ status for Overflow [[br]]Read 0 : No event pending [[br]]Write 0 : No action [[br]]Read 1 : IRQ event pending [[br]]Write 1 : Trigger IRQ event by software" end="1" id="OVF_IT_FLAG" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description=" IRQ status for Match [[br]]Read 0 : No event pending [[br]]Write 0 : No action [[br]]Read 1 : IRQ event pending [[br]]Write 1 : Trigger IRQ event by software" end="0" id="MAT_IT_FLAG" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_IRQSTS" description="Component interrupt request status. Check the corresponding secondary status register.Enabled status isn't set unless event is enabled.Write 1 to clear the status after interrupt has been serviced (raw status gets cleared, i.e. even if not enabled)." id="DMTIMER_IRQSTS" offset="0x28" width="32">
+    
+  <bitfield begin="31" description=" " end="3" id="RESERVED_1" rwaccess="R" width="29"></bitfield>
+    
+  <bitfield begin="2" description=" IRQ status for Capture [[br]]Read 0 : No event pending [[br]]Write 0 : No action [[br]]Read 1 : IRQ event pending [[br]]Write 1 :  Clear pending event, if any" end="2" id="TCAR_IT_FLAG" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description=" IRQ status for Overflow [[br]]Read 0 : No event pending [[br]]Write 0 : No action [[br]]Read 1 : IRQ event pending [[br]]Write 1 :  Clear pending event, if any" end="1" id="OVF_IT_FLAG" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description=" IRQ status for Match [[br]]Read 0 : No event pending [[br]]Write 0 : No action [[br]]Read 1 : IRQ event pending [[br]]Write 1 : Clear pending event, if any" end="0" id="MAT_IT_FLAG" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_IRQEN_SET" description="Component interrupt request enable Write 1 to set (enable interrupt). Readout equal to corresponding _CLR register." id="DMTIMER_IRQEN_SET" offset="0x2C" width="32">
+    
+  <bitfield begin="31" description=" " end="3" id="RESERVED_1" rwaccess="R" width="29"></bitfield>
+    
+  <bitfield begin="2" description=" IRQ enable for Compare [[br]]Read 0 : IRQ event is disabled [[br]]Write 0 : No action [[br]]Read 1 : IRQ event is enabled [[br]]Write 1 : Set IRQ enable" end="2" id="TCAR_EN_FLAG" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description=" IRQ enable for Overflow [[br]]Read 0 : IRQ event is disabled [[br]]Write 0 : No action [[br]]Read 1 : IRQ event is enabled [[br]]Write 1 : Set IRQ enable" end="1" id="OVF_EN_FLAG" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description=" IRQ enable for Match [[br]]Read 0 : IRQ event is disabled [[br]]Write 0 : No action [[br]]Read 1 : IRQ event is enabled [[br]]Write 1 : Set IRQ enable" end="0" id="MAT_EN_FLAG" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_IRQEN_CLR" description="Component interrupt request enable Write 1 to clear (disable interrupt). Readout equal to corresponding _SET register." id="DMTIMER_IRQEN_CLR" offset="0x30" width="32">
+    
+  <bitfield begin="31" description=" " end="3" id="RESERVED_1" rwaccess="R" width="29"></bitfield>
+    
+  <bitfield begin="2" description=" IRQ enable for Compare [[br]]Read 0 : IRQ event is disabled [[br]]Write 0 : No action [[br]]Read 1 : IRQ event is enabled [[br]]Write 1 : Clear IRQ enable" end="2" id="TCAR_EN_FLAG" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="1" description=" IRQ enable for Overflow [[br]]Read 0 : IRQ event is disabled [[br]]Write 0 : No action [[br]]Read 1 : IRQ event is enabled [[br]]Write 1 : Clear IRQ enable" end="1" id="OVF_EN_FLAG" rwaccess="RW" width="1"></bitfield>
+    
+  <bitfield begin="0" description=" IRQ enable for Match [[br]]Read 0 : IRQ event is disabled [[br]]Write 0 : No action [[br]]Read 1 : IRQ event is enabled [[br]]Write 1 : Clear IRQ enable" end="0" id="MAT_EN_FLAG" rwaccess="RW" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_IRQWAKEEN" description="Wakeup-enabled events taking place when module is idle shall generate an asynchronous wakeup." id="DMTIMER_IRQWAKEEN" offset="0x34" width="32">
+    
+  <bitfield begin="31" description=" " end="3" id="RESERVED_1" rwaccess="R" width="29"></bitfield>
+    
+  <bitfield begin="2" description=" Wakeup generation for Compare" end="2" id="TCAR_WUP_ENA" rwaccess="RW" width="1">
+    <bitenum description="Wakeup enabled" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="Wakeup disabled" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="1" description=" Wakeup generation for Overflow" end="1" id="OVF_WUP_ENA" rwaccess="RW" width="1">
+    <bitenum description="Wakeup enabled" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="Wakeup disabled" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="0" description=" Wakeup generation for Match" end="0" id="MAT_WUP_ENA" rwaccess="RW" width="1">
+    <bitenum description="Wakeup enabled" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="Wakeup disabled" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_TCLR" description="This register controls optional features specific to the timer functionality." id="DMTIMER_TCLR" offset="0x38" width="32">
+    
+  <bitfield begin="31" description=" " end="15" id="RESERVED_1" rwaccess="R" width="17"></bitfield>
+    
+  <bitfield begin="14" description=" General Purpose Output - this register drives directly the PORGPOCFG output pin." end="14" id="GPO_CFG" rwaccess="RW" width="1">
+    <bitenum description="PORGPOCFG drives 1" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="PORGPOCFG drives 0" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="14" description=" Drives the direction for TriState buffers." end="14" id="IODIRECTION" rwaccess="RW" width="1">
+    <bitenum description="Tristate is input. Used for capture." id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="Tristates driven to output. Used for PWM output." id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="13" description=" Capture mode select bit (first/second)" end="13" id="CAPT_MODE" rwaccess="RW" width="1">
+    <bitenum description="capture on second event" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="single capture" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="12" description=" Pulse or toggle mode on PORTIMERPWM output pin" end="12" id="PT" rwaccess="RW" width="1">
+    <bitenum description="toggle" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="pulse" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="11" description=" Trigger output mode on PORTIMERPWM output pin" end="10" id="TRG" rwaccess="RW" width="2">
+    <bitenum description="reserved" id="en_4_0x3" token="en_4_0x3" value="0x3"></bitenum>
+    <bitenum description="trigger on overflow and match" id="en_3_0x2" token="en_3_0x2" value="0x2"></bitenum>
+    <bitenum description="trigger on overflow" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="no trigger" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="9" description=" Transition Capture Mode on PIEVENTCAPT input pin (When the TCM field passed from (00) to any other combination then the TCAR_IT_FLAG and the edge detection logic are cleared)" end="8" id="TCM" rwaccess="RW" width="2">
+    <bitenum description="Capture on booth edges of PIEVETCAPT" id="en_4_0x3" token="en_4_0x3" value="0x3"></bitenum>
+    <bitenum description="capture on both edge transition" id="en_3_0x2" token="en_3_0x2" value="0x2"></bitenum>
+    <bitenum description="capture on low to high transition" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="no capture" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="7" description=" This bit should be set or clear while the timer is stopped or the trigger is off." end="7" id="SCPWM" rwaccess="RW" width="1">
+    <bitenum description="set the PORTIMERPWM output pin and select negative pulse for pulse mode" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="clear the PORTIMERPWM output pin and select positive pulse for pulse mode" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="6" description=" Compare enable" end="6" id="CE" rwaccess="RW" width="1">
+    <bitenum description="compare mode is enable" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="compare mode is disable" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="5" description=" Prescaler enable" end="5" id="PRE" rwaccess="RW" width="1">
+    <bitenum description="The divided input pin clocks the counter" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="The TIMER clock input pin clocks the counter" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="4" description=" Pre-scale clock Timer Value" end="2" id="PTV" rwaccess="RW" width="3"></bitfield>
+    
+  <bitfield begin="1" description=" Auto-reload mode" end="1" id="AR" rwaccess="RW" width="1">
+    <bitenum description="Auto-reload timer" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="One shot timer" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="0" description=" Start/Stop timer control" end="0" id="ST" rwaccess="RW" width="1">
+    <bitenum description="Start timer" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="Stop timer. Only the counter is frozen In case of one-shot mode selected (AR =0), this bit is automatically reset by internal logic when the counter is overflowed." id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_TCRR" description="This register holds the value of the internal counter" id="DMTIMER_TCRR" offset="0x3C" width="32">
+    
+  <bitfield begin="31" description=" Value of TIMER counter" end="0" id="TIMER_CTR" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_TLDR" description="This register holds the timer's load value" id="DMTIMER_TLDR" offset="0x40" width="32">
+    
+  <bitfield begin="31" description=" Timer counter value loaded on overflow in auto-reload mode or on TTGR write access LOAD_VALUE must be different than the timer overflow value (0xFFFFFFFF)." end="0" id="LOAD_VALUE" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_TTGR" description="The read value of this register is always 0xFFFF FFFF." id="DMTIMER_TTGR" offset="0x44" width="32">
+    
+  <bitfield begin="31" description=" Writing in the TTGR register, TCRR will be loaded from TLDR and prescaler counter will be cleared Reload will be done regardless of the AR field value of TCLR register" end="0" id="TTGR_VALUE" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_TWPS" description="This register contains the write posting bits for all writ-able functional registers" id="DMTIMER_TWPS" offset="0x48" width="32">
+    
+  <bitfield begin="31" description=" " end="5" id="RESERVED_1" rwaccess="R" width="27"></bitfield>
+    
+  <bitfield begin="4" description=" When equal to 1, a write is pending to the TMAR register" end="4" id="W_PEND_TMAR" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="3" description=" When equal to 1, a write is pending to the TTGR register" end="3" id="W_PEND_TTGR" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="2" description=" When equal to 1, a write is pending to the TLDR register" end="2" id="W_PEND_TLDR" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="1" description=" When equal to 1, a write is pending to the TCRR register" end="1" id="W_PEND_TCRR" rwaccess="R" width="1"></bitfield>
+    
+  <bitfield begin="0" description=" When equal to 1, a write is pending to the TCLR register" end="0" id="W_PEND_TCLR" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_TMAR" description="The compare logic consists of a 32-bit wide, read/write data TMAR register and logic to compare counter" id="DMTIMER_TMAR" offset="0x4C" width="32">
+    
+  <bitfield begin="31" description=" Value to be compared to the timer counter" end="0" id="COMPARE_VALUE" rwaccess="RW" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_TCAR1" description="" id="DMTIMER_TCAR1" offset="0x50" width="32">
+    
+  <bitfield begin="31" description=" Timer counter value captured on an external event trigger" end="0" id="CAPTURE_VALUE1" rwaccess="R" width="32"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_TSICR" description="Timer Synchronous Interface Control Register" id="DMTIMER_TSICR" offset="0x54" width="32">
+    
+  <bitfield begin="31" description=" " end="3" id="RESERVED_1" rwaccess="R" width="29"></bitfield>
+    
+  <bitfield begin="2" description=" Reset value of POSTED depends on hardware integration module at design time. [[br]]Software must read POSTED field to get the hardware module configuration. " end="2" id="POSTED" rwaccess="RW" width="1">
+    <bitenum description="posted mode active (clocks ratio needs to fit freq (timer) &lt; freq (OCP)/4 frequency requirement)" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="posted mode inactive: will delay the command accept output signal." id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="1" description=" This bit reset all the functional part of the module " end="1" id="SFT" rwaccess="RW" width="1">
+    <bitenum description="software reset is enabled" id="en_2_0x1" token="en_2_0x1" value="0x1"></bitenum>
+    <bitenum description="software reset is disabled" id="en_1_0x0" token="en_1_0x0" value="0x0"></bitenum>
+  </bitfield>
+    
+  <bitfield begin="0" description=" " end="0" id="RESERVED_2" rwaccess="R" width="1"></bitfield>
+  </register>
+  
+  
+  <register acronym="DMTIMER_TCAR2" description="" id="DMTIMER_TCAR2" offset="0x58" width="32">
+    
+  <bitfield begin="31" description=" Timer counter value captured on an external event trigger" end="0" id="CAPTURE_VALUE2" rwaccess="R" width="32"></bitfield>
+  </register>
+</module>

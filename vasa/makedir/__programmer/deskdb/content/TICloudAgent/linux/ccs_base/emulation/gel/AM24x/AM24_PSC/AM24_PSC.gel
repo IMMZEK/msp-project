@@ -1,0 +1,1077 @@
+
+/**
+ * \file  AM24x_PSC.gel
+ *
+ * \brief GEL File to control the power sleep controller on the AM24x
+ */
+
+/* Copyright (c) 2021, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+
+/*
+ * macro definitions for the MAIN_PSC
+*/
+
+/* power domain indices */
+#define GP_CORE_CTL      0
+#define PD_A53_CLUSTER_0 1
+#define PD_A53_0         2
+#define PD_A53_1         3
+#define PD_PULSAR_0      4
+#define PD_PULSAR_1      5
+#define PD_ICSSG_0       6
+#define PD_ICSSG_1       7
+#define PD_CPSW          9
+
+/* lpsc indices */
+#define LPSC_MAIN_ALWAYSON        0
+#define LPSC_MAIN_TEST            1
+#define LPSC_MAIN_PBIST           2
+#define LPSC_DMSC                 3
+#define LPSC_EMMC_4B              4
+#define LPSC_EMMC_8B              5
+#define LPSC_USB                  6
+#define LPSC_ADC                  7
+#define LPSC_DEBUGSS              8
+#define LPSC_GPMC                 9
+#define LPSC_EMIF_CFG            10
+#define LPSC_EMIF_DATA           11
+#define LPSC_MCAN_0              12
+#define LPSC_MCAN_1              13
+#define LPSC_SA2UL               14
+#define LPSC_SERDES_0            15
+#define LPSC_PCIE_0              16
+#define LPSC_A53_CLUSTER_0       20
+#define LPSC_A53_CLUSTER_0_PBIST 21
+#define LPSC_A53_0               22
+#define LPSC_A53_1               23
+#define LPSC_PULSAR_0_R5_0       24
+#define LPSC_PULSAR_0_R5_1       25
+#define LPSC_PULSAR_PBIST_0      26
+#define LPSC_PULSAR_1_R5_0       27
+#define LPSC_PULSAR_1_R5_1       28
+#define LPSC_PULSAR_PBIST_1      29
+#define LPSC_ICSSG_0             30
+#define LPSC_ICSSG_1             31
+#define LPSC_CPSW3G              33
+
+#define DMSC_LITE0_DMSC_SEC_MMR_BASE                    0x44230120
+//#define MAIN_SEC_MMR_CFG0_CLSTR0_CORE0_PMCTRL_OFFSET    0x120
+//#define MAIN_SEC_MMR_CFG0_CLSTR0_CORE1_PMCTRL_OFFSET    0x1A0
+//#define MAIN_SEC_MMR_CFG0_CLSTR1_CORE0_PMCTRL_OFFSET    0x1120
+//#define MAIN_SEC_MMR_CFG0_CLSTR1_CORE1_PMCTRL_OFFSET    0x11A0
+
+//#define MAIN_SEC_MMR_CFG0_CLSTR0_CORE0_PMCTRL DMSC_LITE0_DMSC_SEC_MMR_BASE + MAIN_SEC_MMR_CFG0_CLSTR0_CORE0_PMCTRL_OFFSET
+//#define MAIN_SEC_MMR_CFG0_CLSTR0_CORE1_PMCTRL DMSC_LITE0_DMSC_SEC_MMR_BASE + MAIN_SEC_MMR_CFG0_CLSTR0_CORE1_PMCTRL_OFFSET
+//#define MAIN_SEC_MMR_CFG0_CLSTR1_CORE0_PMCTRL DMSC_LITE0_DMSC_SEC_MMR_BASE + MAIN_SEC_MMR_CFG0_CLSTR1_CORE0_PMCTRL_OFFSET
+//#define MAIN_SEC_MMR_CFG0_CLSTR1_CORE1_PMCTRL DMSC_LITE0_DMSC_SEC_MMR_BASE + MAIN_SEC_MMR_CFG0_CLSTR1_CORE1_PMCTRL_OFFSET
+
+/*
+ * macro definitions for the MCU_PSC
+*/
+
+/* power domain indices */
+#define GP_CORE_CTL_MCU          0
+#define PD_M4F                   1
+
+/* lpsc indices */
+#define LPSC_MCU_ALWAYSON 0
+#define LPSC_TEST 2
+#define LPSC_MAIN2MCU 3
+#define LPSC_MCU2MAIN 4
+#define LPSC_M4F 7
+
+// PSC Register Definitions
+
+#define MCU_PSC_BASE				(0x04000000)
+#define MAIN_PSC_BASE				(0x00400000)
+
+#define MAIN_PSC_INDEX				0
+#define MCU_PSC_INDEX		    	1
+
+#define PSC_MDCTL00           		(0xA00)
+#define PSC_MDSTAT00          		(0x800)
+#define PSC_PDCTL00           		(0x300)
+#define PSC_PDSTAT00          		(0x200)
+#define PSC_PTCMD 					(0x120)
+#define PSC_PTSTAT 					(0x128)
+
+#define PSC_PD_OFF					(0x0)
+#define PSC_PD_ON					(0x1)
+
+#define PSC_SYNCRESETDISABLE		(0x0)
+#define PSC_SYNCRESET 				(0x1)
+#define PSC_DISABLE   				(0x2)
+#define PSC_ENABLE    				(0x3)
+
+#define PSC_TIMEOUT					(100)
+
+#define MCU_PSC_MDCTL_BASE          MCU_PSC_BASE + PSC_MDCTL00
+#define MCU_PSC_MDSTAT_BASE         MCU_PSC_BASE + PSC_MDSTAT00
+#define MCU_PSC_PDCTL_BASE          MCU_PSC_BASE + PSC_PDCTL00
+#define MCU_PSC_PDSTAT_BASE         MCU_PSC_BASE + PSC_PDSTAT00
+#define MCU_PSC_PTCMD_BASE		    MCU_PSC_BASE + PSC_PTCMD
+#define MCU_PSC_PTSTAT_BASE		    MCU_PSC_BASE + PSC_PTSTAT
+#define MCU_PSC_PTCMD               MCU_PSC_PTCMD_BASE
+#define MCU_PSC_PTSTAT              MCU_PSC_PTSTAT_BASE
+
+#define MAIN_PSC_MDCTL_BASE    		MAIN_PSC_BASE + PSC_MDCTL00
+#define MAIN_PSC_MDSTAT_BASE      	MAIN_PSC_BASE + PSC_MDSTAT00
+#define MAIN_PSC_PDCTL_BASE       	MAIN_PSC_BASE + PSC_PDCTL00
+#define MAIN_PSC_PDSTAT_BASE      	MAIN_PSC_BASE + PSC_PDSTAT00
+#define MAIN_PSC_PTCMD_BASE			MAIN_PSC_BASE + PSC_PTCMD
+#define MAIN_PSC_PTSTAT_BASE		MAIN_PSC_BASE + PSC_PTSTAT
+#define MAIN_PSC_PTCMD             	MAIN_PSC_PTCMD_BASE
+#define MAIN_PSC_PTSTAT 			MAIN_PSC_PTSTAT_BASE
+
+/******************************************************************************
+ *
+ * NAME:
+ *      Set_MAIN_PSC_State
+ *
+ * PURPOSE:
+ *      Set a new power state for the specified power domain pd_id and module 
+ *		domain md_id. Wait for the power transition to complete.
+ *
+ * USAGE:
+ *      This routine can be called as:
+ *
+ *      Set_MAIN_PSC_State(unsigned int pd_id, unsigned int md_id, unsigned int pd_state, unsigned int md_state)
+ *
+ *      pd_id - (i) power domain id
+ *
+ *      md_id - (i) module domain id
+ *
+ *		pd_state - (i) new power domain state value to set
+ *					0 = PSC_PD_OFF
+ *					1 = PSC_PD_ON
+ *
+ *      md_state - (i) new module domain state value to set
+ *                  0 = PSC_SYNCRESETDISABLE (IP reset asserted and clock gated)
+ *                  1 = PSC_SYNCRESET (IP reset asserted and clock running)
+ *                  2 = PSC_DISABLE (IP reset released and clock gated, MMRs retained)
+ *                  3 = PSC_ENABLE (IP reset released and clock running)
+ * 
+ * RETURN VALUE:
+ *      0 if ok, !=0 for error
+ *
+ * REFERENCE:
+ *
+ *****************************************************************************/
+ Set_MAIN_PSC_State(unsigned int pd_id, unsigned int md_id, unsigned int pd_state, unsigned int md_state)
+{
+	unsigned int* mdctl;
+	unsigned int* mdstat;
+	unsigned int* pdctl;
+	unsigned int* pdstat;	
+	
+	unsigned int loop_cnt = 0;
+	unsigned int ret = 1;
+    
+    unsigned int address_offset = 0;
+    
+    address_offset = 0x80000000;
+
+	mdctl = (unsigned int*)(MAIN_PSC_MDCTL_BASE + ( 4 * md_id ) + address_offset);
+	mdstat = (unsigned int*)(MAIN_PSC_MDSTAT_BASE + ( 4 * md_id )+ address_offset);
+	pdctl = (unsigned int*)(MAIN_PSC_PDCTL_BASE + ( 4 * pd_id ) + address_offset);
+	pdstat = (unsigned int*)(MAIN_PSC_PDSTAT_BASE + ( 4 * pd_id )+ address_offset);	
+
+	// If state is already set, do nothing
+	if ( (( *pdstat & 0x1 ) == pd_state) && (( *mdstat & 0x1f ) == md_state) )
+	{
+        
+		GEL_TextOut( "No change needed.\n");
+		ret = 1;
+		return ret;
+	}
+
+	// Wait for GOSTAT to clear
+	while( (loop_cnt < PSC_TIMEOUT) && (*(unsigned int*)(MAIN_PSC_PTSTAT+address_offset) & (0x1 << pd_id)) != 0 )
+	{
+		loop_cnt++;
+	}
+	
+	// Check if we got timeout error while waiting
+	if (loop_cnt >= PSC_TIMEOUT)
+	{
+		GEL_TextOut( "Timeout Error. State not changed.\n");
+		ret = 0;
+		return ret;
+	}
+	
+	// Set PDCTL NEXT to new state
+	*pdctl = ((*pdctl) & ~(0x1)) | pd_state;	
+
+	// Set MDCTL NEXT to new state
+	*mdctl = ((*mdctl) & ~(0x1f)) | md_state;
+	
+	// Start power transition by setting PTCMD GO to 1
+	*((unsigned int*)(MAIN_PSC_PTCMD+address_offset)) = (*(unsigned int*)(MAIN_PSC_PTCMD+address_offset)) | (0x1<<pd_id);
+	
+	loop_cnt = 0;
+
+	// Wait for PTSTAT GOSTAT to clear
+	while( (loop_cnt < PSC_TIMEOUT) && (*(unsigned int*)(MAIN_PSC_PTSTAT+address_offset) & (0x1 << pd_id)) != 0 )
+	{
+		loop_cnt++;
+	}			
+
+	// Check if we got timeout error while waiting
+	if (loop_cnt >= PSC_TIMEOUT)
+	{
+		GEL_TextOut( "Timeout Error. State not changed.\n");
+		ret = 0;
+		return ret;		
+	}
+
+	// Verify power domain and module domain state got changed
+	if ( (( *pdstat & 0x1 ) == pd_state) && (( *mdstat & 0x1f ) == md_state) )
+	{
+		GEL_TextOut( "Power domain and module state changed successfully.\n");
+		ret = 1;
+	}
+	if (( *pdstat & 0x1 ) != pd_state)
+	{
+		GEL_TextOut( "ERROR: PSC power domain state NOT changed!\n");
+		ret = 0;
+	}
+	if (( *mdstat & 0x1f ) != md_state)
+	{
+		GEL_TextOut( "ERROR: module state NOT changed!\n");
+		ret = 0;
+	}
+	
+	return ret;
+}
+
+/******************************************************************************
+ *
+ * NAME:
+ *      Set_MCU_PSC_State
+ *
+ * PURPOSE:
+ *      Set a new power state for the specified power domain pd_id and module 
+ *		domain md_id. Wait for the power transition to complete.
+ *
+ * USAGE:
+ *      This routine can be called as:
+ *
+ *      Set_MCU_PSC_State(unsigned int pd_id, unsigned int md_id, unsigned int pd_state, unsigned int md_state)
+ *
+ *      pd_id - (i) power domain id
+ *
+ *      md_id - (i) module domain id
+ *
+ *		pd_state - (i) new power domain state value to set
+ *					0 = PSC_PD_OFF
+ *					1 = PSC_PD_ON
+ *
+ *      md_state - (i) new module domain state value to set
+ *                  0 = PSC_SYNCRESETDISABLE (IP reset asserted and clock gated)
+ *                  1 = PSC_SYNCRESET (IP reset asserted and clock running)
+ *                  2 = PSC_DISABLE (IP reset released and clock gated, MMRs retained)
+ *                  3 = PSC_ENABLE (IP reset released and clock running)
+ * 
+ * RETURN VALUE:
+ *      0 if ok, !=0 for error
+ *
+ * REFERENCE:
+ *
+ *****************************************************************************/
+ Set_MCU_PSC_State(unsigned int pd_id, unsigned int md_id, unsigned int pd_state, unsigned int md_state)
+{
+	unsigned int* mdctl;
+	unsigned int* mdstat;
+	unsigned int* pdctl;
+	unsigned int* pdstat;	
+	
+	unsigned int loop_cnt = 0;
+	unsigned int ret = 1;
+    
+    unsigned int address_offset = 0;
+    
+    address_offset = 0x80000000;
+
+	mdctl  = (unsigned int*)(MCU_PSC_MDCTL_BASE + ( 4 * md_id ) + address_offset);
+	mdstat = (unsigned int*)(MCU_PSC_MDSTAT_BASE + ( 4 * md_id ) + address_offset);
+	pdctl  = (unsigned int*)(MCU_PSC_PDCTL_BASE + ( 4 * pd_id ) + address_offset);
+	pdstat = (unsigned int*)(MCU_PSC_PDSTAT_BASE + ( 4 * pd_id ) + address_offset);	
+
+	// If state is already set, do nothing
+	if ( (( *pdstat & 0x1 ) == pd_state) && (( *mdstat & 0x1f ) == md_state) )
+	{
+		GEL_TextOut( "No change needed.\n");
+		ret = 1;
+		return ret;
+	}
+
+	// Wait for GOSTAT to clear
+	while( (loop_cnt < PSC_TIMEOUT) && (*((unsigned int*)(MCU_PSC_PTSTAT+address_offset)) & (0x1 << pd_id)) != 0 )
+	{
+		loop_cnt++;
+	}
+	
+	// Check if we got timeout error while waiting
+	if (loop_cnt >= PSC_TIMEOUT)
+	{
+		GEL_TextOut( "ERROR: Timeout. You are likely attempting to modify the Power Sleep Controller\n");
+		GEL_TextOut( "       across a voltage crossing which is currently powered off.\n");
+        GEL_TextOut( "       Consult the CBASS connectivity diagram and the PSC IP dictionary for more\n");
+        GEL_TextOut( "       information.\n");
+        
+        
+        ret = 0;
+		return ret;
+	}
+	
+	// Set PDCTL NEXT to new state
+	*pdctl = ((*pdctl) & ~(0x1)) | pd_state;	
+
+	// Set MDCTL NEXT to new state
+	*mdctl = ((*mdctl) & ~(0x1f)) | md_state;
+	
+	// Start power transition by setting PTCMD GO to 1
+	(*(unsigned int*)(MCU_PSC_PTCMD + address_offset)) = (*(unsigned int*)(MCU_PSC_PTCMD + address_offset)) | (0x1<<pd_id);
+	
+	loop_cnt = 0;
+
+	// Wait for PTSTAT GOSTAT to clear
+	while( (loop_cnt < PSC_TIMEOUT) && (*((unsigned int*)(MCU_PSC_PTSTAT+address_offset)) & (0x1 << pd_id)) != 0 )
+	{
+		loop_cnt++;
+	}			
+
+	// Check if we got timeout error while waiting
+	if (loop_cnt >= PSC_TIMEOUT)
+	{
+		GEL_TextOut( "Timeout Error. State not changed.\n");
+		ret = 0;
+		return ret;		
+	}
+
+	// Verify power domain and module domain state got changed
+	if ( (( *pdstat & 0x1 ) == pd_state) && (( *mdstat & 0x1f ) == md_state) )
+	{
+		GEL_TextOut( "Power domain and module state changed successfully.\n");
+		ret = 1;
+	}
+	if (( *pdstat & 0x1 ) != pd_state)
+	{
+		GEL_TextOut( "ERROR: PSC power domain state NOT changed!\n");
+		ret = 0;
+	}
+	if (( *mdstat & 0x1f ) != md_state)
+	{
+		GEL_TextOut( "ERROR: module state NOT changed!\n");
+		ret = 0;
+	}
+	
+	return ret;
+}
+
+ Get_MAIN_PSC_State( unsigned int pd_id, unsigned int md_id )
+{
+	unsigned int* mdctl;
+	unsigned int* mdstat;
+	unsigned int* pdstat;	
+
+	unsigned int pt_state;			
+	unsigned int pd_state;
+	unsigned int md_state;
+    
+    unsigned int address_offset = 0;
+    
+    address_offset = 0x80000000;
+
+	
+	mdstat = (unsigned int*)(MAIN_PSC_MDSTAT_BASE + ( 4 * md_id ) + address_offset);
+	pdstat = (unsigned int*)(MAIN_PSC_PDSTAT_BASE + ( 4 * pd_id ) + address_offset);	
+	
+	pt_state = *(unsigned int*)(MAIN_PSC_PTSTAT+address_offset) & (0x1 << pd_id);	
+	pd_state = *pdstat & 0x1;	
+	md_state = *mdstat & 0x1f;
+    
+    if (pd_state == PSC_PD_OFF)
+    {
+        GEL_TextOut( "Power Domain: Off\n ");
+    }
+    else if (pd_state == PSC_PD_ON)
+    {
+        GEL_TextOut( "Power Domain: On\n ");
+    }
+    else
+    {
+        GEL_TextOut( "Power Domain: ERR\n ");
+    }
+    
+    if (md_state == PSC_SYNCRESETDISABLE)
+    {
+        GEL_TextOut( "Module State: SyncResetDisable\n ");
+    }
+    else if (md_state == PSC_SYNCRESET)
+    {   
+        GEL_TextOut( "Module State: SyncReset\n ");
+    }
+    else if (md_state == PSC_DISABLE)
+    {
+        GEL_TextOut( "Module State: Disable\n ");
+    }
+    else if (md_state == PSC_ENABLE)
+    {
+        GEL_TextOut( "Module State: Enable\n ");
+    }
+    else
+    {
+        GEL_TextOut( "Module State: Error\n ");
+    }
+    
+    return 1;
+}
+
+ Get_MCU_PSC_State( unsigned int pd_id, unsigned int md_id )
+{
+	unsigned int* mdctl;
+	unsigned int* mdstat;
+	unsigned int* pdstat;	
+
+	unsigned int pt_state;			
+	unsigned int pd_state;
+	unsigned int md_state;
+    
+    unsigned int address_offset = 0;
+    
+    address_offset = 0x80000000;
+	
+	mdstat = (unsigned int*)(MCU_PSC_MDSTAT_BASE + ( 4 * md_id ) + address_offset);
+	pdstat = (unsigned int*)(MCU_PSC_PDSTAT_BASE + ( 4 * pd_id ) + address_offset);	
+	
+	pt_state = *((unsigned int*)(MCU_PSC_PTSTAT+address_offset)) & (0x1 << pd_id);	
+	pd_state = *pdstat & 0x1;	
+	md_state = *mdstat & 0x1f;
+
+	    if (pd_state == PSC_PD_OFF)
+    {
+        GEL_TextOut( "Power Domain: Off\n");
+    }
+    else if (pd_state == PSC_PD_ON)
+    {
+        GEL_TextOut( "Power Domain: On\n");
+    }
+    else
+    {
+        GEL_TextOut( "Power Domain: ERR\n");
+    }
+    
+    if (md_state == PSC_SYNCRESETDISABLE)
+    {
+        GEL_TextOut( "Module State: SyncResetDisable\n ");
+    }
+    else if (md_state == PSC_SYNCRESET)
+    {   
+        GEL_TextOut( "Module State: SyncReset\n ");
+    }
+    else if (md_state == PSC_DISABLE)
+    {
+        GEL_TextOut( "Module State: Disable\n ");
+    }
+    else if (md_state == PSC_ENABLE)
+    {
+        GEL_TextOut( "Module State: Enable\n ");
+    }
+    else
+    {
+        GEL_TextOut( "Module State: Error\n ");
+    }
+    
+    return 1;
+}
+
+ LPSC_Pulsar_0_R5_0_On()
+{
+    int status = 1;
+    GEL_TextOut( "Powering up LPSC_PULSAR_0_R5_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0,LPSC_PULSAR_0_R5_0, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_PULSAR_0_R5_0 done. \n");
+    return status;
+}
+
+change_M4_LRST(int enable) {
+    unsigned int* mdctl;
+
+    unsigned int loop_cnt = 0;
+    unsigned int ret = 1;
+
+    unsigned int address_offset = 0;
+
+    address_offset = 0x80000000;
+
+    mdctl  = (unsigned int*)(MCU_PSC_MDCTL_BASE + ( 4 * LPSC_M4F ) + address_offset);
+
+    if(enable==1) {
+        *mdctl = ((*mdctl) & ~(0x100));
+    } else {
+        *mdctl = ((*mdctl) | (0x100));
+    }
+}
+
+// Common PSC Power Controls
+
+menuitem "Power Sleep Controller/Common PSC Power Controls";
+
+hotmenu Set_PSC_All_On()
+{
+    int status = 1;    GEL_TextOut( "Powering up all PSC power domains in progress...\n");
+    status = MAIN_PSC_Peripheral_PowerUp();
+    status = MCU_PSC_Peripheral_PowerUp();
+    GEL_TextOut( "Powering up all PSC power domains done!\n");
+    return status;
+}
+
+
+hotmenu Get_PSC_All_States()
+{
+    int status = 1;    GEL_TextOut( "Getting all PSC power states in progress... \n");
+	status = Get_MAIN_PSC_Peripheral_States();
+	status = Get_MCU_PSC_Peripheral_States();
+    GEL_TextOut( "Getting all PSC power states done. \n");
+    return status;
+}
+
+menuitem "Power Sleep Controller/MAIN PSC Power Controls";
+
+hotmenu MAIN_PSC_Peripheral_PowerUp()
+{
+    int status = 1;    GEL_TextOut( "Powering up MAIN domain peripherals...\n");
+	status = GP_CORE_CTL_PowerUp();
+	status = PD_PULSAR_0_PowerUp();
+	status = PD_PULSAR_1_PowerUp();
+	status = PD_ICSSG_0_PowerUp();
+	status = PD_ICSSG_1_PowerUp();
+	status = PD_CPSW_PowerUp();
+    GEL_TextOut( "Powering up all MAIN domain peripherals done. \n");
+    return status;
+}
+
+hotmenu Get_MAIN_PSC_Peripheral_States()
+{
+    int status = 1;    GEL_TextOut( "Getting all MAIN PSC peripheral states in progress......\n");
+    GEL_TextOut( "State of LPSC_MAIN_ALWAYSON\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_MAIN_ALWAYSON);
+    GEL_TextOut( "State of LPSC_MAIN_TEST\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_MAIN_TEST);
+    GEL_TextOut( "State of LPSC_MAIN_PBIST\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_MAIN_PBIST);
+    GEL_TextOut( "State of LPSC_DMSC\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_DMSC);
+    GEL_TextOut( "State of LPSC_EMMC_4B\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMMC_4B);
+    GEL_TextOut( "State of LPSC_EMMC_8B\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMMC_8B);
+    GEL_TextOut( "State of LPSC_USB\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_USB);
+    GEL_TextOut( "State of LPSC_ADC\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_ADC);
+    GEL_TextOut( "State of LPSC_GPMC\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_GPMC);
+    GEL_TextOut( "State of LPSC_EMIF_CFG\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMIF_CFG);
+    GEL_TextOut( "State of LPSC_EMIF_DATA\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMIF_DATA);
+    GEL_TextOut( "State of LPSC_MCAN_0\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_MCAN_0);
+    GEL_TextOut( "State of LPSC_MCAN_1\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_MCAN_1);
+    GEL_TextOut( "State of LPSC_SA2UL\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_SA2UL);
+    GEL_TextOut( "State of LPSC_SERDES_0\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_SERDES_0);
+    GEL_TextOut( "State of LPSC_PCIE_0\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_PCIE_0);
+    GEL_TextOut( "State of LPSC_PULSAR_0_R5_0\n");
+    status &= Get_MAIN_PSC_State( PD_PULSAR_0, LPSC_PULSAR_0_R5_0);
+    GEL_TextOut( "State of LPSC_PULSAR_0_R5_1\n");
+    status &= Get_MAIN_PSC_State( PD_PULSAR_0, LPSC_PULSAR_0_R5_1);
+    GEL_TextOut( "State of LPSC_PULSAR_PBIST_0\n");
+    status &= Get_MAIN_PSC_State( PD_PULSAR_0, LPSC_PULSAR_PBIST_0);
+    GEL_TextOut( "State of LPSC_PULSAR_1_R5_0\n");
+    status &= Get_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_1_R5_0);
+    GEL_TextOut( "State of LPSC_PULSAR_1_R5_1\n");
+    status &= Get_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_1_R5_1);
+    GEL_TextOut( "State of LPSC_PULSAR_PBIST_1\n");
+    status &= Get_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_PBIST_1);
+    GEL_TextOut( "State of LPSC_ICSSG_0\n");
+    status &= Get_MAIN_PSC_State( PD_ICSSG_0, LPSC_ICSSG_0);
+    GEL_TextOut( "State of LPSC_ICSSG_1\n");
+    status &= Get_MAIN_PSC_State( PD_ICSSG_1, LPSC_ICSSG_1);
+    GEL_TextOut( "State of LPSC_DEBUGSS\n");
+    status &= Get_MAIN_PSC_State( GP_CORE_CTL, LPSC_DEBUGSS);
+    GEL_TextOut( "State of LPSC_CPSW3G\n");
+    status &= Get_MAIN_PSC_State( PD_CPSW, LPSC_CPSW3G);
+    GEL_TextOut( "Getting the state of all MAIN peripherals done. \n");
+    return status;
+}
+
+menuitem "Power Sleep Controller/MCU PSC Power Controls";
+
+hotmenu MCU_PSC_Peripheral_PowerUp()
+{
+    int status = 1;    GEL_TextOut( "Powering up MCU Domain peripherals. \n");
+	status = GP_Core_CTL_MCU_PowerUp();
+	status = PD_M4F_PowerUp();
+    GEL_TextOut( "Powering up MCU Domain peripherals done. \n");
+    return status;
+}
+
+hotmenu Get_MCU_PSC_Peripheral_States()
+{
+    int status = 1;    GEL_TextOut( "Getting all MCU peripheral states in progress......\n");
+    GEL_TextOut( "State of LPSC_MCU_ALWAYSON\n");
+    status &= Get_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_MCU_ALWAYSON);
+    GEL_TextOut( "State of LPSC_TEST\n");
+    status &= Get_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_TEST);
+    GEL_TextOut( "State of LPSC_MAIN2MCU\n");
+    status &= Get_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_MAIN2MCU);
+    GEL_TextOut( "State of LPSC_MCU2MAIN\n");
+    status &= Get_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_MCU2MAIN);
+    GEL_TextOut( "State of LPSC_M4F\n");
+    status &= Get_MCU_PSC_State( PD_M4F, LPSC_M4F);
+    GEL_TextOut( "Getting the state of all MCU peripherals done. \n");
+    return status;
+}
+
+menuitem "Power Sleep Controller/Power Up by Power Domain Controls";
+
+hotmenu GP_CORE_CTL_PowerUp()
+{
+    int status = 1;    GEL_TextOut( "Powering up GP_CORE_CTL. \n");
+    GEL_TextOut( "Powering up LPSC_DMSC\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_DMSC, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_MAIN_TEST\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MAIN_TEST, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_MAIN_PBIST\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MAIN_PBIST, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_EMMC_4B\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMMC_4B, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_EMMC_8B\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMMC_8B, PSC_PD_ON, PSC_ENABLE);
+	GEL_TextOut( "Powering up LPSC_USB\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_USB, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_ADC\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_ADC, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_DEBUGSS\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_DEBUGSS, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_GPMC\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_GPMC, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_EMIF_CFG\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMIF_CFG, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_EMIF_DATA\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMIF_DATA, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_MCAN_0\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MCAN_0, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_MCAN_1\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MCAN_1, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_SA2UL\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_SA2UL, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_SERDES_0\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_SERDES_0, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_PCIE_0\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_PCIE_0, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up GP_CORE_CTL done. \n");
+    return status;
+}
+
+hotmenu PCIE_PowerUp()
+{
+	int status = 1;
+	GEL_TextOut( "Powering up LPSC_PCIE_0\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_PCIE_0, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up GP_CORE_CTL done. \n");
+}
+
+hotmenu PD_PULSAR_0_PowerUp()
+{
+    int status = 1;    GEL_TextOut( "Powering up PD_PULSAR_0. \n");
+    GEL_TextOut( "Powering up LPSC_PULSAR_0_R5_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0,LPSC_PULSAR_0_R5_0, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_PULSAR_0_R5_1\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0,LPSC_PULSAR_0_R5_1, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_PULSAR_PBIST_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0, LPSC_PULSAR_PBIST_0, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up PD_PULSAR_0 done. \n");
+    return status;
+}
+
+hotmenu PD_PULSAR_1_PowerUp()
+{
+    int status = 1;    GEL_TextOut( "Powering up PD_PULSAR_1. \n");
+    GEL_TextOut( "Powering up LPSC_PULSAR_1_R5_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_1_R5_0, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_PULSAR_1_R5_1\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_1_R5_1, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_PULSAR_PBIST_1\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_PBIST_1, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up PD_PULSAR_1 done. \n");
+    return status;
+}
+
+hotmenu PD_ICSSG_0_PowerUp()
+{
+    int status = 1;    GEL_TextOut( "Powering up PD_ICSSG_0. \n");
+    GEL_TextOut( "Powering up LPSC_ICSSG_0\n");
+    status &= Set_MAIN_PSC_State( PD_ICSSG_0, LPSC_ICSSG_0, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up PD_ICSSG_0 done. \n");
+    return status;
+}
+
+hotmenu PD_ICSSG_1_PowerUp()
+{
+    int status = 1;    GEL_TextOut( "Powering up PD_ICSSG_1. \n");
+    GEL_TextOut( "Powering up LPSC_ICSSG_1\n");
+    status &= Set_MAIN_PSC_State( PD_ICSSG_1, LPSC_ICSSG_1, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up PD_ICSSG_1 done. \n");
+    return status;
+}
+
+hotmenu PD_CPSW_PowerUp()
+{
+    int status = 1;    GEL_TextOut( "Powering up PD_CPSW. \n");
+    GEL_TextOut( "Powering up LPSC_CPSW3G\n");
+    status &= Set_MAIN_PSC_State( PD_CPSW, LPSC_CPSW3G, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up PD_CPSW done. \n");
+    return status;
+}
+
+hotmenu GP_Core_CTL_MCU_PowerUp()
+{
+    int status = 1;    GEL_TextOut( "Powering up GP_CORE_CTL_MCU. \n");
+    GEL_TextOut( "Powering up LPSC_TEST\n");
+    status &= Set_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_TEST, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_MAIN2MCU\n");
+    status &= Set_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_MAIN2MCU, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up LPSC_MCU2MAIN\n");
+    status &= Set_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_MCU2MAIN, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up GP_CORE_CTL_MCU done. \n");
+    return status;
+}
+
+hotmenu PD_M4F_PowerUp()
+{
+    int status = 1;    GEL_TextOut( "Powering up PD_M4F. \n");
+    GEL_TextOut( "Powering up LPSC_M4F\n");
+    status &= Set_MCU_PSC_State( PD_M4F, LPSC_M4F, PSC_PD_ON, PSC_ENABLE);
+    GEL_TextOut( "Powering up PD_M4F done. \n");
+    return status;
+}
+
+menuitem "Power Sleep Controller/Clock Gate by Power Domain Controls";
+
+hotmenu GP_CORE_CTL_ClockGate()
+{
+    int status = 1;    GEL_TextOut( "Clock Gating GP_CORE_CTL. \n");
+    GEL_TextOut( "Clock Gating LPSC_DMSC\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_DMSC, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_MAIN_TEST\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MAIN_TEST, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_MAIN_PBIST\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MAIN_PBIST, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_EMMC_4B\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMMC_4B, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_EMMC_8B\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMMC_8B, PSC_PD_ON, PSC_DISABLE);
+	GEL_TextOut( "Clock Gating LPSC_USB\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_USB, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_ADC\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_ADC, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_DEBUGSS\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_DEBUGSS, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_GPMC\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_GPMC, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_EMIF_CFG\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMIF_CFG, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_EMIF_DATA\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMIF_DATA, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_MCAN_0\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MCAN_0, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_MCAN_1\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MCAN_1, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_SA2UL\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_SA2UL, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_SERDES_0\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_SERDES_0, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_PCIE_0\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_PCIE_0, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating GP_CORE_CTL done. \n");
+    return status;
+}
+
+hotmenu PCIE_ClockGate()
+{
+	int status = 1;
+	GEL_TextOut( "Clock Gating LPSC_PCIE_0\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_PCIE_0, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating GP_CORE_CTL done. \n");
+    return status;
+}
+
+hotmenu PD_PULSAR_0_ClockGate()
+{
+    int status = 1;    GEL_TextOut( "Clock Gating PD_PULSAR_0. \n");
+    GEL_TextOut( "Clock Gating LPSC_PULSAR_0_R5_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0,LPSC_PULSAR_0_R5_0, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_PULSAR_0_R5_1\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0,LPSC_PULSAR_0_R5_1, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_PULSAR_PBIST_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0, LPSC_PULSAR_PBIST_0, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating PD_PULSAR_0 done. \n");
+    return status;
+}
+
+hotmenu PD_PULSAR_1_ClockGate()
+{
+    int status = 1;    GEL_TextOut( "Clock Gating PD_PULSAR_1. \n");
+    GEL_TextOut( "Clock Gating LPSC_PULSAR_1_R5_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_1_R5_0, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_PULSAR_1_R5_1\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_1_R5_1, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_PULSAR_PBIST_1\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_PBIST_1, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating PD_PULSAR_1 done. \n");
+    return status;
+}
+
+hotmenu PD_ICSSG_0_ClockGate()
+{
+    int status = 1;    GEL_TextOut( "Clock Gating PD_ICSSG_0. \n");
+    GEL_TextOut( "Clock Gating LPSC_ICSSG_0\n");
+    status &= Set_MAIN_PSC_State( PD_ICSSG_0, LPSC_ICSSG_0, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating PD_ICSSG_0 done. \n");
+    return status;
+}
+
+hotmenu PD_ICSSG_1_ClockGate()
+{
+    int status = 1;    GEL_TextOut( "Clock Gating PD_ICSSG_1. \n");
+    GEL_TextOut( "Clock Gating LPSC_ICSSG_1\n");
+    status &= Set_MAIN_PSC_State( PD_ICSSG_1, LPSC_ICSSG_1, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating PD_ICSSG_1 done. \n");
+    return status;
+}
+
+hotmenu PD_CPSW_ClockGate()
+{
+    int status = 1;    GEL_TextOut( "Clock Gating PD_CPSW. \n");
+    GEL_TextOut( "Clock Gating LPSC_CPSW3G\n");
+    status &= Set_MAIN_PSC_State( PD_CPSW, LPSC_CPSW3G, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating PD_CPSW done. \n");
+    return status;
+}
+
+hotmenu GP_Core_CTL_MCU_ClockGate()
+{
+    int status = 1;    GEL_TextOut( "Powering up GP_CORE_CTL_MCU. \n");
+    GEL_TextOut( "Clock Gating LPSC_TEST\n");
+    status &= Set_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_TEST, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_MAIN2MCU\n");
+    status &= Set_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_MAIN2MCU, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating LPSC_MCU2MAIN\n");
+    status &= Set_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_MCU2MAIN, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating GP_CORE_CTL_MCU done. \n");
+    return status;
+}
+
+hotmenu PD_M4F_ClockGate()
+{
+    int status = 1;    GEL_TextOut( "Clock Gating PD_M4F. \n");
+    GEL_TextOut( "Clock Gating LPSC_M4F\n");
+    status &= Set_MCU_PSC_State( PD_M4F, LPSC_M4F, PSC_PD_ON, PSC_DISABLE);
+    GEL_TextOut( "Clock Gating PD_M4F done. \n");
+    return status;
+}
+
+menuitem "Power Sleep Controller/Reset by Power Domain Controls";
+
+hotmenu GP_CORE_CTL_Reset()
+{
+    int status = 1;    GEL_TextOut( "Resetting GP_CORE_CTL. \n");
+    GEL_TextOut( "Resetting LPSC_DMSC\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_DMSC, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_MAIN_ALWAYSON\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MAIN_ALWAYSON, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_MAIN_TEST\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MAIN_TEST, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_MAIN_PBIST\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MAIN_PBIST, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_EMMC_4B\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMMC_4B, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_EMMC_8B\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMMC_8B, PSC_PD_ON, PSC_SYNCRESET);
+	GEL_TextOut( "Resetting LPSC_USB\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_USB, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_ADC\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_ADC, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_DEBUGSS\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_DEBUGSS, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_GPMC\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_GPMC, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_EMIF_CFG\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMIF_CFG, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_EMIF_DATA\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_EMIF_DATA, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_MCAN_0\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MCAN_0, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_MCAN_1\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_MCAN_1, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_SA2UL\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_SA2UL, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_SERDES_0\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_SERDES_0, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_PCIE_0\n");
+    status &= Set_MAIN_PSC_State( GP_CORE_CTL, LPSC_PCIE_0, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting GP_CORE_CTL done. \n");
+    return status;
+}
+
+hotmenu PD_PULSAR_0_Reset()
+{
+    int status = 1;    GEL_TextOut( "Resetting PD_PULSAR_0. \n");
+    GEL_TextOut( "Resetting LPSC_PULSAR_0_R5_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0,LPSC_PULSAR_0_R5_0, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_PULSAR_0_R5_1\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0,LPSC_PULSAR_0_R5_1, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_PULSAR_PBIST_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0, LPSC_PULSAR_PBIST_0, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting PD_PULSAR_0 done. \n");
+    return status;
+}
+
+hotmenu PD_PULSAR_1_Reset()
+{
+    int status = 1;    GEL_TextOut( "Resetting PD_PULSAR_1. \n");
+    GEL_TextOut( "Resetting LPSC_PULSAR_1_R5_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_1_R5_0, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_PULSAR_1_R5_1\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_1_R5_1, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_PULSAR_PBIST_1\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_PBIST_1, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting PD_PULSAR_1 done. \n");
+    return status;
+}
+
+hotmenu PD_ICSSG_0_Reset()
+{
+    int status = 1;    GEL_TextOut( "Resetting PD_ICSSG_0. \n");
+    GEL_TextOut( "Resetting LPSC_ICSSG_0\n");
+    status &= Set_MAIN_PSC_State( PD_ICSSG_0, LPSC_ICSSG_0, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting PD_ICSSG_0 done. \n");
+    return status;
+}
+
+hotmenu PD_ICSSG_1_Reset()
+{
+    int status = 1;    GEL_TextOut( "Resetting PD_ICSSG_1. \n");
+    GEL_TextOut( "Resetting LPSC_ICSSG_1\n");
+    status &= Set_MAIN_PSC_State( PD_ICSSG_1, LPSC_ICSSG_1, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting PD_ICSSG_1 done. \n");
+    return status;
+}
+
+hotmenu PD_CPSW_Reset()
+{
+    int status = 1;    GEL_TextOut( "Resetting PD_CPSW. \n");
+    GEL_TextOut( "Resetting LPSC_CPSW3G\n");
+    status &= Set_MAIN_PSC_State( PD_CPSW, LPSC_CPSW3G, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting PD_CPSW done. \n");
+    return status;
+}
+
+hotmenu GP_Core_CTL_MCU_Reset()
+{
+    int status = 1;    GEL_TextOut( "Resetting GP_CORE_CTL_MCU. \n");
+    GEL_TextOut( "Resetting LPSC_MCU_ALWAYSON\n");
+    status &= Set_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_MCU_ALWAYSON, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_TEST\n");
+    status &= Set_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_TEST, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_MAIN2MCU\n");
+    status &= Set_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_MAIN2MCU, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting LPSC_MCU2MAIN\n");
+    status &= Set_MCU_PSC_State( GP_CORE_CTL_MCU, LPSC_MCU2MAIN, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting GP_CORE_CTL_MCU done. \n");
+    return status;
+}
+
+hotmenu PD_M4F_Reset()
+{
+    int status = 1;    GEL_TextOut( "Resetting PD_M4F. \n");
+    GEL_TextOut( "Resetting LPSC_M4F\n");
+    status &= Set_MCU_PSC_State( PD_M4F, LPSC_M4F, PSC_PD_ON, PSC_SYNCRESET);
+    GEL_TextOut( "Resetting PD_M4F done. \n");
+    return status;
+}
+
+menuitem "Power Sleep Controller/Power Down by Power Domain Controls";
+
+/* Powering down the R5Fs can only be done if those cores are in WFI */
+
+hotmenu PD_PULSAR_0_PowerDown()
+{
+    int status = 1;    GEL_TextOut( "Powering Down PD_PULSAR_0. \n");
+    GEL_TextOut( "Powering Down LPSC_PULSAR_PBIST_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0, LPSC_PULSAR_PBIST_0, PSC_PD_ON, PSC_SYNCRESETDISABLE);
+    GEL_TextOut( "Powering Down LPSC_PULSAR_0_R5_1\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0,LPSC_PULSAR_0_R5_1, PSC_PD_ON, PSC_SYNCRESETDISABLE);
+    GEL_TextOut( "Powering Down LPSC_PULSAR_0_R5_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_0,LPSC_PULSAR_0_R5_0, PSC_PD_OFF, PSC_SYNCRESETDISABLE);
+    GEL_TextOut( "Powering Down PD_PULSAR_0 done. \n");
+    return status;
+}
+
+hotmenu PD_PULSAR_1_PowerDown()
+{
+    int status = 1;    GEL_TextOut( "Powering Down PD_PULSAR_1. \n");
+    GEL_TextOut( "Powering Down LPSC_PULSAR_PBIST_1\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_PBIST_1, PSC_PD_ON, PSC_SYNCRESETDISABLE);
+    GEL_TextOut( "Powering Down LPSC_PULSAR_1_R5_1\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_1_R5_1, PSC_PD_ON, PSC_SYNCRESETDISABLE);
+    GEL_TextOut( "Powering Down LPSC_PULSAR_1_R5_0\n");
+    status &= Set_MAIN_PSC_State( PD_PULSAR_1, LPSC_PULSAR_1_R5_0, PSC_PD_OFF, PSC_SYNCRESETDISABLE);
+    GEL_TextOut( "Powering Down PD_PULSAR_1 done. \n");
+    return status;
+}
+
+hotmenu PD_M4F_PowerDown()
+{
+    int status = 1;    GEL_TextOut( "Powering Down PD_M4F. \n");
+    GEL_TextOut( "Powering Down LPSC_M4F\n");
+    status &= Set_MCU_PSC_State( PD_M4F, LPSC_M4F, PSC_PD_OFF, PSC_SYNCRESETDISABLE);
+    GEL_TextOut( "Powering Down PD_M4F done. \n");
+    return status;
+}

@@ -1,0 +1,95 @@
+#define WR_MEM_32(addr, data)		*(unsigned int*)(addr) =(unsigned int)(data)
+#define RD_MEM_32(addr)				*(unsigned int*)(addr)
+
+/* K3 VTM Definitions */
+#define WKUP_VTM0_BASE				0x42050000
+
+#define VTM_PID(VTM_BASE)			RD_MEM_32(VTM_BASE)
+#define VTM_DEVINFO(VTM_BASE)		RD_MEM_32(VTM_BASE + 0x4)
+#define VTM_DEVINFO_COUNT_MASK		0xF0
+
+#define TMPSENSE0_BASE				WKUP_VTM0_BASE + 0x80
+#define TMPSENSE1_BASE				WKUP_VTM0_BASE + 0x90
+#define TMPSENSE2_BASE				WKUP_VTM0_BASE + 0xA0
+#define TMPSENSE_CTRL(TEMP_BASE)	RD_MEM_32(TEMP_BASE + 0x0)
+#define TMPSENSE_STAT(TEMP_BASE)	RD_MEM_32(TEMP_BASE + 0x8)
+#define TMPSENSE_STAT_TEMP_MASK		0x3FF
+
+/*
+	Init an VTM Module by its base address. Nothing to set up. Just read and print some info.
+*/
+Enable_VTM_Module(unsigned int VTM_BASE)
+{
+	int value;
+	value = VTM_PID(AdjustBaseAddr(VTM_BASE));
+	GEL_TextOut("VTM PID register data: %x \n",,,,, value);
+	
+	value = VTM_DEVINFO(AdjustBaseAddr(VTM_BASE));
+	value = (value & VTM_DEVINFO_COUNT_MASK) >> 4;
+	GEL_TextOut("The number of temperature sensors in this chip: %d \n",,,,, value);
+}
+
+/*
+	Init a TEMP SENSE Module by its base address.
+*/
+Enable_TEMP_Module(unsigned int TEMP_BASE)
+{ 
+	TMPSENSE_CTRL(AdjustBaseAddr(TEMP_BASE))	=	0xE0;
+}
+
+/*
+	Read value from specified temp sensor
+*/
+Read_TEMP_Value(unsigned int TEMP_BASE)
+{
+	int value;
+	value = TMPSENSE_STAT(AdjustBaseAddr(TEMP_BASE)) & TMPSENSE_STAT_TEMP_MASK;
+
+	if (value < 540 || value > 945) {
+		GEL_TextOut("Error in reading temperature sensor value.\n");
+	} else if (value < 640) {
+		GEL_TextOut("Temperature Read: %f \n",,,,, (0.42240 * ((float) value - 544.177)) - 39.8);
+	} else if (value < 736) {
+		GEL_TextOut("Temperature Read: %f \n",,,,, (0.4182 * ((float) value - 639.875)) + 0.6);
+	} else if (value < 833) {
+		GEL_TextOut("Temperature Read: %f \n",,,,, (0.41196 * ((float) value - 735.721)) + 40.6);
+	} else {
+		GEL_TextOut("Temperature Read: %f \n",,,,, (0.4047 * ((float) value - 833.0)) + 80.6);
+	}
+}
+
+menuitem "Temperature Sensor"
+
+hotmenu Enable_WKUP_VTM_Module()
+{
+	Enable_VTM_Module(WKUP_VTM0_BASE);
+	Enable_TEMP_Module(TMPSENSE0_BASE);
+	Enable_TEMP_Module(TMPSENSE1_BASE);
+	Enable_TEMP_Module(TMPSENSE2_BASE);
+	GEL_TextOut("WKUP VTM and Temperature Sensors enabled.\n");
+}
+
+hotmenu Read_All_Temperatures()
+{
+	GEL_TextOut("MCU \n");
+	Read_TEMP_Value(TMPSENSE0_BASE);
+	GEL_TextOut("MPU Cluster 0 \n");
+	Read_TEMP_Value(TMPSENSE1_BASE);
+	GEL_TextOut("MPU Cluster 1 \n");
+	Read_TEMP_Value(TMPSENSE2_BASE);
+}
+
+hotmenu Read_MCU_Temperature()
+{
+	Read_TEMP_Value(TMPSENSE0_BASE);
+}
+
+hotmenu Read_MPU_Cluster0_Temperature()
+{
+	Read_TEMP_Value(TMPSENSE1_BASE);
+}
+
+hotmenu Read_MPU_Cluster1_Temperature()
+{
+	Read_TEMP_Value(TMPSENSE2_BASE);
+}

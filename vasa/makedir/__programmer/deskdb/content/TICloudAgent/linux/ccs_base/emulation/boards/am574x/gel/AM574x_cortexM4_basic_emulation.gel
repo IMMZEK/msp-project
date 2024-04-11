@@ -1,0 +1,119 @@
+/*******************************************************************/ 
+/* This GEL file is loaded on the command line of Code Composer    */
+/* The StartUp() function is called every time you start           */
+/* Code Composer.  You can customize this function to              */
+/* initialize wait states or to perform other initialization.      */
+/*                                                                 */
+/* AM572x cortexM4 reset config                                    */
+/*                                                                 */
+/*                                                                 */
+/*******************************************************************/
+
+menuitem "Basic Emulation"
+/**********************************************************************
+ *
+ *  FUNCTIONS
+ *
+ **********************************************************************/
+ 
+ int G_Control = 0 ;
+
+int address1 = 0;
+int address2 = 0;
+
+hotmenu load_asm_program_sram1()
+{
+    GEL_TextOut("Load asm program in internal ram1 \n");
+    *(short *)0x00001000 = 0xBF00;
+    *(short *)0x00001002 = 0xBF00;
+    *(short *)0x00001004 = 0xBF00;
+    *(short *)0x00001006 = 0xBF00;
+    *(short *)0x00001008 = 0xBF00;
+    *(short *)0x0000100A = 0xBF00;
+    *(short *)0x0000100C = 0xBF00;
+    *(short *)0x0000100E = 0xBF00;
+    *(short *)0x00001010 = 0xBF00;
+    *(short *)0x00001012 = 0xBF00;
+    *(short *)0x00001014 = 0xE7F4;
+
+    PC = 0x00001000;
+    
+    GEL_TextOut("Load asm program in internal ram1 done \n");
+}
+
+hotmenu load_asm_program_sram2()
+{
+    GEL_TextOut("Load asm program in internal ram2 \n");
+    *(short *)0x00000A00 = 0xBF00;
+    *(short *)0x00000A02 = 0xBF00;
+    *(short *)0x00000A04 = 0xBF00;
+    *(short *)0x00000A06 = 0xBF00;
+    *(short *)0x00000A08 = 0xBF00;
+    *(short *)0x00000A0A = 0xBF00;
+    *(short *)0x00000A0C = 0xBF00;
+    *(short *)0x00000A0E = 0xBF00;
+    *(short *)0x00000A10 = 0xBF00;
+    *(short *)0x00000A12 = 0xBF00;
+    *(short *)0x00000A14 = 0xE7F4;
+
+    PC = 0x00000A00;
+    
+    GEL_TextOut("Load asm program in internal ram2 done \n");
+}
+
+
+OnHalt() 
+{   
+    if (G_Control==1000)
+    {
+        GEL_TextOut("basic_asm_execution_control_SWbkpt %x %x\n ",,,,, address1, PC);      
+        GEL_Run();
+    }
+    if (G_Control==1001)
+    {
+        GEL_TextOut("basic_asm_execution_control_HWbkpt %x %x\n",,,,, address2, PC);        
+        GEL_TextOut("basic_asm_execution_control DONE !!!! \n");
+        GEL_Run();
+    }
+    
+    if (G_Control==1002)
+    { 
+        GEL_BreakPtReset(); // clears all SW bkpt.
+        GEL_HWBreakPtReset(); // clears all HW bkpt.
+    }    
+    G_Control++;  
+}
+
+hotmenu basic_asm_execution_control_sram1()
+{
+    PC = 0x00001000;
+    G_Control=1000;
+    address1=0x000001008;
+    address2=0x00001010;
+    GEL_TextOut("basic_asm_execution_control \n");
+    GEL_TextOut("TEST PERFORM ON SRAM1 \n");
+    
+    GEL_BreakPtReset(); // clears all SW bkpt.
+    GEL_HWBreakPtReset(); // clears all HW bkpt.
+    GEL_BreakPtAdd(0x00001008);
+    GEL_HWBreakPtAdd(0x00001010);
+    GEL_Run();
+}
+
+
+hotmenu basic_asm_execution_control_sram2()
+{
+
+    PC = 0x00000A00;
+    G_Control=1000;
+    address1=0x000000A08;
+    address2=0x00000A10;
+    GEL_TextOut("basic_asm_execution_control \n");
+    GEL_TextOut("TEST PERFORM ON SRAM2 \n");
+    
+    GEL_BreakPtReset(); // clears all SW bkpt.
+    GEL_HWBreakPtReset(); // clears all HW bkpt.
+    GEL_BreakPtAdd(0x00000A08);
+    GEL_HWBreakPtAdd(0x00000A10);
+    GEL_Run();
+}

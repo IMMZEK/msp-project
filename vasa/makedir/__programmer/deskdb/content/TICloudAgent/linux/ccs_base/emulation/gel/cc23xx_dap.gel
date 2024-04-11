@@ -1,0 +1,105 @@
+/* \file        cc23xx_dap.gel
+ * \brief       GEL script the DAP core for CC23xx device family.
+ */
+
+#define SC_FLASH_ERASE_CHIP             0x09    ///< Flash programming: Erase CCFG and all MAIN sectors (key)
+
+/**
+ * \brief   This function is called when the gel file is loaded.
+ *          The GEL file is loaded when starting a debug session.
+ */
+StartUp(int major, int minor, int patch)
+{
+    // Load connect utilities, this is used by the M0+ core and in this file
+    GEL_LoadGel("$(GEL_file_dir)/cc23xx_connect_util.gel");
+
+    // Load cc23xx_util.gel, to check which device is being connected to
+    GEL_LoadGel("$(GEL_file_dir)/cc23xx_util.gel");
+
+    // Load SACI utilities, to communicate with SACI and GEL script to do chip erase
+    GEL_LoadGel("$(GEL_file_dir)/cc23xx_dap_saci_util.gel");
+}
+
+
+
+/**
+ * \brief   Function to enter SACI mode by resetting the device using the SECAP_RSTCTL register in SEC-AP.
+ *          The OnTargetConnect callback function will disable the SACI inactivity timeout.
+ *          The device will therefore stay in SACI mode, after this function returns.
+ */
+menuitem "CC23xx"
+hotmenu EnterSaci()
+{
+    ConnectIfDisconnected();  // Connect to DAP core to be able to determine device type.
+    if(    IsCC23xx()
+           )
+    {
+        GEL_EvalOnTarget("Cortex_M0P", "EnterSaci()");
+    }
+    else if(IsCC27xx())
+    {
+        GEL_EvalOnTarget("Cortex_M33_0", "EnterSaci()");
+    }
+}
+
+
+
+
+/**
+ * \brief   Function to exit SACI mode by first sending a EXIT_SACI_HALT command, and if that fails it will send a EXIT_SACI_RUN command.
+ *          No commands will be sent, if the device is not in SACI mode.
+ */
+menuitem "CC23xx"
+hotmenu ExitSaci()
+{
+    ConnectIfDisconnected();  // Connect to DAP core to be able to determine device type.
+    if(    IsCC23xx()
+            )
+    {
+        GEL_EvalOnTarget("Cortex_M0P", "ExitSaci()");
+    }
+    else if(IsCC27xx())
+    {
+        GEL_EvalOnTarget("Cortex_M33_0", "ExitSaci()");
+    }
+}
+/**
+ * \brief   Function to erase both Main flash and CCFG flash.
+ *          This can be used to enable programming of a chip that has been configured (CCFG) to disable the debug port (permissions.allowDebugPort = 0)
+ */
+menuitem "CC23xx"
+hotmenu ChipErase()
+{
+    unsigned int respHeader;
+    unsigned int resultCode;
+    unsigned char respSeqNumber = SaciGenRespSeqNumber();
+    unsigned char retainSelMainSectors = 0;
+
+
+    // Must do a board reset
+    GEL_AdvancedReset("Board Reset");
+    GEL_Connect();
+
+    if(IsCC27xx())
+    {
+        // Make sure that the retain main sectors are always on for CC27xx devices
+        retainSelMainSectors = 1;
+    }
+
+    GEL_TextOut("DAP core is connected! Sending the Chip erase command over the SEC-AP\n");
+
+    EnterSaci();
+
+    SaciWaitForTxDataEmpty();
+    SaciWriteTxWord(SaciMakeFirstParamWord(SC_FLASH_ERASE_CHIP, respSeqNumber, retainSelMainSectors), 1);
+    SaciWaitForTxDataEmpty();
+    SaciWriteTxWord(0xB7E3A08F , 0); // Flash operation key
+    SaciWaitForTxDataEmpty();
+
+    respHeader = SaciReadCmdRespHeader();
+
+    resultCode = SaciGetResultCodeFromResultHeader(respHeader);  // Return result code
+
+    GEL_TextOut("Chip Erase completed with return code: %d\n",,,,, resultCode);
+
+}

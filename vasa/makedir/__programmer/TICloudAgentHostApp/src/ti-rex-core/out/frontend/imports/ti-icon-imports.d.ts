@@ -1,0 +1,23 @@
+/// <reference types="react" />
+import { SvgIconProps } from './material-ui-imports';
+export declare const Chip: (props: SvgIconProps) => JSX.Element;
+export declare const EvaluationModule: (props: SvgIconProps) => JSX.Element;
+export declare const OnlineDataSheet: (props: SvgIconProps) => JSX.Element;
+export declare const ReferenceDesign: (props: SvgIconProps) => JSX.Element;
+export declare const Tools: (props: SvgIconProps) => JSX.Element;
+export declare const IAROpen: (props: SvgIconProps) => JSX.Element;
+export declare const IARClose: (props: SvgIconProps) => JSX.Element;
+export declare const Energia: (props: SvgIconProps) => JSX.Element;
+export declare const CCS: (props: SvgIconProps) => JSX.Element;
+export declare const CCSCloud: (props: SvgIconProps) => JSX.Element;
+export declare const Package: (props: SvgIconProps) => JSX.Element;
+export declare const CFile: (props: SvgIconProps) => JSX.Element;
+export declare const CMDFile: (props: SvgIconProps) => JSX.Element;
+export declare const CPPFile: (props: SvgIconProps) => JSX.Element;
+export declare const HFile: (props: SvgIconProps) => JSX.Element;
+export declare const HPPFile: (props: SvgIconProps) => JSX.Element;
+export declare const JSON: (props: SvgIconProps) => JSX.Element;
+export declare const PDF: (props: SvgIconProps) => JSX.Element;
+export declare const Readme: (props: SvgIconProps) => JSX.Element;
+export declare const TextFile: (props: SvgIconProps) => JSX.Element;
+export declare const Hyperlink: (props: SvgIconProps) => JSX.Element;

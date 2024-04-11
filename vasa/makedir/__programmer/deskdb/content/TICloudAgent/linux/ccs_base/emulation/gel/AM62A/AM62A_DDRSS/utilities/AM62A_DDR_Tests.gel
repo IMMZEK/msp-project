@@ -1,0 +1,174 @@
+/* Copyright (c) 2022, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
+
+
+menuitem "AM62A DDRSS Memory debug/Data Tests"
+
+hotmenu Data_WrRd_test()
+{
+    unsigned int i,SIZE,j;
+    unsigned int read_data;
+    unsigned int i,j,err_cnt32,rd_data32;
+    unsigned int * rd32_ptr;
+    unsigned int * wr32_ptr;
+    unsigned int temp_loop,temp_data;
+	
+	SIZE = 0x8;
+	
+	*(unsigned int *)0x80000000 = 0xACED1234;
+
+    err_cnt32=0;
+
+	GEL_TextOut("Starting WrRd Test 1: \*wr32_ptr=i \n");
+
+    wr32_ptr=(unsigned int *)0x80000000; //make sure no conflict with code location
+    for(i=0;i<SIZE/4;i++)
+    {
+        //MM *wr32_ptr=i;
+		j = (i&0xFF);
+		*wr32_ptr= (j | ((j+1)<<8) | ((j+2)<<16) | ((j+3)<<24));
+		
+        wr32_ptr++;
+    }
+
+    rd32_ptr=(unsigned int *)0x80000000; //make sure no conflict with code location
+    for(i=0;i<SIZE/4;i++)
+    {
+		j = (i&0xFF);
+        rd_data32=*rd32_ptr;
+		//MM if(rd_data32!=i)
+        if(rd_data32!=(j | ((j+1)<<8) | ((j+2)<<16) | ((j+3)<<24)))
+        {
+            err_cnt32++;
+            GEL_TextOut("Data verification failed at %x Expected = %x Actual= %x\n","",,,,(rd32_ptr),(j | (j<<8) | (j<<16) | (j<<24)),rd_data32);
+			//GEL_TextOut("DXnLCDLR%d: %x  %x  %x  %x\n","",,,,index,Read_MMR(regaddr),Read_MMR(regaddr+0x100),Read_MMR(regaddr+0x200),Read_MMR(regaddr+0x300));    
+
+        }
+        rd32_ptr++;
+    }
+	
+	GEL_TextOut("Starting WrRd Test 2: \*wr32_ptr=\~i \n");
+
+	
+    wr32_ptr=(unsigned int *)0x80000000; //make sure no conflict with code location
+    for(i=0;i<SIZE/4;i++)
+    {
+		j = (~i&0xFF);
+        //MM *wr32_ptr=~i;
+		*wr32_ptr= (j | ((j+1)<<8) | ((j+2)<<16) | ((j+3)<<24));
+
+        wr32_ptr++;
+    }
+    rd32_ptr=(unsigned int *)0x80000000; //make sure no conflict with code location
+    for(i=0;i<SIZE/4;i++)
+    {
+		j = (~i&0xFF);
+		
+        rd_data32=*rd32_ptr;
+        if(rd_data32 != (j | ((j+1)<<8) | ((j+2)<<16) | ((j+3)<<24)))
+        {
+            err_cnt32++;
+			 GEL_TextOut("Data verification failed at %x Expected = %x Actual= %x\n","",,,,(rd32_ptr),(j | ((j+1)<<8) | ((j+2)<<16) | ((j+3)<<24)),rd_data32);
+        }
+        rd32_ptr++;
+    }
+    if(err_cnt32==0)
+    {
+        GEL_TextOut("\nDDR Basic WrRd test Passed! \n");
+    }
+    else
+    {
+        GEL_TextOut("\n!!!!! DDR Basic read/write test Failed !!!!\n");
+
+    }
+
+}
+
+hotmenu Data_Writes_test()
+{
+    unsigned int i,SIZE,j;
+    unsigned int read_data;
+    unsigned int i,j,err_cnt32,rd_data32;
+    unsigned int * rd32_ptr;
+    unsigned int * wr32_ptr;
+    unsigned int temp_loop,temp_data;
+	
+	SIZE = 0x8;
+	
+	*(unsigned int *)0x80000000 = 0xACED1234;
+
+    err_cnt32=0;
+
+	GEL_TextOut("Starting Writes Test... \n");
+
+    wr32_ptr=(unsigned int *)0x80000000; //make sure no conflict with code location
+    for(i=0;i<SIZE/4;i++)
+    {
+        //MM *wr32_ptr=i;
+		j = (i&0xFF);
+		*wr32_ptr= (j | ((j+1)<<8) | ((j+2)<<16) | ((j+3)<<24));
+		
+        wr32_ptr++;
+    }
+        GEL_TextOut("...DDR Writes test Done! \n");
+
+}
+
+hotmenu Data_Reads_test()
+{
+    unsigned int i,SIZE,j;
+    unsigned int read_data;
+    unsigned int i,j,err_cnt32,rd_data32;
+    unsigned int * rd32_ptr;
+    unsigned int * wr32_ptr;
+    unsigned int temp_loop,temp_data;
+	
+	SIZE = 0x8;
+    err_cnt32=0;
+
+	GEL_TextOut("Starting Reads Test: \n");
+
+	
+    rd32_ptr=(unsigned int *)0x80000000; //make sure no conflict with code location
+    for(i=0;i<SIZE/4;i++)
+    {
+		j = (i&0xFF);
+        rd_data32=*rd32_ptr;
+		//MM if(rd_data32!=i)
+        if(rd_data32!=(j | ((j+1)<<8) | ((j+2)<<16) | ((j+3)<<24)))
+        {
+            err_cnt32++;
+            GEL_TextOut("Data verification failed at %x Expected = %x Actual= %x\n","",,,,(rd32_ptr),(j | ((j+1)<<8) | ((j+2)<<16) | ((j+3)<<24)),rd_data32);
+        }
+        rd32_ptr++;
+    }
+	
+    GEL_TextOut("\nDDR Reads test Done! \n");
+}

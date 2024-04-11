@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+        crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-zoom/0.6.5/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <ul class="list-group m-4">
+        <li class="list-group-item active" style="background-color: #CC0001;border-color: #CC0001">
+            <b>Report Details</b>
+        </li>
+        <li class="list-group-item">
+            <b>Report Generated On:</b>
+            <%- new Date().toLocaleString() %>
+        </li>
+        <li class="list-group-item">
+            <b>Number of Requests:</b>
+            <%- numServerReqHtml %>
+        </li>
+	<li class="list-group-item">
+            <b>Number of Errors:</b>
+            <%- numErrorsHtml %>
+        </li>
+	<li class="list-group-item">
+            <b>Average Response Times:</b>
+            <ul>
+                <li>1 sigma (68%): <%- stdDevsHtml[0] %>ms</li>
+                <li>2 sigma (95%): <%- stdDevsHtml[1] %>ms</li>
+                <li>3 sigma (99.7%): <%- stdDevsHtml[2] %>ms</li>
+            </ul>
+        </li>
+    </ul>
+    <div class="card m-4">
+        <button class="btn btn-light card-header text-center" type="button" data-toggle="collapse" data-target="#resp" aria-expanded="true"
+            aria-controls="resp">
+            <b>Response Times</b>
+            <i class="fas fa-caret-down"></i>
+        </button>
+        <div class="card-body collapse show" id="resp">
+            <canvas id="respTimeGraph"></canvas>
+        </div>
+    </div>
+    <div class="card m-4">
+        <button class="btn btn-light card-header text-center" type="button" data-toggle="collapse" data-target="#cpu" aria-expanded="true"
+            aria-controls="cpu">
+            <b>CPU Usage</b>
+            <i class="fas fa-caret-down"></i>
+        </button>
+        <div class="card-body collapse" id="cpu">
+            <canvas id="cpuGraph"></canvas>
+        </div>
+    </div>
+    <div class="card m-4">
+        <button class="btn btn-light card-header text-center" type="button" data-toggle="collapse" data-target="#mem" aria-expanded="true"
+            aria-controls="mem">
+            <b>Memory Usage</b>
+            <i class="fas fa-caret-down"></i>
+        </button>
+        <div class="card-body collapse" id="mem">
+            <canvas id="memGraph"></canvas>
+        </div>
+    </div>
+    <script type="text/javascript"> 
+        var ctx1 = 'respTimeGraph';
+        var ctx2 = 'cpuGraph';
+        var ctx3 = 'memGraph';
+	var respTimeScatterChart = new Chart(ctx1, {
+		type: 'scatter', data: {
+			datasets: <%- dataSetsHtml %>
+		},
+		options: {
+			scales: {
+				xAxes: [{
+					type: 'linear', scaleLabel: {
+						display: true, labelString: 'Time (seconds)'
+					},
+					ticks: {
+						min: <%- 0 %>,
+						max: <%- tickMaxHtml %>
+					}
+				}],
+				yAxes: [{
+					type: 'linear', scaleLabel: {
+						display: true, labelString: 'Response Time (ms)'
+					},
+					ticks: {
+						beginAtZero: true
+					}
+				}]
+			},
+			layout: {
+				padding: {
+					left: 40, right: 60, top: 0, bottom: 0
+				}
+			},
+			animation: {
+				duration: 0
+			},
+			hover: {
+				animationDuration: 0
+			},
+			responsiveAnimationDuration: 0,
+			// Container for pan options - not yet implemented in chartjs-plugin-zoom, but maybe one day will be
+			pan: {
+				enabled: true,
+				mode: 'xy'
+			},
+			// Container for zoom options
+			zoom: {
+				// Boolean to enable zooming
+				enabled: true,
+
+				// Zooming directions. Remove the appropriate direction to disable 
+				// Eg. 'y' would only allow zooming in the y direction
+				mode: 'y',
+			}
+		}
+	});
+        var cpuScatterChart = new Chart(ctx2, {
+            type: 'scatter', data: {
+                datasets: [{
+                    label: 'CPU Usage', 
+                    data: <%- cpuDataHtml %>,
+                    backgroundColor: '#f27624', 
+                    borderColor: '#ffd2b5', 
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'linear', scaleLabel: {
+                            display: true, labelString: 'Time (seconds)'
+                        },
+                        ticks: {
+                            min: <%- 0 %>,
+	                    max: <%- tickMaxHtml %>
+                        }
+                    }],
+                    yAxes: [{
+                        type: 'linear', scaleLabel: {
+                            display: true, labelString: 'CPU Usage (%)'
+                        },
+                        ticks: {
+                            beginAtZero: true, max: 100
+                        }
+                    }]
+                },
+                layout: {
+                    padding: {
+                        left: 40, right: 60, top: 0, bottom: 0
+                    }
+                },
+                animation: {
+                    duration: 0
+                },
+                hover: {
+                    animationDuration: 0
+                },
+                responsiveAnimationDuration: 0
+            }
+        }
+        );
+        var memScatterChart = new Chart(ctx3, {
+            type: 'scatter', data: {
+                datasets: [{
+                    label: 'Memory Usage', 
+                    data: <%- memDataHtml %>,
+                    backgroundColor: '#43c1aa', 
+                    borderColor: '#bffff2', 
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'linear', scaleLabel: {
+                            display: true, labelString: 'Time (seconds)'
+                        },
+			ticks: {
+                            min: <%- 0 %>,
+	                    max: <%- tickMaxHtml %>
+                        }
+                    }], 
+                    yAxes: [{
+                        type: 'linear', 
+			scaleLabel: {
+                            display: true, labelString: 'Memory Usage (MB)'
+                        }
+                    }]
+                }, 
+		layout: {
+                    padding: {
+                        left: 40, right: 60, top: 0, bottom: 0
+                    }
+                },
+                animation: {
+                    duration: 0
+                },
+                hover: {
+                    animationDuration: 0
+                },
+                responsiveAnimationDuration: 0
+            }
+        }
+        );
+    </script>
+</body>
+
+</html>
