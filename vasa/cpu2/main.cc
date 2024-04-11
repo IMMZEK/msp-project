@@ -15,8 +15,8 @@ int main(void) {
 
   while (1) {
     GPIO_writePin(CPU2_PIN, 1);
-    DEVICE_DELAY_US(1000000);
+    DEVICE_DELAY_US(1000);
     GPIO_writePin(CPU2_PIN, 0);
-    DEVICE_DELAY_US(1000000);
+    DEVICE_DELAY_US(1000);
   }
 }

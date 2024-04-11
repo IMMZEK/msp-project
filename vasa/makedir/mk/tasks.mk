@@ -73,10 +73,5 @@ hex:
 	"$(HEX_UTIL)" "$(CPUx_BUILD_DIR)/$(PROJ_NAME).out" -boot -sci8 -a -o "$(CPUx_BUILD_DIR)/$(PROJ_NAME).txt"
 	@echo 'Finished hexing.'
 
-flash:
-	@echo 'Flashing target: "$(CPUx_BUILD_DIR)/$(PROJ_NAME).out" to the board...'
-	"$(PROGRAMMER)" --config="$(PROGRAMMER_CCXML)" "$(CPUx_BUILD_DIR)/$(PROJ_NAME).out -n $(CPU_CORE)"
-	@echo 'Finished flashing.'
-
-.PHONY: all CPUx_build_dir CPUx_objects CPUx_out hex flash
+.PHONY: all CPUx_build_dir CPUx_objects CPUx_out hex
 
