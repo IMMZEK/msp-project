@@ -50,7 +50,7 @@ CPUx_out: $(CPUx_BUILD_DIR)/$(PROJ_NAME).out
 $(CPUx_BUILD_DIR)/$(PROJ_NAME).out: $(CPUx_LINKER_OBJS) | CPUx_build_dir
 	@echo 'Building target: "$@"'
 	@echo 'Invoking: C2000 Linker'
-	"$(COMPILER)" $(COMMON_FLAGS) $(COMMON_DEFINES) \
+	"$(COMPILER)" $(COMMON_FLAGS) $(CPUx_DEFINES) \
 	-z \
 	-m"$(CPUx_BUILD_DIR)/$(PROJ_NAME).map" \
 	--stack_size=0x100 \

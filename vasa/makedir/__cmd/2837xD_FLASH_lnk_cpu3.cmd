@@ -1,1 +1,0 @@
-2837xD_FLASH_lnk_cpu2.cmd
